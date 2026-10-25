@@ -35,8 +35,15 @@ const projects: Project[] = raw.projects.map((p) => {
   };
 });
 
-/** Projects created in the interface live here until a database exists. */
-const sessionProjects: Project[] = [];
+/**
+ * Projects created in the interface live here until a database exists.
+ * Server actions and RSC renders are bundled in separate layers, so the array
+ * hangs off globalThis to stay the same array in both.
+ */
+const globalStore = globalThis as typeof globalThis & {
+  __fitteSessionProjects?: Project[];
+};
+const sessionProjects: Project[] = (globalStore.__fitteSessionProjects ??= []);
 
 export async function getProjects(): Promise<Project[]> {
   return [...projects, ...sessionProjects];

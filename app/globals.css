@@ -32,78 +32,82 @@
   --radius-xs: 2px;
 }
 
-:root {
-  color-scheme: light;
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  input,
+  button,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  input::placeholder {
+    color: var(--color-ink-3);
+  }
+
+  button:disabled {
+    cursor: default;
+  }
+
+  ::selection {
+    background: var(--color-accent-08);
+  }
 }
 
-html,
-body {
-  height: 100%;
-}
+@layer components {
+  /* 11 px uppercase labels: the only tracked type in the interface */
+  .label {
+    font-size: 11px;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-2);
+  }
 
-body {
-  background: var(--color-surface);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  line-height: 1.4;
-  font-variant-numeric: tabular-nums;
-  -webkit-font-smoothing: antialiased;
-}
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
 
-input,
-button,
-select {
-  font: inherit;
-  color: inherit;
-}
+  /* low confidence, under 0.7 */
+  .low-conf {
+    color: var(--color-ink-3);
+    border-bottom: 1px dotted var(--color-ink-3);
+  }
 
-input::placeholder {
-  color: var(--color-ink-3);
-}
+  .tip {
+    position: relative;
+  }
 
-button:disabled {
-  cursor: default;
-}
-
-/* 11 px uppercase labels: the only tracked type in the interface */
-.label {
-  font-size: 11px;
-  line-height: 1.4;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-ink-2);
-}
-
-.mono {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-
-/* low confidence, under 0.7 */
-.low-conf {
-  color: var(--color-ink-3);
-  border-bottom: 1px dotted var(--color-ink-3);
-}
-
-.tip {
-  position: relative;
-}
-
-.tip[data-tip]:hover::after {
-  content: attr(data-tip);
-  position: absolute;
-  bottom: calc(100% + 4px);
-  left: 0;
-  white-space: nowrap;
-  background: var(--color-ink);
-  color: var(--color-paper);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 2px 4px;
-  z-index: 20;
-}
-
-::selection {
-  background: var(--color-accent-08);
+  .tip[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: 0;
+    left: calc(100% + 8px);
+    white-space: nowrap;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 2px 4px;
+    z-index: 20;
+  }
 }
