@@ -7,9 +7,9 @@ export default async function LoginPage({
 }) {
   const { next } = await searchParams;
   return (
-    <main className="flex h-screen items-center justify-center bg-surface">
-      <div className="w-[260px]">
-        <div className="mb-6 text-13 text-ink">fitte.</div>
+    <main className="flex min-h-screen items-center justify-center">
+      <div className="w-[240px]">
+        <div className="wordmark mb-6">fitte.</div>
         <LoginForm next={next ?? "/"} />
       </div>
     </main>

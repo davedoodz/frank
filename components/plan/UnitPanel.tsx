@@ -31,8 +31,8 @@ export default function UnitPanel({
       label: "net area",
       value: (
         <>
-          <span className="mono">{unit.net_area_m2.value.toFixed(1)} m²</span>{" "}
-          <span className="mono text-ink-2">{ft2(unit.net_area_m2.value)} ft²</span>
+          <span className="font-mono">{unit.net_area_m2.value.toFixed(1)} m²</span>{" "}
+          <span className="font-mono text-ink-3">{ft2(unit.net_area_m2.value)} ft²</span>
         </>
       ),
       confidence: unit.net_area_m2.confidence,
@@ -44,8 +44,8 @@ export default function UnitPanel({
           "—"
         ) : (
           <>
-            <span className="mono">{unit.gross_area_m2.value.toFixed(1)} m²</span>{" "}
-            <span className="mono text-ink-2">{ft2(unit.gross_area_m2.value)} ft²</span>
+            <span className="font-mono">{unit.gross_area_m2.value.toFixed(1)} m²</span>{" "}
+            <span className="font-mono text-ink-3">{ft2(unit.gross_area_m2.value)} ft²</span>
           </>
         ),
       confidence: unit.gross_area_m2.confidence,
@@ -60,53 +60,72 @@ export default function UnitPanel({
     { label: "floor", value: floor.label },
     { label: "orientation", value: unit.orientation.value, confidence: unit.orientation.confidence },
     { label: "corner", value: unit.is_corner.value ? "yes" : "no", confidence: unit.is_corner.confidence },
-    { label: "sheet", value: <span className="mono">{floor.sheet_number}</span> },
-    { label: "revision", value: <span className="mono">{floor.revision_date}</span> },
-    { label: "source file", value: <span className="mono">{floor.source_file}</span> },
-    { label: "project", value: <span className="mono">{code}</span> },
+    { label: "sheet", value: <span className="font-mono">{floor.sheet_number}</span> },
+    { label: "revision", value: <span className="font-mono">{floor.revision_date}</span> },
+    { label: "source file", value: <span className="font-mono">{floor.source_file}</span> },
+    { label: "project", value: <span className="font-mono">{code}</span> },
   ];
 
   return (
     <aside className="flex w-[360px] shrink-0 flex-col border-l border-line bg-paper">
       <div className="border-b border-line p-4">
         <div className="flex items-baseline gap-2">
-          <span className="mono text-20 text-ink">{unit.number}</span>
-          <span className="text-13 text-ink">{unit.type_qc.value}</span>
+          <span className="font-mono text-title-lg text-ink">{unit.number}</span>
+          <span className="text-body text-ink">{unit.type_qc.value}</span>
           <span className="flex-1" />
-          <span className="mono text-11 text-ink-2">{unit.status}</span>
+          <span className="font-mono text-meta text-ink-2">{unit.status}</span>
         </div>
-        <div className="mono mt-1 text-11 text-ink-2">
+        <div className="mt-1 font-mono text-meta text-ink-3">
           {floor.label} · {floor.sheet_number} · {floor.revision_date} ·{" "}
           {floor.source_file}
         </div>
       </div>
 
       <div className="flex-1 overflow-auto p-4">
-        {rows.map((row) => {
-          const low = row.confidence !== undefined && row.confidence < LOW_CONFIDENCE;
-          return (
-            <div key={row.label} className="mb-4">
-              <div className="label">{row.label}</div>
-              <div
-                className={`tip mt-1 inline-block text-13 ${low ? "low-conf" : "text-ink"}`}
-                data-tip={row.confidence !== undefined ? row.confidence.toFixed(2) : undefined}
-              >
-                {row.value}
-              </div>
-            </div>
-          );
-        })}
+        {rows.map((row) => (
+          <PanelRow key={row.label} {...row} />
+        ))}
       </div>
 
-      <div className="flex items-center gap-2 border-t border-line p-4 text-13 text-ink-3">
-        <span className="tip" data-tip="round 3">
-          find similar units
-        </span>
+      <div className="flex items-center gap-2 border-t border-line p-4 text-body text-ink-3">
+        <Disabled label="find similar units" round="round 3" />
         <span>·</span>
-        <span className="tip" data-tip="round 2">
-          edit
-        </span>
+        <Disabled label="edit" round="round 2" />
       </div>
     </aside>
+  );
+}
+
+/** Label 11 uppercase, value 13, confidence on hover of a low value. */
+function PanelRow({ label, value, confidence }: Row) {
+  const low = confidence !== undefined && confidence < LOW_CONFIDENCE;
+
+  return (
+    <div className="mb-4">
+      <div className="label-11">{label}</div>
+      <div className="mt-1 text-body">
+        {low ? (
+          <span className="group relative inline-block">
+            <span className="low-confidence">{value}</span>
+            <span className="pointer-events-none absolute left-full ml-2 hidden font-mono text-meta text-ink-3 group-hover:inline">
+              {confidence.toFixed(2)}
+            </span>
+          </span>
+        ) : (
+          <span className="text-ink">{value}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Disabled({ label, round }: { label: string; round: string }) {
+  return (
+    <span className="group relative">
+      {label}
+      <span className="pointer-events-none absolute bottom-full left-0 mb-1 hidden font-mono text-meta text-ink-3 group-hover:inline">
+        {round}
+      </span>
+    </span>
   );
 }

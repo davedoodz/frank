@@ -1,55 +1,75 @@
 @import "tailwindcss";
 
 @theme {
+  /* Near-monochrome. The accent is not a UI colour: it marks a position on a
+     drawing. Selection and active state are carried by inversion. */
   --color-paper: #ffffff;
   --color-surface: #f4f4f2;
   --color-line: #d9d9d5;
   --color-ink: #111111;
   --color-ink-2: #6b6b66;
   --color-ink-3: #a3a39e;
+  --color-fill-2: #ecece9;
   --color-accent: #c8411b;
   --color-accent-08: rgba(200, 65, 27, 0.08);
 
+  /* typology fills, 12 percent alpha on the plan */
   --color-t-studio: #8a8a85;
   --color-t-3h: #5b7a99;
   --color-t-4h: #6f8f5e;
   --color-t-5h: #a3733f;
   --color-t-other: #b06a8a;
 
-  --font-sans: -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "JetBrains Mono", SFMono-Regular, Menlo, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial,
+    sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
 
-  --text-11: 11px;
-  --text-11--line-height: 1.4;
-  --text-13: 13px;
-  --text-13--line-height: 1.4;
-  --text-15: 15px;
-  --text-15--line-height: 1.4;
-  --text-20: 20px;
-  --text-20--line-height: 1.4;
+  /* 11 metadata, 13 body, 15 panel title, 20 unit number. */
+  --text-meta: 11px;
+  --text-meta--line-height: 1.4;
+  --text-meta--font-weight: 400;
+  --text-meta--letter-spacing: 0em;
+  --text-body: 13px;
+  --text-body--line-height: 1.4;
+  --text-body--font-weight: 400;
+  --text-body--letter-spacing: 0em;
+  --text-title: 15px;
+  --text-title--line-height: 1.4;
+  --font-wordmark: var(--font-sans);
+  --text-title-lg: 20px;
+  --text-title-lg--line-height: 1.4;
+  --text-title-lg--font-weight: 400;
+  --text-title-lg--letter-spacing: 0em;
 
+  /* 8 px base. Only 4, 8, 12, 16, 24, 48 are used. */
   --spacing: 4px;
-  --radius-xs: 2px;
+
+  --radius-sm: 2px;
 }
 
 @layer base {
-  :root {
-    color-scheme: light;
-  }
-
-  html,
-  body {
+  html {
+    background: var(--color-surface);
     height: 100%;
   }
 
   body {
+    height: 100%;
     background: var(--color-surface);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-size: 13px;
+    font-size: var(--text-body);
+    font-weight: var(--text-body--font-weight);
+    letter-spacing: var(--text-body--letter-spacing);
     line-height: 1.4;
     font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* No focus ring beyond the 1 px register. Keyboard focus uses the accent. */
+  :focus-visible {
+    outline: 1px solid var(--color-accent);
+    outline-offset: 0;
   }
 
   input,
@@ -59,6 +79,10 @@
     color: inherit;
   }
 
+  input {
+    background: transparent;
+  }
+
   input::placeholder {
     color: var(--color-ink-3);
   }
@@ -66,48 +90,25 @@
   button:disabled {
     cursor: default;
   }
-
-  ::selection {
-    background: var(--color-accent-08);
-  }
 }
 
-@layer components {
-  /* 11 px uppercase labels: the only tracked type in the interface */
-  .label {
-    font-size: 11px;
-    line-height: 1.4;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--color-ink-2);
-  }
+@utility label-11 {
+  font-size: var(--text-meta);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
 
-  .mono {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-  }
+/* The wordmark is the word, lowercase, 13 px. */
+@utility wordmark {
+  font-family: var(--font-wordmark);
+  font-size: var(--text-body);
+  color: var(--color-ink);
+}
 
-  /* low confidence, under 0.7 */
-  .low-conf {
-    color: var(--color-ink-3);
-    border-bottom: 1px dotted var(--color-ink-3);
-  }
-
-  .tip {
-    position: relative;
-  }
-
-  .tip[data-tip]:hover::after {
-    content: attr(data-tip);
-    position: absolute;
-    top: 0;
-    left: calc(100% + 8px);
-    white-space: nowrap;
-    background: var(--color-ink);
-    color: var(--color-paper);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 2px 4px;
-    z-index: 20;
-  }
+/* Low confidence: ink-3 with a 1 px dotted underline. Never red. */
+@utility low-confidence {
+  color: var(--color-ink-3);
+  text-decoration: underline dotted var(--color-ink-3) 1px;
+  text-underline-offset: 3px;
 }

@@ -174,8 +174,10 @@ export default function PlanViewer({
           return (
             <span
               key={unit.id}
-              className={`mono absolute -translate-x-1/2 -translate-y-1/2 bg-paper px-[2px] py-[2px] text-11 ${
-                selected?.id === unit.id ? "text-accent" : "text-ink-2"
+              className={`absolute -translate-x-1/2 -translate-y-1/2 px-[3px] py-px font-mono text-meta ${
+                selected?.id === unit.id
+                  ? "bg-ink text-paper"
+                  : "bg-paper text-ink-2"
               }`}
               style={{ left: lx, top: ly }}
             >
@@ -185,7 +187,7 @@ export default function PlanViewer({
         })}
       </div>
 
-      <div className="mono pointer-events-none absolute bottom-2 left-2 text-11 text-ink-2">
+      <div className="pointer-events-none absolute bottom-2 left-2 font-mono text-meta text-ink-3">
         {floor.label} · {floor.sheet_number} · {Math.round(view.zoom * 100)}%
       </div>
     </div>

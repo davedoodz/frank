@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createProjectAction } from "@/app/actions";
+import { ACTION } from "@/components/ui/Action";
 
 const fields = [
   { name: "display_name", label: "display name", type: "text" },
@@ -20,15 +21,22 @@ export default function NewProjectPanel({ onClose }: { onClose: () => void }) {
   return (
     <aside className="w-[360px] shrink-0 overflow-auto border-l border-line bg-paper">
       <div className="flex h-12 items-center justify-between border-b border-line px-4">
-        <span className="text-15 text-ink">new project</span>
-        <button type="button" onClick={onClose} className="mono text-11 text-ink-2">
+        <span className="text-title text-ink">new project</span>
+        <button
+          type="button"
+          onClick={onClose}
+          className="font-mono text-meta text-ink-3 transition-colors duration-[80ms] hover:text-ink"
+        >
           close
         </button>
       </div>
       <form
         className="flex flex-col gap-4 p-4"
         action={(form) => {
-          if (!String(form.get("display_name") ?? "").trim() || !String(form.get("project_code") ?? "").trim()) {
+          if (
+            !String(form.get("display_name") ?? "").trim() ||
+            !String(form.get("project_code") ?? "").trim()
+          ) {
             setError("display name and code required");
             return;
           }
@@ -42,21 +50,23 @@ export default function NewProjectPanel({ onClose }: { onClose: () => void }) {
       >
         {fields.map((f) => (
           <label key={f.name} className="flex flex-col gap-1">
-            <span className="label">{f.label}</span>
+            <span className="label-11">{f.label}</span>
             <input
               name={f.name}
               type={f.type}
-              className={`h-7 border border-line bg-paper px-2 text-13 outline-none focus:border-ink ${
-                f.type === "number" ? "mono" : ""
+              className={`h-6 border border-line px-2 text-body text-ink focus:border-ink-2 ${
+                f.type === "number" ? "font-mono" : ""
               }`}
             />
           </label>
         ))}
         <div className="flex items-center gap-4 pt-2">
-          <button type="submit" disabled={pending} className="h-7 border border-ink px-3 text-13 text-ink">
+          <button type="submit" disabled={pending} className={ACTION}>
             create
           </button>
-          {error ? <span className="mono text-11 text-ink-2">{error}</span> : null}
+          {error ? (
+            <span className="font-mono text-meta text-ink-2">{error}</span>
+          ) : null}
         </div>
       </form>
     </aside>

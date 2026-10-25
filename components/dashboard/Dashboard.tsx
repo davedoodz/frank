@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ACTION, SEARCH } from "@/components/ui/Action";
 import type { Project } from "@/lib/types";
 import NewProjectPanel from "./NewProjectPanel";
 
@@ -23,7 +24,7 @@ const columns: Column[] = [
     key: "project_code",
     label: "code",
     value: (p) => p.project_code,
-    render: (p) => <span className="mono text-11">{p.project_code}</span>,
+    render: (p) => <span className="font-mono text-meta">{p.project_code}</span>,
   },
   { key: "city", label: "city", value: (p) => p.city },
   {
@@ -31,21 +32,21 @@ const columns: Column[] = [
     label: "year",
     numeric: true,
     value: (p) => p.year,
-    render: (p) => <span className="mono text-11">{p.year}</span>,
+    render: (p) => <span className="font-mono text-meta">{p.year}</span>,
   },
   {
     key: "floors_count",
     label: "floors",
     numeric: true,
     value: (p) => p.floors_count,
-    render: (p) => <span className="mono text-11">{p.floors_count}</span>,
+    render: (p) => <span className="font-mono text-meta">{p.floors_count}</span>,
   },
   {
     key: "units_count",
     label: "units",
     numeric: true,
     value: (p) => p.units_count,
-    render: (p) => <span className="mono text-11">{p.units_count}</span>,
+    render: (p) => <span className="font-mono text-meta">{p.units_count}</span>,
   },
   {
     key: "verified_count",
@@ -53,7 +54,7 @@ const columns: Column[] = [
     numeric: true,
     value: (p) => p.verified_count,
     render: (p) => (
-      <span className="mono text-11">
+      <span className="font-mono text-meta">
         {p.verified_count} / {p.units_count}
       </span>
     ),
@@ -67,10 +68,10 @@ const columns: Column[] = [
       const dwg = p.drawings.filter((d) => d.kind === "dwg").length;
       const skp = p.drawings.filter((d) => d.kind === "skp").length;
       return (
-        <span className="mono text-11">
+        <span className="font-mono text-meta">
           {p.drawings.length}
-          {dwg ? <span className="text-ink-2"> dwg {dwg}</span> : null}
-          {skp ? <span className="text-ink-2"> skp {skp}</span> : null}
+          {dwg ? <span className="text-ink-3"> dwg {dwg}</span> : null}
+          {skp ? <span className="text-ink-3"> skp {skp}</span> : null}
         </span>
       );
     },
@@ -80,7 +81,9 @@ const columns: Column[] = [
     label: "last import",
     value: (p) => p.last_import_at ?? "",
     render: (p) => (
-      <span className="mono text-11">{p.last_import_at ?? "—"}</span>
+      <span className="font-mono text-meta text-ink-2">
+        {p.last_import_at ?? "—"}
+      </span>
     ),
   },
 ];
@@ -116,22 +119,19 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
   }, [projects, query, sort]);
 
   return (
-    <div className="flex h-screen flex-col bg-surface">
-      <header className="flex h-12 shrink-0 items-center gap-6 border-b border-line bg-paper px-4">
-        <span className="text-13 text-ink">fitte.</span>
+    <div className="flex h-screen flex-col">
+      <header className="flex h-12 shrink-0 items-center gap-6 border-b border-line bg-surface px-3">
+        <span className="wordmark">fitte.</span>
         <input
+          type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="search projects"
-          className="h-6 w-[220px] border border-line bg-paper px-2 text-13 outline-none focus:border-ink"
+          className={`w-[220px] ${SEARCH}`}
         />
         <div className="flex-1" />
-        <button
-          type="button"
-          onClick={() => setPanelOpen(true)}
-          className="text-13 text-ink"
-        >
-          + new project
+        <button type="button" onClick={() => setPanelOpen(true)} className={ACTION}>
+          new project
         </button>
       </header>
 
@@ -150,13 +150,13 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
                           : { key: c.key, dir: 1 },
                       )
                     }
-                    className={`label h-8 cursor-pointer border-b border-line px-3 ${
+                    className={`label-11 h-8 cursor-pointer border-b border-line px-3 ${
                       c.numeric ? "text-right" : "text-left"
                     } ${sort.key === c.key ? "text-ink" : ""}`}
                   >
                     {c.label}
                     {sort.key === c.key ? (
-                      <span className="mono"> {sort.dir === 1 ? "+" : "−"}</span>
+                      <span className="font-mono"> {sort.dir === 1 ? "+" : "−"}</span>
                     ) : null}
                   </th>
                 ))}
@@ -167,12 +167,12 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
                 <tr
                   key={p.id}
                   onClick={() => router.push(`/p/${p.project_code}/units`)}
-                  className="h-8 cursor-pointer border-b border-line hover:bg-paper"
+                  className="h-8 cursor-pointer border-b border-line transition-colors duration-[80ms] hover:bg-fill-2"
                 >
                   {columns.map((c) => (
                     <td
                       key={c.key}
-                      className={`px-3 text-13 ${c.numeric ? "text-right" : "text-left"}`}
+                      className={`px-3 text-body ${c.numeric ? "text-right" : "text-left"}`}
                     >
                       {c.render ? c.render(p) : c.value(p)}
                     </td>
@@ -181,9 +181,11 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
               ))}
             </tbody>
           </table>
-          {rows.length === 0 ? (
-            <div className="px-3 py-3 text-13 text-ink-3">no match</div>
-          ) : null}
+          <div className="px-3 py-4 text-meta text-ink-2">
+            {rows.length === projects.length
+              ? `${projects.length} projects`
+              : `${rows.length} of ${projects.length} projects`}
+          </div>
         </div>
 
         {panelOpen ? (

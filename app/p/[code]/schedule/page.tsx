@@ -48,7 +48,7 @@ export default async function SchedulePage({
 
   if (rows.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-13 text-ink-3">
+      <div className="flex flex-1 items-center justify-center text-meta text-ink-2">
         no unit indexed
       </div>
     );

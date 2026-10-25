@@ -115,11 +115,11 @@ function Summary({ units }: { units: Unit[] }) {
   ];
 
   return (
-    <div className="flex h-16 shrink-0 items-center border-b border-line bg-paper">
+    <div className="flex h-16 shrink-0 items-center border-b border-line bg-surface">
       {figures.map(([label, value]) => (
-        <div key={label} className="border-r border-line px-4">
-          <div className="mono text-20 text-ink">{value}</div>
-          <div className="label">{label}</div>
+        <div key={label} className="h-full border-r border-line px-4 py-3">
+          <div className="font-mono text-title-lg text-ink">{value}</div>
+          <div className="label-11">{label}</div>
         </div>
       ))}
       <Distribution units={units} />
@@ -133,11 +133,11 @@ function Distribution({ units }: { units: Unit[] }) {
     counts.set(u.type_qc.value, (counts.get(u.type_qc.value) ?? 0) + 1);
   }
   return (
-    <div className="flex items-center gap-4 px-4">
+    <div className="flex h-full items-center gap-6 px-4 py-3">
       {[...counts.entries()].map(([type, count]) => (
         <div key={type}>
-          <div className="mono text-20 text-ink">{count}</div>
-          <div className="label">{type}</div>
+          <div className="font-mono text-title-lg text-ink">{count}</div>
+          <div className="label-11">{type}</div>
         </div>
       ))}
     </div>

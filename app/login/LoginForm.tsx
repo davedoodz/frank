@@ -7,23 +7,24 @@ export default function LoginForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState(signIn, "");
 
   return (
-    <form action={action} className="flex flex-col gap-3">
+    <form action={action}>
       <input type="hidden" name="next" value={next} />
       <input
         name="password"
         type="password"
         autoFocus
         autoComplete="current-password"
-        className="h-7 w-full border border-line bg-paper px-2 text-13 outline-none focus:border-ink"
+        aria-label="password"
+        className="h-6 w-full border border-line px-2 text-body text-ink focus:border-ink-2"
       />
       <button
         type="submit"
         disabled={pending}
-        className="h-7 w-full border border-ink bg-paper text-13 text-ink"
+        className="mt-2 h-6 w-full border border-line text-body text-ink-2 transition-colors duration-[80ms] hover:border-ink hover:text-ink"
       >
         enter
       </button>
-      {state ? <div className="mono text-11 text-ink-2">{state}</div> : null}
+      {state ? <div className="mt-2 text-meta text-ink-2">{state}</div> : null}
     </form>
   );
 }

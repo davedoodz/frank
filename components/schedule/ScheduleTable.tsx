@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { ACTION } from "@/components/ui/Action";
+import { Chip } from "@/components/ui/Chip";
 import { LOW_CONFIDENCE, ft2 } from "@/lib/format";
 
 export type ScheduleRow = {
@@ -49,28 +51,28 @@ const cols: Col[] = [
     key: "number",
     label: "unit",
     sort: (r) => r.number,
-    cell: (r) => <span className="mono text-11 text-ink">{r.number}</span>,
+    cell: (r) => <span className="font-mono text-meta text-ink">{r.number}</span>,
     csv: (r) => r.number,
   },
   {
     key: "floor",
     label: "floor",
     sort: (r) => r.level,
-    cell: (r) => <span className="text-13">{r.floor_label}</span>,
+    cell: (r) => <span className="text-body">{r.floor_label}</span>,
     csv: (r) => r.floor_label,
   },
   {
     key: "status",
     label: "status",
     sort: (r) => r.status,
-    cell: (r) => <span className="mono text-11 text-ink-2">{r.status}</span>,
+    cell: (r) => <span className="font-mono text-meta text-ink-3">{r.status}</span>,
     csv: (r) => r.status,
   },
   {
     key: "type",
     label: "type",
     sort: (r) => r.type,
-    cell: (r) => <span className="text-13">{r.type}</span>,
+    cell: (r) => <span className="text-body">{r.type}</span>,
     conf: (r) => r.type_c,
     csv: (r) => r.type,
   },
@@ -79,7 +81,7 @@ const cols: Col[] = [
     label: "bed",
     numeric: true,
     sort: (r) => r.bedrooms,
-    cell: (r) => <span className="mono text-11">{r.bedrooms}</span>,
+    cell: (r) => <span className="font-mono text-meta">{r.bedrooms}</span>,
     conf: (r) => r.bedrooms_c,
     csv: (r) => r.bedrooms,
   },
@@ -88,7 +90,7 @@ const cols: Col[] = [
     label: "bath",
     numeric: true,
     sort: (r) => r.bathrooms,
-    cell: (r) => <span className="mono text-11">{r.bathrooms}</span>,
+    cell: (r) => <span className="font-mono text-meta">{r.bathrooms}</span>,
     conf: (r) => r.bathrooms_c,
     csv: (r) => r.bathrooms,
   },
@@ -97,7 +99,7 @@ const cols: Col[] = [
     label: "rooms",
     numeric: true,
     sort: (r) => r.rooms ?? 0,
-    cell: (r) => <span className="mono text-11">{r.rooms ?? "—"}</span>,
+    cell: (r) => <span className="font-mono text-meta">{r.rooms ?? "—"}</span>,
     conf: (r) => r.rooms_c,
     csv: (r) => r.rooms ?? "",
   },
@@ -106,7 +108,7 @@ const cols: Col[] = [
     label: "net m²",
     numeric: true,
     sort: (r) => r.net,
-    cell: (r) => <span className="mono text-11">{r.net.toFixed(1)}</span>,
+    cell: (r) => <span className="font-mono text-meta">{r.net.toFixed(1)}</span>,
     conf: (r) => r.net_c,
     csv: (r) => r.net.toFixed(1),
   },
@@ -115,7 +117,7 @@ const cols: Col[] = [
     label: "net ft²",
     numeric: true,
     sort: (r) => r.net,
-    cell: (r) => <span className="mono text-11 text-ink-2">{ft2(r.net)}</span>,
+    cell: (r) => <span className="font-mono text-meta text-ink-3">{ft2(r.net)}</span>,
     csv: (r) => ft2(r.net),
   },
   {
@@ -124,7 +126,9 @@ const cols: Col[] = [
     numeric: true,
     sort: (r) => r.gross ?? 0,
     cell: (r) => (
-      <span className="mono text-11">{r.gross === null ? "—" : r.gross.toFixed(1)}</span>
+      <span className="font-mono text-meta">
+        {r.gross === null ? "—" : r.gross.toFixed(1)}
+      </span>
     ),
     conf: (r) => r.gross_c,
     csv: (r) => (r.gross === null ? "" : r.gross.toFixed(1)),
@@ -133,7 +137,7 @@ const cols: Col[] = [
     key: "orientation",
     label: "orient",
     sort: (r) => r.orientation,
-    cell: (r) => <span className="mono text-11">{r.orientation}</span>,
+    cell: (r) => <span className="font-mono text-meta">{r.orientation}</span>,
     conf: (r) => r.orientation_c,
     csv: (r) => r.orientation,
   },
@@ -141,7 +145,7 @@ const cols: Col[] = [
     key: "corner",
     label: "corner",
     sort: (r) => String(r.corner),
-    cell: (r) => <span className="text-13">{r.corner ? "yes" : "no"}</span>,
+    cell: (r) => <span className="text-body">{r.corner ? "yes" : "no"}</span>,
     conf: (r) => r.corner_c,
     csv: (r) => (r.corner ? "yes" : "no"),
   },
@@ -149,7 +153,7 @@ const cols: Col[] = [
     key: "balcony",
     label: "balcony",
     sort: (r) => String(r.balcony),
-    cell: (r) => <span className="text-13">{r.balcony ? "yes" : "no"}</span>,
+    cell: (r) => <span className="text-body">{r.balcony ? "yes" : "no"}</span>,
     conf: (r) => r.balcony_c,
     csv: (r) => (r.balcony ? "yes" : "no"),
   },
@@ -159,7 +163,7 @@ const cols: Col[] = [
     numeric: true,
     sort: (r) => r.balcony_area ?? 0,
     cell: (r) => (
-      <span className="mono text-11">
+      <span className="font-mono text-meta">
         {r.balcony_area === null ? "—" : r.balcony_area.toFixed(1)}
       </span>
     ),
@@ -170,14 +174,14 @@ const cols: Col[] = [
     key: "sheet",
     label: "sheet",
     sort: (r) => r.sheet,
-    cell: (r) => <span className="mono text-11 text-ink-2">{r.sheet}</span>,
+    cell: (r) => <span className="font-mono text-meta text-ink-3">{r.sheet}</span>,
     csv: (r) => r.sheet,
   },
   {
     key: "revision",
     label: "revision",
     sort: (r) => r.revision,
-    cell: (r) => <span className="mono text-11 text-ink-2">{r.revision}</span>,
+    cell: (r) => <span className="font-mono text-meta text-ink-3">{r.revision}</span>,
     csv: (r) => r.revision,
   },
 ];
@@ -298,50 +302,58 @@ export default function ScheduleTable({
     ["net m²", totalNet.toFixed(1)],
   ];
 
-  const chips = FACETS.flatMap((facet) => {
-    const counts = new Map<string, number>();
-    for (const row of rows) {
-      const value = facetValue(row, facet);
-      counts.set(value, (counts.get(value) ?? 0) + 1);
-    }
-    const values = [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-    return values
-      .filter(([value]) => facet !== "review" || value === "needs review")
-      .map(([value, count]) => ({ facet, value, count }));
-  });
+  // counts follow the other facets, so a chip shows what it would leave
+  const chips = FACETS.flatMap((facet) =>
+    [
+      ...new Set(
+        rows
+          .map((row) => facetValue(row, facet))
+          .filter((value) => facet !== "review" || value === "needs review"),
+      ),
+    ]
+      .sort((a, b) => a.localeCompare(b))
+      .map((value) => ({
+        facet,
+        value,
+        count: rows.filter(
+          (row) =>
+            facetValue(row, facet) === value &&
+            FACETS.every((other) => {
+              if (other === facet) return true;
+              const set = active[other];
+              return !set || set.size === 0 || set.has(facetValue(row, other));
+            }),
+        ).length,
+      })),
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-16 shrink-0 items-center border-b border-line bg-paper">
+      <div className="flex h-16 shrink-0 items-center border-b border-line bg-surface">
         {figures.map(([label, value]) => (
-          <div key={label} className="border-r border-line px-4">
-            <div className="mono text-20 text-ink">{value}</div>
-            <div className="label">{label}</div>
+          <div key={label} className="h-full border-r border-line px-4 py-3">
+            <div className="font-mono text-title-lg text-ink">{value}</div>
+            <div className="label-11">{label}</div>
           </div>
         ))}
         <div className="flex-1" />
-        <button type="button" onClick={exportCsv} className="px-4 text-13 text-ink">
-          export csv
-        </button>
+        <div className="px-3">
+          <button type="button" onClick={exportCsv} className={ACTION}>
+            export csv
+          </button>
+        </div>
       </div>
 
-      <div className="flex h-10 shrink-0 items-center gap-2 overflow-x-auto border-b border-line bg-paper px-4">
-        {chips.map((chip) => {
-          const on = active[chip.facet]?.has(chip.value) ?? false;
-          return (
-            <button
-              key={`${chip.facet}:${chip.value}`}
-              type="button"
-              onClick={() => toggle(chip.facet, chip.value)}
-              className={`flex h-6 shrink-0 items-center gap-1 border px-2 text-13 ${
-                on ? "border-accent text-accent" : "border-line text-ink-2"
-              } ${chip.count === 0 ? "text-ink-3" : ""}`}
-            >
-              {chip.value}
-              <span className="mono text-11">· {chip.count}</span>
-            </button>
-          );
-        })}
+      <div className="flex h-10 shrink-0 items-center gap-1 overflow-x-auto border-b border-line bg-surface px-3">
+        {chips.map((chip) => (
+          <Chip
+            key={`${chip.facet}:${chip.value}`}
+            label={chip.value}
+            count={chip.count}
+            active={active[chip.facet]?.has(chip.value) ?? false}
+            onClick={() => toggle(chip.facet, chip.value)}
+          />
+        ))}
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto">
@@ -358,13 +370,13 @@ export default function ScheduleTable({
                         : { key: c.key, dir: 1 },
                     )
                   }
-                  className={`label h-7 cursor-pointer border-b border-line px-3 ${
+                  className={`label-11 h-7 cursor-pointer border-b border-line px-3 ${
                     c.numeric ? "text-right" : "text-left"
                   } ${sort.key === c.key ? "text-ink" : ""}`}
                 >
                   {c.label}
                   {sort.key === c.key ? (
-                    <span className="mono"> {sort.dir === 1 ? "+" : "−"}</span>
+                    <span className="font-mono"> {sort.dir === 1 ? "+" : "−"}</span>
                   ) : null}
                 </th>
               ))}
@@ -381,14 +393,18 @@ export default function ScheduleTable({
               />
             ))}
             <tr className="h-7 border-t border-ink">
-              <td className="px-3 text-13 text-ink">project total</td>
-              <td className="mono px-3 text-11">{filtered.length}</td>
+              <td className="px-3 text-body text-ink">project total</td>
+              <td className="px-3 font-mono text-meta">{filtered.length}</td>
               {cols.slice(2).map((c) => (
                 <td key={c.key} className="px-3 text-right">
                   {c.key === "net" ? (
-                    <span className="mono text-11 text-ink">{totalNet.toFixed(1)}</span>
+                    <span className="font-mono text-meta text-ink">
+                      {totalNet.toFixed(1)}
+                    </span>
                   ) : c.key === "net_ft" ? (
-                    <span className="mono text-11 text-ink-2">{ft2(totalNet)}</span>
+                    <span className="font-mono text-meta text-ink-3">
+                      {ft2(totalNet)}
+                    </span>
                   ) : null}
                 </td>
               ))}
@@ -396,7 +412,7 @@ export default function ScheduleTable({
           </tbody>
         </table>
         {filtered.length === 0 ? (
-          <div className="px-3 py-3 text-13 text-ink-3">no match</div>
+          <div className="px-3 py-4 text-meta text-ink-2">no unit matches</div>
         ) : null}
       </div>
     </div>
@@ -414,13 +430,15 @@ function FloorGroup({
 
   return (
     <>
-      <tr className="h-8 bg-surface">
-        <td className="px-3 text-13 text-ink" colSpan={7}>
+      <tr className="h-8 bg-fill-2">
+        <td className="px-3 text-body text-ink" colSpan={7}>
           {group.label}
         </td>
-        <td className="mono px-3 text-right text-11 text-ink">{net.toFixed(1)}</td>
-        <td className="mono px-3 text-right text-11 text-ink-2">{ft2(net)}</td>
-        <td className="label px-3 text-right" colSpan={cols.length - 9}>
+        <td className="px-3 text-right font-mono text-meta text-ink">
+          {net.toFixed(1)}
+        </td>
+        <td className="px-3 text-right font-mono text-meta text-ink-3">{ft2(net)}</td>
+        <td className="label-11 px-3 text-right" colSpan={cols.length - 9}>
           {group.rows.length} units
         </td>
       </tr>
@@ -428,7 +446,7 @@ function FloorGroup({
         <tr
           key={row.id}
           onClick={() => onOpen(row)}
-          className="h-7 cursor-pointer border-b border-line hover:bg-paper"
+          className="h-7 cursor-pointer border-b border-line transition-colors duration-[80ms] hover:bg-fill-2"
         >
           {cols.map((c) => {
             const conf = c.conf?.(row);
@@ -438,7 +456,7 @@ function FloorGroup({
                 key={c.key}
                 className={`px-3 ${c.numeric ? "text-right" : "text-left"}`}
               >
-                <span className={low ? "low-conf" : ""}>{c.cell(row)}</span>
+                <span className={low ? "low-confidence" : ""}>{c.cell(row)}</span>
               </td>
             );
           })}

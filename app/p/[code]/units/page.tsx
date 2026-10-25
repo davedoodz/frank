@@ -24,7 +24,7 @@ export default async function UnitsPage({
   const floors = await getFloors(project.id);
   if (floors.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-13 text-ink-3">
+      <div className="flex flex-1 items-center justify-center text-meta text-ink-2">
         no floor indexed
       </div>
     );
