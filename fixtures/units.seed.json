@@ -1,0 +1,1414 @@
+{
+  "_comment": "Seed fixture for building the UI before real plans are imported. One fictional Quebec condo project, Condo Mont-Royal, two floors, 16 units on a double-loaded corridor, rooms for 502 and 504 only. Values are plausible but not from real drawings. Floor images do not exist yet: generate /public/fixtures/floors/A-205.png and A-206.png as simple SVG floor plans (corridor, 8 unit outlines, labels) rendered to PNG at 6600x4800, or any 11:8 placeholder. Unit 504 carries a deliberate type/bedroom disagreement at confidence 0.5 for the prototype 2 correction story. All units are unverified. P-2019-03 and P-2021-07 carry connected, not indexed drawings and no seeded floors or units. Delete this file once real data is in.",
+  "projects": [
+    {
+      "id": "p1",
+      "project_code": "P-2022-04",
+      "year": 2022,
+      "typology": "condo",
+      "floors_count": 2,
+      "ingest_method": "manual",
+      "notes": "fixture: 6-storey wood frame on podium, 2 floors seeded",
+      "display_name": "Condo Mont-Royal",
+      "city": "Montréal",
+      "verified_count": 0,
+      "last_import_at": "2026-10-25",
+      "drawings": [
+        {
+          "filename": "A-205_Niveau_05.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 5,
+          "status": "indexed",
+          "indexed_at": "2026-10-25"
+        },
+        {
+          "filename": "A-206_Niveau_06.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 6,
+          "status": "indexed",
+          "indexed_at": "2026-10-25"
+        },
+        {
+          "filename": "A-207_Niveau_07.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 7,
+          "status": "connected",
+          "indexed_at": null
+        },
+        {
+          "filename": "CMR_massing_v3.skp",
+          "kind": "skp",
+          "role": "massing",
+          "floor_level": null,
+          "status": "connected",
+          "indexed_at": null
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "project_code": "P-2019-03",
+      "display_name": "Les Jardins Saint-Laurent",
+      "city": "Montréal",
+      "year": 2019,
+      "typology": "condo",
+      "floors_count": 8,
+      "units_count": 140,
+      "verified_count": 0,
+      "ingest_method": "manual",
+      "last_import_at": null,
+      "notes": "archive project, drawings connected, not indexed",
+      "drawings": [
+        {
+          "filename": "A-201_Niveau_02.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 2,
+          "status": "connected",
+          "indexed_at": null
+        },
+        {
+          "filename": "A-204_Niveau_05.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 5,
+          "status": "connected",
+          "indexed_at": null
+        },
+        {
+          "filename": "A-207_Niveau_08.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 8,
+          "status": "connected",
+          "indexed_at": null
+        },
+        {
+          "filename": "JSL_massing_v2.skp",
+          "kind": "skp",
+          "role": "massing",
+          "floor_level": null,
+          "status": "connected",
+          "indexed_at": null
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "project_code": "P-2021-07",
+      "display_name": "Beaubien Est",
+      "city": "Montréal",
+      "year": 2021,
+      "typology": "condo",
+      "floors_count": 6,
+      "units_count": 96,
+      "verified_count": 0,
+      "ingest_method": "manual",
+      "last_import_at": null,
+      "notes": "archive project, drawings connected, not indexed",
+      "drawings": [
+        {
+          "filename": "A-203_Niveau_03.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 3,
+          "status": "connected",
+          "indexed_at": null
+        },
+        {
+          "filename": "A-206_Niveau_06.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 6,
+          "status": "connected",
+          "indexed_at": null
+        },
+        {
+          "filename": "BBE_massing_v1.skp",
+          "kind": "skp",
+          "role": "massing",
+          "floor_level": null,
+          "status": "connected",
+          "indexed_at": null
+        }
+      ]
+    }
+  ],
+  "floors": [
+    {
+      "id": "f5",
+      "project_id": "p1",
+      "level": 5,
+      "label": "Niveau 5",
+      "sheet_number": "A-205",
+      "revision_date": "2022-11-14",
+      "image_url": "/fixtures/floors/A-205.png",
+      "width_px": 6600,
+      "height_px": 4800,
+      "scale": "1:100",
+      "px_per_m": 78.7,
+      "source_file": "A-205_Niveau_05.dwg"
+    },
+    {
+      "id": "f6",
+      "project_id": "p1",
+      "level": 6,
+      "label": "Niveau 6",
+      "sheet_number": "A-206",
+      "revision_date": "2022-11-14",
+      "image_url": "/fixtures/floors/A-206.png",
+      "width_px": 6600,
+      "height_px": 4800,
+      "scale": "1:100",
+      "px_per_m": 78.7,
+      "source_file": "A-206_Niveau_06.dwg"
+    }
+  ],
+  "units": [
+    {
+      "id": "u501",
+      "project_id": "p1",
+      "floor_id": "f5",
+      "number": "501",
+      "type_qc": {
+        "value": "3½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 1,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 52.3,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 58.6,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "N",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 6.2,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.08,
+          0.21
+        ],
+        [
+          0.29,
+          0.21
+        ],
+        [
+          0.29,
+          0.47
+        ],
+        [
+          0.08,
+          0.47
+        ]
+      ],
+      "label_pos": [
+        0.185,
+        0.325
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 3,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u502",
+      "project_id": "p1",
+      "floor_id": "f5",
+      "number": "502",
+      "type_qc": {
+        "value": "4½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 2,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 74.8,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 83.8,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "N",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 8.4,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.29,
+          0.21
+        ],
+        [
+          0.5,
+          0.21
+        ],
+        [
+          0.5,
+          0.47
+        ],
+        [
+          0.29,
+          0.47
+        ]
+      ],
+      "label_pos": [
+        0.395,
+        0.325
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 4,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u503",
+      "project_id": "p1",
+      "floor_id": "f5",
+      "number": "503",
+      "type_qc": {
+        "value": "4½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 2,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1.5,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 78.1,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 87.5,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "N",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 8.4,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.5,
+          0.21
+        ],
+        [
+          0.71,
+          0.21
+        ],
+        [
+          0.71,
+          0.47
+        ],
+        [
+          0.5,
+          0.47
+        ]
+      ],
+      "label_pos": [
+        0.605,
+        0.325
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 4,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u504",
+      "project_id": "p1",
+      "floor_id": "f5",
+      "number": "504",
+      "type_qc": {
+        "value": "5½",
+        "confidence": 0.5
+      },
+      "bedrooms": {
+        "value": 2,
+        "confidence": 0.5
+      },
+      "bathrooms": {
+        "value": 2,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 98.6,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 110.4,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "NE",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 11,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.71,
+          0.21
+        ],
+        [
+          0.92,
+          0.21
+        ],
+        [
+          0.92,
+          0.47
+        ],
+        [
+          0.71,
+          0.47
+        ]
+      ],
+      "label_pos": [
+        0.815,
+        0.325
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": true,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 5,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u505",
+      "project_id": "p1",
+      "floor_id": "f5",
+      "number": "505",
+      "type_qc": {
+        "value": "studio",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 0,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 38.9,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 43.6,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "S",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": false,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": null,
+        "confidence": 1
+      },
+      "outline": [
+        [
+          0.08,
+          0.53
+        ],
+        [
+          0.29,
+          0.53
+        ],
+        [
+          0.29,
+          0.82
+        ],
+        [
+          0.08,
+          0.82
+        ]
+      ],
+      "label_pos": [
+        0.185,
+        0.675
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 2,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u506",
+      "project_id": "p1",
+      "floor_id": "f5",
+      "number": "506",
+      "type_qc": {
+        "value": "3½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 1,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 55,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 61.6,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "S",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 6.2,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.29,
+          0.53
+        ],
+        [
+          0.5,
+          0.53
+        ],
+        [
+          0.5,
+          0.82
+        ],
+        [
+          0.29,
+          0.82
+        ]
+      ],
+      "label_pos": [
+        0.395,
+        0.675
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 3,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u507",
+      "project_id": "p1",
+      "floor_id": "f5",
+      "number": "507",
+      "type_qc": {
+        "value": "4½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 2,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 76.2,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 85.3,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "S",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 8.4,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.5,
+          0.53
+        ],
+        [
+          0.71,
+          0.53
+        ],
+        [
+          0.71,
+          0.82
+        ],
+        [
+          0.5,
+          0.82
+        ]
+      ],
+      "label_pos": [
+        0.605,
+        0.675
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 4,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u508",
+      "project_id": "p1",
+      "floor_id": "f5",
+      "number": "508",
+      "type_qc": {
+        "value": "5½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 3,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 2,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 101.3,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 113.5,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "SW",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 12.5,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.71,
+          0.53
+        ],
+        [
+          0.92,
+          0.53
+        ],
+        [
+          0.92,
+          0.82
+        ],
+        [
+          0.71,
+          0.82
+        ]
+      ],
+      "label_pos": [
+        0.815,
+        0.675
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": true,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 5,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u601",
+      "project_id": "p1",
+      "floor_id": "f6",
+      "number": "601",
+      "type_qc": {
+        "value": "3½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 1,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 52.1,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 58.4,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "N",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 6.2,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.08,
+          0.21
+        ],
+        [
+          0.29,
+          0.21
+        ],
+        [
+          0.29,
+          0.47
+        ],
+        [
+          0.08,
+          0.47
+        ]
+      ],
+      "label_pos": [
+        0.185,
+        0.325
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 3,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u602",
+      "project_id": "p1",
+      "floor_id": "f6",
+      "number": "602",
+      "type_qc": {
+        "value": "4½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 2,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 74.4,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 83.3,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "N",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 8.4,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.29,
+          0.21
+        ],
+        [
+          0.5,
+          0.21
+        ],
+        [
+          0.5,
+          0.47
+        ],
+        [
+          0.29,
+          0.47
+        ]
+      ],
+      "label_pos": [
+        0.395,
+        0.325
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 4,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u603",
+      "project_id": "p1",
+      "floor_id": "f6",
+      "number": "603",
+      "type_qc": {
+        "value": "4½",
+        "confidence": 0.55
+      },
+      "bedrooms": {
+        "value": 2,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1.5,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 78.3,
+        "confidence": 0.58
+      },
+      "gross_area_m2": {
+        "value": 87.7,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "N",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 8.4,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.5,
+          0.21
+        ],
+        [
+          0.71,
+          0.21
+        ],
+        [
+          0.71,
+          0.47
+        ],
+        [
+          0.5,
+          0.47
+        ]
+      ],
+      "label_pos": [
+        0.605,
+        0.325
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 4,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u604",
+      "project_id": "p1",
+      "floor_id": "f6",
+      "number": "604",
+      "type_qc": {
+        "value": "5½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 3,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 2,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 98.1,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 109.9,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "NE",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 11,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.71,
+          0.21
+        ],
+        [
+          0.92,
+          0.21
+        ],
+        [
+          0.92,
+          0.47
+        ],
+        [
+          0.71,
+          0.47
+        ]
+      ],
+      "label_pos": [
+        0.815,
+        0.325
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": true,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 5,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u605",
+      "project_id": "p1",
+      "floor_id": "f6",
+      "number": "605",
+      "type_qc": {
+        "value": "studio",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 0,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 38.9,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 43.6,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "S",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": false,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": null,
+        "confidence": 1
+      },
+      "outline": [
+        [
+          0.08,
+          0.53
+        ],
+        [
+          0.29,
+          0.53
+        ],
+        [
+          0.29,
+          0.82
+        ],
+        [
+          0.08,
+          0.82
+        ]
+      ],
+      "label_pos": [
+        0.185,
+        0.675
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 2,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u606",
+      "project_id": "p1",
+      "floor_id": "f6",
+      "number": "606",
+      "type_qc": {
+        "value": "3½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 1,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 54.8,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 61.4,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "S",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 6.2,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.29,
+          0.53
+        ],
+        [
+          0.5,
+          0.53
+        ],
+        [
+          0.5,
+          0.82
+        ],
+        [
+          0.29,
+          0.82
+        ]
+      ],
+      "label_pos": [
+        0.395,
+        0.675
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 3,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u607",
+      "project_id": "p1",
+      "floor_id": "f6",
+      "number": "607",
+      "type_qc": {
+        "value": "4½",
+        "confidence": 0.55
+      },
+      "bedrooms": {
+        "value": 2,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 1,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 75.7,
+        "confidence": 0.58
+      },
+      "gross_area_m2": {
+        "value": 84.8,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "S",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 8.4,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.5,
+          0.53
+        ],
+        [
+          0.71,
+          0.53
+        ],
+        [
+          0.71,
+          0.82
+        ],
+        [
+          0.5,
+          0.82
+        ]
+      ],
+      "label_pos": [
+        0.605,
+        0.675
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": false,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 4,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    },
+    {
+      "id": "u608",
+      "project_id": "p1",
+      "floor_id": "f6",
+      "number": "608",
+      "type_qc": {
+        "value": "5½",
+        "confidence": 0.95
+      },
+      "bedrooms": {
+        "value": 3,
+        "confidence": 0.93
+      },
+      "bathrooms": {
+        "value": 2,
+        "confidence": 0.8
+      },
+      "net_area_m2": {
+        "value": 101.3,
+        "confidence": 0.9
+      },
+      "gross_area_m2": {
+        "value": 113.5,
+        "confidence": 0.7
+      },
+      "orientation": {
+        "value": "SW",
+        "confidence": 0.85
+      },
+      "has_balcony": {
+        "value": true,
+        "confidence": 0.9
+      },
+      "balcony_area_m2": {
+        "value": 12.5,
+        "confidence": 0.75
+      },
+      "outline": [
+        [
+          0.71,
+          0.53
+        ],
+        [
+          0.92,
+          0.53
+        ],
+        [
+          0.92,
+          0.82
+        ],
+        [
+          0.71,
+          0.82
+        ]
+      ],
+      "label_pos": [
+        0.815,
+        0.675
+      ],
+      "computed_area_m2": null,
+      "reviewed": false,
+      "notes": null,
+      "status": "unverified",
+      "is_corner": {
+        "value": true,
+        "confidence": 0.8
+      },
+      "rooms_count": {
+        "value": 5,
+        "confidence": 0.7
+      },
+      "verified_at": null,
+      "verified_by": null
+    }
+  ],
+  "rooms": [
+    {
+      "id": "r502-0",
+      "unit_id": "u502",
+      "name": "salon / cuisine",
+      "area_m2": 31.4,
+      "outline": null
+    },
+    {
+      "id": "r502-1",
+      "unit_id": "u502",
+      "name": "chambre 1",
+      "area_m2": 12.7,
+      "outline": null
+    },
+    {
+      "id": "r502-2",
+      "unit_id": "u502",
+      "name": "chambre 2",
+      "area_m2": 10.5,
+      "outline": null
+    },
+    {
+      "id": "r502-3",
+      "unit_id": "u502",
+      "name": "salle de bain",
+      "area_m2": 5.2,
+      "outline": null
+    },
+    {
+      "id": "r504-4",
+      "unit_id": "u504",
+      "name": "salon / cuisine",
+      "area_m2": 41.4,
+      "outline": null
+    },
+    {
+      "id": "r504-5",
+      "unit_id": "u504",
+      "name": "chambre 1",
+      "area_m2": 16.8,
+      "outline": null
+    },
+    {
+      "id": "r504-6",
+      "unit_id": "u504",
+      "name": "chambre 2",
+      "area_m2": 13.8,
+      "outline": null
+    },
+    {
+      "id": "r504-7",
+      "unit_id": "u504",
+      "name": "salle de bain",
+      "area_m2": 6.9,
+      "outline": null
+    }
+  ]
+}

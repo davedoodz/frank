@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #ffffff;
+  --color-surface: #f4f4f2;
+  --color-line: #d9d9d5;
+  --color-ink: #111111;
+  --color-ink-2: #6b6b66;
+  --color-ink-3: #a3a39e;
+  --color-accent: #c8411b;
+  --color-accent-08: rgba(200, 65, 27, 0.08);
+
+  --color-t-studio: #8a8a85;
+  --color-t-3h: #5b7a99;
+  --color-t-4h: #6f8f5e;
+  --color-t-5h: #a3733f;
+  --color-t-other: #b06a8a;
+
+  --font-sans: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", SFMono-Regular, Menlo, monospace;
+
+  --text-11: 11px;
+  --text-11--line-height: 1.4;
+  --text-13: 13px;
+  --text-13--line-height: 1.4;
+  --text-15: 15px;
+  --text-15--line-height: 1.4;
+  --text-20: 20px;
+  --text-20--line-height: 1.4;
+
+  --spacing: 4px;
+  --radius-xs: 2px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+input,
+button,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+input::placeholder {
+  color: var(--color-ink-3);
+}
+
+button:disabled {
+  cursor: default;
+}
+
+/* 11 px uppercase labels: the only tracked type in the interface */
+.label {
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* low confidence, under 0.7 */
+.low-conf {
+  color: var(--color-ink-3);
+  border-bottom: 1px dotted var(--color-ink-3);
+}
+
+.tip {
+  position: relative;
+}
+
+.tip[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  white-space: nowrap;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 2px 4px;
+  z-index: 20;
+}
+
+::selection {
+  background: var(--color-accent-08);
+}
