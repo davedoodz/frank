@@ -170,11 +170,11 @@ function drawUnit(u: SeedUnit, W: number, H: number) {
     rect(x0 + width * 0.12, by0, width * 0.76, bh, W_PART);
   }
 
-  // unit number
-  const lx = u.label_pos[0] * W;
-  const ly = u.label_pos[1] * H;
+  // unit number, drawn as a plan tag away from the centre so the interface
+  // label at label_pos never sits on top of it
+  const tag = P(0.84, 0.26);
   lines.push(
-    `<text x="${r(lx)}" y="${r(ly)}" font-family="monospace" font-size="150" text-anchor="middle" fill="#000" stroke="none">${u.number}</text>`,
+    `<text x="${r(tag[0])}" y="${r(tag[1])}" font-family="monospace" font-size="150" text-anchor="middle" fill="#000" stroke="none">${u.number}</text>`,
   );
 }
 
