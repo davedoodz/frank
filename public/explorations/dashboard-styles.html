@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>fitte — dashboard styles</title>
+    <style>
+      :root {
+        --paper: #ffffff;
+        --surface: #f4f4f2;
+        --line: #d9d9d5;
+        --ink: #111111;
+        --ink-2: #6b6b66;
+        --ink-3: #a3a39e;
+        --fill-2: #ecece9;
+        --accent: #c8411b;
+        --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+        --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--surface);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 13px;
+        line-height: 1.4;
+        font-variant-numeric: tabular-nums;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .label {
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ink-2);
+      }
+
+      .mono {
+        font-family: var(--mono);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .m11 {
+        font-family: var(--mono);
+        font-size: 11px;
+      }
+
+      /* page frame */
+      header.page {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        height: 48px;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      main {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 48px;
+        max-width: 1280px;
+      }
+
+      section > .head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      section > .head .note {
+        font-size: 11px;
+        color: var(--ink-2);
+      }
+
+      .frame {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        overflow: hidden;
+      }
+
+      /* shared pieces */
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        height: 48px;
+        padding: 0 12px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .search {
+        height: 24px;
+        width: 220px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 10px;
+        display: flex;
+        align-items: center;
+        color: var(--ink-3);
+      }
+
+      .search.square {
+        border-radius: 0;
+      }
+
+      .action {
+        height: 24px;
+        border: 1px solid var(--line);
+        padding: 0 10px;
+        display: inline-flex;
+        align-items: center;
+        color: var(--ink-2);
+      }
+
+      .action.solid {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--paper);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        height: 32px;
+        padding: 0 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--ink-2);
+        font-weight: 400;
+      }
+
+      td {
+        height: 32px;
+        padding: 0 12px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      th.n,
+      td.n {
+        text-align: right;
+      }
+
+      tr.row:hover td {
+        background: var(--fill-2);
+      }
+
+      /* A — sheet */
+      .sheet tbody tr.sel td {
+        background: var(--fill-2);
+      }
+
+      /* B — rail */
+      .split {
+        display: flex;
+        min-height: 300px;
+      }
+
+      .rail {
+        width: 200px;
+        flex: none;
+        border-right: 1px solid var(--line);
+        padding: 8px;
+      }
+
+      .rail .item {
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 0 3px 0 10px;
+        color: var(--ink-2);
+      }
+
+      .rail .item.on {
+        color: var(--ink);
+        border-left: 2px solid var(--accent);
+        padding-left: 8px;
+      }
+
+      .rail .item .count {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-3);
+      }
+
+      /* C — chips */
+      .chiprail .chip {
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 0 3px 0 10px;
+      }
+
+      .chiprail .chip .count {
+        min-width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: var(--fill-2);
+        color: var(--ink-2);
+        font-family: var(--mono);
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 5px;
+      }
+
+      .chiprail .chip.on {
+        background: var(--ink);
+        color: var(--paper);
+      }
+
+      .chiprail .chip.on .count {
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--line);
+        margin: 8px 0;
+      }
+
+      /* D — plates */
+      .plates {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background: var(--line);
+        border-top: 1px solid var(--line);
+      }
+
+      .plate {
+        background: var(--paper);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 200px;
+      }
+
+      .plate .thumb {
+        border: 1px solid var(--line);
+        background: var(--paper);
+        aspect-ratio: 11 / 8;
+        display: block;
+      }
+
+      .plate .name {
+        font-size: 15px;
+      }
+
+      .plate .meta {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-2);
+      }
+
+      .plate.empty {
+        color: var(--ink-3);
+        align-items: flex-start;
+        justify-content: flex-end;
+      }
+
+      .plate:hover {
+        background: var(--fill-2);
+      }
+
+      /* E — index */
+      .index {
+        background: var(--paper);
+      }
+
+      .index .line {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        padding: 12px;
+      }
+
+      .index .line:hover {
+        background: var(--ink);
+        color: var(--paper);
+      }
+
+      .index .line:hover .meta,
+      .index .line:hover .code {
+        color: var(--paper);
+      }
+
+      .index .name {
+        font-size: 20px;
+      }
+
+      .index .code,
+      .index .meta {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-2);
+      }
+
+      .index .meta {
+        margin-left: auto;
+      }
+
+      /* F — board */
+      .board {
+        display: grid;
+        grid-template-columns: 200px 1fr 200px;
+        gap: 1px;
+        background: var(--line);
+      }
+
+      .board > div {
+        background: var(--surface);
+        padding: 12px;
+      }
+
+      .stat {
+        padding: 12px 16px;
+        border-right: 1px solid var(--line);
+      }
+
+      .stat .v {
+        font-family: var(--mono);
+        font-size: 20px;
+      }
+
+      .strip {
+        display: flex;
+        border-bottom: 1px solid var(--line);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <span>fitte.</span>
+      <span class="label">dashboard styles</span>
+      <span class="m11" style="color: var(--ink-3)"
+        >five registers for the same three projects · pick one, or pick parts</span
+      >
+    </header>
+
+    <main>
+      <!-- A -->
+      <section>
+        <div class="head">
+          <span class="label">a</span>
+          <span>sheet</span>
+          <span class="note"
+            >what ships today. one top bar, one table, no navigation furniture.</span
+          >
+        </div>
+        <div class="frame sheet">
+          <div class="bar">
+            <span>fitte.</span>
+            <span class="search">search projects</span>
+            <span style="flex: 1"></span>
+            <span class="action">new project</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>project</th>
+                <th>code</th>
+                <th>city</th>
+                <th class="n">year</th>
+                <th class="n">floors</th>
+                <th class="n">units</th>
+                <th class="n">verified</th>
+                <th class="n">files</th>
+                <th>last import</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row">
+                <td>Condo Mont-Royal</td>
+                <td class="m11">P-2022-04</td>
+                <td>Montréal</td>
+                <td class="n m11">2022</td>
+                <td class="n m11">2</td>
+                <td class="n m11">16</td>
+                <td class="n m11">0 / 16</td>
+                <td class="n m11">4 <span style="color: var(--ink-3)">dwg 3 skp 1</span></td>
+                <td class="m11">2026-10-25</td>
+              </tr>
+              <tr class="row">
+                <td>Les Jardins Saint-Laurent</td>
+                <td class="m11">P-2019-03</td>
+                <td>Montréal</td>
+                <td class="n m11">2019</td>
+                <td class="n m11">8</td>
+                <td class="n m11">140</td>
+                <td class="n m11">0 / 140</td>
+                <td class="n m11">4 <span style="color: var(--ink-3)">dwg 3 skp 1</span></td>
+                <td class="m11">—</td>
+              </tr>
+              <tr class="row">
+                <td>Beaubien Est</td>
+                <td class="m11">P-2021-07</td>
+                <td>Montréal</td>
+                <td class="n m11">2021</td>
+                <td class="n m11">6</td>
+                <td class="n m11">96</td>
+                <td class="n m11">0 / 96</td>
+                <td class="n m11">3 <span style="color: var(--ink-3)">dwg 2 skp 1</span></td>
+                <td class="m11">—</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="m11" style="padding: 16px 12px; color: var(--ink-2)">3 projects</div>
+        </div>
+      </section>
+
+      <!-- B -->
+      <section>
+        <div class="head">
+          <span class="label">b</span>
+          <span>rail</span>
+          <span class="note"
+            >the screenshot structure, de-chromed: 200 px rail, accent marks position only.</span
+          >
+        </div>
+        <div class="frame">
+          <div class="bar">
+            <span>fitte.</span>
+            <span style="flex: 1"></span>
+            <span class="search square">search projects</span>
+            <span class="action">new project</span>
+          </div>
+          <div class="split">
+            <nav class="rail">
+              <div class="item on">projects <span class="count">3</span></div>
+              <div class="item">office dna <span class="count">—</span></div>
+              <div class="item">library <span class="count">—</span></div>
+              <div class="item">settings</div>
+              <div class="divider"></div>
+              <div class="label" style="padding: 4px 10px">recent</div>
+              <div class="item">Condo Mont-Royal <span class="count">16</span></div>
+              <div class="item">Beaubien Est <span class="count">96</span></div>
+            </nav>
+            <div style="flex: 1; min-width: 0">
+              <table>
+                <thead>
+                  <tr>
+                    <th>project</th>
+                    <th>code</th>
+                    <th class="n">year</th>
+                    <th class="n">floors</th>
+                    <th class="n">units</th>
+                    <th class="n">verified</th>
+                    <th>last import</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="row">
+                    <td>Condo Mont-Royal</td>
+                    <td class="m11">P-2022-04</td>
+                    <td class="n m11">2022</td>
+                    <td class="n m11">2</td>
+                    <td class="n m11">16</td>
+                    <td class="n m11">0 / 16</td>
+                    <td class="m11">2026-10-25</td>
+                  </tr>
+                  <tr class="row">
+                    <td>Les Jardins Saint-Laurent</td>
+                    <td class="m11">P-2019-03</td>
+                    <td class="n m11">2019</td>
+                    <td class="n m11">8</td>
+                    <td class="n m11">140</td>
+                    <td class="n m11">0 / 140</td>
+                    <td class="m11">—</td>
+                  </tr>
+                  <tr class="row">
+                    <td>Beaubien Est</td>
+                    <td class="m11">P-2021-07</td>
+                    <td class="n m11">2021</td>
+                    <td class="n m11">6</td>
+                    <td class="n m11">96</td>
+                    <td class="n m11">0 / 96</td>
+                    <td class="m11">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- C -->
+      <section>
+        <div class="head">
+          <span class="label">c</span>
+          <span>chips</span>
+          <span class="note"
+            >coupe register: stadium rows with counts, active state carried by inversion.</span
+          >
+        </div>
+        <div class="frame">
+          <div class="bar">
+            <span>fitte.</span>
+            <span class="search">search projects</span>
+            <span style="flex: 1"></span>
+            <span class="action">new project</span>
+          </div>
+          <div class="split">
+            <nav class="rail chiprail">
+              <div class="chip on">projects <span class="count">3</span></div>
+              <div class="chip">office dna <span class="count">0</span></div>
+              <div class="chip">library <span class="count">0</span></div>
+              <div class="divider"></div>
+              <div class="label" style="padding: 4px 10px">year</div>
+              <div class="chip">2022 <span class="count">1</span></div>
+              <div class="chip">2021 <span class="count">1</span></div>
+              <div class="chip">2019 <span class="count">1</span></div>
+              <div class="divider"></div>
+              <div class="label" style="padding: 4px 10px">state</div>
+              <div class="chip">indexed <span class="count">1</span></div>
+              <div class="chip">connected <span class="count">2</span></div>
+            </nav>
+            <div style="flex: 1; min-width: 0">
+              <table>
+                <thead>
+                  <tr>
+                    <th>project</th>
+                    <th>code</th>
+                    <th class="n">units</th>
+                    <th class="n">verified</th>
+                    <th class="n">files</th>
+                    <th>state</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="row">
+                    <td>Condo Mont-Royal</td>
+                    <td class="m11">P-2022-04</td>
+                    <td class="n m11">16</td>
+                    <td class="n m11">0 / 16</td>
+                    <td class="n m11">4</td>
+                    <td class="m11">indexed</td>
+                  </tr>
+                  <tr class="row">
+                    <td>Les Jardins Saint-Laurent</td>
+                    <td class="m11">P-2019-03</td>
+                    <td class="n m11">140</td>
+                    <td class="n m11">0 / 140</td>
+                    <td class="n m11">4</td>
+                    <td class="m11" style="color: var(--ink-3)">connected</td>
+                  </tr>
+                  <tr class="row">
+                    <td>Beaubien Est</td>
+                    <td class="m11">P-2021-07</td>
+                    <td class="n m11">96</td>
+                    <td class="n m11">0 / 96</td>
+                    <td class="n m11">3</td>
+                    <td class="m11" style="color: var(--ink-3)">connected</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- D -->
+      <section>
+        <div class="head">
+          <span class="label">d</span>
+          <span>plates</span>
+          <span class="note"
+            >the screenshot's grid, with the typical floor plan as the thumbnail instead of a
+            render.</span
+          >
+        </div>
+        <div class="frame">
+          <div class="bar">
+            <span>fitte.</span>
+            <span class="search">search projects</span>
+            <span style="flex: 1"></span>
+            <span class="action">new project</span>
+          </div>
+          <div class="plates">
+            <div class="plate">
+              <svg class="thumb" viewBox="0 0 110 80" fill="none" stroke="#111" stroke-width="0.6">
+                <rect x="8" y="14" width="94" height="52" />
+                <path d="M8 36h94M8 44h94" />
+                <path d="M31 14v22M54 14v22M77 14v22M31 44v22M54 44v22M77 44v22" />
+                <rect x="12" y="38" width="8" height="4" stroke-width="0.4" />
+                <rect x="90" y="38" width="8" height="4" stroke-width="0.4" />
+              </svg>
+              <div class="name">Condo Mont-Royal</div>
+              <div class="meta">P-2022-04 · Montréal · 2022</div>
+              <div class="meta" style="color: var(--ink-3)">16 units · 2 floors · 0 verified</div>
+              <div class="m11" style="margin-top: auto; color: var(--ink-3)">
+                imported 2026-10-25
+              </div>
+            </div>
+            <div class="plate">
+              <svg class="thumb" viewBox="0 0 110 80" fill="none" stroke="#111" stroke-width="0.6">
+                <rect x="6" y="10" width="98" height="60" />
+                <path d="M6 38h98M6 46h98" />
+                <path d="M26 10v28M46 10v28M66 10v28M86 10v28M26 46v24M46 46v24M66 46v24M86 46v24" />
+              </svg>
+              <div class="name">Les Jardins Saint-Laurent</div>
+              <div class="meta">P-2019-03 · Montréal · 2019</div>
+              <div class="meta" style="color: var(--ink-3)">140 units · 8 floors · 0 verified</div>
+              <div class="m11" style="margin-top: auto; color: var(--ink-3)">
+                4 files connected, not indexed
+              </div>
+            </div>
+            <div class="plate">
+              <svg class="thumb" viewBox="0 0 110 80" fill="none" stroke="#111" stroke-width="0.6">
+                <rect x="14" y="12" width="82" height="56" />
+                <path d="M14 40h82" />
+                <path d="M38 12v28M62 12v28M38 40v28M62 40v28" />
+              </svg>
+              <div class="name">Beaubien Est</div>
+              <div class="meta">P-2021-07 · Montréal · 2021</div>
+              <div class="meta" style="color: var(--ink-3)">96 units · 6 floors · 0 verified</div>
+              <div class="m11" style="margin-top: auto; color: var(--ink-3)">
+                3 files connected, not indexed
+              </div>
+            </div>
+            <div class="plate empty">
+              <div class="m11">new project</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- E -->
+      <section>
+        <div class="head">
+          <span class="label">e</span>
+          <span>index</span>
+          <span class="note"
+            >no table rules at all. name at 20 px, everything else monospace metadata, row inverts on
+            hover.</span
+          >
+        </div>
+        <div class="frame">
+          <div class="bar">
+            <span>fitte.</span>
+            <span class="search">search projects</span>
+            <span style="flex: 1"></span>
+            <span class="action">new project</span>
+          </div>
+          <div class="index">
+            <div class="line">
+              <span class="code">P-2022-04</span>
+              <span class="name">Condo Mont-Royal</span>
+              <span class="meta">Montréal 2022 · 2 floors · 16 units · 0 verified · 4 files</span>
+            </div>
+            <div class="line">
+              <span class="code">P-2019-03</span>
+              <span class="name">Les Jardins Saint-Laurent</span>
+              <span class="meta">Montréal 2019 · 8 floors · 140 units · 0 verified · 4 files</span>
+            </div>
+            <div class="line">
+              <span class="code">P-2021-07</span>
+              <span class="name">Beaubien Est</span>
+              <span class="meta">Montréal 2021 · 6 floors · 96 units · 0 verified · 3 files</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- F -->
+      <section>
+        <div class="head">
+          <span class="label">f</span>
+          <span>counter</span>
+          <span class="note"
+            >office totals first, projects second: the dashboard answers "what does the office
+            hold".</span
+          >
+        </div>
+        <div class="frame">
+          <div class="bar">
+            <span>fitte.</span>
+            <span class="search">search projects</span>
+            <span style="flex: 1"></span>
+            <span class="action solid">new project</span>
+          </div>
+          <div class="strip">
+            <div class="stat"><div class="v">3</div><div class="label">projects</div></div>
+            <div class="stat"><div class="v">252</div><div class="label">units</div></div>
+            <div class="stat"><div class="v">16</div><div class="label">indexed</div></div>
+            <div class="stat"><div class="v">0</div><div class="label">verified</div></div>
+            <div class="stat" style="border-right: none">
+              <div class="v">11</div>
+              <div class="label">files connected</div>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>project</th>
+                <th>code</th>
+                <th class="n">units</th>
+                <th class="n">indexed</th>
+                <th class="n">verified</th>
+                <th>coverage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row">
+                <td>Condo Mont-Royal</td>
+                <td class="m11">P-2022-04</td>
+                <td class="n m11">16</td>
+                <td class="n m11">16</td>
+                <td class="n m11">0</td>
+                <td>
+                  <svg width="160" height="6" viewBox="0 0 160 6">
+                    <rect x="0" y="0" width="160" height="6" fill="#ecece9" />
+                    <rect x="0" y="0" width="160" height="6" fill="#6b6b66" />
+                  </svg>
+                </td>
+              </tr>
+              <tr class="row">
+                <td>Les Jardins Saint-Laurent</td>
+                <td class="m11">P-2019-03</td>
+                <td class="n m11">140</td>
+                <td class="n m11">0</td>
+                <td class="n m11">0</td>
+                <td>
+                  <svg width="160" height="6" viewBox="0 0 160 6">
+                    <rect x="0" y="0" width="160" height="6" fill="#ecece9" />
+                  </svg>
+                </td>
+              </tr>
+              <tr class="row">
+                <td>Beaubien Est</td>
+                <td class="m11">P-2021-07</td>
+                <td class="n m11">96</td>
+                <td class="n m11">0</td>
+                <td class="n m11">0</td>
+                <td>
+                  <svg width="160" height="6" viewBox="0 0 160 6">
+                    <rect x="0" y="0" width="160" height="6" fill="#ecece9" />
+                  </svg>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
