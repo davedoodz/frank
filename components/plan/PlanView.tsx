@@ -5,17 +5,19 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import FloorMetrics, { TypologyLegend } from "./AllUnitsPanel";
 import LeftRail from "./LeftRail";
+import MassingViewer from "./MassingViewer";
 import PlanViewer from "./PlanViewer";
 import RoomsStrip from "./RoomsStrip";
 import UnitPanel from "./UnitPanel";
 import UnitPreview from "./UnitPreview";
 import UnitsTable from "./UnitsTable";
 import { centroid } from "./geometry";
+import OpenInCadDialog from "@/components/plan/OpenInCadDialog";
 import Icon from "@/components/ui/Icon";
 import { BTN, BTN_ON } from "@/components/ui/Button";
 import { TYPOLOGY_ORDER, brLabel } from "@/lib/format";
 import type { Prefs } from "@/lib/prefs";
-import type { Floor, Room, Unit } from "@/lib/types";
+import type { Floor, MassingModel, Room, Unit } from "@/lib/types";
 
 /**
  * The floor, three ways at once: where you are in the building, the drawing,
@@ -30,6 +32,9 @@ export default function PlanView({
   rooms,
   rail,
   prefs,
+  massing,
+  levelsMapped,
+  view,
 }: {
   code: string;
   floor: Floor;
@@ -38,19 +43,46 @@ export default function PlanView({
   rooms: Room[];
   rail: { level: number; label: string; units: string[] }[];
   prefs: Prefs;
+  massing: MassingModel | null;
+  /** A BuildingLevelMap row exists for this floor. */
+  levelsMapped: boolean;
+  view: "2d" | "3d";
 }) {
   const router = useRouter();
   const [typology, setTypology] = useState<string>("all");
   const [showLabels, setShowLabels] = useState(false);
 
+  const href = useCallback(
+    (level: number, number: string | null, next: "2d" | "3d") => {
+      const query = new URLSearchParams({ floor: String(level) });
+      if (number) query.set("u", number);
+      if (next === "3d") query.set("view", "3d");
+      return `/p/${code}/units?${query.toString()}`;
+    },
+    [code],
+  );
+
   const select = useCallback(
     (number: string | null) => {
-      const url = number
-        ? `/p/${code}/units?floor=${floor.level}&u=${number}`
-        : `/p/${code}/units?floor=${floor.level}`;
-      router.replace(url, { scroll: false });
+      router.replace(href(floor.level, number, view), { scroll: false });
     },
-    [code, floor.level, router],
+    [floor.level, href, router, view],
+  );
+
+  const setView = useCallback(
+    (next: "2d" | "3d") => {
+      router.replace(href(floor.level, selected?.number ?? null, next), {
+        scroll: false,
+      });
+    },
+    [floor.level, href, router, selected],
+  );
+
+  const setLevel = useCallback(
+    (level: number) => {
+      router.replace(href(level, null, view), { scroll: false });
+    },
+    [href, router, view],
   );
 
   const step = useCallback(
@@ -132,59 +164,109 @@ export default function PlanView({
               {floor.label}
             </h1>
             <p className="truncate text-[13px] text-text-2">
-              Residential plan · {units.length} units
+              Plan résidentiel · {units.length} unités
             </p>
           </div>
           <span className="flex-1" />
+          {selected ? (
+            <OpenInCadDialog
+              code={code}
+              unit={selected}
+              floor={floor}
+              className={BTN}
+            />
+          ) : null}
           <Link href={`/p/${code}/schedule`} className={BTN}>
             <Icon name="table" size={14} />
-            Unit schedule
+            Tableau des unités
           </Link>
           <Link href={`/p/${code}/building`} className={BTN}>
             <Icon name="cube" size={14} />
-            3D context
+            Contexte 3D
           </Link>
         </div>
 
+        {massing ? (
+          <div className="flex shrink-0 justify-center">
+            <div className="flex items-center gap-1 rounded-xl border border-edge bg-panel p-1">
+              {([["2d", "Plan d’étage 2D"], ["3d", "Contexte 3D du bâtiment"]] as const).map(
+                ([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setView(key)}
+                    aria-pressed={view === key}
+                    className={`flex h-8 items-center rounded-lg px-4 text-[13px] font-medium transition-colors ${
+                      view === key
+                        ? "bg-brand text-white"
+                        : "text-text-2 hover:bg-app hover:text-text"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ),
+              )}
+            </div>
+          </div>
+        ) : null}
+
         {selected ? null : <FloorMetrics units={units} />}
 
-        <PlanViewer
-          floor={floor}
-          units={shown}
-          selected={selected}
-          onSelect={select}
-          typologyFills={prefs.typologyFills}
-          showLabels={showLabels}
-          toolbar={
-            <>
-              <label className="flex h-9 items-center gap-2 rounded-lg border border-edge px-2.5 text-[13px] text-text-2">
-                Typology
-                <select
-                  value={typology}
-                  onChange={(e) => setTypology(e.target.value)}
-                  aria-label="typology filter"
-                  className="bg-transparent text-[13px] font-medium text-text outline-none"
+        <div
+          className={`grid min-h-0 flex-1 gap-4 [&>*]:min-w-0 ${
+            view === "3d" && massing ? "grid-cols-2" : "grid-cols-1"
+          }`}
+        >
+          <PlanViewer
+            floor={floor}
+            units={shown}
+            selected={selected}
+            onSelect={select}
+            typologyFills={prefs.typologyFills}
+            showLabels={showLabels}
+            toolbar={
+              <>
+                <label className="flex h-9 items-center gap-2 rounded-lg border border-edge px-2.5 text-[13px] text-text-2">
+                  Typologie
+                  <select
+                    value={typology}
+                    onChange={(e) => setTypology(e.target.value)}
+                    aria-label="Filtre de typologie"
+                    className="bg-transparent text-[13px] font-medium text-text outline-none"
+                  >
+                    <option value="all">Tous les types</option>
+                    {types.map((type) => (
+                      <option key={type} value={type}>
+                        {brLabel(type)} ({type})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowLabels((v) => !v)}
+                  aria-pressed={showLabels}
+                  className={showLabels ? BTN_ON : BTN}
                 >
-                  <option value="all">All types</option>
-                  {types.map((type) => (
-                    <option key={type} value={type}>
-                      {brLabel(type)} ({type})
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowLabels((v) => !v)}
-                aria-pressed={showLabels}
-                className={showLabels ? BTN_ON : BTN}
-              >
-                <Icon name="label" size={14} />
-                Show labels
-              </button>
-            </>
-          }
-        />
+                  <Icon name="label" size={14} />
+                  Afficher les étiquettes
+                </button>
+              </>
+            }
+          />
+
+          {view === "3d" && massing ? (
+            <MassingViewer
+              model={massing}
+              levels={rail.map((r) => ({ level: r.level, label: r.label }))}
+              level={floor.level}
+              onLevel={setLevel}
+              unitNumber={selected?.number ?? null}
+              mapped={levelsMapped}
+              code={code}
+            />
+          ) : null}
+        </div>
 
         {selected ? (
           <RoomsStrip unit={selected} rooms={rooms} />

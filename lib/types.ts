@@ -123,5 +123,39 @@ export type CollectionItem = {
   collection_id: string;
   unit_id: string;
   note: string | null;
+  /** The technician's own reading of the reference, kept with the row. */
+  tags: string[];
   added_at: string;
+};
+
+/** R3, written by the simulated SketchUp extension when levels are synced. */
+export type BuildingLevelMap = {
+  project_id: string;
+  floor_id: string;
+  model_ref: string;
+  synced_at: string;
+};
+
+/** One visible vertical edge of the facade, in render pixels. */
+export type MassingCorner = { x: number; top: number; base: number };
+
+/**
+ * The exterior massing of a project: a static render of the SKP plus the few
+ * numbers needed to outline one level band on it. Never interior geometry.
+ */
+export type MassingModel = {
+  project_id: string;
+  model_ref: string;
+  render_url: string;
+  render_width: number;
+  render_height: number;
+  /** Levels the render shows, counted from the ground up. */
+  levels_in_render: number;
+  /** Rotation of north on the render, degrees clockwise from up. */
+  north_deg: number;
+  corners: MassingCorner[];
+  /** Geometry groups the extension finds in the model. */
+  groups: { name: string; level: number | null }[];
+  /** Approximate position along the facade, 0 at the first corner, 1 at the last. */
+  unit_anchors: { unit_number: string; t: number }[];
 };

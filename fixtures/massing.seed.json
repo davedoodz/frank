@@ -1,0 +1,35 @@
+{
+  "_comment": "Exterior massing models, one per project, as the SketchUp extension would report them. The render is a static image of the SKP; corners are the three visible vertical edges of the facade in render pixels (x, top of the top level, ground), which is all the geometry needed to outline one level band. fitte never stores interior geometry from a massing model.",
+  "models": [
+    {
+      "project_id": "p1",
+      "model_ref": "CMR_massing_v3.skp",
+      "render_url": "/fixtures/massing/P-2022-04.png",
+      "render_width": 1010,
+      "render_height": 940,
+      "levels_in_render": 8,
+      "north_deg": 24,
+      "corners": [
+        { "x": 78, "top": 297, "base": 700 },
+        { "x": 470, "top": 350, "base": 835 },
+        { "x": 935, "top": 330, "base": 745 }
+      ],
+      "groups": [
+        { "name": "MASSE_PODIUM_N01-N02", "level": 1 },
+        { "name": "MASSE_N03", "level": 3 },
+        { "name": "MASSE_N04", "level": 4 },
+        { "name": "MASSE_N05", "level": 5 },
+        { "name": "MASSE_N06", "level": 6 },
+        { "name": "MASSE_N07-N08", "level": 7 },
+        { "name": "TOITURE_MECANIQUE", "level": null }
+      ],
+      "unit_anchors": [
+        { "unit_number": "501", "t": 0.33 },
+        { "unit_number": "502", "t": 0.47 },
+        { "unit_number": "503", "t": 0.6 },
+        { "unit_number": "601", "t": 0.33 },
+        { "unit_number": "602", "t": 0.47 }
+      ]
+    }
+  ]
+}

@@ -6,13 +6,16 @@
  * not change.
  */
 import archiveSeed from "@/fixtures/archive.seed.json";
+import massingSeed from "@/fixtures/massing.seed.json";
 import seed from "@/fixtures/units.seed.json";
 import { buildSimilarities } from "@/lib/similarity";
 import type {
+  BuildingLevelMap,
   Collection,
   CollectionItem,
   Drawing,
   Floor,
+  MassingModel,
   NewProjectInput,
   Project,
   Room,
@@ -282,6 +285,7 @@ export async function addCollectionItem(
   collectionId: string,
   unitId: string,
   note: string | null,
+  tags: string[] = [],
 ): Promise<void> {
   const at = collectionItems.findIndex(
     (i) => i.collection_id === collectionId && i.unit_id === unitId,
@@ -290,6 +294,7 @@ export async function addCollectionItem(
     collection_id: collectionId,
     unit_id: unitId,
     note,
+    tags,
     added_at: new Date().toISOString(),
   };
   if (at >= 0) collectionItems[at] = row;
@@ -304,4 +309,50 @@ export async function removeCollectionItem(
     (i) => i.collection_id === collectionId && i.unit_id === unitId,
   );
   if (at >= 0) collectionItems.splice(at, 1);
+}
+
+/**
+ * Exterior massing. One model per project, read-only: the office models the
+ * envelope in SketchUp and nothing inside it.
+ */
+/** Local fixture, same shape as the future table. */
+const massingRaw = massingSeed as unknown as { models: MassingModel[] };
+const massingModels: MassingModel[] = massingRaw.models;
+
+export async function getMassingModel(
+  projectId: string,
+): Promise<MassingModel | null> {
+  return massingModels.find((m) => m.project_id === projectId) ?? null;
+}
+
+/**
+ * BuildingLevelMap rows. The floor-to-model relationship is the one write the
+ * simulated SketchUp extension makes, so it lives beside the other session
+ * writes until a database exists.
+ */
+const levelMapStore = globalThis as typeof globalThis & {
+  __fitteLevelMaps?: BuildingLevelMap[];
+};
+const levelMaps: BuildingLevelMap[] = (levelMapStore.__fitteLevelMaps ??= []);
+
+export async function getBuildingLevelMaps(
+  projectId: string,
+): Promise<BuildingLevelMap[]> {
+  return levelMaps.filter((m) => m.project_id === projectId);
+}
+
+/** Replaces the project's level map with the assignments the technician approved. */
+export async function syncBuildingLevels(
+  projectId: string,
+  modelRef: string,
+  floorIds: string[],
+): Promise<BuildingLevelMap[]> {
+  const synced_at = new Date().toISOString();
+  for (let i = levelMaps.length - 1; i >= 0; i -= 1) {
+    if (levelMaps[i].project_id === projectId) levelMaps.splice(i, 1);
+  }
+  for (const floor_id of floorIds) {
+    levelMaps.push({ project_id: projectId, floor_id, model_ref: modelRef, synced_at });
+  }
+  return levelMaps.filter((m) => m.project_id === projectId);
 }

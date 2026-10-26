@@ -1,23 +1,26 @@
 import { notFound } from "next/navigation";
 import PlanView from "@/components/plan/PlanView";
 import {
+  getBuildingLevelMaps,
   getFloor,
   getFloorUnits,
   getFloors,
+  getMassingModel,
   getProject,
   getRooms,
   getUnits,
 } from "@/lib/data";
+import { getPrefs } from "@/lib/prefs.server";
 
 export default async function UnitsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ code: string }>;
-  searchParams: Promise<{ floor?: string; u?: string }>;
+  searchParams: Promise<{ floor?: string; u?: string; view?: string }>;
 }) {
   const { code } = await params;
-  const { floor: floorParam, u } = await searchParams;
+  const { floor: floorParam, u, view } = await searchParams;
   const project = await getProject(decodeURIComponent(code));
   if (!project) notFound();
 
@@ -25,7 +28,7 @@ export default async function UnitsPage({
   if (floors.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center text-meta text-ink-2">
-        no floor indexed
+        aucun étage indexé
       </div>
     );
   }
@@ -39,11 +42,15 @@ export default async function UnitsPage({
   const rooms = selected ? await getRooms(selected.id) : [];
 
   const all = await getUnits(project.id);
+  const prefs = await getPrefs();
   const rail = floors.map((f) => ({
     level: f.level,
     label: f.label,
     units: all.filter((x) => x.floor_id === f.id).map((x) => x.number),
   }));
+
+  const massing = await getMassingModel(project.id);
+  const levelMaps = await getBuildingLevelMaps(project.id);
 
   return (
     <PlanView
@@ -53,6 +60,10 @@ export default async function UnitsPage({
       selected={selected}
       rooms={rooms}
       rail={rail}
+      prefs={prefs}
+      massing={massing}
+      levelsMapped={levelMaps.some((m) => m.floor_id === floor.id)}
+      view={view === "3d" && massing ? "3d" : "2d"}
     />
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import PlanCrop from "@/components/dna/PlanCrop";
+import OpenInCadDialog from "@/components/plan/OpenInCadDialog";
 import Icon from "@/components/ui/Icon";
 import { BTN_DARK } from "@/components/ui/Button";
 import VerifyButton from "@/components/plan/VerifyButton";
@@ -12,14 +13,14 @@ import type { Floor, Room, Unit } from "@/lib/types";
 type Tab = "overview" | "rooms" | "drawings" | "history";
 
 const ORIENTATION: Record<string, string> = {
-  N: "North",
-  S: "South",
-  E: "East",
-  W: "West",
-  NE: "Northeast",
-  NW: "Northwest",
-  SE: "Southeast",
-  SW: "Southwest",
+  N: "Nord",
+  S: "Sud",
+  E: "Est",
+  W: "Ouest",
+  NE: "Nord-Est",
+  NW: "Nord-Ouest",
+  SE: "Sud-Est",
+  SW: "Sud-Ouest",
 };
 
 /**
@@ -46,35 +47,35 @@ export default function UnitPanel({
 
   const rows: [string, React.ReactNode][] = [
     ["Type", bedroomLabel(unit.type_qc.value)],
-    ["Floor area", `${unit.net_area_m2.value.toFixed(1)} m²`],
-    ["Interior area", `${interior.toFixed(1)} m²`],
+    ["Superficie", `${unit.net_area_m2.value.toFixed(1)} m²`],
+    ["Superficie intérieure", `${interior.toFixed(1)} m²`],
     [
-      "Balcony area",
+      "Balcon",
       unit.balcony_area_m2.value === null
         ? "—"
         : `${unit.balcony_area_m2.value.toFixed(1)} m²`,
     ],
-    ["Floor area (ft²)", `${ft2(unit.net_area_m2.value)} ft²`],
+    ["Superficie (ft²)", `${ft2(unit.net_area_m2.value)} ft²`],
     ["Orientation", ORIENTATION[unit.orientation.value] ?? unit.orientation.value],
-    ["Position", unit.is_corner.value ? "Corner unit" : "End unit"],
-    ["Floor", floor.label],
-    ["Rooms", unit.rooms_count.value ?? rooms.length],
+    ["Position", unit.is_corner.value ? "Unité de coin" : "Unité d’extrémité"],
+    ["Étage", floor.label],
+    ["Pièces", unit.rooms_count.value ?? rooms.length],
     [
-      "Status",
+      "État",
       <span key="s" className="inline-flex items-center gap-1.5">
         <span
           className={`h-2 w-2 rounded-full ${verified ? "bg-ok" : "bg-text-3"}`}
         />
-        {verified ? "Verified" : "Unverified"}
+        {verified ? "Vérifiée" : "Non vérifiée"}
       </span>,
     ],
   ];
 
   const tabs: [Tab, string][] = [
-    ["overview", "Overview"],
-    ["rooms", `Rooms (${rooms.length})`],
-    ["drawings", "Drawings (1)"],
-    ["history", "History"],
+    ["overview", "Aperçu"],
+    ["rooms", `Pièces (${rooms.length})`],
+    ["drawings", "Dessins (1)"],
+    ["history", "Historique"],
   ];
 
   return (
@@ -82,7 +83,7 @@ export default function UnitPanel({
       <div className="px-4 pt-4">
         <div className="flex items-center gap-2">
           <h2 className="text-[20px] font-semibold tracking-tight text-text">
-            Unit {unit.number}
+            Unité {unit.number}
           </h2>
           <span
             className={`inline-flex h-6 items-center gap-1 rounded-full px-2 text-[11px] font-medium ${
@@ -92,12 +93,12 @@ export default function UnitPanel({
             }`}
           >
             {verified ? <Icon name="check" size={12} /> : null}
-            {verified ? "Verified" : "Unverified"}
+            {verified ? "Vérifiée" : "Non vérifiée"}
           </span>
           <span className="flex-1" />
           <button
             type="button"
-            aria-label="previous unit"
+            aria-label="Unité précédente"
             onClick={() => onStep(-1)}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-text-2 transition-colors hover:text-text"
           >
@@ -105,7 +106,7 @@ export default function UnitPanel({
           </button>
           <button
             type="button"
-            aria-label="next unit"
+            aria-label="Unité suivante"
             onClick={() => onStep(1)}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-edge text-text-2 transition-colors hover:text-text"
           >
@@ -157,7 +158,7 @@ export default function UnitPanel({
 
           <div className="border-t border-edge-2 p-4">
             <div className="text-[13px] font-semibold text-text">
-              Source drawing
+              Dessin source
             </div>
             <div className="mt-3 flex items-start gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-app text-text-2">
@@ -175,7 +176,7 @@ export default function UnitPanel({
           </div>
 
           <div className="border-t border-edge-2 p-4">
-            <div className="text-[13px] font-semibold text-text">Related</div>
+            <div className="text-[13px] font-semibold text-text">Connexes</div>
             <Link
               href={`/p/${code}/office-dna?u=${unit.number}`}
               className="mt-2 flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-app"
@@ -185,10 +186,10 @@ export default function UnitPanel({
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[13px] font-medium text-text">
-                  Find similar units
+                  Trouver des unités similaires
                 </span>
                 <span className="block text-[11px] text-text-3">
-                  Search from past projects
+                  Rechercher dans les projets précédents
                 </span>
               </span>
               <Icon name="chevron-right" size={13} className="text-text-3" />
@@ -202,10 +203,10 @@ export default function UnitPanel({
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[13px] font-medium text-text">
-                  View in building context
+                  Voir dans le contexte du bâtiment
                 </span>
                 <span className="block text-[11px] text-text-3">
-                  See where the unit sits in the stack
+                  Voir où se situe l’unité dans la tour
                 </span>
               </span>
               <Icon name="chevron-right" size={13} className="text-text-3" />
@@ -218,7 +219,7 @@ export default function UnitPanel({
         <div className="p-4">
           {rooms.length === 0 ? (
             <p className="text-[13px] text-text-2">
-              No room was extracted for this unit.
+              Aucune pièce n’a été extraite pour cette unité.
             </p>
           ) : (
             rooms.map((room) => (
@@ -247,7 +248,7 @@ export default function UnitPanel({
                 {floor.source_file}
               </div>
               <div className="text-[11px] text-text-3">
-                Sheet {floor.sheet_number} · {floor.scale} ·{" "}
+                Feuille {floor.sheet_number} · {floor.scale} ·{" "}
                 {floor.revision_date}
               </div>
             </div>
@@ -259,23 +260,23 @@ export default function UnitPanel({
         <div className="p-4 text-[13px] text-text-2">
           {verified ? (
             <>
-              Verified by {unit.verified_by ?? "—"} on {unit.verified_at ?? "—"}.
+              Vérifiée par {unit.verified_by ?? "—"} le{" "}
+              {unit.verified_at ?? "—"}.
             </>
           ) : (
-            <>Imported from {floor.source_file}. Not verified yet.</>
+            <>Importée depuis {floor.source_file}. Pas encore vérifiée.</>
           )}
         </div>
       ) : null}
 
       <div className="mt-auto flex flex-col gap-2 border-t border-edge-2 p-4">
         <VerifyButton code={code} unitId={unit.id} status={unit.status} />
-        <Link
-          href={`/sim/autocad/retrieve?unit=${unit.id}&code=${encodeURIComponent(code)}`}
+        <OpenInCadDialog
+          code={code}
+          unit={unit}
+          floor={floor}
           className={BTN_DARK}
-        >
-          <Icon name="cad" size={14} />
-          Open in AutoCAD
-        </Link>
+        />
       </div>
     </div>
   );
