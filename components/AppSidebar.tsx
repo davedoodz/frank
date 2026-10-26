@@ -9,6 +9,7 @@ import type { Project } from "@/lib/types";
 export type NavKey =
   | "projects"
   | "overview"
+  | "files"
   | "units"
   | "office-dna"
   | "drawings"
@@ -37,19 +38,21 @@ export default function AppSidebar({
 
   const items: [NavKey, string, IconName, string][] = code
     ? [
-        ["projects", "Projects", "grid", "/"],
-        ["units", "Units", "layers", `/p/${code}/units`],
-        ["office-dna", "Office DNA", "dna", `/p/${code}/office-dna`],
-        ["drawings", "Drawings", "drawing", `/p/${code}/drawings`],
-        ["building", "Building", "building", `/p/${code}/building`],
-        ["library", "Library", "table", "/library"],
-        ["settings", "Settings", "settings", "/settings"],
+        ["projects", "Projets", "grid", "/"],
+        ["overview", "Aperçu", "info", `/p/${code}`],
+        ["files", "Fichiers", "file", `/p/${code}/files`],
+        ["units", "Unités", "layers", `/p/${code}/units`],
+        ["office-dna", "ADN de l’agence", "dna", `/p/${code}/office-dna`],
+        ["drawings", "Dessins", "drawing", `/p/${code}/drawings`],
+        ["building", "Bâtiment", "building", `/p/${code}/building`],
+        ["library", "Bibliothèque", "table", "/library"],
+        ["settings", "Paramètres", "settings", "/settings"],
       ]
     : [
-        ["projects", "Projects", "grid", "/"],
-        ["office-dna", "Office DNA", "dna", "/office-dna"],
-        ["library", "Library", "layers", "/library"],
-        ["settings", "Settings", "settings", "/settings"],
+        ["projects", "Projets", "grid", "/"],
+        ["office-dna", "ADN de l’agence", "dna", "/office-dna"],
+        ["library", "Bibliothèque", "layers", "/library"],
+        ["settings", "Paramètres", "settings", "/settings"],
       ];
 
   return (
@@ -124,6 +127,8 @@ export default function AppSidebar({
 function sectionOf(pathname: string): NavKey {
   if (pathname.startsWith("/p/")) {
     const segment = pathname.split("/")[3] ?? "";
+    if (segment === "") return "overview";
+    if (segment === "files") return "files";
     if (segment === "office-dna") return "office-dna";
     if (segment === "drawings") return "drawings";
     if (segment === "building") return "building";

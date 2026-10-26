@@ -11,18 +11,18 @@ import NewProjectDialog from "./NewProjectDialog";
 import ProjectCard from "./ProjectCard";
 
 const filters = [
-  { key: "all", label: "All" },
-  { key: "active", label: "In progress" },
-  { key: "archived", label: "Archived" },
+  { key: "all", label: "Tous" },
+  { key: "active", label: "En cours" },
+  { key: "archived", label: "Archivé" },
 ] as const;
 
 type Filter = (typeof filters)[number]["key"];
 
 const sorts = [
-  { key: "updated_at", label: "Recently modified" },
-  { key: "display_name", label: "Name" },
-  { key: "units_count", label: "Units" },
-  { key: "year", label: "Year" },
+  { key: "updated_at", label: "Modifié récemment" },
+  { key: "display_name", label: "Nom" },
+  { key: "units_count", label: "Unités" },
+  { key: "year", label: "Année" },
 ];
 
 /**
@@ -73,10 +73,10 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
         <header className="flex items-start gap-4 px-6 pt-6 pb-4">
           <div>
             <h1 className="text-[22px] font-semibold tracking-tight text-text">
-              Projects
+              Projets
             </h1>
             <p className="mt-1 text-[13px] text-text-2">
-              Every architectural project of the office, in one place.
+              Tous les projets de l’agence, au même endroit.
             </p>
           </div>
 
@@ -88,8 +88,8 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search a project..."
-              aria-label="search projects"
+              placeholder="Rechercher un projet…"
+              aria-label="rechercher des projets"
               className="min-w-0 flex-1 text-[13px] outline-none [&::-webkit-search-cancel-button]:appearance-none"
             />
           </label>
@@ -100,7 +100,7 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
             className={BTN_BRAND}
           >
             <Icon name="plus" size={14} />
-            New project
+            Nouveau projet
           </button>
         </header>
 
@@ -119,12 +119,12 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
 
           <span className="flex-1" />
 
-          <span className="text-[13px] text-text-2">Sort by</span>
+          <span className="text-[13px] text-text-2">Trier par</span>
           <label className="flex h-9 items-center rounded-lg border border-edge bg-panel px-3">
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              aria-label="sort projects"
+              aria-label="trier les projets"
               className="bg-transparent text-[13px] font-medium text-text outline-none"
             >
               {sorts.map((s) => (
@@ -141,7 +141,7 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
                 key={v}
                 type="button"
                 onClick={() => setView(v)}
-                aria-label={`${v} view`}
+                aria-label={v === "grid" ? "vue en grille" : "vue en liste"}
                 className={`${BTN_ICON} ${
                   view === v ? "border-brand-line bg-brand-soft text-brand" : ""
                 }`}
@@ -167,10 +167,10 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
                   <Icon name="plus" size={18} />
                 </span>
                 <span className="text-[13px] font-medium text-text">
-                  New project
+                  Nouveau projet
                 </span>
                 <span className="text-[12px] text-text-2">
-                  Create a project and connect your AutoCAD and SketchUp files.
+                  Créez un projet et connectez vos fichiers AutoCAD et SketchUp.
                 </span>
               </button>
             </div>
@@ -179,7 +179,7 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-edge-2">
-                    {["Project", "Location", "Units", "Floors", "Status", "Modified"].map(
+                    {["Projet", "Emplacement", "Unités", "Étages", "Statut", "Modifié"].map(
                       (label, i) => (
                         <th
                           key={label}
@@ -232,8 +232,8 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
 
           <p className="pt-4 text-[12px] text-text-3">
             {rows.length === projects.length
-              ? `${projects.length} projects`
-              : `${rows.length} of ${projects.length} projects`}
+              ? `${projects.length} projet${projects.length === 1 ? "" : "s"}`
+              : `${rows.length} sur ${projects.length} projet${projects.length === 1 ? "" : "s"}`}
           </p>
         </div>
       </div>
@@ -252,7 +252,7 @@ export function StatusChip({ status }: { status: Project["status"] }) {
           : "bg-app text-text-2"
       }`}
     >
-      {status === "active" ? "In progress" : "Archived"}
+      {status === "active" ? "En cours" : "Archivé"}
     </span>
   );
 }

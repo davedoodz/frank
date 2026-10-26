@@ -13,16 +13,22 @@ export type Drawing = {
   floor_level: number | null;
   status: DrawingStatus;
   indexed_at: string | null;
+  size_mb: number;
 };
 
 export type ProjectTypology = "condo" | "mixed_use" | "rental" | "other";
 export type IngestMethod = "dxf" | "vision" | "manual" | "mixed";
+export type ProjectStatus = "active" | "archived";
 
 export type Project = {
   id: string;
   project_code: string;
   display_name: string;
   city: string;
+  province: string;
+  status: ProjectStatus;
+  updated_at: string;
+  description: string | null;
   year: number;
   typology: ProjectTypology;
   floors_count: number;
@@ -89,6 +95,9 @@ export type NewProjectInput = {
   display_name: string;
   project_code: string;
   city: string;
+  province: string;
+  typology: ProjectTypology;
+  description: string | null;
   year: number;
   floors_count: number;
 };

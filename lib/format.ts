@@ -42,19 +42,19 @@ const BEDROOM_COUNT: Record<string, number> = {
   "6½": 4,
 };
 
-/** Short form for the plan and the schedule: "2 BR". */
+/** Short form for the plan and the schedule: "2 CH". */
 export function brLabel(type: string): string {
   const n = BEDROOM_COUNT[type];
   if (n === undefined) return type;
-  return n === 0 ? "Studio" : `${n} BR`;
+  return n === 0 ? "Studio" : `${n} CH`;
 }
 
-/** Long form for the unit panel: "2 Bedrooms". */
+/** Long form for the unit panel: "2 chambres". */
 export function bedroomLabel(type: string): string {
   const n = BEDROOM_COUNT[type];
   if (n === undefined) return type;
   if (n === 0) return "Studio";
-  return n === 1 ? "1 Bedroom" : `${n} Bedrooms`;
+  return n === 1 ? "1 chambre" : `${n} chambres`;
 }
 
 /**
@@ -85,9 +85,9 @@ export function since(isoDate: string): string {
     0,
     Math.round((Date.now() - Date.parse(`${isoDate}T12:00:00Z`)) / 86_400_000),
   );
-  if (days === 0) return "modified today";
-  if (days === 1) return "modified yesterday";
-  if (days < 14) return `modified ${days} days ago`;
-  if (days < 60) return `modified ${Math.round(days / 7)} weeks ago`;
-  return `modified ${Math.round(days / 30)} months ago`;
+  if (days === 0) return "modifié aujourd'hui";
+  if (days === 1) return "modifié hier";
+  if (days < 14) return `modifié il y a ${days} jours`;
+  if (days < 60) return `modifié il y a ${Math.round(days / 7)} semaines`;
+  return `modifié il y a ${Math.round(days / 30)} mois`;
 }

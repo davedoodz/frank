@@ -11,6 +11,7 @@ import { buildSimilarities } from "@/lib/similarity";
 import type {
   Collection,
   CollectionItem,
+  Drawing,
   Floor,
   NewProjectInput,
   Project,
@@ -109,9 +110,33 @@ function countVerified(projectId: string): number {
     .length;
 }
 
+/**
+ * Drawings connected through the interface. A connection is the one write the
+ * setup flow makes against a project, and it lives beside the session projects
+ * until a database exists.
+ */
+const connectStore = globalThis as typeof globalThis & {
+  __fitteConnected?: Map<string, Drawing[]>;
+};
+const connected: Map<string, Drawing[]> = (connectStore.__fitteConnected ??=
+  new Map());
+
+export async function connectDrawings(
+  projectId: string,
+  drawings: Drawing[],
+): Promise<void> {
+  const rows = connected.get(projectId) ?? [];
+  const names = new Set(rows.map((d) => d.filename));
+  connected.set(projectId, [
+    ...rows,
+    ...drawings.filter((d) => !names.has(d.filename)),
+  ]);
+}
+
 export async function getProjects(): Promise<Project[]> {
   return [...projectRows, ...sessionProjects].map((p) => ({
     ...p,
+    drawings: [...p.drawings, ...(connected.get(p.id) ?? [])],
     verified_count: countVerified(p.id),
   }));
 }
@@ -127,8 +152,12 @@ export async function createProject(input: NewProjectInput): Promise<Project> {
     project_code: input.project_code,
     display_name: input.display_name,
     city: input.city,
+    province: input.province,
+    status: "active",
+    updated_at: new Date().toISOString().slice(0, 10),
+    description: input.description,
     year: input.year,
-    typology: "condo",
+    typology: input.typology,
     floors_count: input.floors_count,
     units_count: 0,
     verified_count: 0,

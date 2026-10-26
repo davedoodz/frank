@@ -20,7 +20,8 @@
           "role": "floor_plan",
           "floor_level": 5,
           "status": "indexed",
-          "indexed_at": "2026-10-25"
+          "indexed_at": "2026-10-25",
+          "size_mb": 3.6
         },
         {
           "filename": "A-206_Niveau_06.dwg",
@@ -28,7 +29,8 @@
           "role": "floor_plan",
           "floor_level": 6,
           "status": "indexed",
-          "indexed_at": "2026-10-25"
+          "indexed_at": "2026-10-25",
+          "size_mb": 4.1
         },
         {
           "filename": "A-207_Niveau_07.dwg",
@@ -36,7 +38,8 @@
           "role": "floor_plan",
           "floor_level": 7,
           "status": "connected",
-          "indexed_at": null
+          "indexed_at": null,
+          "size_mb": 3.8
         },
         {
           "filename": "CMR_massing_v3.skp",
@@ -44,9 +47,14 @@
           "role": "massing",
           "floor_level": null,
           "status": "connected",
-          "indexed_at": null
+          "indexed_at": null,
+          "size_mb": 18.2
         }
-      ]
+      ],
+      "province": "QC",
+      "status": "active",
+      "updated_at": "2026-10-18",
+      "description": "98-unit residential project on boulevard Mont-Royal. Ten storeys over underground parking."
     },
     {
       "id": "p2",
@@ -68,7 +76,8 @@
           "role": "floor_plan",
           "floor_level": 2,
           "status": "connected",
-          "indexed_at": null
+          "indexed_at": null,
+          "size_mb": 3.6
         },
         {
           "filename": "A-204_Niveau_05.dwg",
@@ -76,7 +85,8 @@
           "role": "floor_plan",
           "floor_level": 5,
           "status": "indexed",
-          "indexed_at": "2026-10-24"
+          "indexed_at": "2026-10-24",
+          "size_mb": 4.1
         },
         {
           "filename": "A-207_Niveau_08.dwg",
@@ -84,7 +94,8 @@
           "role": "floor_plan",
           "floor_level": 8,
           "status": "connected",
-          "indexed_at": null
+          "indexed_at": null,
+          "size_mb": 3.8
         },
         {
           "filename": "JSL_massing_v2.skp",
@@ -92,9 +103,14 @@
           "role": "massing",
           "floor_level": null,
           "status": "connected",
-          "indexed_at": null
+          "indexed_at": null,
+          "size_mb": 18.2
         }
-      ]
+      ],
+      "province": "QC",
+      "status": "active",
+      "updated_at": "2026-10-22",
+      "description": "Two wings around a courtyard, standard floor plate indexed for office dna."
     },
     {
       "id": "p3",
@@ -116,7 +132,8 @@
           "role": "floor_plan",
           "floor_level": 5,
           "status": "indexed",
-          "indexed_at": "2026-10-24"
+          "indexed_at": "2026-10-24",
+          "size_mb": 3.6
         },
         {
           "filename": "A-206_Niveau_06.dwg",
@@ -124,7 +141,8 @@
           "role": "floor_plan",
           "floor_level": 6,
           "status": "connected",
-          "indexed_at": null
+          "indexed_at": null,
+          "size_mb": 4.1
         },
         {
           "filename": "BBE_massing_v1.skp",
@@ -132,7 +150,164 @@
           "role": "massing",
           "floor_level": null,
           "status": "connected",
-          "indexed_at": null
+          "indexed_at": null,
+          "size_mb": 18.2
+        }
+      ],
+      "province": "QC",
+      "status": "active",
+      "updated_at": "2026-10-20",
+      "description": "Six storeys on a corner lot, drawings connected and waiting on indexing."
+    },
+    {
+      "id": "p4",
+      "project_code": "P-2023-01",
+      "display_name": "Le Laurentien",
+      "city": "Québec",
+      "province": "QC",
+      "year": 2023,
+      "typology": "condo",
+      "floors_count": 6,
+      "units_count": 64,
+      "verified_count": 0,
+      "ingest_method": "manual",
+      "status": "archived",
+      "updated_at": "2026-10-11",
+      "last_import_at": null,
+      "description": "Six storeys on a sloping site, archived after the design competition.",
+      "notes": null,
+      "drawings": [
+        {
+          "filename": "A-301_Niveau_03.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 3,
+          "status": "connected",
+          "indexed_at": null,
+          "size_mb": 3.6
+        },
+        {
+          "filename": "A-302_Niveau_04.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 4,
+          "status": "connected",
+          "indexed_at": null,
+          "size_mb": 4.1
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "project_code": "P-2020-06",
+      "display_name": "Rivière-des-Prairies",
+      "city": "Montréal",
+      "province": "QC",
+      "year": 2020,
+      "typology": "rental",
+      "floors_count": 10,
+      "units_count": 112,
+      "verified_count": 0,
+      "ingest_method": "dxf",
+      "status": "active",
+      "updated_at": "2026-10-19",
+      "last_import_at": null,
+      "description": "Ten-storey rental block beside the water, drawings connected in one folder.",
+      "notes": null,
+      "drawings": [
+        {
+          "filename": "A-210_Niveau_10.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 10,
+          "status": "connected",
+          "indexed_at": null,
+          "size_mb": 3.6
+        },
+        {
+          "filename": "A-209_Niveau_09.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 9,
+          "status": "connected",
+          "indexed_at": null,
+          "size_mb": 4.1
+        },
+        {
+          "filename": "RDP_massing.skp",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": null,
+          "status": "connected",
+          "indexed_at": null,
+          "size_mb": 3.8
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "project_code": "P-2018-09",
+      "display_name": "Le Victoria",
+      "city": "Sherbrooke",
+      "province": "QC",
+      "year": 2018,
+      "typology": "condo",
+      "floors_count": 7,
+      "units_count": 76,
+      "verified_count": 0,
+      "ingest_method": "manual",
+      "status": "archived",
+      "updated_at": "2026-10-04",
+      "last_import_at": null,
+      "description": "Seven storeys downtown, kept for the typical floor plate.",
+      "notes": null,
+      "drawings": [
+        {
+          "filename": "A-207_Niveau_07.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 7,
+          "status": "connected",
+          "indexed_at": null,
+          "size_mb": 3.6
+        }
+      ]
+    },
+    {
+      "id": "p7",
+      "project_code": "P-2024-02",
+      "display_name": "Maisons Bellevue",
+      "city": "Laval",
+      "province": "QC",
+      "year": 2024,
+      "typology": "mixed_use",
+      "floors_count": 4,
+      "units_count": 48,
+      "verified_count": 0,
+      "ingest_method": "manual",
+      "status": "active",
+      "updated_at": "2026-10-21",
+      "last_import_at": null,
+      "description": "Four low-rise volumes around a shared court, nothing indexed yet.",
+      "notes": null,
+      "drawings": [
+        {
+          "filename": "A-104_Niveau_04.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 4,
+          "status": "connected",
+          "indexed_at": null,
+          "size_mb": 3.6
+        },
+        {
+          "filename": "A-103_Niveau_03.dwg",
+          "kind": "dwg",
+          "role": "floor_plan",
+          "floor_level": 3,
+          "status": "connected",
+          "indexed_at": null,
+          "size_mb": 4.1
         }
       ]
     }

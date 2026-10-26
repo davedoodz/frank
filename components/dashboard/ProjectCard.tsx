@@ -1,24 +1,23 @@
 import Link from "next/link";
-import { projectThumb } from "@/lib/format";
+import Icon from "@/components/ui/Icon";
+import { projectThumb, since } from "@/lib/format";
 import type { Project } from "@/lib/types";
+import { StatusChip } from "./Dashboard";
 
 /**
- * The thumbnail is a placeholder crop of a reference render; a project created
- * in this session has none and keeps the flat block carrying its code.
- *
- * The card is a 20 px container with a 12 px inset, so the 8 px thumbnail and
- * the 9 px state chip inside it both sit concentric with its corner.
+ * One card per project: render, name, where, how big, lifecycle, when it last
+ * moved. The render is a placeholder crop; a project created in this session
+ * has none and keeps a flat block carrying its code.
  */
 export default function ProjectCard({ project }: { project: Project }) {
-  const indexed = project.verified_count > 0 || project.last_import_at !== null;
   const thumb = projectThumb(project.project_code);
 
   return (
     <Link
-      href={`/p/${project.project_code}/units`}
-      className="group flex flex-col gap-3 rounded-lg border border-line bg-paper p-3 transition-colors duration-[80ms] hover:border-ink"
+      href={`/p/${project.project_code}`}
+      className="panel group flex flex-col overflow-hidden transition-shadow hover:shadow-[0_2px_8px_rgba(15,23,42,0.08)]"
     >
-      <div className="relative flex aspect-[16/10] items-end overflow-hidden rounded-md bg-fill-2 p-2">
+      <div className="relative flex aspect-[16/9] items-end bg-app p-2">
         {thumb ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
@@ -27,33 +26,37 @@ export default function ProjectCard({ project }: { project: Project }) {
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
-          <span className="font-mono text-meta text-ink-3">
+          <span className="text-[11px] text-text-3">
             {project.project_code}
           </span>
         )}
       </div>
 
-      <div className="text-body text-ink">{project.display_name}</div>
+      <div className="flex flex-1 flex-col gap-1.5 p-4">
+        <div className="text-[14px] font-semibold text-text">
+          {project.display_name}
+        </div>
 
-      <div className="font-mono text-meta text-ink-2">
-        {project.city} · {project.year}
-      </div>
-      <div className="font-mono text-meta text-ink-3">
-        {project.units_count} units · {project.floors_count} floors ·{" "}
-        {project.verified_count} verified
-      </div>
+        <div className="flex items-center gap-1.5 text-[12px] text-text-2">
+          <Icon name="pin" size={13} className="text-text-3" />
+          {project.city}, {project.province}
+        </div>
 
-      <div className="mt-auto flex items-center justify-between pt-1">
-        <span
-          className={`flex h-[18px] items-center rounded-full px-2 font-mono text-meta ${
-            indexed ? "bg-ink text-paper" : "bg-fill-2 text-ink-2"
-          }`}
-        >
-          {indexed ? "indexed" : "connected"}
-        </span>
-        <span className="font-mono text-meta text-ink-3">
-          {project.last_import_at ?? `${project.drawings.length} files`}
-        </span>
+        <div className="text-[12px] text-text-2">
+          {project.units_count} unité{project.units_count === 1 ? "" : "s"} ·{" "}
+          {project.floors_count} étage{project.floors_count === 1 ? "" : "s"}
+        </div>
+
+        <div className="pt-1">
+          <StatusChip status={project.status} />
+        </div>
+
+        <div className="mt-auto flex items-center gap-1.5 pt-3 text-[12px] text-text-3">
+          {since(project.updated_at)}
+          {project.last_import_at ? (
+            <Icon name="check" size={13} className="text-ok" />
+          ) : null}
+        </div>
       </div>
     </Link>
   );
