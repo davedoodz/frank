@@ -63,7 +63,7 @@ a{color:inherit;text-decoration:none}
 .shot{position:relative;z-index:1;width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
   box-shadow:0 10px 28px rgba(0,0,0,.09);
   transition:transform .25s ease,box-shadow .25s ease,border-color .2s ease}
-.shot img{width:100%;height:100%;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
+.shot img{width:100%;height:100%;border-radius:inherit;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
 
 /* thumbnail hover — one mode at a time, set by the dial on <body data-hover> */
 [data-hover="lift"] .opt:hover .shot{transform:translateY(-4px);box-shadow:0 18px 44px rgba(0,0,0,.13);border-color:var(--line-2)}
@@ -89,8 +89,8 @@ a{color:inherit;text-decoration:none}
   transform:rotate(0deg);transform-origin:50% 88%;
   transition:transform .35s cubic-bezier(.2,.8,.2,1),color .25s ease,opacity .25s ease;
 }
-.opt:nth-child(1) .mark{left:-.5em}
-.opt:nth-child(2) .mark{right:-.5em}
+.opt:nth-child(1) .mark{left:var(--dial-mark-a, -85px)}
+.opt:nth-child(2) .mark{right:var(--dial-mark-b, -85px)}
 .opt:hover .mark{color:var(--accent);opacity:1}
 .opt:nth-child(1):hover .mark{transform:rotate(-9deg)}
 .opt:nth-child(2):hover .mark{transform:rotate(9deg)}
@@ -122,8 +122,7 @@ a{color:inherit;text-decoration:none}
 .notes-pill .faces img+img{margin-left:-8px;border:2px solid #111110;transition:border-color .2s}
 .notes-pill:hover .faces img+img{border-color:var(--accent)}
 .notes-pill .ext{width:14.3px;height:14.3px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;
-  stroke-linejoin:round;flex:0 0 auto;transition:transform .2s}
-.notes-pill:hover .ext{transform:translate(2px,-2px)}
+  stroke-linejoin:round;flex:0 0 auto}
 </style>
 </head>
 <body data-hover="lift">
@@ -215,6 +214,22 @@ const dial = DialKit.createDialKit("Prototype 1", {
     length: [40, 0, 400, 2],
     thickness: [2, 1, 16, 1],
   },
+  marks: {
+    // Negative pulls the letter outward, positive pushes it under the thumbnail.
+    offsetA: [-85, -260, 40, 1],
+    offsetB: [-85, -260, 40, 1],
+    size: [170, 60, 340, 2],
+  },
+  avatars: {
+    style: { type: "select", default: "solid", options: [
+      { value: "solid", label: "Solid silhouette" },
+      { value: "outline", label: "Outlined silhouette" },
+      { value: "initial", label: "Initial letter" },
+      { value: "flat", label: "Plain colour disc" },
+      { value: "ring", label: "White with coloured ring" },
+      { value: "duo", label: "Inverted — black disc" },
+    ]},
+  },
   // Every string on the screen, editable in place.
   text: Object.fromEntries(
     [...document.querySelectorAll("[data-txt]")].map((el) => [
@@ -249,6 +264,15 @@ dial.subscribe((v) => {
   root.setProperty("--dial-date-track", v.date.tracking / 100 + "em");
   root.setProperty("--dial-rule-w", v.rule.length + "px");
   root.setProperty("--dial-rule-h", v.rule.thickness + "px");
+  root.setProperty("--dial-mark-size", v.marks.size + "px");
+  root.setProperty("--dial-mark-a", v.marks.offsetA + "px");
+  root.setProperty("--dial-mark-b", v.marks.offsetB + "px");
+  const suffixe = v.avatars.style === "solid" ? "" : "-" + v.avatars.style;
+  document.querySelectorAll(".faces img").forEach((img) => {
+    const qui = img.alt === "Benoît" ? "benoit" : "guy";
+    const src = `assets/personas/${qui}${suffixe}.svg`;
+    if (!img.src.endsWith(src)) img.src = src;
+  });
   document.body.dataset.hover = v.thumbnail.hover;
   document.body.dataset.align = v.cards.align;
   for (const [cle, valeur] of Object.entries(v.text)) {
@@ -257,8 +281,8 @@ dial.subscribe((v) => {
   }
 });
 
-// No dial root is mounted: the panel and its bottom-right handle stay off the
-// page. Stored dial values still apply, because createDialKit above reads them.
+// The dial lives in the top-left corner, closed until you open it.
+DialKit.createDialRoot({ position: "top-left", theme: "light", defaultOpen: false });
 </script>
 </body>
 </html>
