@@ -124,8 +124,8 @@ a{color:inherit;text-decoration:none}
 
 @media (max-width:760px){.duo{grid-template-columns:1fr}.tete h1{font-size:32px}}
 
-/* user-notes pill — bottom right, clears the DialKit launcher */
-.notes-pill{position:fixed;right:22px;bottom:86px;z-index:40;display:inline-flex;align-items:center;gap:9px;
+/* user-notes pill — bottom right corner */
+.notes-pill{position:fixed;right:22px;bottom:22px;z-index:40;display:inline-flex;align-items:center;gap:9px;
   padding:7px 13px 7px 7px;border-radius:999px;background:#111110;border:1px solid #111110;
   box-shadow:0 3px 16px rgba(0,0,0,.18);cursor:pointer;text-decoration:none;
   font-family:"Geist Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#e9eadf;
@@ -316,9 +316,8 @@ dial.subscribe((v) => {
   document.querySelectorAll(".cta svg").forEach((s) => { s.style.display = v.cta.arrow ? "" : "none"; });
 });
 
-// The panel only renders once a root is mounted; closed by default so the test
-// screen stays clean. Open it from the handle in the bottom-right corner.
-DialKit.createDialRoot({ position: "bottom-right", theme: "light", defaultOpen: false });
+// No dial root is mounted: the panel and its bottom-right handle stay off the
+// page. Stored dial values still apply, because createDialKit above reads them.
 </script>
 </body>
 </html>
