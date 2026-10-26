@@ -15,8 +15,8 @@ export default function LoginForm({ next }: { next: string }) {
         type="password"
         autoFocus
         autoComplete="current-password"
-        aria-label="mot de passe"
-        placeholder="mot de passe"
+        aria-label="password"
+        placeholder="password"
         className={`w-full ${FIELD}`}
       />
       {/* The only action on the screen, so it carries the green rather than
@@ -26,7 +26,7 @@ export default function LoginForm({ next }: { next: string }) {
         disabled={pending}
         className="mt-2 flex h-6 w-full items-center justify-center rounded-full bg-brand px-3 text-body font-medium text-ink transition-colors duration-[80ms] hover:bg-brand-2 disabled:opacity-50"
       >
-        entrer
+        enter
       </button>
       {state ? <div className="mt-2 text-meta text-ink-2">{state}</div> : null}
     </form>
