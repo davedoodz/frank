@@ -146,10 +146,10 @@
       "sheet_number": "A-205",
       "revision_date": "2022-11-14",
       "image_url": "/fixtures/floors/A-205.png",
-      "width_px": 6600,
-      "height_px": 4800,
+      "width_px": 1460,
+      "height_px": 1240,
       "scale": "1:100",
-      "px_per_m": 78.7,
+      "px_per_m": 17.4,
       "source_file": "A-205_Niveau_05.dwg"
     },
     {
@@ -160,10 +160,10 @@
       "sheet_number": "A-206",
       "revision_date": "2022-11-14",
       "image_url": "/fixtures/floors/A-206.png",
-      "width_px": 6600,
-      "height_px": 4800,
+      "width_px": 1460,
+      "height_px": 1240,
       "scale": "1:100",
-      "px_per_m": 78.7,
+      "px_per_m": 17.4,
       "source_file": "A-206_Niveau_06.dwg"
     }
   ],
@@ -174,27 +174,27 @@
       "floor_id": "f5",
       "number": "501",
       "type_qc": {
-        "value": "3½",
+        "value": "4½",
         "confidence": 0.95
       },
       "bedrooms": {
-        "value": 1,
+        "value": 2,
         "confidence": 0.93
       },
       "bathrooms": {
-        "value": 1,
+        "value": 2,
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 52.3,
+        "value": 78.1,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 58.6,
+        "value": 86.7,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "N",
+        "value": "NE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -202,41 +202,41 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 6.2,
+        "value": 8.4,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.08,
-          0.21
+          0.1027,
+          0.1935
         ],
         [
-          0.29,
-          0.21
+          0.3116,
+          0.1935
         ],
         [
-          0.29,
-          0.47
+          0.3116,
+          0.4395
         ],
         [
-          0.08,
-          0.47
+          0.1027,
+          0.4395
         ]
       ],
       "label_pos": [
-        0.185,
-        0.325
+        0.1699,
+        0.3266
       ],
       "computed_area_m2": null,
       "reviewed": false,
       "notes": null,
       "status": "unverified",
       "is_corner": {
-        "value": false,
+        "value": true,
         "confidence": 0.8
       },
       "rooms_count": {
-        "value": 3,
+        "value": 5,
         "confidence": 0.7
       },
       "verified_at": null,
@@ -256,19 +256,19 @@
         "confidence": 0.93
       },
       "bathrooms": {
-        "value": 1,
+        "value": 2,
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 74.8,
+        "value": 84.6,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 83.8,
+        "value": 93.9,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "N",
+        "value": "SW",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -276,30 +276,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 8.4,
+        "value": 8.2,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.29,
-          0.21
+          0.3151,
+          0.1935
         ],
         [
-          0.5,
-          0.21
+          0.5103,
+          0.1935
         ],
         [
-          0.5,
-          0.47
+          0.5103,
+          0.4355
         ],
         [
-          0.29,
-          0.47
+          0.3151,
+          0.4355
         ]
       ],
       "label_pos": [
-        0.395,
-        0.325
+        0.411,
+        0.2742
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -310,7 +310,7 @@
         "confidence": 0.8
       },
       "rooms_count": {
-        "value": 4,
+        "value": 5,
         "confidence": 0.7
       },
       "verified_at": null,
@@ -322,27 +322,27 @@
       "floor_id": "f5",
       "number": "503",
       "type_qc": {
-        "value": "4½",
+        "value": "3½",
         "confidence": 0.95
       },
       "bedrooms": {
-        "value": 2,
+        "value": 1,
         "confidence": 0.93
       },
       "bathrooms": {
-        "value": 1.5,
+        "value": 1,
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 78.1,
+        "value": 52.8,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 87.5,
+        "value": 58.6,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "N",
+        "value": "NE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -350,30 +350,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 8.4,
+        "value": 5.1,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.5,
-          0.21
+          0.5137,
+          0.1935
         ],
         [
-          0.71,
-          0.21
+          0.7123,
+          0.1935
         ],
         [
-          0.71,
-          0.47
+          0.7123,
+          0.4355
         ],
         [
-          0.5,
-          0.47
+          0.5137,
+          0.4355
         ]
       ],
       "label_pos": [
-        0.605,
-        0.325
+        0.6082,
+        0.2742
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -396,7 +396,7 @@
       "floor_id": "f5",
       "number": "504",
       "type_qc": {
-        "value": "5½",
+        "value": "4½",
         "confidence": 0.5
       },
       "bedrooms": {
@@ -408,15 +408,15 @@
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 98.6,
+        "value": 82.3,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 110.4,
+        "value": 91.4,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "NE",
+        "value": "SE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -424,30 +424,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 11,
+        "value": 8.7,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.71,
-          0.21
+          0.7158,
+          0.1935
         ],
         [
-          0.92,
-          0.21
+          0.9418,
+          0.1935
         ],
         [
-          0.92,
-          0.47
+          0.9418,
+          0.4839
         ],
         [
-          0.71,
-          0.47
+          0.7158,
+          0.4839
         ]
       ],
       "label_pos": [
-        0.815,
-        0.325
+        0.8753,
+        0.3266
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -470,69 +470,69 @@
       "floor_id": "f5",
       "number": "505",
       "type_qc": {
-        "value": "studio",
+        "value": "4½",
         "confidence": 0.95
       },
       "bedrooms": {
-        "value": 0,
+        "value": 2,
         "confidence": 0.93
       },
       "bathrooms": {
-        "value": 1,
+        "value": 2,
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 38.9,
+        "value": 84.2,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 43.6,
+        "value": 93.5,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "S",
+        "value": "SW",
         "confidence": 0.85
       },
       "has_balcony": {
-        "value": false,
+        "value": true,
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": null,
+        "value": 8.4,
         "confidence": 1
       },
       "outline": [
         [
-          0.08,
-          0.53
+          0.7158,
+          0.4839
         ],
         [
-          0.29,
-          0.53
+          0.9418,
+          0.4839
         ],
         [
-          0.29,
-          0.82
+          0.9418,
+          0.8065
         ],
         [
-          0.08,
-          0.82
+          0.7158,
+          0.8065
         ]
       ],
       "label_pos": [
-        0.185,
-        0.675
+        0.8753,
+        0.6452
       ],
       "computed_area_m2": null,
       "reviewed": false,
       "notes": null,
       "status": "unverified",
       "is_corner": {
-        "value": false,
+        "value": true,
         "confidence": 0.8
       },
       "rooms_count": {
-        "value": 2,
+        "value": 5,
         "confidence": 0.7
       },
       "verified_at": null,
@@ -556,15 +556,15 @@
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 55,
+        "value": 52.9,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 61.6,
+        "value": 58.7,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "S",
+        "value": "SE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -572,30 +572,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 6.2,
+        "value": 4.8,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.29,
-          0.53
+          0.5137,
+          0.4919
         ],
         [
-          0.5,
-          0.53
+          0.7123,
+          0.4919
         ],
         [
-          0.5,
-          0.82
+          0.7123,
+          0.8065
         ],
         [
-          0.29,
-          0.82
+          0.5137,
+          0.8065
         ]
       ],
       "label_pos": [
-        0.395,
-        0.675
+        0.6082,
+        0.6758
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -606,7 +606,7 @@
         "confidence": 0.8
       },
       "rooms_count": {
-        "value": 3,
+        "value": 4,
         "confidence": 0.7
       },
       "verified_at": null,
@@ -618,11 +618,11 @@
       "floor_id": "f5",
       "number": "507",
       "type_qc": {
-        "value": "4½",
+        "value": "3½",
         "confidence": 0.95
       },
       "bedrooms": {
-        "value": 2,
+        "value": 1,
         "confidence": 0.93
       },
       "bathrooms": {
@@ -630,15 +630,15 @@
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 76.2,
+        "value": 53.1,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 85.3,
+        "value": 58.9,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "S",
+        "value": "SE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -646,30 +646,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 8.4,
+        "value": 4.9,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.5,
-          0.53
+          0.3151,
+          0.4919
         ],
         [
-          0.71,
-          0.53
+          0.5103,
+          0.4919
         ],
         [
-          0.71,
-          0.82
+          0.5103,
+          0.8065
         ],
         [
-          0.5,
-          0.82
+          0.3151,
+          0.8065
         ]
       ],
       "label_pos": [
-        0.605,
-        0.675
+        0.4329,
+        0.6758
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -692,11 +692,11 @@
       "floor_id": "f5",
       "number": "508",
       "type_qc": {
-        "value": "5½",
+        "value": "4½",
         "confidence": 0.95
       },
       "bedrooms": {
-        "value": 3,
+        "value": 2,
         "confidence": 0.93
       },
       "bathrooms": {
@@ -704,15 +704,15 @@
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 101.3,
+        "value": 80.4,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 113.5,
+        "value": 89.2,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "SW",
+        "value": "NE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -720,30 +720,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 12.5,
+        "value": 8,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.71,
-          0.53
+          0.1027,
+          0.4919
         ],
         [
-          0.92,
-          0.53
+          0.3116,
+          0.4919
         ],
         [
-          0.92,
-          0.82
+          0.3116,
+          0.8065
         ],
         [
-          0.71,
-          0.82
+          0.1027,
+          0.8065
         ]
       ],
       "label_pos": [
-        0.815,
-        0.675
+        0.1699,
+        0.6613
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -766,27 +766,27 @@
       "floor_id": "f6",
       "number": "601",
       "type_qc": {
-        "value": "3½",
+        "value": "4½",
         "confidence": 0.95
       },
       "bedrooms": {
-        "value": 1,
+        "value": 2,
         "confidence": 0.93
       },
       "bathrooms": {
-        "value": 1,
+        "value": 2,
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 52.1,
+        "value": 78.1,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 58.4,
+        "value": 86.7,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "N",
+        "value": "NE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -794,41 +794,41 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 6.2,
+        "value": 8.4,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.08,
-          0.21
+          0.1027,
+          0.1935
         ],
         [
-          0.29,
-          0.21
+          0.3116,
+          0.1935
         ],
         [
-          0.29,
-          0.47
+          0.3116,
+          0.4395
         ],
         [
-          0.08,
-          0.47
+          0.1027,
+          0.4395
         ]
       ],
       "label_pos": [
-        0.185,
-        0.325
+        0.1699,
+        0.3266
       ],
       "computed_area_m2": null,
       "reviewed": false,
       "notes": null,
       "status": "unverified",
       "is_corner": {
-        "value": false,
+        "value": true,
         "confidence": 0.8
       },
       "rooms_count": {
-        "value": 3,
+        "value": 5,
         "confidence": 0.7
       },
       "verified_at": null,
@@ -848,19 +848,19 @@
         "confidence": 0.93
       },
       "bathrooms": {
-        "value": 1,
+        "value": 2,
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 74.4,
+        "value": 84.6,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 83.3,
+        "value": 93.9,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "N",
+        "value": "SW",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -868,30 +868,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 8.4,
+        "value": 8.2,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.29,
-          0.21
+          0.3151,
+          0.1935
         ],
         [
-          0.5,
-          0.21
+          0.5103,
+          0.1935
         ],
         [
-          0.5,
-          0.47
+          0.5103,
+          0.4355
         ],
         [
-          0.29,
-          0.47
+          0.3151,
+          0.4355
         ]
       ],
       "label_pos": [
-        0.395,
-        0.325
+        0.411,
+        0.2742
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -902,7 +902,7 @@
         "confidence": 0.8
       },
       "rooms_count": {
-        "value": 4,
+        "value": 5,
         "confidence": 0.7
       },
       "verified_at": null,
@@ -914,27 +914,27 @@
       "floor_id": "f6",
       "number": "603",
       "type_qc": {
-        "value": "4½",
+        "value": "3½",
         "confidence": 0.55
       },
       "bedrooms": {
-        "value": 2,
+        "value": 1,
         "confidence": 0.93
       },
       "bathrooms": {
-        "value": 1.5,
+        "value": 1,
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 78.3,
+        "value": 52.8,
         "confidence": 0.58
       },
       "gross_area_m2": {
-        "value": 87.7,
+        "value": 58.6,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "N",
+        "value": "NE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -942,30 +942,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 8.4,
+        "value": 5.1,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.5,
-          0.21
+          0.5137,
+          0.1935
         ],
         [
-          0.71,
-          0.21
+          0.7123,
+          0.1935
         ],
         [
-          0.71,
-          0.47
+          0.7123,
+          0.4355
         ],
         [
-          0.5,
-          0.47
+          0.5137,
+          0.4355
         ]
       ],
       "label_pos": [
-        0.605,
-        0.325
+        0.6082,
+        0.2742
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -988,11 +988,11 @@
       "floor_id": "f6",
       "number": "604",
       "type_qc": {
-        "value": "5½",
+        "value": "4½",
         "confidence": 0.95
       },
       "bedrooms": {
-        "value": 3,
+        "value": 2,
         "confidence": 0.93
       },
       "bathrooms": {
@@ -1000,15 +1000,15 @@
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 98.1,
+        "value": 82.3,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 109.9,
+        "value": 91.4,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "NE",
+        "value": "SE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -1016,30 +1016,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 11,
+        "value": 8.7,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.71,
-          0.21
+          0.7158,
+          0.1935
         ],
         [
-          0.92,
-          0.21
+          0.9418,
+          0.1935
         ],
         [
-          0.92,
-          0.47
+          0.9418,
+          0.4839
         ],
         [
-          0.71,
-          0.47
+          0.7158,
+          0.4839
         ]
       ],
       "label_pos": [
-        0.815,
-        0.325
+        0.8753,
+        0.3266
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -1062,69 +1062,69 @@
       "floor_id": "f6",
       "number": "605",
       "type_qc": {
-        "value": "studio",
+        "value": "4½",
         "confidence": 0.95
       },
       "bedrooms": {
-        "value": 0,
+        "value": 2,
         "confidence": 0.93
       },
       "bathrooms": {
-        "value": 1,
+        "value": 2,
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 38.9,
+        "value": 84.2,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 43.6,
+        "value": 93.5,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "S",
+        "value": "SW",
         "confidence": 0.85
       },
       "has_balcony": {
-        "value": false,
+        "value": true,
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": null,
+        "value": 8.4,
         "confidence": 1
       },
       "outline": [
         [
-          0.08,
-          0.53
+          0.7158,
+          0.4839
         ],
         [
-          0.29,
-          0.53
+          0.9418,
+          0.4839
         ],
         [
-          0.29,
-          0.82
+          0.9418,
+          0.8065
         ],
         [
-          0.08,
-          0.82
+          0.7158,
+          0.8065
         ]
       ],
       "label_pos": [
-        0.185,
-        0.675
+        0.8753,
+        0.6452
       ],
       "computed_area_m2": null,
       "reviewed": false,
       "notes": null,
       "status": "unverified",
       "is_corner": {
-        "value": false,
+        "value": true,
         "confidence": 0.8
       },
       "rooms_count": {
-        "value": 2,
+        "value": 5,
         "confidence": 0.7
       },
       "verified_at": null,
@@ -1148,15 +1148,15 @@
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 54.8,
+        "value": 52.9,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 61.4,
+        "value": 58.7,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "S",
+        "value": "SE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -1164,30 +1164,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 6.2,
+        "value": 4.8,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.29,
-          0.53
+          0.5137,
+          0.4919
         ],
         [
-          0.5,
-          0.53
+          0.7123,
+          0.4919
         ],
         [
-          0.5,
-          0.82
+          0.7123,
+          0.8065
         ],
         [
-          0.29,
-          0.82
+          0.5137,
+          0.8065
         ]
       ],
       "label_pos": [
-        0.395,
-        0.675
+        0.6082,
+        0.6758
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -1198,7 +1198,7 @@
         "confidence": 0.8
       },
       "rooms_count": {
-        "value": 3,
+        "value": 4,
         "confidence": 0.7
       },
       "verified_at": null,
@@ -1210,11 +1210,11 @@
       "floor_id": "f6",
       "number": "607",
       "type_qc": {
-        "value": "4½",
+        "value": "3½",
         "confidence": 0.55
       },
       "bedrooms": {
-        "value": 2,
+        "value": 1,
         "confidence": 0.93
       },
       "bathrooms": {
@@ -1222,15 +1222,15 @@
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 75.7,
+        "value": 53.1,
         "confidence": 0.58
       },
       "gross_area_m2": {
-        "value": 84.8,
+        "value": 58.9,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "S",
+        "value": "SE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -1238,30 +1238,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 8.4,
+        "value": 4.9,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.5,
-          0.53
+          0.3151,
+          0.4919
         ],
         [
-          0.71,
-          0.53
+          0.5103,
+          0.4919
         ],
         [
-          0.71,
-          0.82
+          0.5103,
+          0.8065
         ],
         [
-          0.5,
-          0.82
+          0.3151,
+          0.8065
         ]
       ],
       "label_pos": [
-        0.605,
-        0.675
+        0.4329,
+        0.6758
       ],
       "computed_area_m2": null,
       "reviewed": false,
@@ -1284,11 +1284,11 @@
       "floor_id": "f6",
       "number": "608",
       "type_qc": {
-        "value": "5½",
+        "value": "4½",
         "confidence": 0.95
       },
       "bedrooms": {
-        "value": 3,
+        "value": 2,
         "confidence": 0.93
       },
       "bathrooms": {
@@ -1296,15 +1296,15 @@
         "confidence": 0.8
       },
       "net_area_m2": {
-        "value": 101.3,
+        "value": 80.4,
         "confidence": 0.9
       },
       "gross_area_m2": {
-        "value": 113.5,
+        "value": 89.2,
         "confidence": 0.7
       },
       "orientation": {
-        "value": "SW",
+        "value": "NE",
         "confidence": 0.85
       },
       "has_balcony": {
@@ -1312,30 +1312,30 @@
         "confidence": 0.9
       },
       "balcony_area_m2": {
-        "value": 12.5,
+        "value": 8,
         "confidence": 0.75
       },
       "outline": [
         [
-          0.71,
-          0.53
+          0.1027,
+          0.4919
         ],
         [
-          0.92,
-          0.53
+          0.3116,
+          0.4919
         ],
         [
-          0.92,
-          0.82
+          0.3116,
+          0.8065
         ],
         [
-          0.71,
-          0.82
+          0.1027,
+          0.8065
         ]
       ],
       "label_pos": [
-        0.815,
-        0.675
+        0.1699,
+        0.6613
       ],
       "computed_area_m2": null,
       "reviewed": false,

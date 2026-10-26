@@ -67,7 +67,7 @@ export default function UnitPanel({
   ];
 
   return (
-    <aside className="flex w-[360px] shrink-0 flex-col border-l border-line bg-paper">
+    <>
       <div className="border-b border-line p-4">
         <div className="flex items-baseline gap-2">
           <span className="font-mono text-title-lg text-ink">{unit.number}</span>
@@ -81,7 +81,7 @@ export default function UnitPanel({
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4">
+      <div className="p-4">
         {rows.map((row) => (
           <PanelRow key={row.label} {...row} />
         ))}
@@ -92,7 +92,7 @@ export default function UnitPanel({
         <span>·</span>
         <Disabled label="edit" round="round 2" />
       </div>
-    </aside>
+    </>
   );
 }
 

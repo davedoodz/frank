@@ -8,7 +8,20 @@ Two kinds of screen exist. **fitte web** screens use the tokens below. **Simulat
 
 Design-research tool, not a SaaS landing page. The reference is a drawing sheet with a schedule beside it, and an intelligent library for the office's past work. The interface is a frame around a plan. It never competes with the plan.
 
-No gradients. No shadows deeper than 1 px. No rounded corners above 2 px. No illustrations. No emoji. No marketing copy anywhere, including empty states, placeholders, and the login page.
+No gradients. No shadows deeper than 1 px. No illustrations. No emoji. No marketing copy anywhere, including empty states, placeholders, and the login page.
+
+## Radius
+
+Nothing in the interface is a rectangle. Every control is a stadium, every container is rounded, every indicator is a circle. The plan is the only square thing on screen, and it is never rounded, tinted, filtered, or bordered.
+
+```
+--radius-sm:  6px    small nested blocks
+--radius-md:  8px    a leaf block inside a 12 px inset, e.g. a card thumbnail
+--radius-lg:  20px   containers with a 12 px inset: cards, info boxes
+full                 every control: buttons, inputs, chips, tabs, segments, counts, swatches
+```
+
+Nested radii are concentric: the outer radius equals the inner radius plus the inset between them. A 18 px count inside a 24 px row sits at a 3 px inset. A 20 px card holds an 8 px thumbnail at 12 px. A segmented control is a 28 px stadium with a 1 px border and 3 px of padding around 20 px stadium segments. Never let a round thing sit in a square corner, and never let two curves fight.
 
 ## Color
 

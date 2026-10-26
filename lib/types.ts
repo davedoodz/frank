@@ -92,3 +92,27 @@ export type NewProjectInput = {
   year: number;
   floors_count: number;
 };
+
+/** R3. Written at import, one row per candidate pair, best basis per pair. */
+export type SimilarityBasis = "layout" | "area" | "configuration" | "type";
+
+export type UnitSimilarity = {
+  unit_id: string;
+  similar_unit_id: string;
+  score: number;
+  basis: SimilarityBasis;
+};
+
+export type Collection = {
+  id: string;
+  project_id: string;
+  name: string;
+  created_at: string;
+};
+
+export type CollectionItem = {
+  collection_id: string;
+  unit_id: string;
+  note: string | null;
+  added_at: string;
+};

@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "gen:floors": "node scripts/gen-floors.ts"
+    "lint": "next lint"
   },
   "dependencies": {
     "next": "15.5.4",

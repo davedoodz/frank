@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { signIn } from "./actions";
+import { ACTION, FIELD } from "@/components/ui/Action";
 
 export default function LoginForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState(signIn, "");
@@ -15,12 +16,12 @@ export default function LoginForm({ next }: { next: string }) {
         autoFocus
         autoComplete="current-password"
         aria-label="password"
-        className="h-6 w-full border border-line px-2 text-body text-ink focus:border-ink-2"
+        className={`w-full ${FIELD}`}
       />
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 h-6 w-full border border-line text-body text-ink-2 transition-colors duration-[80ms] hover:border-ink hover:text-ink"
+        className={`mt-2 w-full justify-center ${ACTION}`}
       >
         enter
       </button>

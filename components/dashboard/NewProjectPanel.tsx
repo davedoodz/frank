@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createProjectAction } from "@/app/actions";
-import { ACTION } from "@/components/ui/Action";
+import { ACTION, FIELD } from "@/components/ui/Action";
 
 const fields = [
   { name: "display_name", label: "display name", type: "text" },
@@ -54,9 +54,7 @@ export default function NewProjectPanel({ onClose }: { onClose: () => void }) {
             <input
               name={f.name}
               type={f.type}
-              className={`h-6 border border-line px-2 text-body text-ink focus:border-ink-2 ${
-                f.type === "number" ? "font-mono" : ""
-              }`}
+              className={`${FIELD} ${f.type === "number" ? "font-mono" : ""}`}
             />
           </label>
         ))}

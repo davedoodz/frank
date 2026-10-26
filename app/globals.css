@@ -44,7 +44,12 @@
   /* 8 px base. Only 4, 8, 12, 16, 24, 48 are used. */
   --spacing: 4px;
 
-  --radius-sm: 2px;
+  /* Nothing is a rectangle. Controls are stadiums (rounded-full); containers
+     step down this scale so a nested radius stays concentric with its parent:
+     outer radius = inner radius + inset. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 20px;
 }
 
 @layer base {
@@ -111,4 +116,13 @@
   color: var(--color-ink-3);
   text-decoration: underline dotted var(--color-ink-3) 1px;
   text-underline-offset: 3px;
+}
+
+/* A native select cannot be a stadium while it carries the platform arrow, so
+   the arrow is drawn here and the control keeps the same shape as a button. */
+@utility select-pill {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4' viewBox='0 0 7 4'%3E%3Cpath d='M0.5 0.5 3.5 3.5 6.5 0.5' fill='none' stroke='%236b6b66' stroke-width='1'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
 }

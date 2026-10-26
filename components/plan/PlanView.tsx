@@ -3,10 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import type { Floor, Room, Unit } from "@/lib/types";
+import { typologyColor } from "@/lib/format";
+import Link from "next/link";
+import { ACTION } from "@/components/ui/Action";
 import AllUnitsPanel from "./AllUnitsPanel";
 import LeftRail from "./LeftRail";
 import PlanViewer from "./PlanViewer";
 import UnitPanel from "./UnitPanel";
+import UnitsTable from "./UnitsTable";
 import { centroid } from "./geometry";
 
 export default function PlanView({
@@ -83,10 +87,10 @@ export default function PlanView({
 
   return (
     <div className="flex min-h-0 flex-1">
-      <LeftRail code={code} level={floor.level} selected={selected?.number ?? null} rail={rail} />
+      <LeftRail code={code} level={floor.level} rail={rail} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {!selected ? <Summary units={units} /> : null}
+        <Summary units={units} />
         <PlanViewer
           floor={floor}
           units={units}
@@ -96,29 +100,48 @@ export default function PlanView({
         />
       </div>
 
-      {selected ? (
-        <UnitPanel unit={selected} floor={floor} code={code} rooms={rooms} />
-      ) : (
-        <AllUnitsPanel units={units} floor={floor} />
-      )}
+      <aside className="flex w-[360px] shrink-0 flex-col overflow-auto border-l border-line bg-paper">
+        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-line px-4">
+          <span className="text-title text-ink">units</span>
+          <span className="font-mono text-meta text-ink-3">
+            ({units.length})
+          </span>
+          <span className="flex-1" />
+          <Link
+            href={`/p/${code}/schedule`}
+            className={ACTION}
+          >
+            export
+          </Link>
+        </div>
+
+        <UnitsTable units={units} selected={selected} onSelect={select} />
+
+        {selected ? (
+          <UnitPanel unit={selected} floor={floor} code={code} rooms={rooms} />
+        ) : (
+          <AllUnitsPanel units={units} floor={floor} />
+        )}
+      </aside>
     </div>
   );
 }
 
 function Summary({ units }: { units: Unit[] }) {
-  const verified = units.filter((u) => u.status === "verified").length;
   const net = units.reduce((sum, u) => sum + u.net_area_m2.value, 0);
   const figures: [string, string][] = [
-    ["units", String(units.length)],
-    ["verified", `${verified}`],
-    ["net m²", net.toFixed(1)],
+    [String(units.length), "units"],
+    [`${net.toFixed(1)} m²`, "total floor area"],
+    [`${(net / units.length).toFixed(1)} m²`, "average unit"],
   ];
 
   return (
     <div className="flex h-16 shrink-0 items-center border-b border-line bg-surface">
-      {figures.map(([label, value]) => (
+      {figures.map(([value, label]) => (
         <div key={label} className="h-full border-r border-line px-4 py-3">
-          <div className="font-mono text-title-lg text-ink">{value}</div>
+          <div className="font-mono text-title text-ink tabular-nums">
+            {value}
+          </div>
           <div className="label-11">{label}</div>
         </div>
       ))}
@@ -133,11 +156,20 @@ function Distribution({ units }: { units: Unit[] }) {
     counts.set(u.type_qc.value, (counts.get(u.type_qc.value) ?? 0) + 1);
   }
   return (
-    <div className="flex h-full items-center gap-6 px-4 py-3">
+    <div className="flex h-full min-w-0 items-center gap-4 overflow-hidden px-4 py-3">
+      <span className="label-11 shrink-0">unit types</span>
       {[...counts.entries()].map(([type, count]) => (
-        <div key={type}>
-          <div className="font-mono text-title-lg text-ink">{count}</div>
-          <div className="label-11">{type}</div>
+        <div key={type} className="flex shrink-0 items-center gap-2">
+          <span
+            className="h-2.5 w-2.5 shrink-0 rounded-full"
+            style={{
+              background: typologyColor(type as Unit["type_qc"]["value"]),
+            }}
+          />
+          <span className="text-body text-ink">{type}</span>
+          <span className="font-mono text-meta whitespace-nowrap text-ink-3">
+            {count} · {Math.round((count / units.length) * 100)}%
+          </span>
         </div>
       ))}
     </div>

@@ -1,6 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  SEGMENT,
+  SEGMENT_OFF,
+  SEGMENT_SHELL,
+} from "@/components/ui/Action";
 import { typologyColor } from "@/lib/format";
 import type { Floor, Unit } from "@/lib/types";
 
@@ -93,10 +98,64 @@ export default function PlanViewer({
     return "none";
   }
 
+  const zoomBy = useCallback(
+    (k: number) => {
+      const px = size.w / 2;
+      const py = size.h / 2;
+      setView((v) => {
+        const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, v.zoom * k));
+        const r = next / v.zoom;
+        return { zoom: next, x: px - (px - v.x) * r, y: py - (py - v.y) * r };
+      });
+    },
+    [size.w, size.h],
+  );
+
   return (
-    <div
-      ref={frame}
-      className="relative min-h-0 flex-1 overflow-hidden bg-surface"
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex h-14 shrink-0 items-center gap-4 border-b border-line px-4">
+        <div className="min-w-0">
+          <div className="text-title text-ink">{floor.label}</div>
+          <div className="font-mono text-meta text-ink-3">
+            {floor.sheet_number} · {units.length} units · {floor.scale}
+          </div>
+        </div>
+
+        <div className="flex-1" />
+
+        <div className={SEGMENT_SHELL}>
+          <button
+            type="button"
+            onClick={() => zoomBy(1 / 1.25)}
+            aria-label="zoom out"
+            className={`${SEGMENT} w-7 justify-center px-0 ${SEGMENT_OFF}`}
+          >
+            −
+          </button>
+          <span className="w-12 text-center font-mono text-meta text-ink tabular-nums">
+            {Math.round(view.zoom * 100)}%
+          </span>
+          <button
+            type="button"
+            onClick={() => zoomBy(1.25)}
+            aria-label="zoom in"
+            className={`${SEGMENT} w-7 justify-center px-0 ${SEGMENT_OFF}`}
+          >
+            +
+          </button>
+          <button
+            type="button"
+            onClick={reset}
+            className={`${SEGMENT} ${SEGMENT_OFF}`}
+          >
+            fit
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={frame}
+        className="relative min-h-0 flex-1 overflow-hidden bg-surface"
       onPointerDown={(e) => {
         drag.current = { x: e.clientX - view.x, y: e.clientY - view.y, moved: false };
         (e.target as Element).setPointerCapture?.(e.pointerId);
@@ -163,9 +222,10 @@ export default function PlanViewer({
         </svg>
       </div>
 
-      {/* labels stay 11 px at every zoom, so they live outside the transform */}
+      {/* the drawing carries every number, so the overlay marks only the
+          selected unit; it sits outside the transform to stay 11 px at any zoom */}
       <div className="pointer-events-none absolute inset-0">
-        {units.map((unit) => {
+        {units.filter((u) => u.id === selected?.id).map((unit) => {
           const lx = view.x + view.zoom * unit.label_pos[0] * baseW;
           const ly = view.y + view.zoom * unit.label_pos[1] * baseH;
           if (lx < -40 || ly < -20 || lx > size.w + 40 || ly > size.h + 20) {
@@ -174,7 +234,7 @@ export default function PlanViewer({
           return (
             <span
               key={unit.id}
-              className={`absolute -translate-x-1/2 -translate-y-1/2 px-[3px] py-px font-mono text-meta ${
+              className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full px-1.5 py-px font-mono text-meta ${
                 selected?.id === unit.id
                   ? "bg-ink text-paper"
                   : "bg-paper text-ink-2"
@@ -187,8 +247,9 @@ export default function PlanViewer({
         })}
       </div>
 
-      <div className="pointer-events-none absolute bottom-2 left-2 font-mono text-meta text-ink-3">
-        {floor.label} · {floor.sheet_number} · {Math.round(view.zoom * 100)}%
+        <div className="pointer-events-none absolute bottom-2 left-2 font-mono text-meta text-ink-3">
+          {floor.source_file} · {floor.revision_date}
+        </div>
       </div>
     </div>
   );

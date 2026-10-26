@@ -16,20 +16,20 @@ export default async function ProjectLayout({
 
   const floors = await getFloors(project.id);
   const units = await getUnits(project.id);
-  const index = units.map((u) => ({
-    number: u.number,
-    level: floors.find((f) => f.id === u.floor_id)?.level ?? 0,
-  }));
+  const index = units.map((u) => {
+    const floor = floors.find((f) => f.id === u.floor_id);
+    return {
+      number: u.number,
+      level: floor?.level ?? 0,
+      label: floor?.label ?? "",
+    };
+  });
 
   return (
     <div className="flex h-screen">
       <AppSidebar active="none" />
       <div className="flex min-w-0 flex-1 flex-col bg-surface">
-        <ProjectTopBar
-          code={project.project_code}
-          displayName={project.display_name}
-          units={index}
-        />
+        <ProjectTopBar project={project} units={index} />
         <main className="flex min-h-0 flex-1 flex-col">{children}</main>
       </div>
     </div>

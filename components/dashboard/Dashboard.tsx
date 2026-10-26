@@ -3,7 +3,15 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppSidebar from "@/components/AppSidebar";
-import { ACTION, SEARCH } from "@/components/ui/Action";
+import {
+  ACTION,
+  SEARCH,
+  SEGMENT,
+  SEGMENT_OFF,
+  SEGMENT_ON,
+  SEGMENT_SHELL,
+  SELECT,
+} from "@/components/ui/Action";
 import { Chip } from "@/components/ui/Chip";
 import type { Project } from "@/lib/types";
 import NewProjectPanel from "./NewProjectPanel";
@@ -185,7 +193,7 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
           <select
             value={sort.key}
             onChange={(e) => setSort({ key: e.target.value, dir: 1 })}
-            className="h-6 border border-line bg-transparent px-2 text-body text-ink-2"
+            className={SELECT}
           >
             {sorts.map((s) => (
               <option key={s.key} value={s.key}>
@@ -194,17 +202,13 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
             ))}
           </select>
 
-          <div className="ml-2 flex border border-line">
+          <div className={`ml-2 ${SEGMENT_SHELL}`}>
             {(["grid", "list"] as const).map((v) => (
               <button
                 key={v}
                 type="button"
                 onClick={() => setView(v)}
-                className={`h-6 px-2 text-body transition-colors duration-[80ms] ${
-                  view === v
-                    ? "bg-ink text-paper"
-                    : "text-ink-3 hover:bg-fill-2 hover:text-ink"
-                }`}
+                className={`${SEGMENT} ${view === v ? SEGMENT_ON : SEGMENT_OFF}`}
               >
                 {v}
               </button>
@@ -222,7 +226,7 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
                 <button
                   type="button"
                   onClick={() => setPanelOpen(true)}
-                  className="flex flex-col justify-end border border-dashed border-line p-3 text-left text-body text-ink-3 transition-colors duration-[80ms] hover:border-ink hover:text-ink"
+                  className="flex flex-col justify-end rounded-lg border border-dashed border-line p-3 text-left text-body text-ink-3 transition-colors duration-[80ms] hover:border-ink hover:text-ink"
                 >
                   new project
                 </button>
