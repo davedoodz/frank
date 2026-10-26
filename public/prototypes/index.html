@@ -55,15 +55,16 @@ a{color:inherit;text-decoration:none}
 .opt{display:flex;flex-direction:column}
 .frame{position:relative;display:block}
 .shot{display:block;position:relative;z-index:1;width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:transparent;border:0;border-radius:var(--r);
-  box-shadow:0 10px 28px rgba(0,0,0,.09);
+  --ring:0 0 0 var(--dial-stroke-w, 1px) var(--dial-stroke-c, #e6e6e4);
+  box-shadow:var(--ring),0 10px 28px rgba(0,0,0,.09);
   transition:transform .25s ease,box-shadow .25s ease}
 .shot img{display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
 
 /* every card lifts; the dial mode adds its own treatment on top */
-.opt:hover .shot{transform:translateY(-6px);box-shadow:0 20px 46px rgba(0,0,0,.15)}
+.opt:hover .shot{transform:translateY(-6px);box-shadow:var(--ring),0 20px 46px rgba(0,0,0,.15)}
 [data-hover="zoom"] .opt:hover .shot img{transform:scale(1.045)}
-[data-hover="border"] .opt:hover .shot{box-shadow:0 0 0 1px var(--ink),0 20px 46px rgba(0,0,0,.15)}
-[data-hover="shadow"] .opt:hover .shot{box-shadow:0 14px 38px rgba(0,0,0,.13)}
+[data-hover="border"] .opt:hover .shot{box-shadow:0 0 0 var(--dial-stroke-w, 1px) var(--ink),0 20px 46px rgba(0,0,0,.15)}
+[data-hover="shadow"] .opt:hover .shot{box-shadow:var(--ring),0 14px 38px rgba(0,0,0,.13)}
 [data-hover="accent"] .opt:hover .shot{box-shadow:0 0 0 3px rgba(192,215,57,.35),0 20px 46px rgba(0,0,0,.15)}
 [data-hover="reveal"] .shot img{filter:saturate(.55) contrast(.96)}
 [data-hover="reveal"] .opt:hover .shot img{filter:none}
@@ -215,6 +216,11 @@ const dial = DialKit.createDialKit("Prototype 1", {
     length: [40, 0, 400, 2],
     thickness: [2, 1, 16, 1],
   },
+  outline: {
+    // A hairline ring drawn as a shadow, so it costs no layout space.
+    color: "#e6e6e4",
+    thickness: [1, 0, 6, 0.25],
+  },
   arrows: {
     // Y is a nudge: negative lifts the arrow, positive drops it.
     cardSize: [14, 6, 40, 0.5],
@@ -275,6 +281,8 @@ dial.subscribe((v) => {
   root.setProperty("--dial-mark-size", v.marks.size + "px");
   root.setProperty("--dial-mark-a", v.marks.offsetA + "px");
   root.setProperty("--dial-mark-b", v.marks.offsetB + "px");
+  root.setProperty("--dial-stroke-c", v.outline.color);
+  root.setProperty("--dial-stroke-w", v.outline.thickness + "px");
   root.setProperty("--dial-harrow-size", v.arrows.cardSize + "px");
   root.setProperty("--dial-harrow-y", v.arrows.cardY + "px");
   root.setProperty("--dial-parrow-size", v.arrows.pillSize + "px");
