@@ -5,8 +5,6 @@ export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   if (pathname === "/login") return NextResponse.next();
-  // Prototypes d'essai montrés à des participants externes : pas de connexion.
-  if (pathname.startsWith("/prototypes")) return NextResponse.next();
 
   const ok = await isValidToken(request.cookies.get(AUTH_COOKIE)?.value);
   if (ok) return NextResponse.next();
