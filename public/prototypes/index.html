@@ -44,7 +44,13 @@ a{color:inherit;text-decoration:none}
   letter-spacing:var(--dial-date-track, .16em);
   text-transform:uppercase;color:var(--ink-3);
 }
-.tete h1{margin-top:10px;font-size:40px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.ttl{display:inline-flex;align-items:flex-start;gap:6px;margin-top:10px}
+.tete h1{font-size:40px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.ttl .tarrow{width:20px;height:20px;margin-top:6px;stroke:currentColor;fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;color:var(--ink);
+  opacity:0;transform:translate(-4px,4px);
+  transition:opacity .2s ease,transform .25s cubic-bezier(.2,.8,.2,1)}
+.ttl:hover .tarrow{opacity:1;transform:translate(0,0)}
 .tete .rule{width:var(--dial-rule-w, 40px);height:var(--dial-rule-h, 2px);background:var(--accent);margin:18px auto 0}
 
 .duo{
@@ -55,11 +61,12 @@ a{color:inherit;text-decoration:none}
 .opt{display:flex;flex-direction:column}
 .frame{position:relative;display:block}
 .shot{position:relative;z-index:1;width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:0 10px 28px rgba(0,0,0,.09);
   transition:transform .25s ease,box-shadow .25s ease,border-color .2s ease}
 .shot img{width:100%;height:100%;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
 
 /* thumbnail hover — one mode at a time, set by the dial on <body data-hover> */
-[data-hover="lift"] .opt:hover .shot{transform:translateY(-4px);box-shadow:0 10px 28px rgba(0,0,0,.09);border-color:var(--line-2)}
+[data-hover="lift"] .opt:hover .shot{transform:translateY(-4px);box-shadow:0 18px 44px rgba(0,0,0,.13);border-color:var(--line-2)}
 [data-hover="zoom"] .opt:hover .shot img{transform:scale(1.045)}
 [data-hover="border"] .opt:hover .shot{border-color:var(--ink)}
 [data-hover="shadow"] .opt:hover .shot{box-shadow:0 14px 38px rgba(0,0,0,.13)}
@@ -82,9 +89,11 @@ a{color:inherit;text-decoration:none}
   transform:rotate(0deg);transform-origin:50% 88%;
   transition:transform .35s cubic-bezier(.2,.8,.2,1),color .25s ease,opacity .25s ease;
 }
-.opt:nth-child(1) .mark{left:-.62em}
-.opt:nth-child(2) .mark{right:-.62em}
-.opt:hover .mark{transform:rotate(9deg);color:var(--accent);opacity:1}
+.opt:nth-child(1) .mark{left:-.5em}
+.opt:nth-child(2) .mark{right:-.5em}
+.opt:hover .mark{color:var(--accent);opacity:1}
+.opt:nth-child(1):hover .mark{transform:rotate(-9deg)}
+.opt:nth-child(2):hover .mark{transform:rotate(9deg)}
 @media (prefers-reduced-motion:reduce){.shot,.shot img,.mark{transition:none}}
 
 /* how the card content is aligned inside its column */
@@ -121,7 +130,7 @@ a{color:inherit;text-decoration:none}
 <div class="page">
   <div class="tete">
     <p class="d" data-txt="date">Monday, October 26</p>
-    <h1 data-txt="title">Prototype 1</h1>
+    <span class="ttl"><h1 data-txt="title">Prototype 1</h1><svg class="tarrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
     <div class="rule"></div>
   </div>
 
