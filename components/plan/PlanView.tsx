@@ -1,18 +1,27 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
-import type { Floor, Room, Unit } from "@/lib/types";
-import { typologyColor } from "@/lib/format";
 import Link from "next/link";
-import { ACTION } from "@/components/ui/Action";
-import AllUnitsPanel from "./AllUnitsPanel";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import FloorMetrics, { TypologyLegend } from "./AllUnitsPanel";
 import LeftRail from "./LeftRail";
 import PlanViewer from "./PlanViewer";
+import RoomsStrip from "./RoomsStrip";
 import UnitPanel from "./UnitPanel";
+import UnitPreview from "./UnitPreview";
 import UnitsTable from "./UnitsTable";
 import { centroid } from "./geometry";
+import Icon from "@/components/ui/Icon";
+import { BTN, BTN_ON } from "@/components/ui/Button";
+import { TYPOLOGY_ORDER, brLabel } from "@/lib/format";
+import type { Prefs } from "@/lib/prefs";
+import type { Floor, Room, Unit } from "@/lib/types";
 
+/**
+ * The floor, three ways at once: where you are in the building, the drawing,
+ * and the unit you picked. Selection lives in the URL, so the plan, the rail
+ * and the schedule are never out of step, and a link can land on a unit.
+ */
 export default function PlanView({
   code,
   floor,
@@ -20,6 +29,7 @@ export default function PlanView({
   selected,
   rooms,
   rail,
+  prefs,
 }: {
   code: string;
   floor: Floor;
@@ -27,8 +37,11 @@ export default function PlanView({
   selected: Unit | null;
   rooms: Room[];
   rail: { level: number; label: string; units: string[] }[];
+  prefs: Prefs;
 }) {
   const router = useRouter();
+  const [typology, setTypology] = useState<string>("all");
+  const [showLabels, setShowLabels] = useState(false);
 
   const select = useCallback(
     (number: string | null) => {
@@ -38,6 +51,16 @@ export default function PlanView({
       router.replace(url, { scroll: false });
     },
     [code, floor.level, router],
+  );
+
+  const step = useCallback(
+    (direction: -1 | 1) => {
+      if (units.length === 0) return;
+      const at = units.findIndex((u) => u.id === selected?.id);
+      const next = (at + direction + units.length) % units.length;
+      select(units[next].number);
+    },
+    [selected, units, select],
   );
 
   useEffect(() => {
@@ -85,93 +108,122 @@ export default function PlanView({
     return () => window.removeEventListener("keydown", onKey);
   }, [selected, units, select]);
 
+  const types = TYPOLOGY_ORDER.filter((t) =>
+    units.some((u) => u.type_qc.value === t),
+  );
+  const shown =
+    typology === "all" ? units : units.filter((u) => u.type_qc.value === typology);
+
   return (
-    <div className="flex min-h-0 flex-1">
-      <LeftRail code={code} level={floor.level} rail={rail} />
+    <div className="flex min-h-0 flex-1 gap-4 px-6 pb-6">
+      <LeftRail
+        code={code}
+        level={floor.level}
+        rail={rail}
+        units={units}
+        selected={selected}
+        onSelect={select}
+      />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Summary units={units} />
-        <PlanViewer
-          floor={floor}
-          units={units}
-          selected={selected}
-          onSelect={select}
-          typologyFills={!selected}
-        />
-      </div>
-
-      <aside className="flex w-[360px] shrink-0 flex-col overflow-auto border-l border-line bg-paper">
-        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-line px-4">
-          <span className="text-title text-ink">units</span>
-          <span className="font-mono text-meta text-ink-3">
-            ({units.length})
-          </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="min-w-0">
+            <h1 className="text-[22px] font-semibold tracking-tight text-text">
+              {floor.label}
+            </h1>
+            <p className="truncate text-[13px] text-text-2">
+              Residential plan · {units.length} units
+            </p>
+          </div>
           <span className="flex-1" />
-          <Link
-            href={`/p/${code}/schedule`}
-            className={ACTION}
-          >
-            export
+          <Link href={`/p/${code}/schedule`} className={BTN}>
+            <Icon name="table" size={14} />
+            Unit schedule
+          </Link>
+          <Link href={`/p/${code}/building`} className={BTN}>
+            <Icon name="cube" size={14} />
+            3D context
           </Link>
         </div>
 
-        <UnitsTable units={units} selected={selected} onSelect={select} />
+        {selected ? null : <FloorMetrics units={units} />}
+
+        <PlanViewer
+          floor={floor}
+          units={shown}
+          selected={selected}
+          onSelect={select}
+          typologyFills={prefs.typologyFills}
+          showLabels={showLabels}
+          toolbar={
+            <>
+              <label className="flex h-9 items-center gap-2 rounded-lg border border-edge px-2.5 text-[13px] text-text-2">
+                Typology
+                <select
+                  value={typology}
+                  onChange={(e) => setTypology(e.target.value)}
+                  aria-label="typology filter"
+                  className="bg-transparent text-[13px] font-medium text-text outline-none"
+                >
+                  <option value="all">All types</option>
+                  {types.map((type) => (
+                    <option key={type} value={type}>
+                      {brLabel(type)} ({type})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowLabels((v) => !v)}
+                aria-pressed={showLabels}
+                className={showLabels ? BTN_ON : BTN}
+              >
+                <Icon name="label" size={14} />
+                Show labels
+              </button>
+            </>
+          }
+        />
 
         {selected ? (
-          <UnitPanel unit={selected} floor={floor} code={code} rooms={rooms} />
+          <RoomsStrip unit={selected} rooms={rooms} />
         ) : (
-          <AllUnitsPanel units={units} floor={floor} />
+          <div className="panel shrink-0">
+            <TypologyLegend units={units} />
+          </div>
+        )}
+      </div>
+
+      <aside className="flex w-[380px] shrink-0 flex-col gap-4 overflow-y-auto">
+        {selected ? (
+          <UnitPanel
+            unit={selected}
+            floor={floor}
+            code={code}
+            rooms={rooms}
+            onStep={step}
+          />
+        ) : (
+          <>
+            <UnitsTable
+              floor={floor}
+              units={shown}
+              selected={selected}
+              onSelect={select}
+              onExport={`/p/${code}/schedule`}
+            />
+            {units[0] ? (
+              <UnitPreview
+                unit={units[0]}
+                floor={floor}
+                code={code}
+                onOpen={() => select(units[0].number)}
+              />
+            ) : null}
+          </>
         )}
       </aside>
-    </div>
-  );
-}
-
-function Summary({ units }: { units: Unit[] }) {
-  const net = units.reduce((sum, u) => sum + u.net_area_m2.value, 0);
-  const figures: [string, string][] = [
-    [String(units.length), "units"],
-    [`${net.toFixed(1)} m²`, "total floor area"],
-    [`${(net / units.length).toFixed(1)} m²`, "average unit"],
-  ];
-
-  return (
-    <div className="flex h-16 shrink-0 items-center border-b border-line bg-surface">
-      {figures.map(([value, label]) => (
-        <div key={label} className="h-full border-r border-line px-4 py-3">
-          <div className="font-mono text-title text-ink tabular-nums">
-            {value}
-          </div>
-          <div className="label-11">{label}</div>
-        </div>
-      ))}
-      <Distribution units={units} />
-    </div>
-  );
-}
-
-function Distribution({ units }: { units: Unit[] }) {
-  const counts = new Map<string, number>();
-  for (const u of units) {
-    counts.set(u.type_qc.value, (counts.get(u.type_qc.value) ?? 0) + 1);
-  }
-  return (
-    <div className="flex h-full min-w-0 items-center gap-4 overflow-hidden px-4 py-3">
-      <span className="label-11 shrink-0">unit types</span>
-      {[...counts.entries()].map(([type, count]) => (
-        <div key={type} className="flex shrink-0 items-center gap-2">
-          <span
-            className="h-2.5 w-2.5 shrink-0 rounded-full"
-            style={{
-              background: typologyColor(type as Unit["type_qc"]["value"]),
-            }}
-          />
-          <span className="text-body text-ink">{type}</span>
-          <span className="font-mono text-meta whitespace-nowrap text-ink-3">
-            {count} · {Math.round((count / units.length) * 100)}%
-          </span>
-        </div>
-      ))}
     </div>
   );
 }

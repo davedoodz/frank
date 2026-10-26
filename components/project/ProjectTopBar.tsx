@@ -3,30 +3,21 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { projectThumb } from "@/lib/format";
-import {
-  SEARCH,
-  SEGMENT,
-  SEGMENT_OFF,
-  SEGMENT_ON,
-  SEGMENT_SHELL,
-} from "@/components/ui/Action";
+import Icon from "@/components/ui/Icon";
 import type { Project } from "@/lib/types";
 
-const tabs = [
-  { slug: "units", label: "units" },
-  { slug: "office-dna", label: "office dna" },
-  { slug: "drawings", label: "drawings" },
-  { slug: "building", label: "building" },
-];
-
-const typologyLabel: Record<Project["typology"], string> = {
-  condo: "residential (condominium)",
-  mixed_use: "mixed use",
-  rental: "rental",
-  other: "other",
+const TAB_LABEL: Record<string, string> = {
+  units: "Units",
+  schedule: "Units",
+  "office-dna": "Office DNA",
+  drawings: "Drawings",
+  building: "Building",
 };
 
+/**
+ * The thin chrome above the work: where you are, and one search that jumps to
+ * a unit. The project itself lives in the rail, so nothing is repeated here.
+ */
 export default function ProjectTopBar({
   project,
   units,
@@ -35,52 +26,69 @@ export default function ProjectTopBar({
   units: { number: string; level: number; label: string }[];
 }) {
   const code = project.project_code;
-  const thumb = projectThumb(code);
   const pathname = usePathname();
   const params = useSearchParams();
   const router = useRouter();
   const [find, setFind] = useState("");
-  const onSchedule = pathname.startsWith(`/p/${code}/schedule`);
-  const active = onSchedule
-    ? "units"
-    : tabs.find((t) => pathname.startsWith(`/p/${code}/${t.slug}`))?.slug;
 
+  const segment = pathname.split("/")[3] ?? "";
+  const tab = TAB_LABEL[segment];
   const floorParam = params.get("floor");
-  const crumbFloor = units.find((u) => String(u.level) === floorParam)?.label;
-  const lastImport = project.drawings.find((d) => d.status === "indexed");
+  const unitParam = params.get("u");
+  const floorLabel = units.find((u) => String(u.level) === floorParam)?.label;
+
+  const crumbs: { label: string; href?: string }[] = [
+    { label: "Projects", href: "/" },
+    { label: project.display_name, href: `/p/${code}/units` },
+  ];
+  if (tab) crumbs.push({ label: tab, href: `/p/${code}/${segment}` });
+  if (floorLabel) {
+    crumbs.push({
+      label: floorLabel,
+      href: `/p/${code}/units?floor=${floorParam}`,
+    });
+  }
+  if (unitParam && segment === "units") {
+    crumbs.push({ label: `Unit ${unitParam}` });
+  } else if (floorLabel && segment === "units") {
+    crumbs.push({ label: "All Units" });
+  }
 
   return (
-    <header className="shrink-0 border-b border-line bg-surface">
-      {/* breadcrumb */}
-      <div className="flex h-8 items-center gap-2 px-6 font-mono text-meta">
-        <Link
-          href="/"
-          className="text-ink-3 transition-colors duration-[80ms] hover:text-ink"
-        >
-          projects
-        </Link>
-        <span className="text-ink-3">›</span>
-        <Link
-          href={`/p/${code}/units`}
-          className="text-ink-3 transition-colors duration-[80ms] hover:text-ink"
-        >
-          {project.display_name}
-        </Link>
-        {active ? (
-          <>
-            <span className="text-ink-3">›</span>
-            <span className="text-ink">{active}</span>
-          </>
-        ) : null}
-        {crumbFloor ? (
-          <>
-            <span className="text-ink-3">›</span>
-            <span className="text-ink">{crumbFloor}</span>
-          </>
-        ) : null}
+    <header className="flex h-[60px] shrink-0 items-center gap-2 px-6">
+      <nav className="flex min-w-0 items-center gap-2 text-[13px]">
+        {crumbs.map((crumb, i) => {
+          const last = i === crumbs.length - 1;
+          return (
+            <span key={`${crumb.label}-${i}`} className="flex items-center gap-2">
+              {i > 0 ? (
+                <Icon name="chevron-right" size={12} className="text-text-3" />
+              ) : null}
+              {crumb.href && !last ? (
+                <Link
+                  href={crumb.href}
+                  className="truncate text-text-2 transition-colors hover:text-text"
+                >
+                  {crumb.label}
+                </Link>
+              ) : (
+                <span
+                  className={
+                    last ? "truncate font-medium text-text" : "truncate text-text-2"
+                  }
+                >
+                  {crumb.label}
+                </span>
+              )}
+            </span>
+          );
+        })}
+      </nav>
 
-        <div className="flex-1" />
+      <div className="flex-1" />
 
+      <label className="flex h-9 w-[300px] items-center gap-2 rounded-full border border-edge bg-panel px-3 text-text-3 focus-within:border-brand-line">
+        <Icon name="search" size={14} />
         <input
           type="search"
           value={find}
@@ -92,90 +100,23 @@ export default function ProjectTopBar({
               router.push(`/p/${code}/units?floor=${hit.level}&u=${hit.number}`);
             }
           }}
-          placeholder="find unit"
-          aria-label="find unit"
-          className={`w-[160px] ${SEARCH}`}
+          placeholder="Search units in this project..."
+          aria-label="search units"
+          className="w-full text-[13px] text-text outline-none placeholder:text-text-3"
         />
-      </div>
+      </label>
 
-      {/* identity strip: placeholder render crop, or a flat block when none ships */}
-      <div className="flex items-start gap-4 px-6 pt-2 pb-4">
-        <div className="relative flex h-[72px] w-[112px] shrink-0 items-end overflow-hidden rounded-md bg-fill-2 p-1.5">
-          {thumb ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={thumb}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ) : (
-            <span className="font-mono text-meta text-ink-3">{code}</span>
-          )}
-        </div>
+      <button
+        type="button"
+        aria-label="notifications"
+        className="flex h-9 w-9 items-center justify-center rounded-full text-text-2 transition-colors hover:bg-panel hover:text-text"
+      >
+        <Icon name="bell" />
+      </button>
 
-        <div className="min-w-0">
-          <h1 className="text-title-lg text-ink">{project.display_name}</h1>
-          <div className="mt-1 font-mono text-meta text-ink-2">
-            {project.city} · {project.year}
-          </div>
-          <div className="font-mono text-meta text-ink-3">
-            {project.floors_count} floors · {project.units_count} units ·{" "}
-            {typologyLabel[project.typology]}
-          </div>
-        </div>
-
-        <div className="flex-1" />
-
-        <div className="flex min-w-[240px] flex-col gap-1 rounded-lg border border-line p-3">
-          <span className="label-11">
-            {project.last_import_at ? "last import" : "no import yet"}
-          </span>
-          <span className="font-mono text-meta text-ink">
-            {lastImport?.filename ?? "—"}
-          </span>
-          <span className="font-mono text-meta text-ink-3">
-            {project.last_import_at ??
-              `${project.drawings.length} files connected`}
-          </span>
-        </div>
-      </div>
-
-      {/* tabs read as chips: active inverts, nothing underlines */}
-      <div className="flex items-center gap-6 px-6 pb-2">
-        <nav className="flex items-center gap-1">
-          {tabs.map((t) => (
-            <Link
-              key={t.slug}
-              href={`/p/${code}/${t.slug}`}
-              className={`flex h-6 items-center rounded-full px-2.5 text-body transition-colors duration-[80ms] ${
-                active === t.slug
-                  ? "bg-ink text-paper"
-                  : "text-ink-2 hover:bg-fill-2 hover:text-ink"
-              }`}
-            >
-              {t.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex-1" />
-
-        {/* two segments in one stadium, no dropdown */}
-        <div className={SEGMENT_SHELL}>
-          <Link
-            href={`/p/${code}/units`}
-            className={`${SEGMENT} ${onSchedule ? SEGMENT_OFF : SEGMENT_ON}`}
-          >
-            plan
-          </Link>
-          <Link
-            href={`/p/${code}/schedule`}
-            className={`${SEGMENT} ${onSchedule ? SEGMENT_ON : SEGMENT_OFF}`}
-          >
-            schedule
-          </Link>
-        </div>
-      </div>
+      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-nav text-[11px] font-medium text-white">
+        JD
+      </span>
     </header>
   );
 }

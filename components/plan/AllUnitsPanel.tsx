@@ -1,119 +1,105 @@
-import { TYPOLOGY_ORDER, ft2, typologyColor } from "@/lib/format";
-import type { Floor, Unit } from "@/lib/types";
+import Icon from "@/components/ui/Icon";
+import { TYPOLOGY_ORDER, brLabel, typologyColor } from "@/lib/format";
+import type { Unit } from "@/lib/types";
 
 /**
- * The no-selection state of a floor: counted facts first, then the typology
- * split, then the drawing the floor was read from.
+ * The floor in numbers: how many units, how much area, and the typology
+ * split. Every figure is counted from the indexed units, nothing is entered.
  */
-export default function AllUnitsPanel({
-  units,
-  floor,
-}: {
-  units: Unit[];
-  floor: Floor;
-}) {
+export default function FloorMetrics({ units }: { units: Unit[] }) {
   const net = units.reduce((sum, u) => sum + u.net_area_m2.value, 0);
-  const balconies = units.filter((u) => u.balcony_area_m2.value !== null);
-  const balconyArea = balconies.reduce(
-    (sum, u) => sum + (u.balcony_area_m2.value ?? 0),
-    0,
-  );
-  const facings = [...new Set(units.map((u) => u.orientation.value))];
   const types = TYPOLOGY_ORDER.filter((t) =>
     units.some((u) => u.type_qc.value === t),
   );
 
-  const tiles: [string, string, string][] = [
-    [String(units.length), "units", ""],
-    [
-      `${units.filter((u) => u.status === "verified").length}`,
-      "verified",
-      `of ${units.length}`,
-    ],
-    [`${units.filter((u) => u.is_corner.value).length}`, "corner units", ""],
-    [`${net.toFixed(1)} m²`, "net area", `${ft2(net)} ft²`],
-    [`${(net / units.length).toFixed(1)} m²`, "average unit", ""],
-    [
-      balconies.length
-        ? `${(balconyArea / balconies.length).toFixed(1)} m²`
-        : "—",
-      "average balcony",
-      balconies.length ? `${balconies.length} units` : "none",
-    ],
-    [String(facings.length), "orientations", facings.join(" · ")],
-  ];
-
   return (
-    <>
-      <section className="border-b border-line p-4">
-        <div className="label-11 mb-2">floor statistics</div>
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-line">
-          {tiles.map(([value, label, note], i) => (
-            <div
-              key={label}
-              className={`bg-paper p-3 ${
-                i === tiles.length - 1 && tiles.length % 2 === 1
-                  ? "col-span-2"
-                  : ""
-              }`}
-            >
-              <div className="font-mono text-title text-ink tabular-nums">
-                {value}
-              </div>
-              <div className="text-body text-ink-2">{label}</div>
-              {note ? (
-                <div className="font-mono text-meta text-ink-3">{note}</div>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </section>
+    <section className="panel flex shrink-0 items-stretch">
+      <Figure value={String(units.length)} label="Units" />
+      <Figure
+        value={`${net.toFixed(1)} m²`}
+        label="Total floor area"
+        hint="Sum of indexed net areas"
+      />
+      <Figure
+        value={`${units.length ? (net / units.length).toFixed(1) : "0.0"} m²`}
+        label="Average unit area"
+      />
 
-      <section className="border-b border-line p-4">
-        <div className="label-11 mb-2">typology</div>
-        {types.map((type) => {
-          const of = units.filter((u) => u.type_qc.value === type);
-          const area = of.reduce((sum, u) => sum + u.net_area_m2.value, 0);
-          return (
-            <div key={type} className="flex h-6 items-center gap-2">
-              <span
-                className="h-2.5 w-2.5 shrink-0 rounded-full"
-                style={{ background: typologyColor(type) }}
-              />
-              <span className="w-12 text-body text-ink">{type}</span>
-              <span className="w-8 text-right font-mono text-meta text-ink">
-                {of.length}
-              </span>
-              <span className="flex-1 text-right font-mono text-meta text-ink-3">
-                {(area / of.length).toFixed(1)} m² avg
-              </span>
-            </div>
-          );
-        })}
-      </section>
-
-      <SourceFile floor={floor} />
-    </>
-  );
-}
-
-export function SourceFile({ floor }: { floor: Floor }) {
-  return (
-    <section className="p-4">
-      <div className="label-11 mb-2">source file</div>
-      <div className="flex items-start gap-2">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-fill-2 font-mono text-meta text-ink-3">
-          dwg
-        </span>
+      <div className="flex min-w-0 flex-1 items-center gap-6 px-5 py-4">
         <div className="min-w-0">
-          <div className="truncate font-mono text-meta text-ink">
-            {floor.source_file}
-          </div>
-          <div className="font-mono text-meta text-ink-3">
-            {floor.sheet_number} · {floor.label} · {floor.revision_date}
+          <div className="cap">Unit types</div>
+          <div className="mt-2 flex flex-wrap items-center gap-5">
+            {types.map((type) => {
+              const count = units.filter((u) => u.type_qc.value === type).length;
+              return (
+                <div key={type} className="flex items-center gap-2">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ background: typologyColor(type) }}
+                  />
+                  <span className="text-[13px] font-medium text-text">
+                    {brLabel(type)}
+                  </span>
+                  <span className="text-[12px] text-text-2">
+                    {count} units ({Math.round((count / units.length) * 100)}%)
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function Figure({
+  value,
+  label,
+  hint,
+}: {
+  value: string;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <div className="shrink-0 border-r border-edge-2 px-5 py-4">
+      <div className="text-[22px] font-semibold tracking-tight text-text tabular-nums">
+        {value}
+      </div>
+      <div className="mt-0.5 flex items-center gap-1 text-[12px] text-text-2">
+        {label}
+        {hint ? (
+          <span title={hint} className="text-text-3">
+            <Icon name="info" size={12} />
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/** The colour key under the drawing. */
+export function TypologyLegend({ units }: { units: Unit[] }) {
+  const types = TYPOLOGY_ORDER.filter((t) =>
+    units.some((u) => u.type_qc.value === t),
+  );
+
+  return (
+    <div className="flex items-center justify-center gap-6 border-t border-edge-2 py-2.5">
+      {types.map((type) => (
+        <span key={type} className="flex items-center gap-2 text-[12px] text-text-2">
+          <span
+            className="h-2.5 w-2.5 rounded-full"
+            style={{ background: typologyColor(type) }}
+          />
+          {brLabel(type)}
+        </span>
+      ))}
+      <span className="flex items-center gap-2 text-[12px] text-text-2">
+        <span className="h-2.5 w-2.5 rounded-full bg-ty-common" />
+        Common area
+      </span>
+    </div>
   );
 }

@@ -1,94 +1,128 @@
 "use client";
 
-import { typologyColor } from "@/lib/format";
-import type { Unit } from "@/lib/types";
+import Icon from "@/components/ui/Icon";
+import { BTN } from "@/components/ui/Button";
+import { brLabel, ft2, typologyColor } from "@/lib/format";
+import type { Floor, Unit } from "@/lib/types";
+
+const ORIENTATION: Record<string, string> = {
+  N: "North",
+  S: "South",
+  E: "East",
+  W: "West",
+  NE: "NE",
+  NW: "NW",
+  SE: "SE",
+  SW: "SW",
+};
+
+const COLUMNS: [string, "left" | "right"][] = [
+  ["#", "left"],
+  ["Type", "left"],
+  ["m²", "right"],
+  ["ft²", "right"],
+  ["Orient.", "left"],
+  ["Status", "left"],
+];
 
 /**
- * The floor read as a list. Every row is the same selection as clicking the
- * outline on the plan, so the table and the drawing stay one state.
+ * The floor read as a table. A row is the same selection as the outline on
+ * the plan, so the schedule and the drawing stay one state.
  */
 export default function UnitsTable({
+  floor,
   units,
   selected,
   onSelect,
+  onExport,
 }: {
+  floor: Floor;
   units: Unit[];
   selected: Unit | null;
   onSelect: (number: string | null) => void;
+  onExport: string;
 }) {
   return (
-    <table className="w-full table-fixed border-collapse">
-      <colgroup>
-        <col className="w-[66px]" />
-        <col className="w-[52px]" />
-        <col className="w-[48px]" />
-        <col className="w-[56px]" />
-        <col className="w-[40px]" />
-        <col />
-      </colgroup>
-      <thead>
-        <tr>
-          {["unit", "type", "m²", "balc", "dir", "state"].map(
-            (label, i) => (
+    <section className="panel flex shrink-0 flex-col">
+      <div className="flex h-14 items-center gap-2 px-4">
+        <h2 className="truncate text-[15px] font-semibold text-text">
+          Unit Schedule — {floor.label}
+        </h2>
+        <span className="flex-1" />
+        <a href={onExport} className={BTN}>
+          <Icon name="export" size={14} />
+          Export
+        </a>
+      </div>
+
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="border-y border-edge-2 bg-app/60">
+            {COLUMNS.map(([label, align]) => (
               <th
                 key={label}
-                className={`label-11 h-7 border-b border-line px-2 ${
-                  i >= 2 && i <= 3 ? "text-right" : "text-left"
+                className={`cap h-9 px-2 font-normal ${
+                  align === "right" ? "text-right" : "text-left"
                 }`}
               >
                 {label}
               </th>
-            ),
-          )}
-        </tr>
-      </thead>
-      <tbody>
-        {units.map((unit) => {
-          const active = selected?.id === unit.id;
-          return (
-            <tr
-              key={unit.id}
-              onClick={() => onSelect(active ? null : unit.number)}
-              className={`h-7 cursor-pointer border-b border-line transition-colors duration-[80ms] ${
-                active ? "bg-ink text-paper" : "hover:bg-fill-2"
-              }`}
-            >
-              <td className="px-2">
-                <span className="flex items-center gap-1.5">
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {units.map((unit) => {
+            const on = selected?.id === unit.id;
+            return (
+              <tr
+                key={unit.id}
+                onClick={() => onSelect(on ? null : unit.number)}
+                className={`h-9 cursor-pointer border-b border-edge-2 text-[13px] transition-colors last:border-0 ${
+                  on ? "bg-brand-soft" : "hover:bg-app"
+                }`}
+              >
+                <td className="px-2">
+                  <span className="flex items-center gap-2">
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ background: typologyColor(unit.type_qc.value) }}
+                    />
+                    <span
+                      className={`font-medium ${on ? "text-brand" : "text-text"}`}
+                    >
+                      {unit.number}
+                    </span>
+                  </span>
+                </td>
+                <td className="px-2 whitespace-nowrap text-text-2">
+                  {brLabel(unit.type_qc.value)}
+                </td>
+                <td className="px-2 text-right text-text tabular-nums">
+                  {unit.net_area_m2.value.toFixed(1)}
+                </td>
+                <td className="px-2 text-right text-text-2 tabular-nums">
+                  {ft2(unit.net_area_m2.value)}
+                </td>
+                <td className="px-2 whitespace-nowrap text-text-2">
+                  {ORIENTATION[unit.orientation.value] ?? unit.orientation.value}
+                </td>
+                <td className="px-2">
                   <span
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ background: typologyColor(unit.type_qc.value) }}
-                  />
-                  <span className="font-mono text-meta">{unit.number}</span>
-                </span>
-              </td>
-              <td className="px-2 text-body">{unit.type_qc.value}</td>
-              <td className="px-2 text-right font-mono text-meta tabular-nums">
-                {unit.net_area_m2.value.toFixed(1)}
-              </td>
-              <td
-                className={`px-2 text-right font-mono text-meta tabular-nums ${
-                  active ? "" : "text-ink-2"
-                }`}
-              >
-                {unit.balcony_area_m2.value?.toFixed(1) ?? "—"}
-              </td>
-              <td
-                className={`px-2 font-mono text-meta ${active ? "" : "text-ink-2"}`}
-              >
-                {unit.orientation.value}
-              </td>
-              <td
-                className={`px-2 font-mono text-meta ${
-                  active ? "" : unit.status === "verified" ? "text-ink" : "text-ink-3"
-                }`}
-              >
-                {unit.status}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+                    className={`inline-flex items-center gap-1 whitespace-nowrap text-[12px] ${
+                      unit.status === "verified" ? "text-ok" : "text-text-3"
+                    }`}
+                  >
+                    {unit.status === "verified" ? (
+                      <Icon name="check" size={12} />
+                    ) : null}
+                    {unit.status === "verified" ? "Verified" : "Unverified"}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </section>
   );
 }

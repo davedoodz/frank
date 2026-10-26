@@ -24,6 +24,34 @@
     sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
 
+  /* Product chrome. The plan register above stays monochrome; these are the
+     application surfaces: light panels on a grey page, one blue for
+     selection and primary intent, one green for verified. */
+  --color-app: #f6f7f9;
+  --color-panel: #ffffff;
+  --color-edge: #e6e8ec;
+  --color-edge-2: #eef0f3;
+  --color-text: #0f172a;
+  --color-text-2: #475569;
+  --color-text-3: #94a3b8;
+  --color-brand: #2563eb;
+  --color-brand-2: #1d4ed8;
+  --color-brand-soft: #eff6ff;
+  --color-brand-line: #bfdbfe;
+  --color-ok: #16a34a;
+  --color-ok-soft: #dcfce7;
+  --color-nav: #0f1d2b;
+  --color-nav-2: #1b2c3d;
+  --color-nav-text: #93a3b5;
+
+  /* typology, one hue per apartment type */
+  --color-ty-studio: #f59e0b;
+  --color-ty-1br: #22c55e;
+  --color-ty-2br: #3b82f6;
+  --color-ty-3br: #8b5cf6;
+  --color-ty-4br: #ec4899;
+  --color-ty-common: #94a3b8;
+
   /* 11 metadata, 13 body, 15 panel title, 20 unit number. */
   --text-meta: 11px;
   --text-meta--line-height: 1.4;
@@ -54,14 +82,14 @@
 
 @layer base {
   html {
-    background: var(--color-surface);
+    background: var(--color-app);
     height: 100%;
   }
 
   body {
     height: 100%;
-    background: var(--color-surface);
-    color: var(--color-ink);
+    background: var(--color-app);
+    color: var(--color-text);
     font-family: var(--font-sans);
     font-size: var(--text-body);
     font-weight: var(--text-body--font-weight);
@@ -70,7 +98,6 @@
     font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
   }
-
   /* No focus ring beyond the 1 px register. Keyboard focus uses the accent. */
   :focus-visible {
     outline: 1px solid var(--color-accent);
@@ -97,6 +124,23 @@
   }
 }
 
+/* A panel is the product's container: white, 1 px edge, 12 px radius, one
+   hairline shadow. Everything on the grey page sits in one. */
+@utility panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-edge);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+/* Column heading in a table, or a metric caption. */
+@utility cap {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--color-text-3);
+}
+
+
 @utility label-11 {
   font-size: var(--text-meta);
   letter-spacing: 0.04em;
@@ -119,10 +163,12 @@
 }
 
 /* A native select cannot be a stadium while it carries the platform arrow, so
-   the arrow is drawn here and the control keeps the same shape as a button. */
+   the arrow is drawn here and the control keeps the same shape as a button.
+   This is Lucide's chevron-down, inlined: CSS cannot reach a React icon, and
+   the set must stay one set. Keep it identical to `Icon name="chevron-down"`. */
 @utility select-pill {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4' viewBox='0 0 7 4'%3E%3Cpath d='M0.5 0.5 3.5 3.5 6.5 0.5' fill='none' stroke='%236b6b66' stroke-width='1'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b66' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 8px center;
 }

@@ -1,48 +1,97 @@
 "use client";
 
 import Link from "next/link";
+import Icon from "@/components/ui/Icon";
+import { brLabel, typologyColor } from "@/lib/format";
+import type { Unit } from "@/lib/types";
 
 /**
- * Building navigation: one stadium row per floor, highest level first, each
- * carrying its unit count. Picking a floor clears the unit selection, which is
- * how the plan returns to the typology view.
+ * Building navigation: every floor of the building, then the units of the
+ * floor you are on. Picking a floor clears the unit selection; picking a unit
+ * is the same selection the plan and the schedule carry.
  */
 export default function LeftRail({
   code,
   level,
   rail,
+  units,
+  selected,
+  onSelect,
 }: {
   code: string;
   level: number;
   rail: { level: number; label: string; units: string[] }[];
+  units: Unit[];
+  selected: Unit | null;
+  onSelect: (number: string | null) => void;
 }) {
-  return (
-    <nav className="w-[200px] shrink-0 overflow-auto border-r border-line bg-surface p-2">
-      <div className="label-11 px-2.5 pt-1 pb-2">floors</div>
+  const floorLabel = rail.find((f) => f.level === level)?.label ?? "";
 
-      {rail.map((floor) => {
-        const active = floor.level === level;
-        return (
-          <Link
-            key={floor.level}
-            href={`/p/${code}/units?floor=${floor.level}`}
-            className={`group flex h-7 w-full items-center justify-between gap-2 rounded-full py-0 pr-[3px] pl-2.5 text-body transition-colors duration-[80ms] ${
-              active ? "bg-ink text-paper" : "text-ink hover:bg-fill-2"
-            }`}
-          >
-            <span className="truncate">{floor.label}</span>
-            <span
-              className={`flex h-[18px] min-w-[18px] flex-none items-center justify-center rounded-full px-[5px] font-mono text-meta tabular-nums transition-colors duration-[80ms] ${
-                active
-                  ? "bg-paper text-ink"
-                  : "bg-fill-2 text-ink-2 group-hover:bg-paper"
+  return (
+    <nav className="panel flex w-[232px] shrink-0 flex-col overflow-y-auto">
+      <div className="flex h-11 items-center justify-between px-4">
+        <span className="text-[13px] font-semibold text-text">Building</span>
+        <Icon name="chevron-down" size={14} className="text-text-3" />
+      </div>
+
+      <div className="px-2 pb-2">
+        {rail.map((floor) => {
+          const on = floor.level === level;
+          return (
+            <Link
+              key={floor.level}
+              href={`/p/${code}/units?floor=${floor.level}`}
+              className={`flex h-9 items-center gap-2 rounded-lg px-2 text-[13px] transition-colors ${
+                on
+                  ? "bg-brand-soft font-medium text-brand"
+                  : "text-text-2 hover:bg-app"
               }`}
             >
-              {floor.units.length}
-            </span>
-          </Link>
-        );
-      })}
+              <Icon name="file" size={14} className={on ? "" : "text-text-3"} />
+              <span className="truncate">{floor.label}</span>
+              <span className="flex-1" />
+              <span className="text-[11px] text-text-3">
+                {floor.units.length
+                  ? `${floor.units.length} units`
+                  : "—"}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="mt-2 border-t border-edge-2 px-4 pt-3 pb-1">
+        <span className="text-[13px] font-semibold text-text">
+          Units ({floorLabel})
+        </span>
+      </div>
+
+      <div className="px-2 pb-3">
+        {units.map((unit) => {
+          const on = selected?.id === unit.id;
+          return (
+            <button
+              key={unit.id}
+              type="button"
+              onClick={() => onSelect(on ? null : unit.number)}
+              className={`flex h-9 w-full items-center gap-2 rounded-lg px-2 text-left text-[13px] transition-colors ${
+                on ? "bg-brand-soft font-medium text-text" : "hover:bg-app"
+              }`}
+            >
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ background: typologyColor(unit.type_qc.value) }}
+              />
+              <span className="font-medium text-text">{unit.number}</span>
+              <span className="text-text-2">{brLabel(unit.type_qc.value)}</span>
+              <span className="flex-1" />
+              <span className="text-[12px] text-text-2 tabular-nums">
+                {unit.net_area_m2.value.toFixed(1)} m²
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </nav>
   );
 }

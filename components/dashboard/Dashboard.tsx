@@ -1,132 +1,47 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import AppSidebar from "@/components/AppSidebar";
-import {
-  ACTION,
-  SEARCH,
-  SEGMENT,
-  SEGMENT_OFF,
-  SEGMENT_ON,
-  SEGMENT_SHELL,
-  SELECT,
-} from "@/components/ui/Action";
-import { Chip } from "@/components/ui/Chip";
+import Icon from "@/components/ui/Icon";
+import { BTN, BTN_BRAND, BTN_ICON, BTN_ON } from "@/components/ui/Button";
+import { since } from "@/lib/format";
 import type { Project } from "@/lib/types";
-import NewProjectPanel from "./NewProjectPanel";
+import NewProjectDialog from "./NewProjectDialog";
 import ProjectCard from "./ProjectCard";
 
-type Column = {
-  key: string;
-  label: string;
-  numeric?: boolean;
-  value: (p: Project) => string | number;
-  render?: (p: Project) => React.ReactNode;
-};
+const filters = [
+  { key: "all", label: "All" },
+  { key: "active", label: "In progress" },
+  { key: "archived", label: "Archived" },
+] as const;
 
-const columns: Column[] = [
-  { key: "display_name", label: "project", value: (p) => p.display_name },
-  {
-    key: "project_code",
-    label: "code",
-    value: (p) => p.project_code,
-    render: (p) => <span className="font-mono text-meta">{p.project_code}</span>,
-  },
-  { key: "city", label: "city", value: (p) => p.city },
-  {
-    key: "year",
-    label: "year",
-    numeric: true,
-    value: (p) => p.year,
-    render: (p) => <span className="font-mono text-meta">{p.year}</span>,
-  },
-  {
-    key: "floors_count",
-    label: "floors",
-    numeric: true,
-    value: (p) => p.floors_count,
-    render: (p) => <span className="font-mono text-meta">{p.floors_count}</span>,
-  },
-  {
-    key: "units_count",
-    label: "units",
-    numeric: true,
-    value: (p) => p.units_count,
-    render: (p) => <span className="font-mono text-meta">{p.units_count}</span>,
-  },
-  {
-    key: "verified_count",
-    label: "verified",
-    numeric: true,
-    value: (p) => p.verified_count,
-    render: (p) => (
-      <span className="font-mono text-meta">
-        {p.verified_count} / {p.units_count}
-      </span>
-    ),
-  },
-  {
-    key: "drawings",
-    label: "files",
-    numeric: true,
-    value: (p) => p.drawings.length,
-    render: (p) => {
-      const dwg = p.drawings.filter((d) => d.kind === "dwg").length;
-      const skp = p.drawings.filter((d) => d.kind === "skp").length;
-      return (
-        <span className="font-mono text-meta">
-          {p.drawings.length}
-          {dwg ? <span className="text-ink-3"> dwg {dwg}</span> : null}
-          {skp ? <span className="text-ink-3"> skp {skp}</span> : null}
-        </span>
-      );
-    },
-  },
-  {
-    key: "last_import_at",
-    label: "last import",
-    value: (p) => p.last_import_at ?? "",
-    render: (p) => (
-      <span className="font-mono text-meta text-ink-2">
-        {p.last_import_at ?? "—"}
-      </span>
-    ),
-  },
-];
-
-const states = ["all", "indexed", "connected"] as const;
-type State = (typeof states)[number];
-
-function stateOf(p: Project): Exclude<State, "all"> {
-  return p.verified_count > 0 || p.last_import_at !== null
-    ? "indexed"
-    : "connected";
-}
+type Filter = (typeof filters)[number]["key"];
 
 const sorts = [
-  { key: "last_import_at", label: "last import" },
-  { key: "display_name", label: "name" },
-  { key: "units_count", label: "units" },
-  { key: "year", label: "year" },
+  { key: "updated_at", label: "Recently modified" },
+  { key: "display_name", label: "Name" },
+  { key: "units_count", label: "Units" },
+  { key: "year", label: "Year" },
 ];
 
+/**
+ * Everything the office holds, one card per project. A project is a render, a
+ * place, a size and when it last moved; what has actually been indexed shows
+ * on the project itself.
+ */
 export default function Dashboard({ projects }: { projects: Project[] }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [state, setState] = useState<State>("all");
+  const [filter, setFilter] = useState<Filter>("all");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [sort, setSort] = useState<{ key: string; dir: 1 | -1 }>({
-    key: "display_name",
-    dir: 1,
-  });
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [sort, setSort] = useState("updated_at");
+  const [dialog, setDialog] = useState(false);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const column = columns.find((c) => c.key === sort.key) ?? columns[0];
     return projects
-      .filter((p) => state === "all" || stateOf(p) === state)
+      .filter((p) => filter === "all" || p.status === filter)
       .filter(
         (p) =>
           !q ||
@@ -135,166 +50,209 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
             .includes(q),
       )
       .sort((a, b) => {
-        const av = column.value(a);
-        const bv = column.value(b);
-        if (typeof av === "number" && typeof bv === "number") {
-          return (av - bv) * sort.dir;
+        if (sort === "display_name") {
+          return a.display_name.localeCompare(b.display_name);
         }
-        return String(av).localeCompare(String(bv)) * sort.dir;
+        if (sort === "units_count") return b.units_count - a.units_count;
+        if (sort === "year") return b.year - a.year;
+        return b.updated_at.localeCompare(a.updated_at);
       });
-  }, [projects, query, state, sort]);
+  }, [projects, query, filter, sort]);
 
-  const counts = {
+  const counts: Record<Filter, number> = {
     all: projects.length,
-    indexed: projects.filter((p) => stateOf(p) === "indexed").length,
-    connected: projects.filter((p) => stateOf(p) === "connected").length,
+    active: projects.filter((p) => p.status === "active").length,
+    archived: projects.filter((p) => p.status === "archived").length,
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-app">
       <AppSidebar active="projects" />
 
-      <div className="flex min-w-0 flex-1 flex-col bg-surface">
-        <header className="flex items-start gap-6 px-6 pt-6 pb-4">
+      <div className="flex min-w-0 flex-1 flex-col overflow-auto">
+        <header className="flex items-start gap-4 px-6 pt-6 pb-4">
           <div>
-            <h1 className="text-title-lg text-ink">projects</h1>
-            <p className="mt-1 text-body text-ink-2">
-              every project the office has indexed, and every one still waiting
-              on its drawings.
+            <h1 className="text-[22px] font-semibold tracking-tight text-text">
+              Projects
+            </h1>
+            <p className="mt-1 text-[13px] text-text-2">
+              Every architectural project of the office, in one place.
             </p>
           </div>
-          <div className="flex-1" />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="search projects"
-            className={`w-[220px] ${SEARCH}`}
-          />
-          <button type="button" onClick={() => setPanelOpen(true)} className={ACTION}>
-            new project
+
+          <span className="flex-1" />
+
+          <label className="flex h-9 w-[260px] items-center gap-2 rounded-lg border border-edge bg-panel px-3">
+            <Icon name="search" size={14} className="text-text-3" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search a project..."
+              aria-label="search projects"
+              className="min-w-0 flex-1 text-[13px] outline-none [&::-webkit-search-cancel-button]:appearance-none"
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={() => setDialog(true)}
+            className={BTN_BRAND}
+          >
+            <Icon name="plus" size={14} />
+            New project
           </button>
         </header>
 
-        <div className="flex items-center gap-1 border-y border-line px-6 py-2">
-          {states.map((s) => (
-            <Chip
-              key={s}
-              label={s}
-              count={counts[s]}
-              active={state === s}
-              onClick={() => setState(s)}
-            />
+        <div className="flex items-center gap-2 px-6 pb-4">
+          {filters.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setFilter(f.key)}
+              className={filter === f.key ? BTN_ON : BTN}
+            >
+              {f.label}
+              <span className="text-[11px] text-text-3">{counts[f.key]}</span>
+            </button>
           ))}
 
-          <div className="flex-1" />
+          <span className="flex-1" />
 
-          <span className="label-11 mr-2">sort</span>
-          <select
-            value={sort.key}
-            onChange={(e) => setSort({ key: e.target.value, dir: 1 })}
-            className={SELECT}
-          >
-            {sorts.map((s) => (
-              <option key={s.key} value={s.key}>
-                {s.label}
-              </option>
-            ))}
-          </select>
+          <span className="text-[13px] text-text-2">Sort by</span>
+          <label className="flex h-9 items-center rounded-lg border border-edge bg-panel px-3">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              aria-label="sort projects"
+              className="bg-transparent text-[13px] font-medium text-text outline-none"
+            >
+              {sorts.map((s) => (
+                <option key={s.key} value={s.key}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
-          <div className={`ml-2 ${SEGMENT_SHELL}`}>
+          <div className="flex items-center gap-1">
             {(["grid", "list"] as const).map((v) => (
               <button
                 key={v}
                 type="button"
                 onClick={() => setView(v)}
-                className={`${SEGMENT} ${view === v ? SEGMENT_ON : SEGMENT_OFF}`}
+                aria-label={`${v} view`}
+                className={`${BTN_ICON} ${
+                  view === v ? "border-brand-line bg-brand-soft text-brand" : ""
+                }`}
               >
-                {v}
+                <Icon name={v === "grid" ? "grid" : "table"} size={16} />
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1">
-          <div className="min-w-0 flex-1 overflow-auto">
-            {view === "grid" ? (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3 p-6">
-                {rows.map((p) => (
-                  <ProjectCard key={p.id} project={p} />
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setPanelOpen(true)}
-                  className="flex flex-col justify-end rounded-lg border border-dashed border-line p-3 text-left text-body text-ink-3 transition-colors duration-[80ms] hover:border-ink hover:text-ink"
-                >
-                  new project
-                </button>
-              </div>
-            ) : (
+        <div className="px-6 pb-6">
+          {view === "grid" ? (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(248px,1fr))] gap-4">
+              {rows.map((p) => (
+                <ProjectCard key={p.id} project={p} />
+              ))}
+              <button
+                type="button"
+                onClick={() => setDialog(true)}
+                className="flex min-h-[260px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-edge bg-panel/60 px-6 text-center transition-colors hover:border-brand-line hover:bg-brand-soft/40"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-brand">
+                  <Icon name="plus" size={18} />
+                </span>
+                <span className="text-[13px] font-medium text-text">
+                  New project
+                </span>
+                <span className="text-[12px] text-text-2">
+                  Create a project and connect your AutoCAD and SketchUp files.
+                </span>
+              </button>
+            </div>
+          ) : (
+            <div className="panel overflow-hidden">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="sticky top-0 bg-surface">
-                    {columns.map((c) => (
-                      <th
-                        key={c.key}
-                        onClick={() =>
-                          setSort((s) =>
-                            s.key === c.key
-                              ? { key: c.key, dir: s.dir === 1 ? -1 : 1 }
-                              : { key: c.key, dir: 1 },
-                          )
-                        }
-                        className={`label-11 h-8 cursor-pointer border-b border-line px-3 ${
-                          c.numeric ? "text-right" : "text-left"
-                        } ${sort.key === c.key ? "text-ink" : ""}`}
-                      >
-                        {c.label}
-                        {sort.key === c.key ? (
-                          <span className="font-mono">
-                            {" "}
-                            {sort.dir === 1 ? "+" : "−"}
-                          </span>
-                        ) : null}
-                      </th>
-                    ))}
+                  <tr className="border-b border-edge-2">
+                    {["Project", "Location", "Units", "Floors", "Status", "Modified"].map(
+                      (label, i) => (
+                        <th
+                          key={label}
+                          className={`cap h-10 px-4 font-normal ${
+                            i === 2 || i === 3 ? "text-right" : "text-left"
+                          }`}
+                        >
+                          {label}
+                        </th>
+                      ),
+                    )}
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((p) => (
                     <tr
                       key={p.id}
-                      onClick={() => router.push(`/p/${p.project_code}/units`)}
-                      className="h-8 cursor-pointer border-b border-line transition-colors duration-[80ms] hover:bg-fill-2"
+                      onClick={() => router.push(`/p/${p.project_code}`)}
+                      className="h-11 cursor-pointer border-b border-edge-2 transition-colors last:border-0 hover:bg-app"
                     >
-                      {columns.map((c) => (
-                        <td
-                          key={c.key}
-                          className={`px-3 text-body ${
-                            c.numeric ? "text-right" : "text-left"
-                          }`}
-                        >
-                          {c.render ? c.render(p) : c.value(p)}
-                        </td>
-                      ))}
+                      <td className="px-4">
+                        <span className="text-[13px] font-medium text-text">
+                          {p.display_name}
+                        </span>
+                        <span className="ml-2 text-[11px] text-text-3">
+                          {p.project_code}
+                        </span>
+                      </td>
+                      <td className="px-4 text-[13px] text-text-2">
+                        {p.city}, {p.province}
+                      </td>
+                      <td className="px-4 text-right text-[13px] text-text-2">
+                        {p.units_count}
+                      </td>
+                      <td className="px-4 text-right text-[13px] text-text-2">
+                        {p.floors_count}
+                      </td>
+                      <td className="px-4">
+                        <StatusChip status={p.status} />
+                      </td>
+                      <td className="px-4 text-[13px] text-text-2">
+                        {since(p.updated_at)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            )}
-
-            <div className="px-6 pb-6 text-meta text-ink-2">
-              {rows.length === projects.length
-                ? `${projects.length} projects`
-                : `${rows.length} of ${projects.length} projects`}
             </div>
-          </div>
+          )}
 
-          {panelOpen ? (
-            <NewProjectPanel onClose={() => setPanelOpen(false)} />
-          ) : null}
+          <p className="pt-4 text-[12px] text-text-3">
+            {rows.length === projects.length
+              ? `${projects.length} projects`
+              : `${rows.length} of ${projects.length} projects`}
+          </p>
         </div>
       </div>
+
+      {dialog ? <NewProjectDialog onClose={() => setDialog(false)} /> : null}
     </div>
+  );
+}
+
+export function StatusChip({ status }: { status: Project["status"] }) {
+  return (
+    <span
+      className={`inline-flex h-[22px] items-center rounded-md px-2 text-[11px] font-medium ${
+        status === "active"
+          ? "bg-brand-soft text-brand"
+          : "bg-app text-text-2"
+      }`}
+    >
+      {status === "active" ? "In progress" : "Archived"}
+    </span>
   );
 }
