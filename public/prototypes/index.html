@@ -54,13 +54,13 @@ a{color:inherit;text-decoration:none}
 }
 .opt{display:flex;flex-direction:column}
 .frame{position:relative;display:block}
-.shot{position:relative;z-index:1;width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid transparent;border-radius:var(--r);
+.shot{display:block;position:relative;z-index:1;width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid transparent;border-radius:var(--r);
   box-shadow:0 10px 28px rgba(0,0,0,.09);
   transition:transform .25s ease,box-shadow .25s ease,border-color .2s ease}
-.shot img{width:100%;height:100%;border-radius:inherit;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
+.shot img{display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
 
-/* thumbnail hover — one mode at a time, set by the dial on <body data-hover> */
-[data-hover="lift"] .opt:hover .shot{transform:translateY(-4px);box-shadow:0 18px 44px rgba(0,0,0,.13)}
+/* every card lifts; the dial mode adds its own treatment on top */
+.opt:hover .shot{transform:translateY(-6px);box-shadow:0 20px 46px rgba(0,0,0,.15)}
 [data-hover="zoom"] .opt:hover .shot img{transform:scale(1.045)}
 [data-hover="border"] .opt:hover .shot{border-color:var(--ink)}
 [data-hover="shadow"] .opt:hover .shot{box-shadow:0 14px 38px rgba(0,0,0,.13)}
