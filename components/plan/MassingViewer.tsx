@@ -75,7 +75,7 @@ export default function MassingViewer({
       </div>
 
       <div
-        className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[#dde6ef]"
+        className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-app"
         onPointerDown={(e) => {
           setDrag({ x: e.clientX - pan.x, y: e.clientY - pan.y });
           e.currentTarget.setPointerCapture(e.pointerId);
@@ -111,9 +111,9 @@ export default function MassingViewer({
             {band && showLevel ? (
               <polygon
                 points={band}
-                fill="#3C8CFF"
+                fill="var(--color-brand)"
                 fillOpacity={0.22}
-                stroke="#3C8CFF"
+                stroke="var(--color-brand-2)"
                 strokeWidth={1.5}
                 vectorEffect="non-scaling-stroke"
               />
@@ -124,8 +124,8 @@ export default function MassingViewer({
                   cx={marker.x}
                   cy={marker.y}
                   r={0.012}
-                  fill="#ffffff"
-                  stroke="#1d4ed8"
+                  fill="var(--color-panel)"
+                  stroke="var(--color-text)"
                   strokeWidth={2}
                   vectorEffect="non-scaling-stroke"
                 />
@@ -135,22 +135,22 @@ export default function MassingViewer({
 
           {marker && showUnit ? (
             <span
-              className="pointer-events-none absolute -translate-y-1/2 translate-x-3 rounded-lg bg-brand px-2 py-1 text-[12px] font-medium text-white"
+              className="pointer-events-none absolute -translate-y-1/2 translate-x-3 rounded-lg bg-brand px-2 py-1 text-[12px] font-medium text-text"
               style={{ left: `${marker.x * 100}%`, top: `${marker.y * 100}%` }}
             >
-              Unit {unitNumber}
+              Unité {unitNumber}
             </span>
           ) : null}
         </div>
 
         {!mapped ? (
           <div className="absolute inset-x-6 bottom-20 rounded-lg border border-edge bg-panel/95 p-3 text-[13px] text-text-2">
-            Building levels are not mapped to this model yet.{" "}
+            Les étages ne sont pas encore associés à ce modèle.{" "}
             <Link
               href={`/sim/sketchup/connect?code=${encodeURIComponent(code)}`}
-              className="font-medium text-brand hover:underline"
+              className="font-medium text-text hover:underline"
             >
-              Map them in SketchUp
+              Les associer dans SketchUp
             </Link>
             .
           </div>
@@ -204,7 +204,7 @@ export default function MassingViewer({
             onClick={() => setShowLevel((v) => !v)}
             aria-pressed={showLevel}
             className={`flex h-7 items-center gap-1.5 rounded-md px-2 text-[12px] transition-colors ${
-              showLevel ? "bg-brand-soft text-brand" : "text-text-2 hover:bg-app"
+              showLevel ? "bg-brand-soft text-text" : "text-text-2 hover:bg-app"
             }`}
           >
             <Icon name="layers" size={13} />
@@ -217,7 +217,7 @@ export default function MassingViewer({
             disabled={!marker}
             className={`flex h-7 items-center gap-1.5 rounded-md px-2 text-[12px] transition-colors disabled:opacity-40 ${
               showUnit && marker
-                ? "bg-brand-soft text-brand"
+                ? "bg-brand-soft text-text"
                 : "text-text-2 hover:bg-app"
             }`}
           >
