@@ -1,80 +1,119 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { cropBox } from "@/components/dna/crop";
 import PlanCrop from "@/components/dna/PlanCrop";
-import { dimensions } from "@/components/dna/crop";
-import { SEGMENT, SEGMENT_OFF, SEGMENT_SHELL } from "@/components/ui/Action";
 import type { Floor, Unit } from "@/lib/types";
 
-const STEPS = [1, 1.5, 2, 3, 4];
+const ASPECT = 16 / 9;
+const TICKS = [0, 1, 2, 3, 4, 5];
 
 /**
- * The archived unit at a readable size. Zoom crops tighter on the same sheet,
- * the linework is never scaled by CSS beyond the image's own resolution at
- * 200 dpi, and the plan keeps its square corners on white.
+ * The archived unit at a readable size. Zoom crops tighter on the same sheet;
+ * the scale bar below is measured against the crop's real width in metres, so
+ * it stays true at every zoom step, not a fixed decoration.
  */
 export default function CropViewer({
   unit,
   floor,
-  aspect = 3 / 2,
+  zoom,
+  outline,
 }: {
   unit: Unit;
   floor: Floor;
-  aspect?: number;
+  zoom: number;
+  outline: boolean;
 }) {
-  const [step, setStep] = useState(0);
-  const size = dimensions(unit, floor);
+  const frame = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ w: 0, h: 0 });
+
+  useEffect(() => {
+    const el = frame.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) =>
+      setSize({
+        w: entries[0].contentRect.width,
+        h: entries[0].contentRect.height,
+      }),
+    );
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // the crop window takes the panel's own shape, so the sheet is never stretched
+  const aspect = size.w > 0 && size.h > 0 ? size.w / size.h : ASPECT;
+  const box = cropBox(unit, floor, aspect, 0.2);
+  const metresWidth = ((box.w / zoom) * floor.width_px) / floor.px_per_m;
+  const pxPerMetre = metresWidth > 0 ? size.w / metresWidth : 0;
+  const barWidth = pxPerMetre * 5;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-10 shrink-0 items-center gap-4 border-b border-line px-4">
-        <span className="font-mono text-meta text-ink-2">
-          {floor.sheet_number} · {floor.scale} · {floor.revision_date}
-        </span>
-        <span className="flex-1" />
-        <div className={SEGMENT_SHELL}>
-          <button
-            type="button"
-            aria-label="zoom out"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            className={`${SEGMENT} w-7 justify-center px-0 ${SEGMENT_OFF}`}
-          >
-            −
-          </button>
-          <span className="w-12 text-center font-mono text-meta text-ink tabular-nums">
-            {Math.round(STEPS[step] * 100)}%
-          </span>
-          <button
-            type="button"
-            aria-label="zoom in"
-            onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
-            className={`${SEGMENT} w-7 justify-center px-0 ${SEGMENT_OFF}`}
-          >
-            +
-          </button>
-          <button
-            type="button"
-            onClick={() => setStep(0)}
-            className={`${SEGMENT} ${SEGMENT_OFF}`}
-          >
-            fit
-          </button>
-        </div>
+    <div className="flex min-h-0 flex-1 flex-col bg-panel p-6">
+      <div className="mb-3 shrink-0 text-[12px] text-text-3">
+        {floor.sheet_number} · {floor.scale} · Rév. {floor.revision_date}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto bg-surface p-6">
+      <div ref={frame} className="relative min-h-0 flex-1">
         <PlanCrop
           unit={unit}
           floor={floor}
           aspect={aspect}
           margin={0.2}
-          scale={STEPS[step]}
+          scale={zoom}
+          outline={outline}
+          stroke="#2563eb"
+          className="h-full w-full"
         />
-        <div className="mt-2 flex items-baseline gap-4 font-mono text-meta text-ink-3">
-          <span>
-            {size.w.toFixed(1)} × {size.h.toFixed(1)} m overall
-          </span>
-          <span>{floor.source_file}</span>
+
+        {pxPerMetre > 0 ? (
+          <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2">
+            <svg width={barWidth} height={22} className="overflow-visible">
+              <line
+                x1={0}
+                y1={6}
+                x2={barWidth}
+                y2={6}
+                stroke="#0f172a"
+                strokeWidth={1}
+              />
+              {TICKS.map((t) => (
+                <g key={t}>
+                  <line
+                    x1={t * pxPerMetre}
+                    y1={2}
+                    x2={t * pxPerMetre}
+                    y2={10}
+                    stroke="#0f172a"
+                    strokeWidth={1}
+                  />
+                  <text
+                    x={t * pxPerMetre}
+                    y={21}
+                    fontSize={10}
+                    textAnchor="middle"
+                    fill="#475569"
+                  >
+                    {t === 5 ? "5 m" : t}
+                  </text>
+                </g>
+              ))}
+            </svg>
+          </div>
+        ) : null}
+
+        <div className="pointer-events-none absolute bottom-3 right-3 flex flex-col items-center text-text-2">
+          <svg width={18} height={26} viewBox="0 0 18 26">
+            <line
+              x1={9}
+              y1={24}
+              x2={9}
+              y2={6}
+              stroke="currentColor"
+              strokeWidth={1.2}
+            />
+            <polygon points="9,0 5,7 13,7" fill="currentColor" />
+          </svg>
+          <span className="text-[10px] font-medium">N</span>
         </div>
       </div>
     </div>

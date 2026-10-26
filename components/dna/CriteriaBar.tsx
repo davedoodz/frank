@@ -2,41 +2,74 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { FIELD } from "@/components/ui/Action";
-import { ORIENTATION_LABEL, criteriaQuery, type Criteria } from "@/lib/dna";
+import Icon, { type IconName } from "@/components/ui/Icon";
+import { BTN_QUIET } from "@/components/ui/Button";
+import {
+  ORIENTATION_TITLE,
+  criteriaQuery,
+  type Criteria,
+} from "@/lib/dna";
 import type { Orientation } from "@/lib/types";
 
 const ORIENTATIONS: Orientation[] = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
 
-type Field = "bed" | "area" | "corner" | "orient";
+/** The slack around the source unit's area, as the search offers it. */
+const SPREADS = [0.05, 0.1, 0.15, 0.25];
+
+/** The control inside a criterion field: the icon sits in its left padding. */
+const CRITERION =
+  "select-pill h-10 w-full bg-transparent pr-8 pl-11 text-[13px] font-medium text-text";
+
+function band(area: number, pct: number): [number, number] {
+  return [
+    Math.floor((area * (1 - pct)) / 5) * 5,
+    Math.ceil((area * (1 + pct)) / 5) * 5,
+  ];
+}
 
 /**
- * Four chips carry the search. The value is the chip text; clicking it opens
- * the control in place, and every change rewrites the URL so the page, the
- * links out of it and the browser history all hold the same search.
+ * The search criteria, prefilled from the unit open in AutoCAD and editable
+ * here. Every change rewrites the URL, so the gallery, the archived unit page
+ * and the handoff back to the drawing all carry the same search.
  */
 export default function CriteriaBar({
   code,
   sourceNumber,
+  sourceArea,
   criteria,
   defaults,
   extra,
+  sources,
 }: {
   code: string;
   sourceNumber: string;
+  sourceArea: number;
   criteria: Criteria;
   defaults: Criteria;
   extra: Record<string, string | undefined>;
+  sources: { number: string; summary: string }[];
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState<Field | null>(null);
+  const [editing, setEditing] = useState(false);
 
-  function push(next: Criteria) {
+  function push(next: Criteria, unit = sourceNumber) {
     router.replace(
-      `/p/${code}/office-dna?${criteriaQuery(sourceNumber, next, extra)}`,
+      `/p/${code}/office-dna?${criteriaQuery(unit, next, extra)}`,
       { scroll: false },
     );
   }
+
+  const bands = SPREADS.map((p) => band(sourceArea, p));
+  const current: [number, number] = [criteria.areaMin, criteria.areaMax];
+  const known = bands.some(
+    ([lo, hi]) => lo === current[0] && hi === current[1],
+  );
+  const areaValue =
+    criteria.areaMin === 0 && criteria.areaMax >= 999
+      ? "any"
+      : known
+        ? `${criteria.areaMin}:${criteria.areaMax}`
+        : "custom";
 
   const edited =
     criteria.bedrooms !== defaults.bedrooms ||
@@ -46,194 +79,207 @@ export default function CriteriaBar({
     criteria.orientation !== defaults.orientation;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="font-mono text-meta text-ink-3">
-        from unit {sourceNumber}
-      </span>
-
-      <Chip
-        open={open === "bed"}
-        onOpen={() => setOpen(open === "bed" ? null : "bed")}
-        label={
-          criteria.bedrooms === null
-            ? "any bedrooms"
-            : criteria.bedrooms === 0
-              ? "studio"
-              : `${criteria.bedrooms} bedrooms`
-        }
-      >
-        <Select
-          value={criteria.bedrooms === null ? "any" : String(criteria.bedrooms)}
-          options={[
-            ["any", "any bedrooms"],
-            ["0", "studio"],
-            ["1", "1 bedroom"],
-            ["2", "2 bedrooms"],
-            ["3", "3 bedrooms"],
-            ["4", "4 bedrooms"],
-          ]}
-          onChange={(v) => {
-            setOpen(null);
-            push({ ...criteria, bedrooms: v === "any" ? null : Number(v) });
-          }}
-        />
-      </Chip>
-
-      <Chip
-        open={open === "area"}
-        onOpen={() => setOpen(open === "area" ? null : "area")}
-        label={`${criteria.areaMin}–${criteria.areaMax} m²`}
-      >
-        <form
-          className="flex items-center gap-1"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const form = new FormData(e.currentTarget);
-            const min = Number(form.get("amin"));
-            const max = Number(form.get("amax"));
-            setOpen(null);
-            push({
-              ...criteria,
-              areaMin: Number.isFinite(min) && min > 0 ? min : criteria.areaMin,
-              areaMax: Number.isFinite(max) && max > min ? max : criteria.areaMax,
-            });
-          }}
-        >
-          <input
-            name="amin"
-            defaultValue={criteria.areaMin}
-            aria-label="minimum area"
-            className={`w-14 text-center font-mono ${FIELD}`}
-          />
-          <span className="text-ink-3">–</span>
-          <input
-            name="amax"
-            defaultValue={criteria.areaMax}
-            aria-label="maximum area"
-            className={`w-14 text-center font-mono ${FIELD}`}
-          />
-          <button type="submit" className="px-1 text-body text-ink">
-            set
-          </button>
-        </form>
-      </Chip>
-
-      <Chip
-        open={open === "corner"}
-        onOpen={() => setOpen(open === "corner" ? null : "corner")}
-        label={
-          criteria.corner === null
-            ? "any position"
-            : criteria.corner
-              ? "corner unit"
-              : "end unit"
-        }
-      >
-        <Select
-          value={
-            criteria.corner === null ? "any" : criteria.corner ? "yes" : "no"
-          }
-          options={[
-            ["any", "any position"],
-            ["yes", "corner unit"],
-            ["no", "end unit"],
-          ]}
-          onChange={(v) => {
-            setOpen(null);
-            push({ ...criteria, corner: v === "any" ? null : v === "yes" });
-          }}
-        />
-      </Chip>
-
-      <Chip
-        open={open === "orient"}
-        onOpen={() => setOpen(open === "orient" ? null : "orient")}
-        label={
-          criteria.orientation === null
-            ? "any orientation"
-            : ORIENTATION_LABEL[criteria.orientation]
-        }
-      >
-        <Select
-          value={criteria.orientation ?? "any"}
-          options={[
-            ["any", "any orientation"],
-            ...ORIENTATIONS.map(
-              (o) => [o, ORIENTATION_LABEL[o]] as [string, string],
-            ),
-          ]}
-          onChange={(v) => {
-            setOpen(null);
-            push({
-              ...criteria,
-              orientation: v === "any" ? null : (v as Orientation),
-            });
-          }}
-        />
-      </Chip>
-
-      {edited ? (
+    <div className="panel mt-5 px-4 py-3">
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] tracking-[0.02em] text-text-3">
+          Critères de recherche (à partir de l’unité {sourceNumber})
+        </span>
+        <span className="flex-1" />
         <button
           type="button"
-          onClick={() => {
-            setOpen(null);
-            push(defaults);
-          }}
-          className="text-body text-ink-2 transition-colors duration-[80ms] hover:text-ink"
+          onClick={() => setEditing((v) => !v)}
+          className="flex h-6 items-center gap-1.5 text-[13px] font-medium text-brand transition-colors hover:text-brand-2"
         >
-          reset criteria
+          <Icon name={editing ? "chevron-down" : "edit"} size={14} />
+          {editing ? "Terminé" : "Modifier les critères"}
         </button>
+      </div>
+
+      <div className="mt-2.5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Field icon="bed" label="chambres">
+          <select
+            value={criteria.bedrooms === null ? "any" : String(criteria.bedrooms)}
+            aria-label="chambres"
+            onChange={(e) =>
+              push({
+                ...criteria,
+                bedrooms:
+                  e.target.value === "any" ? null : Number(e.target.value),
+              })
+            }
+            className={CRITERION}
+          >
+            <option value="any">N’importe quel nombre de chambres</option>
+            <option value="0">Studio</option>
+            <option value="1">1 chambre</option>
+            <option value="2">2 chambres</option>
+            <option value="3">3 chambres</option>
+            <option value="4">4 chambres</option>
+          </select>
+        </Field>
+
+        <Field icon="ruler" label="superficie">
+          <select
+            value={areaValue}
+            aria-label="superficie de l’étage"
+            onChange={(e) => {
+              const v = e.target.value;
+              if (v === "any") push({ ...criteria, areaMin: 0, areaMax: 999 });
+              else if (v !== "custom") {
+                const [lo, hi] = v.split(":").map(Number);
+                push({ ...criteria, areaMin: lo, areaMax: hi });
+              }
+            }}
+            className={CRITERION}
+          >
+            {bands.map(([lo, hi]) => (
+              <option key={`${lo}:${hi}`} value={`${lo}:${hi}`}>
+                {lo} – {hi} m²
+              </option>
+            ))}
+            {areaValue === "custom" ? (
+              <option value="custom">
+                {criteria.areaMin} – {criteria.areaMax} m²
+              </option>
+            ) : null}
+            <option value="any">N’importe quelle superficie</option>
+          </select>
+        </Field>
+
+        <Field icon="layers" label="position">
+          <select
+            value={
+              criteria.corner === null ? "any" : criteria.corner ? "yes" : "no"
+            }
+            aria-label="position"
+            onChange={(e) =>
+              push({
+                ...criteria,
+                corner:
+                  e.target.value === "any" ? null : e.target.value === "yes",
+              })
+            }
+            className={CRITERION}
+          >
+            <option value="any">N’importe quelle position</option>
+            <option value="yes">Unité de coin</option>
+            <option value="no">Unité d’extrémité</option>
+          </select>
+        </Field>
+
+        <Field icon="sun" label="orientation">
+          <select
+            value={criteria.orientation ?? "any"}
+            aria-label="orientation"
+            onChange={(e) =>
+              push({
+                ...criteria,
+                orientation:
+                  e.target.value === "any"
+                    ? null
+                    : (e.target.value as Orientation),
+              })
+            }
+            className={CRITERION}
+          >
+            <option value="any">N’importe quelle orientation</option>
+            {ORIENTATIONS.map((o) => (
+              <option key={o} value={o}>
+                {ORIENTATION_TITLE[o]}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+
+      {editing ? (
+        <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-edge-2 pt-3">
+          <label className="flex items-center gap-2 text-[12px] text-text-2">
+            Critères à partir de
+            <select
+              value={sourceNumber}
+              aria-label="unité source"
+              onChange={(e) => push(criteria, e.target.value)}
+              className="select-pill h-9 rounded-lg border border-edge bg-panel pr-7 pl-3 text-[13px] text-text"
+            >
+              {sources.map((s) => (
+                <option key={s.number} value={s.number}>
+                  Unité {s.number} · {s.summary}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <form
+            className="flex items-center gap-2 text-[12px] text-text-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const form = new FormData(e.currentTarget);
+              const min = Number(form.get("amin"));
+              const max = Number(form.get("amax"));
+              push({
+                ...criteria,
+                areaMin: Number.isFinite(min) && min >= 0 ? min : criteria.areaMin,
+                areaMax:
+                  Number.isFinite(max) && max > min ? max : criteria.areaMax,
+              });
+            }}
+          >
+            Plage exacte
+            <input
+              name="amin"
+              defaultValue={criteria.areaMin}
+              aria-label="superficie minimale"
+              className="h-9 w-16 rounded-lg border border-edge bg-panel px-2 text-center text-[13px] text-text"
+            />
+            <span className="text-text-3">–</span>
+            <input
+              name="amax"
+              defaultValue={criteria.areaMax}
+              aria-label="superficie maximale"
+              className="h-9 w-16 rounded-lg border border-edge bg-panel px-2 text-center text-[13px] text-text"
+            />
+            m²
+            <button type="submit" className={BTN_QUIET}>
+              Appliquer
+            </button>
+          </form>
+
+          <span className="flex-1" />
+
+          {edited ? (
+            <button
+              type="button"
+              onClick={() => push(defaults)}
+              className={BTN_QUIET}
+            >
+              Rétablir l’unité {sourceNumber}
+            </button>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
 }
 
-/** Closed: the value. Open: the control, at the same height, in the same row. */
-function Chip({
+/** One criterion: icon, value, chevron, all inside a 40 px control. */
+function Field({
+  icon,
   label,
-  open,
-  onOpen,
   children,
 }: {
+  icon: IconName;
   label: string;
-  open: boolean;
-  onOpen: () => void;
   children: React.ReactNode;
 }) {
-  if (open) return <>{children}</>;
-
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="flex h-6 items-center rounded-full border border-line px-3 text-body text-ink transition-colors duration-[80ms] hover:border-ink"
-    >
-      {label}
-    </button>
-  );
-}
-
-function Select({
-  value,
-  options,
-  onChange,
-}: {
-  value: string;
-  options: [string, string][];
-  onChange: (value: string) => void;
-}) {
-  return (
-    <select
-      autoFocus
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="select-pill h-6 rounded-full border border-ink bg-transparent pr-6 pl-3 text-body text-ink"
-    >
-      {options.map(([v, label]) => (
-        <option key={v} value={v}>
-          {label}
-        </option>
-      ))}
-    </select>
+    <div className="relative flex h-10 items-center rounded-lg border border-edge bg-panel">
+      <span className="pointer-events-none absolute left-3 flex h-6 w-6 items-center justify-center rounded-md bg-app text-text-2">
+        <Icon name={icon} size={13} />
+      </span>
+      <div className="w-full" data-criterion={label}>
+        {children}
+      </div>
+    </div>
   );
 }

@@ -37,9 +37,15 @@
   --color-brand: #2563eb;
   --color-brand-2: #1d4ed8;
   --color-brand-soft: #eff6ff;
-  --color-brand-line: #bfdbfe;
   --color-ok: #16a34a;
   --color-ok-soft: #dcfce7;
+  --color-alt: #7c3aed;
+  --color-alt-soft: #f3e8ff;
+  --color-bad: #dc2626;
+  --color-bad-soft: #fee2e2;
+  --color-ok-wash: #f0fdf4;
+  --color-bad-wash: #fef2f2;
+  --color-brand-line: #bfdbfe;
   --color-nav: #0f1d2b;
   --color-nav-2: #1b2c3d;
   --color-nav-text: #93a3b5;

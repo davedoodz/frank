@@ -46,7 +46,7 @@ export default function GlobalResultFilters({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Chip
-        label="all results"
+        label="tous les résultats"
         count={total}
         active={basis === null}
         onClick={() => go({ basis: null })}
@@ -64,7 +64,7 @@ export default function GlobalResultFilters({
       <div className="flex-1" />
 
       <label className="flex items-center gap-2">
-        <span className="label-11">sort</span>
+        <span className="label-11">trier par</span>
         <select
           value={sort}
           onChange={(e) => go({ sort: e.target.value as Sort })}
@@ -73,12 +73,12 @@ export default function GlobalResultFilters({
           {SORTS.map((s) => (
             <option key={s} value={s}>
               {s === "match"
-                ? "best match"
+                ? "meilleure correspondance"
                 : s === "area"
-                  ? "area"
+                  ? "superficie"
                   : s === "year"
-                    ? "most recent"
-                    : "project"}
+                    ? "plus récent"
+                    : "projet"}
             </option>
           ))}
         </select>

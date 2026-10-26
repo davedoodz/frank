@@ -28,7 +28,11 @@ export async function saveToCollectionAction(form: FormData): Promise<void> {
   if (!collectionId) return;
 
   const note = String(form.get("note") ?? "").trim();
-  await addCollectionItem(collectionId, unitId, note || null);
+  const tags = String(form.get("tags") ?? "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  await addCollectionItem(collectionId, unitId, note || null, tags);
 
   revalidatePath(`/p/${code}/office-dna`);
 }

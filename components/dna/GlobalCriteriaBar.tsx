@@ -49,7 +49,7 @@ export default function GlobalCriteriaBar({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="font-mono text-meta text-ink-3">
-        from unit {sourceNumber}
+        à partir de l’unité {sourceNumber}
       </span>
 
       <Chip
@@ -57,21 +57,21 @@ export default function GlobalCriteriaBar({
         onOpen={() => setOpen(open === "bed" ? null : "bed")}
         label={
           criteria.bedrooms === null
-            ? "any bedrooms"
+            ? "n’importe quel nombre de chambres"
             : criteria.bedrooms === 0
               ? "studio"
-              : `${criteria.bedrooms} bedrooms`
+              : `${criteria.bedrooms} chambres`
         }
       >
         <Select
           value={criteria.bedrooms === null ? "any" : String(criteria.bedrooms)}
           options={[
-            ["any", "any bedrooms"],
+            ["any", "n’importe quel nombre de chambres"],
             ["0", "studio"],
-            ["1", "1 bedroom"],
-            ["2", "2 bedrooms"],
-            ["3", "3 bedrooms"],
-            ["4", "4 bedrooms"],
+            ["1", "1 chambre"],
+            ["2", "2 chambres"],
+            ["3", "3 chambres"],
+            ["4", "4 chambres"],
           ]}
           onChange={(v) => {
             setOpen(null);
@@ -103,18 +103,18 @@ export default function GlobalCriteriaBar({
           <input
             name="amin"
             defaultValue={criteria.areaMin}
-            aria-label="minimum area"
+            aria-label="superficie minimale"
             className={`w-14 text-center font-mono ${FIELD}`}
           />
           <span className="text-ink-3">–</span>
           <input
             name="amax"
             defaultValue={criteria.areaMax}
-            aria-label="maximum area"
+            aria-label="superficie maximale"
             className={`w-14 text-center font-mono ${FIELD}`}
           />
           <button type="submit" className="px-1 text-body text-ink">
-            set
+            définir
           </button>
         </form>
       </Chip>
@@ -124,10 +124,10 @@ export default function GlobalCriteriaBar({
         onOpen={() => setOpen(open === "corner" ? null : "corner")}
         label={
           criteria.corner === null
-            ? "any position"
+            ? "n’importe quelle position"
             : criteria.corner
-              ? "corner unit"
-              : "end unit"
+              ? "unité de coin"
+              : "unité d’extrémité"
         }
       >
         <Select
@@ -135,9 +135,9 @@ export default function GlobalCriteriaBar({
             criteria.corner === null ? "any" : criteria.corner ? "yes" : "no"
           }
           options={[
-            ["any", "any position"],
-            ["yes", "corner unit"],
-            ["no", "end unit"],
+            ["any", "n’importe quelle position"],
+            ["yes", "unité de coin"],
+            ["no", "unité d’extrémité"],
           ]}
           onChange={(v) => {
             setOpen(null);
@@ -151,14 +151,14 @@ export default function GlobalCriteriaBar({
         onOpen={() => setOpen(open === "orient" ? null : "orient")}
         label={
           criteria.orientation === null
-            ? "any orientation"
+            ? "n’importe quelle orientation"
             : ORIENTATION_LABEL[criteria.orientation]
         }
       >
         <Select
           value={criteria.orientation ?? "any"}
           options={[
-            ["any", "any orientation"],
+            ["any", "n’importe quelle orientation"],
             ...ORIENTATIONS.map(
               (o) => [o, ORIENTATION_LABEL[o]] as [string, string],
             ),
@@ -182,7 +182,7 @@ export default function GlobalCriteriaBar({
           }}
           className="text-body text-ink-2 transition-colors duration-[80ms] hover:text-ink"
         >
-          reset criteria
+          réinitialiser les critères
         </button>
       ) : null}
     </div>

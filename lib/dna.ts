@@ -50,6 +50,29 @@ export const ORIENTATION_LABEL: Record<Orientation, string> = {
   SW: "southwest",
 };
 
+/** The same orientations, written the way the product chrome labels them. */
+export const ORIENTATION_TITLE: Record<Orientation, string> = {
+  N: "Nord",
+  S: "Sud",
+  E: "Est",
+  W: "Ouest",
+  NE: "Nord-est",
+  NW: "Nord-ouest",
+  SE: "Sud-est",
+  SW: "Sud-ouest",
+};
+
+/** The chips under a result card: configuration read off the record. */
+export function unitChips(unit: Unit): string[] {
+  return [
+    unit.bedrooms.value === 0
+      ? "Studio"
+      : `${unit.bedrooms.value} chambre${unit.bedrooms.value === 1 ? "" : "s"}`,
+    unit.is_corner.value ? "Unité de coin" : "Unité d’extrémité",
+    ORIENTATION_TITLE[unit.orientation.value],
+  ];
+}
+
 /** The search a technician starts from: this unit, ten percent of slack. */
 export function defaultCriteria(unit: Unit): Criteria {
   const area = unit.net_area_m2.value;

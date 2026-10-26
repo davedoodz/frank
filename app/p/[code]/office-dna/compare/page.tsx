@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import CompareView, { type Side } from "@/components/dna/CompareView";
 import {
@@ -6,15 +5,12 @@ import {
   getProject,
   getProjects,
   getRooms,
+  getSimilarities,
   getUnit,
   getUnits,
 } from "@/lib/data";
-import {
-  criteriaQuery,
-  readBasis,
-  readCriteria,
-  readSort,
-} from "@/lib/dna";
+import { criteriaQuery, readBasis, readCriteria, readSort } from "@/lib/dna";
+import type { SimilarityBasis } from "@/lib/types";
 
 export default async function ComparePage({
   params,
@@ -58,36 +54,33 @@ export default async function ComparePage({
     sort: readSort(query),
   });
 
-  return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-12 shrink-0 items-center gap-4 border-b border-line px-6">
-        <Link
-          href={`/p/${project.project_code}/office-dna/${left.unit.id}?${search}`}
-          className="text-body text-ink-2 transition-colors duration-[80ms] hover:text-ink"
-        >
-          back to unit {left.unit.number}
-        </Link>
-        <span className="font-mono text-meta text-ink-3">
-          {left.unit.number} {left.project.display_name} ·{" "}
-          {right.unit.number} {right.project.display_name}
-        </span>
-        <span className="flex-1" />
-        <Link
-          href={`/p/${project.project_code}/office-dna/compare?a=${right.unit.id}&b=${left.unit.id}&${search}`}
-          className="text-body text-ink-2 transition-colors duration-[80ms] hover:text-ink"
-        >
-          swap sides
-        </Link>
-        <span className="text-ink-3">·</span>
-        <Link
-          href={`/p/${project.project_code}/office-dna?${search}`}
-          className="text-body text-ink-2 transition-colors duration-[80ms] hover:text-ink"
-        >
-          back to results
-        </Link>
-      </div>
+  // the match basis that put these two units side by side, if any: written
+  // from the current (live) unit toward the unit it is similar to
+  async function matchBasis(a: Side, b: Side): Promise<SimilarityBasis | null> {
+    const fromA = (await getSimilarities(a.unit.id)).find((r) => r.similar_unit_id === b.unit.id);
+    if (fromA) return fromA.basis;
+    const fromB = (await getSimilarities(b.unit.id)).find((r) => r.similar_unit_id === a.unit.id);
+    return fromB ? fromB.basis : null;
+  }
+  const basis = await matchBasis(left, right);
 
-      <CompareView left={left} right={right} />
-    </div>
+  // the back-to-unit link only resolves for the archived side: the page that
+  // reads it 404s on a unit that belongs to the current project
+  const archivedSide = left.unit.project_id !== project.id ? left : right.unit.project_id !== project.id ? right : null;
+  const unitBackHref = archivedSide
+    ? `/p/${project.project_code}/office-dna/${archivedSide.unit.id}?${search}`
+    : null;
+
+  return (
+    <CompareView
+      left={left}
+      right={right}
+      leftBasis={basis}
+      rightBasis={basis}
+      projectCode={project.project_code}
+      unitBackHref={unitBackHref}
+      resultsHref={`/p/${project.project_code}/office-dna?${search}`}
+      swapHref={`/p/${project.project_code}/office-dna/compare?a=${right.unit.id}&b=${left.unit.id}&${search}`}
+    />
   );
 }

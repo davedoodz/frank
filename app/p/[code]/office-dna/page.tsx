@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import CollectionList from "@/components/dna/CollectionList";
 import CriteriaBar from "@/components/dna/CriteriaBar";
 import ResultFilters from "@/components/dna/ResultFilters";
 import ResultGrid from "@/components/dna/ResultGrid";
+import ResultPanel from "@/components/dna/ResultPanel";
 import {
   getCollectionItems,
   getFloorById,
@@ -12,6 +12,7 @@ import {
   getUnits,
 } from "@/lib/data";
 import {
+  criteriaQuery,
   defaultCriteria,
   findSimilar,
   readBasis,
@@ -19,8 +20,14 @@ import {
   readSort,
   sortResults,
 } from "@/lib/dna";
+import { brLabel, projectThumb } from "@/lib/format";
 import type { SimilarityBasis } from "@/lib/types";
 
+/**
+ * Office DNA (flow C, step 2). The search arrives prefilled from the unit open
+ * in AutoCAD, the gallery holds real archived sheets, and the panel on the
+ * right is the quick reading of whichever result is selected.
+ */
 export default async function OfficeDnaTab({
   params,
   searchParams,
@@ -36,17 +43,24 @@ export default async function OfficeDnaTab({
   const units = await getUnits(project.id);
   if (units.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center text-meta text-ink-2">
-        no unit indexed in this project
+      <div className="flex-1 p-6">
+        <div className="panel px-6 py-16 text-center text-[13px] text-text-2">
+          Ce projet n’a pas encore d’unité indexée à partir de laquelle effectuer une recherche.
+        </div>
       </div>
     );
   }
 
-  const asked = Array.isArray(query.u) ? query.u[0] : query.u;
-  const source = units.find((u) => u.number === asked) ?? units[0];
+  const one = (key: string) => {
+    const v = query[key];
+    return Array.isArray(v) ? v[0] : v;
+  };
+
+  const source = units.find((u) => u.number === one("u")) ?? units[0];
   const criteria = readCriteria(query, source);
   const basis = readBasis(query);
   const sort = readSort(query);
+  const view = one("view") === "list" ? "list" : "grid";
 
   const all = await findSimilar(source, criteria);
   const counts = all.reduce(
@@ -64,72 +78,138 @@ export default async function OfficeDnaTab({
     sort,
   );
 
+  const asked = one("sel");
+  const index = Math.max(
+    0,
+    results.findIndex((r) => r.unit.id === asked),
+  );
+  const selected = asked === "none" ? null : (results[index] ?? null);
+
   const sourceFloor = await getFloorById(source.floor_id);
   const projects = await getProjects();
   const indexed = projects.filter(
-    (p) =>
-      p.id !== project.id &&
-      p.drawings.some((d) => d.status === "indexed"),
+    (p) => p.id !== project.id && p.drawings.some((d) => d.status === "indexed"),
   );
   const collections = await getCollectionItems(project.id);
 
+  const search = criteriaQuery(source.number, criteria, {
+    basis: basis ?? undefined,
+    sort,
+  });
+  const link = (sel: string | undefined) =>
+    `/p/${project.project_code}/office-dna?${criteriaQuery(
+      source.number,
+      criteria,
+      {
+        basis: basis ?? undefined,
+        sort,
+        view: view === "list" ? "list" : undefined,
+        sel,
+      },
+    )}`;
+
+  const drawingStatus = selected
+    ? (selected.project.drawings.find(
+        (d) => d.filename === selected.floor.source_file,
+      )?.status ?? "connected")
+    : "connected";
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="border-b border-line px-6 py-3">
+    <div className="flex min-h-0 flex-1">
+      <div className="min-w-0 flex-1 overflow-y-auto px-6 pb-10">
+        <header className="pt-1">
+          <h1 className="text-[28px] font-semibold tracking-tight text-text">
+            ADN de l’agence
+          </h1>
+          <p className="mt-1 text-[20px] font-semibold tracking-tight text-text">
+            Unités similaires provenant de projets antérieurs
+          </p>
+          <p className="mt-1 text-[13px] text-text-2">
+            Réutilisez des dispositions éprouvées tirées de l’historique de
+            projets de l’agence —{" "}
+            {indexed.length} {indexed.length === 1 ? "projet indexé" : "projets indexés"},{" "}
+            {indexed.map((p) => p.display_name).join(", ")}.
+          </p>
+        </header>
+
         <CriteriaBar
           code={project.project_code}
           sourceNumber={source.number}
+          sourceArea={source.net_area_m2.value}
           criteria={criteria}
           defaults={defaultCriteria(source)}
-          extra={{ basis: basis ?? undefined, sort }}
+          extra={{
+            basis: basis ?? undefined,
+            sort,
+            view: view === "list" ? "list" : undefined,
+            sel: selected?.unit.id,
+          }}
+          sources={units.map((u) => ({
+            number: u.number,
+            summary: `${brLabel(u.type_qc.value)} · ${u.net_area_m2.value.toFixed(1)} m²`,
+          }))}
         />
-        <div className="mt-2 font-mono text-meta text-ink-3">
-          {source.number} · {source.type_qc.value} ·{" "}
-          {source.net_area_m2.value.toFixed(1)} m² ·{" "}
-          {sourceFloor ? `${sourceFloor.label} · ${sourceFloor.sheet_number}` : "—"}{" "}
-          ·{" "}
-          <Link
-            href={`/p/${project.project_code}/units?floor=${sourceFloor?.level ?? 0}&u=${source.number}`}
-            className="text-ink-2 transition-colors duration-[80ms] hover:text-ink"
-          >
-            open on the plan
-          </Link>
-        </div>
-      </div>
 
-      <div className="border-b border-line px-6 py-3">
+        <p className="mt-2 text-[12px] text-text-3">
+          Critères à partir de l’unité {source.number} ·{" "}
+          {source.net_area_m2.value.toFixed(1)} m² ·{" "}
+          {brLabel(source.type_qc.value)}
+          {sourceFloor ? ` · ${sourceFloor.label} · ${sourceFloor.sheet_number}` : ""}
+        </p>
+
         <ResultFilters
           code={project.project_code}
           sourceNumber={source.number}
           criteria={criteria}
           basis={basis}
           sort={sort}
+          view={view}
+          selectedId={selected?.unit.id ?? null}
           total={all.length}
           counts={counts}
         />
-        <div className="mt-2 font-mono text-meta text-ink-3">
-          searching {indexed.length} indexed past{" "}
-          {indexed.length === 1 ? "project" : "projects"} ·{" "}
-          {indexed.map((p) => `${p.display_name} ${p.year}`).join(" · ")}
-        </div>
-      </div>
 
-      <div className="p-6">
         <ResultGrid
           code={project.project_code}
           sourceNumber={source.number}
           criteria={criteria}
           basis={basis}
           sort={sort}
+          view={view}
           results={results}
+          selectedId={selected?.unit.id ?? null}
         />
 
         <CollectionList
           code={project.project_code}
+          search={search}
           collections={collections}
         />
       </div>
+
+      {selected ? (
+        <ResultPanel
+          code={project.project_code}
+          result={selected}
+          source={source}
+          search={search}
+          closeHref={link("none")}
+          prevHref={index > 0 ? link(results[index - 1].unit.id) : null}
+          nextHref={
+            index < results.length - 1 ? link(results[index + 1].unit.id) : null
+          }
+          collections={collections.map((c) => c.collection)}
+          saved={collections.some((c) =>
+            c.items.some((i) => i.unit_id === selected.unit.id),
+          )}
+          drawingStatus={drawingStatus}
+          currentProject={{
+            display_name: project.display_name,
+            city: project.city,
+            thumb: projectThumb(project.project_code),
+          }}
+        />
+      ) : null}
     </div>
   );
 }

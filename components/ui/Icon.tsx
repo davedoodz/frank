@@ -11,13 +11,16 @@
 import {
   ArrowDown,
   ArrowUp,
+  BedDouble,
   Bell,
+  Bookmark,
   Box,
   Building2,
   Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Columns2,
   Dna,
   Download,
   DraftingCompass,
@@ -27,18 +30,27 @@ import {
   Info,
   Layers,
   LayoutGrid,
+  List,
+  Lock,
   type LucideIcon,
   MapPin,
   Maximize,
   Minus,
+  MoreHorizontal,
   PencilRuler,
   Plus,
+  RotateCw,
+  Ruler,
+  Scaling,
   Search,
   Settings,
+  SquarePen,
+  Sun,
   Table,
   Tag,
   Users,
   X,
+  ZoomIn,
 } from "lucide-react";
 
 export type IconName =
@@ -70,6 +82,18 @@ export type IconName =
   | "info"
   | "pin"
   | "label"
+  | "bookmark"
+  | "list"
+  | "compare"
+  | "rotate"
+  | "more"
+  | "zoom"
+  | "edit"
+  | "lock"
+  | "sun"
+  | "ruler"
+  | "scale"
+  | "bed"
   | "close";
 
 const ICONS: Record<IconName, LucideIcon> = {
@@ -101,6 +125,18 @@ const ICONS: Record<IconName, LucideIcon> = {
   info: Info,
   pin: MapPin,
   label: Tag,
+  bookmark: Bookmark,
+  list: List,
+  compare: Columns2,
+  rotate: RotateCw,
+  more: MoreHorizontal,
+  zoom: ZoomIn,
+  edit: SquarePen,
+  lock: Lock,
+  sun: Sun,
+  ruler: Ruler,
+  scale: Scaling,
+  bed: BedDouble,
   close: X,
 };
 

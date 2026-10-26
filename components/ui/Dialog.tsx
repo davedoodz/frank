@@ -1,19 +1,22 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Icon from "@/components/ui/Icon";
 
 /**
- * A dialog is a container, so it takes the 20 px container radius, a 1 px line
- * border and no shadow. The page behind it is dimmed by the surface colour,
- * not blurred.
+ * A modal panel in the product chrome: white, 16 px radius, one soft lift, the
+ * page behind it dimmed by ink, not blurred. Escape and a click outside close
+ * it; the caller owns the actions in the footer.
  */
 export default function Dialog({
   title,
+  subtitle,
   onClose,
   children,
   width = 520,
 }: {
   title: string;
+  subtitle?: string;
   onClose: () => void;
   children: React.ReactNode;
   width?: number;
@@ -34,7 +37,7 @@ export default function Dialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-text/25 p-6"
       onPointerDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -46,18 +49,25 @@ export default function Dialog({
         aria-modal="true"
         aria-label={title}
         style={{ width }}
-        className="max-h-full overflow-y-auto rounded-[20px] border border-line bg-surface p-3 outline-none"
+        className="max-h-full overflow-y-auto rounded-2xl border border-edge bg-panel p-6 shadow-[0_24px_60px_rgba(15,23,42,0.18)] outline-none"
       >
-        <div className="flex items-baseline gap-2 px-3 pt-2 pb-3">
-          <span className="text-title text-ink">{title}</span>
+        <div className="flex items-start gap-2 pb-4">
+          <div className="min-w-0">
+            <h2 className="text-[20px] font-semibold tracking-tight text-text">
+              {title}
+            </h2>
+            {subtitle ? (
+              <p className="mt-1 text-[13px] text-text-2">{subtitle}</p>
+            ) : null}
+          </div>
           <span className="flex-1" />
           <button
             type="button"
             onClick={onClose}
-            aria-label="close"
-            className="flex h-6 w-6 items-center justify-center rounded-full text-body text-ink-3 transition-colors duration-[80ms] hover:bg-fill-2 hover:text-ink"
+            aria-label="fermer"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-text-3 transition-colors hover:bg-app hover:text-text"
           >
-            ×
+            <Icon name="close" size={16} />
           </button>
         </div>
         {children}
