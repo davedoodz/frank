@@ -1,3 +1,4 @@
+import AppSidebar from "@/components/AppSidebar";
 import { notFound } from "next/navigation";
 import ProjectTopBar from "@/components/project/ProjectTopBar";
 import { getFloors, getProject, getUnits } from "@/lib/data";
@@ -21,13 +22,16 @@ export default async function ProjectLayout({
   }));
 
   return (
-    <div className="flex h-screen flex-col bg-surface">
-      <ProjectTopBar
-        code={project.project_code}
-        displayName={project.display_name}
-        units={index}
-      />
-      <main className="flex min-h-0 flex-1 flex-col">{children}</main>
+    <div className="flex h-screen">
+      <AppSidebar active="none" />
+      <div className="flex min-w-0 flex-1 flex-col bg-surface">
+        <ProjectTopBar
+          code={project.project_code}
+          displayName={project.display_name}
+          units={index}
+        />
+        <main className="flex min-h-0 flex-1 flex-col">{children}</main>
+      </div>
     </div>
   );
 }

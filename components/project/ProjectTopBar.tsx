@@ -31,8 +31,11 @@ export default function ProjectTopBar({
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-6 border-b border-line bg-surface px-3">
-      <Link href="/" className="wordmark">
-        fitte.
+      <Link
+        href="/"
+        className="text-body text-ink-3 transition-colors duration-[80ms] hover:text-ink"
+      >
+        projects
       </Link>
       <div className="flex items-baseline gap-2">
         <span className="text-body text-ink">{displayName}</span>
