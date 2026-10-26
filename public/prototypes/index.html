@@ -46,11 +46,11 @@ a{color:inherit;text-decoration:none}
 }
 .ttl{display:inline-flex;align-items:flex-start;gap:6px;margin-top:10px}
 .tete h1{font-size:40px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
-.ttl .tarrow{width:20px;height:20px;margin-top:6px;stroke:currentColor;fill:none;stroke-width:2;
+.ttl .tarrow{width:var(--dial-tarrow-size, 20px);height:var(--dial-tarrow-size, 20px);
+  margin-top:var(--dial-tarrow-y, 6px);stroke:currentColor;fill:none;stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round;color:var(--ink);
-  opacity:0;transform:translate(-4px,4px);
-  transition:opacity .2s ease,transform .25s cubic-bezier(.2,.8,.2,1)}
-.ttl:hover .tarrow{opacity:1;transform:translate(0,0)}
+  opacity:0;transition:opacity .2s ease}
+.ttl:hover .tarrow{opacity:1}
 .tete .rule{width:var(--dial-rule-w, 40px);height:var(--dial-rule-h, 2px);background:var(--accent);margin:18px auto 0}
 
 .duo{
@@ -77,7 +77,8 @@ a{color:inherit;text-decoration:none}
 .txt{padding:18px 2px 0;display:flex;flex-direction:column;gap:8px;flex:1}
 .txt h2{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .hrow{display:flex;align-items:flex-start;gap:6px}
-.hrow .harrow{width:14px;height:14px;margin-top:3px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:2;
+.hrow .harrow{width:var(--dial-harrow-size, 14px);height:var(--dial-harrow-size, 14px);
+  margin-top:var(--dial-harrow-y, 3px);flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round;color:var(--ink);opacity:0;transition:opacity .2s ease}
 .opt:hover .hrow .harrow{opacity:1}
 /* balance keeps the last line from hanging short: the block stays as tight as it can be */
@@ -125,7 +126,9 @@ a{color:inherit;text-decoration:none}
 .notes-pill .faces img{width:24px;height:24px;border-radius:999px}
 .notes-pill .faces img+img{margin-left:-8px;border:2px solid #111110;transition:border-color .2s}
 .notes-pill:hover .faces img+img{border-color:var(--accent)}
-.notes-pill .ext{width:14.3px;height:14.3px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;
+.notes-pill .ext{width:var(--dial-parrow-size, 14.3px);height:var(--dial-parrow-size, 14.3px);
+  position:relative;top:var(--dial-parrow-y, 0px);
+  stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;
   stroke-linejoin:round;flex:0 0 auto}
 </style>
 </head>
@@ -218,6 +221,15 @@ const dial = DialKit.createDialKit("Prototype 1", {
     length: [40, 0, 400, 2],
     thickness: [2, 1, 16, 1],
   },
+  arrows: {
+    // Y is a nudge: negative lifts the arrow, positive drops it.
+    titleSize: [20, 8, 60, 0.5],
+    titleY: [6, -20, 40, 0.5],
+    cardSize: [14, 6, 40, 0.5],
+    cardY: [3, -20, 30, 0.5],
+    pillSize: [14.3, 6, 30, 0.1],
+    pillY: [0, -12, 12, 0.5],
+  },
   marks: {
     // Negative pulls the letter outward, positive pushes it under the thumbnail.
     offsetA: [-85, -260, 40, 1],
@@ -271,6 +283,12 @@ dial.subscribe((v) => {
   root.setProperty("--dial-mark-size", v.marks.size + "px");
   root.setProperty("--dial-mark-a", v.marks.offsetA + "px");
   root.setProperty("--dial-mark-b", v.marks.offsetB + "px");
+  root.setProperty("--dial-tarrow-size", v.arrows.titleSize + "px");
+  root.setProperty("--dial-tarrow-y", v.arrows.titleY + "px");
+  root.setProperty("--dial-harrow-size", v.arrows.cardSize + "px");
+  root.setProperty("--dial-harrow-y", v.arrows.cardY + "px");
+  root.setProperty("--dial-parrow-size", v.arrows.pillSize + "px");
+  root.setProperty("--dial-parrow-y", v.arrows.pillY + "px");
   const suffixe = v.avatars.style === "solid" ? "" : "-" + v.avatars.style;
   document.querySelectorAll(".faces img").forEach((img) => {
     const qui = img.alt === "Benoît" ? "benoit" : "guy";
