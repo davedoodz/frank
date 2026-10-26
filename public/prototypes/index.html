@@ -53,7 +53,8 @@ a{color:inherit;text-decoration:none}
   margin-top:var(--dial-gap-haut, 40px);
 }
 .opt{display:flex;flex-direction:column}
-.shot{width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+.frame{position:relative;display:block}
+.shot{position:relative;z-index:1;width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
   transition:transform .25s ease,box-shadow .25s ease,border-color .2s ease}
 .shot img{width:100%;height:100%;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
 
@@ -71,16 +72,19 @@ a{color:inherit;text-decoration:none}
 /* balance keeps the last line from hanging short: the block stays as tight as it can be */
 .txt p{font-size:13px;color:var(--ink-2);line-height:1.6;text-wrap:balance}
 
-/* big letter above the thumbnail */
+/* oversized letter behind the thumbnail */
 .mark{
-  display:block;text-align:center;
+  position:absolute;top:50%;z-index:0;pointer-events:none;
   font-family:var(--sans);
-  font-size:var(--dial-mark-size, 40px);
+  font-size:var(--dial-mark-size, 170px);
   font-weight:600;line-height:1;letter-spacing:-.03em;
-  color:var(--ink);margin-bottom:14px;
-  transition:color .2s ease;
+  color:var(--ink-3);opacity:.45;
+  transform:translateY(-50%);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),color .25s ease,opacity .25s ease;
 }
-.opt:hover .mark{color:var(--accent)}
+.opt:nth-child(1) .mark{left:-.36em}
+.opt:nth-child(2) .mark{right:-.36em}
+.opt:hover .mark{transform:translateY(-50%) skewX(-9deg) rotate(-2deg);color:var(--accent);opacity:1}
 @media (prefers-reduced-motion:reduce){.shot,.shot img,.mark{transition:none}}
 
 /* how the card content is aligned inside its column */
@@ -123,8 +127,10 @@ a{color:inherit;text-decoration:none}
 
   <div class="duo">
     <a class="opt" href="/" target="_blank" rel="noopener">
-      <span class="mark" aria-hidden="true">A</span>
-      <span class="shot"><img src="assets/apercu-1a.jpg" alt="1A"></span>
+      <span class="frame">
+        <span class="mark" aria-hidden="true">A</span>
+        <span class="shot"><img src="assets/apercu-1a.jpg" alt="1A"></span>
+      </span>
       <span class="txt">
         <h2 data-txt="aTitle">Units and drawings</h2>
         <p data-txt="aBody">Projects, connected files, the floor plan viewer and the unit inspector. One source of truth for what has been drawn.</p>
@@ -132,8 +138,10 @@ a{color:inherit;text-decoration:none}
     </a>
 
     <a class="opt" href="plateforme-b.html" target="_blank" rel="noopener">
-      <span class="mark" aria-hidden="true">B</span>
-      <span class="shot"><img src="assets/apercu-1b.jpg" alt="1B"></span>
+      <span class="frame">
+        <span class="mark" aria-hidden="true">B</span>
+        <span class="shot"><img src="assets/apercu-1b.jpg" alt="1B"></span>
+      </span>
       <span class="txt">
         <h2 data-txt="bTitle">Units, drawings and the 3D model</h2>
         <p data-txt="bBody">Plan and volume side by side inside Unités, a window status on every unit, and a façade glazing total that moves as you decide.</p>
