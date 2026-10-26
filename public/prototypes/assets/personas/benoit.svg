@@ -3,6 +3,6 @@
   <g clip-path="url(#pb)">
     <rect width="96" height="96" fill="#d4dde4"/>
     <circle cx="48" cy="38" r="14" fill="#33363a"/>
-    <path d="M48 56c14 0 25 10 26 24l1 16H21l1-16c1-14 12-24 26-24z" fill="#33363a"/>
+    <path d="M48 56c19 0 34 14 35 31l1 13H12l1-13c1-17 16-31 35-31z" fill="#33363a"/>
   </g>
 </svg>

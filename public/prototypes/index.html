@@ -79,7 +79,7 @@ a{color:inherit;text-decoration:none}
   background:var(--paper);font-size:var(--dial-cta-size, 13px);font-weight:var(--dial-cta-weight, 700);color:var(--ink);
   transition:background-color .2s ease,border-color .2s ease,color .2s ease;
 }
-.cta svg{width:15px;height:15px;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.cta svg{width:15px;height:15px;position:relative;top:-1px;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
 .cta > span:hover{background:var(--ink);border-color:var(--ink);color:#fff}
 .cta > span:hover svg{transform:translate(2px,-2px)}
 @media (prefers-reduced-motion:reduce){.shot,.shot img,.cta>span,.cta svg{transition:none}}
@@ -140,7 +140,7 @@ a{color:inherit;text-decoration:none}
 .notes-pill .faces img{width:24px;height:24px;border-radius:999px}
 .notes-pill .faces img+img{margin-left:-8px;border:2px solid #111110;transition:border-color .2s}
 .notes-pill:hover .faces img+img{border-color:var(--accent)}
-.notes-pill .ext{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;
+.notes-pill .ext{width:14.3px;height:14.3px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;
   stroke-linejoin:round;flex:0 0 auto;transition:transform .2s}
 .notes-pill:hover .ext{transform:translate(2px,-2px)}
 </style>
