@@ -48,14 +48,15 @@ a{color:inherit}
 
 /* ---------------- trigger ---------------- */
 .trigger{position:absolute;right:22px;bottom:22px;z-index:6;display:inline-flex;align-items:center;gap:9px;
-  padding:7px 14px 7px 7px;border-radius:999px;background:var(--paper);border:1px solid var(--line);
-  box-shadow:0 2px 12px rgba(0,0,0,.06);cursor:pointer;
-  font-family:var(--f-trigger);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);
-  transition:border-color .2s,box-shadow .2s,transform .2s}
-.trigger:hover{border-color:var(--accent);box-shadow:0 8px 22px rgba(0,0,0,.1);transform:translateY(-1px)}
+  padding:7px 14px 7px 7px;border-radius:999px;background:#111110;border:1px solid #111110;
+  box-shadow:0 3px 16px rgba(0,0,0,.18);cursor:pointer;
+  font-family:var(--f-trigger);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#e9eadf;
+  transition:border-color .2s,box-shadow .2s,transform .2s,background-color .2s,color .2s}
+.trigger:hover{background:#1c1c13;border-color:var(--accent);box-shadow:0 10px 26px rgba(0,0,0,.24);
+  transform:translateY(-1px);color:#fff}
 .trigger .faces{display:flex}
 .trigger .faces img{width:24px;height:24px;border-radius:999px}
-.trigger .faces img+img{margin-left:-8px;border:2px solid var(--paper)}
+.trigger .faces img+img{margin-left:-8px;border:2px solid #111110}
 
 /* ---------------- notes panel ---------------- */
 .scrim{position:absolute;inset:0;background:rgba(17,17,15,.34);opacity:0;pointer-events:none;transition:opacity .28s;z-index:7}
