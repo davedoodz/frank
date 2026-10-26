@@ -55,7 +55,7 @@ a{color:inherit;text-decoration:none}
 .opt{display:flex;flex-direction:column}
 .frame{position:relative;display:block}
 .shot{display:block;position:relative;z-index:1;width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:transparent;border:0;border-radius:var(--r);
-  --ring:0 0 0 var(--dial-stroke-w, 1px) var(--dial-stroke-c, #e6e6e4);
+  --ring:0 0 0 var(--dial-stroke-w, 0px) var(--dial-stroke-c, #e6e6e4);
   box-shadow:var(--ring),0 10px 28px rgba(0,0,0,.09);
   transition:transform .25s ease,box-shadow .25s ease}
 .shot img{display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
@@ -217,9 +217,9 @@ const dial = DialKit.createDialKit("Prototype 1", {
     thickness: [2, 1, 16, 1],
   },
   outline: {
-    // A hairline ring drawn as a shadow, so it costs no layout space.
+    // Off by default; drawn as a shadow ring, so it costs no layout space.
     color: "#e6e6e4",
-    thickness: [1, 0, 6, 0.25],
+    thickness: [0, 0, 6, 0.25],
   },
   arrows: {
     // Y is a nudge: negative lifts the arrow, positive drops it.
