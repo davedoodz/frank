@@ -3,6 +3,6 @@
   <g clip-path="url(#pg)">
     <rect width="96" height="96" fill="#dde5c0"/>
     <circle cx="48" cy="38" r="14" fill="#111110"/>
-    <circle cx="48" cy="118" r="58" fill="#111110"/>
+    <circle cx="48" cy="118" r="58" fill="#111110" stroke="#111110" stroke-width="1.5"/>
   </g>
 </svg>

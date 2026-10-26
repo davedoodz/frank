@@ -74,17 +74,17 @@ a{color:inherit;text-decoration:none}
 
 /* oversized letter behind the thumbnail */
 .mark{
-  position:absolute;top:50%;z-index:0;pointer-events:none;
+  position:absolute;bottom:-.1em;z-index:0;pointer-events:none;
   font-family:var(--sans);
   font-size:var(--dial-mark-size, 170px);
   font-weight:600;line-height:1;letter-spacing:-.03em;
   color:var(--ink-3);opacity:.45;
-  transform:translateY(-50%);
+  transform:rotate(0deg);transform-origin:50% 88%;
   transition:transform .35s cubic-bezier(.2,.8,.2,1),color .25s ease,opacity .25s ease;
 }
-.opt:nth-child(1) .mark{left:-.36em}
-.opt:nth-child(2) .mark{right:-.36em}
-.opt:hover .mark{transform:translateY(-50%) skewX(-9deg) rotate(-2deg);color:var(--accent);opacity:1}
+.opt:nth-child(1) .mark{left:-.62em}
+.opt:nth-child(2) .mark{right:-.62em}
+.opt:hover .mark{transform:rotate(9deg);color:var(--accent);opacity:1}
 @media (prefers-reduced-motion:reduce){.shot,.shot img,.mark{transition:none}}
 
 /* how the card content is aligned inside its column */
