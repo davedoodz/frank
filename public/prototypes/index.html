@@ -74,12 +74,17 @@ a{color:inherit;text-decoration:none}
 /* pill — reacts to the pill only, never to the whole card */
 .cta{margin-top:auto;padding-top:16px;display:flex}
 .cta > span{
-  display:inline-flex;align-items:center;gap:7px;
+  display:inline-flex;align-items:center;gap:9px;
   padding:8px 15px;border:1px solid var(--line-2);border-radius:999px;
-  background:var(--paper);font-size:var(--dial-cta-size, 13px);font-weight:var(--dial-cta-weight, 700);color:var(--ink);
+  background:var(--paper);color:var(--ink);
+  font-family:var(--dial-date-font, var(--mono));
+  font-size:11px;
+  font-weight:400;
+  letter-spacing:var(--dial-date-track, .16em);
+  text-transform:uppercase;
   transition:background-color .2s ease,border-color .2s ease,color .2s ease;
 }
-.cta svg{width:15px;height:15px;position:relative;top:-1px;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.cta svg{width:14.3px;height:14.3px;position:relative;top:-1px;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
 .cta > span:hover{background:var(--ink);border-color:var(--ink);color:#fff}
 .cta > span:hover svg{transform:translate(2px,-2px)}
 @media (prefers-reduced-motion:reduce){.shot,.shot img,.cta>span,.cta svg{transition:none}}
