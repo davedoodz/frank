@@ -1,0 +1,1491 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>fitte — patrons de navigation</title>
+    <style>
+      :root {
+        --app: #fafafa;
+        --panel: #ffffff;
+        --edge: #e4e4e4;
+        --edge-2: #efefef;
+        --text: #111111;
+        --text-2: #6b6b6b;
+        --text-3: #9a9a9a;
+        --brand: #c0d739;
+        --brand-2: #b2c92c;
+        --brand-soft: #f1f6da;
+        --brand-line: #dde9a6;
+        --nav: #111111;
+        --nav-2: #262626;
+        --nav-text: #8e8e8e;
+        --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial,
+          sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--app);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 13px;
+        line-height: 1.45;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: inherit;
+      }
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 40px 28px 120px;
+      }
+
+      /* ---------- page head ---------- */
+      .masthead {
+        border-bottom: 1px solid var(--edge);
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+      }
+      .masthead h1 {
+        font-size: 26px;
+        letter-spacing: -0.02em;
+        font-weight: 600;
+      }
+      .masthead p {
+        color: var(--text-2);
+        margin-top: 8px;
+        max-width: 70ch;
+      }
+      .toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 18px;
+      }
+      .toc a {
+        text-decoration: none;
+        border: 1px solid var(--edge);
+        background: var(--panel);
+        border-radius: 999px;
+        padding: 5px 11px;
+        font-size: 12px;
+        color: var(--text-2);
+      }
+      .toc a:hover {
+        border-color: var(--brand-line);
+        background: var(--brand-soft);
+        color: var(--text);
+      }
+
+      /* ---------- pattern block ---------- */
+      section.pat {
+        margin-top: 44px;
+        scroll-margin-top: 20px;
+      }
+      .pat-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 4px;
+      }
+      .pat-no {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text-3);
+        letter-spacing: 0.08em;
+      }
+      .pat-head h2 {
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .pat-sub {
+        color: var(--text-2);
+        max-width: 78ch;
+        margin-bottom: 14px;
+      }
+      .frame {
+        border: 1px solid var(--edge);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--panel);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+      .screen {
+        display: flex;
+        height: 440px;
+        position: relative;
+      }
+      .verdict {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        border-top: 1px solid var(--edge);
+        font-size: 12px;
+      }
+      .verdict div {
+        padding: 10px 14px;
+        color: var(--text-2);
+      }
+      .verdict div + div {
+        border-left: 1px solid var(--edge);
+      }
+      .verdict b {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .screen svg {
+        width: 15px;
+        height: 15px;
+        flex: 0 0 auto;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.5;
+      }
+
+      /* ---------- shared chrome ---------- */
+      .rail {
+        background: var(--nav);
+        color: #fff;
+        width: 212px;
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        padding: 14px 10px 10px;
+        gap: 2px;
+        overflow: auto;
+      }
+      .rail.slim {
+        width: 56px;
+        align-items: center;
+        padding: 14px 0 10px;
+      }
+      .brand {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        padding: 2px 8px 14px;
+      }
+      .rail-label {
+        font-size: 10px;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: #5f5f5f;
+        padding: 14px 8px 6px;
+      }
+      .nav-i {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 7px 8px;
+        border-radius: 7px;
+        color: var(--nav-text);
+        cursor: pointer;
+        user-select: none;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .nav-i:hover {
+        background: var(--nav-2);
+        color: #e6e6e6;
+      }
+      .nav-i.on {
+        background: var(--nav-2);
+        color: #fff;
+      }
+      .nav-i.on.brand-on {
+        box-shadow: inset 0 0 0 1px var(--brand);
+        color: var(--brand);
+      }
+      .nav-i svg {
+        width: 15px;
+        height: 15px;
+        flex: 0 0 auto;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.5;
+      }
+      .ic-sq {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        display: grid;
+        place-items: center;
+        color: var(--nav-text);
+        cursor: pointer;
+      }
+      .ic-sq:hover {
+        background: var(--nav-2);
+        color: #fff;
+      }
+      .ic-sq.on {
+        background: var(--brand);
+        color: #111;
+      }
+      .ic-sq svg {
+        width: 15px;
+        height: 15px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.5;
+      }
+      .rail .spacer {
+        flex: 1;
+      }
+      .who {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 8px 2px;
+        margin-top: 8px;
+      }
+      .av {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        background: #2f2f2f;
+        color: #cfcfcf;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .who b {
+        font-size: 12px;
+        font-weight: 500;
+        color: #e4e4e4;
+        display: block;
+      }
+      .who span {
+        font-size: 11px;
+        color: #777;
+      }
+      .thumb {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #5c6b3b, #9aa875);
+        flex: 0 0 auto;
+      }
+
+      /* second column (sub-rail) */
+      .subrail {
+        width: 190px;
+        flex: 0 0 auto;
+        border-right: 1px solid var(--edge);
+        background: #fcfcfc;
+        padding: 12px 10px;
+        overflow: auto;
+      }
+      .sub-i {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 7px;
+        color: var(--text-2);
+        cursor: pointer;
+        user-select: none;
+      }
+      .sub-i {
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .sub-i:hover {
+        background: var(--edge-2);
+        color: var(--text);
+      }
+      .sub-i.on {
+        background: var(--brand-soft);
+        box-shadow: inset 0 0 0 1px var(--brand-line);
+        color: var(--text);
+        font-weight: 500;
+      }
+      .sub-i svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.5;
+        opacity: 0.8;
+      }
+      .sub-label {
+        font-size: 10px;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--text-3);
+        padding: 10px 8px 6px;
+      }
+
+      /* main area */
+      .main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        background: var(--app);
+      }
+      .topbar {
+        height: 46px;
+        flex: 0 0 auto;
+        border-bottom: 1px solid var(--edge);
+        background: var(--panel);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 16px;
+      }
+      .body {
+        padding: 22px 24px;
+        overflow: auto;
+      }
+      .body h3 {
+        font-size: 21px;
+        letter-spacing: -0.02em;
+        font-weight: 600;
+      }
+      .body .lede {
+        color: var(--text-2);
+        margin-top: 4px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .card {
+        border: 1px solid var(--edge);
+        border-radius: 10px;
+        background: var(--panel);
+        padding: 12px;
+        min-height: 92px;
+      }
+      .card .k {
+        font-size: 11px;
+        color: var(--text-3);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .card .v {
+        font-size: 15px;
+        margin-top: 6px;
+      }
+      .skeleton {
+        margin-top: 18px;
+        border: 1px solid var(--edge);
+        border-radius: 10px;
+        background: var(--panel);
+        height: 150px;
+      }
+
+      /* breadcrumb */
+      .crumbs {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--text-2);
+      }
+      .crumb {
+        padding: 3px 7px;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .crumb:hover {
+        background: var(--edge-2);
+        color: var(--text);
+      }
+      .crumb.last {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .crumb .caret {
+        font-size: 9px;
+        color: var(--text-3);
+      }
+      .sep {
+        color: var(--text-3);
+      }
+
+      /* tabs */
+      .tabs {
+        display: flex;
+        gap: 2px;
+        align-items: flex-end;
+        height: 100%;
+      }
+      .tab {
+        padding: 0 11px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--text-2);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+      }
+      .tab:hover {
+        color: var(--text);
+      }
+      .tab.on {
+        color: var(--text);
+        font-weight: 500;
+        border-bottom-color: var(--brand);
+      }
+      .tab svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.5;
+      }
+
+      /* browser-ish project tabs */
+      .ptabs {
+        display: flex;
+        gap: 4px;
+        padding: 6px 10px 0;
+        background: #f2f2f0;
+        border-bottom: 1px solid var(--edge);
+      }
+      .ptab {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 10px;
+        border-radius: 8px 8px 0 0;
+        background: transparent;
+        color: var(--text-2);
+        cursor: pointer;
+        font-size: 12px;
+        max-width: 180px;
+      }
+      .ptab:hover {
+        background: #e8e8e5;
+      }
+      .ptab.on {
+        background: var(--panel);
+        color: var(--text);
+        box-shadow: inset 0 1px 0 var(--brand), 0 -1px 0 var(--edge);
+      }
+      .ptab .x {
+        color: var(--text-3);
+        font-size: 13px;
+      }
+      .ptab .dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        background: linear-gradient(135deg, #5c6b3b, #9aa875);
+        flex: 0 0 auto;
+      }
+
+      /* tree */
+      .tree-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 8px;
+        border-radius: 7px;
+        cursor: pointer;
+        color: var(--nav-text);
+        user-select: none;
+        white-space: nowrap;
+      }
+      .tree-row:hover {
+        background: var(--nav-2);
+        color: #e6e6e6;
+      }
+      .tree-row.on {
+        background: var(--nav-2);
+        color: var(--brand);
+      }
+      .tw {
+        width: 12px;
+        display: inline-grid;
+        place-items: center;
+        color: #6a6a6a;
+        font-size: 9px;
+      }
+      .tree-kids {
+        margin-left: 10px;
+        border-left: 1px solid #2b2b2b;
+        padding-left: 6px;
+      }
+
+      /* dropdown menu */
+      .menu {
+        position: absolute;
+        z-index: 20;
+        min-width: 212px;
+        background: var(--panel);
+        border: 1px solid var(--edge);
+        border-radius: 10px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+        padding: 5px;
+      }
+      .menu .mi {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 8px;
+        border-radius: 7px;
+        cursor: pointer;
+        color: var(--text-2);
+      }
+      .menu .mi:hover {
+        background: var(--edge-2);
+        color: var(--text);
+      }
+      .menu .mi.on {
+        background: var(--brand-soft);
+        color: var(--text);
+        font-weight: 500;
+      }
+      .menu .mh {
+        font-size: 10px;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--text-3);
+        padding: 8px 8px 4px;
+      }
+      .menu svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.5;
+      }
+
+      /* command palette */
+      .scrim {
+        position: absolute;
+        inset: 0;
+        background: rgba(17, 17, 17, 0.32);
+        z-index: 30;
+        display: grid;
+        place-items: start center;
+        padding-top: 64px;
+      }
+      .palette {
+        width: 440px;
+        background: var(--panel);
+        border-radius: 12px;
+        border: 1px solid var(--edge);
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.26);
+        overflow: hidden;
+      }
+      .palette input {
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid var(--edge);
+        padding: 13px 14px;
+        font: inherit;
+        font-size: 14px;
+        outline: none;
+      }
+      .plist {
+        max-height: 232px;
+        overflow: auto;
+        padding: 5px;
+      }
+      .prow {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px;
+        border-radius: 7px;
+        cursor: pointer;
+        color: var(--text-2);
+      }
+      .prow:hover,
+      .prow.on {
+        background: var(--brand-soft);
+        color: var(--text);
+      }
+      .prow .path {
+        color: var(--text-3);
+        font-size: 12px;
+      }
+      .kbd {
+        font-family: var(--mono);
+        font-size: 10px;
+        border: 1px solid var(--edge);
+        border-bottom-width: 2px;
+        border-radius: 5px;
+        padding: 1px 5px;
+        color: var(--text-2);
+        background: var(--panel);
+      }
+
+      .pill-search {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid var(--edge);
+        border-radius: 8px;
+        padding: 5px 9px;
+        color: var(--text-3);
+        font-size: 12px;
+        cursor: pointer;
+        background: var(--panel);
+      }
+      .pill-search:hover {
+        border-color: var(--brand-line);
+        background: var(--brand-soft);
+      }
+      .right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .switcher {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--edge);
+        border-radius: 9px;
+        padding: 5px 9px 5px 6px;
+        cursor: pointer;
+        background: var(--panel);
+      }
+      .switcher:hover {
+        border-color: var(--brand-line);
+      }
+      .switcher b {
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .switcher span {
+        color: var(--text-3);
+        font-size: 11px;
+        display: block;
+      }
+      .seg {
+        display: inline-flex;
+        background: var(--edge-2);
+        border-radius: 8px;
+        padding: 2px;
+      }
+      .seg div {
+        padding: 4px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: var(--text-2);
+        font-size: 12px;
+      }
+      .seg div.on {
+        background: var(--panel);
+        color: var(--text);
+        font-weight: 500;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      }
+      .hintbar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 12px;
+        color: var(--text-3);
+        margin: 8px 2px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="masthead">
+        <h1>Patrons de navigation</h1>
+        <p>
+          Sept façons de se déplacer entre les pages de l’agence (Projets, ADN,
+          Bibliothèque) et les pages d’un projet (Aperçu, Fichiers, Unités,
+          Dessins, Bâtiment, Précédents), y compris les sous-niveaux comme
+          Unités&nbsp;→&nbsp;Niveau&nbsp;5&nbsp;→&nbsp;unité&nbsp;501. Chaque
+          écran est cliquable&nbsp;: la zone de contenu suit toujours la
+          sélection.
+        </p>
+        <div class="toc" id="toc"></div>
+      </div>
+      <div id="patterns"></div>
+    </div>
+
+    <script>
+      /* ---------------- data ---------------- */
+      const AGENCY = [
+        ["projets", "Projets", "grid"],
+        ["dna", "ADN de l’agence", "dna"],
+        ["biblio", "Bibliothèque", "book"],
+      ];
+      const PAGES = [
+        ["apercu", "Aperçu", "info", []],
+        ["fichiers", "Fichiers", "file", ["AutoCAD", "SketchUp", "PDF"]],
+        ["unites", "Unités", "layers", ["Niveau 5", "Niveau 6"]],
+        ["dessins", "Dessins", "pen", ["Plans", "Élévations", "Coupes"]],
+        ["batiment", "Bâtiment", "building", []],
+        ["precedents", "Précédents", "dna", []],
+      ];
+      const PROJECTS = [
+        ["jsl", "Les Jardins Saint-Laurent", "Montréal · 140 unités"],
+        ["cmr", "Condo Mont-Royal", "Montréal · 16 unités"],
+        ["be", "Beaubien Est", "Montréal · 96 unités"],
+      ];
+      const ICONS = {
+        grid: '<rect x="2.5" y="2.5" width="5" height="5" rx="1"/><rect x="10.5" y="2.5" width="5" height="5" rx="1"/><rect x="2.5" y="10.5" width="5" height="5" rx="1"/><rect x="10.5" y="10.5" width="5" height="5" rx="1"/>',
+        dna: '<path d="M4 3c0 4 10 4 10 8s-10 4-10 8"/><path d="M14 3c0 2-2.5 3-4 3.6"/><path d="M4 15c0-2 2.5-3 4-3.6"/>',
+        book: '<rect x="3" y="2.5" width="12" height="13" rx="1.5"/><path d="M3 6h12M7 2.5v13"/>',
+        info: '<circle cx="9" cy="9" r="6.5"/><path d="M9 8.2v4M9 5.8v.6"/>',
+        file: '<path d="M4.5 2.5h6l3.5 3.5v9.5h-9.5z"/><path d="M10.5 2.5V6H14"/>',
+        layers:
+          '<path d="M9 2.5 15.5 6 9 9.5 2.5 6z"/><path d="M2.5 9.5 9 13l6.5-3.5"/>',
+        pen: '<path d="M11.5 3.5 14.5 6.5 6 15H3v-3z"/>',
+        building:
+          '<rect x="3.5" y="2.5" width="11" height="13" rx="1"/><path d="M6.5 6h2M9.5 6h2M6.5 9h2M9.5 9h2M8 15.5v-3h2v3"/>',
+        settings:
+          '<circle cx="9" cy="9" r="2.6"/><path d="M9 2.5v2M9 13.5v2M2.5 9h2M13.5 9h2M4.4 4.4l1.4 1.4M12.2 12.2l1.4 1.4M13.6 4.4l-1.4 1.4M5.8 12.2l-1.4 1.4"/>',
+        search: '<circle cx="8" cy="8" r="4.8"/><path d="M11.6 11.6 15 15"/>',
+        pin: '<path d="M9 15.5s5-4.6 5-8a5 5 0 1 0-10 0c0 3.4 5 8 5 8z"/><circle cx="9" cy="7.5" r="1.8"/>',
+        folder: '<path d="M2.5 5.5h4l1.5 2h7.5v8h-13z"/>',
+      };
+      const svg = (n) =>
+        `<svg viewBox="0 0 18 18" aria-hidden="true">${ICONS[n] || ""}</svg>`;
+      const pageOf = (k) => PAGES.find((p) => p[0] === k);
+      const projOf = (k) => PROJECTS.find((p) => p[0] === k);
+
+      /* ---------------- shared chunks ---------------- */
+      function bodyFor(s) {
+        if (s.scope === "agency") {
+          const t = AGENCY.find((a) => a[0] === s.agency);
+          return `<h3>${t[1]}</h3><div class="lede">Niveau agence — ${
+            s.agency === "projets"
+              ? "7 projets"
+              : s.agency === "dna"
+                ? "1 284 unités indexées"
+                : "48 références"
+          }</div>
+          <div class="cards">${[1, 2, 3]
+            .map(
+              (i) =>
+                `<div class="card"><div class="k">élément ${i}</div><div class="v">—</div></div>`,
+            )
+            .join("")}</div><div class="skeleton"></div>`;
+        }
+        const pg = pageOf(s.page);
+        const sub = s.sub ? ` · ${s.sub}` : "";
+        return `<h3>${pg[1]}</h3><div class="lede">${projOf(s.project)[1]}${sub}</div>
+          <div class="cards">${(pg[3].length ? pg[3] : ["Résumé", "État", "Dernier import"])
+            .map(
+              (c) =>
+                `<div class="card"><div class="k">${c}</div><div class="v">—</div></div>`,
+            )
+            .join("")}</div><div class="skeleton"></div>`;
+      }
+      function crumbsFor(s, withCaret) {
+        const c = withCaret ? '<span class="caret">▾</span>' : "";
+        if (s.scope === "agency")
+          return `<div class="crumbs"><div class="crumb last">${AGENCY.find((a) => a[0] === s.agency)[1]}${c}</div></div>`;
+        const parts = [
+          `<div class="crumb">Projets${c}</div>`,
+          `<div class="crumb">${projOf(s.project)[1]}${c}</div>`,
+          `<div class="crumb${s.sub ? "" : " last"}">${pageOf(s.page)[1]}${c}</div>`,
+        ];
+        if (s.sub) parts.push(`<div class="crumb last">${s.sub}${c}</div>`);
+        return `<div class="crumbs">${parts.join('<span class="sep">›</span>')}</div>`;
+      }
+      const who = `<div class="who"><div class="av">JD</div><div><b>Julie Dubois</b><span>Atelier Nord</span></div></div>`;
+
+      /* ---------------- patterns ---------------- */
+      const PATTERNS = [];
+      const P = (o) => PATTERNS.push(o);
+
+      /* 01 — actuel */
+      P({
+        id: "sectionne",
+        name: "Rail sectionné (l’écran actuel)",
+        sub: "Une seule colonne, coupée en deux titres : L’AGENCE au-dessus, LE PROJET en dessous. Le projet ouvert reste visible en permanence; changer de projet se fait par Projets.",
+        good: "Tout est à plat, un seul clic par page, aucune mécanique à apprendre.",
+        cost: "Le rail grandit avec chaque page ajoutée, et rien n’indique comment passer d’un projet à l’autre sans repasser par la liste.",
+        init: { scope: "project", project: "jsl", page: "precedents", sub: null },
+        render(s) {
+          return `<div class="screen">
+            <div class="rail">
+              <div class="brand">ça fitte.</div>
+              <div class="rail-label">L’agence</div>
+              ${AGENCY.map(
+                ([k, l, i]) =>
+                  `<div class="nav-i ${s.scope === "agency" && s.agency === k ? "on" : ""}" data-a="${k}">${svg(i)}${l}</div>`,
+              ).join("")}
+              <div class="rail-label">Le projet</div>
+              <div class="nav-i" style="gap:9px"><div class="thumb"></div><div><b style="display:block;color:#fff;font-weight:500">Les Jardins Sa…</b><span style="font-size:11px;color:#777">Montréal</span></div></div>
+              ${PAGES.map(
+                ([k, l, i]) =>
+                  `<div class="nav-i ${s.scope === "project" && s.page === k ? "on brand-on" : ""}" data-p="${k}">${svg(i)}${l}</div>`,
+              ).join("")}
+              <div class="spacer"></div>
+              <div class="nav-i">${svg("settings")}Paramètres</div>
+              ${who}
+            </div>
+            <div class="main">
+              <div class="topbar">${crumbsFor(s)}</div>
+              <div class="body">${bodyFor(s)}</div>
+            </div>
+          </div>`;
+        },
+        click(s, el) {
+          if (el.dataset.a) {
+            s.scope = "agency";
+            s.agency = el.dataset.a;
+          }
+          if (el.dataset.p) {
+            s.scope = "project";
+            s.page = el.dataset.p;
+            s.sub = null;
+          }
+        },
+      });
+
+      /* 02 — rail mince + colonne contextuelle */
+      P({
+        id: "deux-colonnes",
+        name: "Rail d’icônes + colonne contextuelle",
+        sub: "La barre noire ne garde que les destinations de l’agence. La deuxième colonne, claire, affiche le contenu de la destination choisie : la liste des projets, ou les pages du projet ouvert avec leurs sous-niveaux.",
+        good: "Deux niveaux lisibles d’un coup d’œil; la colonne 2 peut contenir une arborescence longue sans écraser le reste.",
+        cost: "Coûte 250 px de largeur en permanence et demande de comprendre que la colonne 2 change de contenu.",
+        init: {
+          scope: "project",
+          project: "jsl",
+          page: "unites",
+          sub: "Niveau 5",
+          icon: "projets",
+        },
+        render(s) {
+          const col =
+            s.icon === "projets"
+              ? `<div class="sub-label">Projets</div>` +
+                PROJECTS.map(
+                  ([k, l, c]) =>
+                    `<div class="sub-i ${s.project === k ? "on" : ""}" data-proj="${k}"><div class="thumb" style="width:18px;height:18px"></div><div><div>${l.length > 20 ? l.slice(0, 19) + "…" : l}</div></div></div>`,
+                ).join("") +
+                `<div class="sub-label">${projOf(s.project)[1].slice(0, 22)}</div>` +
+                PAGES.map(
+                  ([k, l, i, kids]) =>
+                    `<div class="sub-i ${s.page === k && !s.sub ? "on" : ""}" data-p="${k}">${svg(i)}${l}</div>` +
+                    (s.page === k && kids.length
+                      ? `<div style="margin-left:18px">${kids
+                          .map(
+                            (c) =>
+                              `<div class="sub-i ${s.sub === c ? "on" : ""}" data-sub="${c}">${c}</div>`,
+                          )
+                          .join("")}</div>`
+                      : ""),
+                ).join("")
+              : `<div class="sub-label">${AGENCY.find((a) => a[0] === s.icon)[1]}</div>` +
+                ["Toutes les unités", "Recherches sauvegardées", "Collections"]
+                  .map(
+                    (l, i) =>
+                      `<div class="sub-i ${i === 0 ? "on" : ""}">${svg("folder")}${l}</div>`,
+                  )
+                  .join("");
+          return `<div class="screen">
+            <div class="rail slim">
+              <div style="font-weight:700;font-size:13px;padding-bottom:12px">ç.</div>
+              ${AGENCY.map(
+                ([k, l, i]) =>
+                  `<div class="ic-sq ${s.icon === k ? "on" : ""}" data-icon="${k}" title="${l}">${svg(i)}</div>`,
+              ).join("")}
+              <div class="spacer"></div>
+              <div class="ic-sq">${svg("settings")}</div>
+              <div class="av" style="margin-top:8px">JD</div>
+            </div>
+            <div class="subrail">${col}</div>
+            <div class="main">
+              <div class="topbar">${crumbsFor(s)}</div>
+              <div class="body">${bodyFor(s)}</div>
+            </div>
+          </div>`;
+        },
+        click(s, el) {
+          if (el.dataset.icon) {
+            s.icon = el.dataset.icon;
+            if (s.icon !== "projets") {
+              s.scope = "agency";
+              s.agency = s.icon;
+            } else s.scope = "project";
+          }
+          if (el.dataset.proj) {
+            s.project = el.dataset.proj;
+            s.scope = "project";
+            s.sub = null;
+          }
+          if (el.dataset.p) {
+            s.page = el.dataset.p;
+            s.sub = null;
+            s.scope = "project";
+          }
+          if (el.dataset.sub) s.sub = el.dataset.sub;
+        },
+      });
+
+      /* 03 — sélecteur de projet + onglets */
+      P({
+        id: "onglets",
+        name: "Sélecteur de projet + onglets horizontaux",
+        sub: "Le rail ne contient que l’agence. Le projet vit dans une barre d’en-tête : son nom ouvre un sélecteur, ses pages sont des onglets, ses sous-niveaux une deuxième ligne d’onglets.",
+        good: "Rend le changement de projet évident et libère la colonne de gauche; familier pour quiconque a utilisé un outil de gestion de projet.",
+        cost: "Six onglets plus les sous-onglets saturent vite la largeur; mal adapté si la liste de pages continue de grandir.",
+        init: {
+          scope: "project",
+          project: "jsl",
+          page: "dessins",
+          sub: "Plans",
+          menu: false,
+        },
+        render(s) {
+          const kids = pageOf(s.page)[3];
+          return `<div class="screen">
+            <div class="rail" style="width:188px">
+              <div class="brand">ça fitte.</div>
+              ${AGENCY.map(
+                ([k, l, i]) =>
+                  `<div class="nav-i ${s.scope === "agency" && s.agency === k ? "on" : ""}" data-a="${k}">${svg(i)}${l}</div>`,
+              ).join("")}
+              <div class="spacer"></div>
+              <div class="nav-i">${svg("settings")}Paramètres</div>
+              ${who}
+            </div>
+            <div class="main">
+              <div class="topbar" style="position:relative">
+                <div class="switcher" data-menu="1"><div class="thumb"></div><div><b>${projOf(s.project)[1]}</b><span>${projOf(s.project)[2]}</span></div><span style="color:#9a9a9a;font-size:10px">▾</span></div>
+                <div class="right"><div class="pill-search">${svg("search")}Rechercher une unité…</div></div>
+                ${
+                  s.menu
+                    ? `<div class="menu" style="top:42px;left:12px">${PROJECTS.map(
+                        ([k, l, c]) =>
+                          `<div class="mi ${s.project === k ? "on" : ""}" data-proj="${k}"><div class="thumb" style="width:20px;height:20px"></div><div>${l}<div style="font-size:11px;color:#9a9a9a">${c}</div></div></div>`,
+                      ).join("")}</div>`
+                    : ""
+                }
+              </div>
+              <div class="topbar" style="height:40px;padding:0 10px">
+                <div class="tabs">${PAGES.map(
+                  ([k, l, i]) =>
+                    `<div class="tab ${s.scope === "project" && s.page === k ? "on" : ""}" data-p="${k}">${svg(i)}${l}</div>`,
+                ).join("")}</div>
+              </div>
+              ${
+                kids.length
+                  ? `<div class="topbar" style="height:36px;background:var(--app);padding:0 16px"><div class="seg">${kids
+                      .map(
+                        (c) =>
+                          `<div class="${s.sub === c ? "on" : ""}" data-sub="${c}">${c}</div>`,
+                      )
+                      .join("")}</div></div>`
+                  : ""
+              }
+              <div class="body">${bodyFor(s)}</div>
+            </div>
+          </div>`;
+        },
+        click(s, el) {
+          if (el.dataset.menu) {
+            s.menu = !s.menu;
+            return;
+          }
+          s.menu = false;
+          if (el.dataset.a) {
+            s.scope = "agency";
+            s.agency = el.dataset.a;
+          }
+          if (el.dataset.proj) {
+            s.project = el.dataset.proj;
+            s.scope = "project";
+          }
+          if (el.dataset.p) {
+            s.scope = "project";
+            s.page = el.dataset.p;
+            s.sub = pageOf(el.dataset.p)[3][0] || null;
+          }
+          if (el.dataset.sub) s.sub = el.dataset.sub;
+        },
+      });
+
+      /* 04 — fil d'Ariane actif */
+      P({
+        id: "ariane",
+        name: "Fil d’Ariane cliquable à chaque segment",
+        sub: "Pas de rail du tout : chaque segment du fil ouvre la liste de ses voisins. Projets ▾ donne les sept projets, le nom du projet donne ses pages, la page donne ses sous-niveaux.",
+        good: "Zéro chrome permanent, la navigation suit exactement l’URL, et on change de branche sans remonter.",
+        cost: "Rien n’est découvrable au repos : il faut savoir que les segments s’ouvrent. À combiner avec un autre patron, rarement seul.",
+        init: {
+          scope: "project",
+          project: "jsl",
+          page: "unites",
+          sub: "Niveau 5",
+          open: null,
+        },
+        render(s) {
+          const seg = (i, label, items, key, cur) =>
+            `<div class="crumb ${i === 3 ? "last" : ""}" data-seg="${key}">${label}<span class="caret">▾</span></div>`;
+          const menus = {
+            projets: PROJECTS.map(
+              ([k, l]) =>
+                `<div class="mi ${s.project === k ? "on" : ""}" data-proj="${k}"><div class="thumb" style="width:18px;height:18px"></div>${l}</div>`,
+            ).join(""),
+            projet: PAGES.map(
+              ([k, l, i]) =>
+                `<div class="mi ${s.page === k ? "on" : ""}" data-p="${k}">${svg(i)}${l}</div>`,
+            ).join(""),
+            page:
+              pageOf(s.page)[3]
+                .map(
+                  (c) =>
+                    `<div class="mi ${s.sub === c ? "on" : ""}" data-sub="${c}">${svg("folder")}${c}</div>`,
+                )
+                .join("") ||
+              `<div class="mh">Aucun sous-niveau</div>`,
+          };
+          const left = { projets: 16, projet: 92, page: 268 };
+          return `<div class="screen">
+            <div class="main">
+              <div class="topbar" style="height:52px;position:relative">
+                <div class="crumbs">
+                  ${seg(1, "Projets", 0, "projets")}<span class="sep">›</span>
+                  ${seg(2, projOf(s.project)[1], 0, "projet")}<span class="sep">›</span>
+                  ${seg(3, pageOf(s.page)[1] + (s.sub ? " · " + s.sub : ""), 0, "page")}
+                </div>
+                <div class="right"><div class="pill-search">${svg("search")}Aller à…<span class="kbd">⌘K</span></div><div class="av">JD</div></div>
+                ${
+                  s.open
+                    ? `<div class="menu" style="top:44px;left:${left[s.open]}px">${menus[s.open]}</div>`
+                    : ""
+                }
+              </div>
+              <div class="body" style="padding-top:26px">${bodyFor(s)}</div>
+            </div>
+          </div>`;
+        },
+        click(s, el) {
+          if (el.dataset.seg) {
+            s.open = s.open === el.dataset.seg ? null : el.dataset.seg;
+            return;
+          }
+          s.open = null;
+          if (el.dataset.proj) {
+            s.project = el.dataset.proj;
+            s.sub = null;
+          }
+          if (el.dataset.p) {
+            s.page = el.dataset.p;
+            s.sub = null;
+          }
+          if (el.dataset.sub) s.sub = el.dataset.sub;
+        },
+      });
+
+      /* 05 — arborescence */
+      P({
+        id: "arbre",
+        name: "Arborescence dépliable (dossiers et sous-dossiers)",
+        sub: "Le rail devient un arbre : les projets se déplient en pages, les pages en niveaux, les niveaux en unités. Plusieurs branches peuvent rester ouvertes en même temps.",
+        good: "Le seul patron qui montre deux projets ouverts côte à côte; idéal pour comparer ou copier d’un projet à l’autre.",
+        cost: "Profondeur et défilement : à quatre niveaux, le rail devient un explorateur de fichiers, pas une barre de navigation.",
+        init: {
+          scope: "project",
+          project: "jsl",
+          page: "unites",
+          sub: "Niveau 5",
+          open: { jsl: true, "jsl:unites": true },
+        },
+        render(s) {
+          const node = (label, depth, opened, on, attrs, twisty) =>
+            `<div class="tree-row ${on ? "on" : ""}" ${attrs}><span class="tw">${twisty ? (opened ? "▾" : "▸") : ""}</span>${label}</div>`;
+          const tree = PROJECTS.map(([k, l]) => {
+            const op = s.open[k];
+            let out = node(
+              l.length > 19 ? l.slice(0, 18) + "…" : l,
+              0,
+              op,
+              false,
+              `data-tproj="${k}"`,
+              true,
+            );
+            if (op) {
+              out += `<div class="tree-kids">${PAGES.map(([pk, pl, pi, kids]) => {
+                const pOpen = s.open[k + ":" + pk];
+                let r = node(
+                  pl,
+                  1,
+                  pOpen,
+                  s.project === k && s.page === pk && !s.sub,
+                  `data-tpage="${k}:${pk}"`,
+                  kids.length > 0,
+                );
+                if (pOpen && kids.length)
+                  r += `<div class="tree-kids">${kids
+                    .map((c) =>
+                      node(
+                        c,
+                        2,
+                        false,
+                        s.project === k && s.page === pk && s.sub === c,
+                        `data-tsub="${k}:${pk}:${c}"`,
+                        false,
+                      ),
+                    )
+                    .join("")}</div>`;
+                return r;
+              }).join("")}</div>`;
+            }
+            return out;
+          }).join("");
+          return `<div class="screen">
+            <div class="rail" style="width:226px">
+              <div class="brand">ça fitte.</div>
+              ${AGENCY.slice(1)
+                .map(
+                  ([k, l, i]) =>
+                    `<div class="nav-i ${s.scope === "agency" && s.agency === k ? "on" : ""}" data-a="${k}">${svg(i)}${l}</div>`,
+                )
+                .join("")}
+              <div class="rail-label">Projets</div>
+              ${tree}
+              <div class="spacer"></div>
+              ${who}
+            </div>
+            <div class="main">
+              <div class="topbar">${crumbsFor(s)}</div>
+              <div class="body">${bodyFor(s)}</div>
+            </div>
+          </div>`;
+        },
+        click(s, el) {
+          if (el.dataset.a) {
+            s.scope = "agency";
+            s.agency = el.dataset.a;
+          }
+          if (el.dataset.tproj) {
+            const k = el.dataset.tproj;
+            s.open[k] = !s.open[k];
+            s.project = k;
+          }
+          if (el.dataset.tpage) {
+            const [k, pk] = el.dataset.tpage.split(":");
+            s.scope = "project";
+            s.project = k;
+            s.page = pk;
+            s.sub = null;
+            if (pageOf(pk)[3].length)
+              s.open[k + ":" + pk] = !s.open[k + ":" + pk];
+          }
+          if (el.dataset.tsub) {
+            const [k, pk, c] = el.dataset.tsub.split(":");
+            s.scope = "project";
+            s.project = k;
+            s.page = pk;
+            s.sub = c;
+          }
+        },
+      });
+
+      /* 06 — onglets de projets */
+      P({
+        id: "projets-ouverts",
+        name: "Projets ouverts en onglets",
+        sub: "Le rail reste celui de l’agence. Les projets consultés s’empilent en onglets au-dessus du contenu, chacun gardant la page où on l’a laissé.",
+        good: "Revenir à un projet le remet exactement où il était; parfait pendant une comparaison de deux ou trois projets.",
+        cost: "Introduit une notion d’état ouvert/fermé à gérer, et les onglets deviennent illisibles au-delà de quatre projets.",
+        init: {
+          scope: "project",
+          project: "jsl",
+          page: "apercu",
+          sub: null,
+          tabs: { jsl: "apercu", cmr: "unites" },
+        },
+        render(s) {
+          return `<div class="screen">
+            <div class="rail" style="width:188px">
+              <div class="brand">ça fitte.</div>
+              ${AGENCY.map(
+                ([k, l, i]) =>
+                  `<div class="nav-i ${s.scope === "agency" && s.agency === k ? "on" : ""}" data-a="${k}">${svg(i)}${l}</div>`,
+              ).join("")}
+              <div class="rail-label">Ouvrir un projet</div>
+              ${PROJECTS.map(
+                ([k, l]) =>
+                  `<div class="nav-i" data-open="${k}">${svg("folder")}${l.length > 18 ? l.slice(0, 17) + "…" : l}</div>`,
+              ).join("")}
+              <div class="spacer"></div>
+              ${who}
+            </div>
+            <div class="main">
+              <div class="ptabs">${Object.keys(s.tabs)
+                .map(
+                  (k) =>
+                    `<div class="ptab ${s.scope === "project" && s.project === k ? "on" : ""}" data-tab="${k}"><div class="dot"></div>${projOf(k)[1].slice(0, 18)}<span class="x" data-close="${k}">×</span></div>`,
+                )
+                .join("")}</div>
+              <div class="topbar" style="height:40px;padding:0 10px">
+                <div class="tabs">${PAGES.map(
+                  ([k, l, i]) =>
+                    `<div class="tab ${s.scope === "project" && s.page === k ? "on" : ""}" data-p="${k}">${svg(i)}${l}</div>`,
+                ).join("")}</div>
+              </div>
+              <div class="body">${bodyFor(s)}</div>
+            </div>
+          </div>`;
+        },
+        click(s, el) {
+          if (el.dataset.close) {
+            delete s.tabs[el.dataset.close];
+            const left = Object.keys(s.tabs);
+            if (!left.length) s.scope = "agency";
+            else if (!s.tabs[s.project]) {
+              s.project = left[0];
+              s.page = s.tabs[left[0]];
+            }
+            return;
+          }
+          if (el.dataset.a) {
+            s.scope = "agency";
+            s.agency = el.dataset.a;
+          }
+          if (el.dataset.open) {
+            const k = el.dataset.open;
+            if (!s.tabs[k]) s.tabs[k] = "apercu";
+            s.scope = "project";
+            s.project = k;
+            s.page = s.tabs[k];
+          }
+          if (el.dataset.tab) {
+            s.scope = "project";
+            s.project = el.dataset.tab;
+            s.page = s.tabs[el.dataset.tab];
+          }
+          if (el.dataset.p) {
+            s.scope = "project";
+            s.page = el.dataset.p;
+            s.tabs[s.project] = el.dataset.p;
+            s.sub = null;
+          }
+        },
+      });
+
+      /* 07 — palette */
+      P({
+        id: "palette",
+        name: "Palette de navigation (⌘K) sur un rail réduit",
+        sub: "Le rail ne garde que cinq destinations. Tout le reste — un projet, une page, un niveau, une unité — se rejoint en tapant. La palette montre le chemin complet de chaque cible.",
+        good: "La vitesse ne dépend plus du nombre de projets ni de la profondeur; le chrome reste minimal.",
+        cost: "Invisible pour qui n’essaie pas le raccourci : il faut un point d’entrée visible et une liste de récents.",
+        init: {
+          scope: "project",
+          project: "jsl",
+          page: "apercu",
+          sub: null,
+          open: true,
+          q: "",
+        },
+        render(s) {
+          const targets = [];
+          PROJECTS.forEach(([k, l]) => {
+            targets.push({ t: l, path: "Projets", proj: k, p: "apercu" });
+            PAGES.forEach(([pk, pl, pi, kids]) => {
+              targets.push({
+                t: pl,
+                path: "Projets › " + l,
+                proj: k,
+                p: pk,
+                icon: pi,
+              });
+              kids.forEach((c) =>
+                targets.push({
+                  t: c,
+                  path: "Projets › " + l + " › " + pl,
+                  proj: k,
+                  p: pk,
+                  sub: c,
+                  icon: "folder",
+                }),
+              );
+            });
+          });
+          AGENCY.forEach(([k, l, i]) =>
+            targets.push({ t: l, path: "Agence", ag: k, icon: i }),
+          );
+          const q = (s.q || "").toLowerCase();
+          const hits = targets
+            .filter(
+              (x) =>
+                !q ||
+                (x.t + " " + x.path).toLowerCase().includes(q),
+            )
+            .slice(0, 7);
+          return `<div class="screen">
+            <div class="rail" style="width:188px">
+              <div class="brand">ça fitte.</div>
+              ${AGENCY.map(
+                ([k, l, i]) =>
+                  `<div class="nav-i ${s.scope === "agency" && s.agency === k ? "on" : ""}" data-a="${k}">${svg(i)}${l}</div>`,
+              ).join("")}
+              <div class="nav-i" data-open="1" style="margin-top:10px;box-shadow:inset 0 0 0 1px #2f2f2f">${svg("search")}Aller à…<span style="margin-left:auto" class="kbd">⌘K</span></div>
+              <div class="rail-label">Récents</div>
+              ${[
+                ["Les Jardins Saint-Laurent", "jsl", "precedents"],
+                ["Condo Mont-Royal", "cmr", "unites"],
+              ]
+                .map(
+                  ([l, k, p]) =>
+                    `<div class="nav-i" data-rec="${k}:${p}">${svg("folder")}${l.slice(0, 18)}</div>`,
+                )
+                .join("")}
+              <div class="spacer"></div>
+              ${who}
+            </div>
+            <div class="main">
+              <div class="topbar">${crumbsFor(s)}</div>
+              <div class="body">${bodyFor(s)}</div>
+            </div>
+            ${
+              s.open
+                ? `<div class="scrim" data-dismiss="1"><div class="palette">
+                    <input placeholder="Projet, page, niveau, unité…" value="${s.q || ""}" data-q="1" />
+                    <div class="plist">${
+                      hits
+                        .map(
+                          (h, i) =>
+                            `<div class="prow ${i === 0 ? "on" : ""}" data-go='${JSON.stringify(h)}'>${svg(h.icon || "folder")}<div>${h.t}<div class="path">${h.path}</div></div></div>`,
+                        )
+                        .join("") ||
+                      `<div class="prow">Aucun résultat</div>`
+                    }</div>
+                  </div></div>`
+                : ""
+            }
+          </div>`;
+        },
+        click(s, el) {
+          if (el.dataset.open) {
+            s.open = true;
+            s.q = "";
+            return;
+          }
+          if (el.dataset.dismiss) {
+            s.open = false;
+            return;
+          }
+          if (el.dataset.a) {
+            s.scope = "agency";
+            s.agency = el.dataset.a;
+          }
+          if (el.dataset.rec) {
+            const [k, p] = el.dataset.rec.split(":");
+            s.scope = "project";
+            s.project = k;
+            s.page = p;
+            s.sub = null;
+          }
+          if (el.dataset.go) {
+            const h = JSON.parse(el.dataset.go);
+            if (h.ag) {
+              s.scope = "agency";
+              s.agency = h.ag;
+            } else {
+              s.scope = "project";
+              s.project = h.proj;
+              s.page = h.p;
+              s.sub = h.sub || null;
+            }
+            s.open = false;
+          }
+        },
+        input(s, el) {
+          s.q = el.value;
+        },
+      });
+
+      /* ---------------- mount ---------------- */
+      const host = document.getElementById("patterns");
+      const toc = document.getElementById("toc");
+      PATTERNS.forEach((pat, idx) => {
+        const n = String(idx + 1).padStart(2, "0");
+        toc.insertAdjacentHTML(
+          "beforeend",
+          `<a href="#${pat.id}">${n} · ${pat.name}</a>`,
+        );
+        const sec = document.createElement("section");
+        sec.className = "pat";
+        sec.id = pat.id;
+        sec.innerHTML = `
+          <div class="pat-head"><span class="pat-no">${n}</span><h2>${pat.name}</h2></div>
+          <p class="pat-sub">${pat.sub}</p>
+          <div class="frame"><div class="mount"></div>
+            <div class="verdict"><div><b>Gagne</b> — ${pat.good}</div><div><b>Coûte</b> — ${pat.cost}</div></div>
+          </div>`;
+        host.appendChild(sec);
+        const mount = sec.querySelector(".mount");
+        const state = JSON.parse(JSON.stringify(pat.init));
+        const paint = (focus) => {
+          mount.innerHTML = pat.render(state);
+          if (focus) {
+            const i = mount.querySelector("input[data-q]");
+            if (i) {
+              i.focus();
+              i.setSelectionRange(i.value.length, i.value.length);
+            }
+          }
+        };
+        paint(false);
+        mount.addEventListener("click", (e) => {
+          let el = e.target;
+          while (el && el !== mount) {
+            if (
+              el.dataset &&
+              Object.keys(el.dataset).some((k) =>
+                [
+                  "a",
+                  "p",
+                  "sub",
+                  "proj",
+                  "icon",
+                  "menu",
+                  "seg",
+                  "tproj",
+                  "tpage",
+                  "tsub",
+                  "open",
+                  "tab",
+                  "close",
+                  "go",
+                  "rec",
+                  "dismiss",
+                ].includes(k),
+              )
+            ) {
+              if (el.dataset.dismiss && e.target !== el) break;
+              pat.click(state, el);
+              paint(!!mount.querySelector("input[data-q]"));
+              return;
+            }
+            el = el.parentElement;
+          }
+        });
+        mount.addEventListener("input", (e) => {
+          if (e.target.dataset.q && pat.input) {
+            pat.input(state, e.target);
+            paint(true);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
