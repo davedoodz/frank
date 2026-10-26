@@ -5,3 +5,6 @@ out
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# real client drawings and permit sets — never on GitHub
+lafondarchitecte-projects/

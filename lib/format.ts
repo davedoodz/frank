@@ -19,14 +19,18 @@ export function area(m2: number | null, unit: AreaUnit = "both"): string {
 
 export const TYPOLOGY_ORDER: TypeQc[] = ["studio", "3½", "4½", "5½", "6½", "other"];
 
-/** One hue per apartment type, used on the plan, in dots and in legends. */
+/**
+ * Typology is a quantity, not a category: the ramp darkens as the unit gains
+ * a bedroom, so a legend is barely needed and the office green keeps its one
+ * meaning — selected, active, verified.
+ */
 const TYPOLOGY_COLOR: Record<string, string> = {
-  studio: "#f59e0b",
-  "3½": "#22c55e",
-  "4½": "#3b82f6",
-  "5½": "#8b5cf6",
-  "6½": "#ec4899",
-  other: "#94a3b8",
+  studio: "#dcdcdc",
+  "3½": "#b4b4b4",
+  "4½": "#8c8c8c",
+  "5½": "#5a5a5a",
+  "6½": "#2a2a2a",
+  other: "#ececec",
 };
 
 export function typologyColor(type: string): string {

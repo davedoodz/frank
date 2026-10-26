@@ -37,21 +37,18 @@ export type Sort = "match" | "area" | "year" | "project";
 
 export const SORTS: Sort[] = ["match", "area", "year", "project"];
 
-const ORIENTATIONS: Orientation[] = ["N", "S", "E", "W", "NE", "NW", "SE", "SW"];
-
-export const ORIENTATION_LABEL: Record<Orientation, string> = {
-  N: "north",
-  S: "south",
-  E: "east",
-  W: "west",
-  NE: "northeast",
-  NW: "northwest",
-  SE: "southeast",
-  SW: "southwest",
+/** One wording for the sort, shared by both result bars. */
+export const SORT_LABEL: Record<Sort, string> = {
+  match: "Meilleure correspondance",
+  area: "Superficie",
+  year: "Plus récent",
+  project: "Projet",
 };
 
-/** The same orientations, written the way the product chrome labels them. */
-export const ORIENTATION_TITLE: Record<Orientation, string> = {
+const ORIENTATIONS: Orientation[] = ["N", "S", "E", "W", "NE", "NW", "SE", "SW"];
+
+/** The orientations, written the way the interface labels them. */
+export const ORIENTATION_LABEL: Record<Orientation, string> = {
   N: "Nord",
   S: "Sud",
   E: "Est",
@@ -69,7 +66,7 @@ export function unitChips(unit: Unit): string[] {
       ? "Studio"
       : `${unit.bedrooms.value} chambre${unit.bedrooms.value === 1 ? "" : "s"}`,
     unit.is_corner.value ? "Unité de coin" : "Unité d’extrémité",
-    ORIENTATION_TITLE[unit.orientation.value],
+    ORIENTATION_LABEL[unit.orientation.value],
   ];
 }
 

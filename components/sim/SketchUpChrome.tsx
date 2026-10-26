@@ -76,7 +76,7 @@ export default function SketchUpChrome({
         <div className="relative min-w-0 flex-1 overflow-hidden bg-gradient-to-b from-[#C9DCEE] via-[#EFF3F6] to-[#DCDCD8]">
           {children}
           <span className="pointer-events-none absolute bottom-3 left-3 font-mono text-[11px] text-[#6B7177]">
-            simulated
+            simulé
           </span>
         </div>
 
@@ -94,7 +94,7 @@ export default function SketchUpChrome({
       <div className="flex h-7 shrink-0 items-center gap-3 border-t border-[#C8C8C8] bg-[#F3F3F3] px-3 text-[12px] text-[#4A4A4A]">
         <span className="truncate">{status}</span>
         <span className="flex-1" />
-        <span className="text-[#6B6B6B]">Measurements</span>
+        <span className="text-[#6B6B6B]">Mesures</span>
         <span className="flex h-5 w-[180px] items-center rounded-[2px] border border-[#BDBDBD] bg-white px-2 font-mono text-[11px]">
           {measurement}
         </span>

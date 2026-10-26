@@ -32,7 +32,7 @@ Next.js App Router, TypeScript, Tailwind, no component library. Supabase (Postgr
 
 ## Language
 
-Plans are in French. The interface is in English. Keep French values as they appear on the plans (unit types as `3½`, `4½`, `5½`, room names as labeled). Do not translate them. Project display names are fictional or anonymized and appear as given.
+Plans are in French and so is the interface. Keep French values as they appear on the plans (unit types as `3½`, `4½`, `5½`, room names as labeled). Do not translate them, and do not re-translate them into a different French either. Project display names are fictional or anonymized and appear as given. Québec French, not France French: `superficie` not `surface`, `étage` for a storey, `chambre` for a bedroom, `feuille` for a drawing sheet. Dates on drawings stay ISO (`2022-11-14`) because that is how the sheets carry them. Numbers keep the decimal point the schedule already uses, not a comma, so a figure copied into a spreadsheet survives.
 
 ## Simulated screens
 

@@ -5,7 +5,7 @@ import OpenDrawingDialog from "@/components/dna/OpenDrawingDialog";
 import PlanCrop from "@/components/dna/PlanCrop";
 import Icon from "@/components/ui/Icon";
 import { BTN } from "@/components/ui/Button";
-import { ORIENTATION_TITLE, unitChips, type Result } from "@/lib/dna";
+import { ORIENTATION_LABEL, unitChips, type Result } from "@/lib/dna";
 import { bedroomLabel } from "@/lib/format";
 import type { Collection, Unit } from "@/lib/types";
 
@@ -53,7 +53,7 @@ export default function ResultPanel({
         : "Aucun",
     ],
     ["Étage", floor.label],
-    ["Orientation", ORIENTATION_TITLE[unit.orientation.value]],
+    ["Orientation", ORIENTATION_LABEL[unit.orientation.value]],
     ["Bâtiment", project.display_name],
     [
       "Dessin",
@@ -78,7 +78,7 @@ export default function ResultPanel({
           <div className="flex items-center gap-2">
             <Link
               href={unitHref}
-              className="text-[22px] font-semibold text-text transition-colors hover:text-brand"
+              className="text-[22px] font-semibold text-text transition-colors hover:text-text-2"
             >
               Unité {unit.number}
             </Link>

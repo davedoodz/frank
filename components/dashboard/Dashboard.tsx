@@ -143,7 +143,7 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
                 onClick={() => setView(v)}
                 aria-label={v === "grid" ? "vue en grille" : "vue en liste"}
                 className={`${BTN_ICON} ${
-                  view === v ? "border-brand-line bg-brand-soft text-brand" : ""
+                  view === v ? "border-brand-line bg-brand-soft text-text" : ""
                 }`}
               >
                 <Icon name={v === "grid" ? "grid" : "table"} size={16} />
@@ -163,7 +163,7 @@ export default function Dashboard({ projects }: { projects: Project[] }) {
                 onClick={() => setDialog(true)}
                 className="flex min-h-[260px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-edge bg-panel/60 px-6 text-center transition-colors hover:border-brand-line hover:bg-brand-soft/40"
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-brand">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft text-text">
                   <Icon name="plus" size={18} />
                 </span>
                 <span className="text-[13px] font-medium text-text">
@@ -248,7 +248,7 @@ export function StatusChip({ status }: { status: Project["status"] }) {
     <span
       className={`inline-flex h-[22px] items-center rounded-md px-2 text-[11px] font-medium ${
         status === "active"
-          ? "bg-brand-soft text-brand"
+          ? "bg-brand-soft text-ok"
           : "bg-app text-text-2"
       }`}
     >

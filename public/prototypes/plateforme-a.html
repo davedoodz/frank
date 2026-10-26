@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ça fitte — option A · la coordination est une page</title>
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="plateforme.css">
+</head>
+<body>
+<div class="shell" id="shell"></div>
+<div class="voile" id="voile" hidden></div>
+<script src="plateforme.js"></script>
+<script>
+/* OPTION A — « la coordination est une page »
+   La comparaison plan ↔ volumétrie occupe un onglet de projet à part entière,
+   au même rang que Unités ou Dessins. On y va, on règle, on en sort. */
+
+const S = {
+  page: "apercu", projet: "bal", niveau: 5, ec: "F-05-09", unite: "9",
+  onglet: "ecart", filtre: "Niveau 5", typologie: false,
+};
+
+const PAGES = () => [
+  ["apercu", "Aperçu", "info"],
+  ["fichiers", "Fichiers", "file"],
+  ["unites", "Unités", "layers"],
+  ["coord", "Coordination", "lien", ouverts().length || null],
+];
+
+const AUTRES = {
+  cmr: { nom: "Condo Mont-Royal", etages: 4, skp: true, ecarts: 2 },
+  be: { nom: "Beaubien Est", etages: 6, skp: false, ecarts: 0 },
+};
+
+/* ------------------------------------------------------------------ aperçu */
+
+function apercuHTML() {
+  const o = ouverts().length;
+  return `<div class="dedans">
+    <div class="bandeau">
+      <span class="vig"><img src="assets/skp-proche.jpg" alt=""></span>
+      <div class="txt">
+        <h1>${PROJET.nom}</h1>
+        <div class="ligne">${ico("pt")}${PROJET.ville}</div>
+        <div class="ligne">${ico("building")}${PROJET.etages} étages · ${PROJET.logements} logements à l’étage type · ${PROJET.sous}</div>
+      </div>
+      <div class="bout">
+        <img src="assets/skp-ensemble.jpg" alt="">
+        <span class="fondu"></span>
+        <span class="coin"><span class="puce vive">${PROJET.statut}</span></span>
+      </div>
+    </div>
+    <div class="grille g-3">
+      <div class="carte">
+        <header><h2 class="grow">Les deux sources du projet</h2></header>
+        <div class="corps">
+          <p class="t-meta" style="line-height:1.5;margin-bottom:12px">Le plan et la volumétrie restent là où ils sont dessinés. ça fitte les lit, les compare et garde la trace de ce qui change.</p>
+          <div class="grille g-2">
+            <div style="border:1px solid var(--line);border-radius:8px;padding:11px">
+              <div class="rang" style="margin-bottom:7px">${ico("drawing")}<b style="font-size:13px">AutoCAD</b></div>
+              <div class="t-meta" style="line-height:1.5">3 plans · étage type en R04</div>
+              <div style="margin-top:9px"><button class="btn sm" data-act="aller-fichiers">Voir les fichiers</button></div>
+            </div>
+            <div style="border:1px solid var(--line);border-radius:8px;padding:11px">
+              <div class="rang" style="margin-bottom:7px">${ico("cube")}<b style="font-size:13px">SketchUp</b></div>
+              <div class="t-meta" style="line-height:1.5">Volumétrie option 2 · ${SOURCES.skp.rev}</div>
+              <div style="margin-top:9px"><button class="btn sm" data-act="aller-coord">Voir l’alignement</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="carte">
+        <header><h2 class="grow">Informations du projet</h2></header>
+        <div class="corps">
+          <dl class="fiche">
+            <dt>Projet</dt><dd>${PROJET.nom}</dd>
+            <dt>Code</dt><dd class="m">${PROJET.code}</dd>
+            <dt>Usage</dt><dd>${PROJET.sous}</dd>
+            <dt>Étages</dt><dd class="m">${PROJET.etages}</dd>
+            <dt>Logements · étage type</dt><dd class="m">${PROJET.logements}</dd>
+            <dt>Superficie nette</dt><dd class="m">${PROJET.pi2Total} pi²</dd>
+            <dt>Pertes</dt><dd class="m">${PROJET.pertes}</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="carte">
+        <header><h2 class="grow">État de synchronisation</h2></header>
+        <div class="corps serre">
+          <div class="cx">${ico("check")}<span class="n">Plans AutoCAD</span><span class="v">3 connectés</span></div>
+          <div class="cx">${ico("check")}<span class="n">Volumétrie SketchUp</span><span class="v">1 connectée</span></div>
+          <div class="cx">${ico("check")}<span class="n">Niveaux comparés</span><span class="v">3 sur ${PROJET.etages}</span></div>
+          <div class="cx">${ico("check")}<span class="n">Ouvertures comparées</span><span class="v">168</span></div>
+          <button class="cx alerte" data-act="aller-coord" style="width:100%">${ico("alerte")}<span class="n" style="text-align:left">Écarts ouverts</span><span class="v">${o}</span></button>
+          <div class="cx">${ico("sync")}<span class="n">Dernière lecture</span><span class="v">il y a 6 min</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grille g-2">
+      <div class="carte">
+        <header><h2 class="grow">Étage type · ${PROJET.logements} logements</h2><button class="btn sm" data-act="aller-unites">Voir le plan</button></header>
+        <div style="max-height:300px;overflow:auto">
+        <table class="tech">
+          <thead><tr><th>Unité</th><th>Type</th><th style="text-align:right">pi² net</th><th style="text-align:right">m²</th><th>Ouvertures</th></tr></thead>
+          <tbody>${UNITES.map((u) => {
+            const e = ecartsUnite(u.id).filter((x) => x.etat === "ouvert").length;
+            return `<tr><td><b>NO. ${u.id}</b></td><td class="cle">${u.ty}</td><td class="num">${u.pi2}</td><td class="num">${vg(u.m2)}</td>
+              <td>${e ? `<span class="etat ouvert">${e} écart${e > 1 ? "s" : ""}</span>` : `<span class="etat neutre">alignées</span>`}</td></tr>`;
+          }).join("")}</tbody>
+        </table></div>
+      </div>
+      <div class="carte">
+        <header><h2 class="grow">Journal des changements</h2></header>
+        <div class="corps serre">${JOURNAL.map(journalRang).join("")}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function journalRang(j) {
+  return `<div class="cx" style="align-items:flex-start">
+    <span style="width:22px;height:22px;border-radius:5px;background:var(--paper-3);color:var(--ink-2);display:grid;place-items:center;font-size:10px;flex:0 0 22px">${j.qui}</span>
+    <span class="n"><b style="font-weight:600;display:block">${j.quoi}</b><span style="color:var(--ink-2)">${j.det}</span></span>
+    <span class="v">${j.d}</span>
+  </div>`;
+}
+
+function autreProjetHTML(k) {
+  const a = AUTRES[k];
+  return `<div class="dedans">
+    <div class="bandeau"><div class="txt" style="padding:18px"><h1>${a.nom}</h1>
+      <div class="ligne">${ico("pt")}Montréal (QC)</div>
+      <div class="ligne">${ico("building")}${a.etages} étages</div></div></div>
+    ${a.skp ? `<div class="avis marque">${ico("check")}<span><b>Les deux sources sont connectées</b>${a.ecarts} écarts ouverts sur ce projet.</span></div>`
+      : `<div class="carte"><div class="corps">
+          <h2 style="margin-bottom:6px">Connecter les sources de ce projet</h2>
+          <p class="t-meta" style="line-height:1.5;margin-bottom:14px">Rien n’est encore comparé. Pointez le dossier des plans et la volumétrie pour que ça fitte commence à suivre les changements.</p>
+          <div class="grille g-2">
+            <button class="depot" data-act="brancher">${ico("drawing")}<span class="t">Connecter les plans AutoCAD</span><span class="f">DWG · étage type, niveaux</span></button>
+            <button class="depot" data-act="brancher">${ico("cube")}<span class="t">Connecter la volumétrie SketchUp</span><span class="f">SKP · volume du bâtiment</span></button>
+          </div>
+        </div></div>`}
+  </div>`;
+}
+
+/* ---------------------------------------------------------- coordination */
+
+function coordHTML() {
+  const lst = S.filtre === "Tous" ? ECARTS : ecartsNiveau(S.niveau);
+  const ec = ecartPar(S.ec);
+  return `<div class="sous">
+    <span class="titre">Coordination plan ↔ volumétrie</span>
+    ${segments("niveau", ["Niveau 2", "Niveau 5", "Niveau 8"], "Niveau " + S.niveau)}
+    <span class="grow"></span>
+    <span class="puce">${ico("drawing")} étage type R04</span>
+    <span class="puce">${ico("cube")} volumétrie ${SOURCES.skp.rev}</span>
+    <button class="btn sm" data-act="resync">${ico("sync")} Relire les sources</button>
+  </div>
+  <div class="travail">
+    <div class="col etroite">
+      <header><h2 class="grow">Écarts</h2>${segments("filtre", ["Niveau 5", "Tous"], S.filtre)}</header>
+      <div class="liste">
+        ${lst.length ? lst.map((e) => `<button class="fen-rang" data-ecart="${e.id}"${e.id === S.ec ? ' aria-selected="true"' : ""}>
+          <span class="vg">${vign(e)}</span>
+          <span class="t"><b>${e.id}</b><span>${e.quoi}</span><em>NO. ${e.unite} · ${e.piece} · travée ${e.travee}</em></span>
+          <span class="etat ${e.etat === "regle" ? "regle" : "ouvert"}">${e.etat === "regle" ? "réglé" : "ouvert"}</span>
+        </button>`).join("") : `<p class="vide">Aucun écart à ce niveau.</p>`}
+      </div>
+      <div class="legende"><span><i class="plein"></i>plan 2D</span><span><i class="tirete"></i>volumétrie 3D</span><span><i class="vert"></i>différence</span></div>
+    </div>
+    <div class="scene">
+      <div class="duo empile">
+        <div class="cadre">
+          <div class="tete">Volumétrie SketchUp<span class="src">${SOURCES.skp.nom}</span><span class="grow"></span>
+            <span class="puce">${FACADE_NOM} · niveau ${S.niveau}</span></div>
+          <div class="aire skp">
+            ${vue3d({ niveau: S.niveau, sel: S.ec })}
+            <div class="skp-outils">
+              <button aria-pressed="true" title="Orbite">${ico("orbite")}</button>
+              <button title="Panoramique">${ico("main")}</button>
+              <button title="Zoom">${ico("loupe")}</button>
+              <button title="Vue étendue">${ico("etendre")}</button>
+            </div>
+            <span class="skp-mesure">${ec && ec.modele ? ec.modele.l + " × " + ec.modele.h + " mm" : "—"}</span>
+          </div>
+        </div>
+        <div class="cadre">
+          <div class="tete">Plan d’étage type<span class="src">${SOURCES.dwg[0].nom}</span><span class="grow"></span>
+            <button class="btn sm" data-act="typo" aria-pressed="${S.typologie}">${S.typologie ? "Masquer la typologie" : "Afficher la typologie"}</button>
+            <button class="btn sm" data-act="ouvrir-dwg">${ico("externe")} Ouvrir dans AutoCAD</button>
+          </div>
+          <div class="aire papier">${vuePlan({ sel: ec ? ec.unite : null, typologie: S.typologie })}</div>
+        </div>
+      </div>
+    </div>
+    ${inspecteur(ec)}
+  </div>`;
+}
+
+function inspecteur(ec) {
+  if (!ec) return `<div class="insp"><p class="vide">Choisissez un écart.</p></div>`;
+  const u = uniPar(ec.unite);
+  const ongl = [["ecart", "Écart"], ["facade", "Façade"], ["histo", "Historique"]];
+  let corps = "";
+  if (S.onglet === "ecart") {
+    corps = `
+      <div style="border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff">${svgPreuve(ec)}</div>
+      <dl class="fiche">
+        <dt>Unité</dt><dd>NO. ${ec.unite} · ${u.ty}</dd>
+        <dt>Pièce</dt><dd>${ec.piece}</dd>
+        <dt>Niveau · travée</dt><dd class="m">${ec.niveau} · ${ec.travee}</dd>
+        <dt>Au plan 2D</dt><dd class="m">${ec.plan ? ec.plan.l + " × " + ec.plan.h + " mm" : "absente"}</dd>
+        <dt>À la volumétrie</dt><dd class="m">${ec.modele ? ec.modele.l + " × " + ec.modele.h + " mm" : "absente"}</dd>
+        <dt>Différence</dt><dd class="m">${ec.delta ? ec.delta + " mm" : ec.genre}</dd>
+      </dl>
+      <div class="avis">${ico("info")}<span><b>Ce que disent les dessins</b>${ec.note}</span></div>
+      <p class="t-meta" style="color:var(--ink-3)">${DEPUIS[ec.id] || ""}</p>`;
+  } else if (S.onglet === "facade") {
+    corps = `
+      <div class="chiffres" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="chiffre"><b>${vg(IMPACT.avant)}<small>m²</small></b><span>en R03</span></div>
+        <div class="chiffre"><b>${vg(IMPACT.apres)}<small>m²</small></b><span>en R04</span></div>
+        <div class="chiffre fort"><b>+${vg(IMPACT.ecart)}<small>m²</small></b><span>différence</span></div>
+      </div>
+      <dl class="fiche">
+        <dt>Façade</dt><dd>${IMPACT.facade}</dd>
+        <dt>Surface de la façade</dt><dd class="m">${vg(IMPACT.surfaceFacade)} m²</dd>
+        <dt>Part des ouvertures · R03</dt><dd class="m">${vg(IMPACT.pcAvant)} %</dd>
+        <dt>Part des ouvertures · R04</dt><dd class="m">${vg(IMPACT.pcApres)} %</dd>
+      </dl>
+      <div class="avis">${ico("alerte")}<span><b>Quatre intrants manquent</b>ça fitte mesure la surface vitrée, pas la conformité. Il manque : ${IMPACT.manquants.join(", ").toLowerCase()}.</span></div>`;
+  } else {
+    corps = JOURNAL.map((j) => `<div style="padding:9px 0;border-bottom:1px solid var(--line)">
+      <div class="rang"><b style="font-size:12px">${j.quoi}</b><span class="grow"></span><span class="mono" style="color:var(--ink-3)">${j.d}</span></div>
+      <p class="t-meta" style="margin-top:3px">${j.det} · ${j.qui}</p></div>`).join("");
+  }
+  return `<div class="insp">
+    <header><div class="rang"><h2 class="grow mono" style="font-size:14px">${ec.id}</h2>
+      <span class="etat ${ec.etat === "regle" ? "regle" : "ouvert"}">${ec.etat === "regle" ? "réglé" : "ouvert"}</span></div>
+      <p class="t-meta" style="margin:4px 0 10px">${ec.quoi}</p></header>
+    <div class="onglets">${ongl.map(([k, n]) => `<button data-onglet="${k}"${S.onglet === k ? ' aria-selected="true"' : ""}>${n}</button>`).join("")}</div>
+    <div class="corps">${corps}</div>
+    <footer>
+      ${ec.etat === "regle"
+        ? `<p class="t-meta">${ec.decision || "Réglé."}</p><button class="btn sm" data-act="rouvrir">Rouvrir cet écart</button>`
+        : `<button class="btn lg primaire" data-act="corriger-plan">Corriger le plan 2D — la 3D est bonne</button>
+           <button class="btn lg" data-act="corriger-modele">Corriger la 3D — le plan est bon</button>
+           <button class="btn sm discret" data-act="accepter">Ne rien corriger, c’est voulu</button>`}
+    </footer>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------- unités */
+
+function unitesHTML() {
+  const u = uniPar(S.unite);
+  const ecs = ecartsUnite(S.unite);
+  const ouv = ecs.filter((e) => e.etat === "ouvert").length;
+  return `<div class="sous">
+    <span class="titre">Étage type</span>
+    ${segments("niveau", ["Niveau 2", "Niveau 5", "Niveau 8"], "Niveau " + S.niveau)}
+    <span class="legende-typo"><b><i style="background:#f2b4b4"></i>3½</b><b><i style="background:#9fd0f0"></i>4½</b><b><i style="background:#a8e6a8"></i>5½</b></span>
+    <span class="grow"></span>
+    <button class="btn sm" data-act="typo" aria-pressed="${S.typologie}">${S.typologie ? "Masquer la typologie" : "Afficher la typologie"}</button>
+    <button class="btn sm" data-act="ouvrir-dwg">${ico("externe")} Ouvrir dans AutoCAD</button>
+  </div>
+  <div class="travail">
+    <div class="col unites">
+      <header><h2 class="grow">Unités</h2><span class="t-meta">${UNITES.length}</span></header>
+      <div class="liste">${UNITES.map((x) => {
+        const n = ecartsUnite(x.id).filter((e) => e.etat === "ouvert").length;
+        return `<button class="uni" data-unite="${x.id}"${x.id === S.unite ? ' aria-selected="true"' : ""}>
+          <span class="pt ${n ? "att" : "ok"}"></span><b>NO. ${x.id}</b><span class="ty">${x.ty}</span><span class="su">${x.pi2} pi²</span></button>`;
+      }).join("")}</div>
+    </div>
+    <div class="scene">
+      <div class="duo une"><div class="cadre">
+        <div class="tete">Plan d’étage type<span class="src">${SOURCES.dwg[0].nom}</span><span class="grow"></span><span class="src">1" = 20'-0" · R04</span></div>
+        <div class="aire papier">${vuePlan({ sel: S.unite, typologie: S.typologie })}</div>
+      </div></div>
+    </div>
+    <div class="insp">
+      <header><div class="rang"><h2 class="grow">NO. ${u.id}</h2><span class="etat neutre">non vérifiée</span></div>
+        <p class="t-meta" style="margin:4px 0 10px">${u.ty} · ${u.pi2} pi² net</p></header>
+      <div class="corps">
+        <dl class="fiche">
+          <dt>Type</dt><dd>${u.ty}</dd>
+          <dt>Superficie nette</dt><dd class="m">${u.pi2} pi²</dd>
+          <dt>Superficie (m²)</dt><dd class="m">${vg(u.m2)} m²</dd>
+          ${u.pieces.map(([n, d]) => `<dt>${n}</dt><dd class="m">${d}</dd>`).join("")}
+        </dl>
+        ${ouv ? `<div class="avis marque">${ico("alerte")}<span><b>${ouv} ouverture(s) à coordonner</b>Le plan et la volumétrie ne concordent pas sur cette unité.</span></div>
+          <button class="btn lg" data-act="aller-coord" style="width:100%">Ouvrir dans Coordination</button>`
+        : `<div class="avis">${ico("check")}<span><b>Ouvertures alignées</b>Le plan et la volumétrie concordent sur cette unité.</span></div>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+function fichiersHTML() {
+  const ligne = (f, k) => `<tr><td>${ico(k)} <b style="font-weight:500">${f.nom}</b></td><td class="cle">${f.type}</td><td class="num">${f.rev}</td><td class="cle">${f.maj}</td><td class="num">${f.taille}</td></tr>`;
+  return `<div class="dedans">
+    <div class="carte">
+      <header><h2 class="grow">Sources connectées</h2><button class="btn sm" data-act="resync">${ico("sync")} Relire les sources</button></header>
+      <table class="tech">
+        <thead><tr><th>Fichier</th><th>Type</th><th style="text-align:right">Révision</th><th>Dernière lecture</th><th style="text-align:right">Taille</th></tr></thead>
+        <tbody>${SOURCES.dwg.map((f) => ligne(f, "drawing")).join("")}${ligne(SOURCES.skp, "cube")}</tbody>
+      </table>
+    </div>
+    <div class="carte">
+      <header><h2 class="grow">Journal des changements</h2></header>
+      <div class="corps serre">${JOURNAL.map(journalRang).join("")}</div>
+    </div>
+  </div>`;
+}
+
+function placeholderHTML(nom) {
+  return `<div class="dedans"><div class="carte"><p class="vide">${nom} — hors du périmètre de ce prototype.</p></div></div>`;
+}
+
+/* ----------------------------------------------------------------- rendu */
+
+function pageHTML() {
+  if (S.projet !== "bal") return autreProjetHTML(S.projet);
+  switch (S.page) {
+    case "apercu": return apercuHTML();
+    case "coord": return coordHTML();
+    case "unites": return unitesHTML();
+    case "fichiers": return fichiersHTML();
+    default: return placeholderHTML(PAGES().find((p) => p[0] === S.page)[1]);
+  }
+}
+
+function rendre() {
+  const plein = S.projet === "bal" && (S.page === "coord" || S.page === "unites");
+  $("#shell").innerHTML = railIcones("projets") +
+    `<div class="vue">${ongletsProjets(S.projet)}${ongletsPages(S.page, PAGES(), `<span class="puce">${ico("sync")} lu il y a 6 min</span>`)}
+      <main class="page${plein ? " plein" : ""}">${pageHTML()}</main></div>`;
+}
+
+/* -------------------------------------------------------------- actions */
+
+function regler(mode) {
+  const e = ecartPar(S.ec);
+  if (!e) return;
+  e.etat = "regle";
+  e.decision = mode === "plan" ? "Plan 2D à corriger dans AutoCAD"
+    : mode === "modele" ? "Volumétrie 3D à corriger dans SketchUp"
+    : "Rien à corriger";
+  JOURNAL.unshift({ d: "aujourd’hui · maintenant", qui: MOI.init, quoi: `${e.id} — ${e.decision}`, det: `NO. ${e.unite} · ${e.piece}` });
+  DEPUIS[e.id] = "Réglé aujourd’hui par " + MOI.init;
+  const suivant = ouverts()[0];
+  if (suivant) { S.ec = suivant.id; S.niveau = suivant.niveau; S.filtre = "Tous"; }
+  rendre();
+}
+
+$("#shell").addEventListener("click", (ev) => {
+  const t = ev.target;
+  const nav = t.closest("[data-nav]");
+  const pj = t.closest("[data-projet]");
+  const nouveau = t.closest("[data-nouveau]");
+  const seg = t.closest("[data-seg] button");
+  const ecart = t.closest("[data-ecart]");
+  const uni = t.closest("[data-unite]");
+  const ong = t.closest("[data-onglet]");
+  const act = t.closest("[data-act]");
+
+  if (nouveau) return ouvrirVoile();
+  if (pj) { S.projet = pj.dataset.projet; S.page = "apercu"; return rendre(); }
+  if (nav) {
+    const k = nav.dataset.nav;
+    if (["projets", "adn", "biblio", "param"].includes(k)) return;
+    S.page = k; S.projet = "bal"; return rendre();
+  }
+  if (seg) {
+    const nom = seg.closest("[data-seg]").dataset.seg, v = seg.dataset.val;
+    if (nom === "niveau") {
+      S.niveau = +v.replace(/\D/g, "");
+      const c = ecartsNiveau(S.niveau)[0];
+      if (c) S.ec = c.id;
+      S.filtre = "Niveau " + S.niveau;
+    }
+    if (nom === "filtre") S.filtre = v;
+    return rendre();
+  }
+  if (ong) { S.onglet = ong.dataset.onglet; return rendre(); }
+  if (ecart && ecart.dataset.ecart) {
+    const e = ecartPar(ecart.dataset.ecart);
+    S.ec = e.id; S.niveau = e.niveau; S.page = "coord"; return rendre();
+  }
+  if (uni) { S.unite = uni.dataset.unite; if (S.page === "coord") { const e = ecartsUnite(S.unite)[0]; if (e) { S.ec = e.id; S.niveau = e.niveau; } } return rendre(); }
+  if (act) {
+    const a = act.dataset.act;
+    if (a === "aller-coord") {
+      const e = ecartsUnite(S.unite).find((x) => x.etat === "ouvert");
+      if (e) { S.ec = e.id; S.niveau = e.niveau; }
+      S.page = "coord"; return rendre();
+    }
+    if (a === "aller-unites") { S.page = "unites"; return rendre(); }
+    if (a === "aller-fichiers") { S.page = "fichiers"; return rendre(); }
+    if (a === "typo") { S.typologie = !S.typologie; return rendre(); }
+    if (a === "corriger-plan") return regler("plan");
+    if (a === "corriger-modele") return regler("modele");
+    if (a === "accepter") return regler("accepter");
+    if (a === "rouvrir") { const e = ecartPar(S.ec); e.etat = "ouvert"; delete e.decision; return rendre(); }
+    if (a === "resync") return resync(act);
+    if (a === "ouvrir-dwg") return ouvrirVoile("dwg");
+    if (a === "brancher") return ouvrirVoile("brancher");
+  }
+});
+
+function resync(btn) {
+  btn.disabled = true;
+  btn.innerHTML = ico("sync") + " Lecture des fichiers…";
+  setTimeout(() => {
+    JOURNAL.unshift({ d: "aujourd’hui · maintenant", qui: MOI.init, quoi: "Sources relues", det: "Aucun changement depuis la dernière lecture" });
+    rendre();
+  }, 1100);
+}
+
+function ouvrirVoile(quoi) {
+  const v = $("#voile");
+  const corps = quoi === "dwg"
+    ? `<header><h2 class="grow">Ouvrir dans AutoCAD</h2></header>
+       <div class="corps"><p class="t-meta" style="line-height:1.6">ça fitte ne pilote pas AutoCAD et n’écrit jamais dans un fichier de dessin. Le lien ouvre <span class="mono">${SOURCES.dwg[0].nom}</span> sur le poste. La reprise se fait à la main, dans AutoCAD.</p></div>
+       <footer><button class="btn lg primaire" data-fermer>J’ai compris</button></footer>`
+    : quoi === "brancher"
+    ? `<header><h2 class="grow">Connecter une source</h2></header>
+       <div class="corps"><p class="t-meta" style="line-height:1.6">Dans le prototype, les sources sont déjà en place sur ${PROJET.nom}. Sur un projet neuf, on pointe le dossier du serveur : ça fitte relit les fichiers à chaque enregistrement.</p></div>
+       <footer><button class="btn lg primaire" data-fermer>Fermer</button></footer>`
+    : `<header><h2 class="grow">Ouvrir un projet</h2></header>
+       <div class="corps"><div class="pile">
+         ${["Rosemont Nord", "Verdun 4e Avenue", "Parc-Extension"].map((n) => `<button class="depot" style="text-align:left" data-fermer>${ico("building")}<span class="t">${n}</span><span class="f">archivé · aucune source connectée</span></button>`).join("")}
+       </div></div>
+       <footer><button class="btn lg" data-fermer>Annuler</button></footer>`;
+  v.innerHTML = `<div class="modale" style="width:min(520px,100%)">${corps}</div>`;
+  v.hidden = false;
+  v.onclick = (e) => { if (e.target === v || e.target.closest("[data-fermer]")) v.hidden = true; };
+}
+
+rendre();
+</script>
+</body>
+</html>

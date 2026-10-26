@@ -32,7 +32,7 @@ export default function VerifyButton({
       className={`${BTN} justify-center`}
     >
       <Icon name="check" size={14} />
-      {verified ? "Undo verification" : "Mark as verified"}
+      {verified ? "Annuler la vérification" : "Marquer comme vérifiée"}
     </button>
   );
 }

@@ -128,7 +128,7 @@ export default function PlanViewer({
           <button
             type="button"
             onClick={() => zoomBy(1 / 1.25)}
-            aria-label="zoom out"
+            aria-label="Zoom arrière"
             className="flex h-full w-9 items-center justify-center text-text-2 transition-colors hover:text-text"
           >
             <Icon name="minus" size={14} />
@@ -139,7 +139,7 @@ export default function PlanViewer({
           <button
             type="button"
             onClick={() => zoomBy(1.25)}
-            aria-label="zoom in"
+            aria-label="Zoom avant"
             className="flex h-full w-9 items-center justify-center text-text-2 transition-colors hover:text-text"
           >
             <Icon name="plus" size={14} />
@@ -149,7 +149,7 @@ export default function PlanViewer({
         <button
           type="button"
           onClick={reset}
-          aria-label="fit to view"
+          aria-label="Ajuster à la vue"
           className="flex h-9 w-9 items-center justify-center rounded-lg border border-edge text-text-2 transition-colors hover:text-text"
         >
           <Icon name="expand" size={14} />
@@ -249,8 +249,8 @@ export default function PlanViewer({
                   style={{ left: lx, top: ly }}
                   className={`absolute flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11px] font-medium ${
                     on
-                      ? "bg-brand text-white"
-                      : "bg-white/90 text-text ring-1 ring-edge"
+                      ? "bg-brand text-text"
+                      : "bg-panel/90 text-text ring-1 ring-edge"
                   }`}
                 >
                   {on ? null : (

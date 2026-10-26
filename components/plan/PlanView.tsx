@@ -176,13 +176,14 @@ export default function PlanView({
               className={BTN}
             />
           ) : null}
+          {/* The panel on the right is already "Tableau des unités — this
+              floor", so this link has to say the thing it adds: the whole
+              project. The 3D link that used to sit beside it is gone — the
+              segmented control below does it inline, and Bâtiment is in the
+              rail, so the same idea had three controls. */}
           <Link href={`/p/${code}/schedule`} className={BTN}>
             <Icon name="table" size={14} />
-            Tableau des unités
-          </Link>
-          <Link href={`/p/${code}/building`} className={BTN}>
-            <Icon name="cube" size={14} />
-            Contexte 3D
+            Toutes les unités du projet
           </Link>
         </div>
 
@@ -198,7 +199,7 @@ export default function PlanView({
                     aria-pressed={view === key}
                     className={`flex h-8 items-center rounded-lg px-4 text-[13px] font-medium transition-colors ${
                       view === key
-                        ? "bg-brand text-white"
+                        ? "bg-brand text-text"
                         : "text-text-2 hover:bg-app hover:text-text"
                     }`}
                   >

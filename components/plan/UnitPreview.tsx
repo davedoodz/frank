@@ -8,14 +8,14 @@ import { bedroomLabel } from "@/lib/format";
 import type { Floor, Unit } from "@/lib/types";
 
 const ORIENTATION: Record<string, string> = {
-  N: "North",
-  S: "South",
-  E: "East",
-  W: "West",
-  NE: "Northeast",
-  NW: "Northwest",
-  SE: "Southeast",
-  SW: "Southwest",
+  N: "Nord",
+  S: "Sud",
+  E: "Est",
+  W: "Ouest",
+  NE: "Nord-Est",
+  NW: "Nord-Ouest",
+  SE: "Sud-Est",
+  SW: "Sud-Ouest",
 };
 
 /**
@@ -35,16 +35,16 @@ export default function UnitPreview({
 }) {
   const verified = unit.status === "verified";
   const rows: [string, string][] = [
-    ["Floor area", `${unit.net_area_m2.value.toFixed(1)} m²`],
+    ["Superficie", `${unit.net_area_m2.value.toFixed(1)} m²`],
     [
-      "Balcony area",
+      "Balcon",
       unit.balcony_area_m2.value === null
         ? "—"
         : `${unit.balcony_area_m2.value.toFixed(1)} m²`,
     ],
     ["Orientation", ORIENTATION[unit.orientation.value] ?? unit.orientation.value],
-    ["Floor", floor.label],
-    ["Position", unit.is_corner.value ? "Corner unit" : "End unit"],
+    ["Étage", floor.label],
+    ["Position", unit.is_corner.value ? "Unité de coin" : "Unité d’extrémité"],
   ];
 
   return (
@@ -56,7 +56,7 @@ export default function UnitPreview({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-[17px] font-semibold text-text">
-              Unit {unit.number}
+              Unité {unit.number}
             </span>
             <span
               className={`inline-flex h-5 items-center gap-1 rounded-full px-2 text-[11px] font-medium ${
@@ -64,7 +64,7 @@ export default function UnitPreview({
               }`}
             >
               {verified ? <Icon name="check" size={11} /> : null}
-              {verified ? "Verified" : "Unverified"}
+              {verified ? "Vérifiée" : "Non vérifiée"}
             </span>
           </div>
           <div className="text-[12px] text-text-2">
@@ -89,14 +89,14 @@ export default function UnitPreview({
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button type="button" onClick={onOpen} className={`${BTN} justify-center`}>
           <Icon name="external" size={14} />
-          View full unit
+          Voir l’unité complète
         </button>
         <Link
           href={`/sim/autocad/retrieve?unit=${unit.id}&code=${encodeURIComponent(code)}`}
           className={BTN_DARK}
         >
           <Icon name="cad" size={14} />
-          Open in AutoCAD
+          Ouvrir dans AutoCAD
         </Link>
       </div>
     </section>

@@ -19,15 +19,15 @@ export default function RoomsStrip({
     <section className="panel shrink-0 px-4 py-3">
       <div className="flex items-center gap-2">
         <h2 className="text-[13px] font-semibold text-text">
-          Rooms ({rooms.length})
+          Pièces ({rooms.length})
         </h2>
         <span className="text-[12px] text-text-3">
-          Unit {unit.number} · as labelled on the sheet
+          Unité {unit.number} · telle qu’indiquée sur la feuille
         </span>
       </div>
       {rooms.length === 0 ? (
         <p className="mt-2 text-[13px] text-text-2">
-          No room was extracted for this unit.
+          Aucune pièce n’a été extraite pour cette unité.
         </p>
       ) : (
         <div className="mt-3 flex flex-wrap gap-2">
@@ -48,8 +48,8 @@ export default function RoomsStrip({
                   {room.area_m2 === null ? "—" : `${room.area_m2.toFixed(1)} m²`}
                 </div>
                 <div className="text-[11px] text-text-3 tabular-nums">
-                  {room.area_m2 === null ? "no area" : `${ft2(room.area_m2)} ft²`}
-                  {share === null ? "" : ` · ${share}%`}
+                  {room.area_m2 === null ? "aucune superficie" : `${ft2(room.area_m2)} ft²`}
+                  {share === null ? "" : ` · ${share}\u00a0%`}
                 </div>
               </div>
             );

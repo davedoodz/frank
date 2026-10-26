@@ -17,10 +17,10 @@ export function aspect(outline: [number, number][], widthPx: number, heightPx: n
 }
 
 export const BASIS_LABEL: Record<SimilarityBasis, string> = {
-  layout: "close layout match",
-  area: "close area match",
-  configuration: "similar configuration",
-  type: "same type",
+  layout: "Disposition très proche",
+  area: "Superficie très proche",
+  configuration: "Configuration semblable",
+  type: "Même typologie",
 };
 
 type Shape = { unit: Unit; aspect: number };

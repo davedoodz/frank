@@ -1,62 +1,69 @@
 @import "tailwindcss";
 
 @theme {
-  /* Near-monochrome. The accent is not a UI colour: it marks a position on a
-     drawing. Selection and active state are carried by inversion. */
+  /* One palette. Black, white, grey — and a single green, #C0D739, taken
+     from the office mark. The green is the only chromatic value in the
+     product: it marks what is selected, active, or verified, and nothing
+     else. It is a light value, so text on it is always ink, never white. */
   --color-paper: #ffffff;
-  --color-surface: #f4f4f2;
-  --color-line: #d9d9d5;
+  --color-surface: #f4f4f4;
+  --color-line: #e2e2e2;
   --color-ink: #111111;
-  --color-ink-2: #6b6b66;
-  --color-ink-3: #a3a39e;
-  --color-fill-2: #ecece9;
-  --color-accent: #c8411b;
-  --color-accent-08: rgba(200, 65, 27, 0.08);
+  --color-ink-2: #6b6b6b;
+  --color-ink-3: #9a9a9a;
+  --color-fill-2: #ededed;
+  --color-accent: #c0d739;
+  --color-accent-08: rgba(192, 215, 57, 0.14);
 
-  /* typology fills, 12 percent alpha on the plan */
-  --color-t-studio: #8a8a85;
-  --color-t-3h: #5b7a99;
-  --color-t-4h: #6f8f5e;
-  --color-t-5h: #a3733f;
-  --color-t-other: #b06a8a;
+  /* Typology is a quantity, not a category: the ramp darkens as the unit
+     gains a bedroom. It stays grey so the green keeps its one meaning. */
+  --color-t-studio: #dcdcdc;
+  --color-t-3h: #b4b4b4;
+  --color-t-4h: #8c8c8c;
+  --color-t-5h: #5a5a5a;
+  --color-t-other: #ececec;
 
-  --font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial,
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
     sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --font-mono: var(--font-geist-mono), ui-monospace, Menlo, monospace;
 
-  /* Product chrome. The plan register above stays monochrome; these are the
-     application surfaces: light panels on a grey page, one blue for
-     selection and primary intent, one green for verified. */
-  --color-app: #f6f7f9;
+  /* Product chrome. Same palette, applied to the application surfaces:
+     white panels on a near-white page, a black rail, and the office green
+     as the one highlight. The green is a fill, never a text colour — at
+     #C0D739 it is too light to read on white, and inverting it would give
+     the product a second accent. Text on green is always ink. */
+  --color-app: #fafafa;
   --color-panel: #ffffff;
-  --color-edge: #e6e8ec;
-  --color-edge-2: #eef0f3;
-  --color-text: #0f172a;
-  --color-text-2: #475569;
-  --color-text-3: #94a3b8;
-  --color-brand: #2563eb;
-  --color-brand-2: #1d4ed8;
-  --color-brand-soft: #eff6ff;
-  --color-ok: #16a34a;
-  --color-ok-soft: #dcfce7;
-  --color-alt: #7c3aed;
-  --color-alt-soft: #f3e8ff;
-  --color-bad: #dc2626;
-  --color-bad-soft: #fee2e2;
-  --color-ok-wash: #f0fdf4;
-  --color-bad-wash: #fef2f2;
-  --color-brand-line: #bfdbfe;
-  --color-nav: #0f1d2b;
-  --color-nav-2: #1b2c3d;
-  --color-nav-text: #93a3b5;
+  --color-edge: #e4e4e4;
+  --color-edge-2: #efefef;
+  --color-text: #111111;
+  --color-text-2: #6b6b6b;
+  --color-text-3: #9a9a9a;
+  --color-brand: #c0d739;
+  --color-brand-2: #b2c92c;
+  --color-brand-soft: #f1f6da;
+  --color-brand-line: #dde9a6;
+  /* Verified. The one place the green has to carry a glyph or a word, so it
+     is darkened until it reads on white; same hue, same meaning. */
+  --color-ok: #6f7f0d;
+  --color-ok-soft: #f1f6da;
+  --color-ok-wash: #f8fbee;
+  --color-alt: #6b6b6b;
+  --color-alt-soft: #f0f0f0;
+  --color-bad: #6b6b6b;
+  --color-bad-soft: #f0f0f0;
+  --color-bad-wash: #f5f5f5;
+  --color-nav: #111111;
+  --color-nav-2: #262626;
+  --color-nav-text: #8e8e8e;
 
-  /* typology, one hue per apartment type */
-  --color-ty-studio: #f59e0b;
-  --color-ty-1br: #22c55e;
-  --color-ty-2br: #3b82f6;
-  --color-ty-3br: #8b5cf6;
-  --color-ty-4br: #ec4899;
-  --color-ty-common: #94a3b8;
+  /* Typology, one grey step per bedroom. See the plan ramp above. */
+  --color-ty-studio: #dcdcdc;
+  --color-ty-1br: #b4b4b4;
+  --color-ty-2br: #8c8c8c;
+  --color-ty-3br: #5a5a5a;
+  --color-ty-4br: #2a2a2a;
+  --color-ty-common: #ececec;
 
   /* 11 metadata, 13 body, 15 panel title, 20 unit number. */
   --text-meta: 11px;

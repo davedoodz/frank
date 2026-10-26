@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ACTION } from "@/components/ui/Action";
 import { Chip } from "@/components/ui/Chip";
-import { LOW_CONFIDENCE, ft2 } from "@/lib/format";
+import Icon from "@/components/ui/Icon";
+import { ft2 } from "@/lib/format";
+import type { AreaUnit, Prefs } from "@/lib/prefs";
 
 export type ScheduleRow = {
   id: string;
@@ -46,167 +48,225 @@ type Col = {
   csv: (r: ScheduleRow) => string | number;
 };
 
-const cols: Col[] = [
-  {
-    key: "number",
-    label: "unit",
-    sort: (r) => r.number,
-    cell: (r) => <span className="font-mono text-meta text-ink">{r.number}</span>,
-    csv: (r) => r.number,
-  },
-  {
-    key: "floor",
-    label: "floor",
-    sort: (r) => r.level,
-    cell: (r) => <span className="text-body">{r.floor_label}</span>,
-    csv: (r) => r.floor_label,
-  },
-  {
-    key: "status",
-    label: "status",
-    sort: (r) => r.status,
-    cell: (r) => <span className="font-mono text-meta text-ink-3">{r.status}</span>,
-    csv: (r) => r.status,
-  },
-  {
-    key: "type",
-    label: "type",
-    sort: (r) => r.type,
-    cell: (r) => <span className="text-body">{r.type}</span>,
-    conf: (r) => r.type_c,
-    csv: (r) => r.type,
-  },
-  {
-    key: "bedrooms",
-    label: "bed",
-    numeric: true,
-    sort: (r) => r.bedrooms,
-    cell: (r) => <span className="font-mono text-meta">{r.bedrooms}</span>,
-    conf: (r) => r.bedrooms_c,
-    csv: (r) => r.bedrooms,
-  },
-  {
-    key: "bathrooms",
-    label: "bath",
-    numeric: true,
-    sort: (r) => r.bathrooms,
-    cell: (r) => <span className="font-mono text-meta">{r.bathrooms}</span>,
-    conf: (r) => r.bathrooms_c,
-    csv: (r) => r.bathrooms,
-  },
-  {
-    key: "rooms",
-    label: "rooms",
-    numeric: true,
-    sort: (r) => r.rooms ?? 0,
-    cell: (r) => <span className="font-mono text-meta">{r.rooms ?? "—"}</span>,
-    conf: (r) => r.rooms_c,
-    csv: (r) => r.rooms ?? "",
-  },
-  {
-    key: "net",
-    label: "net m²",
-    numeric: true,
-    sort: (r) => r.net,
-    cell: (r) => <span className="font-mono text-meta">{r.net.toFixed(1)}</span>,
-    conf: (r) => r.net_c,
-    csv: (r) => r.net.toFixed(1),
-  },
-  {
-    key: "net_ft",
-    label: "net ft²",
-    numeric: true,
-    sort: (r) => r.net,
-    cell: (r) => <span className="font-mono text-meta text-ink-3">{ft2(r.net)}</span>,
-    csv: (r) => ft2(r.net),
-  },
-  {
-    key: "gross",
-    label: "gross m²",
-    numeric: true,
-    sort: (r) => r.gross ?? 0,
-    cell: (r) => (
-      <span className="font-mono text-meta">
-        {r.gross === null ? "—" : r.gross.toFixed(1)}
-      </span>
-    ),
-    conf: (r) => r.gross_c,
-    csv: (r) => (r.gross === null ? "" : r.gross.toFixed(1)),
-  },
-  {
-    key: "orientation",
-    label: "orient",
-    sort: (r) => r.orientation,
-    cell: (r) => <span className="font-mono text-meta">{r.orientation}</span>,
-    conf: (r) => r.orientation_c,
-    csv: (r) => r.orientation,
-  },
-  {
-    key: "corner",
-    label: "corner",
-    sort: (r) => String(r.corner),
-    cell: (r) => <span className="text-body">{r.corner ? "yes" : "no"}</span>,
-    conf: (r) => r.corner_c,
-    csv: (r) => (r.corner ? "yes" : "no"),
-  },
-  {
-    key: "balcony",
-    label: "balcony",
-    sort: (r) => String(r.balcony),
-    cell: (r) => <span className="text-body">{r.balcony ? "yes" : "no"}</span>,
-    conf: (r) => r.balcony_c,
-    csv: (r) => (r.balcony ? "yes" : "no"),
-  },
-  {
-    key: "balcony_area",
-    label: "balcony m²",
-    numeric: true,
-    sort: (r) => r.balcony_area ?? 0,
-    cell: (r) => (
-      <span className="font-mono text-meta">
-        {r.balcony_area === null ? "—" : r.balcony_area.toFixed(1)}
-      </span>
-    ),
-    conf: (r) => r.balcony_area_c,
-    csv: (r) => (r.balcony_area === null ? "" : r.balcony_area.toFixed(1)),
-  },
-  {
-    key: "sheet",
-    label: "sheet",
-    sort: (r) => r.sheet,
-    cell: (r) => <span className="font-mono text-meta text-ink-3">{r.sheet}</span>,
-    csv: (r) => r.sheet,
-  },
-  {
-    key: "revision",
-    label: "revision",
-    sort: (r) => r.revision,
-    cell: (r) => <span className="font-mono text-meta text-ink-3">{r.revision}</span>,
-    csv: (r) => r.revision,
-  },
-];
+function buildCols(areaUnit: AreaUnit): Col[] {
+  const netCols: Col[] =
+    areaUnit === "ft2"
+      ? [
+          {
+            key: "net_ft",
+            label: "net ft²",
+            numeric: true,
+            sort: (r) => r.net,
+            cell: (r) => <span className="font-mono text-meta">{ft2(r.net)}</span>,
+            conf: (r) => r.net_c,
+            csv: (r) => ft2(r.net),
+          },
+        ]
+      : areaUnit === "m2"
+        ? [
+            {
+              key: "net",
+              label: "net m²",
+              numeric: true,
+              sort: (r) => r.net,
+              cell: (r) => (
+                <span className="font-mono text-meta">{r.net.toFixed(1)}</span>
+              ),
+              conf: (r) => r.net_c,
+              csv: (r) => r.net.toFixed(1),
+            },
+          ]
+        : [
+            {
+              key: "net",
+              label: "net m²",
+              numeric: true,
+              sort: (r) => r.net,
+              cell: (r) => (
+                <span className="font-mono text-meta">{r.net.toFixed(1)}</span>
+              ),
+              conf: (r) => r.net_c,
+              csv: (r) => r.net.toFixed(1),
+            },
+            {
+              key: "net_ft",
+              label: "net ft²",
+              numeric: true,
+              sort: (r) => r.net,
+              cell: (r) => (
+                <span className="font-mono text-meta text-ink-3">{ft2(r.net)}</span>
+              ),
+              csv: (r) => ft2(r.net),
+            },
+          ];
+
+  const grossCol: Col =
+    areaUnit === "ft2"
+      ? {
+          key: "gross",
+          label: "brute ft²",
+          numeric: true,
+          sort: (r) => r.gross ?? 0,
+          cell: (r) => (
+            <span className="font-mono text-meta">
+              {r.gross === null ? "—" : ft2(r.gross)}
+            </span>
+          ),
+          conf: (r) => r.gross_c,
+          csv: (r) => (r.gross === null ? "" : ft2(r.gross)),
+        }
+      : {
+          key: "gross",
+          label: "brute m²",
+          numeric: true,
+          sort: (r) => r.gross ?? 0,
+          cell: (r) => (
+            <span className="font-mono text-meta">
+              {r.gross === null ? "—" : r.gross.toFixed(1)}
+            </span>
+          ),
+          conf: (r) => r.gross_c,
+          csv: (r) => (r.gross === null ? "" : r.gross.toFixed(1)),
+        };
+
+  return [
+    {
+      key: "number",
+      label: "unité",
+      sort: (r) => r.number,
+      cell: (r) => <span className="font-mono text-meta text-ink">{r.number}</span>,
+      csv: (r) => r.number,
+    },
+    {
+      key: "floor",
+      label: "étage",
+      sort: (r) => r.level,
+      cell: (r) => <span className="text-body whitespace-nowrap">{r.floor_label}</span>,
+      csv: (r) => r.floor_label,
+    },
+    {
+      key: "status",
+      label: "statut",
+      sort: (r) => r.status,
+      cell: (r) => (
+        <span className="font-mono text-meta text-ink-3 whitespace-nowrap">
+          {r.status === "verified" ? "vérifiée" : "non vérifiée"}
+        </span>
+      ),
+      csv: (r) => (r.status === "verified" ? "vérifiée" : "non vérifiée"),
+    },
+    {
+      key: "type",
+      label: "type",
+      sort: (r) => r.type,
+      cell: (r) => <span className="text-body">{r.type}</span>,
+      conf: (r) => r.type_c,
+      csv: (r) => r.type,
+    },
+    {
+      key: "bedrooms",
+      label: "ch",
+      numeric: true,
+      sort: (r) => r.bedrooms,
+      cell: (r) => <span className="font-mono text-meta">{r.bedrooms}</span>,
+      conf: (r) => r.bedrooms_c,
+      csv: (r) => r.bedrooms,
+    },
+    {
+      key: "bathrooms",
+      label: "sdb",
+      numeric: true,
+      sort: (r) => r.bathrooms,
+      cell: (r) => <span className="font-mono text-meta">{r.bathrooms}</span>,
+      conf: (r) => r.bathrooms_c,
+      csv: (r) => r.bathrooms,
+    },
+    {
+      key: "rooms",
+      label: "pièces",
+      numeric: true,
+      sort: (r) => r.rooms ?? 0,
+      cell: (r) => <span className="font-mono text-meta">{r.rooms ?? "—"}</span>,
+      conf: (r) => r.rooms_c,
+      csv: (r) => r.rooms ?? "",
+    },
+    ...netCols,
+    grossCol,
+    {
+      key: "orientation",
+      label: "orient.",
+      sort: (r) => r.orientation,
+      cell: (r) => <span className="font-mono text-meta">{r.orientation}</span>,
+      conf: (r) => r.orientation_c,
+      csv: (r) => r.orientation,
+    },
+    {
+      key: "corner",
+      label: "coin",
+      sort: (r) => String(r.corner),
+      cell: (r) => <span className="text-body">{r.corner ? "oui" : "non"}</span>,
+      conf: (r) => r.corner_c,
+      csv: (r) => (r.corner ? "oui" : "non"),
+    },
+    {
+      key: "balcony",
+      label: "balcon",
+      sort: (r) => String(r.balcony),
+      cell: (r) => <span className="text-body">{r.balcony ? "oui" : "non"}</span>,
+      conf: (r) => r.balcony_c,
+      csv: (r) => (r.balcony ? "oui" : "non"),
+    },
+    {
+      key: "balcony_area",
+      label: "balcon m²",
+      numeric: true,
+      sort: (r) => r.balcony_area ?? 0,
+      cell: (r) => (
+        <span className="font-mono text-meta">
+          {r.balcony_area === null ? "—" : r.balcony_area.toFixed(1)}
+        </span>
+      ),
+      conf: (r) => r.balcony_area_c,
+      csv: (r) => (r.balcony_area === null ? "" : r.balcony_area.toFixed(1)),
+    },
+    {
+      key: "sheet",
+      label: "feuille",
+      sort: (r) => r.sheet,
+      cell: (r) => <span className="font-mono text-meta text-ink-3">{r.sheet}</span>,
+      csv: (r) => r.sheet,
+    },
+    {
+      key: "revision",
+      label: "révision",
+      sort: (r) => r.revision,
+      cell: (r) => <span className="font-mono text-meta text-ink-3">{r.revision}</span>,
+      csv: (r) => r.revision,
+    },
+  ];
+}
 
 const FACETS = ["floor", "type", "bedrooms", "balcony", "status", "review"] as const;
 type Facet = (typeof FACETS)[number];
 
-function facetValue(row: ScheduleRow, facet: Facet): string {
+function facetValue(row: ScheduleRow, facet: Facet, lowConfidence: number): string {
   switch (facet) {
     case "floor":
       return row.floor_label;
     case "type":
       return row.type;
     case "bedrooms":
-      return `${row.bedrooms} bed`;
+      return `${row.bedrooms} ch`;
     case "balcony":
-      return row.balcony ? "balcony" : "no balcony";
+      return row.balcony ? "balcon" : "sans balcon";
     case "status":
-      return row.status;
+      return row.status === "verified" ? "vérifiée" : "non vérifiée";
     case "review":
-      return needsReview(row) ? "needs review" : "clear";
+      return needsReview(row, lowConfidence) ? "à réviser" : "conforme";
   }
 }
 
-function needsReview(row: ScheduleRow): boolean {
+function needsReview(row: ScheduleRow, lowConfidence: number): boolean {
   return [
     row.type_c,
     row.bedrooms_c,
@@ -218,15 +278,17 @@ function needsReview(row: ScheduleRow): boolean {
     row.corner_c,
     row.balcony_c,
     row.balcony_area_c,
-  ].some((c) => c < LOW_CONFIDENCE);
+  ].some((c) => c < lowConfidence);
 }
 
 export default function ScheduleTable({
   code,
   rows,
+  prefs,
 }: {
   code: string;
   rows: ScheduleRow[];
+  prefs: Prefs;
 }) {
   const router = useRouter();
   const [active, setActive] = useState<Record<string, Set<string>>>({});
@@ -235,15 +297,20 @@ export default function ScheduleTable({
     dir: 1,
   });
 
+  const lowConfidence = prefs.lowConfidence;
+  const cols = useMemo(() => buildCols(prefs.area), [prefs.area]);
+  const rowH = prefs.density === "dense" ? "h-6" : "h-7";
+  const groupH = prefs.density === "dense" ? "h-7" : "h-8";
+
   const filtered = useMemo(
     () =>
       rows.filter((row) =>
         FACETS.every((facet) => {
           const set = active[facet];
-          return !set || set.size === 0 || set.has(facetValue(row, facet));
+          return !set || set.size === 0 || set.has(facetValue(row, facet, lowConfidence));
         }),
       ),
-    [rows, active],
+    [rows, active, lowConfidence],
   );
 
   const groups = useMemo(() => {
@@ -266,7 +333,7 @@ export default function ScheduleTable({
             : String(xv).localeCompare(String(yv)) * sort.dir;
         }),
       }));
-  }, [filtered, sort]);
+  }, [filtered, sort, cols]);
 
   function toggle(facet: Facet, value: string) {
     setActive((state) => {
@@ -293,8 +360,8 @@ export default function ScheduleTable({
 
   const totalNet = filtered.reduce((sum, r) => sum + r.net, 0);
   const figures: [string, string][] = [
-    ["units", String(filtered.length)],
-    ["verified", String(filtered.filter((r) => r.status === "verified").length)],
+    ["unités", String(filtered.length)],
+    ["vérifiées", String(filtered.filter((r) => r.status === "verified").length)],
     ["studio", String(filtered.filter((r) => r.type === "studio").length)],
     ["3½", String(filtered.filter((r) => r.type === "3½").length)],
     ["4½", String(filtered.filter((r) => r.type === "4½").length)],
@@ -307,7 +374,7 @@ export default function ScheduleTable({
     [
       ...new Set(
         rows
-          .map((row) => facetValue(row, facet))
+          .map((row) => facetValue(row, facet, lowConfidence))
           .filter((value) => facet !== "review" || value === "needs review"),
       ),
     ]
@@ -317,11 +384,11 @@ export default function ScheduleTable({
         value,
         count: rows.filter(
           (row) =>
-            facetValue(row, facet) === value &&
+            facetValue(row, facet, lowConfidence) === value &&
             FACETS.every((other) => {
               if (other === facet) return true;
               const set = active[other];
-              return !set || set.size === 0 || set.has(facetValue(row, other));
+              return !set || set.size === 0 || set.has(facetValue(row, other, lowConfidence));
             }),
         ).length,
       })),
@@ -339,7 +406,7 @@ export default function ScheduleTable({
         <div className="flex-1" />
         <div className="px-3">
           <button type="button" onClick={exportCsv} className={ACTION}>
-            export csv
+            exporter csv
           </button>
         </div>
       </div>
@@ -374,10 +441,15 @@ export default function ScheduleTable({
                     c.numeric ? "text-right" : "text-left"
                   } ${sort.key === c.key ? "text-ink" : ""}`}
                 >
-                  {c.label}
-                  {sort.key === c.key ? (
-                    <span className="font-mono"> {sort.dir === 1 ? "+" : "−"}</span>
-                  ) : null}
+                  <span className="inline-flex items-center gap-1">
+                    {c.label}
+                    {sort.key === c.key ? (
+                      <Icon
+                        name={sort.dir === 1 ? "arrow-up" : "arrow-down"}
+                        size={11}
+                      />
+                    ) : null}
+                  </span>
                 </th>
               ))}
             </tr>
@@ -387,13 +459,17 @@ export default function ScheduleTable({
               <FloorGroup
                 key={group.label}
                 group={group}
+                cols={cols}
+                lowConfidence={lowConfidence}
+                rowH={rowH}
+                groupH={groupH}
                 onOpen={(row) =>
                   router.push(`/p/${code}/units?floor=${row.level}&u=${row.number}`)
                 }
               />
             ))}
-            <tr className="h-7 border-t border-ink">
-              <td className="px-3 text-body text-ink">project total</td>
+            <tr className={`${rowH} border-t border-ink`}>
+              <td className="px-3 text-body text-ink">total du projet</td>
               <td className="px-3 font-mono text-meta">{filtered.length}</td>
               {cols.slice(2).map((c) => (
                 <td key={c.key} className="px-3 text-right">
@@ -412,7 +488,7 @@ export default function ScheduleTable({
           </tbody>
         </table>
         {filtered.length === 0 ? (
-          <div className="px-3 py-4 text-meta text-ink-2">no unit matches</div>
+          <div className="px-3 py-4 text-meta text-ink-2">aucune unité ne correspond</div>
         ) : null}
       </div>
     </div>
@@ -421,36 +497,52 @@ export default function ScheduleTable({
 
 function FloorGroup({
   group,
+  cols,
+  lowConfidence,
+  rowH,
+  groupH,
   onOpen,
 }: {
   group: { label: string; rows: ScheduleRow[] };
+  cols: Col[];
+  lowConfidence: number;
+  rowH: string;
+  groupH: string;
   onOpen: (row: ScheduleRow) => void;
 }) {
   const net = group.rows.reduce((sum, r) => sum + r.net, 0);
+  const netCols = cols.filter((c) => c.key === "net" || c.key === "net_ft");
+  const labelSpan = cols.length - 7 - netCols.length;
 
   return (
     <>
-      <tr className="h-8 bg-fill-2">
+      <tr className={`${groupH} bg-fill-2`}>
         <td className="px-3 text-body text-ink" colSpan={7}>
           {group.label}
         </td>
-        <td className="px-3 text-right font-mono text-meta text-ink">
-          {net.toFixed(1)}
-        </td>
-        <td className="px-3 text-right font-mono text-meta text-ink-3">{ft2(net)}</td>
-        <td className="label-11 px-3 text-right" colSpan={cols.length - 9}>
-          {group.rows.length} units
+        {netCols.map((c) => (
+          <td
+            key={c.key}
+            className={`px-3 text-right font-mono text-meta ${
+              c.key === "net" ? "text-ink" : "text-ink-3"
+            }`}
+          >
+            {c.key === "net" ? net.toFixed(1) : ft2(net)}
+          </td>
+        ))}
+        <td className="label-11 px-3 text-right" colSpan={labelSpan}>
+          {group.rows.length} unités
         </td>
       </tr>
       {group.rows.map((row) => (
         <tr
           key={row.id}
           onClick={() => onOpen(row)}
-          className="h-7 cursor-pointer border-b border-line transition-colors duration-[80ms] hover:bg-fill-2"
+          className={`${rowH} cursor-pointer border-b border-line transition-colors duration-[80ms] hover:bg-fill-2`}
         >
           {cols.map((c) => {
             const conf = c.conf?.(row);
-            const low = conf !== undefined && conf < LOW_CONFIDENCE;
+            const low = conf !== undefined && conf < lowConfidence;
             return (
               <td
                 key={c.key}

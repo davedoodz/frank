@@ -166,7 +166,7 @@ function Field({
     <label className="flex flex-col gap-1.5">
       <span className="text-[12px] font-medium text-text-2">
         {label}
-        {required ? <span className="text-brand"> *</span> : null}
+        {required ? <span className="text-text"> *</span> : null}
       </span>
       {children}
     </label>

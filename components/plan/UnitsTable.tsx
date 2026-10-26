@@ -6,10 +6,10 @@ import { brLabel, ft2, typologyColor } from "@/lib/format";
 import type { Floor, Unit } from "@/lib/types";
 
 const ORIENTATION: Record<string, string> = {
-  N: "North",
-  S: "South",
-  E: "East",
-  W: "West",
+  N: "Nord",
+  S: "Sud",
+  E: "Est",
+  W: "Ouest",
   NE: "NE",
   NW: "NW",
   SE: "SE",
@@ -17,12 +17,12 @@ const ORIENTATION: Record<string, string> = {
 };
 
 const COLUMNS: [string, "left" | "right"][] = [
-  ["#", "left"],
+  ["Unité", "left"],
   ["Type", "left"],
   ["m²", "right"],
   ["ft²", "right"],
   ["Orient.", "left"],
-  ["Status", "left"],
+  ["État", "left"],
 ];
 
 /**
@@ -46,12 +46,12 @@ export default function UnitsTable({
     <section className="panel flex shrink-0 flex-col">
       <div className="flex h-14 items-center gap-2 px-4">
         <h2 className="truncate text-[15px] font-semibold text-text">
-          Unit Schedule — {floor.label}
+          Tableau des unités — {floor.label}
         </h2>
         <span className="flex-1" />
         <a href={onExport} className={BTN}>
           <Icon name="export" size={14} />
-          Export
+          Exporter
         </a>
       </div>
 
@@ -88,7 +88,7 @@ export default function UnitsTable({
                       style={{ background: typologyColor(unit.type_qc.value) }}
                     />
                     <span
-                      className={`font-medium ${on ? "text-brand" : "text-text"}`}
+                      className="font-medium text-text"
                     >
                       {unit.number}
                     </span>
@@ -115,7 +115,7 @@ export default function UnitsTable({
                     {unit.status === "verified" ? (
                       <Icon name="check" size={12} />
                     ) : null}
-                    {unit.status === "verified" ? "Verified" : "Unverified"}
+                    {unit.status === "verified" ? "Vérifiée" : "Non vérifiée"}
                   </span>
                 </td>
               </tr>

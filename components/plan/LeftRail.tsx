@@ -30,7 +30,7 @@ export default function LeftRail({
   return (
     <nav className="panel flex w-[232px] shrink-0 flex-col overflow-y-auto">
       <div className="flex h-11 items-center justify-between px-4">
-        <span className="text-[13px] font-semibold text-text">Building</span>
+        <span className="text-[13px] font-semibold text-text">Bâtiment</span>
         <Icon name="chevron-down" size={14} className="text-text-3" />
       </div>
 
@@ -43,7 +43,7 @@ export default function LeftRail({
               href={`/p/${code}/units?floor=${floor.level}`}
               className={`flex h-9 items-center gap-2 rounded-lg px-2 text-[13px] transition-colors ${
                 on
-                  ? "bg-brand-soft font-medium text-brand"
+                  ? "bg-brand-soft font-medium text-text"
                   : "text-text-2 hover:bg-app"
               }`}
             >
@@ -52,7 +52,7 @@ export default function LeftRail({
               <span className="flex-1" />
               <span className="text-[11px] text-text-3">
                 {floor.units.length
-                  ? `${floor.units.length} units`
+                  ? `${floor.units.length} unités`
                   : "—"}
               </span>
             </Link>
@@ -62,7 +62,7 @@ export default function LeftRail({
 
       <div className="mt-2 border-t border-edge-2 px-4 pt-3 pb-1">
         <span className="text-[13px] font-semibold text-text">
-          Units ({floorLabel})
+          Unités ({floorLabel})
         </span>
       </div>
 

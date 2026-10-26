@@ -19,14 +19,15 @@ export function Chip({
 }) {
   const dead = count === 0 && !active;
 
+  /* Selected is the office green, the same "on" the segmented controls use. */
   const row = active
-    ? "bg-ink text-paper"
+    ? "bg-brand font-medium text-ink"
     : dead
       ? "text-ink-3"
       : "text-ink hover:bg-fill-2";
 
   const badge = active
-    ? "bg-paper text-ink"
+    ? "bg-ink/12 text-ink"
     : dead
       ? "text-ink-3 ring-1 ring-line ring-inset"
       : "bg-fill-2 text-ink-2 group-hover:bg-paper";

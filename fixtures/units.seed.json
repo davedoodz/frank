@@ -8,7 +8,7 @@
       "typology": "condo",
       "floors_count": 2,
       "ingest_method": "manual",
-      "notes": "fixture: 6-storey wood frame on podium, 2 floors seeded",
+      "notes": "fixture : ossature de bois de 6 étages sur podium, 2 étages amorcés",
       "display_name": "Condo Mont-Royal",
       "city": "Montréal",
       "verified_count": 0,
@@ -54,7 +54,7 @@
       "province": "QC",
       "status": "active",
       "updated_at": "2026-10-18",
-      "description": "98-unit residential project on boulevard Mont-Royal. Ten storeys over underground parking."
+      "description": "Projet résidentiel de 98 unités sur le boulevard Mont-Royal. Dix étages sur stationnement souterrain."
     },
     {
       "id": "p2",
@@ -68,7 +68,7 @@
       "verified_count": 0,
       "ingest_method": "dxf",
       "last_import_at": "2026-10-24",
-      "notes": "archive project, standard floor plate indexed for office dna",
+      "notes": "projet d’archive, plateau type indexé pour l’ADN de l’agence",
       "drawings": [
         {
           "filename": "A-201_Niveau_02.dwg",
@@ -110,7 +110,7 @@
       "province": "QC",
       "status": "active",
       "updated_at": "2026-10-22",
-      "description": "Two wings around a courtyard, standard floor plate indexed for office dna."
+      "description": "Deux ailes autour d’une cour, plateau type indexé pour l’ADN de l’agence."
     },
     {
       "id": "p3",
@@ -124,7 +124,7 @@
       "verified_count": 0,
       "ingest_method": "dxf",
       "last_import_at": "2026-10-24",
-      "notes": "archive project, standard floor plate indexed for office dna",
+      "notes": "projet d’archive, plateau type indexé pour l’ADN de l’agence",
       "drawings": [
         {
           "filename": "A-205_Niveau_05.dwg",
@@ -157,7 +157,7 @@
       "province": "QC",
       "status": "active",
       "updated_at": "2026-10-20",
-      "description": "Six storeys on a corner lot, drawings connected and waiting on indexing."
+      "description": "Six étages sur un lot de coin, dessins connectés et en attente d’indexation."
     },
     {
       "id": "p4",
@@ -174,7 +174,7 @@
       "status": "archived",
       "updated_at": "2026-10-11",
       "last_import_at": null,
-      "description": "Six storeys on a sloping site, archived after the design competition.",
+      "description": "Six étages sur un terrain en pente, archivé après le concours de design.",
       "notes": null,
       "drawings": [
         {
@@ -212,7 +212,7 @@
       "status": "active",
       "updated_at": "2026-10-19",
       "last_import_at": null,
-      "description": "Ten-storey rental block beside the water, drawings connected in one folder.",
+      "description": "Immeuble locatif de dix étages au bord de l’eau, dessins connectés dans un seul dossier.",
       "notes": null,
       "drawings": [
         {
@@ -259,7 +259,7 @@
       "status": "archived",
       "updated_at": "2026-10-04",
       "last_import_at": null,
-      "description": "Seven storeys downtown, kept for the typical floor plate.",
+      "description": "Sept étages au centre-ville, conservé pour son plateau type.",
       "notes": null,
       "drawings": [
         {
@@ -288,7 +288,7 @@
       "status": "active",
       "updated_at": "2026-10-21",
       "last_import_at": null,
-      "description": "Four low-rise volumes around a shared court, nothing indexed yet.",
+      "description": "Quatre volumes de faible hauteur autour d’une cour commune, rien d’indexé pour l’instant.",
       "notes": null,
       "drawings": [
         {

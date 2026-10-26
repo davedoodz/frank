@@ -4,7 +4,7 @@ import { useState } from "react";
 import Badge, { Tag } from "@/components/dna/Badge";
 import PlanCrop from "@/components/dna/PlanCrop";
 import { DimensionTable, RoomTable } from "@/components/dna/UnitTables";
-import { ORIENTATION_TITLE, unitChips } from "@/lib/dna";
+import { ORIENTATION_LABEL, unitChips } from "@/lib/dna";
 import { ft2 } from "@/lib/format";
 import type { Drawing, Floor, Project, Room, SimilarityBasis, Unit } from "@/lib/types";
 
@@ -65,7 +65,7 @@ export default function ArchiveUnitPanel({
     ],
     ["Chambres", unit.bedrooms.value],
     ["Salles de bain", unit.bathrooms.value],
-    ["Orientation", ORIENTATION_TITLE[unit.orientation.value]],
+    ["Orientation", ORIENTATION_LABEL[unit.orientation.value]],
     ["Étage", floor.label],
   ];
 
@@ -111,7 +111,7 @@ export default function ArchiveUnitPanel({
             type="button"
             onClick={() => setTab(key)}
             className={`relative flex h-11 items-center text-[13px] font-medium transition-colors ${
-              tab === key ? "text-brand" : "text-text-2 hover:text-text"
+              tab === key ? "text-text" : "text-text-2 hover:text-text"
             }`}
           >
             {label}
@@ -143,9 +143,9 @@ export default function ArchiveUnitPanel({
                   floor={floor}
                   aspect={4 / 3}
                   margin={2.4}
-                  fill="#2563eb"
+                  fill="var(--color-brand)"
                   fillOpacity={0.22}
-                  stroke="#2563eb"
+                  stroke="var(--color-brand)"
                   strokeWidth={1.5}
                 />
               </div>

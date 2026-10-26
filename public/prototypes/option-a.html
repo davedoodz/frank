@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>ça fitte — option A</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ----- propre à l'option A : la procédure est visible en permanence ----- */
+.etapes { display: flex; align-items: stretch; background: var(--paper); border-bottom: 1px solid var(--line); padding: 0 12px; flex: 0 0 auto; }
+.etapes button { display: flex; align-items: center; gap: 8px; padding: 9px 14px 9px 10px; position: relative; }
+.etapes button + button::before { content: ""; position: absolute; left: -1px; top: 50%; width: 1px; height: 18px; margin-top: -9px; background: var(--line); }
+.etapes .pastille { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line-3); display: grid; place-items: center; font-size: 10.5px; font-weight: 700; color: var(--ink-3); flex: 0 0 20px; }
+.etapes .lib { font-size: var(--t-meta); color: var(--ink-3); white-space: nowrap; }
+.etapes button[data-etat="fait"] .pastille { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+.etapes button[data-etat="fait"] .lib { color: var(--ink-2); }
+.etapes button[aria-current="true"] .pastille { background: var(--ink); border-color: var(--ink); color: #fff; }
+.etapes button[aria-current="true"] .lib { color: var(--ink); font-weight: 620; }
+.etapes button:disabled { cursor: not-allowed; }
+
+.vue { flex: 1; min-height: 0; display: none; flex-direction: column; }
+.vue[data-actif="1"] { display: flex; }
+
+.entete { padding: 16px 20px 12px; }
+.entete p { font-size: var(--t-meta); color: var(--ink-2); margin-top: 4px; max-width: 72ch; line-height: 1.5; }
+
+.pied { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-top: 1px solid var(--line); background: var(--paper); flex: 0 0 auto; }
+.pied .note { font-size: var(--t-micro); color: var(--ink-3); }
+
+.corps2 { flex: 1; min-height: 0; display: grid; gap: 14px; padding: 0 20px 16px; }
+.scroll { overflow-y: auto; }
+
+/* étape 3 : trois colonnes */
+.triptyque { flex: 1; min-height: 0; display: grid; grid-template-columns: 262px 1fr 358px; }
+.triptyque > * { min-width: 0; min-height: 0; }
+.colg { background: var(--paper); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+
+.avancement { padding: 11px 12px; border-bottom: 1px solid var(--line); }
+.avancement .rang { justify-content: space-between; margin-bottom: 7px; }
+.avancement b { font-size: var(--t-body); font-weight: 620; }
+
+.photo-detail { width: 100%; height: 118px; object-fit: cover; border-radius: var(--r); border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <span class="wordmark">ça fitte<i>.</i></span>
+    <span class="sep"></span>
+    <div class="projtitle" id="barre-projet" hidden>
+      <b>Résidence Papineau</b>
+      <span class="t-meta">Montréal (QC) · Dossier préliminaire</span>
+    </div>
+    <span class="grow"></span>
+    <div class="revpair" id="barre-rev" hidden>
+      <div class="rev"><span>Référence</span><b>R03 · acceptée</b></div>
+      <div class="arrow">→</div>
+      <div class="rev courante"><span>Courante</span><b>R04 · 24 janv. 2026</b></div>
+    </div>
+    <button class="btn discret" onclick="allerAccueil()" id="btn-accueil" hidden>Quitter</button>
+  </header>
+
+  <!-- ===================== ACCUEIL ===================== -->
+  <section class="vue" id="v-accueil" data-actif="1" style="overflow-y:auto">
+    <div style="max-width:980px;margin:0 auto;padding:46px 24px 60px;width:100%">
+      <h1 style="font-size:26px">Vos projets</h1>
+      <p class="t-meta" style="margin-top:6px">Comparez les plans AutoCAD et la volumétrie SketchUp, et voyez tôt si un changement de fenêtre touche la façade de rayonnement.</p>
+
+      <div class="carte" style="margin-top:22px;overflow:hidden">
+        <div style="display:flex">
+          <img class="photo" src="assets/batiment.jpg" alt="" style="width:256px;height:184px;object-fit:cover;flex:0 0 256px">
+          <div style="flex:1;padding:16px 18px;display:flex;flex-direction:column">
+            <div class="rang" style="gap:10px">
+              <h2 style="font-size:18px">Résidence Papineau</h2>
+              <span class="etat attention">Révision requise</span>
+            </div>
+            <p class="t-meta" style="margin-top:4px">Montréal (QC) · Dossier préliminaire · 6 niveaux · RMC-001</p>
+
+            <div class="rang" style="gap:22px;margin-top:16px">
+              <div><b style="font-size:22px">7</b> <span class="t-meta">écarts de fenêtres</span></div>
+              <div><b style="font-size:22px">2</b> <span class="t-meta">à réviser</span></div>
+              <div><b style="font-size:22px">Est</b> <span class="t-meta">façade touchée</span></div>
+            </div>
+
+            <div class="grow"></div>
+            <div class="rang" style="gap:8px;margin-top:14px">
+              <button class="btn primaire lg" onclick="ouvrirEtape(3)">Réviser la comparaison R03 → R04</button>
+              <button class="btn lg" onclick="ouvrirEtape(1)">Nouvelle comparaison</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="carte" style="margin-top:12px;width:100%;padding:18px;display:flex;align-items:center;gap:12px;text-align:left;border-style:dashed"
+              onclick="nouveauProjet()">
+        <span style="color:var(--ink-3)" id="ic-plus"></span>
+        <div><b style="font-size:var(--t-body)">Nouveau projet</b><div class="t-meta" style="margin-top:2px">Partir d'un dossier vide et importer une première paire de fichiers.</div></div>
+      </button>
+
+      <p class="t-micro" style="margin-top:26px;letter-spacing:.04em">Prototype · option A · données fictives</p>
+    </div>
+  </section>
+
+  <!-- ===================== ASSISTANT ===================== -->
+  <nav class="etapes" id="etapes" hidden></nav>
+
+  <!-- étape 1 : fichiers -->
+  <section class="vue" id="v-1">
+    <div class="entete">
+      <h1>Importer la révision</h1>
+      <p>Déposez l'export 2D des plans d'étage et l'export 3D de la volumétrie. Fitte lit la géométrie et n'écrit jamais dans vos fichiers sources.</p>
+    </div>
+    <div class="corps2 scroll" style="grid-template-columns:1fr 1fr 280px">
+      <div class="carte" style="padding:14px">
+        <div class="rang" style="gap:8px;margin-bottom:10px"><span class="t-micro">Source 2D</span><span class="grow"></span><span class="t-meta">AutoCAD · DXF ou PDF vectoriel</span></div>
+        <div id="depot-plan">
+          <button class="depot" style="width:100%" onclick="deposer('plan')">
+            <span id="ic-d1"></span>
+            <div class="t">Déposer les plans d'étage</div>
+            <div class="f">ou cliquer pour choisir un fichier</div>
+          </button>
+        </div>
+        <div id="apercu-plan" hidden style="margin-top:12px">
+          <div class="t-micro" style="margin-bottom:6px">Aperçu · niveau 02</div>
+          <div style="border:1px solid var(--line);border-radius:var(--r);overflow:hidden;height:210px" id="mini-plan"></div>
+        </div>
+      </div>
+
+      <div class="carte" style="padding:14px">
+        <div class="rang" style="gap:8px;margin-bottom:10px"><span class="t-micro">Source 3D</span><span class="grow"></span><span class="t-meta">SketchUp · DAE ou OBJ</span></div>
+        <div id="depot-modele">
+          <button class="depot" style="width:100%" onclick="deposer('modele')">
+            <span id="ic-d2"></span>
+            <div class="t">Déposer la volumétrie</div>
+            <div class="f">ou cliquer pour choisir un fichier</div>
+          </button>
+        </div>
+        <div id="apercu-modele" hidden style="margin-top:12px">
+          <div class="t-micro" style="margin-bottom:6px">Aperçu · vue 3D</div>
+          <img class="photo" src="assets/massing.jpg" alt="" style="border:1px solid var(--line);border-radius:var(--r);height:210px;object-fit:cover">
+        </div>
+      </div>
+
+      <div class="pile" style="gap:12px">
+        <div class="carte" style="padding:13px">
+          <div class="t-micro" style="margin-bottom:8px">Référence de comparaison</div>
+          <div class="rang" style="gap:9px">
+            <span class="etat regle">Acceptée</span>
+            <div><b style="font-size:var(--t-body)">Révision R03</b><div class="t-micro" style="margin-top:2px">Acceptée le 10 janvier 2026</div></div>
+          </div>
+          <hr class="fin" style="margin:11px 0">
+          <div class="t-meta" style="line-height:1.5;color:var(--ink-2)">Fitte compare la révision que vous importez à cette référence, <b>et</b> le plan au modèle à l'intérieur de la nouvelle révision.</div>
+        </div>
+        <div class="carte" style="padding:13px">
+          <div class="t-micro" style="margin-bottom:8px">Révision courante</div>
+          <label class="champ" style="margin-bottom:9px"><span>Identifiant</span><input value="R04"></label>
+          <label class="champ"><span>Description</span><input value="Dossier préliminaire — fenêtres est"></label>
+        </div>
+      </div>
+    </div>
+    <footer class="pied">
+      <button class="btn" onclick="allerAccueil()">Annuler</button>
+      <span class="grow"></span>
+      <span class="note">Les fichiers sources ne sont jamais modifiés.</span>
+      <button class="btn primaire lg" id="suite-1" disabled onclick="ouvrirEtape(2)">Continuer vers l'alignement</button>
+    </footer>
+  </section>
+
+  <!-- étape 2 : alignement -->
+  <section class="vue" id="v-2">
+    <div class="entete">
+      <h1>Aligner le plan et le modèle</h1>
+      <p>Confirmez que les deux fichiers décrivent le même bâtiment : unités, échelle, niveau de référence, orientation et façades. Fitte propose, vous confirmez.</p>
+    </div>
+    <div class="corps2" style="grid-template-columns:1fr 316px">
+      <div class="carte" style="display:flex;flex-direction:column;overflow:hidden">
+        <header><span class="t-micro">Superposition</span><span class="grow"></span>
+          <div class="segment">
+            <button aria-pressed="true" onclick="vueAlign(this,'plan')">Plan niveau 02</button>
+            <button onclick="vueAlign(this,'modele')">Volumétrie</button>
+          </div>
+        </header>
+        <div style="flex:1;min-height:0;position:relative" id="scene-align"></div>
+      </div>
+
+      <div class="pile scroll" style="gap:10px">
+        <div class="carte">
+          <header><h3>Unités et échelle</h3></header>
+          <table class="tech">
+            <tr><td class="cle">Unités du dessin</td><td style="text-align:right"><b>Millimètres</b></td><td style="width:1%"><span class="prov">Détecté 98<span>&nbsp;</span>%</span></td></tr>
+            <tr><td class="cle">Échelle</td><td style="text-align:right"><b>1:1 (du fichier)</b></td><td><span class="prov">Détecté 96&nbsp;%</span></td></tr>
+            <tr><td class="cle">Niveau de référence</td><td style="text-align:right"><b>Niveau 02</b></td><td><span class="prov">Apparié 95&nbsp;%</span></td></tr>
+          </table>
+        </div>
+        <div class="carte">
+          <header><h3>Orientation</h3><span class="grow"></span><span class="etat" id="et-nord">À confirmer</span></header>
+          <div style="padding:12px">
+            <div class="t-meta" style="color:var(--ink-2);line-height:1.5">Fitte propose le nord du projet à 0°, d'après l'axe du bâtiment dans le modèle.</div>
+            <button class="btn sm" style="margin-top:10px" id="btn-nord" onclick="confirmerNord()">Confirmer l'orientation</button>
+          </div>
+        </div>
+        <div class="carte">
+          <header><h3>Façades</h3></header>
+          <table class="tech" id="tbl-facades"></table>
+        </div>
+        <div class="carte">
+          <header><h3>Éléments détectés</h3></header>
+          <table class="tech">
+            <tr><td class="cle">Murs extérieurs</td><td class="num">12 segments</td></tr>
+            <tr><td class="cle">Fenêtres au plan</td><td class="num">24</td></tr>
+            <tr><td class="cle">Ouvertures au modèle</td><td class="num">26</td></tr>
+            <tr><td class="cle">Tolérance de correspondance</td><td class="num">150 mm</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <footer class="pied">
+      <button class="btn" onclick="ouvrirEtape(1)">Retour</button>
+      <span class="grow"></span>
+      <div id="bandeau-align" class="avis" style="padding:7px 11px"><span id="ic-a1"></span><div>Confirmez l'orientation pour poursuivre.</div></div>
+      <button class="btn primaire lg" id="suite-2" disabled onclick="lancerComparaison()">Lancer la comparaison</button>
+    </footer>
+  </section>
+
+  <!-- étape 3 : écarts -->
+  <section class="vue" id="v-3">
+    <div class="triptyque">
+      <div class="colg">
+        <div class="avancement">
+          <div class="rang"><b>7 écarts détectés</b><span class="t-meta" id="cpt-revus">0 sur 7 réglés</span></div>
+          <div class="jauge"><i id="jauge-revus" style="width:0"></i></div>
+        </div>
+        <div style="padding:9px 12px;border-bottom:1px solid var(--line)">
+          <div class="segment" style="width:100%">
+            <button aria-pressed="true" style="flex:1" onclick="filtrer(this,'tous')">Tous</button>
+            <button style="flex:1" onclick="filtrer(this,'est')">Façade est</button>
+            <button style="flex:1" onclick="filtrer(this,'ouvert')">À régler</button>
+          </div>
+        </div>
+        <div class="grow scroll" id="liste-ecarts"></div>
+      </div>
+
+      <div class="toile">
+        <div class="barre">
+          <div class="segment">
+            <button aria-pressed="true" onclick="vueToile(this,'elevation')">Élévation est</button>
+            <button onclick="vueToile(this,'plan')">Plan niveau 02</button>
+            <button onclick="vueToile(this,'modele')">Modèle 3D</button>
+          </div>
+          <span class="grow"></span>
+          <span class="t-meta" id="toile-titre">Façade est · R03 → R04</span>
+        </div>
+        <div class="scene" id="scene-3"></div>
+        <div class="legende">
+          <span><i class="plein"></i>Géométrie du plan (2D)</span>
+          <span><i class="tirete"></i>Géométrie du modèle (3D)</span>
+          <span><i class="vert"></i>Écart mesuré</span>
+          <span><i class="gris"></i>Ouverture conforme</span>
+        </div>
+      </div>
+
+      <aside class="panneau" id="detail-3"></aside>
+    </div>
+    <footer class="pied">
+      <button class="btn" onclick="ouvrirEtape(2)">Retour</button>
+      <span class="grow"></span>
+      <span class="note" id="note-3">Réglez les écarts un à un : Fitte passe au suivant automatiquement.</span>
+      <button class="btn primaire lg" onclick="ouvrirEtape(4)">Voir l'impact sur la façade</button>
+    </footer>
+  </section>
+
+  <!-- étape 4 : impact -->
+  <section class="vue" id="v-4">
+    <div class="entete">
+      <h1>Impact sur la façade de rayonnement</h1>
+      <p>Les ouvertures confirmées sont regroupées par façade. Fitte mesure la géométrie ; il n'interprète pas le code.</p>
+    </div>
+    <div class="corps2" style="grid-template-columns:1fr 394px">
+      <div class="carte" style="display:flex;flex-direction:column;overflow:hidden">
+        <header><span class="t-micro">Façade est · ouvertures comptées</span><span class="grow"></span>
+          <div class="segment"><button aria-pressed="true">R04 courante</button><button onclick="alert('Prototype : la bascule R03 existe dans l\u2019option B.')">R03 référence</button></div>
+        </header>
+        <div style="flex:1;min-height:0;position:relative" id="scene-4"></div>
+        <div class="legende"><span><i class="vert"></i>Ouverture modifiée en R04</span><span><i class="gris"></i>Ouverture inchangée</span></div>
+      </div>
+      <div class="pile scroll" style="gap:11px">
+        <div class="chiffres" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="chiffre"><b>30,2<small>m²</small></b><span>Référence R03</span></div>
+          <div class="chiffre"><b>35,0<small>m²</small></b><span>Courante R04</span></div>
+          <div class="chiffre fort"><b>+4,8<small>m²</small></b><span>Écart</span></div>
+        </div>
+        <div class="carte" style="padding:13px">
+          <div class="rang"><h3>Pourcentage d'ouverture actuel</h3><span class="grow"></span><b style="font-size:17px">17,5&nbsp;%</b></div>
+          <div class="jauge" style="margin-top:9px"><i style="width:17.5%"></i><span class="ref" style="left:15.1%"></span></div>
+          <div class="t-micro" style="margin-top:7px;line-height:1.5;letter-spacing:.02em">Repère : 15,1&nbsp;% en R03. Calculé sur une façade de rayonnement de 200,0&nbsp;m² saisie par l'utilisateur. Ce n'est pas un pourcentage d'ouvertures permises.</div>
+        </div>
+        <div class="avis sombre"><span id="ic-i1"></span><div><b>Révision professionnelle requise</b>L'aire des ouvertures a augmenté de 4,8&nbsp;m². Les limites applicables ne peuvent pas être établies tant que les intrants et la méthode de calcul ne sont pas confirmés.</div></div>
+        <div class="carte">
+          <header><h3>Intrants et hypothèses</h3><span class="grow"></span><span class="etat">Géométrie seulement</span></header>
+          <table class="tech" id="tbl-intrants"></table>
+        </div>
+      </div>
+    </div>
+    <footer class="pied">
+      <button class="btn" onclick="ouvrirEtape(3)">Retour aux écarts</button>
+      <span class="grow"></span>
+      <button class="btn primaire lg" onclick="ouvrirEtape(5)">Demander une révision</button>
+    </footer>
+  </section>
+
+  <!-- étape 5 : demande de révision -->
+  <section class="vue" id="v-5">
+    <div class="entete">
+      <h1>Demander une révision professionnelle</h1>
+      <p>Fitte assemble les preuves. Vous choisissez le destinataire et ce qu'il doit vérifier.</p>
+    </div>
+    <div class="corps2" style="grid-template-columns:1fr 1fr">
+      <div class="pile scroll" style="gap:11px">
+        <div class="carte">
+          <header><h3>Contenu de la demande</h3><span class="grow"></span><span class="t-meta">Façade est · R04</span></header>
+          <table class="tech" id="tbl-paquet"></table>
+        </div>
+        <div class="carte" style="padding:13px">
+          <div class="t-micro" style="margin-bottom:8px">Résumé transmis</div>
+          <p class="t-meta" style="line-height:1.55;color:var(--ink-2)">Les fenêtres de la façade est ont changé depuis la dernière révision acceptée. L'aire totale des ouvertures passe de 30,2&nbsp;m² à 35,0&nbsp;m², soit une hausse d'environ 4,8&nbsp;m². Quatre écarts sont confirmés, un reste ambigu. Les intrants de code ne sont pas renseignés.</p>
+        </div>
+      </div>
+      <div class="pile" style="gap:11px">
+        <div class="carte" style="padding:14px">
+          <label class="champ" style="margin-bottom:12px"><span>Destinataire</span>
+            <select id="sel-reviseur"></select>
+          </label>
+          <label class="champ"><span>Note de révision</span>
+            <textarea id="note-rev" rows="5">Merci de valider les ouvertures révisées de la façade est et de confirmer les hypothèses de séparation spatiale avant que nous poussions le développement de façade.</textarea>
+          </label>
+        </div>
+        <div class="avis"><span id="ic-r1"></span><div><b>Ce que Fitte ne fait pas</b>Aucune conclusion de conformité n'est transmise. La demande contient la géométrie mesurée, ses sources et les intrants manquants.</div></div>
+        <div id="confirmation-5" hidden class="avis marque"><span id="ic-r2"></span><div><b>Demande envoyée</b><span id="txt-confirm"></span></div></div>
+      </div>
+    </div>
+    <footer class="pied">
+      <button class="btn" onclick="ouvrirEtape(4)">Retour</button>
+      <span class="grow"></span>
+      <button class="btn primaire lg" id="btn-envoyer" onclick="envoyerDemande()">Envoyer la demande</button>
+    </footer>
+  </section>
+
+  <!-- étape 6 : rapport -->
+  <section class="vue" id="v-6">
+    <div class="entete">
+      <h1>Rapport de coordination</h1>
+      <p>Trace permanente de ce qui a changé, de ce qui a été confirmé et de ce qui reste à décider.</p>
+    </div>
+    <div class="corps2" style="grid-template-columns:1fr 310px">
+      <div class="carte scroll" style="padding:0">
+        <div style="padding:26px 30px;max-width:760px">
+          <div class="rang" style="justify-content:space-between;border-bottom:1.5px solid var(--ink);padding-bottom:9px">
+            <span class="wordmark" style="font-size:13px">ça fitte<i>.</i></span>
+            <span class="t-micro">Rapport de coordination des fenêtres · R03 → R04</span>
+          </div>
+          <h2 style="font-size:19px;margin-top:18px">Résidence Papineau</h2>
+          <table class="tech" style="margin-top:12px">
+            <tr><td class="cle" style="width:38%">Projet</td><td>RMC-001 · Montréal (QC)</td></tr>
+            <tr><td class="cle">Typologie</td><td>Copropriété résidentielle · 6 niveaux</td></tr>
+            <tr><td class="cle">Sources</td><td>AutoCAD R04 (plans 2D) · SketchUp R04 (volumétrie 3D)</td></tr>
+            <tr><td class="cle">État de révision</td><td><span class="etat attention">En attente de révision professionnelle</span></td></tr>
+          </table>
+
+          <h3 style="margin-top:22px">1. Registre des écarts</h3>
+          <table class="tech" style="margin-top:8px" id="tbl-rapport"></table>
+
+          <h3 style="margin-top:22px">2. Façade est — aire des ouvertures</h3>
+          <table class="tech" style="margin-top:8px">
+            <tr><td class="cle">Référence R03</td><td class="num">30,2 m²</td><td class="num">15,1 %</td></tr>
+            <tr><td class="cle">Courante R04</td><td class="num">35,0 m²</td><td class="num">17,5 %</td></tr>
+            <tr class="total"><td>Écart</td><td class="num">+4,8 m²</td><td class="num">+2,4 pts</td></tr>
+          </table>
+          <p class="t-meta" style="margin-top:9px;color:var(--ink-2);line-height:1.5">Géométrie mesurée à partir des dessins appariés. Aucune limite applicable n'est établie : la distance limitative, l'édition du code, l'hypothèse de gicleurs et la méthode de calcul restent à confirmer.</p>
+
+          <h3 style="margin-top:22px">3. Preuve · F-204</h3>
+          <div style="border:1px solid var(--line);border-radius:var(--r);margin-top:8px;overflow:hidden;background:var(--paper-2)" id="rapport-detail"></div>
+        </div>
+      </div>
+      <div class="pile" style="gap:11px">
+        <div class="carte" style="padding:13px">
+          <div class="t-micro" style="margin-bottom:9px">Exporter</div>
+          <div class="pile" style="gap:7px">
+            <button class="btn" style="justify-content:flex-start" onclick="faux('Rapport PDF généré (prototype).')"><span id="ic-e1"></span>Rapport PDF · 12 pages</button>
+            <button class="btn" style="justify-content:flex-start" onclick="faux('Registre CSV exporté (prototype).')">Registre des écarts · CSV</button>
+          </div>
+        </div>
+        <div class="carte" style="padding:13px">
+          <div class="t-micro" style="margin-bottom:8px">Boucler la révision</div>
+          <p class="t-meta" style="color:var(--ink-2);line-height:1.5">Corrigez le modèle dans SketchUp, exportez une R05 et relancez une comparaison. R04 ne devient la nouvelle référence qu'après la révision humaine.</p>
+          <button class="btn primaire" style="width:100%;margin-top:11px" id="btn-accepter" onclick="accepterRevision()">Accepter R04 comme référence</button>
+          <div id="etat-accept" hidden class="t-meta" style="margin-top:9px;color:var(--accent-dk)"></div>
+        </div>
+      </div>
+    </div>
+    <footer class="pied">
+      <button class="btn" onclick="ouvrirEtape(5)">Retour</button>
+      <span class="grow"></span>
+      <button class="btn" onclick="allerAccueil()">Terminer</button>
+    </footer>
+  </section>
+</div>
+
+<script src="proto.js"></script>
+<script>
+/* ============================ état ============================ */
+const ETAPES = [
+  { n: 1, lib: "Fichiers" }, { n: 2, lib: "Alignement" }, { n: 3, lib: "Écarts" },
+  { n: 4, lib: "Impact façade" }, { n: 5, lib: "Révision" }, { n: 6, lib: "Rapport" }
+];
+let etapeCourante = 0;
+let maxEtape = 1;
+let selection = "F-204";
+let filtre = "tous";
+let regles = new Set();
+let depots = { plan: false, modele: false };
+let nordOk = false;
+
+/* ============================ accueil ============================ */
+function allerAccueil() {
+  etapeCourante = 0;
+  $$(".vue").forEach((v) => v.removeAttribute("data-actif"));
+  $("#v-accueil").dataset.actif = "1";
+  $("#etapes").hidden = true;
+  $("#barre-projet").hidden = true;
+  $("#barre-rev").hidden = true;
+  $("#btn-accueil").hidden = true;
+}
+function nouveauProjet() {
+  depots = { plan: false, modele: false };
+  nordOk = false;
+  regles = new Set();
+  $("#depot-plan").innerHTML = '<button class="depot" style="width:100%" onclick="deposer(\'plan\')">' + icone("depot") + '<div class="t">Déposer les plans d\'étage</div><div class="f">ou cliquer pour choisir un fichier</div></button>';
+  $("#depot-modele").innerHTML = '<button class="depot" style="width:100%" onclick="deposer(\'modele\')">' + icone("depot") + '<div class="t">Déposer la volumétrie</div><div class="f">ou cliquer pour choisir un fichier</div></button>';
+  $("#apercu-plan").hidden = true;
+  $("#apercu-modele").hidden = true;
+  $("#suite-1").disabled = true;
+  maxEtape = 1;
+  ouvrirEtape(1);
+}
+
+/* ============================ étapes ============================ */
+function dessinerEtapes() {
+  $("#etapes").innerHTML = ETAPES.map((e) => {
+    const etat = e.n < etapeCourante ? "fait" : "";
+    const dis = e.n > maxEtape ? "disabled" : "";
+    return '<button data-etat="' + etat + '" ' + (e.n === etapeCourante ? 'aria-current="true"' : "") + " " + dis +
+      ' onclick="ouvrirEtape(' + e.n + ')"><span class="pastille">' + (e.n < etapeCourante ? "✓" : e.n) + '</span><span class="lib">' + e.lib + "</span></button>";
+  }).join("");
+}
+
+function ouvrirEtape(n) {
+  if (n > maxEtape) maxEtape = n;
+  etapeCourante = n;
+  $$(".vue").forEach((v) => v.removeAttribute("data-actif"));
+  $("#v-" + n).dataset.actif = "1";
+  $("#etapes").hidden = false;
+  $("#barre-projet").hidden = false;
+  $("#barre-rev").hidden = n < 2;
+  $("#btn-accueil").hidden = false;
+  dessinerEtapes();
+  if (n === 2) rendreAlign();
+  if (n === 3) rendre3();
+  if (n === 4) rendre4();
+  if (n === 5) rendre5();
+  if (n === 6) rendre6();
+}
+
+/* ============================ étape 1 ============================ */
+function deposer(quoi) {
+  const info = quoi === "plan" ? PROJET.fichiers.plan : PROJET.fichiers.modele;
+  simulerDepot($("#depot-" + quoi), info, () => {
+    depots[quoi] = true;
+    $("#apercu-" + quoi).hidden = false;
+    if (quoi === "plan") $("#mini-plan").innerHTML = svgPlan({ niveau: 2 });
+    $("#suite-1").disabled = !(depots.plan && depots.modele);
+  });
+}
+
+/* ============================ étape 2 ============================ */
+function rendreAlign() {
+  if (!$("#scene-align").innerHTML) vueAlign(null, "plan");
+  $("#tbl-facades").innerHTML = FACADES.map((f) =>
+    '<tr><td class="cle">' + f.nom + '</td><td style="text-align:right"><b>Assignée</b></td><td style="width:1%"><span class="prov">' + (f.ecarts ? f.ecarts + " écart" + (f.ecarts > 1 ? "s" : "") : "aucun écart") + "</span></td></tr>").join("");
+}
+function vueAlign(btn, quoi) {
+  if (btn) { $$("#v-2 .segment button").forEach((b) => b.setAttribute("aria-pressed", "false")); btn.setAttribute("aria-pressed", "true"); }
+  const s = $("#scene-align");
+  if (quoi === "plan") {
+    s.innerHTML = '<div style="position:absolute;inset:0">' + svgPlan({ niveau: 2 }) + "</div>";
+    s.querySelector("svg").style.cssText = "position:absolute;inset:0;width:100%;height:100%";
+  } else {
+    s.innerHTML = '<img class="photo" src="assets/massing.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--paper-2)">';
+  }
+}
+function confirmerNord() {
+  nordOk = true;
+  majEtat($("#et-nord"), "Confirmé par vous", "regle");
+  $("#btn-nord").textContent = "Orientation confirmée";
+  $("#btn-nord").disabled = true;
+  $("#suite-2").disabled = false;
+  $("#bandeau-align").className = "avis marque";
+  $("#bandeau-align").innerHTML = icone("coche") + "<div>Alignement confirmé — prêt à comparer.</div>";
+}
+function lancerComparaison() {
+  const b = $("#suite-2");
+  b.disabled = true; b.textContent = "Comparaison en cours…";
+  setTimeout(() => { b.disabled = false; b.textContent = "Lancer la comparaison"; ouvrirEtape(3); }, 900);
+}
+
+/* ============================ étape 3 ============================ */
+function listeFiltree() {
+  if (filtre === "est") return ECARTS.filter((e) => e.facade === "est");
+  if (filtre === "ouvert") return ECARTS.filter((e) => !regles.has(e.id) && e.statut !== "regle");
+  return ECARTS;
+}
+function filtrer(btn, f) {
+  filtre = f;
+  $$("#v-3 .colg .segment button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+  btn.setAttribute("aria-pressed", "true");
+  rendreListe();
+}
+function rendreListe() {
+  $("#liste-ecarts").innerHTML = listeFiltree().map((e) => {
+    const regle = regles.has(e.id) || e.statut === "regle";
+    return '<button class="ecart" aria-selected="' + (e.id === selection) + '" onclick="choisir(\'' + e.id + '\')">' +
+      '<span class="vignette">' + vignette(e) + "</span>" +
+      '<span class="txt"><span class="id">' + e.id + '</span><span class="quoi">' + e.libelle + '</span><span class="ou">Façade ' + e.facade + " · niveau 0" + e.niveau + " · " + e.piece + "</span></span>" +
+      '<span class="marque"><span class="etat ' + (regle ? "regle" : e.gravite === "haute" ? "attention" : "ouvert") + '">' + (regle ? "Réglé" : e.gravite === "haute" ? "À réviser" : "Ouvert") + "</span></span></button>";
+  }).join("");
+  const n = ECARTS.filter((e) => regles.has(e.id) || e.statut === "regle").length;
+  $("#cpt-revus").textContent = n + " sur 7 réglés";
+  $("#jauge-revus").style.width = (n / 7 * 100) + "%";
+}
+function choisir(id) {
+  selection = id;
+  rendreListe();
+  rendreToile();
+  rendreDetail();
+}
+let vueCourante = "elevation";
+function vueToile(btn, quoi) {
+  vueCourante = quoi;
+  $$("#v-3 .toile .segment button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+  btn.setAttribute("aria-pressed", "true");
+  rendreToile();
+}
+function rendreToile() {
+  const s = $("#scene-3");
+  const ec = ecartPar(selection);
+  if (vueCourante === "modele") {
+    s.innerHTML = '<img class="photo" src="assets/massing.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--paper-2)">' +
+      '<div style="position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);border:2px solid var(--accent-dk);width:68px;height:46px;box-shadow:0 0 0 4px rgba(192,215,57,.45)"></div>' +
+      '<div style="position:absolute;left:50%;top:56%;transform:translateX(-50%);font-family:var(--mono);font-size:11px;font-weight:700;background:var(--accent);padding:2px 7px;border-radius:3px">' + selection + "</div>";
+    $("#toile-titre").textContent = "Volumétrie SketchUp · R04";
+  } else if (vueCourante === "plan") {
+    s.innerHTML = svgPlan({ niveau: ec ? ec.niveau : 2, surligne: selection });
+    $("#toile-titre").textContent = "Plan AutoCAD · niveau 0" + (ec ? ec.niveau : 2) + " · R04";
+    brancherFen(s);
+  } else {
+    s.innerHTML = svgElevation({ surligne: selection });
+    $("#toile-titre").textContent = "Élévation est · R03 → R04";
+    brancherFen(s);
+  }
+}
+function brancherFen(s) {
+  $$("g.fen", s).forEach((g) => g.addEventListener("click", () => choisir(g.dataset.fen)));
+}
+function rendreDetail() {
+  const e = ecartPar(selection);
+  const regle = regles.has(e.id) || e.statut === "regle";
+  const dim = (src) => src ? src.l.toLocaleString("fr-CA") + " × " + src.h.toLocaleString("fr-CA") + " mm" : "—";
+  $("#detail-3").innerHTML =
+    '<header><div class="rang" style="gap:8px"><h2 class="mono" style="font-size:14px">' + e.id + '</h2><span class="grow"></span><span class="etat ' + (regle ? "regle" : "attention") + '">' + (regle ? "Réglé" : e.libelle) + "</span></div>" +
+    '<div class="t-meta" style="margin-top:3px">Façade ' + e.facade + " · niveau 0" + e.niveau + " · " + e.piece + " · unité " + e.unite + "</div></header>" +
+    '<div class="corps">' +
+      '<div style="border-bottom:1px solid var(--line)">' + svgDetail(e) + "</div>" +
+      '<div style="padding:11px 13px;border-bottom:1px solid var(--line)">' +
+        '<div class="t-micro" style="margin-bottom:6px">Preuve au modèle</div>' +
+        '<img class="photo photo-detail" src="assets/modele-detail.jpg" alt="">' +
+      "</div>" +
+      '<table class="tech">' +
+        '<tr><th>Mesure</th><th style="text-align:right">Plan (2D)</th><th style="text-align:right">Modèle (3D)</th></tr>' +
+        '<tr><td class="cle">Dimensions</td><td class="num">' + dim(e.plan) + '</td><td class="num">' + dim(e.modele) + "</td></tr>" +
+        '<tr><td class="cle">Aire d\'ouverture</td><td class="num">' + e.aire.plan.toFixed(2).replace(".", ",") + ' m²</td><td class="num">' + e.aire.modele.toFixed(2).replace(".", ",") + " m²</td></tr>" +
+        '<tr class="total"><td>Écart</td><td class="num" colspan="2">' + e.delta + "</td></tr>" +
+      "</table>" +
+      '<div style="padding:11px 13px;border-bottom:1px solid var(--line)">' +
+        '<div class="t-micro" style="margin-bottom:6px">Pourquoi cette correspondance</div>' +
+        '<p class="t-meta" style="line-height:1.55;color:var(--ink-2)">' + e.explication + "</p>" +
+        '<div class="rang" style="gap:12px;margin-top:9px">' +
+          (e.confiance !== null ? '<span class="prov">Confiance ' + e.confiance + '&nbsp;% · proposée</span>' : '<span class="prov">Aucune correspondance proposée</span>') +
+          '<span class="prov">Source : géométrie lue</span>' +
+        "</div>" +
+      "</div>" +
+      '<div style="padding:12px 13px" id="actions-3">' +
+        '<div class="t-micro" style="margin-bottom:8px">Décision</div>' +
+        (regle
+          ? '<div class="avis marque">' + icone("coche") + "<div><b>Écart réglé</b>" + (regles.has(e.id) ? "Décision enregistrée dans cette session." : "Retrait confirmé par l'équipe le 22 janvier.") + "</div></div>"
+          : '<div class="pile" style="gap:7px">' +
+              choixHtml("accepter", "Accepter la correspondance", "Les deux objets représentent la même ouverture. L'écart de dimension reste un écart réel.") +
+              choixHtml("relier", "Relier à un autre objet", "Choisir manuellement une autre ouverture du modèle.") +
+              choixHtml("ignorer", "Ignorer avec motif", "Différence de modélisation, sans conséquence sur la façade.") +
+            "</div>" +
+            '<button class="btn primaire" style="width:100%;margin-top:10px" onclick="regler()">Enregistrer et passer au suivant</button>') +
+      "</div>" +
+    "</div>";
+}
+function choixHtml(val, titre, desc) {
+  return '<label class="choix"><input type="radio" name="dec" value="' + val + '"' + (val === "accepter" ? " checked" : "") + '><span><b>' + titre + "</b><span>" + desc + "</span></span></label>";
+}
+function regler() {
+  regles.add(selection);
+  const reste = ECARTS.filter((e) => !regles.has(e.id) && e.statut !== "regle");
+  rendreListe();
+  if (reste.length) { choisir(reste[0].id); $("#note-3").textContent = reste.length + " écart" + (reste.length > 1 ? "s" : "") + " encore à régler."; }
+  else { rendreDetail(); rendreToile(); $("#note-3").textContent = "Tous les écarts sont réglés."; }
+}
+function rendre3() { rendreListe(); rendreToile(); rendreDetail(); }
+
+/* ============================ étape 4 ============================ */
+function rendre4() {
+  $("#scene-4").innerHTML = svgElevation({ comptees: true });
+  const s = $("#scene-4").querySelector("svg");
+  s.style.cssText = "position:absolute;inset:0;width:100%;height:100%";
+  $("#tbl-intrants").innerHTML = IMPACT.intrants.map((i) =>
+    '<tr><td class="cle">' + i.nom + '</td><td style="text-align:right">' + i.valeur +
+    '</td><td style="width:1%"><span class="etat ' + (i.ok === true ? "regle" : i.ok === false ? "ouvert" : "neutre") + '">' + i.etat + "</span></td></tr>").join("");
+}
+
+/* ============================ étape 5 ============================ */
+function rendre5() {
+  $("#sel-reviseur").innerHTML = REVISEURS.map((r) => "<option>" + r + "</option>").join("");
+  $("#tbl-paquet").innerHTML = [
+    ["Écarts confirmés", "4 sur 7"],
+    ["Écart non résolu", "F-309 · ambigu"],
+    ["Extraits plan et modèle avec cotes", "7 vues"],
+    ["Aire des ouvertures · référence et courante", "30,2 → 35,0 m²"],
+    ["Intrants manquants", "4"],
+    ["Rapport de comparaison PDF", "12 pages"]
+  ].map((r) => '<tr><td class="cle">' + r[0] + '</td><td style="text-align:right"><b>' + r[1] + "</b></td></tr>").join("");
+}
+function envoyerDemande() {
+  const qui = $("#sel-reviseur").value.split(" — ")[0];
+  $("#confirmation-5").hidden = false;
+  $("#txt-confirm").textContent = "Transmise à " + qui + ". État : en attente de révision professionnelle. Fitte distingue la demande envoyée de la révision terminée.";
+  $("#btn-envoyer").disabled = true;
+  $("#btn-envoyer").textContent = "Demande envoyée";
+}
+
+/* ============================ étape 6 ============================ */
+function rendre6() {
+  $("#tbl-rapport").innerHTML =
+    '<tr><th>Fenêtre</th><th>Type d\'écart</th><th>Localisation</th><th style="text-align:right">Écart</th><th>État</th></tr>' +
+    ECARTS.map((e) => {
+      const regle = regles.has(e.id) || e.statut === "regle";
+      return "<tr><td><b class=\"mono\">" + e.id + "</b></td><td>" + e.libelle + '</td><td class="cle">Façade ' + e.facade + " · niv. 0" + e.niveau +
+        '</td><td class="num">' + e.delta + '</td><td><span class="etat ' + (regle ? "regle" : "ouvert") + '">' + (regle ? "Confirmé" : "Ouvert") + "</span></td></tr>";
+    }).join("");
+  $("#rapport-detail").innerHTML = svgDetail(ecartPar("F-204"));
+}
+function accepterRevision() {
+  $("#etat-accept").hidden = false;
+  $("#etat-accept").textContent = "Impossible : la révision professionnelle n'est pas terminée. R03 reste la référence.";
+  $("#btn-accepter").disabled = true;
+}
+
+/* ============================ divers ============================ */
+function faux(m) { alert(m); }
+
+/* icônes */
+["ic-plus|coche", "ic-d1|depot", "ic-d2|depot", "ic-a1|info", "ic-i1|alerte", "ic-r1|info", "ic-r2|coche", "ic-e1|telecharger"].forEach((p) => {
+  const [id, n] = p.split("|");
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = icone(n);
+});
+$("#ic-plus").innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg>';
+allerAccueil();
+</script>
+</body>
+</html>

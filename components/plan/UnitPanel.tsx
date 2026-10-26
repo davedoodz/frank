@@ -127,7 +127,7 @@ export default function UnitPanel({
             onClick={() => setTab(key)}
             className={`-mb-px border-b-2 pb-2 text-[13px] transition-colors ${
               tab === key
-                ? "border-brand font-medium text-brand"
+                ? "border-brand font-medium text-text"
                 : "border-transparent text-text-2 hover:text-text"
             }`}
           >

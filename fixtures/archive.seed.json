@@ -102,7 +102,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "corner unit, two bedrooms on the north facade, open living and kitchen, dedicated entry with closet"
+      "notes": "unité de coin, deux chambres sur la façade nord, séjour et cuisine à aire ouverte, entrée dédiée avec penderie"
     },
     {
       "id": "au-jsl-502",
@@ -175,7 +175,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "open living and dining with the kitchen along the party wall, bedrooms on opposite sides, separate laundry"
+      "notes": "séjour et salle à manger à aire ouverte avec cuisine le long du mur mitoyen, chambres de part et d’autre, lavage séparé"
     },
     {
       "id": "au-jsl-503",
@@ -248,7 +248,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "one bedroom behind the living area, bathroom shared with the entry"
+      "notes": "une chambre derrière le séjour, salle de bain partagée avec l’entrée"
     },
     {
       "id": "au-jsl-504",
@@ -321,7 +321,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "corner unit, two bedrooms, dining bay on the return facade"
+      "notes": "unité de coin, deux chambres, baie de la salle à manger sur la façade de retour"
     },
     {
       "id": "au-jsl-505",
@@ -394,7 +394,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "corner unit, two bedrooms, two bathrooms, walk-in off the main bedroom"
+      "notes": "unité de coin, deux chambres, deux salles de bain, walk-in attenant à la chambre principale"
     },
     {
       "id": "au-jsl-506",
@@ -467,7 +467,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "one bedroom, galley kitchen opening on the living area"
+      "notes": "une chambre, cuisine en couloir ouverte sur le séjour"
     },
     {
       "id": "au-jsl-507",
@@ -540,7 +540,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "one bedroom, kitchen inboard, laundry in the bathroom"
+      "notes": "une chambre, cuisine en retrait, lavage dans la salle de bain"
     },
     {
       "id": "au-jsl-508",
@@ -613,7 +613,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "corner unit, two bedrooms separated by the bathroom core, open living on the facade"
+      "notes": "unité de coin, deux chambres séparées par le noyau de la salle de bain, séjour à aire ouverte sur la façade"
     },
     {
       "id": "au-bbe-501",
@@ -686,7 +686,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "corner unit, two bedrooms, second bathroom added off the entry"
+      "notes": "unité de coin, deux chambres, deuxième salle de bain ajoutée près de l’entrée"
     },
     {
       "id": "au-bbe-502",
@@ -759,7 +759,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "open living and dining, bedrooms on opposite sides, laundry moved into the bathroom"
+      "notes": "séjour et salle à manger à aire ouverte, chambres de part et d’autre, lavage déplacé dans la salle de bain"
     },
     {
       "id": "au-bbe-503",
@@ -832,7 +832,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "one bedroom, widened balcony on the north facade"
+      "notes": "une chambre, balcon élargi sur la façade nord"
     },
     {
       "id": "au-bbe-504",
@@ -905,7 +905,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "corner unit, two bedrooms, single bathroom and a larger entry closet"
+      "notes": "unité de coin, deux chambres, une seule salle de bain et une penderie d’entrée agrandie"
     },
     {
       "id": "au-bbe-505",
@@ -978,7 +978,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "corner unit, two bedrooms, two bathrooms, separate laundry room"
+      "notes": "unité de coin, deux chambres, deux salles de bain, salle de lavage séparée"
     },
     {
       "id": "au-bbe-506",
@@ -1051,7 +1051,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "one bedroom, kitchen along the party wall"
+      "notes": "une chambre, cuisine le long du mur mitoyen"
     },
     {
       "id": "au-bbe-507",
@@ -1124,7 +1124,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "one bedroom, bathroom between the entry and the bedroom"
+      "notes": "une chambre, salle de bain entre l’entrée et la chambre"
     },
     {
       "id": "au-bbe-508",
@@ -1197,7 +1197,7 @@
       "computed_area_m2": null,
       "verified_at": null,
       "verified_by": null,
-      "notes": "corner unit, two bedrooms, two bathrooms, open living and dining"
+      "notes": "unité de coin, deux chambres, deux salles de bain, séjour et salle à manger à aire ouverte"
     }
   ],
   "rooms": [

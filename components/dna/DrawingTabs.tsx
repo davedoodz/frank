@@ -45,7 +45,7 @@ export default function DrawingTabs({
             type="button"
             onClick={() => setTab(key)}
             className={`relative flex h-12 items-center text-[13px] font-medium transition-colors ${
-              tab === key ? "text-brand" : "text-text-2 hover:text-text"
+              tab === key ? "text-text" : "text-text-2 hover:text-text"
             }`}
           >
             {label}
@@ -91,7 +91,7 @@ export default function DrawingTabs({
               aria-label="Afficher ou masquer le contour"
               onClick={() => setOutline((o) => !o)}
               className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
-                outline ? "bg-brand-soft text-brand" : "text-text-2 hover:bg-app hover:text-text"
+                outline ? "bg-brand-soft text-text" : "text-text-2 hover:bg-app hover:text-text"
               }`}
             >
               <Icon name="layers" size={14} />

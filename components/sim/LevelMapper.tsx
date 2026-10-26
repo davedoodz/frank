@@ -64,8 +64,8 @@ export default function LevelMapper({
       title={`${model.model_ref} — SketchUp Pro 2024`}
       status={
         current
-          ? `Select objects: 1 group selected · ${current.name}`
-          : "Select objects: 0 selected"
+          ? `Sélectionner des objets : 1 groupe sélectionné · ${current.name}`
+          : "Sélectionner des objets : 0 sélectionné"
       }
       measurement={current ? `Niveau ${String(target).padStart(2, "0")}` : ""}
       tray={
@@ -101,7 +101,7 @@ export default function LevelMapper({
                   if (g.level !== null && indexed.has(g.level)) setTarget(g.level);
                 }}
                 className={`flex w-full items-center gap-2 border-b border-edge-2 px-2.5 py-2 text-left text-[12px] last:border-0 transition-colors ${
-                  group === g.name ? "bg-brand-soft text-brand" : "hover:bg-app"
+                  group === g.name ? "bg-brand-soft text-text" : "hover:bg-app"
                 }`}
               >
                 <Icon name="cube" size={13} />
@@ -158,7 +158,7 @@ export default function LevelMapper({
                       className="flex items-center gap-2 border-b border-edge-2 px-2.5 py-2 text-[12px] last:border-0"
                     >
                       <input type="hidden" name="level" value={level} />
-                      <span className="h-2 w-2 rounded-full bg-[#4A90E2]" />
+                      <span className="h-2 w-2 rounded-full bg-brand" />
                       <span className="flex-1 truncate">
                         {floor?.label ?? `Étage ${level}`}
                       </span>
@@ -179,7 +179,7 @@ export default function LevelMapper({
           <button
             type="submit"
             disabled={levels.length === 0}
-            className="mt-4 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand text-[13px] font-medium text-white transition-colors hover:bg-brand-2 disabled:opacity-50"
+            className="mt-4 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand text-[13px] font-medium text-text transition-colors hover:bg-brand-2 disabled:opacity-50"
           >
             <Icon name="external" size={14} />
             Synchroniser le contexte du bâtiment

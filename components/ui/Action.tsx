@@ -28,5 +28,7 @@ export const SEGMENT_SHELL =
 export const SEGMENT =
   "flex h-5 items-center rounded-full px-2.5 text-body transition-colors duration-[80ms]";
 
-export const SEGMENT_ON = "bg-ink text-paper";
+/* Selected is the office green, here and in every other control. Inverting to
+   ink was the old rule; keeping both gave the product two "on" states. */
+export const SEGMENT_ON = "bg-brand font-medium text-ink";
 export const SEGMENT_OFF = "text-ink-3 hover:bg-fill-2 hover:text-ink";

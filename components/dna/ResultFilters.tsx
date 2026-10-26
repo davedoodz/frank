@@ -1,19 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { BASIS_TITLE } from "@/components/dna/Badge";
+import { BASIS_LABEL } from "@/lib/similarity";
 import Icon from "@/components/ui/Icon";
-import { SORTS, criteriaQuery, type Criteria, type Sort } from "@/lib/dna";
+import { SORTS, SORT_LABEL, criteriaQuery, type Criteria, type Sort } from "@/lib/dna";
 import type { SimilarityBasis } from "@/lib/types";
 
 const BASES: SimilarityBasis[] = ["layout", "area", "configuration", "type"];
-
-const SORT_LABEL: Record<Sort, string> = {
-  match: "Meilleure correspondance",
-  area: "Superficie",
-  year: "Plus récent",
-  project: "Projet",
-};
 
 /**
  * The result set, cut by match basis. The counts come from the unfiltered
@@ -60,7 +53,7 @@ export default function ResultFilters({
   const tabs: [SimilarityBasis | null, string, number][] = [
     [null, "Tous les résultats", total],
     ...BASES.filter((b) => counts[b] > 0).map(
-      (b) => [b, BASIS_TITLE[b], counts[b]] as [SimilarityBasis, string, number],
+      (b) => [b, BASIS_LABEL[b], counts[b]] as [SimilarityBasis, string, number],
     ),
   ];
 
@@ -76,7 +69,7 @@ export default function ResultFilters({
               onClick={() => go({ basis: key })}
               className={`-mb-px flex h-10 shrink-0 items-center border-b-2 text-[13px] whitespace-nowrap transition-colors ${
                 on
-                  ? "border-brand font-medium text-brand"
+                  ? "border-brand font-medium text-text"
                   : "border-transparent text-text-2 hover:text-text"
               }`}
             >
@@ -111,7 +104,7 @@ export default function ResultFilters({
               onClick={() => go({ view: v })}
               className={`flex h-[27px] w-[27px] items-center justify-center rounded-md transition-colors ${
                 view === v
-                  ? "bg-brand-soft text-brand"
+                  ? "bg-brand-soft text-text"
                   : "text-text-3 hover:text-text"
               }`}
             >

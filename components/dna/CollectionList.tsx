@@ -94,7 +94,7 @@ export default async function CollectionList({
                   <div className="flex items-baseline gap-2">
                     <Link
                       href={`/p/${code}/office-dna/${item.unit.id}?${search}`}
-                      className="text-[14px] font-semibold text-text transition-colors hover:text-brand"
+                      className="text-[14px] font-semibold text-text transition-colors hover:text-text-2"
                     >
                       {item.unit.number}
                     </Link>

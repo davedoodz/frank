@@ -117,18 +117,18 @@ export default async function OfficeDnaTab({
   return (
     <div className="flex min-h-0 flex-1">
       <div className="min-w-0 flex-1 overflow-y-auto px-6 pb-10">
+        {/* Named "Précédents", not "ADN de l’agence": the rail already has an
+            agency-wide entry under that name, and two live entries with one
+            name is what made the rail unreadable. This one is narrower — it
+            searches the archive for units like a unit in *this* project. */}
         <header className="pt-1">
           <h1 className="text-[28px] font-semibold tracking-tight text-text">
-            ADN de l’agence
+            Précédents
           </h1>
-          <p className="mt-1 text-[20px] font-semibold tracking-tight text-text">
-            Unités similaires provenant de projets antérieurs
-          </p>
           <p className="mt-1 text-[13px] text-text-2">
-            Réutilisez des dispositions éprouvées tirées de l’historique de
-            projets de l’agence —{" "}
-            {indexed.length} {indexed.length === 1 ? "projet indexé" : "projets indexés"},{" "}
-            {indexed.map((p) => p.display_name).join(", ")}.
+            Unités d’anciens projets semblables à l’unité {source.number} ·{" "}
+            {indexed.length}{" "}
+            {indexed.length === 1 ? "projet indexé" : "projets indexés"}
           </p>
         </header>
 
@@ -151,7 +151,6 @@ export default async function OfficeDnaTab({
         />
 
         <p className="mt-2 text-[12px] text-text-3">
-          Critères à partir de l’unité {source.number} ·{" "}
           {source.net_area_m2.value.toFixed(1)} m² ·{" "}
           {brLabel(source.type_qc.value)}
           {sourceFloor ? ` · ${sourceFloor.label} · ${sourceFloor.sheet_number}` : ""}

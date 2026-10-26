@@ -42,11 +42,7 @@ export default function AppSidebar({
   const thumb = code ? projectThumb(code) : null;
   const current: NavKey = active ?? sectionOf(pathname);
 
-  const agency: Entry[] = [
-    ["projects", "Projets", "grid", "/"],
-    ["office-dna", "ADN de l’agence", "dna", "/office-dna"],
-    ["library", "Bibliothèque", "table", "/library"],
-  ];
+  const agency: Entry[] = [["projects", "Projets", "grid", "/"]];
 
   const inProject: Entry[] = code
     ? [

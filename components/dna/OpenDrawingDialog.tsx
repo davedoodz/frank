@@ -75,7 +75,7 @@ export default function OpenDrawingDialog({
         <Dialog title="Ouvrir le dessin original" onClose={() => setOpen(false)}>
           <div className="flex items-center gap-4 border-b border-edge-2 pb-4">
             <span className="flex h-16 w-20 shrink-0 items-center justify-center rounded-lg border border-edge bg-app text-text-3">
-              <span className="flex h-7 items-center rounded-md bg-brand px-2 text-[11px] font-semibold text-white">
+              <span className="flex h-7 items-center rounded-md bg-brand px-2 text-[11px] font-semibold text-text">
                 DWG
               </span>
             </span>
@@ -105,7 +105,7 @@ export default function OpenDrawingDialog({
           </div>
 
           <div className="mt-4 flex gap-3 rounded-lg border border-brand-line bg-brand-soft p-3">
-            <Icon name="info" size={16} className="mt-0.5 text-brand" />
+            <Icon name="info" size={16} className="mt-0.5 text-text-2" />
             <p className="text-[13px] text-text-2">
               <span className="font-medium text-text">
                 Ce dessin s’ouvrira dans AutoCAD comme référence en lecture

@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ça fitte — Prototype 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- DialKit 2.0.2 (MIT, Josh Puckett), vendored vanilla build: vendor/dialkit -->
+<link rel="stylesheet" href="vendor/dialkit/styles.css">
+<style>
+/* Geist Pixel, self-hosted from geist@1.8.2 — five shapes, one weight each */
+@font-face{font-family:"Geist Pixel Square";src:url("assets/GeistPixel-Square.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Geist Pixel Grid";src:url("assets/GeistPixel-Grid.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Geist Pixel Circle";src:url("assets/GeistPixel-Circle.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Geist Pixel Line";src:url("assets/GeistPixel-Line.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Geist Pixel Triangle";src:url("assets/GeistPixel-Triangle.woff2") format("woff2");font-display:swap}
+
+:root{
+  --ink:#111111; --ink-2:#5a5a5a; --ink-3:#8f8f8f;
+  --line:#e6e6e4; --line-2:#d4d4d1; --paper:#ffffff; --bg:#f7f7f5;
+  --accent:#C0D739;
+  --sans:"Geist",sans-serif; --mono:"Geist Mono",monospace;
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+/* no rubber-band, and on desktop the whole screen fits: no scrolling at all */
+html{overscroll-behavior:none;height:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5;min-height:100vh;display:flex;align-items:center;justify-content:center;overscroll-behavior:none}
+@media (min-width:761px){
+  html,body{height:100%;overflow:hidden}
+  body{min-height:0}
+}
+svg{display:block}
+a{color:inherit;text-decoration:none}
+
+.page{width:100%;max-width:var(--dial-page, 1020px);margin:0 auto;padding:48px 24px}
+
+.tete{text-align:center}
+.tete .d{
+  font-family:var(--dial-date-font, var(--mono));
+  font-size:var(--dial-date-size, 11px);
+  letter-spacing:var(--dial-date-track, .16em);
+  text-transform:uppercase;color:var(--ink-3);
+}
+.tete h1{margin-top:10px;font-size:40px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.tete .rule{width:var(--dial-rule-w, 40px);height:var(--dial-rule-h, 2px);background:var(--accent);margin:18px auto 0}
+
+.duo{
+  display:grid;grid-template-columns:1fr 1fr;
+  column-gap:var(--dial-col, 28px);row-gap:28px;
+  margin-top:var(--dial-gap-haut, 40px);
+}
+.opt{display:flex;flex-direction:column}
+.shot{width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);
+  transition:transform .25s ease,box-shadow .25s ease,border-color .2s ease}
+.shot img{width:100%;height:100%;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
+
+/* thumbnail hover — one mode at a time, set by the dial on <body data-hover> */
+[data-hover="lift"] .opt:hover .shot{transform:translateY(-4px);box-shadow:0 10px 28px rgba(0,0,0,.09);border-color:var(--line-2)}
+[data-hover="zoom"] .opt:hover .shot img{transform:scale(1.045)}
+[data-hover="border"] .opt:hover .shot{border-color:var(--ink)}
+[data-hover="shadow"] .opt:hover .shot{box-shadow:0 14px 38px rgba(0,0,0,.13)}
+[data-hover="accent"] .opt:hover .shot{border-color:var(--accent);box-shadow:0 0 0 3px rgba(192,215,57,.22)}
+[data-hover="reveal"] .shot img{filter:saturate(.55) contrast(.96)}
+[data-hover="reveal"] .opt:hover .shot img{filter:none}
+
+.txt{padding:18px 2px 0;display:flex;flex-direction:column;gap:8px;flex:1}
+.txt h2{font-size:17px;font-weight:600;letter-spacing:-.01em}
+/* balance keeps the last line from hanging short: the block stays as tight as it can be */
+.txt p{font-size:13px;color:var(--ink-2);line-height:1.6;text-wrap:balance}
+
+/* pill — reacts to the pill only, never to the whole card */
+.cta{margin-top:auto;padding-top:16px;display:flex}
+.cta > span{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 15px;border:1px solid var(--line-2);border-radius:999px;
+  background:var(--paper);font-size:var(--dial-cta-size, 13px);font-weight:var(--dial-cta-weight, 700);color:var(--ink);
+  transition:background-color .2s ease,border-color .2s ease,color .2s ease;
+}
+.cta svg{width:15px;height:15px;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.cta > span:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.cta > span:hover svg{transform:translate(2px,-2px)}
+@media (prefers-reduced-motion:reduce){.shot,.shot img,.cta>span,.cta svg{transition:none}}
+
+/* other shapes for the call to action; one at a time, via <body data-cta> */
+[data-cta="overline"] .cta > span{
+  padding:0;border:0;background:none;border-radius:0;
+  font-family:var(--mono);font-size:11px;font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);gap:9px;
+}
+[data-cta="overline"] .cta > span:hover{background:none;color:var(--ink)}
+[data-cta="overline"] .cta svg{width:13px;height:13px}
+
+[data-cta="square"] .cta > span{border-radius:4px}
+
+[data-cta="filled"] .cta > span{background:var(--ink);border-color:var(--ink);color:#fff}
+[data-cta="filled"] .cta > span:hover{background:var(--paper);border-color:var(--ink);color:var(--ink)}
+
+[data-cta="accent"] .cta > span{background:var(--accent);border-color:var(--accent);color:var(--ink)}
+[data-cta="accent"] .cta > span:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+
+[data-cta="underline"] .cta > span{
+  padding:0 0 3px;border:0;border-bottom:1.5px solid var(--ink);border-radius:0;background:none;
+}
+[data-cta="underline"] .cta > span:hover{background:none;color:var(--ink-2);border-bottom-color:var(--ink-2)}
+
+[data-cta="plain"] .cta > span{padding:0;border:0;background:none;border-radius:0}
+[data-cta="plain"] .cta > span:hover{background:none;color:var(--ink-2)}
+
+/* where the call to action sits in the card */
+[data-pos="left"] .cta{justify-content:flex-start}
+[data-pos="center"] .cta{justify-content:center}
+[data-pos="right"] .cta{justify-content:flex-end}
+[data-pos="stretch"] .cta > span{flex:1;justify-content:center}
+
+/* how the card content is aligned inside its column */
+[data-align="center"] .txt{align-items:center;text-align:center}
+[data-align="center"] .shot{margin-left:auto;margin-right:auto}
+
+.sign{margin-top:var(--dial-gap-bas, 40px);display:flex;justify-content:center}
+.sign img{height:var(--dial-logo, 60px);width:auto}
+
+@media (max-width:760px){.duo{grid-template-columns:1fr}.tete h1{font-size:32px}}
+</style>
+</head>
+<body data-hover="lift" data-cta="pill">
+<div class="page">
+  <div class="tete">
+    <p class="d" data-txt="date">Monday, October 26</p>
+    <h1 data-txt="title">Prototype 1</h1>
+    <div class="rule"></div>
+  </div>
+
+  <div class="duo">
+    <a class="opt" href="/" target="_blank" rel="noopener">
+      <span class="shot"><img src="assets/apercu-1a.jpg" alt="1A"></span>
+      <span class="txt">
+        <h2 data-txt="aTitle">Units and drawings</h2>
+        <p data-txt="aBody">Projects, connected files, the floor plan viewer and the unit inspector. One source of truth for what has been drawn.</p>
+        <span class="cta"><span><span data-txt="aCta">Open 1A</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span></span>
+      </span>
+    </a>
+
+    <a class="opt" href="plateforme-b.html" target="_blank" rel="noopener">
+      <span class="shot"><img src="assets/apercu-1b.jpg" alt="1B"></span>
+      <span class="txt">
+        <h2 data-txt="bTitle">Units, drawings and the 3D model</h2>
+        <p data-txt="bBody">Plan and volume side by side inside Unités, a window status on every unit, and a façade glazing total that moves as you decide.</p>
+        <span class="cta"><span><span data-txt="bCta">Open 1B</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span></span>
+      </span>
+    </a>
+  </div>
+
+  <footer class="sign"><img src="assets/lafond.png" alt="Lafond Architecte"></footer>
+</div>
+
+<script src="vendor/dialkit/browser.global.js"></script>
+<script>
+/* Spacing, hover and the date face are dialled, not guessed. Every dialled
+   declaration reads var(--dial-*, <authored value>), so an untouched dial
+   renders exactly as authored and Reset returns there. */
+const dial = DialKit.createDialKit("Prototype 1", {
+  spacing: {
+    // [default, min, max, step]
+    pageWidth: [1020, 720, 1600, 10],
+    betweenCards: [28, 0, 400, 2],
+    underRule: [40, 0, 200, 2],
+    underCards: [40, 0, 200, 2],
+  },
+  cards: {
+    align: { type: "select", default: "left", options: [
+      { value: "left", label: "Left-aligned" },
+      { value: "center", label: "Centred" },
+    ]},
+  },
+  thumbnail: {
+    scale: [100, 40, 200, 1],
+    hover: { type: "select", default: "lift", options: [
+      { value: "none", label: "None" },
+      { value: "lift", label: "Lift + shadow" },
+      { value: "zoom", label: "Zoom image" },
+      { value: "border", label: "Border to black" },
+      { value: "shadow", label: "Shadow only" },
+      { value: "accent", label: "Accent ring" },
+      { value: "reveal", label: "Desaturate, reveal on hover" },
+    ]},
+  },
+  date: {
+    font: { type: "select", default: "mono", options: [
+      { value: "mono", label: "Geist Mono" },
+      { value: "square", label: "Geist Pixel · Square" },
+      { value: "grid", label: "Geist Pixel · Grid" },
+      { value: "circle", label: "Geist Pixel · Circle" },
+      { value: "line", label: "Geist Pixel · Line" },
+      { value: "triangle", label: "Geist Pixel · Triangle" },
+    ]},
+    size: [11, 8, 28, 0.5],
+    tracking: [16, 0, 48, 1],
+  },
+  rule: {
+    length: [40, 0, 400, 2],
+    thickness: [2, 1, 16, 1],
+  },
+  cta: {
+    shape: { type: "select", default: "pill", options: [
+      { value: "pill", label: "Pill — outlined" },
+      { value: "filled", label: "Pill — solid black" },
+      { value: "accent", label: "Pill — office green" },
+      { value: "square", label: "Rounded rectangle" },
+      { value: "underline", label: "Underlined text" },
+      { value: "plain", label: "Plain text" },
+      { value: "overline", label: "Overline (like the date)" },
+    ]},
+    position: { type: "select", default: "left", options: [
+      { value: "left", label: "Left" },
+      { value: "center", label: "Centred" },
+      { value: "right", label: "Right" },
+      { value: "stretch", label: "Full width" },
+    ]},
+    label: { type: "select", default: "open", options: [
+      { value: "open", label: "Open 1A · Open 1B" },
+      { value: "short", label: "1A · 1B" },
+      { value: "view", label: "View 1A · View 1B" },
+      { value: "openOnly", label: "Open · Open" },
+      { value: "prototype", label: "Prototype 1A · Prototype 1B" },
+      { value: "custom", label: "Custom (use the Text fields)" },
+    ]},
+    weight: [700, 400, 800, 100],
+    size: [13, 10, 22, 0.5],
+    arrow: true,
+  },
+  // Every string on the screen, editable in place.
+  text: Object.fromEntries(
+    [...document.querySelectorAll("[data-txt]")].map((el) => [
+      el.dataset.txt,
+      { type: "text", default: el.textContent.trim() },
+    ])
+  ),
+  logo: {
+    height: [60, 20, 240, 2],
+  },
+}, { persist: true });
+
+const FACES = {
+  mono: 'var(--mono)',
+  square: '"Geist Pixel Square", var(--mono)',
+  grid: '"Geist Pixel Grid", var(--mono)',
+  circle: '"Geist Pixel Circle", var(--mono)',
+  line: '"Geist Pixel Line", var(--mono)',
+  triangle: '"Geist Pixel Triangle", var(--mono)',
+};
+
+const ETIQUETTES = {
+  open: ["Open 1A", "Open 1B"],
+  short: ["1A", "1B"],
+  view: ["View 1A", "View 1B"],
+  openOnly: ["Open", "Open"],
+  prototype: ["Prototype 1A", "Prototype 1B"],
+};
+
+dial.subscribe((v) => {
+  const root = document.documentElement.style;
+  root.setProperty("--dial-col", v.spacing.betweenCards + "px");
+  root.setProperty("--dial-page", v.spacing.pageWidth + "px");
+  root.setProperty("--dial-thumb", v.thumbnail.scale + "%");
+  root.setProperty("--dial-gap-haut", v.spacing.underRule + "px");
+  root.setProperty("--dial-gap-bas", v.spacing.underCards + "px");
+  root.setProperty("--dial-logo", v.logo.height + "px");
+  root.setProperty("--dial-date-font", FACES[v.date.font] || FACES.mono);
+  root.setProperty("--dial-date-size", v.date.size + "px");
+  root.setProperty("--dial-date-track", v.date.tracking / 100 + "em");
+  root.setProperty("--dial-rule-w", v.rule.length + "px");
+  root.setProperty("--dial-rule-h", v.rule.thickness + "px");
+  document.body.dataset.hover = v.thumbnail.hover;
+  document.body.dataset.cta = v.cta.shape;
+  document.body.dataset.pos = v.cta.position;
+  document.body.dataset.align = v.cards.align;
+  root.setProperty("--dial-cta-weight", v.cta.weight);
+  root.setProperty("--dial-cta-size", v.cta.size + "px");
+  for (const [cle, valeur] of Object.entries(v.text)) {
+    const el = document.querySelector(`[data-txt="${cle}"]`);
+    if (el && el.textContent !== valeur) el.textContent = valeur;
+  }
+  // The preset wins over the two text fields unless it is set to custom.
+  if (v.cta.label !== "custom") {
+    const [a, b] = ETIQUETTES[v.cta.label];
+    document.querySelector('[data-txt="aCta"]').textContent = a;
+    document.querySelector('[data-txt="bCta"]').textContent = b;
+  }
+  document.querySelectorAll(".cta svg").forEach((s) => { s.style.display = v.cta.arrow ? "" : "none"; });
+});
+
+// The panel only renders once a root is mounted; closed by default so the test
+// screen stays clean. Open it from the handle in the bottom-right corner.
+DialKit.createDialRoot({ position: "bottom-right", theme: "light", defaultOpen: false });
+</script>
+</body>
+</html>

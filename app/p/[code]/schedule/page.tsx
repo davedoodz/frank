@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import ScheduleTable from "@/components/schedule/ScheduleTable";
 import { getFloors, getProject, getUnits } from "@/lib/data";
+import { getPrefs } from "@/lib/prefs.server";
 
 export default async function SchedulePage({
   params,
@@ -13,6 +14,7 @@ export default async function SchedulePage({
 
   const floors = await getFloors(project.id);
   const units = await getUnits(project.id);
+  const prefs = await getPrefs();
   const rows = units.map((u) => {
     const floor = floors.find((f) => f.id === u.floor_id);
     return {
@@ -49,10 +51,10 @@ export default async function SchedulePage({
   if (rows.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center text-meta text-ink-2">
-        no unit indexed
+        aucune unité indexée
       </div>
     );
   }
 
-  return <ScheduleTable code={project.project_code} rows={rows} />;
+  return <ScheduleTable code={project.project_code} rows={rows} prefs={prefs} />;
 }

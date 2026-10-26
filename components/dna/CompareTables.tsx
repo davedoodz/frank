@@ -1,7 +1,7 @@
 import Badge from "@/components/dna/Badge";
 import PlanCrop from "@/components/dna/PlanCrop";
 import type { Side } from "@/components/dna/CompareView";
-import { ORIENTATION_TITLE } from "@/lib/dna";
+import { ORIENTATION_LABEL } from "@/lib/dna";
 import { ft2 } from "@/lib/format";
 import type { Room, SimilarityBasis } from "@/lib/types";
 
@@ -274,8 +274,8 @@ export function KeyAttributesTable({
       kind: "count",
       left: null,
       right: null,
-      leftDisplay: ORIENTATION_TITLE[left.unit.orientation.value],
-      rightDisplay: ORIENTATION_TITLE[right.unit.orientation.value],
+      leftDisplay: ORIENTATION_LABEL[left.unit.orientation.value],
+      rightDisplay: ORIENTATION_LABEL[right.unit.orientation.value],
     },
   ];
 

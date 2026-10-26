@@ -83,7 +83,7 @@ export default async function PublishPage({
                   key={floor.id}
                   className="flex items-center gap-2 border-b border-edge-2 px-2.5 py-2 text-[12px] last:border-0"
                 >
-                  <span className="h-2 w-2 rounded-full bg-[#4A90E2]" />
+                  <span className="h-2 w-2 rounded-full bg-brand" />
                   <span className="flex-1 truncate">{floor.label}</span>
                   <span className="font-mono text-[11px] text-text-3">
                     {floor.sheet_number}
@@ -115,7 +115,7 @@ export default async function PublishPage({
 
           <Link
             href={target}
-            className="mt-4 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand text-[13px] font-medium text-white transition-colors hover:bg-brand-2"
+            className="mt-4 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand text-[13px] font-medium text-text transition-colors hover:bg-brand-2"
           >
             <Icon name="external" size={14} />
             Voir le contexte du bâtiment dans fitte

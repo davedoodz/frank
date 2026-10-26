@@ -5,7 +5,7 @@ import { useState } from "react";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import { BTN_QUIET } from "@/components/ui/Button";
 import {
-  ORIENTATION_TITLE,
+  ORIENTATION_LABEL,
   criteriaQuery,
   type Criteria,
 } from "@/lib/dna";
@@ -88,7 +88,7 @@ export default function CriteriaBar({
         <button
           type="button"
           onClick={() => setEditing((v) => !v)}
-          className="flex h-6 items-center gap-1.5 text-[13px] font-medium text-brand transition-colors hover:text-brand-2"
+          className="flex h-6 items-center gap-1.5 text-[13px] font-medium text-text transition-colors hover:text-text-2"
         >
           <Icon name={editing ? "chevron-down" : "edit"} size={14} />
           {editing ? "Terminé" : "Modifier les critères"}
@@ -185,7 +185,7 @@ export default function CriteriaBar({
             <option value="any">N’importe quelle orientation</option>
             {ORIENTATIONS.map((o) => (
               <option key={o} value={o}>
-                {ORIENTATION_TITLE[o]}
+                {ORIENTATION_LABEL[o]}
               </option>
             ))}
           </select>

@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>ça fitte — option B</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ----- propre à l'option B : un seul écran, des panneaux qui changent ----- */
+.espace { flex: 1; min-height: 0; display: grid; grid-template-columns: 250px 1fr 356px; position: relative; }
+.espace > * { min-width: 0; min-height: 0; }
+
+.colg { background: var(--paper); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+.colg .bloc { border-bottom: 1px solid var(--line); }
+.colg .titre { display: flex; align-items: center; gap: 6px; padding: 9px 12px; }
+.colg .titre span { font-size: var(--t-micro); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+
+.facade { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 8px 12px; border-left: 2px solid transparent; }
+.facade:hover { background: var(--paper-2); }
+.facade[aria-selected="true"] { background: var(--accent-soft); border-left-color: var(--accent-dk); }
+.facade b { font-size: var(--t-meta); font-weight: 600; display: block; }
+.facade .s { font-size: var(--t-micro); color: var(--ink-3); }
+
+/* panneau droit à onglets : c'est lui qui remplace la navigation */
+.onglets { display: flex; border-bottom: 1px solid var(--line); background: var(--paper); }
+.onglets button { flex: 1; padding: 10px 6px; font-size: var(--t-meta); color: var(--ink-3); border-bottom: 2px solid transparent; }
+.onglets button[aria-selected="true"] { color: var(--ink); font-weight: 620; border-bottom-color: var(--ink); }
+.onglets button .pt { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-dk); margin-left: 4px; vertical-align: middle; }
+
+/* barre d'impact toujours visible : la conséquence ne se cache jamais */
+.barre-impact { display: flex; align-items: center; gap: 14px; padding: 0 14px; height: 46px; flex: 0 0 46px;
+  background: var(--ink); color: #e6e6e6; cursor: pointer; }
+.barre-impact:hover { background: #1c1c1c; }
+.barre-impact b { color: #fff; font-weight: 620; }
+.barre-impact .val { font-family: var(--mono); font-size: 12px; color: #fff; }
+.barre-impact .fleche { color: var(--accent); }
+.barre-impact .j { width: 150px; height: 6px; border-radius: 3px; background: #3a3a3a; overflow: hidden; position: relative; }
+.barre-impact .j i { display: block; height: 100%; background: var(--accent); }
+.barre-impact .j span { position: absolute; top: -2px; bottom: -2px; width: 1.5px; background: #fff; }
+
+.curseur { display: flex; align-items: center; gap: 9px; }
+.curseur input { width: 160px; accent-color: var(--accent-dk); }
+
+.vue { display: none; flex-direction: column; flex: 1; min-height: 0; }
+.vue[data-actif="1"] { display: flex; }
+
+.photo-detail { width: 100%; height: 112px; object-fit: cover; border-radius: var(--r); border: 1px solid var(--line); }
+.paire { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <span class="wordmark">ça fitte<i>.</i></span>
+    <span class="sep"></span>
+    <div class="projtitle" id="barre-projet" hidden>
+      <b>Résidence Papineau</b>
+      <span class="t-meta">Montréal (QC) · Dossier préliminaire</span>
+    </div>
+    <span class="grow"></span>
+    <div id="barre-droite" hidden style="display:flex;align-items:center;gap:10px">
+      <div class="revpair">
+        <div class="rev"><span>Référence</span><b>R03 · acceptée</b></div>
+        <div class="arrow">→</div>
+        <div class="rev courante"><span>Courante</span><b>R04</b></div>
+      </div>
+      <button class="btn" onclick="ouvrirImport()">Nouvelle comparaison</button>
+      <button class="btn discret" onclick="allerAccueil()">Quitter</button>
+    </div>
+  </header>
+
+  <!-- ===================== ACCUEIL ===================== -->
+  <section class="vue" id="v-accueil" data-actif="1" style="overflow-y:auto">
+    <div style="max-width:980px;margin:0 auto;padding:46px 24px 60px;width:100%">
+      <h1 style="font-size:26px">Vos projets</h1>
+      <p class="t-meta" style="margin-top:6px">Comparez les plans AutoCAD et la volumétrie SketchUp, et voyez tôt si un changement de fenêtre touche la façade de rayonnement.</p>
+
+      <button class="carte" style="margin-top:22px;overflow:hidden;width:100%;text-align:left;display:block" onclick="ouvrirEspace()">
+        <div style="display:flex">
+          <img class="photo" src="assets/batiment.jpg" alt="" style="width:256px;height:176px;object-fit:cover;flex:0 0 256px">
+          <div style="flex:1;padding:16px 18px">
+            <div class="rang" style="gap:10px">
+              <h2 style="font-size:18px">Résidence Papineau</h2>
+              <span class="etat attention">Révision requise</span>
+              <span class="grow"></span>
+              <span class="t-meta">R03 → R04</span>
+            </div>
+            <p class="t-meta" style="margin-top:4px">Montréal (QC) · Dossier préliminaire · 6 niveaux · RMC-001</p>
+            <div class="rang" style="gap:22px;margin-top:18px">
+              <div><b style="font-size:22px">7</b> <span class="t-meta">écarts de fenêtres</span></div>
+              <div><b style="font-size:22px">+4,8</b> <span class="t-meta">m² d'ouvertures en plus · façade est</span></div>
+            </div>
+            <div class="t-meta" style="margin-top:16px;color:var(--accent-dk);font-weight:600">Ouvrir l'espace de comparaison →</div>
+          </div>
+        </div>
+      </button>
+
+      <button class="carte" style="margin-top:12px;width:100%;padding:18px;display:flex;align-items:center;gap:12px;text-align:left;border-style:dashed" onclick="nouveauProjet()">
+        <span style="color:var(--ink-3)" id="ic-plus"></span>
+        <div><b style="font-size:var(--t-body)">Nouveau projet</b><div class="t-meta" style="margin-top:2px">Partir d'un dossier vide et importer une première paire de fichiers.</div></div>
+      </button>
+
+      <p class="t-micro" style="margin-top:26px;letter-spacing:.04em">Prototype · option B · données fictives</p>
+    </div>
+  </section>
+
+  <!-- ===================== ESPACE DE TRAVAIL ===================== -->
+  <section class="vue" id="v-espace">
+    <div class="espace">
+
+      <!-- colonne gauche : façades puis registre -->
+      <div class="colg">
+        <div class="bloc">
+          <div class="titre"><span>Façades</span></div>
+          <div id="liste-facades"></div>
+        </div>
+        <div class="titre" style="border-bottom:1px solid var(--line)">
+          <span id="titre-registre">Registre · 7 écarts</span>
+          <span class="grow"></span>
+          <button class="btn sm" id="btn-lot" onclick="accepterLot()">Accepter les 3 sûrs</button>
+        </div>
+        <div class="grow" style="overflow-y:auto" id="liste-ecarts"></div>
+      </div>
+
+      <!-- toile centrale : elle ne change jamais de place -->
+      <div class="toile">
+        <div class="barre">
+          <div class="segment">
+            <button aria-pressed="true" onclick="vueToile(this,'elevation')">Élévation</button>
+            <button onclick="vueToile(this,'plan')">Plan</button>
+            <button onclick="vueToile(this,'modele')">3D</button>
+            <button onclick="vueToile(this,'superposition')">Superposition</button>
+          </div>
+          <span class="grow"></span>
+          <div class="curseur" id="zone-curseur" hidden>
+            <span class="t-micro">R03</span>
+            <input type="range" min="0" max="100" value="100" id="curseur" oninput="majSuperposition()">
+            <span class="t-micro">R04</span>
+          </div>
+          <span class="t-meta" id="toile-titre"></span>
+        </div>
+        <div class="scene" id="scene"></div>
+        <div class="legende">
+          <span><i class="plein"></i>Géométrie du plan (2D)</span>
+          <span><i class="tirete"></i>Géométrie du modèle (3D)</span>
+          <span><i class="vert"></i>Écart mesuré</span>
+          <span><i class="gris"></i>Ouverture conforme</span>
+        </div>
+      </div>
+
+      <!-- panneau droit : trois contextes, jamais trois pages -->
+      <aside class="panneau">
+        <div class="onglets">
+          <button aria-selected="true" onclick="onglet(this,'ecart')">Écart</button>
+          <button onclick="onglet(this,'impact')">Impact façade<span class="pt"></span></button>
+          <button onclick="onglet(this,'rapport')">Rapport</button>
+        </div>
+        <div class="corps" id="panneau-corps"></div>
+      </aside>
+
+      <!-- tiroir de demande de révision : il glisse par-dessus, rien ne disparaît -->
+      <div class="tiroir" id="tiroir" hidden>
+        <header style="padding:14px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start">
+          <div class="grow"><h2>Demander une révision</h2><div class="t-meta" style="margin-top:2px">Façade est · révision R04</div></div>
+          <button class="btn discret sm" onclick="$('#tiroir').hidden=true"><span id="ic-x"></span></button>
+        </header>
+        <div class="corps" style="padding:14px" id="tiroir-corps"></div>
+      </div>
+    </div>
+
+    <!-- barre d'impact permanente -->
+    <button class="barre-impact" onclick="onglet(document.querySelectorAll('.onglets button')[1],'impact')">
+      <span class="t-micro" style="color:#9a9a9a;letter-spacing:.07em">Façade de rayonnement · est</span>
+      <span class="val">30,2 m²</span><span class="fleche">→</span><span class="val">35,0 m²</span>
+      <b class="val" style="color:var(--accent)">+4,8 m²</b>
+      <span class="j"><i style="width:17.5%"></i><span style="left:15.1%"></span></span>
+      <span class="val">17,5 %</span>
+      <span class="grow"></span>
+      <span class="etat attention">Révision requise</span>
+      <span style="color:#9a9a9a;font-size:var(--t-micro)">Ouvrir le détail →</span>
+    </button>
+  </section>
+</div>
+
+<!-- ===================== MODALE IMPORT + ALIGNEMENT ===================== -->
+<div class="voile" id="voile" hidden>
+  <div class="modale">
+    <header>
+      <div class="grow">
+        <h2>Nouvelle comparaison</h2>
+        <div class="t-meta" style="margin-top:2px">Référence <b>R03 · acceptée</b> → nouvelle révision <b>R04</b>. Import et alignement sur le même écran.</div>
+      </div>
+      <button class="btn discret sm" onclick="$('#voile').hidden=true"><span id="ic-x2"></span></button>
+    </header>
+    <div class="corps">
+      <div class="paire" style="gap:14px">
+        <div>
+          <div class="rang" style="gap:8px;margin-bottom:8px"><span class="t-micro">Source 2D</span><span class="grow"></span><span class="t-meta">AutoCAD · DXF</span></div>
+          <div id="depot-plan">
+            <button class="depot" style="width:100%" onclick="deposer('plan')"><span id="ic-d1"></span><div class="t">Déposer les plans d'étage</div><div class="f">ou cliquer pour choisir</div></button>
+          </div>
+        </div>
+        <div>
+          <div class="rang" style="gap:8px;margin-bottom:8px"><span class="t-micro">Source 3D</span><span class="grow"></span><span class="t-meta">SketchUp · DAE</span></div>
+          <div id="depot-modele">
+            <button class="depot" style="width:100%" onclick="deposer('modele')"><span id="ic-d2"></span><div class="t">Déposer la volumétrie</div><div class="f">ou cliquer pour choisir</div></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="zone-align" hidden style="margin-top:16px">
+        <hr class="fin" style="margin-bottom:14px">
+        <div class="rang" style="gap:8px;margin-bottom:10px"><h3>Alignement proposé</h3><span class="grow"></span><span class="etat regle" id="et-align">Proposé · 96 %</span></div>
+        <div class="paire" style="gap:14px;align-items:start">
+          <div style="border:1px solid var(--line);border-radius:var(--r);overflow:hidden;height:186px" id="mini-plan"></div>
+          <table class="tech" style="border:1px solid var(--line);border-radius:var(--r)">
+            <tr><td class="cle">Unités</td><td style="text-align:right"><b>Millimètres</b></td><td style="width:1%"><span class="prov">98&nbsp;%</span></td></tr>
+            <tr><td class="cle">Échelle</td><td style="text-align:right"><b>1:1</b></td><td><span class="prov">96&nbsp;%</span></td></tr>
+            <tr><td class="cle">Niveau de référence</td><td style="text-align:right"><b>Niveau 02</b></td><td><span class="prov">95&nbsp;%</span></td></tr>
+            <tr><td class="cle">Nord du projet</td><td style="text-align:right"><b>0°</b></td><td><span class="prov">93&nbsp;%</span></td></tr>
+            <tr><td class="cle">Façades</td><td style="text-align:right"><b>N / E / S / O assignées</b></td><td><span class="prov">auto</span></td></tr>
+          </table>
+        </div>
+        <div class="avis" style="margin-top:12px"><span id="ic-i2"></span><div><b>Fitte a tout proposé</b>Lancez la comparaison maintenant, ou corrigez un réglage si une valeur vous paraît fausse.</div></div>
+      </div>
+    </div>
+    <footer>
+      <button class="btn" onclick="$('#voile').hidden=true">Annuler</button>
+      <span class="grow"></span>
+      <button class="btn" id="btn-corriger" disabled onclick="faux('Prototype : les réglages d\u2019alignement s\u2019ouvriraient ici.')">Corriger l'alignement</button>
+      <button class="btn primaire lg" id="btn-comparer" disabled onclick="comparer()">Comparer</button>
+    </footer>
+  </div>
+</div>
+
+<script src="proto.js"></script>
+<script>
+let selection = "F-204";
+let facadeActive = "est";
+let vueCourante = "elevation";
+let ongletActif = "ecart";
+let regles = new Set();
+let depots = { plan: false, modele: false };
+
+/* ============================ navigation ============================ */
+function allerAccueil() {
+  $$(".vue").forEach((v) => v.removeAttribute("data-actif"));
+  $("#v-accueil").dataset.actif = "1";
+  $("#barre-projet").hidden = true;
+  $("#barre-droite").hidden = true;
+}
+function ouvrirEspace() {
+  $$(".vue").forEach((v) => v.removeAttribute("data-actif"));
+  $("#v-espace").dataset.actif = "1";
+  $("#barre-projet").hidden = false;
+  $("#barre-droite").hidden = false;
+  rendreFacades(); rendreListe(); rendreToile(); rendrePanneau();
+}
+function ouvrirImport() { $("#voile").hidden = false; }
+function nouveauProjet() {
+  depots = { plan: false, modele: false };
+  $("#depot-plan").innerHTML = '<button class="depot" style="width:100%" onclick="deposer(\'plan\')">' + icone("depot") + '<div class="t">Déposer les plans d\'étage</div><div class="f">ou cliquer pour choisir</div></button>';
+  $("#depot-modele").innerHTML = '<button class="depot" style="width:100%" onclick="deposer(\'modele\')">' + icone("depot") + '<div class="t">Déposer la volumétrie</div><div class="f">ou cliquer pour choisir</div></button>';
+  $("#zone-align").hidden = true;
+  $("#btn-comparer").disabled = true;
+  $("#btn-corriger").disabled = true;
+  ouvrirImport();
+}
+function deposer(quoi) {
+  const info = quoi === "plan" ? PROJET.fichiers.plan : PROJET.fichiers.modele;
+  simulerDepot($("#depot-" + quoi), info, () => {
+    depots[quoi] = true;
+    if (depots.plan && depots.modele) {
+      $("#zone-align").hidden = false;
+      $("#mini-plan").innerHTML = svgPlan({ niveau: 2 });
+      $("#btn-comparer").disabled = false;
+      $("#btn-corriger").disabled = false;
+    }
+  });
+}
+function comparer() {
+  const b = $("#btn-comparer");
+  b.disabled = true; b.textContent = "Comparaison…";
+  setTimeout(() => {
+    b.textContent = "Comparer"; b.disabled = false;
+    $("#voile").hidden = true;
+    ouvrirEspace();
+  }, 900);
+}
+
+/* ============================ colonne gauche ============================ */
+function rendreFacades() {
+  $("#liste-facades").innerHTML = FACADES.map((f) =>
+    '<button class="facade" aria-selected="' + (f.id === facadeActive) + '" onclick="choisirFacade(\'' + f.id + '\')">' +
+    miniFacade(f.id) +
+    '<span style="flex:1"><b>' + f.nom + '</b><span class="s">' + (f.ecarts ? f.ecarts + " écart" + (f.ecarts > 1 ? "s" : "") : "aucun écart") + "</span></span>" +
+    '<span class="etat ' + f.classe + '" style="height:18px;padding:0 6px">' + f.etat + "</span></button>").join("");
+}
+function choisirFacade(f) {
+  facadeActive = f;
+  const liste = ecartsFacade(f);
+  if (liste.length) selection = liste[0].id;
+  rendreFacades(); rendreListe(); rendreToile(); rendrePanneau();
+}
+function rendreListe() {
+  const liste = ecartsFacade(facadeActive);
+  $("#titre-registre").textContent = "Registre · " + liste.length + " sur la façade " + facadeActive;
+  $("#liste-ecarts").innerHTML = liste.length ? liste.map((e) => {
+    const regle = regles.has(e.id) || e.statut === "regle";
+    return '<button class="ecart" aria-selected="' + (e.id === selection) + '" onclick="choisir(\'' + e.id + '\')">' +
+      '<span class="vignette">' + vignette(e) + "</span>" +
+      '<span class="txt"><span class="id">' + e.id + '</span><span class="quoi">' + e.libelle + " · " + e.delta + '</span><span class="ou">Niveau 0' + e.niveau + " · " + e.piece + "</span></span>" +
+      '<span class="marque"><span class="etat ' + (regle ? "regle" : e.gravite === "haute" ? "attention" : "ouvert") + '">' + (regle ? "Réglé" : e.gravite === "haute" ? "À réviser" : "Ouvert") + "</span></span></button>";
+  }).join("") : '<div style="padding:22px 14px;text-align:center" class="t-meta">Aucun écart détecté sur cette façade dans les tolérances retenues.<br><span class="t-micro">Cela ne garantit pas une concordance parfaite.</span></div>';
+  const sur = ECARTS.filter((e) => e.confiance && e.confiance >= 88 && !regles.has(e.id)).length;
+  $("#btn-lot").hidden = sur === 0;
+  $("#btn-lot").textContent = "Accepter les " + sur + " sûrs";
+}
+function accepterLot() {
+  ECARTS.filter((e) => e.confiance && e.confiance >= 88).forEach((e) => regles.add(e.id));
+  rendreListe(); rendrePanneau(); rendreToile();
+}
+function choisir(id) {
+  selection = id;
+  const e = ecartPar(id);
+  if (e.facade !== facadeActive) { facadeActive = e.facade; rendreFacades(); }
+  if (ongletActif !== "ecart") onglet(document.querySelectorAll(".onglets button")[0], "ecart");
+  rendreListe(); rendreToile(); rendrePanneau();
+}
+
+/* ============================ toile ============================ */
+function vueToile(btn, quoi) {
+  vueCourante = quoi;
+  $$("#v-espace .toile .segment button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+  btn.setAttribute("aria-pressed", "true");
+  $("#zone-curseur").hidden = quoi !== "superposition";
+  rendreToile();
+}
+function rendreToile() {
+  const s = $("#scene");
+  const e = ecartPar(selection);
+  const impact = ongletActif === "impact";
+  if (vueCourante === "modele") {
+    s.innerHTML = '<img class="photo" src="assets/massing.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:var(--paper-2)">' +
+      '<div style="position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);border:2px solid var(--accent-dk);width:66px;height:44px;box-shadow:0 0 0 4px rgba(192,215,57,.45)"></div>' +
+      '<div style="position:absolute;left:50%;top:56%;transform:translateX(-50%);font-family:var(--mono);font-size:11px;font-weight:700;background:var(--accent);padding:2px 7px;border-radius:3px">' + selection + "</div>";
+    $("#toile-titre").textContent = "Volumétrie SketchUp · R04";
+  } else if (vueCourante === "plan") {
+    s.innerHTML = svgPlan({ niveau: e ? e.niveau : 2, surligne: selection });
+    $("#toile-titre").textContent = "Plan AutoCAD · niveau 0" + (e ? e.niveau : 2);
+    brancher(s);
+  } else if (vueCourante === "superposition") {
+    s.innerHTML = svgElevation({ surligne: impact ? null : selection, comptees: impact });
+    $("#toile-titre").textContent = "Superposition R03 / R04";
+    brancher(s);
+    majSuperposition();
+  } else {
+    s.innerHTML = svgElevation({ surligne: impact ? null : selection, comptees: impact });
+    $("#toile-titre").textContent = "Élévation " + facadeActive + " · R04";
+    brancher(s);
+  }
+}
+function brancher(s) { $$("g.fen", s).forEach((g) => g.addEventListener("click", () => choisir(g.dataset.fen))); }
+function majSuperposition() {
+  const v = +$("#curseur").value / 100;
+  $$("#scene g.fen rect[stroke-dasharray]").forEach((r) => r.setAttribute("opacity", (1 - v).toFixed(2)));
+  $$("#scene g.fen rect:not([stroke-dasharray])").forEach((r) => r.setAttribute("opacity", Math.max(.25, v).toFixed(2)));
+}
+
+/* ============================ panneau droit ============================ */
+function onglet(btn, quoi) {
+  ongletActif = quoi;
+  $$(".onglets button").forEach((b) => b.setAttribute("aria-selected", "false"));
+  btn.setAttribute("aria-selected", "true");
+  rendrePanneau();
+  rendreToile();
+}
+function rendrePanneau() {
+  if (ongletActif === "ecart") return panneauEcart();
+  if (ongletActif === "impact") return panneauImpact();
+  return panneauRapport();
+}
+
+function panneauEcart() {
+  const e = ecartPar(selection);
+  if (!e) { $("#panneau-corps").innerHTML = '<div style="padding:20px" class="t-meta">Aucun écart sélectionné.</div>'; return; }
+  const regle = regles.has(e.id) || e.statut === "regle";
+  const dim = (s) => s ? s.l.toLocaleString("fr-CA") + " × " + s.h.toLocaleString("fr-CA") + " mm" : "—";
+  $("#panneau-corps").innerHTML =
+    '<div style="padding:12px 14px;border-bottom:1px solid var(--line)">' +
+      '<div class="rang" style="gap:8px"><h2 class="mono" style="font-size:14px">' + e.id + '</h2><span class="grow"></span>' +
+      '<span class="etat ' + (regle ? "regle" : "attention") + '">' + (regle ? "Réglé" : e.libelle) + "</span></div>" +
+      '<div class="t-meta" style="margin-top:3px">Façade ' + e.facade + " · niveau 0" + e.niveau + " · " + e.piece + " · unité " + e.unite + "</div></div>" +
+    '<div style="border-bottom:1px solid var(--line)">' + svgDetail(e) + "</div>" +
+    '<div style="padding:11px 14px;border-bottom:1px solid var(--line)">' +
+      '<div class="t-micro" style="margin-bottom:6px">Preuve · extrait du modèle</div>' +
+      '<img class="photo photo-detail" src="assets/modele-detail.jpg" alt=""></div>' +
+    '<table class="tech">' +
+      '<tr><th>Mesure</th><th style="text-align:right">Plan (2D)</th><th style="text-align:right">Modèle (3D)</th></tr>' +
+      '<tr><td class="cle">Dimensions</td><td class="num">' + dim(e.plan) + '</td><td class="num">' + dim(e.modele) + "</td></tr>" +
+      '<tr><td class="cle">Aire</td><td class="num">' + e.aire.plan.toFixed(2).replace(".", ",") + ' m²</td><td class="num">' + e.aire.modele.toFixed(2).replace(".", ",") + " m²</td></tr>" +
+      '<tr class="total"><td>Écart</td><td class="num" colspan="2">' + e.delta + "</td></tr></table>" +
+    '<div style="padding:11px 14px;border-bottom:1px solid var(--line)">' +
+      '<div class="t-micro" style="margin-bottom:6px">Pourquoi cette correspondance</div>' +
+      '<p class="t-meta" style="line-height:1.55;color:var(--ink-2)">' + e.explication + "</p>" +
+      '<div class="rang" style="gap:12px;margin-top:8px">' +
+        (e.confiance !== null ? '<span class="prov">Confiance ' + e.confiance + '&nbsp;%</span>' : '<span class="prov">Aucune correspondance</span>') +
+        '<span class="prov">Géométrie lue</span></div></div>' +
+    '<div style="padding:12px 14px">' +
+      (regle
+        ? '<div class="avis marque">' + icone("coche") + "<div><b>Écart réglé</b>L'écart reste inscrit au registre tant que le modèle n'est pas corrigé.</div></div>"
+        : '<div class="rang" style="gap:7px">' +
+            '<button class="btn primaire" style="flex:1" onclick="reglerEcart()">' + icone("coche") + "Accepter</button>" +
+            '<button class="btn" onclick="faux(\'Prototype : choix d\u2019un autre objet du modèle.\')">' + icone("lien") + "Relier</button>" +
+            '<button class="btn" onclick="faux(\'Prototype : motif d\u2019exclusion.\')">' + icone("interdit") + "Ignorer</button></div>") +
+      '<button class="btn" style="width:100%;margin-top:9px" onclick="ouvrirTiroir()">' + icone("personne") + "Demander une révision professionnelle</button>" +
+    "</div>";
+}
+function reglerEcart() { regles.add(selection); rendreListe(); rendrePanneau(); }
+
+function panneauImpact() {
+  $("#panneau-corps").innerHTML =
+    '<div style="padding:12px 14px;border-bottom:1px solid var(--line)">' +
+      '<div class="rang" style="gap:8px"><h2>Façade est · ouvertures</h2><span class="grow"></span><span class="etat attention">Révision requise</span></div>' +
+      '<div class="t-meta" style="margin-top:3px">Façade de rayonnement · ouvertures non protégées</div></div>' +
+    '<div style="padding:12px 14px;border-bottom:1px solid var(--line)">' +
+      '<div class="chiffres" style="grid-template-columns:1fr 1fr 1fr">' +
+        '<div class="chiffre"><b>30,2<small>m²</small></b><span>Référence R03</span></div>' +
+        '<div class="chiffre"><b>35,0<small>m²</small></b><span>Courante R04</span></div>' +
+        '<div class="chiffre fort"><b>+4,8<small>m²</small></b><span>Écart</span></div></div>' +
+      '<div class="rang" style="margin-top:12px"><span class="t-meta">Pourcentage d\'ouverture actuel</span><span class="grow"></span><b style="font-size:16px">17,5&nbsp;%</b></div>' +
+      '<div class="jauge" style="margin-top:7px"><i style="width:17.5%"></i><span class="ref" style="left:15.1%"></span></div>' +
+      '<div class="t-micro" style="margin-top:7px;line-height:1.5;letter-spacing:.02em">Repère : 15,1&nbsp;% en R03. Sur une façade de rayonnement de 200,0&nbsp;m² saisie par l\'utilisateur. Ce n\'est pas un pourcentage d\'ouvertures permises.</div></div>' +
+    '<div style="padding:12px 14px;border-bottom:1px solid var(--line)"><div class="avis sombre">' + icone("alerte") +
+      "<div><b>Observation géométrique, pas une conclusion de code</b>L'aire des ouvertures a augmenté de 4,8&nbsp;m². Les limites applicables ne peuvent pas être établies tant que les intrants ci-dessous ne sont pas confirmés.</div></div></div>" +
+    '<div class="titre" style="padding:10px 14px 6px"><span>Intrants et hypothèses</span></div>' +
+    '<table class="tech">' + IMPACT.intrants.map((i) =>
+      '<tr><td class="cle">' + i.nom + '</td><td style="text-align:right">' + i.valeur +
+      '</td><td style="width:1%"><span class="etat ' + (i.ok === true ? "regle" : i.ok === false ? "ouvert" : "neutre") + '">' + i.etat + "</span></td></tr>").join("") + "</table>" +
+    '<div style="padding:12px 14px">' +
+      '<button class="btn" style="width:100%" onclick="faux(\'Prototype : saisie des intrants de projet.\')">Renseigner les intrants manquants</button>' +
+      '<button class="btn primaire" style="width:100%;margin-top:8px" onclick="ouvrirTiroir()">' + icone("personne") + "Demander une révision professionnelle</button></div>";
+}
+
+function panneauRapport() {
+  $("#panneau-corps").innerHTML =
+    '<div style="padding:12px 14px;border-bottom:1px solid var(--line)">' +
+      '<div class="rang" style="gap:8px"><h2>Rapport R03 → R04</h2><span class="grow"></span><span class="etat attention">En attente</span></div>' +
+      '<div class="t-meta" style="margin-top:3px">Assemblé en continu à partir de vos décisions.</div></div>' +
+    '<table class="tech">' +
+      '<tr><th>Fenêtre</th><th>Écart</th><th style="text-align:right">État</th></tr>' +
+      ECARTS.map((e) => {
+        const r = regles.has(e.id) || e.statut === "regle";
+        return '<tr><td><b class="mono">' + e.id + '</b><div class="t-micro" style="color:var(--ink-3)">Façade ' + e.facade + " · niv. 0" + e.niveau + '</div></td><td>' + e.libelle +
+          '<div class="t-micro" style="color:var(--ink-3)">' + e.delta + '</div></td><td style="text-align:right"><span class="etat ' + (r ? "regle" : "ouvert") + '">' + (r ? "Confirmé" : "Ouvert") + "</span></td></tr>";
+      }).join("") + "</table>" +
+    '<div style="padding:12px 14px;border-top:1px solid var(--line)">' +
+      '<div class="t-micro" style="margin-bottom:8px">Aperçu</div>' +
+      '<div style="border:1px solid var(--line);border-radius:var(--r);padding:12px;background:var(--paper-2)">' +
+        '<div class="rang" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px"><span class="wordmark" style="font-size:11px">ça fitte<i>.</i></span><span class="t-micro">R03 → R04</span></div>' +
+        '<div style="font-weight:620;margin-top:8px">Rapport de coordination des fenêtres</div>' +
+        '<div class="t-meta" style="color:var(--ink-2)">Résidence Papineau · 12 pages</div>' +
+        '<div style="margin-top:10px">' + svgDetail(ecartPar("F-204")) + "</div></div></div>" +
+    '<div style="padding:0 14px 14px">' +
+      '<button class="btn" style="width:100%;justify-content:flex-start" onclick="faux(\'Rapport PDF généré (prototype).\')">' + icone("telecharger") + "Rapport PDF · 12 pages</button>" +
+      '<button class="btn" style="width:100%;margin-top:7px;justify-content:flex-start" onclick="faux(\'Registre CSV exporté (prototype).\')">' + icone("telecharger") + "Registre des écarts · CSV</button>" +
+      '<hr class="fin" style="margin:12px 0">' +
+      '<div class="t-micro" style="margin-bottom:7px">Boucler la révision</div>' +
+      '<button class="btn primaire" style="width:100%" id="btn-accepter" onclick="accepterRevision()">Accepter R04 comme référence</button>' +
+      '<div id="etat-accept" class="t-meta" style="margin-top:8px;color:var(--accent-dk)" hidden></div></div>';
+}
+function accepterRevision() {
+  $("#etat-accept").hidden = false;
+  $("#etat-accept").textContent = "Impossible : la révision professionnelle n'est pas terminée. R03 reste la référence.";
+  $("#btn-accepter").disabled = true;
+}
+
+/* ============================ tiroir ============================ */
+function ouvrirTiroir() {
+  $("#tiroir").hidden = false;
+  $("#tiroir-corps").innerHTML =
+    '<div class="avis marque">' + icone("alerte") + "<div><b>Résumé transmis</b>Les fenêtres de la façade est ont changé depuis la dernière révision acceptée. L'aire des ouvertures passe de 30,2&nbsp;m² à 35,0&nbsp;m² (+4,8&nbsp;m²).</div></div>" +
+    '<div class="titre" style="padding:14px 0 6px"><span>Contenu de la demande</span></div>' +
+    '<table class="tech" style="border:1px solid var(--line);border-radius:var(--r)">' +
+      [["Écarts confirmés", regles.size + " sur 7"], ["Écart non résolu", "F-309 · ambigu"], ["Extraits plan et modèle", "7 vues cotées"], ["Aire des ouvertures", "30,2 → 35,0 m²"], ["Intrants manquants", "4"]]
+        .map((r) => '<tr><td class="cle">' + r[0] + '</td><td style="text-align:right"><b>' + r[1] + "</b></td></tr>").join("") + "</table>" +
+    '<label class="champ" style="margin-top:14px"><span>Destinataire</span><select id="sel-rev">' + REVISEURS.map((r) => "<option>" + r + "</option>").join("") + "</select></label>" +
+    '<label class="champ" style="margin-top:11px"><span>Note</span><textarea rows="4">Merci de valider les ouvertures révisées de la façade est et de confirmer les hypothèses de séparation spatiale avant que nous poussions le développement de façade.</textarea></label>' +
+    '<div class="avis" style="margin-top:12px">' + icone("info") + "<div>Aucune conclusion de conformité n'est transmise : la demande contient la géométrie mesurée, ses sources et les intrants manquants.</div></div>" +
+    '<button class="btn primaire lg" style="width:100%;margin-top:14px" id="btn-env" onclick="envoyer()">Envoyer la demande</button>' +
+    '<div id="conf" hidden class="avis marque" style="margin-top:10px">' + icone("coche") + '<div><b>Demande envoyée</b><span id="conf-txt"></span></div></div>';
+}
+function envoyer() {
+  const qui = $("#sel-rev").value.split(" — ")[0];
+  $("#conf").hidden = false;
+  $("#conf-txt").textContent = "Transmise à " + qui + ". État : en attente de révision professionnelle, ce qui n'est pas une révision terminée.";
+  $("#btn-env").disabled = true;
+  $("#btn-env").textContent = "Demande envoyée";
+}
+
+function faux(m) { alert(m); }
+
+/* icônes */
+$("#ic-plus").innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg>';
+["ic-x|croix", "ic-x2|croix", "ic-d1|depot", "ic-d2|depot", "ic-i2|info"].forEach((p) => {
+  const [id, n] = p.split("|");
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = icone(n);
+});
+allerAccueil();
+</script>
+</body>
+</html>

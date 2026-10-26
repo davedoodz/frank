@@ -156,7 +156,7 @@ export default function AddToCollectionDialog({
                   <button
                     type="button"
                     onClick={() => setAdding((a) => !a)}
-                    className="flex items-center gap-1 text-[13px] font-medium text-brand transition-colors hover:text-brand-2"
+                    className="flex items-center gap-1 text-[13px] font-medium text-text transition-colors hover:text-text-2"
                   >
                     <Icon name={adding ? "chevron-down" : "plus"} size={14} />
                     {adding ? "Choisir une collection existante" : "Nouvelle collection"}

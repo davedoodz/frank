@@ -230,7 +230,7 @@ export default async function ProjectOverview({
             {units.length ? (
               <Link
                 href={`/p/${project.project_code}/units`}
-                className="text-[13px] font-medium text-brand"
+                className="text-[13px] font-medium text-text-2"
               >
                 Voir toutes
               </Link>
@@ -307,7 +307,7 @@ export default async function ProjectOverview({
             {project.drawings.length ? (
               <Link
                 href={`/p/${project.project_code}/drawings`}
-                className="text-[13px] font-medium text-brand"
+                className="text-[13px] font-medium text-text-2"
               >
                 Voir tout
               </Link>

@@ -108,52 +108,52 @@ export default async function GlobalOfficeDnaPage({
           </p>
         </header>
 
+        {/* One strip for the source. The picker already names the project and
+            the unit, so the line beside it carries only what the picker
+            cannot: the size, where it sits, and the sheet it came from. */}
         <div className="border-b border-line px-6 py-3">
-          <GlobalSourcePicker
-            projects={withUnits.map((e) => e.project)}
-            projectCode={picked.project.project_code}
-            units={picked.units}
-            unitNumber={source.number}
-          />
-          <p className="mt-2 font-mono text-meta text-ink-3">
-            {projectDefaulted || unitDefaulted
-              ? "aucune source choisie — affichage de la première unité indexée de l’agence : "
-              : "source : "}
-            {picked.project.display_name} ({picked.project.year}) · unité{" "}
-            {source.number}
-          </p>
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="border-b border-line px-6 py-3">
-            <div className="font-mono text-meta text-ink-3">
-              {source.number} · {source.type_qc.value} ·{" "}
-              {source.net_area_m2.value.toFixed(1)} m² ·{" "}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <GlobalSourcePicker
+              projects={withUnits.map((e) => e.project)}
+              projectCode={picked.project.project_code}
+              units={picked.units}
+              unitNumber={source.number}
+            />
+            <span className="font-mono text-meta text-ink-3">
+              {source.net_area_m2.value.toFixed(1)} m²
               {sourceFloor
-                ? `${sourceFloor.label} · ${sourceFloor.sheet_number}`
-                : "—"}{" "}
-              · {picked.project.display_name} {picked.project.year} ·{" "}
+                ? ` · ${sourceFloor.label} · ${sourceFloor.sheet_number}`
+                : ""}{" "}
+              ·{" "}
               <Link
                 href={`/p/${picked.project.project_code}/units?floor=${
                   sourceFloor?.level ?? 0
                 }&u=${source.number}`}
-                className="text-ink-2 transition-colors duration-[80ms] hover:text-ink"
+                className="text-ink-2 underline-offset-2 transition-colors duration-[80ms] hover:text-ink hover:underline"
               >
                 ouvrir sur le plan
               </Link>
-            </div>
-
-            <div className="mt-2">
-              <GlobalCriteriaBar
-                code={picked.project.project_code}
-                sourceNumber={source.number}
-                criteria={criteria}
-                defaults={defaultCriteria(source)}
-                extra={{ basis: basis ?? undefined, sort }}
-              />
-            </div>
+            </span>
           </div>
 
+          {projectDefaulted || unitDefaulted ? (
+            <p className="mt-2 font-mono text-meta text-ink-3">
+              aucune source choisie — première unité indexée de l’agence
+            </p>
+          ) : null}
+
+          <div className="mt-3">
+            <GlobalCriteriaBar
+              code={picked.project.project_code}
+              sourceNumber={source.number}
+              criteria={criteria}
+              defaults={defaultCriteria(source)}
+              extra={{ basis: basis ?? undefined, sort }}
+            />
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="border-b border-line px-6 py-3">
             <GlobalResultFilters
               code={picked.project.project_code}

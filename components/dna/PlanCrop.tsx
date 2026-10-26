@@ -15,7 +15,7 @@ export default function PlanCrop({
   scale = 1,
   widthM,
   invert = false,
-  stroke = "#111111",
+  stroke = "var(--color-text)",
   strokeWidth = 1,
   fill = "none",
   fillOpacity = 1,

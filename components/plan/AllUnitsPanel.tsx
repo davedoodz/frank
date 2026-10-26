@@ -14,20 +14,20 @@ export default function FloorMetrics({ units }: { units: Unit[] }) {
 
   return (
     <section className="panel flex shrink-0 items-stretch">
-      <Figure value={String(units.length)} label="Units" />
+      <Figure value={String(units.length)} label="Unités" />
       <Figure
         value={`${net.toFixed(1)} m²`}
-        label="Total floor area"
-        hint="Sum of indexed net areas"
+        label="Superficie totale de l’étage"
+        hint="Somme des superficies nettes indexées"
       />
       <Figure
         value={`${units.length ? (net / units.length).toFixed(1) : "0.0"} m²`}
-        label="Average unit area"
+        label="Unité moyenne"
       />
 
       <div className="flex min-w-0 flex-1 items-center gap-6 px-5 py-4">
         <div className="min-w-0">
-          <div className="cap">Unit types</div>
+          <div className="cap">Types d’unités</div>
           <div className="mt-2 flex flex-wrap items-center gap-5">
             {types.map((type) => {
               const count = units.filter((u) => u.type_qc.value === type).length;
@@ -41,7 +41,7 @@ export default function FloorMetrics({ units }: { units: Unit[] }) {
                     {brLabel(type)}
                   </span>
                   <span className="text-[12px] text-text-2">
-                    {count} units ({Math.round((count / units.length) * 100)}%)
+                    {count} unités ({Math.round((count / units.length) * 100)}&nbsp;%)
                   </span>
                 </div>
               );
@@ -98,7 +98,7 @@ export function TypologyLegend({ units }: { units: Unit[] }) {
       ))}
       <span className="flex items-center gap-2 text-[12px] text-text-2">
         <span className="h-2.5 w-2.5 rounded-full bg-ty-common" />
-        Common area
+        Aire commune
       </span>
     </div>
   );

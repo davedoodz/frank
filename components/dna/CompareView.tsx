@@ -106,7 +106,7 @@ export default function CompareView({
             {unitBackHref ? (
               <Link href={unitBackHref} className={BTN_QUIET}>
                 <Icon name="chevron-left" size={14} />
-                Retour à l'unité {left.unit.number}
+                Retour à l’unité {left.unit.number}
               </Link>
             ) : null}
             <Link href={swapHref} className={BTN_QUIET}>
@@ -146,7 +146,7 @@ export default function CompareView({
 
           <button type="button" onClick={() => setRotateRight((v) => !v)} className={BTN}>
             <Icon name="rotate" size={14} />
-            Faire pivoter l'unité de droite
+            Faire pivoter l’unité de droite
           </button>
 
           <div className="relative">
@@ -222,7 +222,7 @@ export default function CompareView({
                 type="button"
                 onClick={() => setTab(t)}
                 className={`relative h-12 text-[13px] font-medium transition-colors ${
-                  tab === t ? "text-brand" : "text-text-2 hover:text-text"
+                  tab === t ? "text-text" : "text-text-2 hover:text-text"
                 }`}
               >
                 {TAB_LABEL[t]}
@@ -420,7 +420,7 @@ function MoreMenu({ side }: { side: Side }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={BTN_ICON}
-        aria-label="Plus d'actions"
+        aria-label="Plus d’actions"
       >
         <Icon name="more" size={14} />
       </button>
@@ -436,7 +436,7 @@ function MoreMenu({ side }: { side: Side }) {
               }}
               className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-[13px] text-text hover:bg-app"
             >
-              Copier le numéro d'unité
+              Copier le numéro d’unité
             </button>
             <button
               type="button"
@@ -489,7 +489,7 @@ function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       }`}
     >
       <span
-        className={`absolute top-0.5 h-[18px] w-[18px] rounded-full bg-white shadow transition-transform ${
+        className={`absolute top-0.5 h-[18px] w-[18px] rounded-full bg-paper shadow transition-transform ${
           checked ? "translate-x-[20px]" : "translate-x-0.5"
         }`}
       />

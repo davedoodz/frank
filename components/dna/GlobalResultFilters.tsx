@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Chip } from "@/components/ui/Chip";
 import { SELECT } from "@/components/ui/Action";
-import { SORTS, criteriaQuery, type Criteria, type Sort } from "@/lib/dna";
+import { SORTS, SORT_LABEL, criteriaQuery, type Criteria, type Sort } from "@/lib/dna";
 import { BASIS_LABEL } from "@/lib/similarity";
 import type { SimilarityBasis } from "@/lib/types";
 
@@ -46,7 +46,7 @@ export default function GlobalResultFilters({
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Chip
-        label="tous les résultats"
+        label="Tous les résultats"
         count={total}
         active={basis === null}
         onClick={() => go({ basis: null })}
@@ -64,7 +64,7 @@ export default function GlobalResultFilters({
       <div className="flex-1" />
 
       <label className="flex items-center gap-2">
-        <span className="label-11">trier par</span>
+        <span className="label-11">Trier par</span>
         <select
           value={sort}
           onChange={(e) => go({ sort: e.target.value as Sort })}
@@ -72,13 +72,7 @@ export default function GlobalResultFilters({
         >
           {SORTS.map((s) => (
             <option key={s} value={s}>
-              {s === "match"
-                ? "meilleure correspondance"
-                : s === "area"
-                  ? "superficie"
-                  : s === "year"
-                    ? "plus récent"
-                    : "projet"}
+              {SORT_LABEL[s]}
             </option>
           ))}
         </select>

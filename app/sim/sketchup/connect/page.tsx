@@ -99,7 +99,7 @@ export default async function ConnectPage({
 
           <Link
             href={`/sim/sketchup/levels?code=${encodeURIComponent(project.project_code)}`}
-            className="mt-4 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand text-[13px] font-medium text-white transition-colors hover:bg-brand-2"
+            className="mt-4 flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand text-[13px] font-medium text-text transition-colors hover:bg-brand-2"
           >
             <Icon name="layers" size={14} />
             Associer les étages du bâtiment

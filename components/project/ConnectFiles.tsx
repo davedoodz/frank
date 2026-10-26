@@ -23,16 +23,16 @@ type Candidate = {
  * the geometry work.
  */
 const FOLDER: Candidate[] = [
-  { filename: "A-200_Site_Plan.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 2.4, description: "Site plan", modified: "2026-09-12" },
-  { filename: "A-201_Level_01.dwg", kind: "dwg", role: "floor_plan", floor_level: 1, size_mb: 4.1, description: "Floor plan — Level 01", modified: "2026-09-12" },
-  { filename: "A-202_Level_02.dwg", kind: "dwg", role: "floor_plan", floor_level: 2, size_mb: 3.8, description: "Floor plan — Level 02", modified: "2026-09-12" },
-  { filename: "A-203_Level_03.dwg", kind: "dwg", role: "floor_plan", floor_level: 3, size_mb: 3.7, description: "Floor plan — Level 03", modified: "2026-09-12" },
-  { filename: "A-204_Level_04.dwg", kind: "dwg", role: "floor_plan", floor_level: 4, size_mb: 3.7, description: "Floor plan — Level 04", modified: "2026-09-12" },
-  { filename: "A-300_Elevations.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 4.8, description: "Elevations", modified: "2026-09-05" },
-  { filename: "A-301_Sections.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 4.2, description: "Sections", modified: "2026-09-05" },
-  { filename: "A-400_Unit_Schedule.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 1.1, description: "Unit schedule", modified: "2026-09-05" },
-  { filename: "A-401_Parking_Schedule.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 0.98, description: "Parking schedule", modified: "2026-09-05" },
-  { filename: "Massing_v3.skp", kind: "skp", role: "massing", floor_level: null, size_mb: 18.2, description: "Building mass", modified: "2026-09-02" },
+  { filename: "A-200_Site_Plan.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 2.4, description: "Plan d’implantation", modified: "2026-09-12" },
+  { filename: "A-201_Level_01.dwg", kind: "dwg", role: "floor_plan", floor_level: 1, size_mb: 4.1, description: "Plan d’étage — Niveau 01", modified: "2026-09-12" },
+  { filename: "A-202_Level_02.dwg", kind: "dwg", role: "floor_plan", floor_level: 2, size_mb: 3.8, description: "Plan d’étage — Niveau 02", modified: "2026-09-12" },
+  { filename: "A-203_Level_03.dwg", kind: "dwg", role: "floor_plan", floor_level: 3, size_mb: 3.7, description: "Plan d’étage — Niveau 03", modified: "2026-09-12" },
+  { filename: "A-204_Level_04.dwg", kind: "dwg", role: "floor_plan", floor_level: 4, size_mb: 3.7, description: "Plan d’étage — Niveau 04", modified: "2026-09-12" },
+  { filename: "A-300_Elevations.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 4.8, description: "Élévations", modified: "2026-09-05" },
+  { filename: "A-301_Sections.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 4.2, description: "Coupes", modified: "2026-09-05" },
+  { filename: "A-400_Unit_Schedule.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 1.1, description: "Tableau des unités", modified: "2026-09-05" },
+  { filename: "A-401_Parking_Schedule.dwg", kind: "dwg", role: "other", floor_level: null, size_mb: 0.98, description: "Tableau du stationnement", modified: "2026-09-05" },
+  { filename: "Massing_v3.skp", kind: "skp", role: "massing", floor_level: null, size_mb: 18.2, description: "Volumétrie du bâtiment", modified: "2026-09-02" },
 ];
 
 const ROLE_LABEL: Record<DrawingRole, string> = {
@@ -186,7 +186,7 @@ export default function ConnectFiles({ project }: { project: Project }) {
                       {ROLE_LABEL[d.role]}
                     </td>
                     <td className="px-5 text-[13px] text-text-2">
-                      {d.floor_level === null ? "—" : `Étage ${d.floor_level}`}
+                      {d.floor_level === null ? "—" : `Niveau ${d.floor_level}`}
                     </td>
                     <td className="px-5 text-[13px]">
                       <span className={d.status === "indexed" ? "text-ok" : "text-text-2"}>
@@ -276,7 +276,7 @@ function ConnectDrawer({
           <li key={label} className="flex items-center gap-2">
             <span
               className={`flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-medium ${
-                i <= step ? "bg-brand text-white" : "bg-app text-text-3"
+                i <= step ? "bg-brand text-text" : "bg-app text-text-3"
               }`}
             >
               {i + 1}
@@ -340,7 +340,7 @@ function ConnectDrawer({
                       <span
                         className={`flex h-4 w-4 items-center justify-center rounded border ${
                           picked[f.filename]
-                            ? "border-brand bg-brand text-white"
+                            ? "border-brand bg-brand text-ok"
                             : "border-edge bg-panel"
                         }`}
                       >
@@ -398,7 +398,7 @@ function ConnectDrawer({
                     <span className="block text-[11px] text-text-3">
                       {f.floor_level === null
                         ? "Aucun étage"
-                        : `Étage ${f.floor_level}`}
+                        : `Niveau ${f.floor_level}`}
                     </span>
                   </span>
                   <select

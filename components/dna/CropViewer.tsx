@@ -61,7 +61,7 @@ export default function CropViewer({
           margin={0.2}
           scale={zoom}
           outline={outline}
-          stroke="#2563eb"
+          stroke="var(--color-brand)"
           className="h-full w-full"
         />
 
@@ -73,7 +73,7 @@ export default function CropViewer({
                 y1={6}
                 x2={barWidth}
                 y2={6}
-                stroke="#0f172a"
+                stroke="var(--color-text)"
                 strokeWidth={1}
               />
               {TICKS.map((t) => (
@@ -83,7 +83,7 @@ export default function CropViewer({
                     y1={2}
                     x2={t * pxPerMetre}
                     y2={10}
-                    stroke="#0f172a"
+                    stroke="var(--color-text)"
                     strokeWidth={1}
                   />
                   <text
@@ -91,7 +91,7 @@ export default function CropViewer({
                     y={21}
                     fontSize={10}
                     textAnchor="middle"
-                    fill="#475569"
+                    fill="var(--color-text-2)"
                   >
                     {t === 5 ? "5 m" : t}
                   </text>
