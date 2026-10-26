@@ -1,22 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import Icon from "@/components/ui/Icon";
 import type { Project } from "@/lib/types";
 
+/**
+ * Every section of a project, including the two that have no sub-navigation.
+ * The empty key is the overview; leaving it out is what made Fichiers and
+ * Aperçu end their trail at the project name while the others did not, so
+ * the same click depth looked like two different depths.
+ */
 const TAB_LABEL: Record<string, string> = {
-  units: "Units",
-  schedule: "Units",
-  "office-dna": "Office DNA",
-  drawings: "Drawings",
-  building: "Building",
+  "": "Aperçu",
+  files: "Fichiers",
+  units: "Unités",
+  schedule: "Unités",
+  "office-dna": "Précédents",
+  drawings: "Dessins",
+  building: "Bâtiment",
 };
 
 /**
- * The thin chrome above the work: where you are, and one search that jumps to
- * a unit. The project itself lives in the rail, so nothing is repeated here.
+ * The thin chrome above the work: where you are. The project itself lives in
+ * the rail, so nothing is repeated here.
  */
 export default function ProjectTopBar({
   project,
@@ -28,8 +35,6 @@ export default function ProjectTopBar({
   const code = project.project_code;
   const pathname = usePathname();
   const params = useSearchParams();
-  const router = useRouter();
-  const [find, setFind] = useState("");
 
   const segment = pathname.split("/")[3] ?? "";
   const tab = TAB_LABEL[segment];
@@ -38,8 +43,8 @@ export default function ProjectTopBar({
   const floorLabel = units.find((u) => String(u.level) === floorParam)?.label;
 
   const crumbs: { label: string; href?: string }[] = [
-    { label: "Projects", href: "/" },
-    { label: project.display_name, href: `/p/${code}/units` },
+    { label: "Projets", href: "/" },
+    { label: project.display_name, href: `/p/${code}` },
   ];
   if (tab) crumbs.push({ label: tab, href: `/p/${code}/${segment}` });
   if (floorLabel) {
@@ -49,9 +54,9 @@ export default function ProjectTopBar({
     });
   }
   if (unitParam && segment === "units") {
-    crumbs.push({ label: `Unit ${unitParam}` });
+    crumbs.push({ label: `Unité ${unitParam}` });
   } else if (floorLabel && segment === "units") {
-    crumbs.push({ label: "All Units" });
+    crumbs.push({ label: "Toutes les unités" });
   }
 
   return (
@@ -85,38 +90,6 @@ export default function ProjectTopBar({
         })}
       </nav>
 
-      <div className="flex-1" />
-
-      <label className="flex h-9 w-[300px] items-center gap-2 rounded-full border border-edge bg-panel px-3 text-text-3 focus-within:border-brand-line">
-        <Icon name="search" size={14} />
-        <input
-          type="search"
-          value={find}
-          onChange={(e) => setFind(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key !== "Enter") return;
-            const hit = units.find((u) => u.number === find.trim());
-            if (hit) {
-              router.push(`/p/${code}/units?floor=${hit.level}&u=${hit.number}`);
-            }
-          }}
-          placeholder="Search units in this project..."
-          aria-label="search units"
-          className="w-full text-[13px] text-text outline-none placeholder:text-text-3"
-        />
-      </label>
-
-      <button
-        type="button"
-        aria-label="notifications"
-        className="flex h-9 w-9 items-center justify-center rounded-full text-text-2 transition-colors hover:bg-panel hover:text-text"
-      >
-        <Icon name="bell" />
-      </button>
-
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-nav text-[11px] font-medium text-white">
-        JD
-      </span>
     </header>
   );
 }
