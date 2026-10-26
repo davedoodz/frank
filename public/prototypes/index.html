@@ -71,49 +71,17 @@ a{color:inherit;text-decoration:none}
 /* balance keeps the last line from hanging short: the block stays as tight as it can be */
 .txt p{font-size:13px;color:var(--ink-2);line-height:1.6;text-wrap:balance}
 
-/* pill — reacts to the pill only, never to the whole card */
-.cta{margin-top:auto;padding-top:16px;display:flex}
-.cta > span{
-  display:inline-flex;align-items:center;gap:7px;
-  padding:8px 15px;border:1px solid var(--line-2);border-radius:999px;
-  background:var(--paper);font-size:var(--dial-cta-size, 13px);font-weight:var(--dial-cta-weight, 700);color:var(--ink);
-  transition:background-color .2s ease,border-color .2s ease,color .2s ease;
+/* big letter above the thumbnail */
+.mark{
+  display:block;text-align:center;
+  font-family:var(--dial-date-font, var(--mono));
+  font-size:var(--dial-mark-size, 40px);
+  font-weight:400;line-height:1;letter-spacing:.04em;
+  color:var(--ink);margin-bottom:14px;
+  transition:color .2s ease;
 }
-.cta svg{width:15px;height:15px;position:relative;top:-1px;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
-.cta > span:hover{background:var(--ink);border-color:var(--ink);color:#fff}
-.cta > span:hover svg{transform:translate(2px,-2px)}
-@media (prefers-reduced-motion:reduce){.shot,.shot img,.cta>span,.cta svg{transition:none}}
-
-/* other shapes for the call to action; one at a time, via <body data-cta> */
-[data-cta="overline"] .cta > span{
-  padding:0;border:0;background:none;border-radius:0;
-  font-family:var(--mono);font-size:11px;font-weight:400;
-  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);gap:9px;
-}
-[data-cta="overline"] .cta > span:hover{background:none;color:var(--ink)}
-[data-cta="overline"] .cta svg{width:13px;height:13px}
-
-[data-cta="square"] .cta > span{border-radius:4px}
-
-[data-cta="filled"] .cta > span{background:var(--ink);border-color:var(--ink);color:#fff}
-[data-cta="filled"] .cta > span:hover{background:var(--paper);border-color:var(--ink);color:var(--ink)}
-
-[data-cta="accent"] .cta > span{background:var(--accent);border-color:var(--accent);color:var(--ink)}
-[data-cta="accent"] .cta > span:hover{background:var(--ink);border-color:var(--ink);color:#fff}
-
-[data-cta="underline"] .cta > span{
-  padding:0 0 3px;border:0;border-bottom:1.5px solid var(--ink);border-radius:0;background:none;
-}
-[data-cta="underline"] .cta > span:hover{background:none;color:var(--ink-2);border-bottom-color:var(--ink-2)}
-
-[data-cta="plain"] .cta > span{padding:0;border:0;background:none;border-radius:0}
-[data-cta="plain"] .cta > span:hover{background:none;color:var(--ink-2)}
-
-/* where the call to action sits in the card */
-[data-pos="left"] .cta{justify-content:flex-start}
-[data-pos="center"] .cta{justify-content:center}
-[data-pos="right"] .cta{justify-content:flex-end}
-[data-pos="stretch"] .cta > span{flex:1;justify-content:center}
+.opt:hover .mark{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.shot,.shot img,.mark{transition:none}}
 
 /* how the card content is aligned inside its column */
 [data-align="center"] .txt{align-items:center;text-align:center}
@@ -145,7 +113,7 @@ a{color:inherit;text-decoration:none}
 .notes-pill:hover .ext{transform:translate(2px,-2px)}
 </style>
 </head>
-<body data-hover="lift" data-cta="pill">
+<body data-hover="lift">
 <div class="page">
   <div class="tete">
     <p class="d" data-txt="date">Monday, October 26</p>
@@ -155,20 +123,20 @@ a{color:inherit;text-decoration:none}
 
   <div class="duo">
     <a class="opt" href="/" target="_blank" rel="noopener">
+      <span class="mark" aria-hidden="true">A</span>
       <span class="shot"><img src="assets/apercu-1a.jpg" alt="1A"></span>
       <span class="txt">
         <h2 data-txt="aTitle">Units and drawings</h2>
         <p data-txt="aBody">Projects, connected files, the floor plan viewer and the unit inspector. One source of truth for what has been drawn.</p>
-        <span class="cta"><span><span data-txt="aCta">Open 1A</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span></span>
       </span>
     </a>
 
     <a class="opt" href="plateforme-b.html" target="_blank" rel="noopener">
+      <span class="mark" aria-hidden="true">B</span>
       <span class="shot"><img src="assets/apercu-1b.jpg" alt="1B"></span>
       <span class="txt">
         <h2 data-txt="bTitle">Units, drawings and the 3D model</h2>
         <p data-txt="bBody">Plan and volume side by side inside Unités, a window status on every unit, and a façade glazing total that moves as you decide.</p>
-        <span class="cta"><span><span data-txt="bCta">Open 1B</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span></span>
       </span>
     </a>
   </div>
@@ -230,34 +198,6 @@ const dial = DialKit.createDialKit("Prototype 1", {
     length: [40, 0, 400, 2],
     thickness: [2, 1, 16, 1],
   },
-  cta: {
-    shape: { type: "select", default: "pill", options: [
-      { value: "pill", label: "Pill — outlined" },
-      { value: "filled", label: "Pill — solid black" },
-      { value: "accent", label: "Pill — office green" },
-      { value: "square", label: "Rounded rectangle" },
-      { value: "underline", label: "Underlined text" },
-      { value: "plain", label: "Plain text" },
-      { value: "overline", label: "Overline (like the date)" },
-    ]},
-    position: { type: "select", default: "left", options: [
-      { value: "left", label: "Left" },
-      { value: "center", label: "Centred" },
-      { value: "right", label: "Right" },
-      { value: "stretch", label: "Full width" },
-    ]},
-    label: { type: "select", default: "open", options: [
-      { value: "open", label: "Open 1A · Open 1B" },
-      { value: "short", label: "1A · 1B" },
-      { value: "view", label: "View 1A · View 1B" },
-      { value: "openOnly", label: "Open · Open" },
-      { value: "prototype", label: "Prototype 1A · Prototype 1B" },
-      { value: "custom", label: "Custom (use the Text fields)" },
-    ]},
-    weight: [700, 400, 800, 100],
-    size: [13, 10, 22, 0.5],
-    arrow: true,
-  },
   // Every string on the screen, editable in place.
   text: Object.fromEntries(
     [...document.querySelectorAll("[data-txt]")].map((el) => [
@@ -279,14 +219,6 @@ const FACES = {
   triangle: '"Geist Pixel Triangle", var(--mono)',
 };
 
-const ETIQUETTES = {
-  open: ["Open 1A", "Open 1B"],
-  short: ["1A", "1B"],
-  view: ["View 1A", "View 1B"],
-  openOnly: ["Open", "Open"],
-  prototype: ["Prototype 1A", "Prototype 1B"],
-};
-
 dial.subscribe((v) => {
   const root = document.documentElement.style;
   root.setProperty("--dial-col", v.spacing.betweenCards + "px");
@@ -301,22 +233,11 @@ dial.subscribe((v) => {
   root.setProperty("--dial-rule-w", v.rule.length + "px");
   root.setProperty("--dial-rule-h", v.rule.thickness + "px");
   document.body.dataset.hover = v.thumbnail.hover;
-  document.body.dataset.cta = v.cta.shape;
-  document.body.dataset.pos = v.cta.position;
   document.body.dataset.align = v.cards.align;
-  root.setProperty("--dial-cta-weight", v.cta.weight);
-  root.setProperty("--dial-cta-size", v.cta.size + "px");
   for (const [cle, valeur] of Object.entries(v.text)) {
     const el = document.querySelector(`[data-txt="${cle}"]`);
     if (el && el.textContent !== valeur) el.textContent = valeur;
   }
-  // The preset wins over the two text fields unless it is set to custom.
-  if (v.cta.label !== "custom") {
-    const [a, b] = ETIQUETTES[v.cta.label];
-    document.querySelector('[data-txt="aCta"]').textContent = a;
-    document.querySelector('[data-txt="bCta"]').textContent = b;
-  }
-  document.querySelectorAll(".cta svg").forEach((s) => { s.style.display = v.cta.arrow ? "" : "none"; });
 });
 
 // No dial root is mounted: the panel and its bottom-right handle stay off the
