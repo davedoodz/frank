@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ça fitte — raw notes panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"Geist Pixel Square";src:url("assets/GeistPixel-Square.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Geist Pixel Grid";src:url("assets/GeistPixel-Grid.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Geist Pixel Circle";src:url("assets/GeistPixel-Circle.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Geist Pixel Line";src:url("assets/GeistPixel-Line.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"Geist Pixel Triangle";src:url("assets/GeistPixel-Triangle.woff2") format("woff2");font-display:swap}
+
+:root{
+  --ink:#111111; --ink-2:#5a5a5a; --ink-3:#8f8f8f;
+  --line:#e6e6e4; --line-2:#d4d4d1; --paper:#ffffff; --bg:#f7f7f5;
+  --accent:#C0D739; --accent-wash:#f4f7e4;
+  --sans:"Geist",sans-serif; --mono:"Geist Mono",monospace;
+  /* the six typographic roles, switchable from the panel on the right */
+  --f-trigger:var(--mono); --f-label:var(--mono); --f-name:var(--sans);
+  --f-head:var(--mono); --f-body:var(--sans); --f-link:var(--mono);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
+img,svg{display:block}
+a{color:inherit}
+
+.shell{display:grid;grid-template-columns:1fr 268px;min-height:100vh}
+
+/* ---------------- the prototype page ---------------- */
+.stage{position:relative;overflow:hidden}
+.page{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px}
+.tete{text-align:center}
+.tete .d{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.tete h1{margin-top:8px;font-size:36px;font-weight:600;letter-spacing:-.03em}
+.tete .rule{width:58px;height:3px;background:var(--accent);margin:14px auto 0;border-radius:3px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:34px;width:100%;max-width:760px}
+.card{display:flex;flex-direction:column;align-items:center;text-align:center}
+.shot{width:100%;aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:6px}
+.shot img{width:100%;height:100%;object-fit:cover;object-position:top left}
+.card h3{font-size:15px;font-weight:600;margin-top:14px}
+.card p{font-size:12.5px;color:var(--ink-2);line-height:1.6;margin-top:7px;max-width:36ch}
+.card .cta{margin-top:14px;display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border:1px solid var(--line-2);
+  border-radius:999px;background:var(--paper);font-size:12.5px;font-weight:600}
+.sign{margin-top:30px}
+.sign img{height:34px;width:auto}
+
+/* ---------------- trigger ---------------- */
+.trigger{position:absolute;right:22px;bottom:22px;z-index:6;display:inline-flex;align-items:center;gap:9px;
+  padding:7px 14px 7px 7px;border-radius:999px;background:var(--paper);border:1px solid var(--line);
+  box-shadow:0 2px 12px rgba(0,0,0,.06);cursor:pointer;
+  font-family:var(--f-trigger);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);
+  transition:border-color .2s,box-shadow .2s,transform .2s}
+.trigger:hover{border-color:var(--accent);box-shadow:0 8px 22px rgba(0,0,0,.1);transform:translateY(-1px)}
+.trigger .faces{display:flex}
+.trigger .faces img{width:24px;height:24px;border-radius:999px}
+.trigger .faces img+img{margin-left:-8px;border:2px solid var(--paper)}
+
+/* ---------------- notes panel ---------------- */
+.scrim{position:absolute;inset:0;background:rgba(17,17,15,.34);opacity:0;pointer-events:none;transition:opacity .28s;z-index:7}
+.scrim.on{opacity:1;pointer-events:auto}
+.notes{position:absolute;top:0;right:0;bottom:0;width:430px;background:var(--paper);border-left:1px solid var(--line);
+  transform:translateX(100%);transition:transform .34s cubic-bezier(.2,.8,.2,1);z-index:8;display:flex;flex-direction:column}
+.notes.on{transform:none}
+.nhd{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.nhd .faces{display:flex}
+.nhd .faces img{width:24px;height:24px;border-radius:999px}
+.nhd .faces img+img{margin-left:-8px;border:2px solid var(--paper)}
+.nhd .t{font-family:var(--f-label);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.nhd .x{margin-left:auto;cursor:pointer;color:var(--ink-3);font-size:16px;line-height:1}
+.nhd .x:hover{color:var(--ink)}
+.tabs{display:flex;gap:4px;padding:12px 18px 0;flex:0 0 auto;flex-wrap:wrap}
+.tab{display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;cursor:pointer;border:1px solid transparent;
+  font-family:var(--f-name);font-size:12px;color:var(--ink-2)}
+.tab img{width:20px;height:20px;border-radius:999px}
+.tab:hover{background:var(--bg)}
+.tab.on{background:var(--accent-wash);border-color:#e2ebbb;color:var(--ink);font-weight:500}
+.nbody{padding:16px 18px 24px;overflow:auto;flex:1}
+.pane{display:none}.pane.on{display:block}
+.who{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.who img{width:34px;height:34px;border-radius:999px}
+.who b{font-family:var(--f-name);font-size:14px;font-weight:600;display:block}
+.who span{font-family:var(--f-label);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.nbody h4{font-family:var(--f-head);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin:20px 0 8px}
+.nbody h4:first-of-type{margin-top:0}
+.nbody ul{margin-left:16px}
+.nbody li{font-family:var(--f-body);font-size:13px;color:var(--ink-2);line-height:1.65;margin-bottom:7px}
+.nbody li ul{margin-top:6px}
+.nbody li li{font-size:12.5px;color:var(--ink-3)}
+.nbody p{font-family:var(--f-body);font-size:13px;color:var(--ink-2);line-height:1.65;margin-bottom:10px}
+.nbody ol{margin-left:17px}
+.nbody ol li{margin-bottom:8px}
+table.x{width:100%;border-collapse:collapse;margin:4px 0 8px;font-family:var(--f-body)}
+table.x th,table.x td{border:1px solid var(--line);padding:7px 8px;font-size:12px;text-align:left;vertical-align:top;color:var(--ink-2)}
+table.x th{background:var(--bg);color:var(--ink);font-weight:600}
+.nft{flex:0 0 auto;border-top:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;gap:8px}
+.nft a{font-family:var(--f-link);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-2);
+  text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.nft a:hover{color:var(--ink)}
+.nft svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6}
+
+/* ---------------- type controls ---------------- */
+.dial{border-left:1px solid var(--line);background:var(--paper);padding:20px 18px;overflow:auto;position:sticky;top:0;height:100vh}
+.dial h2{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.dial p.hint{font-size:11.5px;color:var(--ink-3);margin-top:8px;line-height:1.5}
+.row{margin-top:16px}
+.row label{display:block;font-size:11.5px;color:var(--ink-2);margin-bottom:5px}
+.row label i{font-style:normal;color:var(--ink-3)}
+.row select{width:100%;font:inherit;font-size:12.5px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink)}
+.row select:focus{outline:none;border-color:var(--accent)}
+.row .prev{margin-top:6px;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--bg);
+  font-size:14px;color:var(--ink);line-height:1.3;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.dial .acts{display:flex;gap:7px;margin-top:20px}
+.dial button{flex:1;font:inherit;font-size:11.5px;padding:7px 10px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper);cursor:pointer}
+.dial button:hover{border-color:var(--ink);background:var(--ink);color:#fff}
+.spec{margin-top:18px;border-top:1px solid var(--line);padding-top:12px;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);line-height:1.8;white-space:pre-wrap}
+@media (max-width:1000px){.shell{grid-template-columns:1fr}.dial{height:auto;position:static;border-left:0;border-top:1px solid var(--line)}.stage{height:620px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="stage">
+    <div class="page">
+      <div class="tete">
+        <p class="d">Monday, October 26</p>
+        <h1>Prototype 01</h1>
+        <div class="rule"></div>
+      </div>
+      <div class="duo">
+        <div class="card">
+          <div class="shot"><img src="assets/apercu-1a.jpg" alt=""></div>
+          <h3>Visual Projects Overview (One Source of Truth)</h3>
+          <p>Testing whether a centralized project overview improves information retrieval and revision tracking.</p>
+          <span class="cta">Open 1A <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
+        </div>
+        <div class="card">
+          <div class="shot"><img src="assets/apercu-1b.jpg" alt=""></div>
+          <h3>2D Units - 3D Massing Coordination Tool</h3>
+          <p>Exploring whether connecting AutoCAD plans and SketchUp models reduces manual coordination and design inconsistencies.</p>
+          <span class="cta">Open 1B <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
+        </div>
+      </div>
+      <div class="sign"><img src="assets/lafond.png" alt="Lafond Architecte"></div>
+    </div>
+
+    <div class="trigger" id="open">
+      <span class="faces"><img src="assets/personas/guy.svg" alt="Guy"><img src="assets/personas/benoit.svg" alt="Benoît"></span>
+      User notes
+    </div>
+
+    <div class="scrim" id="scrim"></div>
+
+    <aside class="notes" id="panel">
+      <div class="nhd">
+        <span class="faces"><img src="assets/personas/guy.svg" alt="Guy"><img src="assets/personas/benoit.svg" alt="Benoît"></span>
+        <span class="t">User Interview Notes</span>
+        <span class="x" id="close">✕</span>
+      </div>
+      <div class="tabs">
+        <div class="tab on" data-tab="guy"><img src="assets/personas/guy.svg" alt="">Guy</div>
+        <div class="tab" data-tab="ben"><img src="assets/personas/benoit.svg" alt="">Benoît</div>
+        <div class="tab" data-tab="cross">Cross-Interview Findings</div>
+      </div>
+      <div class="nbody">
+
+        <div class="pane on" data-pane="guy">
+          <div class="who"><img src="assets/personas/guy.svg" alt=""><span><b>User 1 — Guy</b><span>Senior Architectural Technician · 3D Specialist</span></span></div>
+
+          <h4>1. Architectural programming &amp; regulations</h4>
+          <ul>
+            <li>Initial client programming and needs assessment takes approximately one day.</li>
+            <li>Regulatory research is a major pain point.
+              <ul>
+                <li>Municipal zoning regulations can be difficult to access, especially during revisions.</li>
+                <li>Building codes are difficult to interpret due to ambiguous wording and subjective interpretations.</li>
+                <li>Finding the relevant article is not the problem; understanding and applying it is.</li>
+                <li>Code updates (roughly every four years) create uncertainty about which requirements apply.</li>
+              </ul>
+            </li>
+            <li>Regulations are checked initially at a high level, then revisited multiple times as the design progresses.</li>
+            <li>Communication with municipal urban planners is slow and bureaucratic.</li>
+          </ul>
+
+          <h4>2. Design revisions &amp; CCU approvals</h4>
+          <ul>
+            <li>Waiting for municipal and CCU approvals causes significant delays.</li>
+            <li>Clients frequently request design changes to reduce construction costs.</li>
+            <li>Changes may require renewed discussions with the city and partial or complete resubmissions.</li>
+            <li>Approximately 70% of changes are minor, including some occurring after CCU submission.</li>
+            <li>This creates repeated design and approval cycles.</li>
+          </ul>
+
+          <h4>3. 3D modeling &amp; visualization</h4>
+          <ul>
+            <li>Benoît sends AutoCAD drawings to Guy, who manually retraces them in SketchUp.</li>
+            <li>Producing high-quality 3D representations and post-production renders is time-consuming.</li>
+            <li>Interactive 3D orbiting could improve client presentations and allow clients to explore individual units.</li>
+          </ul>
+
+          <h4>4. Project tracking &amp; documentation</h4>
+          <ul>
+            <li>Relies on handwritten notes and memory to track requirements across projects.</li>
+            <li>A checklist with automated red flags and reminders would be valuable.</li>
+            <li>Manually prepares approximately 10 pages of building-code analysis per project.</li>
+          </ul>
+
+          <h4>5. Requested features</h4>
+          <ul>
+            <li>Zoning and building-code assistance with clear interpretations and article references.</li>
+            <li>Preliminary identification of potential dérogations mineures.</li>
+            <li>Reports that can be shared with municipal urban planners, citing relevant regulations.</li>
+            <li>Project-specific checklists and automated compliance warnings.</li>
+            <li>Interactive 3D unit visualization.</li>
+          </ul>
+        </div>
+
+        <div class="pane" data-pane="ben">
+          <div class="who"><img src="assets/personas/benoit.svg" alt=""><span><b>User 2 — Benoît</b><span>Senior Architectural Technician · 2D Specialist</span></span></div>
+
+          <h4>1. Drawing revisions &amp; version management</h4>
+          <ul>
+            <li>Tracking drawing versions and changes is difficult.</li>
+            <li>Changes are sometimes made without documenting why, making past decisions hard to reconstruct.</li>
+            <li>AutoCAD plans are sent to Guy for manual reconstruction in SketchUp.</li>
+            <li>Balcony modifications are a recurring example of design changes.</li>
+          </ul>
+
+          <h4>2. Floor plans &amp; calculations</h4>
+          <ul>
+            <li>Unit areas are calculated manually using AutoCAD polylines, floor by floor.</li>
+            <li>Would benefit from automated project summaries:
+              <ul>
+                <li>Total number of residential units.</li>
+                <li>Unit types (3½, 4½, 5½, etc.).</li>
+                <li>Areas by unit and floor.</li>
+                <li>Window types by floor.</li>
+              </ul>
+            </li>
+            <li>Material area calculations for elevations would also be useful.</li>
+          </ul>
+
+          <h4>3. Construction documentation &amp; coordination</h4>
+          <ul>
+            <li>Coordination with engineers is a major opportunity for improvement.</li>
+            <li>Must manually review mechanical and structural drawings to identify conflicts (e.g., ducts intersecting columns).</li>
+            <li>Would benefit from automatically highlighting aligned elements across floor plans, such as roof drains and columns.</li>
+            <li>Sees greater practical value in these tools during the execution phase than during early design.</li>
+          </ul>
+
+          <h4>4. CCU &amp; client presentations</h4>
+          <ul>
+            <li>For CCU submissions, area calculations are more useful than detailed 3D functionality.</li>
+            <li>Additional tools during early design could slow down the process.</li>
+            <li>Interactive 3D is primarily valuable for client discussions and spatial understanding.</li>
+            <li>Project PDFs and Photoshop adjustments are part of the presentation/documentation workflow.</li>
+          </ul>
+        </div>
+
+        <div class="pane" data-pane="cross">
+          <h4>Cross-Interview Findings</h4>
+          <table class="x">
+            <thead><tr><th>Theme</th><th>Guy</th><th>Benoît</th></tr></thead>
+            <tbody>
+              <tr><td>Regulatory compliance</td><td>Major pain point</td><td>CCU area calculations</td></tr>
+              <tr><td>Version tracking</td><td>Repeated revisions</td><td>Lost change history and rationale</td></tr>
+              <tr><td>AutoCAD → SketchUp</td><td>Manual reconstruction</td><td>Manual handoff</td></tr>
+              <tr><td>Calculations</td><td>Building-code studies</td><td>Unit and material areas</td></tr>
+              <tr><td>Project coordination</td><td>Checklists and reminders</td><td>Cross-floor and engineering coordination</td></tr>
+              <tr><td>3D visualization</td><td>Rendering effort; interactive presentations</td><td>Useful for clients, less for execution</td></tr>
+              <tr><td>Workflow priorities</td><td>Regulations and approvals</td><td>Drawing production and execution</td></tr>
+            </tbody>
+          </table>
+
+          <h4>Key opportunities for Fitte</h4>
+          <ol>
+            <li>Regulatory intelligence: Explain applicable zoning and building-code requirements, with source references and potential compliance flags.</li>
+            <li>Drawing intelligence: Automate unit, window, and material-area calculations from AutoCAD drawings.</li>
+            <li>Revision tracking: Identify drawing changes and preserve the reasons behind design decisions.</li>
+            <li>Cross-drawing coordination: Highlight inconsistencies between floors, disciplines, and 2D/3D representations.</li>
+            <li>Project management: Provide project-specific checklists, reminders, and approval tracking.</li>
+          </ol>
+
+          <h4>Central insight</h4>
+          <p>Both technicians experience repeated manual verification, but at different stages. Guy’s largest frustrations involve regulatory interpretation and municipal approvals; Benoît’s involve drawing revisions, calculations, and technical coordination. The strongest shared opportunity is reducing repetitive work while preserving design accuracy and traceability.</p>
+        </div>
+
+      </div>
+      <div class="nft">
+        <a href="https://docs.google.com/document/d/15q07ueqG374PNpKiemFzhmYMHLMKdSaA1K31OJOB91E/edit?usp=sharing" target="_blank" rel="noopener">
+          <svg viewBox="0 0 18 18"><path d="M4.5 2.5h6l3.5 3.5v9.5h-9.5z"/><path d="M10.5 2.5V6H14"/></svg>
+          Original notes
+          <svg viewBox="0 0 18 18"><path d="M6 5h7v7"/><path d="M6 12 13 5"/></svg>
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <div class="dial">
+    <h2>Type</h2>
+    <p class="hint">Each row maps to one text role inside the notes panel. Pick any Geist cut — the five pixel shapes are the self-hosted Geist Pixel family.</p>
+    <div id="rows"></div>
+    <div class="acts">
+      <button id="reset">Reset</button>
+      <button id="openbtn">Open panel</button>
+    </div>
+    <div class="spec" id="spec"></div>
+  </div>
+</div>
+
+<script>
+const FONTS = [
+  ["Geist Sans", '"Geist",sans-serif'],
+  ["Geist Mono", '"Geist Mono",monospace'],
+  ["Geist Pixel Square", '"Geist Pixel Square","Geist Mono",monospace'],
+  ["Geist Pixel Grid", '"Geist Pixel Grid","Geist Mono",monospace'],
+  ["Geist Pixel Circle", '"Geist Pixel Circle","Geist Mono",monospace'],
+  ["Geist Pixel Line", '"Geist Pixel Line","Geist Mono",monospace'],
+  ["Geist Pixel Triangle", '"Geist Pixel Triangle","Geist Mono",monospace'],
+];
+const ROLES = [
+  ["f-trigger", "Corner button", "User notes", 1],
+  ["f-label",   "Panel label",   "USER INTERVIEW NOTES", 1],
+  ["f-name",    "Names & tabs",  "User 1 — Guy", 0],
+  ["f-head",    "Section headings", "1. 3D modeling & visualization", 1],
+  ["f-body",    "Note text",     "paragraphs, bullets, table", 0],
+  ["f-link",    "Original notes link", "ORIGINAL NOTES", 1],
+];
+
+const rows = document.getElementById("rows"), spec = document.getElementById("spec");
+ROLES.forEach(([v, label, sample, def]) => {
+  const id = "sel-" + v;
+  rows.insertAdjacentHTML("beforeend",
+    '<div class="row"><label>' + label + ' <i>— ' + sample + '</i></label>' +
+    '<select id="' + id + '" data-var="' + v + '">' +
+      FONTS.map((f, i) => '<option value="' + i + '"' + (i === def ? " selected" : "") + ">" + f[0] + "</option>").join("") +
+    "</select><div class=\"prev\" id=\"prev-" + v + "\">" + sample + "</div></div>");
+});
+function apply() {
+  const out = [];
+  rows.querySelectorAll("select").forEach((s) => {
+    const f = FONTS[+s.value];
+    document.documentElement.style.setProperty("--" + s.dataset.var, f[1]);
+    out.push("--" + s.dataset.var + ": " + f[0]);
+    const pv = document.getElementById("prev-" + s.dataset.var);
+    if (pv) pv.style.fontFamily = f[1];
+  });
+  spec.textContent = out.join("\n");
+}
+rows.addEventListener("change", apply);
+document.getElementById("reset").addEventListener("click", () => {
+  rows.querySelectorAll("select").forEach((s, i) => { s.value = String(ROLES[i][3]); });
+  apply();
+});
+apply();
+
+const panel = document.getElementById("panel"), scrim = document.getElementById("scrim");
+const open = () => { panel.classList.add("on"); scrim.classList.add("on"); };
+const shut = () => { panel.classList.remove("on"); scrim.classList.remove("on"); };
+document.getElementById("open").addEventListener("click", open);
+document.getElementById("openbtn").addEventListener("click", open);
+document.getElementById("close").addEventListener("click", shut);
+scrim.addEventListener("click", shut);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") shut(); });
+panel.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+  panel.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x === t));
+  panel.querySelectorAll(".pane").forEach((p) => p.classList.toggle("on", p.dataset.pane === t.dataset.tab));
+  panel.querySelector(".nbody").scrollTop = 0;
+}));
+</script>
+</body>
+</html>
