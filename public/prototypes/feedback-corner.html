@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ça fitte — corner access to the raw interview notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111111; --ink-2:#5a5a5a; --ink-3:#8f8f8f;
+  --line:#e6e6e4; --line-2:#d4d4d1; --paper:#ffffff; --bg:#f7f7f5;
+  --accent:#C0D739; --accent-wash:#f4f7e4;
+  --sans:"Geist",sans-serif; --mono:"Geist Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
+img,svg{display:block}
+.wrap{max-width:1100px;margin:0 auto;padding:44px 24px 120px}
+.lede .meta{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.lede h1{font-size:28px;font-weight:600;letter-spacing:-.025em;margin-top:8px}
+.lede p{color:var(--ink-2);margin-top:10px;max-width:76ch}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:20px}
+.toc a{font-size:12px;color:var(--ink-2);text-decoration:none;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 11px}
+.toc a:hover{border-color:var(--accent);background:var(--accent-wash);color:var(--ink)}
+
+section.opt{margin-top:50px;scroll-margin-top:16px}
+.opt-head{display:flex;align-items:baseline;gap:11px}
+.opt-no{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em}
+.opt-head h2{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.opt-sub{color:var(--ink-2);margin:5px 0 14px;max-width:82ch;font-size:13px}
+.frame{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.verdict{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);font-size:12px;background:var(--paper)}
+.verdict div{padding:10px 14px;color:var(--ink-2)}
+.verdict div+div{border-left:1px solid var(--line)}
+.verdict b{color:var(--ink)}
+
+/* ---------- the prototype page, untouched and centred ---------- */
+.stage{position:relative;height:470px;overflow:hidden;background:var(--bg)}
+.page{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:28px 36px;transition:transform .32s cubic-bezier(.2,.8,.2,1),filter .3s ease}
+.tete{text-align:center}
+.tete .d{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.tete h1{margin-top:7px;font-size:27px;font-weight:600;letter-spacing:-.03em}
+.tete .rule{width:46px;height:3px;background:var(--accent);margin:12px auto 0;border-radius:3px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:26px;width:100%;max-width:700px}
+.card{display:flex;flex-direction:column;align-items:center;text-align:center}
+.shot{width:100%;aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:6px}
+.shot img{width:100%;height:100%;object-fit:cover;object-position:top left}
+.card h3{font-size:13.5px;font-weight:600;margin-top:12px}
+.card p{font-size:11.5px;color:var(--ink-2);line-height:1.55;margin-top:6px;max-width:34ch}
+.card .cta{margin-top:12px;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--line-2);
+  border-radius:999px;background:var(--paper);font-size:11.5px;font-weight:600}
+.sign{margin-top:24px;opacity:.9}
+.sign img{height:30px;width:auto}
+
+/* ---------- corner triggers ---------- */
+.trig{position:absolute;z-index:6;cursor:pointer;user-select:none}
+.tr-br{right:16px;bottom:16px} .tr-bl{left:16px;bottom:16px}
+.tr-tr{right:16px;top:16px}   .tr-tl{left:16px;top:16px}
+
+.pill{display:inline-flex;align-items:center;gap:8px;padding:7px 13px 7px 7px;border-radius:999px;
+  background:var(--paper);border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.05);
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);
+  transition:border-color .2s,box-shadow .2s,transform .2s}
+.pill:hover{border-color:var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.09);transform:translateY(-1px)}
+.pill img{width:22px;height:22px;border-radius:999px}
+.pill .faces{display:flex}
+.pill .faces img+img{margin-left:-7px;border:2px solid var(--paper)}
+
+.dot{width:11px;height:11px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 4px rgba(192,215,57,.25);
+  transition:transform .2s}
+.dot:hover{transform:scale(1.25)}
+
+.round{width:38px;height:38px;border-radius:999px;background:var(--ink);color:#fff;display:grid;place-items:center;
+  font-family:var(--mono);font-size:11px;box-shadow:0 6px 18px rgba(0,0,0,.18);transition:transform .2s}
+.round:hover{transform:scale(1.06)}
+
+.ghost{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);transition:color .2s}
+.ghost:hover{color:var(--ink)}
+.ghost svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6}
+
+.fold{position:absolute;top:0;right:0;width:52px;height:52px;cursor:pointer;z-index:6}
+.fold i{position:absolute;inset:0;background:linear-gradient(225deg,var(--accent) 0 50%,transparent 50%);
+  transition:filter .2s,width .2s,height .2s}
+.fold:hover i{filter:brightness(.94)}
+.fold span{position:absolute;right:5px;top:6px;font-family:var(--mono);font-size:9px;color:#2a2d16;transform:rotate(0)}
+
+.stamp{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:4px;background:#15150f;color:#eceedc;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.stamp img{width:20px;height:20px;border-radius:999px}
+
+/* ---------- surfaces ---------- */
+.scrim{position:absolute;inset:0;background:rgba(17,17,15,.38);opacity:0;pointer-events:none;transition:opacity .28s;z-index:7}
+.scrim.on{opacity:1;pointer-events:auto}
+
+.sheetR{position:absolute;top:0;right:0;bottom:0;width:360px;background:var(--paper);border-left:1px solid var(--line);
+  transform:translateX(100%);transition:transform .34s cubic-bezier(.2,.8,.2,1);z-index:8;display:flex;flex-direction:column}
+.sheetR.on{transform:none}
+
+.sheetB{position:absolute;left:0;right:0;bottom:0;height:72%;background:var(--paper);border-top:1px solid var(--line);
+  border-radius:14px 14px 0 0;transform:translateY(101%);transition:transform .34s cubic-bezier(.2,.8,.2,1);z-index:8;
+  display:flex;flex-direction:column;box-shadow:0 -14px 40px rgba(0,0,0,.12)}
+.sheetB.on{transform:none}
+.grab{width:34px;height:4px;border-radius:4px;background:var(--line-2);margin:9px auto 0}
+
+.modal{position:absolute;left:50%;top:50%;width:min(700px,86%);max-height:80%;background:var(--paper);border-radius:14px;
+  border:1px solid var(--line);box-shadow:0 26px 60px rgba(0,0,0,.26);z-index:8;display:flex;flex-direction:column;
+  transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;transition:all .26s cubic-bezier(.2,.8,.2,1)}
+.modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+
+.pop{position:absolute;right:16px;bottom:62px;width:330px;max-height:330px;background:var(--paper);border:1px solid var(--line);
+  border-radius:12px;box-shadow:0 18px 40px rgba(0,0,0,.18);z-index:8;display:flex;flex-direction:column;
+  transform:translateY(8px) scale(.98);opacity:0;pointer-events:none;transition:all .22s cubic-bezier(.2,.8,.2,1)}
+.pop.on{opacity:1;pointer-events:auto;transform:none}
+
+.full{position:absolute;inset:0;background:var(--paper);z-index:8;display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;transform:scale(1.02);transition:all .3s cubic-bezier(.2,.8,.2,1)}
+.full.on{opacity:1;pointer-events:auto;transform:none}
+
+/* split: page slides left, notes dock right, no overlay */
+.stage.split .page{transform:translateX(-180px)}
+.stage.split .trig{opacity:0;pointer-events:none;transition:opacity .2s}
+.dock{position:absolute;top:0;right:0;bottom:0;width:360px;background:var(--paper);border-left:1px solid var(--line);
+  transform:translateX(100%);transition:transform .34s cubic-bezier(.2,.8,.2,1);z-index:5;display:flex;flex-direction:column}
+.dock.on{transform:none}
+
+/* fold reveal: the page lifts to show the notes underneath */
+.under{position:absolute;inset:0;background:#15150f;color:#e8e9db;z-index:2;display:flex;flex-direction:column}
+.page.lifted{transform:translateY(-100%)}
+
+/* ---------- notes content ---------- */
+.nhd{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.nhd .t{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.nhd .x{margin-left:auto;cursor:pointer;color:var(--ink-3);font-size:15px;line-height:1}
+.nhd .x:hover{color:var(--ink)}
+.tabs{display:flex;gap:4px;padding:10px 16px 0;flex:0 0 auto}
+.tab{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;cursor:pointer;
+  font-size:12px;color:var(--ink-2);border:1px solid transparent}
+.tab img{width:20px;height:20px;border-radius:999px}
+.tab:hover{background:var(--bg)}
+.tab.on{background:var(--accent-wash);border-color:#e2ebbb;color:var(--ink);font-weight:500}
+.nbody{padding:12px 16px 18px;overflow:auto;flex:1}
+.nbody h5{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 7px}
+.nbody h5:first-child{margin-top:4px}
+.nbody li{font-size:12.5px;color:var(--ink-2);line-height:1.6;margin:0 0 6px 15px}
+.nbody .raw{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);line-height:1.75;white-space:pre-wrap}
+.pane{display:none}.pane.on{display:block}
+.dark .nhd{border-color:#2a2a22}.dark .nhd .t{color:#8f9078}
+.dark .nbody h5{color:#8f9078}.dark .nbody li{color:#cfd0bd}
+.dark .tab{color:#9b9c86}.dark .tab.on{background:#262718;border-color:#3a3b26;color:#eceedc}
+.dark .nhd .x{color:#8f9078}
+.cols{column-count:2;column-gap:22px}
+@media (max-width:860px){.cols{column-count:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="lede">
+    <p class="meta">Prototype 01 · accès aux notes brutes</p>
+    <h1>Huit boutons de coin, huit façons d’ouvrir les notes</h1>
+    <p>La page reste exactement telle que vous l’avez réglée : rien n’entre dans la colonne centrale, aucune marge n’est ajoutée, les deux options gardent tout le poids visuel. Le seul ajout est un déclencheur dans un coin. Ce qui change d’une option à l’autre, c’est la surface qui s’ouvre et ce qu’elle fait à la page derrière. Tout est cliquable ci-dessous — y compris la fermeture.</p>
+    <div class="toc" id="toc"></div>
+  </div>
+  <div id="opts"></div>
+</div>
+
+<script>
+const P = {
+  guy: { n:"Guy", r:"Technicien senior · 3D", img:"assets/personas/guy.svg" },
+  ben: { n:"Benoît", r:"Technicien senior · 2D", img:"assets/personas/benoit.svg" },
+};
+
+const NOTES = {
+  guy: [
+    ["Programmation & réglementation", [
+      "Programmation initiale et analyse des besoins : environ une journée.",
+      "La recherche réglementaire est le point de douleur principal.",
+      "Zonage municipal difficile d’accès, surtout pendant les révisions.",
+      "Trouver l’article n’est pas le problème : c’est l’interpréter et l’appliquer.",
+      "Mise à jour du code tous les quatre ans : incertitude sur ce qui s’applique.",
+      "Les échanges avec les urbanistes sont lents et bureaucratiques.",
+    ]],
+    ["Révisions & approbations CCU", [
+      "L’attente des approbations municipales et du CCU cause des délais importants.",
+      "Les clients demandent des changements pour réduire les coûts de construction.",
+      "Environ 70 % des changements sont mineurs, certains après le dépôt au CCU.",
+    ]],
+    ["Modélisation 3D", [
+      "Benoît envoie les dessins AutoCAD; Guy les retrace à la main dans SketchUp.",
+      "Les rendus de qualité et la post-production prennent beaucoup de temps.",
+      "Une orbite 3D interactive améliorerait les présentations client.",
+    ]],
+    ["Suivi de projet", [
+      "Notes manuscrites et mémoire pour suivre les exigences.",
+      "Une liste de contrôle avec drapeaux rouges automatiques serait précieuse.",
+      "Environ dix pages d’analyse du code préparées à la main par projet.",
+    ]],
+    ["Demandes", [
+      "Assistance zonage et code avec interprétation et référence d’article.",
+      "Identification préliminaire des dérogations mineures.",
+      "Rapports partageables avec les urbanistes, citant les règlements.",
+      "Listes de contrôle par projet et avertissements de conformité.",
+      "Visualisation 3D interactive des unités.",
+    ]],
+  ],
+  ben: [
+    ["Révisions & versions", [
+      "Le suivi des versions et des changements de dessins est difficile.",
+      "Des changements sont faits sans documenter le pourquoi.",
+      "Les plans AutoCAD partent chez Guy pour reconstruction manuelle.",
+      "Les modifications de balcons reviennent constamment.",
+    ]],
+    ["Plans & calculs", [
+      "Superficies calculées à la main par polylignes AutoCAD, étage par étage.",
+      "Sommaires automatiques souhaités : nombre d’unités, types, superficies, fenêtres par étage.",
+      "Les superficies de matériaux en élévation seraient utiles aussi.",
+    ]],
+    ["Documentation & coordination", [
+      "La coordination avec les ingénieurs est la plus grande occasion d’amélioration.",
+      "Révision manuelle des dessins méca/structure pour repérer les conflits.",
+      "Souhaite un repérage automatique des éléments alignés entre étages.",
+      "Valeur plus forte en phase exécution qu’en conception préliminaire.",
+    ]],
+    ["CCU & présentations", [
+      "Pour le CCU, les calculs de superficie valent plus qu’une 3D détaillée.",
+      "Des outils supplémentaires tôt dans la conception risquent de ralentir.",
+      "La 3D interactive sert surtout aux discussions client.",
+    ]],
+  ],
+};
+
+const notesHTML = (dark) => {
+  const pane = (k) => '<div class="pane' + (k === "guy" ? " on" : "") + '" data-pane="' + k + '">' +
+    NOTES[k].map(([h, items]) => "<h5>" + h + "</h5><ul>" + items.map((i) => "<li>" + i + "</li>").join("") + "</ul>").join("") +
+    "</div>";
+  return '<div class="tabs">' +
+      Object.keys(P).map((k) => '<div class="tab' + (k === "guy" ? " on" : "") + '" data-tab="' + k + '"><img src="' + P[k].img + '">' + P[k].n + " · " + (k === "guy" ? "3D" : "2D") + "</div>").join("") +
+    '</div><div class="nbody">' + pane("guy") + pane("ben") + "</div>";
+};
+const head = (title) => '<div class="nhd"><img src="' + P.guy.img + '" style="width:24px;height:24px;border-radius:999px">' +
+  '<span class="t">' + title + '</span><span class="x" data-close="1">✕</span></div>';
+
+/* ---- the page, exactly as set ---- */
+function page(cls) {
+  const card = (shot, h, p, cta) =>
+    '<div class="card"><div class="shot"><img src="' + shot + '" alt=""></div><h3>' + h + "</h3><p>" + p + "</p>" +
+    '<span class="cta">' + cta + ' <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span></div>';
+  return '<div class="page ' + (cls || "") + '">' +
+    '<div class="tete"><p class="d">Monday, October 26</p><h1>Prototype 01</h1><div class="rule"></div></div>' +
+    '<div class="duo">' +
+      card("assets/apercu-1a.jpg", "Visual Projects Overview (One Source of Truth)", "Testing whether a centralized project overview improves information retrieval and revision tracking.", "Open 1A") +
+      card("assets/apercu-1b.jpg", "2D Units - 3D Massing Coordination Tool", "Exploring whether connecting AutoCAD plans and SketchUp models reduces manual coordination and design inconsistencies.", "Open 1B") +
+    '</div><div class="sign"><img src="assets/lafond.png" alt="Lafond Architecte"></div></div>';
+}
+
+const OPTIONS = [
+
+{ id:"pastille", name:"Pastille de portraits, coin inférieur droit",
+  sub:"Deux portraits superposés et le mot « Notes ». Un clic fait entrer un panneau de 360 px par la droite, avec un onglet par personne.",
+  good:"On sait immédiatement de qui viennent les notes avant même d’ouvrir.",
+  cost:"Le panneau couvre un quart de la page, donc l’option 1B passe partiellement dessous.",
+  build:(s)=>'<div class="trig tr-br" data-open="1"><div class="pill"><span class="faces"><img src="'+P.guy.img+'"><img src="'+P.ben.img+'"></span>Notes brutes</div></div>' +
+    '<div class="scrim" data-close="1"></div><div class="sheetR" data-surface="1">'+head("Notes d’entrevue · 26 oct")+notesHTML()+'</div>' },
+
+{ id:"modale", name:"Bouton mono en haut à droite + modale centrée",
+  sub:"Un libellé typographique discret, sans boîte. La modale s’ouvre au centre et déroule les notes en deux colonnes.",
+  good:"La lecture se fait au centre, comme le reste de la page; rien n’est tassé sur un côté.",
+  cost:"La modale masque complètement les deux options : on ne compare plus pendant la lecture.",
+  build:()=>'<div class="trig tr-tr" data-open="1"><span class="ghost"><svg viewBox="0 0 18 18"><path d="M4 3.5h10v11H4z"/><path d="M6.5 7h5M6.5 10h5"/></svg>Notes d’entrevue</span></div>' +
+    '<div class="scrim" data-close="1"></div><div class="modal" data-surface="1">'+head("Notes brutes · Guy & Benoît")+'<div class="nbody"><div class="cols">'+
+    Object.keys(P).map((k)=>'<div><h5 style="display:flex;align-items:center;gap:7px;margin-top:0"><img src="'+P[k].img+'" style="width:20px;height:20px;border-radius:999px">'+P[k].n+' · '+P[k].r+'</h5>'+
+      NOTES[k].map(([h,items])=>"<h5>"+h+"</h5><ul>"+items.map(i=>"<li>"+i+"</li>").join("")+"</ul>").join("")+'</div>').join("")+
+    '</div></div></div>' },
+
+{ id:"point", name:"Point accent, coin inférieur gauche + feuille basse",
+  sub:"Le déclencheur le plus silencieux possible : un point de 11 px. La feuille monte du bas sur 72 % de la hauteur, la page reste visible au-dessus.",
+  good:"Invisible pour le client, évident pour qui sait; la page n’est jamais recouverte en entier.",
+  cost:"Un point sans libellé ne se découvre pas tout seul.",
+  build:()=>'<div class="trig tr-bl" data-open="1"><div class="dot"></div></div>' +
+    '<div class="scrim" data-close="1"></div><div class="sheetB" data-surface="1"><div class="grab"></div>'+head("Notes d’entrevue")+notesHTML()+'</div>' },
+
+{ id:"popover", name:"Portrait unique + popover ancré",
+  sub:"Un seul portrait dans le coin. Le popover de 330 px s’ouvre juste au-dessus, sans assombrir la page : on lit la note et l’option en même temps.",
+  good:"Le plus léger : aucun voile, aucun déplacement, fermeture par clic ailleurs.",
+  cost:"Trop petit pour des notes longues — il faut y défiler beaucoup.",
+  build:()=>'<div class="trig tr-br" data-open="1"><div class="pill"><img src="'+P.ben.img+'">Benoît & Guy</div></div>' +
+    '<div class="pop" data-surface="1">'+head("Notes")+notesHTML()+'</div>' },
+
+{ id:"dock", name:"Icône discrète + accostage latéral",
+  sub:"Pas de voile et pas de superposition : la page glisse vers la gauche et les notes prennent la place libérée à droite.",
+  good:"Rien n’est caché — on peut pointer une capture et lire la note correspondante.",
+  cost:"Le centrage parfait de la page est rompu tant que le panneau est ouvert.",
+  build:()=>'<div class="trig tr-tr" data-open="1"><span class="ghost"><svg viewBox="0 0 18 18"><path d="M3 4h12v10H3z"/><path d="M11 4v10"/></svg>Notes</span></div>' +
+    '<div class="dock" data-surface="1" data-split="1">'+head("Notes d’entrevue")+notesHTML()+'</div>' },
+
+{ id:"coin", name:"Coin de page replié",
+  sub:"Le coin supérieur droit est corné comme une feuille. Cliquer soulève la page entière et découvre les notes posées dessous, sur fond sombre.",
+  good:"Le geste le plus mémorable : la page est littéralement une feuille avec des notes derrière.",
+  cost:"Mouvement spectaculaire — à utiliser une seule fois dans un produit, pas partout.",
+  build:()=>'<div class="fold" data-open="1"><i></i><span>N</span></div>' +
+    '<div class="under dark"><div style="padding:4px 0 0">'+head("Notes brutes · verso")+'</div>'+notesHTML(true)+
+    '<div style="padding:12px 16px;border-top:1px solid #2a2a22"><span class="ghost" style="color:#9b9c86" data-close="1">↑ Rabattre la page</span></div></div>' },
+
+{ id:"plein", name:"Bulle ronde + lecture plein cadre",
+  sub:"Un bouton rond sombre marqué « N ». Il ouvre les notes en pleine surface, en colonne de lecture, comme un document.",
+  good:"La seule option confortable pour lire les deux entrevues en entier.",
+  cost:"On quitte la page de choix : c’est un écran, plus une annotation.",
+  build:()=>'<div class="trig tr-br" data-open="1"><div class="round">N</div></div>' +
+    '<div class="full" data-surface="1">'+head("Entrevues utilisateurs · 26 octobre")+notesHTML()+'</div>' },
+
+{ id:"tampon", name:"Tampon « RAW NOTES », coin supérieur gauche",
+  sub:"Une étiquette sombre façon tampon d’archive, avec le portrait. Elle ouvre le panneau latéral et porte visiblement la mention « brut ».",
+  good:"Dit explicitement que le contenu est une transcription, pas un texte de présentation.",
+  cost:"Le tampon sombre attire l’œil : moins neutre que les autres déclencheurs.",
+  build:()=>'<div class="trig tr-tl" data-open="1"><div class="stamp"><img src="'+P.guy.img+'">Raw notes · 2</div></div>' +
+    '<div class="scrim" data-close="1"></div><div class="sheetR" data-surface="1">'+head("Transcription brute")+
+    '<div class="nbody"><div class="raw">USER 1 — GUY · technicien senior, 3D\n\n' +
+      NOTES.guy.map(([h,i])=>"— "+h.toUpperCase()+"\n"+i.map(x=>"  · "+x).join("\n")).join("\n\n") +
+      "\n\nUSER 2 — BENOÎT · technicien senior, 2D\n\n" +
+      NOTES.ben.map(([h,i])=>"— "+h.toUpperCase()+"\n"+i.map(x=>"  · "+x).join("\n")).join("\n\n") +
+    '</div></div></div>' },
+];
+
+const opts = document.getElementById("opts"), toc = document.getElementById("toc");
+OPTIONS.forEach((o, i) => {
+  const n = String(i + 1).padStart(2, "0");
+  toc.insertAdjacentHTML("beforeend", '<a href="#' + o.id + '">' + n + " · " + o.name + "</a>");
+  const s = document.createElement("section");
+  s.className = "opt"; s.id = o.id;
+  s.innerHTML = '<div class="opt-head"><span class="opt-no">' + n + '</span><h2>' + o.name + "</h2></div>" +
+    '<p class="opt-sub">' + o.sub + "</p>" +
+    '<div class="frame"><div class="stage">' + page(o.id === "coin" ? "" : "") + o.build() + "</div>" +
+    '<div class="verdict"><div><b>Gagne</b> — ' + o.good + '</div><div><b>Coûte</b> — ' + o.cost + "</div></div></div>";
+  opts.appendChild(s);
+});
+
+function close(stage) {
+  stage.classList.remove("split");
+  stage.querySelectorAll(".scrim,[data-surface]").forEach((e) => e.classList.remove("on"));
+  const p = stage.querySelector(".page"); if (p) p.classList.remove("lifted");
+}
+document.addEventListener("click", (e) => {
+  const stage = e.target.closest(".stage");
+  const open = e.target.closest("[data-open]");
+  const shut = e.target.closest("[data-close]");
+  const tab  = e.target.closest(".tab");
+  if (tab) {
+    const host = tab.closest("[data-surface],.under");
+    host.querySelectorAll(".tab").forEach((t) => t.classList.toggle("on", t === tab));
+    host.querySelectorAll(".pane").forEach((p) => p.classList.toggle("on", p.dataset.pane === tab.dataset.tab));
+    return;
+  }
+  if (shut && stage) { close(stage); return; }
+  if (open && stage) {
+    const surf = stage.querySelector("[data-surface]");
+    if (surf) {
+      surf.classList.add("on");
+      if (surf.dataset.split) stage.classList.add("split");
+      else stage.querySelector(".scrim")?.classList.add("on");
+    } else {
+      stage.querySelector(".page").classList.add("lifted");
+    }
+    return;
+  }
+  // click outside a popover closes it
+  if (stage && !e.target.closest("[data-surface]")) close(stage);
+});
+</script>
+</body>
+</html>
