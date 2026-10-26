@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ça fitte — user feedback on the prototype page</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111111; --ink-2:#5a5a5a; --ink-3:#8f8f8f;
+  --line:#e6e6e4; --line-2:#d4d4d1; --paper:#ffffff; --bg:#f7f7f5;
+  --accent:#C0D739; --accent-wash:#f4f7e4;
+  --sans:"Geist",sans-serif; --mono:"Geist Mono",monospace;
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
+svg{display:block}
+img{display:block}
+
+.wrap{max-width:1100px;margin:0 auto;padding:44px 24px 120px}
+.lede h1{font-size:28px;font-weight:600;letter-spacing:-.025em}
+.lede p{color:var(--ink-2);margin-top:10px;max-width:74ch}
+.lede .meta{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.cast{display:flex;gap:18px;margin-top:20px;flex-wrap:wrap}
+.cast .one{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 14px 6px 6px}
+.cast img{width:30px;height:30px;border-radius:999px}
+.cast b{font-size:13px;font-weight:600}
+.cast span{display:block;font-size:11px;color:var(--ink-3)}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
+.toc a{font-size:12px;color:var(--ink-2);text-decoration:none;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 11px}
+.toc a:hover{border-color:var(--accent);background:var(--accent-wash);color:var(--ink)}
+
+section.opt{margin-top:52px;scroll-margin-top:16px}
+.opt-head{display:flex;align-items:baseline;gap:11px}
+.opt-no{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em}
+.opt-head h2{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.opt-sub{color:var(--ink-2);margin:5px 0 14px;max-width:80ch;font-size:13px}
+.frame{border:1px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden}
+.verdict{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);font-size:12px;background:var(--paper)}
+.verdict div{padding:10px 14px;color:var(--ink-2)}
+.verdict div+div{border-left:1px solid var(--line)}
+.verdict b{color:var(--ink)}
+
+/* ---- the prototype page, shrunk ---- */
+.page{position:relative;padding:34px 30px 30px;background:var(--bg)}
+.tete{text-align:center}
+.tete .d{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.tete h1{margin-top:8px;font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.tete .rule{width:34px;height:2px;background:var(--accent);margin:14px auto 0;border-radius:2px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:30px;position:relative}
+.card{display:flex;flex-direction:column;position:relative}
+.shot{aspect-ratio:900/562;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);position:relative}
+.shot img{width:100%;height:100%;object-fit:cover;object-position:top left}
+.txt{padding:14px 2px 0;display:flex;flex-direction:column;gap:7px}
+.txt h3{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.txt p{font-size:12.5px;color:var(--ink-2);line-height:1.6}
+.cta{margin-top:12px}
+.cta span{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper);font-size:12px;font-weight:600}
+.sign{margin-top:30px;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--ink-3);text-transform:uppercase}
+
+/* ---- shared annotation atoms ---- */
+.av{width:26px;height:26px;border-radius:999px;flex:0 0 auto}
+.cast .av{width:30px;height:30px}
+.note{display:block;font-size:12px;line-height:1.55;color:var(--ink-2)}
+.note .q{color:var(--ink);font-style:italic}
+.who{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:5px}
+
+/* A — marginalia */
+.a-note{position:absolute;width:184px;display:flex;flex-direction:column;gap:6px}
+.a-note .line{height:1px;background:var(--line-2);position:absolute;top:13px}
+.a-note.left{left:-206px;text-align:right}
+.a-note.left .line{right:-20px;width:18px}
+.a-note.right{right:-206px}
+.a-note.right .line{left:-20px;width:18px}
+.a-note .hd{display:flex;align-items:center;gap:7px}
+.a-note.left .hd{justify-content:flex-end}
+.page.gut{padding-left:232px;padding-right:232px}
+.page.railpad{padding-left:70px}
+
+/* B — pins */
+.pin{position:absolute;width:19px;height:19px;border-radius:999px;background:var(--accent);color:#1b1b16;
+  font-family:var(--mono);font-size:10px;display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 0 0 3px rgba(192,215,57,.26);transition:transform .15s ease}
+.pin:hover{transform:scale(1.12)}
+.bubble{position:absolute;z-index:6;width:236px;background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  box-shadow:0 12px 30px rgba(0,0,0,.12);padding:11px 12px;display:none;gap:9px}
+.bubble.on,.bubble:hover{display:flex}
+.bubble img{width:26px;height:26px}
+
+/* C — footer band */
+.band{margin-top:28px;border-top:1px solid var(--line);padding-top:18px;display:flex;gap:26px;align-items:flex-start}
+.band .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);width:120px;flex:0 0 auto;padding-top:3px}
+.band .qs{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1}
+.band .q1{display:flex;gap:10px}
+.band img{width:28px;height:28px}
+
+/* D — note card under each option */
+.dcard{margin-top:14px;display:flex;gap:10px;padding:11px 12px;background:var(--paper);
+  border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:0 8px 8px 0}
+.dcard img{width:28px;height:28px}
+
+/* E — underlined phrase */
+.mark{border-bottom:1px dashed var(--line-2);cursor:help;position:relative;color:var(--ink)}
+.mark .tip{position:absolute;left:0;bottom:calc(100% + 9px);width:250px;background:#15150f;color:#f3f4ec;
+  border-radius:9px;padding:10px 11px;display:none;z-index:8;font-size:12px;font-style:normal;line-height:1.5;gap:9px}
+.mark:hover .tip{display:flex}
+.mark .tip img{width:24px;height:24px}
+.mark .tip .note{flex:1;min-width:0}
+.mark .tip .q{color:#f3f4ec}
+.mark .tip .who{color:#9a9a8c}
+
+/* F — drawer */
+.stack{position:absolute;top:16px;right:18px;display:flex;align-items:center;gap:0;cursor:pointer;z-index:7}
+.stack img{width:26px;height:26px;border:2px solid var(--bg);margin-left:-8px}
+.stack .n{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-left:9px;letter-spacing:.1em}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:290px;background:var(--paper);border-left:1px solid var(--line);
+  padding:18px;overflow:auto;transform:translateX(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:9}
+.drawer.on{transform:none}
+.drawer h4{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.drawer h4 img{width:26px;height:26px}
+.drawer ul{margin:10px 0 20px;padding-left:14px}
+.drawer li{font-size:12px;color:var(--ink-2);margin-bottom:6px}
+.drawer .x{position:absolute;top:12px;right:14px;color:var(--ink-3);cursor:pointer;font-size:14px}
+
+/* G — notes toggle */
+.toggle{position:absolute;top:16px;left:18px;display:inline-flex;align-items:center;gap:8px;z-index:7;
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);cursor:pointer}
+.toggle .sw{width:28px;height:16px;border-radius:999px;background:var(--line-2);position:relative;transition:background .2s}
+.toggle .sw i{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:999px;background:#fff;transition:left .2s}
+.toggle.on .sw{background:var(--accent)}
+.toggle.on .sw i{left:14px}
+.annot{opacity:0;transition:opacity .25s ease;pointer-events:none}
+.annot.on{opacity:1;pointer-events:auto}
+
+/* H — hover reveal */
+.reveal{max-height:0;overflow:hidden;transition:max-height .3s ease,opacity .25s ease;opacity:0}
+.card:hover .reveal{max-height:120px;opacity:1}
+.reveal .inner{display:flex;gap:9px;padding:11px 0 0}
+.reveal img{width:26px;height:26px}
+
+/* I — footnotes */
+sup.fn{font-family:var(--mono);font-size:9px;color:var(--accent);padding-left:2px;cursor:pointer;vertical-align:super}
+.fnlist{margin-top:26px;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:9px}
+.fnlist .row{display:flex;gap:9px;align-items:flex-start}
+.fnlist img{width:22px;height:22px}
+.fnlist .n{font-family:var(--mono);font-size:10px;color:var(--ink-3);width:14px;flex:0 0 auto;padding-top:3px}
+
+/* J — avatar rail */
+.rail{position:absolute;left:14px;top:84px;display:flex;flex-direction:column;gap:10px;z-index:7}
+.rail img{width:30px;height:30px;border-radius:999px;cursor:pointer;filter:grayscale(1) opacity(.45);transition:filter .2s,transform .2s}
+.rail img:hover{filter:none;transform:scale(1.06)}
+.rail img.on{filter:none;box-shadow:0 0 0 2px var(--accent)}
+.jnote{display:none;margin-top:12px;gap:9px}
+.jnote.on{display:flex}
+.jnote img{width:26px;height:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="lede">
+    <p class="meta">Prototype 1 · page d’accueil</p>
+    <h1>Dix façons de montrer les notes d’entrevue</h1>
+    <p>Les deux techniciens interviewés apparaissent sur la page de choix du prototype, assez discrètement pour ne pas concurrencer les deux options, assez clairement pour qu’on sache d’un coup d’œil qu’il s’agit de la parole d’un utilisateur et non d’un texte de présentation. Chaque persona porte son portrait; remplacez simplement <code>assets/personas/guy.svg</code> et <code>benoit.svg</code> par une photo le jour venu.</p>
+    <div class="cast">
+      <div class="one"><img class="av" src="assets/personas/guy.svg" alt="Guy"><div><b>Guy</b><span>Technicien senior · spécialiste 3D</span></div></div>
+      <div class="one"><img class="av" src="assets/personas/benoit.svg" alt="Benoît"><div><b>Benoît</b><span>Technicien senior · spécialiste 2D</span></div></div>
+    </div>
+    <div class="toc" id="toc"></div>
+  </div>
+  <div id="opts"></div>
+</div>
+
+<script>
+const P = {
+  guy: { name: "Guy", role: "Technicien senior · 3D", img: "assets/personas/guy.svg" },
+  ben: { name: "Benoît", role: "Technicien senior · 2D", img: "assets/personas/benoit.svg" },
+};
+const Q = {
+  retrace: { p: "guy", t: "Benoît m’envoie les dessins AutoCAD et je les retrace à la main dans SketchUp." },
+  orbite:  { p: "guy", t: "Une orbite 3D interactive changerait mes présentations : le client visiterait ses unités." },
+  code:    { p: "guy", t: "Trouver l’article n’est pas le problème. C’est l’interpréter et l’appliquer." },
+  dixpages:{ p: "guy", t: "Je prépare à la main une dizaine de pages d’analyse du code par projet." },
+  poly:    { p: "ben", t: "Les superficies, je les calcule polyligne par polyligne, étage par étage." },
+  ccu:     { p: "ben", t: "Pour le CCU, les calculs de superficie valent plus qu’une 3D détaillée." },
+  pourquoi:{ p: "ben", t: "On modifie un dessin sans noter pourquoi. Six mois plus tard, personne ne sait." },
+  fen:     { p: "ben", t: "Le nombre d’unités, les types, les superficies, les fenêtres par étage : ça devrait sortir tout seul." },
+};
+const av = (k, cls) => '<img class="av ' + (cls||"") + '" src="' + P[k].img + '" alt="' + P[k].name + '">';
+const note = (qk) => {
+  const q = Q[qk];
+  return '<span class="note"><span class="q">« ' + q.t + ' »</span><span class="who">' + P[q.p].name + " · " + P[q.p].role + "</span></span>";
+};
+
+const SHOT_A = "assets/apercu-1a.jpg", SHOT_B = "assets/apercu-1b.jpg";
+const TA = { h: "Units and drawings", p: "Projects, connected files, the floor plan viewer and the unit inspector. One source of truth for what has been drawn.", cta: "Open 1A" };
+const TB = { h: "Units, drawings and the 3D model", p: "Plan and volume side by side inside Unités, a window status on every unit, and a façade glazing total that moves as you decide.", cta: "Open 1B" };
+
+const arrow = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>';
+function card(t, shot, extras) {
+  extras = extras || {};
+  return '<div class="card">' +
+    '<div class="shot">' + '<img src="' + shot + '" alt="">' + (extras.inShot || "") + "</div>" +
+    '<div class="txt"><h3>' + t.h + "</h3><p>" + (extras.body || t.p) + "</p>" +
+    '<div class="cta"><span>' + t.cta + " " + arrow + "</span></div>" + (extras.underCta || "") + "</div>" +
+    (extras.afterTxt || "") + "</div>";
+}
+function page(o) {
+  o = o || {};
+  return '<div class="page ' + (o.pageClass || "") + '">' + (o.pre || "") +
+    '<div class="tete"><p class="d">Monday, October 26</p><h1>Prototype 1</h1><div class="rule"></div></div>' +
+    '<div class="duo">' + card(TA, SHOT_A, o.a || {}) + card(TB, SHOT_B, o.b || {}) + (o.inDuo || "") + "</div>" +
+    (o.post || "") +
+    '<div class="sign">Lafond Architecte</div>' + (o.tail || "") + "</div>";
+}
+
+/* ---------------- the ten options ---------------- */
+const OPTIONS = [
+
+{ id:"marge", name:"Notes en marge",
+  sub:"Les notes vivent dans la marge blanche, reliées à leur carte par un trait d’un pixel. Rien ne bouge dans la mise en page centrale; la page se lit comme une planche annotée.",
+  good:"Le plus discret de tous : les notes sont hors du flux, impossible à confondre avec la présentation.",
+  cost:"Demande 230 px de marge de chaque côté — disparaît sous 1280 px de large.",
+  html: () => page({ pageClass:"gut",
+    a:{ afterTxt:'<div class="a-note left" style="top:4px"><div class="line"></div><div class="hd" style="justify-content:flex-end">' + av("ben") + "</div>" + note("poly") + "</div>" },
+    b:{ afterTxt:'<div class="a-note right" style="top:4px"><div class="line"></div><div class="hd">' + av("guy") + "</div>" + note("orbite") + "</div>" },
+  })},
+
+{ id:"epingles", name:"Épingles sur la capture",
+  sub:"Un point accent posé à l’endroit exact dont parle la note. Au survol, la bulle s’ouvre avec le portrait et la citation.",
+  good:"Relie la parole à un élément précis de l’écran — le plus convaincant en atelier.",
+  cost:"Les points se posent sur l’image : ils doivent être repositionnés dès qu’une capture change.",
+  html: () => page({
+    a:{ inShot:'<div class="pin" style="left:52%;top:62%">1</div>', afterTxt:'<div class="bubble" style="left:38%;top:42%">' + av("ben") + note("fen") + "</div>" },
+    b:{ inShot:'<div class="pin" style="left:62%;top:40%">2</div>', afterTxt:'<div class="bubble" style="left:28%;top:28%">' + av("guy") + note("retrace") + "</div>" },
+  })},
+
+{ id:"bandeau", name:"Bandeau d’entrevue en pied de page",
+  sub:"Une seule bande sous les deux options : l’étiquette à gauche, deux citations côte à côte avec leur portrait.",
+  good:"Zéro interférence avec le choix; se lit après la décision, comme une signature.",
+  cost:"Ne relie aucune note à une option précise.",
+  html: () => page({ post:'<div class="band"><div class="lbl">Entrevues · 26 oct</div><div class="qs">' +
+    '<div class="q1">' + av("guy") + note("code") + "</div>" +
+    '<div class="q1">' + av("ben") + note("ccu") + "</div>" + "</div></div>" })},
+
+{ id:"fiche", name:"Fiche sous chaque option",
+  sub:"Chaque option porte une fiche papier à filet accent : le portrait, la citation, la source. La note appartient visiblement à la carte.",
+  good:"Lien option ↔ note évident, sans survol ni clic.",
+  cost:"Allonge les cartes et ajoute un deuxième bloc de texte sous le bouton.",
+  html: () => page({
+    a:{ underCta:'<div class="dcard">' + av("ben") + note("poly") + "</div>" },
+    b:{ underCta:'<div class="dcard">' + av("guy") + note("orbite") + "</div>" },
+  })},
+
+{ id:"souligne", name:"Phrase soulignée dans le texte",
+  sub:"Le texte de présentation reste intact; une expression porte un souligné pointillé. Au survol, la citation de l’utilisateur apparaît en infobulle sombre.",
+  good:"Invisible tant qu’on ne cherche pas; la note est attachée au mot exact qu’elle justifie.",
+  cost:"Découverte par hasard seulement, et inutilisable sur mobile.",
+  html: () => page({
+    a:{ body:'Projects, connected files, the floor plan viewer and <span class="mark">the unit inspector<span class="tip">' + av("ben") + note("fen") + "</span></span>. One source of truth for what has been drawn." },
+    b:{ body:'Plan and volume side by side inside Unités, <span class="mark">a window status on every unit<span class="tip">' + av("guy") + note("retrace") + "</span></span>, and a façade glazing total that moves as you decide." },
+  })},
+
+{ id:"tiroir", name:"Pile de portraits + tiroir",
+  sub:"Deux portraits empilés en haut à droite, avec le compte des notes. Un clic ouvre un tiroir qui déroule l’entrevue par thème.",
+  good:"Porte l’entrevue complète — dix points par personne — sans encombrer la page.",
+  cost:"Tout est caché derrière un clic : il faut que la pile attire l’œil.",
+  html: () => page({
+    pre:'<div class="stack" data-drawer="1">' + av("guy") + av("ben") + '<span class="n">2 entrevues</span></div>',
+    tail:'<div class="drawer" data-panel="1"><span class="x" data-close="1">✕</span>' +
+      "<h4>" + av("guy") + "Guy · 3D</h4><ul><li>Retrace à la main les plans AutoCAD dans SketchUp.</li><li>Dix pages d’analyse de code par projet.</li><li>Veut une orbite 3D pour les présentations client.</li></ul>" +
+      "<h4>" + av("ben") + "Benoît · 2D</h4><ul><li>Superficies calculées polyligne par polyligne.</li><li>Changements de dessins sans trace du pourquoi.</li><li>Pour le CCU, les superficies priment sur la 3D.</li></ul></div>",
+  })},
+
+{ id:"bascule", name:"Interrupteur « Notes »",
+  sub:"La page est nue par défaut. Un petit interrupteur en haut à gauche fait apparaître les notes en marge et les épingles d’un seul coup.",
+  good:"Deux publics servis par une seule page : le client voit la proposition, l’équipe voit les notes.",
+  cost:"Un état de plus; quelqu’un verra toujours la page dans le mauvais mode.",
+  html: () => page({ pageClass:"gut",
+    pre:'<div class="toggle" data-toggle="1"><span class="sw"><i></i></span>Notes</div>',
+    a:{ afterTxt:'<div class="a-note left annot" data-annot="1" style="top:4px"><div class="line"></div><div class="hd" style="justify-content:flex-end">' + av("ben") + "</div>" + note("pourquoi") + "</div>" },
+    b:{ afterTxt:'<div class="a-note right annot" data-annot="1" style="top:4px"><div class="line"></div><div class="hd">' + av("guy") + "</div>" + note("dixpages") + "</div>" },
+  })},
+
+{ id:"survol", name:"Révélation au survol de la carte",
+  sub:"Rien sous la carte au repos. Survoler l’option déplie une ligne : portrait, citation, nom.",
+  good:"Page parfaitement propre au premier regard, note disponible à l’instant où l’on s’intéresse à une option.",
+  cost:"La hauteur des cartes bouge au survol; à amortir avec une réserve d’espace.",
+  html: () => page({
+    a:{ underCta:'<div class="reveal"><div class="inner">' + av("ben") + note("ccu") + "</div></div>" },
+    b:{ underCta:'<div class="reveal"><div class="inner">' + av("guy") + note("orbite") + "</div></div>" },
+  })},
+
+{ id:"appels", name:"Appels de note",
+  sub:"Des exposants en mono dans le texte, et la liste des notes en bas de page avec les portraits — la convention du livre, appliquée telle quelle.",
+  good:"Entièrement typographique : aucun panneau, aucune bulle, imprimable tel quel.",
+  cost:"Oblige l’œil à faire l’aller-retour haut-bas.",
+  html: () => page({
+    a:{ body:'Projects, connected files, the floor plan viewer and the unit inspector<sup class="fn">1</sup>. One source of truth for what has been drawn.' },
+    b:{ body:'Plan and volume side by side inside Unités, a window status on every unit, and a façade glazing total<sup class="fn">2</sup> that moves as you decide.' },
+    post:'<div class="fnlist">' +
+      '<div class="row"><span class="n">1</span>' + av("ben") + note("poly") + "</div>" +
+      '<div class="row"><span class="n">2</span>' + av("guy") + note("code") + "</div>" + "</div>",
+  })},
+
+{ id:"colonne", name:"Rail de portraits",
+  sub:"Les deux portraits restent sur le bord gauche, en gris. Cliquer l’un d’eux colore son portrait et fait apparaître ses notes sous les cartes concernées.",
+  good:"Permet de lire la page « avec les yeux de Guy », puis « avec ceux de Benoît ».",
+  cost:"Rien n’est visible tant qu’on n’a pas cliqué un portrait.",
+  html: () => page({ pageClass:"railpad",
+    pre:'<div class="rail">' + av("guy","on") + av("ben") + "</div>",
+    a:{ underCta:'<div class="jnote on" data-for="guy">' + av("guy") + note("retrace") + '</div><div class="jnote" data-for="ben">' + av("ben") + note("poly") + "</div>" },
+    b:{ underCta:'<div class="jnote on" data-for="guy">' + av("guy") + note("orbite") + '</div><div class="jnote" data-for="ben">' + av("ben") + note("ccu") + "</div>" },
+  })},
+];
+
+const opts = document.getElementById("opts"), toc = document.getElementById("toc");
+OPTIONS.forEach((o, i) => {
+  const n = String(i + 1).padStart(2, "0");
+  toc.insertAdjacentHTML("beforeend", '<a href="#' + o.id + '">' + n + " · " + o.name + "</a>");
+  const s = document.createElement("section");
+  s.className = "opt"; s.id = o.id;
+  s.innerHTML = '<div class="opt-head"><span class="opt-no">' + n + '</span><h2>' + o.name + "</h2></div>" +
+    '<p class="opt-sub">' + o.sub + "</p>" +
+    '<div class="frame">' + o.html() +
+    '<div class="verdict"><div><b>Gagne</b> — ' + o.good + '</div><div><b>Coûte</b> — ' + o.cost + "</div></div></div>";
+  opts.appendChild(s);
+});
+
+/* interactions */
+document.querySelectorAll("#epingles .card").forEach((c) => {
+  const pin = c.querySelector(".pin"), bub = c.querySelector(".bubble");
+  if (!pin || !bub) return;
+  pin.addEventListener("mouseenter", () => bub.classList.add("on"));
+  c.addEventListener("mouseleave", () => bub.classList.remove("on"));
+});
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-drawer],[data-close],[data-toggle],.rail img");
+  if (!t) return;
+  const frame = t.closest(".frame");
+  if (t.matches("[data-drawer]")) frame.querySelector("[data-panel]").classList.add("on");
+  if (t.matches("[data-close]")) frame.querySelector("[data-panel]").classList.remove("on");
+  if (t.matches("[data-toggle]")) {
+    t.classList.toggle("on");
+    frame.querySelectorAll("[data-annot]").forEach((n) => n.classList.toggle("on", t.classList.contains("on")));
+  }
+  if (t.matches(".rail img")) {
+    const who = t.alt === "Guy" ? "guy" : "ben";
+    frame.querySelectorAll(".rail img").forEach((im) => im.classList.toggle("on", im === t));
+    frame.querySelectorAll(".jnote").forEach((n) => n.classList.toggle("on", n.dataset.for === who));
+  }
+});
+</script>
+</body>
+</html>
