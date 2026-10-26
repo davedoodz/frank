@@ -48,15 +48,20 @@ a{color:inherit}
 
 /* ---------------- trigger ---------------- */
 .trigger{position:absolute;right:22px;bottom:22px;z-index:6;display:inline-flex;align-items:center;gap:9px;
-  padding:7px 14px 7px 7px;border-radius:999px;background:#111110;border:1px solid #111110;
-  box-shadow:0 3px 16px rgba(0,0,0,.18);cursor:pointer;
+  padding:7px 13px 7px 7px;border-radius:999px;background:#111110;border:1px solid #111110;
+  box-shadow:0 3px 16px rgba(0,0,0,.18);cursor:pointer;text-decoration:none;
   font-family:var(--f-trigger);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#e9eadf;
   transition:border-color .2s,box-shadow .2s,transform .2s,background-color .2s,color .2s}
-.trigger:hover{background:#1c1c13;border-color:var(--accent);box-shadow:0 10px 26px rgba(0,0,0,.24);
-  transform:translateY(-1px);color:#fff}
+.trigger:hover{background:var(--accent);border-color:var(--accent);box-shadow:0 10px 26px rgba(0,0,0,.2);
+  transform:translateY(-1px);color:#1b2005}
+.trigger:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .trigger .faces{display:flex}
 .trigger .faces img{width:24px;height:24px;border-radius:999px}
-.trigger .faces img+img{margin-left:-8px;border:2px solid #111110}
+.trigger .faces img+img{margin-left:-8px;border:2px solid #111110;transition:border-color .2s}
+.trigger:hover .faces img+img{border-color:var(--accent)}
+.trigger .ext{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;
+  stroke-linejoin:round;flex:0 0 auto;transition:transform .2s}
+.trigger:hover .ext{transform:translate(2px,-2px)}
 
 /* ---------------- notes panel ---------------- */
 .scrim{position:absolute;inset:0;background:rgba(17,17,15,.34);opacity:0;pointer-events:none;transition:opacity .28s;z-index:7}
@@ -145,10 +150,12 @@ table.x th{background:var(--bg);color:var(--ink);font-weight:600}
       <div class="sign"><img src="assets/lafond.png" alt="Lafond Architecte"></div>
     </div>
 
-    <div class="trigger" id="open">
+    <a class="trigger" id="open" href="https://docs.google.com/document/d/15q07ueqG374PNpKiemFzhmYMHLMKdSaA1K31OJOB91E/edit?usp=sharing"
+       target="_blank" rel="noopener" title="Open the interview notes in Google Docs">
       <span class="faces"><img src="assets/personas/guy.svg" alt="Guy"><img src="assets/personas/benoit.svg" alt="Benoît"></span>
-      User notes
-    </div>
+      <span>User notes</span>
+      <svg class="ext" viewBox="0 0 18 18" aria-hidden="true"><path d="M6.5 4.5h7v7"/><path d="M6.5 11.5 13.5 4.5"/></svg>
+    </a>
 
     <div class="scrim" id="scrim"></div>
 
@@ -358,7 +365,6 @@ apply();
 const panel = document.getElementById("panel"), scrim = document.getElementById("scrim");
 const open = () => { panel.classList.add("on"); scrim.classList.add("on"); };
 const shut = () => { panel.classList.remove("on"); scrim.classList.remove("on"); };
-document.getElementById("open").addEventListener("click", open);
 document.getElementById("openbtn").addEventListener("click", open);
 document.getElementById("close").addEventListener("click", shut);
 scrim.addEventListener("click", shut);
