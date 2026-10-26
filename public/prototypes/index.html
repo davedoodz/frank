@@ -34,27 +34,27 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);-webkit-font-
 svg{display:block}
 a{color:inherit;text-decoration:none}
 
-.page{width:100%;max-width:var(--dial-page, 1020px);margin:0 auto;padding:48px 24px}
+.page{width:100%;max-width:1020px;margin:0 auto;padding:48px 24px}
 
 .tete{text-align:center}
 .tete .d{
-  font-family:var(--dial-date-font, var(--mono));
-  font-size:var(--dial-date-size, 11px);
-  letter-spacing:var(--dial-date-track, .16em);
+  font-family:var(--mono);
+  font-size:11.5px;
+  letter-spacing:.09em;
   text-transform:uppercase;color:var(--ink-3);
 }
 .tete h1{margin-top:10px;font-size:40px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
-.tete .rule{width:var(--dial-rule-w, 40px);height:var(--dial-rule-h, 2px);background:var(--accent);margin:18px auto 0}
+.tete .rule{width:82px;height:7px;background:var(--accent);margin:18px auto 0}
 
 .duo{
   display:grid;grid-template-columns:1fr 1fr;
-  column-gap:var(--dial-col, 28px);row-gap:28px;
-  margin-top:var(--dial-gap-haut, 40px);
+  column-gap:58px;row-gap:28px;
+  margin-top:112px;
 }
 .opt{display:flex;flex-direction:column}
 .frame{position:relative;display:block}
-.shot{display:block;position:relative;z-index:1;width:var(--dial-thumb, 100%);aspect-ratio:900/562;overflow:hidden;background:transparent;border:0;border-radius:var(--r);
-  --ring:0 0 0 var(--dial-stroke-w, 0px) var(--dial-stroke-c, #e6e6e4);
+.shot{display:block;position:relative;z-index:1;width:100%;aspect-ratio:900/562;overflow:hidden;background:transparent;border:0;border-radius:var(--r);
+  --ring:0 0 0 0 #e6e6e4;
   box-shadow:var(--ring),0 10px 28px rgba(0,0,0,.09);
   transition:transform .25s ease,box-shadow .25s ease}
 .shot img{display:block;width:100%;height:100%;border-radius:inherit;object-fit:cover;object-position:top left;transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .25s ease}
@@ -62,7 +62,7 @@ a{color:inherit;text-decoration:none}
 /* every card lifts; the dial mode adds its own treatment on top */
 .opt:hover .shot{transform:translateY(-6px);box-shadow:var(--ring),0 20px 46px rgba(0,0,0,.15)}
 [data-hover="zoom"] .opt:hover .shot img{transform:scale(1.045)}
-[data-hover="border"] .opt:hover .shot{box-shadow:0 0 0 var(--dial-stroke-w, 1px) var(--ink),0 20px 46px rgba(0,0,0,.15)}
+[data-hover="border"] .opt:hover .shot{box-shadow:0 0 0 1px var(--ink),0 20px 46px rgba(0,0,0,.15)}
 [data-hover="shadow"] .opt:hover .shot{box-shadow:var(--ring),0 14px 38px rgba(0,0,0,.13)}
 [data-hover="accent"] .opt:hover .shot{box-shadow:0 0 0 3px rgba(192,215,57,.35),0 20px 46px rgba(0,0,0,.15)}
 [data-hover="reveal"] .shot img{filter:saturate(.55) contrast(.96)}
@@ -71,8 +71,8 @@ a{color:inherit;text-decoration:none}
 .txt{padding:18px 2px 0;display:flex;flex-direction:column;gap:8px;flex:1}
 .txt h2{font-size:17px;font-weight:600;letter-spacing:-.01em}
 .hrow{display:flex;align-items:flex-start;gap:6px}
-.hrow .harrow{width:var(--dial-harrow-size, 14px);height:var(--dial-harrow-size, 14px);
-  margin-top:var(--dial-harrow-y, 3px);flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:2;
+.hrow .harrow{width:14px;height:14px;
+  margin-top:3px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:2;
   stroke-linecap:round;stroke-linejoin:round;color:var(--ink);opacity:0;transition:opacity .2s ease}
 .opt:hover .hrow .harrow{opacity:1}
 /* balance keeps the last line from hanging short: the block stays as tight as it can be */
@@ -82,14 +82,14 @@ a{color:inherit;text-decoration:none}
 .mark{
   position:absolute;bottom:-.1em;z-index:0;pointer-events:none;
   font-family:var(--sans);
-  font-size:var(--dial-mark-size, 170px);
+  font-size:170px;
   font-weight:600;line-height:1;letter-spacing:-.03em;
   color:var(--ink-3);opacity:.45;
   transform:rotate(0deg);transform-origin:50% 88%;
   transition:transform .35s cubic-bezier(.2,.8,.2,1),color .25s ease,opacity .25s ease;
 }
-.opt:nth-child(1) .mark{left:var(--dial-mark-a, -85px)}
-.opt:nth-child(2) .mark{right:var(--dial-mark-b, -85px)}
+.opt:nth-child(1) .mark{left:-85px}
+.opt:nth-child(2) .mark{right:-85px}
 .opt:hover .mark{color:var(--accent);opacity:1}
 .opt:nth-child(1):hover .mark{transform:rotate(-9deg)}
 .opt:nth-child(2):hover .mark{transform:rotate(9deg)}
@@ -99,8 +99,8 @@ a{color:inherit;text-decoration:none}
 [data-align="center"] .txt{align-items:center;text-align:center}
 [data-align="center"] .shot{margin-left:auto;margin-right:auto}
 
-.sign{margin-top:var(--dial-gap-bas, 40px);display:flex;justify-content:center}
-.sign img{height:var(--dial-logo, 60px);width:auto}
+.sign{margin-top:112px;display:flex;justify-content:center}
+.sign img{height:42px;width:auto}
 
 @media (max-width:760px){.duo{grid-template-columns:1fr}.tete h1{font-size:32px}}
 
@@ -108,9 +108,9 @@ a{color:inherit;text-decoration:none}
 .notes-pill{position:fixed;right:22px;bottom:22px;z-index:40;display:inline-flex;align-items:center;gap:9px;
   padding:7px 13px 7px 7px;border-radius:999px;background:#111110;border:1px solid #111110;
   box-shadow:0 3px 16px rgba(0,0,0,.18);cursor:pointer;text-decoration:none;
-  font-family:var(--dial-date-font, var(--mono));
-  font-size:var(--dial-date-size, 11px);
-  letter-spacing:var(--dial-date-track, .16em);
+  font-family:var(--mono);
+  font-size:11.5px;
+  letter-spacing:.09em;
   text-transform:uppercase;color:#e9eadf;
   transition:border-color .2s,box-shadow .2s,transform .2s,background-color .2s,color .2s}
 .notes-pill:hover{background:var(--accent);border-color:var(--accent);color:#1b2005;
@@ -120,8 +120,8 @@ a{color:inherit;text-decoration:none}
 .notes-pill .faces img{width:24px;height:24px;border-radius:999px}
 .notes-pill .faces img+img{margin-left:-8px;border:2px solid #111110;transition:border-color .2s}
 .notes-pill:hover .faces img+img{border-color:var(--accent)}
-.notes-pill .ext{width:var(--dial-parrow-size, 14.3px);height:var(--dial-parrow-size, 14.3px);
-  position:relative;top:var(--dial-parrow-y, 0px);
+.notes-pill .ext{width:14.3px;height:14.3px;
+  position:relative;top:0;
   stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;
   stroke-linejoin:round;flex:0 0 auto}
 </style>
