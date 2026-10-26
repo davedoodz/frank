@@ -14,7 +14,7 @@ Repo conventions for coding agents. Short on purpose.
 - Build the UI against the fixture first. Do not wait for the import scripts or the real plans.
 - Scope is PRD.md section 4 Must list. If a task is not on it, stop and ask. Prototype 2 and 3 features are not tonight, even if the table or route already exists.
 - Create every table in PRD.md section 6 tonight, including the R2 and R3 tables. Leave them empty.
-- Routes that exist tonight: `/`, `/login`, `/p/[project]/units`, `/p/[project]/schedule`, `/admin/outline`. The `office dna`, `drawings`, and `building` tabs render the placeholder line. `/sim/...` routes do not exist tonight.
+- Routes that exist: `/`, `/login`, `/p/[project]/units`, `/p/[project]/schedule`, `/admin/outline`, `/p/[project]/office-dna`, `/p/[project]/office-dna/[unit]`, `/p/[project]/office-dna/compare`, `/sim/autocad/retrieve`. The `drawings` and `building` tabs render the placeholder line.
 - Never write a unit without an outline polygon. An approximate rectangle with low confidence is acceptable.
 - `status` is `unverified` on every imported unit. Only the prototype 2 verify action sets `verified`.
 - Store areas in square meters. Display ft² as `m2 * 10.764` rounded to the unit.
@@ -34,9 +34,9 @@ Next.js App Router, TypeScript, Tailwind, no component library. Supabase (Postgr
 
 Plans are in French. The interface is in English. Keep French values as they appear on the plans (unit types as `3½`, `4½`, `5½`, room names as labeled). Do not translate them. Project display names are fictional or anonymized and appear as given.
 
-## Simulated screens (prototype 2 and 3, not tonight)
+## Simulated screens
 
-When they are built: static routes under `/sim/autocad/...` and `/sim/sketchup/...`, ordinary pages reading the same database, host chrome per DESIGN.md "Host chrome", a `simulated` label bottom-left, and every cross-environment button a real link to the web route with the unit in the URL. Never claim a simulated screen is connected to an installed application.
+`/sim/autocad/retrieve` exists: the archived sheet open in the host, the historical unit selected, the fitte palette docked right. SketchUp routes are not built. Rules for any simulated screen: static routes under `/sim/autocad/...` and `/sim/sketchup/...`, ordinary pages reading the same database, host chrome per DESIGN.md "Host chrome", a `simulated` label bottom-left, and every cross-environment button a real link to the web route with the unit in the URL. Never claim a simulated screen is connected to an installed application.
 
 ## When something fails
 
@@ -45,7 +45,7 @@ Log it, keep going, report at the end of the block. A failed DXF parse or a wron
 ## Do not
 
 - Do not install a component library. Tailwind only.
-- Do not add editing, verifying, Office DNA, compare, collections, simulated screens, revision comparison, dark mode, mobile layout, accounts, or browser upload tonight.
+- Do not add editing, verifying, revision comparison, SketchUp building context, dark mode, mobile layout, accounts, or browser upload tonight. Office DNA search, the archived unit page, compare and collections are built; keep them on the fixture archive in `fixtures/archive.seed.json`.
 - Do not generate, edit, or redraw any plan.
 - Do not write to any drawing file, ever. CAD updates are proposed records a human applies inside AutoCAD.
 - Do not write client, developer, or consultant names or street addresses anywhere, including logs and fixtures.

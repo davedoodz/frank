@@ -58,9 +58,9 @@
       "floors_count": 8,
       "units_count": 140,
       "verified_count": 0,
-      "ingest_method": "manual",
-      "last_import_at": null,
-      "notes": "archive project, drawings connected, not indexed",
+      "ingest_method": "dxf",
+      "last_import_at": "2026-10-24",
+      "notes": "archive project, standard floor plate indexed for office dna",
       "drawings": [
         {
           "filename": "A-201_Niveau_02.dwg",
@@ -75,8 +75,8 @@
           "kind": "dwg",
           "role": "floor_plan",
           "floor_level": 5,
-          "status": "connected",
-          "indexed_at": null
+          "status": "indexed",
+          "indexed_at": "2026-10-24"
         },
         {
           "filename": "A-207_Niveau_08.dwg",
@@ -106,17 +106,17 @@
       "floors_count": 6,
       "units_count": 96,
       "verified_count": 0,
-      "ingest_method": "manual",
-      "last_import_at": null,
-      "notes": "archive project, drawings connected, not indexed",
+      "ingest_method": "dxf",
+      "last_import_at": "2026-10-24",
+      "notes": "archive project, standard floor plate indexed for office dna",
       "drawings": [
         {
-          "filename": "A-203_Niveau_03.dwg",
+          "filename": "A-205_Niveau_05.dwg",
           "kind": "dwg",
           "role": "floor_plan",
-          "floor_level": 3,
-          "status": "connected",
-          "indexed_at": null
+          "floor_level": 5,
+          "status": "indexed",
+          "indexed_at": "2026-10-24"
         },
         {
           "filename": "A-206_Niveau_06.dwg",
@@ -149,7 +149,7 @@
       "width_px": 1460,
       "height_px": 1240,
       "scale": "1:100",
-      "px_per_m": 17.4,
+      "px_per_m": 36.7,
       "source_file": "A-205_Niveau_05.dwg"
     },
     {
@@ -163,7 +163,7 @@
       "width_px": 1460,
       "height_px": 1240,
       "scale": "1:100",
-      "px_per_m": 17.4,
+      "px_per_m": 36.7,
       "source_file": "A-206_Niveau_06.dwg"
     }
   ],
