@@ -123,6 +123,23 @@ a{color:inherit;text-decoration:none}
 .sign img{height:var(--dial-logo, 60px);width:auto}
 
 @media (max-width:760px){.duo{grid-template-columns:1fr}.tete h1{font-size:32px}}
+
+/* user-notes pill — bottom right, clears the DialKit launcher */
+.notes-pill{position:fixed;right:22px;bottom:86px;z-index:40;display:inline-flex;align-items:center;gap:9px;
+  padding:7px 13px 7px 7px;border-radius:999px;background:#111110;border:1px solid #111110;
+  box-shadow:0 3px 16px rgba(0,0,0,.18);cursor:pointer;text-decoration:none;
+  font-family:"Geist Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#e9eadf;
+  transition:border-color .2s,box-shadow .2s,transform .2s,background-color .2s,color .2s}
+.notes-pill:hover{background:var(--accent);border-color:var(--accent);color:#1b2005;
+  box-shadow:0 10px 26px rgba(0,0,0,.2);transform:translateY(-1px)}
+.notes-pill:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.notes-pill .faces{display:flex}
+.notes-pill .faces img{width:24px;height:24px;border-radius:999px}
+.notes-pill .faces img+img{margin-left:-8px;border:2px solid #111110;transition:border-color .2s}
+.notes-pill:hover .faces img+img{border-color:var(--accent)}
+.notes-pill .ext{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;
+  stroke-linejoin:round;flex:0 0 auto;transition:transform .2s}
+.notes-pill:hover .ext{transform:translate(2px,-2px)}
 </style>
 </head>
 <body data-hover="lift" data-cta="pill">
@@ -155,6 +172,13 @@ a{color:inherit;text-decoration:none}
 
   <footer class="sign"><img src="assets/lafond.png" alt="Lafond Architecte"></footer>
 </div>
+
+<a class="notes-pill" href="https://docs.google.com/document/d/15q07ueqG374PNpKiemFzhmYMHLMKdSaA1K31OJOB91E/edit?tab=t.nbxprq7k3t4w"
+   target="_blank" rel="noopener" title="Open the interview notes in Google Docs">
+  <span class="faces"><img src="assets/personas/guy.svg" alt="Guy"><img src="assets/personas/benoit.svg" alt="Benoît"></span>
+  <span>User notes</span>
+  <svg class="ext" viewBox="0 0 18 18" aria-hidden="true"><path d="M6.5 4.5h7v7"/><path d="M6.5 11.5 13.5 4.5"/></svg>
+</a>
 
 <script src="vendor/dialkit/browser.global.js"></script>
 <script>
