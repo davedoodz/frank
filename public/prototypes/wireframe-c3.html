@@ -85,7 +85,7 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    strip runs out of room, so they scroll instead of pushing the name off. */
 .tabs .crumb{flex:0 0 auto;max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tabs .views{display:flex;align-items:center;gap:4px;min-width:0;overflow-x:auto;
-  scrollbar-width:none;mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent)}
+  scrollbar-width:none}
 .tabs .views::-webkit-scrollbar{display:none}
 .tabs .views button{flex:0 0 auto}
 
@@ -353,7 +353,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .frame[data-chrome="black"] .tabs .crumb.on{color:#fff}
 .frame[data-chrome="black"] .tabs .div,
 .frame[data-chrome="black"] .tabs .sep{background:rgba(255,255,255,.16)}
-.frame[data-chrome="black"] .tabs .views{mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent)}
 /* The card is the same white card; only what holds it changes. */
 .frame[data-chrome="black"][data-shell="inset"] .work{border-color:rgba(255,255,255,.1);
   box-shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px rgba(0,0,0,.35)}
@@ -407,6 +406,27 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    percentage keeps meaning the same thing at every zoom. */
 .vp{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab}
 .vp.drag{cursor:grabbing}
+
+/* Zoom belongs on the frame of the drawing it zooms, not in a toolbar two
+   panes away. One vertical slider per pane, against the outer edge of the
+   card: the plan's on its left, the model's on its right, so the two sliders
+   sit at the edges of the pair and never between the two drawings. */
+.zrail{flex:0 0 34px;display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding:10px 0;background:var(--fill-2);border-right:1px solid var(--line-2)}
+.zrail[data-side="right"]{border-right:0;border-left:1px solid var(--line-2)}
+.zslider{appearance:slider-vertical;-webkit-appearance:slider-vertical;
+  writing-mode:vertical-lr;direction:rtl;width:16px;flex:1;min-height:60px;
+  accent-color:var(--ink);cursor:ns-resize;margin:0}
+.zread{font-size:10.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.zrail .btnw{width:26px;height:26px;padding:0;justify-content:center;flex:0 0 26px}
+/* The two drawing panes are the thing being compared, so their edge is
+   stated instead of implied — including in the inset shell, where panes
+   otherwise give up their border to the grid lines. */
+.pane.drawing{border:1px solid #b4b4b7;border-radius:9px;
+  box-shadow:0 1px 2px rgba(17,17,18,.06),0 6px 16px rgba(17,17,18,.07)}
+.frame[data-shell="inset"] .pane.drawing{border:1px solid #b4b4b7;border-radius:9px;background:#fff}
+.frame[data-chrome="black"] .pane.drawing{border-color:rgba(255,255,255,.22);
+  box-shadow:0 2px 14px rgba(0,0,0,.45)}
 .vp > .plan{position:absolute;left:0;top:0;width:100%;transform-origin:0 0;will-change:transform}
 /* The selected unit, drawn over the sheet and never into it: a thin outline
    and a light wash, both in the one accent the screen already uses. */
@@ -422,8 +442,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 [data-fi="low"] .ulabel{display:none}
 /* The live SketchUp export fills its pane. The previous facade JPG stays
    behind it only while the 58 MB GLB loads, or if WebGL cannot start. */
+/* No border of its own: the pane around it now states the edge, and two
+   boxes one inside the other state it twice. */
 .model3d{position:relative;flex:1;min-height:0;overflow:hidden;
-  border:1px solid var(--line);border-radius:var(--r);background:#f1f3f4 url(assets/skp-facade.jpg) center/contain no-repeat}
+  background:#f1f3f4 url(assets/skp-facade.jpg) center/contain no-repeat}
 .model3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;
   opacity:0;cursor:grab;touch-action:none;transition:opacity .18s ease}
 .model3d-canvas:active{cursor:grabbing}
@@ -520,7 +542,9 @@ const V = {
   /* Where the sheet has been dragged to inside the 2D pane, in pixels of
      the pane. Zoom and pan are one pair: the wheel writes both. */
   pan: { x: 0, y: 0 },
-  focus: false,      // the drawing alone, list and inspector folded away
+  /* How close the camera is to the model, 0 far to 100 near. The slider on
+     the right edge writes it; orbiting or wheeling writes it back. */
+  mzoom: 40,
   query: "",         // the text in the list search
   reason: null,      // the reason picked for the decision being recorded
   note: "",          // the sentence written for the next person
@@ -1331,7 +1355,21 @@ function contentHTML() {
   const body = {
     "Unités": () => {
       const unit = (selRow("Unités") || ["—"])[0];
-      const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
+      /* Each drawing carries its own zoom on its own edge: a vertical slider
+         the hand can push, the percentage under it, and on the plan the one
+         button that frames the selected unit. */
+      const planRail = () => `<div class="zrail" data-side="left">
+        <input class="zslider" type="range" min="${ZMIN}" max="${ZMAX}" step="1" value="${V.zoom}"
+               data-zoom aria-label="Zoom du plan" title="Zoom du plan">
+        <span class="zread hi" data-zread>${V.zoom}%</span>
+        <span class="btnw" ${act("fitunit")} title="Cadrer l'unité sélectionnée sur le plan">${icon("search")}</span>
+      </div>`;
+      const modelRail = () => `<div class="zrail" data-side="right">
+        <input class="zslider" type="range" min="0" max="100" step="1" value="${V.mzoom}"
+               data-mzoom aria-label="Zoom de la maquette" title="Zoom de la maquette">
+        <span class="zread hi" data-mread>${V.mzoom}%</span>
+      </div>`;
+      const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane drawing" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>${hostButton(kind === "plan" ? "plan" : "model")}</div>
         ${fileStrip(kind === "plan" ? "plan" : "model")}
@@ -1340,25 +1378,27 @@ function contentHTML() {
              it: the drawing, the consultants' layers, the typology fills and
              the unit outline all sit inside one transformed box and move
              together. The wheel zooms where the pointer is; dragging pans. */
-          ? `<div class="pb" style="padding:0;overflow:hidden"><div class="vp" data-vp>
+          ? `<div class="pb" style="padding:0;overflow:hidden;flex-direction:row;gap:0">
+              ${planRail()}
+              <div class="vp" data-vp>
               <div class="plan ${cls}" data-img="${kind}"
                    style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})">
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${layers}${unitMarkHTML()}</div></div></div>`
-          : `<div class="pb" style="overflow:hidden">
+          : `<div class="pb" style="padding:0;overflow:hidden;flex-direction:row;gap:0">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
                 <div class="model3d-hint hi">Glisser pour orbiter · molette pour zoomer</div>
                 <button class="model3d-reset hi" type="button" data-model-reset>Recentrer</button>
               </div>
+              ${modelRail()}
             </div>`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
       const plan = () => pane("Plan 2D", `${unit} — contours par-dessus`, "plan", "align", typoHTML() + layersHTML());
       const model = () => pane("Maquette 3D", `${unit} — volumétrie, même niveau`, "model", "fit");
-      if (V.focus) return `<div style="flex:1;display:flex">${plan()}</div>`;
       if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
       if (mode === "Single pane + inset") return `<div style="position:relative;flex:1;display:flex">${plan()}
         <div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
@@ -1423,16 +1463,10 @@ function contentHTML() {
           <span class="hi" style="font-size:11.5px">rien n'est écrit dans un fichier de dessin; les mises à jour sont proposées</span></div></div></div>`,
   }[V.screen]();
 
-  const zoomable = V.screen === "Unités";
+  /* Nothing sits in this header any more: zoom went to the edge of the
+     drawing it zooms, and the full-screen button went away with it. */
   return region("content", "contenu", `<div class="ph">${icon("box")}
     <span class="lo bar" style="width:80px"></span><span class="hi">${V.screen}</span>
-    <span style="flex:1"></span>
-    ${zoomable ? `<span class="btnw" ${act("zoom", -25)} title="Réduire">${icon("minus")}</span>
-      <span class="btnw" ${act("zoom", 0)} title="Revenir à la feuille entière">${V.zoom}%</span>
-      <span class="btnw" ${act("zoom", 25)} title="Agrandir">${icon("plus")}</span>
-      <span class="btnw" ${act("fitunit")} title="Cadrer l'unité sélectionnée sur le plan">${icon("search")}
-        <span class="lo bar" style="width:40px"></span><span class="hi">Cadrer l'unité</span></span>
-      <span class="btnw" ${act("focus")} title="${V.focus ? "Revenir à l'écran complet" : "Le dessin seul"}">${icon(V.focus ? "minimize" : "maximize")}</span>` : ""}
     </div><div class="pb">${body}</div>`, step);
 }
 
@@ -1581,24 +1615,31 @@ function fitUnit() {
 
 /* The wheel and the drag write straight to the element and to V, without a
    re-render: a re-render per wheel tick would rebuild the whole screen and
-   the drag would stutter. The percentage in the header is patched in place
-   and the next real action draws from the same numbers. */
-function wireViewport() {
+   the drag would stutter. The slider and the percentage on the edge of the
+   pane are patched in place, and the next real action draws from the same
+   numbers. */
+function paintSheet() {
   const el = vpEl();
   if (!el) return;
   const plan = el.querySelector(".plan");
-  const paint = () => {
-    plan.style.transform = `translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})`;
-    const read = document.querySelector('[data-act="zoom"][data-value="0"]');
-    if (read) read.textContent = `${V.zoom}%`;
-    const z = V.zoom / 100;
-    const label = el.querySelector(".ulabel");
-    if (label) {
-      label.style.fontSize = `${(11 / z).toFixed(2)}px`;
-      label.style.transform = `translateY(${(label.dataset.side === "below" ? 2 / z : -(14 / z)).toFixed(2)}px)`;
-    }
-    el.querySelectorAll(".umark rect").forEach((r) => { r.style.strokeWidth = `${(1.6 / z).toFixed(3)}px`; });
-  };
+  if (plan) plan.style.transform = `translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})`;
+  const slider = document.querySelector("[data-zoom]");
+  if (slider && document.activeElement !== slider) slider.value = String(V.zoom);
+  const read = document.querySelector("[data-zread]");
+  if (read) read.textContent = `${V.zoom}%`;
+  const z = V.zoom / 100;
+  const label = el.querySelector(".ulabel");
+  if (label) {
+    label.style.fontSize = `${(11 / z).toFixed(2)}px`;
+    label.style.transform = `translateY(${(label.dataset.side === "below" ? 2 / z : -(14 / z)).toFixed(2)}px)`;
+  }
+  el.querySelectorAll(".umark rect").forEach((r) => { r.style.strokeWidth = `${(1.6 / z).toFixed(3)}px`; });
+}
+
+function wireViewport() {
+  const el = vpEl();
+  if (!el) return;
+  const paint = paintSheet;
   el.onwheel = (e) => {
     e.preventDefault();
     const r = el.getBoundingClientRect();
@@ -1634,14 +1675,45 @@ function wireViewport() {
     };
   };
 }
+
+/* The two sliders are the only zoom controls left, so each one is wired to
+   the thing it moves: the plan slider to the sheet transform, the model
+   slider to the camera distance the viewer module exposes. The model writes
+   back through an event, because orbiting with the mouse changes the same
+   number the slider shows. */
+function wireZoomRails() {
+  const sheet = document.querySelector("[data-zoom]");
+  if (sheet) sheet.oninput = () => { zoomBy(Number(sheet.value)); paintSheet(); };
+  const cam = document.querySelector("[data-mzoom]");
+  if (cam) {
+    cam.value = String(V.mzoom);
+    cam.oninput = () => {
+      V.mzoom = Number(cam.value);
+      paintModelRead();
+      window.fitteModel?.writeZoom(V.mzoom);
+    };
+  }
+  paintModelRead();
+}
+
+function paintModelRead() {
+  const read = document.querySelector("[data-mread]");
+  if (read) read.textContent = `${V.mzoom}%`;
+}
+
+window.addEventListener("fitte:model-zoom", (e) => {
+  if (!Number.isFinite(e.detail)) return;
+  V.mzoom = e.detail;
+  const cam = document.querySelector("[data-mzoom]");
+  if (cam && document.activeElement !== cam) cam.value = String(V.mzoom);
+  paintModelRead();
+});
 /* ---------------------------------------------------------------- frame */
 
 function render() {
   const def = SCREENS[V.screen];
-  /* Focus is the drawing alone: the list and the inspector fold away rather
-     than shrink, so the plan gets the whole card. */
-  const hasList = !V.focus && def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
-  const hasInsp = !V.focus && def.regions.includes("inspector") && V.inspector.layout === "Right panel";
+  const hasList = def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
+  const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Right panel";
   const cols = [hasList ? "260px" : null, "1fr", hasInsp ? "340px" : null].filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
@@ -1691,6 +1763,7 @@ function render() {
   /* The pane that holds the sheet is rebuilt with the screen, so its wheel
      and drag are hooked back up every time it is drawn. */
   wireViewport();
+  wireZoomRails();
   const find = document.querySelector(".find");
   if (find) find.oninput = (e) => {
     V.query = e.target.value;
@@ -1836,17 +1909,9 @@ function onClick(e) {
        only notes what was opened. */
     case "source": say(`${value} — texte officiel ouvert dans un onglet. Lecture seule.`); return render();
     case "utab": V.utab = Number(value); break;
-    /* Zooming from the buttons holds the middle of the pane still, the way
-       the wheel holds the pointer still. 0 is back to the whole sheet. */
-    case "zoom": {
-      if (Number(value) === 0) { V.zoom = 100; V.pan = { x: 0, y: 0 }; break; }
-      zoomBy(V.zoom + Number(value));
-      break;
-    }
     /* The unit the list is on, filling the pane: the move the plan is
        opened for, without hunting for it with the wheel. */
     case "fitunit": fitUnit(); break;
-    case "focus": V.focus = !V.focus; break;
     case "reason": V.reason = V.reason === value ? null : value; break;
     case "save":
       if (!V.reason) { say("Choisissez une raison: une décision sans raison ne s'enregistre pas."); break; }

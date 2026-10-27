@@ -13,6 +13,7 @@ let model;
 let modelPromise;
 let homePosition;
 let homeTarget;
+let lastZoom = null;
 
 function setStatus(host, state, message) {
   host.dataset.state = state;
@@ -70,6 +71,40 @@ function resetCamera() {
   controls.update();
 }
 
+// The slider on the edge of the pane needs one number it can write and read
+// back. Distance between the two limits OrbitControls already carries, on a
+// log scale so each step of the slider feels the same, mapped 0 far to
+// 100 near.
+// Until fitModel has run, OrbitControls still carries its defaults, 0 and
+// Infinity, which have no logarithm. Both ends have to be real distances
+// before the slider means anything.
+function limits() {
+  if (!camera || !controls) return null;
+  const { minDistance: lo, maxDistance: hi } = controls;
+  return lo > 0 && Number.isFinite(hi) && hi > lo ? { lo, hi } : null;
+}
+
+function readZoom() {
+  const l = limits();
+  if (!l) return null;
+  const d = camera.position.distanceTo(controls.target);
+  const t = (Math.log(d) - Math.log(l.lo)) / (Math.log(l.hi) - Math.log(l.lo));
+  if (!Number.isFinite(t)) return null;
+  return Math.round((1 - Math.min(1, Math.max(0, t))) * 100);
+}
+
+function writeZoom(percent) {
+  const l = limits();
+  if (!l || !Number.isFinite(percent)) return;
+  const t = 1 - Math.min(100, Math.max(0, percent)) / 100;
+  const d = Math.exp(Math.log(l.lo) + t * (Math.log(l.hi) - Math.log(l.lo)));
+  const direction = camera.position.clone().sub(controls.target).normalize();
+  camera.position.copy(controls.target).add(direction.multiplyScalar(d));
+  controls.update();
+}
+
+window.fitteModel = { readZoom, writeZoom, reset: resetCamera };
+
 function createRenderer() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xf1f3f4);
@@ -101,6 +136,16 @@ function createRenderer() {
   controls.dampingFactor = 0.075;
   controls.screenSpacePanning = true;
   controls.zoomToCursor = true;
+
+  // Orbiting and the wheel change the same number the slider shows, so the
+  // viewer announces it. Only whole percents are sent: damping fires this
+  // listener every frame while the camera settles.
+  controls.addEventListener("change", () => {
+    const percent = readZoom();
+    if (percent === null || percent === lastZoom) return;
+    lastZoom = percent;
+    window.dispatchEvent(new CustomEvent("fitte:model-zoom", { detail: percent }));
+  });
 
   renderer.setAnimationLoop(() => {
     if (!renderer.domElement.isConnected) return;
