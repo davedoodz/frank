@@ -158,6 +158,36 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .listrow{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:5px}
 .listrow.on{background:var(--fill)}
 .listrow .dot{width:8px;height:8px;border-radius:50%;background:var(--bar);flex:0 0 8px}
+
+/* Anything that does something says so under the cursor, and anything that
+   cannot act yet is visibly out of reach rather than silently inert. */
+[data-act],[data-screen]{cursor:pointer}
+[data-act]:hover{border-color:var(--line)}
+.chip[data-act]:hover,.btnw[data-act]:hover{background:var(--fill)}
+.listrow[data-act]:hover{background:var(--fill-2)}
+.tbl tr[data-act]:hover td{background:var(--fill-2)}
+.tile[data-act].on,.chip.on{border-color:var(--ink)}
+.btnw.off{opacity:.45}
+input.find,input.note{border:1px solid var(--line-2);border-radius:5px;padding:5px 7px;
+  font:inherit;font-size:11.5px;color:var(--ink);background:#fff;min-width:0;width:100%}
+input.find{border:0;background:transparent;padding:0;width:140px}
+input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1px}
+/* The answer to an action that leaves no other mark on the screen. */
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:40;
+  background:var(--ink);color:#fff;border-radius:7px;padding:8px 12px;font-size:12px;
+  max-width:min(620px,80vw);box-shadow:0 8px 24px rgba(17,17,18,.22)}
+
+/* The dialog sits over the frame, centred, and dims what it interrupts. */
+.scrim{position:fixed;inset:0;z-index:50;background:rgba(17,17,18,.28);
+  display:grid;place-items:center;padding:24px}
+.dialog{width:min(520px,92vw);background:#fff;border-radius:12px;border:1px solid rgba(17,17,18,.07);
+  box-shadow:0 12px 40px rgba(17,17,18,.22);display:flex;flex-direction:column;max-height:86vh}
+.dialog .dh{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line-2)}
+.dialog .db{display:flex;flex-direction:column;gap:9px;padding:14px;overflow:auto}
+.dialog .df{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid var(--line-2)}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld input{border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;font:inherit;font-size:12px;color:var(--ink);background:#fff}
+.fld input:focus{outline:1px solid var(--ink);outline-offset:1px}
 .plan{flex:1;background:repeating-linear-gradient(0deg,var(--fill-2) 0 15px,transparent 15px 16px),
   repeating-linear-gradient(90deg,var(--fill-2) 0 15px,transparent 15px 16px);
   border:1px dashed var(--line);border-radius:var(--r);display:grid;place-items:center;color:var(--ink-3);font-size:11.5px}
@@ -169,10 +199,18 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .pcard{cursor:pointer}
 .pcard .thumb{aspect-ratio:16 / 9;flex:0 0 auto;position:relative}
 .pcard .thumb.mark{display:flex;align-items:center;justify-content:center;border:1px solid var(--line-2);
-  border-radius:var(--r);overflow:hidden}
+  border-radius:var(--r);overflow:hidden;background:var(--tint);color:var(--mark)}
 .pcard .thumb.mark span{font-size:20px;font-weight:600;letter-spacing:.04em}
 .pcard .thumb .lv{position:absolute;right:6px;bottom:5px;z-index:2;font-size:10px;color:var(--ink-3);
   background:rgba(255,255,255,.86);border-radius:4px;padding:1px 5px}
+/* The rendering reads as the cover once the screen is at full fidelity; the
+   initials carry the card until then. */
+[data-fi="high"] .pcard .thumb.cover{background-image:url(assets/baldwin-cover.png);
+  background-size:cover;background-position:center 42%}
+[data-fi="high"] .pcard .thumb.cover span{display:none}
+[data-fi="high"] .plan.ghost.cover{background:url(assets/baldwin-cover.png) center 42%/cover no-repeat;
+  border-style:solid}
+[data-fi="high"] .plan.ghost.cover svg{display:none}
 .pnew .newbox{aspect-ratio:16 / 9;border:1px dashed var(--line-2);border-radius:var(--r);background:var(--fill-2);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:12px}
 .state{display:inline-flex;align-items:center;gap:5px}
@@ -194,6 +232,10 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 [data-fi="high"] .bar{display:none}
 [data-fi="high"] .hi{display:block}
 .hi{display:none}
+/* The dialog and the toast are not part of the fidelity study: they are the
+   application answering, so their words show at any fidelity. */
+.dialog .hi,.toast.hi{display:block}
+.dialog .chip .hi,.dialog .btnw .hi{display:inline}
 [data-fi="high"] .lo{display:none}
 [data-fi="high"] .pane{border-color:var(--line)}
 
@@ -223,12 +265,18 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 [data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
 
 /* The consultants' sheets sit over the floor plan in one shared coordinate
-   space: the plan box takes the drawing's own aspect and is drawn edge to
-   edge, so a percentage means the same thing on every layer. */
+   space: the plan box takes the drawing's own aspect, so the drawing fills
+   it without being stretched and a percentage means the same thing on every
+   layer. The plan itself is read in black and white; the sheets keep their
+   own ink, since their colour is what tells them apart. */
 .plan.align{aspect-ratio:1280 / 1160;height:auto;flex:0 0 auto;overflow:hidden}
-[data-fi="high"] .plan.align[data-img]{background-size:100% 100%;background-position:0 0}
+[data-fi="high"] .plan.align[data-img]{background:none}
+[data-fi="high"] .plan.align[data-img="plan"]::before{content:"";position:absolute;inset:0;
+  background:url(assets/plan-etage.jpg) center/contain no-repeat;filter:grayscale(1)}
+/* The thumbnails are crops of the same plan, so they read the same way. */
+[data-fi="high"] .plan[data-img="plan"]:not(.align){filter:grayscale(1)}
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
-  background-size:100% 100%;pointer-events:none;z-index:1}
+  background-size:contain;background-position:center;pointer-events:none;z-index:2}
 [data-fi="high"] .plan[data-img] .lay{display:block}
 .plan .lay[data-lay="arp"]{background-image:url(assets/arp-site.png)}
 /* The landscaping sheet is drawn the other way round from the surveyor's:
@@ -236,6 +284,8 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    other once both are measured against their property lines. The file stays
    as extracted; the half turn happens here. */
 .plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png);transform:rotate(180deg)}
+/* One typology, one colour, laid on the unit it belongs to. */
+.plan .utag{position:absolute;z-index:1;opacity:.45;pointer-events:none;mix-blend-mode:multiply}
 [data-fi="high"] .btnw.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
 [data-fi="high"] .listrow.on{background:#eef1e0}
 [data-fi="high"] .listrow .dot{background:#8ba00f}
@@ -300,7 +350,7 @@ const V = {
   /* Everything below is what the screen is actually doing, as opposed to how
      it is drawn: which view, which row, which article, what has been decided.
      Every control on the screen writes one of these. */
-  project: "Alder Court",
+  project: "Le Baldwin III",
   view: {},          // screen → index of the view in its tab strip
   sel: {},           // screen → index of the selected row
   article: 2,        // which article is open under Zonage et code
@@ -312,10 +362,20 @@ const V = {
   note: "",          // the sentence written for the next person
   settled: {},       // "screen · row" → the reason it was settled with
   toast: null,       // what the last action answered
+  /* The new-project dialog, while it is open: what has been typed, which
+     kinds of file the office folder will be read for, and what is missing. */
+  dialog: null,
+  /* Which typologies are asked for. Nothing is on: the plan is read in black
+     and white until someone asks a question of it. Keyed by TYPOS, written
+     out here because TYPOS is declared further down the file. */
+  typo: { "3½": false, "4½": false, "5½": false },
   nav: { fidelity: "inherit", layout: "Icon rail + tabs" },
   header: { fidelity: "inherit", layout: "Title + actions" },
   list: { fidelity: "inherit", layout: "Vertical list" },
   content: { fidelity: "inherit", layout: "Two panes" },
+  /* Which typologies are asked for. None asked for is the plain black and
+     white plan, which is how the drawing is read by default. */
+  typo: { "3½": false, "4½": false, "5½": false },
   inspector: { fidelity: "inherit", layout: "Right panel" },
   footer: { fidelity: "inherit", layout: "Impact strip" },
   lay: { arp: { on: true, opacity: 55, scale: 100, x: 0, y: 0 },
@@ -328,8 +388,8 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
    a hidden sprite and referenced by id afterwards. */
 function sprite() {
   const names = ["home", "folder", "image", "layout-grid", "layers", "table", "scale", "git-compare", "calendar-check",
-    "file", "box", "pen-line", "chevron-right", "chevron-down", "search", "plus", "minus", "maximize",
-    "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "image"];
+    "file", "box", "pen-line", "chevron-right", "chevron-down", "search", "plus", "minus", "maximize", "minimize",
+    "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "x", "link"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
     if (!node) return "";
@@ -377,16 +437,43 @@ const SCREENS = {
    are reading. One table per question, so a control can change the answer
    instead of only changing a border colour. */
 
-const UNITS_BY_LEVEL = {
-  "Niveau 5": [["501 · 3½", "707 pi²"], ["502 · 4½", "1 écart"], ["503 · 3½", "753 pi²"],
-    ["504 · 3½+bureau", "822 pi²"], ["505 · 4½", "968 pi²"], ["506 · 4½", "1 écart"],
-    ["507 · 4½", "1203 pi²"], ["508 · 5½", "1 écart"]],
-  "Niveau 4": [["401 · 3½", "707 pi²"], ["402 · 4½", "985 pi²"], ["403 · 3½", "753 pi²"],
-    ["404 · 3½+bureau", "822 pi²"], ["405 · 4½", "968 pi²"], ["406 · 5½", "1 écart"]],
-  "Niveau 3": [["301 · 3½", "707 pi²"], ["302 · 4½", "985 pi²"], ["303 · 4½", "1 écart"],
-    ["304 · 5½", "1424 pi²"]],
-};
-UNITS_BY_LEVEL["Tous les niveaux"] = Object.values(UNITS_BY_LEVEL).flat();
+/* Le Baldwin III is eight storeys: levels 1 to 7 repeat the typical floor,
+   fourteen units read off BAL3_Étage_Type.dwg, and level 8 is the six
+   penthouses. 104 units in all, the number the surveyor's sheet carries.
+   The units come from the typical floor, so a level only renumbers them. */
+/* ty, net pi², and the unit's box on assets/plan-etage.jpg normalised 0–1,
+   the same numbers the platform uses. */
+const TYPICAL = [
+  ["3½", 707, [0.3953, 0.5862, 0.1203, 0.1586]], ["3½", 727, [0.5063, 0.0328, 0.1141, 0.1552]],
+  ["3½", 753, [0.6281, 0.0328, 0.1172, 0.1552]], ["3½+bureau", 880, [0.1609, 0.7293, 0.1266, 0.2172]],
+  ["4½", 968, [0.2203, 0.5207, 0.1422, 0.1724]], ["4½", 1012, [0.2203, 0.3483, 0.1422, 0.1724]],
+  ["4½", 1170, [0.4891, 0.2259, 0.1984, 0.1552]], ["4½", 1203, [0.2203, 0.1362, 0.1625, 0.2034]],
+  ["5½", 1249, [0.303, 0.0276, 0.1969, 0.1603]], ["5½", 1350, [0.0266, 0.6966, 0.1859, 0.25]],
+  ["4½", 1380, [0.3938, 0.3155, 0.1438, 0.2638]], ["5½", 1470, [0.6953, 0.1966, 0.2719, 0.1845]],
+  ["4½+bureau", 1494, [0.7516, 0.0328, 0.2156, 0.1741]], ["5½", 1626, [0.2953, 0.7293, 0.2016, 0.2172]],
+];
+
+/* A unit reads as its base typology: the den or the office does not make a
+   fourth colour on the plan. */
+const TYPOS = ["3½", "4½", "5½"];
+const TYPO_INK = { "3½": "#d98b8b", "4½": "#6fa9d8", "5½": "#78c47f" };
+const baseTypo = (ty) => ty.split("+")[0];
+
+/* The open differences sit on named units, so the same ones keep reading as
+   differences wherever that unit is listed. */
+const UNIT_GAPS = { "502": 1, "506": 1, "508": 1, "406": 1, "703": 1 };
+
+const LEVELS = [8, 7, 6, 5, 4, 3, 2, 1];
+
+const UNITS_BY_LEVEL = {};
+LEVELS.forEach((lv) => {
+  const n = lv === 8 ? 6 : TYPICAL.length;
+  UNITS_BY_LEVEL[`Niveau ${lv}`] = TYPICAL.slice(0, n).map(([ty, pi2], i) => {
+    const no = `${lv}${String(i + 1).padStart(2, "0")}`;
+    return [`${no} · ${ty}`, UNIT_GAPS[no] ? `${UNIT_GAPS[no]} écart` : `${pi2} pi²`, i, baseTypo(ty)];
+  });
+});
+UNITS_BY_LEVEL["Tous les niveaux"] = LEVELS.flatMap((lv) => UNITS_BY_LEVEL[`Niveau ${lv}`]);
 
 const CROSSINGS = {
   "Structure": [["C-05-07 poutre sous le plafond", "niveau 5"], ["C-05-11 colonne absente", "niveau 5"],
@@ -394,6 +481,11 @@ const CROSSINGS = {
   "Mécanique": [["C-05-02 conduit dans une colonne", "niveau 5"], ["C-TT-03 drain hors colonne", "toiture"]],
   "Architecture": [["C-05-09 retombée sous la fenêtre", "niveau 5"], ["C-04-01 gaine dans le rangement", "niveau 4"]],
 };
+
+/* The inspector's own tabs, and the five reasons a change is allowed to have.
+   A decision without one of them does not save. */
+const UNIT_TABS = ["Vue d'ensemble", "Ouvertures", "Coordination", "Historique"];
+const REASONS = ["coût client", "structure", "code", "ville", "erreur de dessin"];
 
 /* The articles that touch this project, each with the number the drawings
    produced and the number the article asks for. */
@@ -410,7 +502,7 @@ const QTABS = {
   "Unités": { head: ["Type", "Par étage", "Projet", "pi² moy", "pi² total", "Part"],
     rows: [["3½", 3, 21, 729, 2187, "21 %"], ["3½+bureau", 1, 7, 880, 880, "7 %"],
       ["4½", 5, 35, 1147, 5733, "36 %"], ["4½+bureau", 1, 7, 1494, 1494, "7 %"], ["5½", 4, 28, 1424, 5695, "29 %"]] },
-  "Superficie par étage": { head: ["Niveau", "Unités", "Net pi²", "Brut pi²", "Circulation", "Part"],
+  "Superficies": { head: ["Niveau", "Unités", "Net pi²", "Brut pi²", "Circulation", "Part"],
     rows: [["6", 8, 9120, 10980, "17 %", "18 %"], ["5", 14, 11860, 13940, "15 %", "23 %"],
       ["4", 14, 11860, 13940, "15 %", "23 %"], ["3", 8, 9120, 10980, "17 %", "18 %"], ["2", 4, 4580, 5610, "18 %", "9 %"]] },
   "Fenêtres": { head: ["Repère", "Largeur", "Hauteur", "Quantité", "Façade", "Source"],
@@ -439,14 +531,8 @@ const FILES = {
     ["Compte rendu de comité", "14 Nov · à venir"]],
 };
 
-/* Unit boxes measured on assets/plan-etage.jpg, normalised 0–1, same numbers
-   the platform uses. A thumbnail shows its own unit, never the whole sheet. */
-const UNIT_BOXES = [
-  [0.3953, 0.5862, 0.1203, 0.1586], [0.5063, 0.0328, 0.1141, 0.1552],
-  [0.6281, 0.0328, 0.1172, 0.1552], [0.1609, 0.7293, 0.1266, 0.2172],
-  [0.2203, 0.5207, 0.1422, 0.1724], [0.2203, 0.3483, 0.1422, 0.1724],
-  [0.4891, 0.2259, 0.1984, 0.1552], [0.2203, 0.1362, 0.1625, 0.2034],
-];
+/* A thumbnail shows its own unit, never the whole sheet. */
+const UNIT_BOXES = TYPICAL.map((u) => u[2]);
 
 /* Frames one box with air around it: the drawing is scaled so the box fills
    the element, then slid so the box sits in the middle. */
@@ -464,33 +550,55 @@ function crop(box, pad = 0.45, axis = "width") {
 }
 
 /* Where each consultant's building sits inside its own sheet, measured once
-   and normalised 0–1. The surveyor's box is the teal implantation outline;
-   the landscaping box is the same outline carried across by the two property
-   lines, which agree to within half a percent on the drive island. */
+   and normalised 0–1, with the sheet's own pixel ratio beside it. The
+   surveyor's box is the teal implantation outline; the landscaping box is
+   the same outline carried across by the two property lines, which agree to
+   within half a percent on the drive island. */
 const SHEETS = {
-  arp: { box: [.159, .246, .818, .814] },
-  pay: { box: [.138, .224, .808, .796] },
+  arp: { box: [.159, .246, .818, .814], ratio: 1650 / 1560 },
+  pay: { box: [.138, .224, .808, .796], ratio: 835 / 800 },
 };
-/* The floor plan's own building, in the same terms. */
+/* The floor plan's own building, and the plan's pixel ratio. */
 const BASE_BOX = [.014, .019, .978, .961];
+const BASE_RATIO = 1280 / 1160;
 
 /* Places one sheet so its building lands on the floor plan's building, then
-   adds the nudge the panel holds. The ground sheets cover the podium, so
-   they bound the typical floor rather than trace it. */
+   adds the nudge the panel holds. One scale for both axes: a sheet is never
+   stretched to fit, it is placed and then nudged. The ground sheets cover
+   the podium, so they bound the typical floor rather than trace it. */
 function sheetStyle(key) {
-  const L = V.lay[key];
+  const L = V.lay[key], S = SHEETS[key];
   const [bx0, by0, bx1, by1] = BASE_BOX;
-  const [sx0, sy0, sx1, sy1] = SHEETS[key].box;
+  const [sx0, sy0, sx1, sy1] = S.box;
+  /* The width the sheet needs so its building spans the plan's, and the
+     height that width implies at the sheet's own proportions. */
   const w = (bx1 - bx0) / (sx1 - sx0) * L.scale / 100;
-  const h = (by1 - by0) / (sy1 - sy0) * L.scale / 100;
+  const h = w * BASE_RATIO / S.ratio;
   const left = bx0 - sx0 * w + L.x / 100;
-  const top = by0 - sy0 * h + L.y / 100;
+  /* Centred on the building vertically, since the height is no longer free. */
+  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h + L.y / 100;
   return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
     + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;opacity:${L.opacity / 100}`;
 }
 
 const layersHTML = () => ["arp", "pay"].filter((k) => V.lay[k].on)
   .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"></div>`).join("");
+
+/* The plan is read in black and white. Colour only arrives when a typology
+   is asked for, and then only on the units that answer. */
+const typosOn = () => TYPOS.filter((t) => V.typo[t]);
+
+const typoHTML = () => {
+  const on = typosOn();
+  if (!on.length) return "";
+  return TYPICAL.map(([ty, , box]) => {
+    const t = baseTypo(ty);
+    if (!on.includes(t)) return "";
+    const [x, y, w, h] = box;
+    return `<div class="utag" style="left:${(x * 100).toFixed(2)}%;top:${(y * 100).toFixed(2)}%;`
+      + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;background:${TYPO_INK[t]}"></div>`;
+  }).join("");
+};
 
 const NAV = [["layout-grid", "Vue d'ensemble"], ["layers", "Unités"], ["table", "Quantités"],
   ["git-compare", "Coordination"], ["calendar-check", "Suivi"], ["file", "Fichiers"]];
@@ -534,14 +642,20 @@ const bars = (n, w = [100, 70, 85]) =>
    changes the answer on the screen and not just the border of the control. */
 
 const viewsOf = (screen) => CONTEXT[screen] || [];
-const viewIndex = (screen) => Math.min(V.view[screen] || 0, Math.max(0, viewsOf(screen).length - 1));
+/* Units opens on level 5: that is the floor every example here is about. */
+const defaultView = (screen) => (screen === "Unités" ? Math.max(0, LEVELS.indexOf(5)) : 0);
+const viewIndex = (screen) => Math.min(V.view[screen] === undefined ? defaultView(screen) : V.view[screen],
+  Math.max(0, viewsOf(screen).length - 1));
 const viewOf = (screen) => viewsOf(screen)[viewIndex(screen)];
 
 /* The rows the current screen is showing, after its view and its search. */
 function rowsOf(screen) {
-  const all = screen === "Unités" ? (UNITS_BY_LEVEL[viewOf(screen)] || UNITS_BY_LEVEL["Niveau 5"])
+  let all = screen === "Unités" ? (UNITS_BY_LEVEL[viewOf(screen)] || UNITS_BY_LEVEL["Niveau 5"])
     : screen === "Coordination" ? (CROSSINGS[viewOf(screen)] || [])
       : [];
+  /* No typology asked for means the whole level; asking for one narrows the
+     list to it, the same units the plan then colours. */
+  if (screen === "Unités" && typosOn().length) all = all.filter((r) => typosOn().includes(r[3]));
   const q = V.query.trim().toLowerCase();
   return q ? all.filter((r) => r.join(" ").toLowerCase().includes(q)) : all;
 }
@@ -580,28 +694,29 @@ const tabIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Tabs 
    Open a project that is running, or start one. The layouts differ only in
    which of those two is louder. */
 
+/* One real project, the one every drawing in assets/ belongs to:
+   Le Baldwin III, boulevard Saint-Jean, Dollard-des-Ormeaux. */
 const PROJECTS = [
-  ["Alder Court", "48 unités · 6 niveaux", "A-201 R04 · 24 Oct", "6 écarts", 1],
-  ["Rivière Nord", "112 unités · 9 niveaux", "A-110 R07 · 21 Oct", "2 écarts", 1],
-  ["Îlot Papineau", "26 unités · 4 niveaux", "A-201 R02 · 17 Oct", "10 données manquantes", 1],
-  ["Maison Clark", "8 unités · 3 niveaux", "A-100 R01 · 02 Oct", "à jour", 0],
-  ["Rue Fabre", "14 unités · 3 niveaux", "A-201 R01 · 28 Sep", "à jour", 0],
+  ["Le Baldwin III", "104 unités · 8 niveaux", "BAL3_Étage_Type R04 · 24 Oct", "6 écarts", 1],
 ];
 
 /* The state is the one word on a card allowed colour: a project with
    differences or missing inputs reads in the accent, a settled one stays grey. */
 const pstate = (p) => `<span class="state" data-open="${p[4]}"><span class="d"></span>${p[3]}</span>`;
 
-/* A project is told apart by a tint and its initials, not by a plan: every
-   building's first sheet looks the same at thumbnail size. */
+/* At low fidelity a project is told apart by a tint and its initials. At
+   high fidelity the card carries the project's own rendering, the one image
+   that names the building faster than any sheet. */
 const TINTS = [["#e8eef7", "#3f5a80"], ["#e6f1ea", "#3d6b52"], ["#f7ece3", "#85573a"],
   ["#eeeaf6", "#584a78"], ["#f7e9ec", "#7d4450"], ["#e9f1f3", "#3c6670"]];
-
 const initials = (name) => name.split(/[\s—-]+/).filter(Boolean).slice(0, 2)
   .map((w) => w[0]).join("").toUpperCase() || name.slice(0, 2).toUpperCase();
 
-const pcard = (p, i = 0) => `<div class="tile pcard" data-screen="Vue d'ensemble" title="Open ${p[0]}">
-  <div class="thumb mark" style="background:${TINTS[i % TINTS.length][0]};color:${TINTS[i % TINTS.length][1]}">
+/* Opening a project is the one thing this screen does: every card, row and
+   table line carries it, and it is the project the rest of the app then
+   reads. */
+const pcard = (p, i = 0) => `<div class="tile pcard" ${act("open", p[0])} title="Ouvrir ${p[0]}">
+  <div class="thumb mark cover" style="--tint:${TINTS[i % TINTS.length][0]};--mark:${TINTS[i % TINTS.length][1]}">
     <span>${initials(p[0])}</span></div>
   <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
   <div><span class="lo bar lt" style="width:72%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
@@ -610,7 +725,7 @@ const pcard = (p, i = 0) => `<div class="tile pcard" data-screen="Vue d'ensemble
 
 /* The tile takes the thumbnail's shape, so it sits in the row instead of
    spanning two of them. */
-const pnew = () => `<div class="tile pnew">
+const pnew = () => `<div class="tile pnew" ${act("newproject")} title="Démarrer un projet">
   <div class="thumb newbox">
     ${icon("plus")}
     <div><span class="lo bar" style="width:92px"></span><span class="hi" style="font-weight:600;font-size:13px">Nouveau projet</span></div>
@@ -618,12 +733,17 @@ const pnew = () => `<div class="tile pnew">
       <span class="hi" style="font-size:11.5px;color:var(--ink-3)">Déposez un DXF ou un PDF. La première lecture nomme les unités et les niveaux; rien n'est dessiné.</span></div>
   </div></div>`;
 
+/* One project is in the office, so the index shows it and the only other
+   thing to do here is start another. */
+const shownProjects = () => PROJECTS;
+
 const ptable = () => `<table class="tbl"><thead><tr>${["Projet", "Taille", "Dernière lecture", "Ouvrir"].map((h) =>
     `<th><span class="lo bar lt" style="width:60%"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
-  <tbody>${PROJECTS.map((p) => `<tr>${p.slice(0, 4).map((c) =>
+  <tbody>${shownProjects().map((p) => `<tr ${act("open", p[0])} title="Ouvrir ${p[0]}">${p.slice(0, 4).map((c) =>
     `<td><span class="lo bar lt" style="width:${c.length > 12 ? 86 : 54}%"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>`;
 
-const plist = (sel) => PROJECTS.map((p, i) => `<div class="listrow ${i === sel ? "on" : ""}"><span class="dot"></span>
+const plist = (sel) => shownProjects().map((p, i) => `<div class="listrow ${p[0] === V.project ? "on" : ""}"
+  ${act("open", p[0])} title="Ouvrir ${p[0]}"><span class="dot"></span>
   <span class="lo bar" style="width:${70 - i * 6}%"></span><span class="hi" style="flex:1">${p[0]}</span>
   <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[3]}</span></div>`).join("");
 
@@ -631,18 +751,26 @@ const pane = (label, title, inner, style) => `<div class="pane rg" data-rg="${la
   <div class="ph">${icon("folder")}<span class="lo bar" style="width:110px"></span><span class="hi">${title}</span></div>
   <div class="pb">${inner}</div></div>`;
 
+/* The index has no tab strip — the strip above it carries the breadcrumb —
+   so En cours and Archivés sit in the pane itself, where they filter. */
+const pviews = () => `<div class="row" style="padding-bottom:4px">${viewsOf("Projets").map((t, i) =>
+  `<span class="chip ${i === viewIndex("Projets") ? "on" : ""}" ${act("view", i)}>
+    <span class="lo bar" style="width:40px"></span><span class="hi">${t}</span></span>`).join("")}</div>`;
+
 const HOMES = {
-  "Card grid": () => pane("projets", "Tous les projets",
-    `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-content:start">${PROJECTS.map((p, i) => pcard(p, i)).join("")}${pnew()}</div>`),
+  "Card grid": () => pane("projets", viewOf("Projets") === "Archivés" ? "Projets archivés" : "Tous les projets",
+    `${pviews()}
+     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-content:start">${shownProjects().map((p, i) => pcard(p, i)).join("")}${viewOf("Projets") === "Archivés" ? "" : pnew()}</div>
+     ${shownProjects().length ? "" : `<div class="hi" style="font-size:11.5px;color:var(--ink-3);padding-top:8px">aucun projet dans cette vue</div>`}`),
 
   "Table of projects": () => pane("projets", "Projets en cours",
     `${ptable()}<div class="row"><span class="sp" style="flex:1"></span>
-      <span class="btnw solid">${icon("plus")}<span class="hi">Nouveau projet</span></span></div>`),
+      <span class="btnw solid" ${act("newproject")}>${icon("plus")}<span class="hi">Nouveau projet</span></span></div>`),
 
   "List + preview": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
-      ${pane("projets", "Tous les projets", `${plist(0)}<span class="btnw solid" style="justify-content:center">${icon("plus")}<span class="hi">Nouveau projet</span></span>`, "flex:.85")}
-      ${pane("aperçu", "Alder Court", `<div class="plan ghost" style="min-height:140px">${icon("image")}</div>
-        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">48 units · 6 levels · read 6 min ago</span></div></div>`, "flex:1.5")}
+      ${pane("projets", "Tous les projets", `${plist(0)}<span class="btnw solid" ${act("newproject")} style="justify-content:center">${icon("plus")}<span class="hi">Nouveau projet</span></span>`, "flex:.85")}
+      ${pane("aperçu", "Le Baldwin III", `<div class="plan ghost cover" style="min-height:140px">${icon("image")}</div>
+        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">104 unités · 8 niveaux · lu il y a 6 min</span></div></div>`, "flex:1.5")}
     </div>`,
 
   "Recent, then all": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
@@ -686,7 +814,7 @@ function navHTML() {
 const CONTEXT = {
   "Projets": ["En cours", "Archivés"],
   "Vue d'ensemble": ["Ce qui a changé", "Totaux", "Zonage et code", "Ce qui bloque"],
-  "Unités": ["Niveau 5", "Niveau 4", "Niveau 3", "Tous les niveaux"],
+  "Unités": [...LEVELS.map((lv) => `Niveau ${lv}`), "Tous les niveaux"],
   "Quantités": ["Unités", "Superficies", "Fenêtres", "Matériaux"],
   "Coordination": ["Structure", "Mécanique", "Architecture"],
   "Suivi": ["Programme", "Esquisse", "Comité", "Permis", "Site"],
@@ -714,19 +842,21 @@ function tabsHTML() {
   if (SCREENS[V.screen].index) {
     items = `<span class="crumb on hi">${icon("folder")}Tous les projets</span><span class="sp"></span>`;
   } else if (mode === "Rail + view menu") {
-    items = `<span class="btnw solid" data-menu><span class="hi">${views[0]}</span>${icon("chevron-down")}</span>
+    /* One button that steps through the views, because a menu that cannot
+       open is not a control. */
+    items = `<span class="btnw solid" ${act("viewnext")} title="Vue suivante"><span class="hi">${views[viewIndex(V.screen)]}</span>${icon("chevron-down")}</span>
       <span class="sp"></span>
-      <span class="chip hi">1 of ${views.length}</span>`;
+      <span class="chip hi">${viewIndex(V.screen) + 1} / ${views.length}</span>`;
   } else if (mode === "Rail + breadcrumb") {
     items = `${back}${icon("chevron-right")}
-      <span class="crumb on hi">Alder Court</span>
+      <span class="crumb on hi">${V.project}</span>
       <span class="sp"></span>`;
   } else if (top || mode === "Tabs only, no rail") {
     items = `${back}<span class="div"></span>${names.map(tab).join("")}<span class="sp"></span>`;
   } else {
     /* A rail is on screen, so the strip shows this screen's views instead
-       of repeating the screen list. */
-    items = `${back}<span class="div"></span>${views.map((t, i) => `<button aria-current="${i === 0}" title="${t}">
+       of repeating the screen list. Picking one changes what is read. */
+    items = `${back}<span class="div"></span>${views.map((t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen)}" title="${t}">
         <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`).join("")}
       <span class="sp"></span>`;
   }
@@ -740,13 +870,17 @@ function tabsHTML() {
 
 function headerHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.header : null;
-  const title = { "Projets": ["Projets", "5 en cours · 1 archivé"],
-    "Vue d'ensemble": ["Alder Court", "6 étages · 48 unités · 5 articles non résolus"],
-    "Unités": ["Étage type — niveau 5", "14 unités · 6 écarts ouverts"],
-    "Quantités": ["Quantités", "compté à partir des dessins, rien de saisi"],
-    "Coordination": ["Coordination", "4 croisements ouverts · 1 réglé"],
+  /* The subtitle answers to the state: which project is open, which level is
+     being read, how many rows the current view is actually showing. */
+  const unresolved = ARTICLES.filter((a) => a[4] !== "conforme").length;
+  const open = Object.keys(V.settled).length;
+  const title = { "Projets": ["Projets", `${PROJECTS.length} en cours`],
+    "Vue d'ensemble": [V.project, `8 étages · 104 unités · ${unresolved} articles non résolus`],
+    "Unités": [`Étage type — ${viewOf("Unités").toLowerCase()}`, `${rowsOf("Unités").length} unités · ${rowsOf("Unités").filter((r) => r[1] === "1 écart").length} écarts ouverts`],
+    "Quantités": ["Quantités", `${viewOf("Quantités")} · compté à partir des dessins, rien de saisi`],
+    "Coordination": ["Coordination", `${rowsOf("Coordination").length} croisements en ${viewOf("Coordination").toLowerCase()} · ${open} réglés`],
     "Fichiers": ["Fichiers", "ce qui a été lu, et quand"],
-    "Suivi": ["Suivi", "une liste par phase, les signaux viennent des dessins"] }[V.screen] || [V.screen, ""];
+    "Suivi": ["Suivi", `${viewOf("Suivi")} · les signaux viennent des dessins`] }[V.screen] || [V.screen, ""];
   const metrics = V.header.layout === "Title + metrics";
   const bare = V.header.layout === "Title only";
   return `<header class="pane rg ${solo("header")}" data-rg="entête" data-fi="${fiOf("header")}" style="flex:0 0 auto">
@@ -760,9 +894,9 @@ function headerHTML() {
           <div class="hi" style="font-size:12px;color:var(--ink-2)">${title[1]}</div>
         </div>
         ${bare ? "" : SCREENS[V.screen].home
-          ? `<span class="btnw solid">${icon("plus")}<span class="lo bar" style="width:52px"></span><span class="hi">Nouveau projet</span></span>`
-          : `<span class="btnw">${icon("external-link")}<span class="lo bar" style="width:52px"></span><span class="hi">Ouvrir dans AutoCAD</span></span>
-        <span class="btnw">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Exporter</span></span>`}
+          ? `<span class="btnw solid" ${act("newproject")} title="Démarrer un projet">${icon("plus")}<span class="lo bar" style="width:52px"></span><span class="hi">Nouveau projet</span></span>`
+          : `<span class="btnw" ${act("autocad")} title="Ouvrir le dessin dans AutoCAD">${icon("external-link")}<span class="lo bar" style="width:52px"></span><span class="hi">Ouvrir dans AutoCAD</span></span>
+        <span class="btnw" ${act("export")} title="Exporter ce que cet écran montre">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Exporter</span></span>`}
       </div>
       ${metrics ? `<div class="row" style="gap:var(--gap)">${[1, 2, 3, 4].map((i) => `<div class="tile" style="flex:1">
         <div class="lo bar" style="width:38px;height:14px"></div><div class="lo bar lt" style="width:70%"></div>
@@ -777,26 +911,28 @@ function listHTML() {
   const mode = V.list.layout;
   if (mode === "Hidden") return "";
   const step = V.journey ? SCREENS[V.screen].steps.list : null;
-  const label = { "Unités": "Unités", "Coordination": "Croisements" }[V.screen] || "List";
-  const rows = {
-    "Unités": ["501 · 3½ · 707 pi²", "502 · 4½ · 1 écart", "503 · 3½ · 753 pi²", "504 · 3½+bureau", "505 · 4½ · 968 pi²", "506 · 4½ · 1 écart", "507 · 4½ · 1203 pi²", "508 · 5½ · 1 écart"],
-    "Coordination": ["C-05-02 conduit dans une colonne", "C-05-07 poutre sous le plafond", "C-TT-03 drain hors colonne", "C-05-11 colonne absente", "C-02-05 réglé"],
-  }[V.screen] || ["item", "item", "item", "item"];
+  const label = { "Unités": "Unités", "Coordination": "Croisements" }[V.screen] || "Liste";
+  /* The list reads the same rows the header counts, so the view above it and
+     the search inside it both change what is on screen. */
+  const pairs = rowsOf(V.screen);
+  const rows = pairs.length ? pairs.map((r) => `${r[0]} · ${r[1]}`) : ["rien ne correspond"];
+  const sel = selIndex(V.screen);
 
   if (mode === "Filter bar only") {
     return `<section class="pane rg ${solo("list")}" data-rg="liste → barre de filtres" data-fi="${fiOf("list")}" style="flex:0 0 auto;grid-column:1/-1">
       ${step ? `<span class="step">${step}</span>` : ""}
       <div class="pb" style="flex-direction:row;align-items:center;padding:8px 10px">
-        <span class="chip">${icon("search")}<span class="lo bar" style="width:70px"></span><span class="hi">Search ${label.toLowerCase()}</span></span>
-        ${rows.slice(0, 4).map((r) => `<span class="chip"><span class="lo bar" style="width:46px"></span><span class="hi">${r.split(" ")[0]}</span></span>`).join("")}
+        <span class="chip">${icon("search")}<span class="lo bar" style="width:70px"></span>
+          <input class="hi find" value="${V.query}" placeholder="Chercher dans ${label.toLowerCase()}"></span>
+        ${pairs.slice(0, 4).map((r, i) => `<span class="chip ${i === sel ? "on" : ""}" ${act("row", i)}><span class="lo bar" style="width:46px"></span><span class="hi">${r[0].split(" ")[0]}</span></span>`).join("")}
       </div></section>`;
   }
   const inner = mode === "Card grid"
-    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${rows.map((r, i) => `<div class="tile">
-        <div class="plan"${V.screen === "Unités" ? ` data-img="plan" style="height:54px;flex:0 0 54px;${crop(UNIT_BOXES[i % UNIT_BOXES.length])}"` : ` style="height:54px;flex:0 0 54px"`}></div>
-        <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r}</div></div>`).join("")}</div>`
-    : rows.map((r, i) => `<div class="listrow ${i === 1 ? "on" : ""}"><span class="dot"></span>
-        <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}</span></div>`).join("");
+    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${pairs.map((r, i) => `<div class="tile ${i === sel ? "on" : ""}" ${act("row", i)}>
+        <div class="plan"${V.screen === "Unités" ? ` data-img="plan" style="height:54px;flex:0 0 54px;${crop(UNIT_BOXES[(r[2] ?? i) % UNIT_BOXES.length])}"` : ` style="height:54px;flex:0 0 54px"`}></div>
+        <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r[0]} · ${r[1]}</div></div>`).join("")}</div>`
+    : rows.map((r, i) => `<div class="listrow ${i === sel ? "on" : ""}" ${pairs.length ? act("row", i) : ""}><span class="dot"></span>
+        <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}${V.settled[`${V.screen} · ${(pairs[i] || [""])[0]}`] ? " · réglé" : ""}</span></div>`).join("");
 
   return region("list", `list — ${label.toLowerCase()}`,
     `<div class="ph">${icon("list")}<span class="lo bar" style="width:60px"></span><span class="hi">${label}</span></div>
@@ -808,13 +944,15 @@ function contentHTML() {
   const mode = V.content.layout;
   const body = {
     "Unités": () => {
+      const unit = (selRow("Unités") || ["—"])[0];
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span></div>
-        <div class="pb"><div class="plan ${cls}" data-img="${kind}"><span class="lo"></span><span class="hi">${note}</span>${layers}</div></div></div>`;
+        <div class="pb" style="overflow:hidden"><div class="plan ${cls}" data-img="${kind}" style="zoom:${V.zoom / 100}"><span class="lo"></span><span class="hi">${note}</span>${layers}</div></div></div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
-      const plan = () => pane("Plan 2D", "plan d'étage, contours par-dessus", "plan", "align", layersHTML());
-      const model = () => pane("Maquette 3D", "volumétrie, même niveau", "model");
+      const plan = () => pane("Plan 2D", `${unit} — contours par-dessus`, "plan", "align", typoHTML() + layersHTML());
+      const model = () => pane("Maquette 3D", `${unit} — volumétrie, même niveau`, "model");
+      if (V.focus) return `<div style="flex:1;display:flex">${plan()}</div>`;
       if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
       if (mode === "Single pane + inset") return `<div style="position:relative;flex:1;display:flex">${plan()}
         <div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
@@ -824,60 +962,91 @@ function contentHTML() {
     /* The overview carries the four readings of the project and, under them,
        the zoning and code block that used to be its own screen: the articles
        that touch this project, the measured number against the required one,
-       and the inputs still missing to conclude. */
-    "Vue d'ensemble": () => `<div class="col" style="flex:1;gap:var(--gap)">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)">
-        ${["Ce qui a changé depuis la dernière lecture", "Les deux sources connectées", "Étage type — 14 unités", "Répartition des typologies"].map((t) => `<div class="tile">
+       and the inputs still missing to conclude. The view above decides which
+       of the two is on screen, so the strip is a filter and not a label. */
+    "Vue d'ensemble": () => {
+      const view = viewOf("Vue d'ensemble");
+      const a = ARTICLES[V.article];
+      const tiles = {
+        "Ce qui a changé": ["Ce qui a changé depuis la dernière lecture", "Les deux sources connectées"],
+        "Totaux": ["Étage type — 14 unités", "Répartition des typologies"],
+        "Ce qui bloque": ["Croisements ouverts", "Articles non résolus"],
+      }[view];
+      const grid = tiles ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)">
+        ${tiles.map((t) => `<div class="tile">
           <div class="lo bar" style="width:60%"></div><div class="hi" style="font-weight:600">${t}</div>
           <div class="lo col">${bars(4)}</div>
-          <div class="hi" style="color:var(--ink-2);font-size:11.5px">liste de lignes lues dans les dessins</div></div>`).join("")}</div>
-        <div class="pane" style="flex:0 0 auto">
+          <div class="hi" style="color:var(--ink-2);font-size:11.5px">liste de lignes lues dans les dessins</div></div>`).join("")}</div>` : "";
+      const zoning = (view === "Zonage et code" || view === "Ce qui bloque") ? `<div class="pane" style="flex:0 0 auto">
           <div class="ph">${icon("scale")}<span class="lo bar" style="width:90px"></span>
             <span class="hi">Zonage et code</span><span style="flex:1"></span>
-            <span class="chip"><span class="lo bar" style="width:52px"></span><span class="hi">5 non résolus</span></span></div>
+            <span class="chip"><span class="lo bar" style="width:52px"></span><span class="hi">${ARTICLES.filter((x) => x[4] !== "conforme").length} non résolus</span></span></div>
           <div class="pb">
-            <div class="row" style="flex-wrap:wrap">${["art. 9 hauteur", "art. 43 implantation", "art. 22 marge arrière", "art. 71 stationnement", "art. 134 verdissement", "3.2.3.1 ouvertures"]
-              .map((t, i) => `<span class="chip" style="${i === 2 ? "border-color:var(--ink)" : ""}">
-              <span class="lo bar" style="width:54px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-            <div class="tile"><div class="lo bar" style="width:55%"></div><div class="hi" style="font-weight:600">art. 22 — marge arrière</div>
+            <div class="row" style="flex-wrap:wrap">${ARTICLES.map((x, i) => `<span class="chip" ${act("article", i)} style="${i === V.article ? "border-color:var(--ink)" : ""}">
+              <span class="lo bar" style="width:54px"></span><span class="hi">${x[0]}</span></span>`).join("")}</div>
+            <div class="tile"><div class="lo bar" style="width:55%"></div><div class="hi" style="font-weight:600">${a[0]} — ${a[4]}</div>
               <div class="lo bar lt" style="width:90%"></div>
-              <div class="hi" style="font-size:11.5px;color:var(--ink-2)">« La marge arrière minimale est de 3,00 m »</div></div>
+              <div class="hi" style="font-size:11.5px;color:var(--ink-2)">${a[1]}</div></div>
             <div class="row" style="gap:var(--gap)">
-              ${[["2.70 m", "mesuré dans les dessins"], ["3.00 m", "exigé par l'article"]].map(([a, b]) => `<div class="tile" style="flex:1">
-                <div class="lo bar" style="width:60px;height:16px"></div><div class="hi" style="font-size:17px;font-weight:600">${a}</div>
+              ${[[a[2], "mesuré dans les dessins"], [a[3], "exigé par l'article"]].map(([x, b]) => `<div class="tile" style="flex:1">
+                <div class="lo bar" style="width:60px;height:16px"></div><div class="hi" style="font-size:17px;font-weight:600">${x}</div>
                 <div class="lo bar lt" style="width:80%"></div>
                 <div class="hi" style="font-size:11.5px;color:var(--ink-2)">${b}</div></div>`).join("")}</div>
             <div class="tile"><div class="lo col">${bars(2)}</div>
               <div class="hi" style="font-size:12px;color:var(--ink-2)">lecture simple de l'écart, puis ce qui manque pour conclure</div></div>
             <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
               <span class="hi" style="font-size:11.5px">données manquantes, communes à tous les articles</span></div></div>
-          </div></div></div>`,
-    "Quantités": () => `<div class="col" style="flex:1">
-        <div class="row">${["Unités", "Superficie par étage", "Fenêtres", "Matériaux"].map((t, i) => `<span class="chip" style="${i === 0 ? "border-color:var(--ink)" : ""}">
-          <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-        <table class="tbl"><thead><tr>${["Type", "Par étage", "Projet", "pi² moy", "pi² total", "Part"].map((h) => `<th><span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
-        <tbody>${[["3½", 3, 21, 729, 2187, "21 %"], ["3½+den", 1, 7, 880, 880, "7 %"], ["4½", 5, 35, 1147, 5733, "36 %"], ["4½+den", 1, 7, 1494, 1494, "7 %"], ["5½", 4, 28, 1424, 5695, "29 %"]]
-          .map((r) => `<tr>${r.map((c, i) => `<td class="${i ? "n" : ""}"><span class="lo bar" style="width:${i ? 34 : 50}px"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>
+          </div></div>` : "";
+      return `<div class="col" style="flex:1;gap:var(--gap)">${grid}${zoning}</div>`;
+    },
+    "Quantités": () => {
+      const views = viewsOf("Quantités");
+      const t = QTABS[viewOf("Quantités")];
+      return `<div class="col" style="flex:1">
+        <div class="row">${views.map((n, i) => `<span class="chip" ${act("view", i)} style="${i === viewIndex("Quantités") ? "border-color:var(--ink)" : ""}">
+          <span class="lo bar" style="width:46px"></span><span class="hi">${n}</span></span>`).join("")}</div>
+        <table class="tbl"><thead><tr>${t.head.map((h) => `<th><span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
+        <tbody>${t.rows.map((r) => `<tr>${r.map((c, i) => `<td class="${i ? "n" : ""}"><span class="lo bar" style="width:${i ? 34 : 50}px"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>
         <div class="tile"><div class="row">${icon("info")}<span class="lo bar" style="width:60%"></span>
-          <span class="hi" style="font-size:11.5px">fichier source, révision et heure de lecture sous chaque tableau</span></div></div></div>`,
+          <span class="hi" style="font-size:11.5px">fichier source, révision et heure de lecture sous chaque tableau</span></div></div></div>`;
+    },
 
-    "Coordination": () => `<div class="col" style="flex:1">
-        <div class="pane" style="max-width:420px"><div class="pb"><div class="plan" data-img="plan" style="height:170px;flex:0 0 170px">
-          <span class="lo"></span><span class="hi">deux dessins superposés, chevauchement marqué</span></div></div></div>
+    "Coordination": () => {
+      const r = selRow("Coordination") || ["—", ""];
+      return `<div class="col" style="flex:1">
+        <div class="pane" style="max-width:420px"><div class="pb" style="overflow:hidden"><div class="plan" data-img="plan" style="height:170px;flex:0 0 170px;zoom:${V.zoom / 100}">
+          <span class="lo"></span><span class="hi">${r[0]} — deux dessins superposés</span></div></div></div>
         <div class="tile"><div class="lo col">${bars(3)}</div>
-          <div class="hi" style="font-size:12px;color:var(--ink-2)">quels deux fichiers, quel niveau, quelle unité est touchée</div></div></div>`,
-    "Suivi": () => `<div class="col" style="flex:1">
-        <div class="row">${["Programme", "Esquisse", "Comité", "Permis", "Site"].map((t, i) => `<span class="chip" style="${i === 2 ? "border-color:var(--ink)" : ""}">
+          <div class="hi" style="font-size:12px;color:var(--ink-2)">${viewOf("Coordination")} · ${r[1]} · ${V.settled[settleKey()] ? `réglé — ${V.settled[settleKey()]}` : "quels deux fichiers, quel niveau, quelle unité est touchée"}</div></div></div>`;
+    },
+    "Suivi": () => {
+      const views = viewsOf("Suivi");
+      return `<div class="col" style="flex:1">
+        <div class="row">${views.map((t, i) => `<span class="chip" ${act("view", i)} style="${i === viewIndex("Suivi") ? "border-color:var(--ink)" : ""}">
           <span class="lo bar" style="width:44px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-        ${[1, 2, 3, 4, 5].map((i) => `<div class="listrow"><span class="dot" style="border-radius:3px"></span>
+        ${(PHASES[viewOf("Suivi")] || []).map((t) => `<div class="listrow" ${act("tick", t)} title="Cocher">
+          <span class="dot" style="border-radius:3px;${V.settled[`Suivi · ${t}`] ? "background:var(--ink);border-color:var(--ink)" : ""}"></span>
           <span class="lo bar" style="flex:1"></span>
-          <span class="hi" style="font-size:12px">${["Tableau des superficies par étage", "Répartition des typologies", "Élévations avec matériaux", "Demande de dérogation mineure rédigée", "Note à l'urbaniste"][i - 1]}</span></div>`).join("")}</div>`,
+          <span class="hi" style="font-size:12px">${t}${V.settled[`Suivi · ${t}`] ? " · fait" : ""}</span></div>`).join("")}</div>`;
+    },
+    /* Files: what was read, and when. The view picks the kind. */
+    "Fichiers": () => `<div class="col" style="flex:1">
+        ${(FILES[viewOf("Fichiers")] || []).map(([n, meta]) => `<div class="listrow" ${act("openfile", n)} title="Ouvrir ${n}">
+          <span class="dot"></span><span class="lo bar" style="flex:1"></span>
+          <span class="hi" style="font-size:12px;flex:1">${n}</span>
+          <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${meta}</span></div>`).join("")}
+        <div class="tile"><div class="row">${icon("info")}<span class="lo bar" style="width:60%"></span>
+          <span class="hi" style="font-size:11.5px">rien n'est écrit dans un fichier de dessin; les mises à jour sont proposées</span></div></div></div>`,
   }[V.screen]();
 
+  const zoomable = V.screen === "Unités" || V.screen === "Coordination";
   return region("content", "contenu", `<div class="ph">${icon("box")}
     <span class="lo bar" style="width:80px"></span><span class="hi">${V.screen}</span>
     <span style="flex:1"></span>
-    ${V.screen === "Unités" ? `<span class="btnw">${icon("minus")}</span><span class="btnw">100%</span><span class="btnw">${icon("plus")}</span><span class="btnw">${icon("maximize")}</span>` : ""}
+    ${zoomable ? `<span class="btnw" ${act("zoom", -25)} title="Réduire">${icon("minus")}</span>
+      <span class="btnw" ${act("zoom", 0)} title="Revenir à 100 %">${V.zoom}%</span>
+      <span class="btnw" ${act("zoom", 25)} title="Agrandir">${icon("plus")}</span>
+      <span class="btnw" ${act("focus")} title="${V.focus ? "Revenir à l'écran complet" : "Le dessin seul"}">${icon(V.focus ? "minimize" : "maximize")}</span>` : ""}
     </div><div class="pb">${body}</div>`, step);
 }
 
@@ -885,35 +1054,49 @@ function inspectorHTML() {
   const mode = V.inspector.layout;
   if (mode === "Hidden") return "";
   const step = V.journey ? SCREENS[V.screen].steps.inspector : null;
-  const title = { "Unités": "Unité 502", "Vue d'ensemble": "Ce qui bloque", "Coordination": "Décision", "Suivi": "Échéances et signaux" }[V.screen] || "Détail";
+  const row = selRow(V.screen);
+  const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`, "Vue d'ensemble": "Ce qui bloque",
+    "Coordination": "Décision", "Suivi": "Échéances et signaux" }[V.screen] || "Détail";
   /* A decision panel on the screens where something is decided; a short
      read-only column everywhere else. */
   const decides = V.screen === "Unités" || V.screen === "Coordination";
+  /* The unit inspector answers a different question per tab, so the tabs
+     carry four sets of rows and not one set with four labels. */
+  const unitRows = {
+    "Vue d'ensemble": [["Typologie", (row || ["", ""])[0].split(" · ")[1] || "—"],
+      ["Superficie", (row || ["", ""])[1]], ["Niveau", viewOf("Unités")], ["Statut", V.settled[settleKey()] ? "réglé" : "non vérifié"]],
+    "Ouvertures": [["Le plan dit", "1800 × 1500"], ["La maquette dit", "1560 × 1500"], ["Écart", "240 mm"], ["Apparu dans", "R04 · 24 Oct"]],
+    "Coordination": [["Croisements", "2 ouverts"], ["Discipline", "structure, mécanique"], ["Axe", "4"], ["Dernier dessin lu", "S-301 R02"]],
+    "Historique": [["R04 · 24 Oct", "fenêtre élargie"], ["R03 · 02 Oct", "cloison déplacée"], ["R02 · 19 Oct", "unité découpée"], ["R01 · 12 Sep", "première lecture"]],
+  };
   const rows = {
-    "Unités": [["Le plan dit", "1800 × 1500"], ["La maquette dit", "1560 × 1500"], ["Écart", "240 mm"], ["Apparu dans", "R04 · 24 Oct"]],
-    "Coordination": [["Niveau", "5"], ["Where", "corridor, axe 4"], ["Dessins", "mécanique + structure"], ["Unité", "507"]],
+    "Unités": unitRows[UNIT_TABS[V.utab]],
+    "Coordination": [["Niveau", "5"], ["Où", "corridor, axe 4"], ["Dessins", "mécanique + structure"], ["Unité", "507"]],
     "Vue d'ensemble": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Émission du permis", "21 Nov"], ["Données manquantes", "10"]],
     "Suivi": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Croisements ouverts", "4"], ["Articles à lire", "5"]],
   }[V.screen] || [["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"]];
 
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
     <div class="pb">
-      ${V.screen === "Unités" ? `<div class="row">${["Vue d'ensemble", "Ouvertures", "Coordination", "Historique"].map((t, i) => `<span class="chip" style="${i === 1 ? "border-color:var(--ink)" : ""}">
+      ${V.screen === "Unités" ? `<div class="row">${UNIT_TABS.map((t, i) => `<span class="chip" ${act("utab", i)} style="${i === V.utab ? "border-color:var(--ink)" : ""}">
         <span class="lo bar" style="width:40px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-      <div class="plan" data-img="plan" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[6], .25, "height")}"><span class="hi">recadrage de l'unité</span></div>` : ""}
+      <div class="plan" data-img="plan" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[((selRow("Unités") || [])[2] ?? 0) % UNIT_BOXES.length], .25, "height")}"><span class="hi">${UNIT_TABS[V.utab]} — recadrage de l'unité</span></div>` : ""}
       ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
         <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>
         <span class="hi" style="font-size:12px">${val}</span></div>`).join("")}
       ${decides ? `<div class="tile" style="border-color:var(--ink)">
         <div class="lo bar" style="width:50%"></div><div class="hi" style="font-weight:600;font-size:12.5px">Pourquoi ce changement?</div>
-        <div class="row" style="flex-wrap:wrap;gap:5px">${["coût client", "structure", "code", "ville", "erreur de dessin"].map((m) => `<span class="chip">
+        <div class="row" style="flex-wrap:wrap;gap:5px">${REASONS.map((m) => `<span class="chip" ${act("reason", m)} style="${m === V.reason ? "border-color:var(--ink)" : ""}">
           <span class="lo bar" style="width:40px"></span><span class="hi">${m}</span></span>`).join("")}</div>
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">${V.reason ? `raison retenue: ${V.reason}` : "aucune raison retenue — le bouton reste inactif"}</div>
         <div class="lo bar" style="width:100%;height:34px;border-radius:5px"></div>
-        <div class="hi" style="border:1px solid var(--line-2);border-radius:5px;padding:7px;color:var(--ink-3);font-size:11.5px">une phrase pour la personne suivante</div>
-        <span class="btnw solid" style="justify-content:center"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Enregistrer la décision</span></span>
+        <input class="hi note" value="${V.note.replace(/"/g, "&quot;")}" placeholder="une phrase pour la personne suivante">
+        ${V.settled[settleKey()] ? `<div class="hi" style="font-size:11.5px;color:var(--ink-2)">enregistré — ${V.settled[settleKey()]}</div>` : ""}
+        <span class="btnw solid ${V.reason ? "" : "off"}" ${act("save")} style="justify-content:center"
+          title="${V.reason ? "Enregistrer" : "Choisissez d'abord une raison"}"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Enregistrer la décision</span></span>
       </div>
-      <span class="btnw solid" style="justify-content:center">${icon("external-link")}<span class="lo bar" style="width:70px;background:#fff;opacity:.6"></span><span class="hi">Ouvrir dans AutoCAD</span></span>`
+      <span class="btnw solid" ${act("autocad")} style="justify-content:center">${icon("external-link")}<span class="lo bar" style="width:70px;background:#fff;opacity:.6"></span><span class="hi">Ouvrir dans AutoCAD</span></span>`
       : `<div class="tile"><div class="lo col">${bars(3)}</div>
           <div class="hi" style="font-size:11.5px;color:var(--ink-2)">compté à partir des dessins, rien de saisi</div></div>`}
     </div>`;
@@ -940,7 +1123,7 @@ function footerHTML() {
       <span class="hi" style="font-size:12px;font-weight:600">68.5 m² → 74.2 m²</span>
       <span class="hi" style="font-size:12px;color:var(--ink-2)">+5.7 m²</span>
       <span style="flex:1"></span>
-      <span class="btnw"><span class="lo bar" style="width:70px"></span><span class="hi">Lire l'article 3.2.3.1</span></span>
+      <span class="btnw" ${act("readarticle")} title="Ouvrir l'article dans Zonage et code"><span class="lo bar" style="width:70px"></span><span class="hi">Lire l'article 3.2.3.1</span></span>
     </div></section>`;
 }
 
@@ -948,8 +1131,10 @@ function footerHTML() {
 
 function render() {
   const def = SCREENS[V.screen];
-  const hasList = def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
-  const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Right panel";
+  /* Focus is the drawing alone: the list and the inspector fold away rather
+     than shrink, so the plan gets the whole card. */
+  const hasList = !V.focus && def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
+  const hasInsp = !V.focus && def.regions.includes("inspector") && V.inspector.layout === "Right panel";
   const cols = [hasList ? "260px" : null, "1fr", hasInsp ? "340px" : null].filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
@@ -980,13 +1165,189 @@ function render() {
   /* The journey strip lived under the frame; with the frame filling the
      window, the step badges on the screen carry it alone. */
 
-  document.querySelectorAll("[data-screen]").forEach((b) => b.addEventListener("click", () => {
-    V.screen = b.dataset.screen;
+  if (V.dialog) document.getElementById("frame").insertAdjacentHTML("beforeend", dialogHTML());
+
+  if (V.toast) {
+    const t = document.createElement("div");
+    t.className = "toast hi";
+    t.textContent = V.toast;
+    document.getElementById("frame").appendChild(t);
+  }
+
+  /* One handler for the whole screen, assigned rather than added: render runs
+     often and a stack of identical listeners would fire the same action
+     several times. Every control carries data-act, so a new control is wired
+     the moment it is drawn. */
+  document.getElementById("frame").onclick = onClick;
+  const find = document.querySelector(".find");
+  if (find) find.oninput = (e) => {
+    V.query = e.target.value;
+    render();
+    const f = document.querySelector(".find");
+    f.focus(); f.setSelectionRange(f.value.length, f.value.length);
+  };
+  const note = document.querySelector(".note");
+  if (note) note.oninput = (e) => { V.note = e.target.value; };
+
+  /* The dialog's fields write straight into state without a re-render, so
+     typing is never interrupted; the button validates when it is pressed. */
+  document.querySelectorAll("[data-field]").forEach((el) => {
+    el.oninput = (e) => { V.dialog[e.target.dataset.field] = e.target.value; };
+  });
+  const first = document.querySelector(".dialog input");
+  if (first) first.focus();
+}
+
+/* Escape closes the dialog, because a dialog that can only be dismissed by
+   finding the right button is a trap. */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && V.dialog) { V.dialog = null; render(); }
+});
+
+/* ------------------------------------------------- the new-project dialog
+   A project starts as a folder that already exists on the office server, so
+   the dialog asks where that folder is and what inside it may be read. It
+   never asks for a client or an address: neither belongs in this tool. */
+
+const FOLDERS = [
+  "\\\\serveur-bureau\\Projets\\2026\\", "\\\\serveur-bureau\\Projets\\2025\\",
+  "\\\\serveur-bureau\\Concours\\", "/Volumes/Projets/2026/",
+];
+const READ_KINDS = ["Dessins DXF", "PDF d'émission", "Maquette SketchUp", "Plan d'arpentage"];
+
+function dialogHTML() {
+  const d = V.dialog;
+  const field = (key, label, hint) => `<label class="fld">
+    <span class="hi" style="font-size:11.5px;color:var(--ink-2)">${label}</span>
+    <input data-field="${key}" value="${(d[key] || "").replace(/"/g, "&quot;")}" placeholder="${hint}">
+  </label>`;
+  return `<div class="scrim" ${act("dlgclose")}>
+    <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
+      <div class="dh"><span class="hi" style="font-weight:600;font-size:13.5px">Nouveau projet</span>
+        <span style="flex:1"></span>
+        <span class="btnw" ${act("dlgclose")} title="Fermer">${icon("x")}</span></div>
+      <div class="db">
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Le projet existe déjà sur le serveur du bureau. Indiquez le dossier: la première lecture nomme les unités et les niveaux, et rien n'est écrit dedans.</div>
+        ${field("name", "Nom du projet", "tel qu'il est écrit sur le dossier")}
+        ${field("folder", "Dossier sur le serveur", "\\\\serveur-bureau\\Projets\\…")}
+        <div class="row" style="flex-wrap:wrap;gap:5px">${FOLDERS.map((f) => `<span class="chip" ${act("dlgfolder", f)} title="Choisir ce dossier">
+          <span class="hi" style="font-family:var(--mono,monospace);font-size:11px">${f}</span></span>`).join("")}</div>
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2);padding-top:2px">Ce qui sera lu</div>
+        <div class="row" style="flex-wrap:wrap;gap:5px">${READ_KINDS.map((k) => `<span class="chip ${d.kinds.includes(k) ? "on" : ""}" ${act("dlgkind", k)}>
+          ${d.kinds.includes(k) ? icon("check") : ""}<span class="hi">${k}</span></span>`).join("")}</div>
+        ${d.error ? `<div class="hi" style="font-size:11.5px;color:var(--accent,#b3261e)">${d.error}</div>` : ""}
+      </div>
+      <div class="df">
+        <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Lecture seule. Aucune écriture dans un fichier de dessin.</span>
+        <span class="btnw" ${act("dlgclose")}><span class="hi">Annuler</span></span>
+        <span class="btnw solid" ${act("dlgcreate")}>${icon("link")}<span class="hi">Connecter le dossier</span></span>
+      </div>
+    </div></div>`;
+}
+
+/* Saying what just happened, briefly. An action that leaves no trace on the
+   screen says so here instead of pretending to be a button. */
+let TOAST_TIMER = null;
+function say(message) {
+  V.toast = message;
+  clearTimeout(TOAST_TIMER);
+  TOAST_TIMER = setTimeout(() => { V.toast = null; render(); }, 2600);
+}
+
+function onClick(e) {
+  const screenEl = e.target.closest("[data-screen]");
+  const el = e.target.closest("[data-act]");
+  if (screenEl && !el) {
+    V.screen = screenEl.dataset.screen;
     /* The panel speaks English: hand it the English name, or it rejects the
        value and the first click is swallowed. */
     dial.setValue("screen", FR_SCREEN[V.screen]);
-    render();
-  }));
+    return render();
+  }
+  if (!el) return;
+  const value = el.dataset.value;
+  const screen = V.screen;
+
+  switch (el.dataset.act) {
+    case "view":
+      V.view[screen] = Number(value);
+      /* A new view is a new set of rows, so the old row number means nothing. */
+      V.sel[screen] = 0;
+      break;
+    case "viewnext":
+      V.view[screen] = (viewIndex(screen) + 1) % viewsOf(screen).length;
+      V.sel[screen] = 0;
+      break;
+    case "row": V.sel[screen] = Number(value); break;
+    case "article": V.article = Number(value); break;
+    case "utab": V.utab = Number(value); break;
+    case "zoom":
+      V.zoom = Number(value) === 0 ? 100 : Math.min(200, Math.max(50, V.zoom + Number(value)));
+      break;
+    case "focus": V.focus = !V.focus; break;
+    case "reason": V.reason = V.reason === value ? null : value; break;
+    case "save":
+      if (!V.reason) { say("Choisissez une raison: une décision sans raison ne s'enregistre pas."); break; }
+      V.settled[settleKey()] = V.reason + (V.note.trim() ? ` · ${V.note.trim()}` : "");
+      say(`Décision enregistrée sur ${settleKey()}.`);
+      V.reason = null; V.note = "";
+      break;
+    case "tick": {
+      const key = `Suivi · ${value}`;
+      if (V.settled[key]) delete V.settled[key]; else V.settled[key] = "fait";
+      break;
+    }
+    case "open":
+      V.project = value;
+      V.screen = "Vue d'ensemble";
+      dial.setValue("screen", FR_SCREEN[V.screen]);
+      break;
+    /* A project is not created by a click: it is a folder on the server that
+       someone points at, so the button opens the dialog that asks where. */
+    case "newproject":
+      V.dialog = { name: "", folder: "", kinds: ["Dessins DXF"], error: "" };
+      break;
+    case "dlgstop": return;
+    case "dlgclose": V.dialog = null; break;
+    case "dlgfolder": V.dialog.folder = value; V.dialog.error = ""; break;
+    case "dlgkind": {
+      const k = V.dialog.kinds;
+      V.dialog.kinds = k.includes(value) ? k.filter((x) => x !== value) : [...k, value];
+      break;
+    }
+    case "dlgcreate": {
+      const d = V.dialog;
+      /* Both answers are needed: a name with no folder has nothing to read,
+         a folder with no name cannot be found again in the list. */
+      if (!d.name.trim() || !d.folder.trim()) {
+        d.error = "Il faut un nom et un dossier: la lecture part du dossier, la liste part du nom.";
+        break;
+      }
+      if (!d.kinds.length) { d.error = "Choisissez au moins un type de fichier à lire."; break; }
+      if (PROJECTS.some((p) => p[0].toLowerCase() === d.name.trim().toLowerCase())) {
+        d.error = "Ce nom est déjà dans la liste."; break;
+      }
+      PROJECTS.unshift([d.name.trim(), "aucun dessin lu",
+        `${d.folder.trim()} · ${d.kinds.length} type${d.kinds.length > 1 ? "s" : ""}`, "première lecture en attente", true]);
+      say(`${d.name.trim()} — dossier connecté. La première lecture est en file; rien n'est écrit dans le dossier.`);
+      V.dialog = null;
+      V.screen = "Projets";
+      dial.setValue("screen", FR_SCREEN[V.screen]);
+      V.view["Projets"] = 0;
+      break;
+    }
+    case "openfile": say(`${value} — ouvert en lecture. Rien n'est écrit dans le fichier.`); break;
+    case "autocad": say("Remise à AutoCAD: le dessin s'ouvre sur l'unité, la décision suit."); break;
+    case "export": say(`Export préparé: ${screen}${CONTEXT[screen] ? ` · ${viewOf(screen)}` : ""}.`); break;
+    case "readarticle":
+      V.screen = "Vue d'ensemble";
+      dial.setValue("screen", FR_SCREEN[V.screen]);
+      V.view["Vue d'ensemble"] = viewsOf("Vue d'ensemble").indexOf("Zonage et code");
+      V.article = ARTICLES.findIndex((a) => a[0].startsWith("3.2.3.1"));
+      break;
+    default: return;
+  }
+  render();
 }
 
 /* -------------------------------------------------------------- the dial */
@@ -1010,6 +1371,8 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   shell: sel(["Inset card", "Flat"]),
   homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
+  /* The plan is black and white until a typology is asked for. */
+  typologies: { _collapsed: false, "3½": false, "4½": false, "5½": false },
   layers: { _collapsed: false,
     surveyor: true,
     surveyorOpacity: [55, 0, 100, 5],
@@ -1049,6 +1412,7 @@ function applyDial(v) {
   V.homeLayout = v.homeLayout;
   V.isolate = v.isolate;
   const la = v.layers, al = la.align;
+  TYPOS.forEach((t) => { V.typo[t] = v.typologies[t]; });
   V.lay.arp = { on: la.surveyor, opacity: la.surveyorOpacity,
     scale: al.surveyorScale, x: al.surveyorX, y: al.surveyorY };
   V.lay.pay = { on: la.landscaping, opacity: la.landscapingOpacity,
