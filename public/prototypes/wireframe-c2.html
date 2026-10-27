@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prototype C, adapted — low-fidelity wireframe</title>
+<title>Prototype C, adapted — composable low-fidelity wireframe</title>
 <link rel="stylesheet" href="vendor/geist/geist.css">
 <link rel="stylesheet" href="vendor/dialkit/styles.css">
 <style>
@@ -44,7 +44,6 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
   font-size:10px;text-align:center}
 .rail .code{font-size:9.5px;letter-spacing:.03em;color:var(--ink-2)}
 .rail .r .code{display:block}
-.frame[data-nav="stack"] .rail .r span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rail .sct{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:8px 4px 2px}
 
 /* label presets, shared by the rail and the tab strip */
@@ -72,6 +71,8 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .tabs[data-style="Segmented"] button.on{background:var(--paper)}
 .tabs[data-style="Top accent"] button{border-radius:0;border-color:transparent}
 .tabs[data-style="Top accent"] button.on{background:none;box-shadow:inset 0 2px 0 var(--ink)}
+.tabs[data-style="Boxed"] button{border-color:var(--line);background:var(--paper)}
+.tabs[data-style="Boxed"] button.on{background:var(--fill);border-color:var(--line-2)}
 .tabs .crumb{font-size:12.5px;color:var(--ink-3)}
 .tabs .crumb.on{color:var(--ink);font-weight:500}
 .tabs .grp{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 6px 0 2px}
@@ -87,17 +88,20 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .tabs .sp{flex:1}
 .tabs .stamp{font-size:11.5px;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
 
-.hd{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.hd{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .hd .t{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
 .hd .t .hi:first-child{font-size:16px;font-weight:600;letter-spacing:-.01em}
 .hd .t .hi+.hi{font-size:12.5px;color:var(--ink-2)}
 .hd .btn{height:28px;min-width:96px;border-radius:7px;background:var(--fill);display:flex;align-items:center;
   justify-content:center;gap:6px;font-size:12px;color:var(--ink-2);padding:0 10px;white-space:nowrap}
 .hd .btn svg{width:13px;height:13px;stroke-width:1.9}
+.hd .metrics{flex:0 0 100%;display:flex;gap:8px}
 
-.body{flex:1;display:flex;gap:10px;padding:10px;min-height:0;background:var(--fill-2)}
+.body{flex:1;display:flex;flex-direction:column;gap:10px;padding:10px;min-height:0;background:var(--fill-2);position:relative}
 .body[data-dense="1"]{gap:7px;padding:7px}
-.col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.cols{flex:1;display:flex;gap:10px;min-height:0}
+.body[data-dense="1"] .cols{gap:7px}
+.col{display:flex;flex-direction:column;gap:10px;min-width:0;position:relative}
 .body[data-dense="1"] .col{gap:7px}
 
 .blk{background:var(--paper);border:1px solid var(--line);border-radius:9px;display:flex;flex-direction:column;
@@ -105,7 +109,6 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .blk > .bh{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line)}
 .blk > .bh .hi{font-size:12.5px;font-weight:600}
 .blk > .bb{padding:9px 10px;display:flex;flex-direction:column;gap:7px;overflow:hidden;flex:1;min-height:0}
-
 
 /* inset card: chrome sinks into a grey field, the work becomes one white card */
 .frame[data-shell="inset"]{background:var(--fill-2);border-color:#eaeaec}
@@ -115,16 +118,20 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .frame[data-shell="inset"] .hd{background:#fff;border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0}
 .frame[data-shell="inset"] .body{background:#fff;border:1px solid var(--line);border-top:0;
   border-radius:0 0 12px 12px;gap:0;padding:0}
+.frame[data-shell="inset"] .cols{gap:0}
 .frame[data-shell="inset"] .col{gap:0;border-right:1px solid var(--line)}
 .frame[data-shell="inset"] .col:last-child{border-right:0}
 .frame[data-shell="inset"] .blk{border:0;border-radius:0}
 .frame[data-shell="inset"] .col > .blk + .blk{border-top:1px solid var(--line)}
 
-/* fidelity -------------------------------------------------------- */
-.frame[data-fi="low"] .hi{display:none}
-.frame[data-fi="high"] .lo{display:none}
+/* fidelity ---------------------------------------------------------------
+   Fidelity is carried as a class on each container, never inherited from the
+   frame, so one region can be read in words while the rest stays in boxes. */
+.fi-low .hi{display:none}
+.fi-high .lo{display:none}
 .hi{font-size:12.5px;color:var(--ink)}
 .hi.q{color:var(--ink-2)}
+.fi-low .solid{color:transparent}
 
 /* grey matter */
 .bar{height:8px;border-radius:3px;background:var(--fill);display:block}
@@ -135,9 +142,8 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .rowline{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
 .rowline > .bar{flex:1}
 .rowline .sp{flex:1}
-.row-sel{display:flex;align-items:center;gap:8px;border-radius:6px;padding:4px;margin:0 -4px;cursor:pointer}
+.row-sel{display:flex;align-items:flex-start;gap:8px;border-radius:6px;padding:4px;margin:0 -4px;cursor:pointer}
 .row-sel.on{background:var(--tag-soft);box-shadow:inset 2px 0 0 var(--tag)}
-.row-sel{align-items:flex-start}
 .row-sel .dot{margin-top:6px}
 .row-sel .hi{flex:1;min-width:0;line-height:1.35}
 .row-sel .tail{font-size:11.5px;color:var(--ink-3);white-space:nowrap}
@@ -156,7 +162,6 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .field{border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;font-size:11.5px;color:var(--ink-3)}
 .solid{background:var(--ink);color:#fff;border-radius:6px;padding:7px;text-align:center;font-size:12px}
 .solid .hi{color:#fff}
-.frame[data-fi="low"] .solid{color:transparent}
 
 /* plan + overlay */
 .plan{flex:1;min-height:90px;border:1px dashed var(--line-2);border-radius:8px;background:var(--fill-2);
@@ -169,28 +174,99 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .plan.ghost svg{position:static;inset:auto;width:22px;height:22px;stroke-width:1.5}
 /* High fidelity swaps the hatch for the drawing it stands for: the floor
    plan, the elevation, or the massing view, all from the platform assets. */
-.frame[data-fi="high"] .plan[data-img]{background-repeat:no-repeat;background-position:center;
+.fi-high .plan[data-img]{background-repeat:no-repeat;background-position:center;
   background-size:cover;border-style:solid;border-color:var(--line)}
-.frame[data-fi="high"] .plan[data-img] > .cap{display:none}
-.frame[data-fi="high"] .plan[data-img="plan"]{background-image:url(assets/plan-etage.jpg)}
-.frame[data-fi="high"] .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
-.frame[data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
+.fi-high .plan[data-img] > .cap{display:none}
+.fi-high .plan[data-img="plan"]{background-image:url(assets/plan-etage.jpg)}
+.fi-high .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
+.fi-high .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
 /* Over a real drawing the footprint block would hide it; the overlay keeps
    its property line and its measured distances only. */
-.frame[data-fi="high"] .plan[data-img] svg rect{fill:none}
+.fi-high .plan[data-img] svg rect{fill:none}
 
 /* labels and notes */
 .tag{position:absolute;top:0;left:0;background:var(--tag);color:#fff;font-size:9.5px;letter-spacing:.05em;
   text-transform:uppercase;padding:2px 6px;border-radius:0 0 5px 0;z-index:3}
-.flag{position:absolute;top:5px;right:8px;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9.5px;color:var(--tag);background:var(--tag-soft);
-  border-radius:4px;padding:2px 6px;z-index:3}
+.flag{position:absolute;top:5px;right:8px;max-width:52%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:9.5px;color:var(--tag);background:var(--tag-soft);border-radius:4px;padding:2px 6px;z-index:3}
 .frame[data-labels="0"] .tag,.frame[data-flags="0"] .flag{display:none}
 .frame[data-labels="1"] .blk > .bh{padding-top:16px}
 .note{font-size:11px;color:var(--ink-3);line-height:1.45}
 .frame[data-notes="0"] .note{display:none}
 
+/* journey ---------------------------------------------------------------
+   The step badge says where a part sits in the six-move journey, so a layout
+   can be judged by the order it makes someone read. */
+.step{position:absolute;top:5px;left:5px;z-index:4;width:17px;height:17px;border-radius:50%;
+  background:var(--ink);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center}
+.frame[data-labels="1"] .step{left:auto;right:5px}
+.frame[data-journey="0"] .step{display:none}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin-top:12px}
+.flow .st{border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:9px 11px;
+  display:flex;flex-direction:column;gap:3px;cursor:pointer;font:inherit;text-align:left}
+.flow .st.on{border-color:var(--ink)}
+.flow .st b{font-size:12.5px;font-weight:600}
+.flow .st span{font-size:11.5px;color:var(--ink-2)}
+.flow .st em{font-style:normal;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--tag)}
+.flow .st .n{width:17px;height:17px;border-radius:50%;background:var(--fill);color:var(--ink-2);
+  font-size:10px;display:flex;align-items:center;justify-content:center}
+
+/* isolation: the frame stays whole, everything but the region under study
+   steps back, so a part is judged in place rather than alone */
+.faded{opacity:.16}
+
+/* inspector placements that are not a column */
+.sheet{flex:0 0 240px}
+.drawer{position:absolute;top:10px;right:10px;bottom:10px;width:330px;z-index:6;
+  box-shadow:-12px 0 28px rgba(17,17,18,.1)}
+
+/* ----------------------------------------------------------- composition
+   Every block is a piece: it can be picked up, dropped in another column,
+   hidden without losing its place, or taken back to the tray. */
+.blk[data-uid]{transition:box-shadow .12s}
+.frame[data-compose="1"] .blk[data-uid]{cursor:grab}
+.frame[data-compose="1"] .blk[data-uid]:hover{box-shadow:0 0 0 1px var(--line-2)}
+.blk.dragging{opacity:.35}
+.bt{position:absolute;top:4px;right:4px;z-index:5;display:none;gap:2px;background:var(--paper);
+  border:1px solid var(--line);border-radius:7px;padding:2px}
+.frame[data-compose="1"] .blk[data-uid]:hover > .bt,
+.frame[data-compose="1"] .blk.off > .bt{display:flex}
+.bt button{font:inherit;border:0;background:none;width:20px;height:20px;border-radius:5px;cursor:pointer;
+  color:var(--ink-3);display:flex;align-items:center;justify-content:center;padding:0}
+.bt button:hover{background:var(--fill);color:var(--ink)}
+.bt button svg{width:12px;height:12px;stroke-width:2}
+.bt .hdl{cursor:grab;color:var(--line-2)}
+.blk.off{flex:0 0 auto;background:var(--fill-2);border-style:dashed;border-color:var(--line-2)}
+.blk.off > .bh,.blk.off > .bb,.blk.off > .flag{display:none}
+.blk.off > .stub{display:flex;align-items:center;gap:7px;padding:7px 10px;font-size:11.5px;color:var(--ink-3)}
+.blk > .stub{display:none}
+.col.over{outline:2px dashed var(--tag);outline-offset:-2px;border-radius:9px}
+.dropline{height:2px;background:var(--tag);border-radius:2px;flex:0 0 2px}
+.coltools{display:flex;align-items:center;gap:4px;justify-content:center;padding:2px 0}
+.coltools button{font:inherit;font-size:11px;border:1px solid var(--line);background:var(--paper);
+  border-radius:6px;height:21px;padding:0 7px;cursor:pointer;color:var(--ink-3)}
+.coltools button:hover{color:var(--ink);border-color:var(--line-2)}
+.col.focus > .coltools button{border-color:var(--tag);color:var(--tag)}
+
+.tray{margin-top:14px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+.tray header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tray h2{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.tray .hint{font-size:11.5px;color:var(--ink-3)}
+.tray .grp{margin-top:11px}
+.tray .grp h3{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:6px}
+.tray .pieces{display:flex;flex-wrap:wrap;gap:6px}
+.piece{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;
+  padding:4px 5px 4px 10px;font-size:11.5px;color:var(--ink-2);background:var(--paper);cursor:grab}
+.piece:hover{border-color:var(--line-2);color:var(--ink)}
+.piece[data-placed="1"]{background:var(--fill-2);color:var(--ink-3)}
+.piece .n{font-size:9.5px;color:var(--ink-3);border-left:1px solid var(--line);padding-left:7px}
+.piece button{font:inherit;border:0;background:var(--fill);width:19px;height:19px;border-radius:50%;
+  cursor:pointer;color:var(--ink-2);display:flex;align-items:center;justify-content:center;padding:0}
+.piece button:hover{background:var(--ink);color:#fff}
+.piece button svg{width:11px;height:11px;stroke-width:2.2}
+
 /* legend under the frame */
-.key{margin-top:18px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:16px 18px}
+.key{margin-top:14px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:16px 18px}
 .key h2{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
 .key ul{list-style:none;margin:11px 0 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:9px 22px}
 .key li{display:flex;gap:9px;font-size:12.5px;color:var(--ink-2);line-height:1.45}
@@ -203,10 +279,11 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 <div class="stage">
 
 <h1>Prototype C, adapted to the nine high-priority features</h1>
-<p class="sub">Space, composition and order of reading. Low fidelity is the working state: boxes only.
+<p class="sub">Space, composition and order of reading. Every block is a piece: drag it between columns, drop it where
+it should be read, or hide it to argue it away. Low fidelity is the working state: boxes only.
 Raise <b>Fidelity</b> in the DialKit panel to read the same layout with the real words and numbers in it.</p>
 
-<div class="frame" id="frame" data-fi="low" data-labels="1" data-notes="1" data-flags="1" data-wide="0">
+<div class="frame" id="frame" data-fi="low" data-labels="1" data-notes="1" data-flags="1" data-compose="1">
   <nav class="rail" id="rail"></nav>
   <div class="main">
     <div class="tabs" id="tabs"></div>
@@ -214,6 +291,10 @@ Raise <b>Fidelity</b> in the DialKit panel to read the same layout with the real
     <div class="body" id="body" data-dense="0"></div>
   </div>
 </div>
+
+<div id="journey"></div>
+
+<section class="tray" id="tray"></section>
 
 <div class="key">
   <h2>What each screen is carrying</h2>
@@ -226,7 +307,9 @@ Raise <b>Fidelity</b> in the DialKit panel to read the same layout with the real
 <script src="vendor/dialkit/browser.global.js"></script>
 <script>
 /* Every block exists because of a high-priority feature. Low fidelity argues
-   about room and order; high fidelity checks the same boxes hold real content. */
+   about room and order; high fidelity checks the same boxes hold real content.
+   A block is also a piece: the layout of a screen is data, not markup, so the
+   same part can be tried in the left column, the right column, or not at all. */
 
 const ico = (n) => '<i data-lucide="' + n + '"></i>';
 
@@ -264,241 +347,27 @@ const siteSVG = `<svg viewBox="0 0 100 60" preserveAspectRatio="none">
   <line x1="50" y1="44" x2="50" y2="52" stroke="#4b4bd6" stroke-width=".5"/>
 </svg>`;
 
-const blk = (label, head, body, flag, grow = 1) => ({ label, head, body, flag, grow });
+/* Unit boxes measured on assets/plan-etage.jpg, normalised 0–1, the same
+   numbers the platform uses. A thumbnail shows its own unit, never the sheet. */
+const UNIT_BOXES = [
+  [0.3953, 0.5862, 0.1203, 0.1586], [0.5063, 0.0328, 0.1141, 0.1552],
+  [0.6281, 0.0328, 0.1172, 0.1552], [0.1609, 0.7293, 0.1266, 0.2172],
+  [0.2203, 0.5207, 0.1422, 0.1724], [0.2203, 0.3483, 0.1422, 0.1724],
+  [0.4891, 0.2259, 0.1984, 0.1552], [0.2203, 0.1362, 0.1625, 0.2034],
+];
 
-const SCREENS = {
-  Home: {
-    icon: "home", title: "Projects", sub: "4 ongoing · 1 archived",
-    actions: [["plus", "New project"]],
-    home: true, cols: [],
-  },
-
-  Project: {
-    icon: "layout-dashboard", title: "Alder Court", sub: "48 units · 6 levels · read 6 min ago",
-    actions: [["external-link", "Open in AutoCAD"], ["download", "Export"]],
-    cols: [
-      { flex: 1.6, blocks: [
-        blk("change log", "What changed since you last looked",
-          `<p class="note">Newest first. Every line points at the unit, the floor or the table it touched.</p>
-           ${list([
-             ["Unit 502 · window 240 mm narrower", "R04 · 24 Oct"],
-             ["Level 5 · corridor widened 150 mm", "R04 · 24 Oct"],
-             ["Unit 507 · balcony moved 400 mm", "R04 · 24 Oct"],
-             ["Areas table · level 5 total −18 m²", "R04 · 24 Oct"],
-             ["Surveyor's plan R2 replaced R1", "12 Sep"],
-             ["Unit 311 · type 3½ → 4½", "R03 · 02 Oct"],
-             ["Window schedule · 4 openings added", "R03 · 02 Oct"],
-           ], 0)}`,
-          "high · what changed between two revisions"),
-      ] },
-      { flex: 1, blocks: [
-        blk("counts", "Running totals",
-          `<p class="note">Read from the drawings, never typed.</p>
-           ${nums([["48", "units"], ["4 212 m²", "net area"], ["45 338", "ft²"]])}
-           ${table(["Type", "Count", "Area m²"], [["3½", "18", "1 274"], ["4½", "22", "2 046"], ["5½", "8", "892"]])}`,
-          "high · unit count and areas", 0),
-      ] },
-      { flex: 1, blocks: [
-        blk("open", "What is blocking",
-          `<p class="note">Differences, missing inputs, answers waited on.</p>
-           ${list([
-             ["6 differences between plan and model", "units"],
-             ["10 missing inputs", "rules"],
-             ["Planner reply", "12 days late"],
-             ["4 crossings not decided", "coordination"],
-           ], -1)}`),
-      ] },
-    ],
-  },
-
-  Site: {
-    icon: "map", title: "Site and property lines", sub: "Surveyor's plan R2 · 12 Sep · lot 1 459 m²",
-    actions: [["layers", "Layers"], ["download", "Export"]],
-    cols: [
-      { flex: 2, blocks: [
-        blk("plan + surveyor layer", "Floor with the surveyor's plan under it",
-          `<div class="rowline">${chips(["Level 5", "Ground", "Site"], 0)}<span class="sp"></span>${chips(["Surveyor's plan R2 · on"], 0)}</div>
-           <div class="plan" data-img="plan">${siteSVG}<span class="cap">property lines over the building, every distance drawn</span></div>
-           <p class="note">The overlay is a layer that switches off, never a tint or a filter on the drawing.</p>`,
-          "high · the surveyor's plan under everything"),
-      ] },
-      { flex: 1.05, blocks: [
-        blk("measured from the line", "Setbacks and coverage",
-          `<p class="note">Each distance names the surveyor's plan it was measured from.</p>
-           ${table(["From the line", "Measured", "Required"], [
-             ["Front", "6.10 m", "6.00 m"],
-             ["Rear", "7.42 m", "7.50 m"],
-             ["Side west", "2.05 m", "2.00 m"],
-             ["Side east", "2.00 m", "2.00 m"],
-             ["Lot coverage", "38.4 %", "40 %"],
-           ])}`),
-        blk("new plan", "A newer plan arrived",
-          `<p class="note">What moved, and which numbers change with it.</p>
-           ${list([
-             ["Rear line moved 80 mm north", "R1 → R2"],
-             ["Lot area 1 462 → 1 459 m²", "−3 m²"],
-             ["3 measurements change", "rear, coverage, density"],
-           ], -1)}
-           <div class="solid"><span class="hi">Apply the new plan</span></div>`, null, 0),
-      ] },
-    ],
-  },
-
-  Units: {
-    icon: "layers", title: "Typical floor — level 5", sub: "14 units · 6 differences open",
-    actions: [["external-link", "Open in AutoCAD"], ["share-2", "Share link"], ["download", "Export"]],
-    cols: [
-      { flex: .95, blocks: [
-        blk("units list", "Units on this floor",
-          `<p class="note">One row per unit, a mark where plan and model disagree.</p>
-           ${list([
-             ["501 · 3½", "707 ft²"], ["502 · 4½", "1 difference"], ["503 · 3½", "753 ft²"],
-             ["504 · 3½+den", "822 ft²"], ["505 · 4½", "968 ft²"], ["506 · 4½", "1 difference"],
-             ["507 · 4½", "1 203 ft²"], ["508 · 5½", "1 difference"], ["509 · 3½", "714 ft²"],
-           ], 1)}`),
-      ] },
-      { flex: 1.5, blocks: [
-        blk("plan vs model", "The two drawings side by side",
-          `<div class="rowline">${chips(["2D plan", "3D model"], 0)}<span class="sp"></span>${chips(["100 %"], -1)}</div>
-           <div style="display:flex;gap:8px;flex:1;min-height:0">
-             <div class="plan" data-img="plan"><span class="cap">2D plan, unit outlines on top</span></div>
-             <div class="plan" data-img="model"><span class="cap">3D model, same level</span></div>
-           </div>
-           <p class="note">Same unit, same zoom, same moment in both panes.</p>`,
-          "high · 2D plan against the 3D model"),
-      ] },
-      { flex: 1.15, blocks: [
-        blk("unit", "Unit 502",
-          `<div class="rowline">${chips(["Overview", "Openings", "History"], 1)}</div>
-           ${table(["Window W-12", "Value", "Source"], [
-             ["Plan says", "1 800 × 1 500", "A-201 R04"],
-             ["Model says", "1 560 × 1 500", "SU · 24 Oct"],
-             ["Difference", "240 mm", "width"],
-             ["Appeared in", "R04", "24 Oct"],
-           ])}`),
-        blk("reason", "Why this change?",
-          `<div class="rowline" style="flex-wrap:wrap">${chips(["client cost", "structure", "code", "city", "drawing error"], -1)}</div>
-           <div class="field"><span class="lo bar" style="width:70%"></span><span class="hi">one sentence for the next person</span></div>
-           <div class="solid"><span class="hi">Record the decision</span></div>
-           <p class="note">Nothing is recorded until a reason is picked and a sentence is written.</p>`,
-          "high · why was this changed", 0),
-      ] },
-    ],
-  },
-
-  Counts: {
-    icon: "table", title: "Counts read from the drawings", sub: "A-201 R04 · read 6 min ago",
-    actions: [["download", "Export"], ["share-2", "Share link"]],
-    cols: [
-      { flex: 1.4, blocks: [
-        blk("question tabs", "One table per question",
-          `<div class="rowline">${chips(["Units and types", "Areas", "Window schedule", "Materials"], 0)}</div>
-           <p class="note">Each tab is one question, answered by one table.</p>
-           ${table(["Type", "Count", "Area m²", "Area ft²", "Floors"], [
-             ["3½", "18", "1 274", "13 714", "2 – 6"],
-             ["3½ + den", "6", "468", "5 038", "3 – 6"],
-             ["4½", "22", "2 046", "22 023", "2 – 6"],
-             ["5½", "8", "892", "9 601", "5 – 6"],
-             ["Total", "48", "4 212", "45 338", "—"],
-           ])}
-           <div class="rowline"><span class="sp"></span>${chips(["Export this table"], -1)}</div>`,
-          "high · unit count, areas, window schedule"),
-      ] },
-      { flex: .85, blocks: [
-        blk("per floor", "The same count, floor by floor",
-          `<p class="note">A floor that differs from the others is flagged in place.</p>
-           ${table(["Level", "Units", "Windows"], [
-             ["2", "8", "34"], ["3", "8", "34"], ["4", "8", "34"],
-             ["5", "8", "30 · differs", "—"], ["6", "8", "34"], ["Roof", "—", "4"],
-           ])}`),
-        blk("source", "Where these numbers came from",
-          `${list([["A-201 Plan niveau 5", "R04 · 24 Oct"], ["A-202 Élévations", "R03 · 02 Oct"], ["Model SU", "24 Oct"]], -1)}
-           <p class="note">File, revision, read time. No number without one.</p>`, null, 0),
-      ] },
-    ],
-  },
-
-  Rules: {
-    icon: "scale", title: "Rules, measured and missing", sub: "Zoning by-law 2019-45 · code edition to confirm",
-    actions: [["download", "Export the study"], ["mail", "Note to the planner"]],
-    cols: [
-      { flex: .85, blocks: [
-        blk("articles", "Articles that matter here",
-          `<div class="rowline">${chips(["All", "To check", "Missing"], 0)}</div>
-           <p class="note">Filtered to this project, each with a plain state.</p>
-           ${list([
-             ["4.2.1 Hauteur", "fine"], ["4.2.4 Marge arrière", "to check"], ["4.3.1 Taux d'implantation", "fine"],
-             ["5.1.2 Stationnement", "missing input"], ["5.4 Ratio logements", "fine"],
-             ["6.1 Aires d'agrément", "missing input"], ["6.3 Rangement vélo", "to check"],
-             ["7.2 Façade sur rue", "fine"], ["8.1 Matériaux", "to check"],
-           ], 1)}`),
-      ] },
-      { flex: 1.45, blocks: [
-        blk("article", "4.2.4 Marge arrière",
-          `<div class="field q"><span class="lo bar" style="width:92%"></span><span class="lo bar" style="width:64%;margin-top:6px"></span>
-             <span class="hi q">« La marge arrière minimale est de 7,50 m, mesurée depuis la ligne arrière du lot. »</span></div>
-           ${nums([["7.42 m", "measured from the surveyor's plan R2"], ["7.50 m", "required by 4.2.4"]])}
-           <p class="note">Measured against required, side by side, then one sentence of plain reading.
-             It names the gap; it never says the project complies.</p>
-           <div>${line("The rear wall sits 80 mm inside the required setback.", 88)}</div>
-           <div>${line("A minor exemption request covers up to 10 % of the setback.", 76)}</div>`,
-          "high · the article in words anyone can act on"),
-        blk("export", "The code study as a document",
-          `<div class="rowline">${chips(["Print", "PDF"], -1)}<span class="sp"></span>${chips(["Export the study"], 0)}</div>`, null, 0),
-      ] },
-      { flex: .85, blocks: [
-        blk("missing inputs", "What the project still needs",
-          `<p class="note">The answers no drawing can give. One shared list.</p>
-           ${list([
-             ["Lot area", "surveyor"], ["Code edition", "city"], ["Parking ratio", "by-law annex"],
-             ["Amenity area rule", "city"], ["Bike storage count", "client"], ["Street façade width", "surveyor"],
-           ], -1)}
-           <div class="solid"><span class="hi">Write the note to the planner</span></div>`,
-          "high · say out loud what is missing"),
-      ] },
-    ],
-  },
-
-  Coordination: {
-    icon: "git-compare", title: "Where the trades cross", sub: "Structure R02 · mechanical R01 · compared 24 Oct",
-    actions: [["external-link", "Open in AutoCAD"], ["download", "Export"]],
-    cols: [
-      { flex: .95, blocks: [
-        blk("crossings", "Ducts, beams and columns in the same place",
-          `<p class="note">One row per crossing, level and axis named.</p>
-           ${list([
-             ["Level 5 · corridor, axis 4", "duct × beam"], ["Level 5 · unit 507", "column × closet"],
-             ["Level 4 · corridor, axis 4", "duct × beam"], ["Level 3 · shaft B", "duct × slab"],
-             ["Level 3 · unit 311", "column × window"], ["Level 2 · lobby", "beam × ceiling"],
-             ["Roof · unit 603", "duct × parapet"], ["Garage · axis 7", "column × stall"],
-           ], 1)}`,
-          "high · ducts, beams and columns"),
-      ] },
-      { flex: 1.5, blocks: [
-        blk("overlay", "The two drawings on top of each other",
-          `<div class="rowline">${chips(["Structure", "Mechanical", "Architecture"], 0)}<span class="sp"></span>${chips(["Level 5"], -1)}</div>
-           <div class="plan" data-img="plan"><span class="cap">structure over mechanical, the overlap marked</span></div>`),
-      ] },
-      { flex: 1.05, blocks: [
-        blk("crossing", "Corridor, axis 4",
-          `${table(["Crossing", "Value", "Source"], [
-             ["Duct underside", "2 310 mm", "MEC R01"],
-             ["Beam underside", "2 280 mm", "STR R02"],
-             ["Overlap", "30 mm", "measured"],
-             ["Clear height left", "2 250 mm", "needs 2 300"],
-           ])}
-           <div class="field"><span class="lo bar" style="width:72%"></span><span class="hi">one sentence for the next person</span></div>
-           <div class="solid"><span class="hi">Record the decision</span></div>
-           <p class="note">Recording it asks for the same reason as any other decision.</p>`),
-      ] },
-    ],
-  },
-};
-
-
-/* ------------------------------------------------------------ the home
-   Two things happen here and nothing else: open a project that is running,
-   or start one. The layouts differ in which of the two is louder. */
+/* Frames one box with air around it: the drawing is scaled so the box fills
+   the element, then slid so the box sits in the middle. */
+function crop(box, pad = 0.45, axis = "width") {
+  const [x, y, w, h] = box;
+  const fw = Math.min(1, w * (1 + pad * 2));
+  const fh = Math.min(1, h * (1 + pad * 2));
+  const px = Math.max(0, Math.min(1 - fw, x + w / 2 - fw / 2));
+  const py = Math.max(0, Math.min(1 - fh, y + h / 2 - fh / 2));
+  const size = axis === "height" ? `auto ${(100 / fh).toFixed(1)}%` : `${(100 / fw).toFixed(1)}% auto`;
+  return `background-size:${size};`
+    + `background-position:${(px / (1 - fw) * 100).toFixed(1)}% ${(py / (1 - fh) * 100).toFixed(1)}%`;
+}
 
 const PROJECTS = [
   ["Alder Court", "48 units · 6 levels", "A-201 R04 · 24 Oct", "6 differences"],
@@ -525,47 +394,425 @@ const newCard = (big) => `<section class="blk" style="border-style:dashed;border
 
 const projTable = () => table(["Project", "Size", "Last read", "Open"], PROJECTS.map((p) => [p[0], p[1], p[2], p[3]]));
 
-const HOMES = {
-  "Card grid": () => `<div class="col" style="flex:1">
-      <section class="blk"><div class="bb gridbody" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;overflow:auto">
-        ${newCard()}${PROJECTS.map((p) => card(p)).join("")}
-      </div></section></div>`,
+/* --------------------------------------------------------------- parts
+   One entry per piece. `kind` decides which region control governs it, which
+   number it carries in the journey, and what isolation fades. `body` is a
+   function so a piece can answer to its region's layout setting. */
 
-  "Table of projects": () => `<div class="col" style="flex:1">
-      <section class="blk"><span class="tag">projects</span>
-        <div class="bh"><span class="lo bar d" style="width:120px;height:10px"></span><span class="hi">Ongoing projects</span></div>
-        <div class="bb">${projTable()}
-          <div class="rowline"><span class="sp"></span><span class="chip on"><span class="lo bar" style="width:70px;background:none"></span><span class="hi">New project</span></span></div>
-        </div></section></div>`,
+const P = (id, kind, tag, head, body, opts = {}) => ({
+  id, kind, tag, head, body,
+  flag: opts.flag || null,
+  grow: opts.grow === undefined ? 1 : opts.grow,
+  from: opts.from || "C, adapted",
+});
 
-  "List + preview": () => `<div class="col" style="flex:.9">
-      <section class="blk"><span class="tag">projects</span>
-        <div class="bh"><span class="lo bar d" style="width:96px;height:10px"></span><span class="hi">All projects</span></div>
-        <div class="bb">${list(PROJECTS.map((p) => [p[0], p[3]]), 0)}
-          <div class="solid"><span class="hi">New project</span></div></div></section></div>
-    <div class="col" style="flex:1.6">
-      <section class="blk"><span class="tag">preview</span>
-        <div class="bh"><span class="lo bar d" style="width:120px;height:10px"></span><span class="hi">Alder Court</span></div>
-        <div class="bb"><div class="plan ghost">${ico("image")}</div>
+const UNIT_ROWS = [
+  ["501 · 3½", "707 ft²"], ["502 · 4½", "1 difference"], ["503 · 3½", "753 ft²"],
+  ["504 · 3½+den", "822 ft²"], ["505 · 4½", "968 ft²"], ["506 · 4½", "1 difference"],
+  ["507 · 4½", "1 203 ft²"], ["508 · 5½", "1 difference"], ["509 · 3½", "714 ft²"],
+];
+
+const ARTICLE_ROWS = [
+  ["4.2.1 Hauteur", "fine"], ["4.2.4 Marge arrière", "to check"], ["4.3.1 Taux d'implantation", "fine"],
+  ["5.1.2 Stationnement", "missing input"], ["5.4 Ratio logements", "fine"],
+  ["6.1 Aires d'agrément", "missing input"], ["6.3 Rangement vélo", "to check"],
+  ["7.2 Façade sur rue", "fine"], ["8.1 Matériaux", "fine"],
+];
+
+const CROSSING_ROWS = [
+  ["Level 5 · corridor, axis 4", "duct × beam"], ["Level 5 · unit 507", "column × closet"],
+  ["Level 4 · corridor, axis 4", "duct × beam"], ["Level 3 · shaft B", "duct × slab"],
+  ["Level 3 · unit 311", "column × window"], ["Level 2 · lobby", "beam × ceiling"],
+  ["Roof · unit 603", "duct × parapet"], ["Garage · axis 7", "column × stall"],
+];
+
+/* A list piece answers to list.layout: the same rows read as a column, as
+   cards with their own crop, or shrunk to the filters above them. */
+function listBody(mode, opts) {
+  const { rows, sel, note, filters, cards } = opts;
+  if (mode === "Filter bar only") {
+    return `<div class="rowline" style="flex-wrap:wrap">${chips(filters, 0)}
+      <span class="sp"></span><span class="chip"><span class="lo bar" style="width:40px;background:none"></span>
+      <span class="hi">${rows.length} rows</span></span></div>`;
+  }
+  if (mode === "Card grid") {
+    return `${note ? `<p class="note">${note}</p>` : ""}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;overflow:auto">
+        ${rows.map((r, i) => `<div class="blk" style="border-color:var(--line)">
+          <div class="bb" style="gap:5px">
+            ${cards === false ? "" : `<div class="plan" data-img="plan" style="min-height:52px;flex:0 0 52px;${crop(UNIT_BOXES[i % UNIT_BOXES.length])}"><span class="cap">crop</span></div>`}
+            <div><span class="lo bar" style="width:70%"></span><span class="hi">${r[0]}</span></div>
+            <div><span class="lo bar" style="width:46%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${r[1]}</span></div>
+          </div></div>`).join("")}
+      </div>`;
+  }
+  return `${note ? `<p class="note">${note}</p>` : ""}
+    <div class="rowline" style="flex-wrap:wrap">${chips(filters, 0)}</div>
+    ${list(rows, sel)}`;
+}
+
+/* The two-drawing piece answers to content.layout: side by side, stacked, or
+   one pane with the other as an inset. */
+function twoPanes(mode, a, b, caption) {
+  const pane = (img, cap) => `<div class="plan" data-img="${img}"><span class="cap">${cap}</span></div>`;
+  if (mode === "Stacked") {
+    return `<div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0">${pane(a[0], a[1])}${pane(b[0], b[1])}</div>`;
+  }
+  if (mode === "Single pane + inset") {
+    return `<div style="position:relative;flex:1;display:flex;min-height:0">${pane(a[0], a[1])}
+      <div class="blk" style="position:absolute;right:9px;bottom:9px;width:190px;height:120px">
+        <div class="bb" style="padding:6px">${pane(b[0], b[1])}</div></div></div>`;
+  }
+  return `<div style="display:flex;gap:8px;flex:1;min-height:0">${pane(a[0], a[1])}${pane(b[0], b[1])}</div>`;
+}
+
+const PARTS = [
+  /* ----------------------------------------------------- project reading */
+  P("change-log", "content", "change log", "What changed since you last looked", () =>
+    `<p class="note">Newest first. Every line points at the unit, the floor or the table it touched.</p>
+     ${list([
+       ["Unit 502 · window 240 mm narrower", "R04 · 24 Oct"],
+       ["Level 5 · corridor widened 150 mm", "R04 · 24 Oct"],
+       ["Unit 507 · balcony moved 400 mm", "R04 · 24 Oct"],
+       ["Areas table · level 5 total −18 m²", "R04 · 24 Oct"],
+       ["Surveyor's plan R2 replaced R1", "12 Sep"],
+       ["Unit 311 · type 3½ → 4½", "R03 · 02 Oct"],
+       ["Window schedule · 4 openings added", "R03 · 02 Oct"],
+     ], 0)}`, { flag: "high · what changed between two revisions" }),
+
+  P("counts", "content", "counts", "Running totals", () =>
+    `<p class="note">Read from the drawings, never typed.</p>
+     ${nums([["48", "units"], ["4 212 m²", "net area"], ["45 338", "ft²"]])}
+     ${table(["Type", "Count", "Area m²"], [["3½", "18", "1 274"], ["4½", "22", "2 046"], ["5½", "8", "892"]])}`,
+    { flag: "high · unit count and areas", grow: 0 }),
+
+  P("blocking", "inspector", "open", "What is blocking", () =>
+    `<p class="note">Differences, missing inputs, answers waited on.</p>
+     ${list([
+       ["6 differences between plan and model", "units"],
+       ["10 missing inputs", "rules"],
+       ["Planner reply", "12 days late"],
+       ["4 crossings not decided", "coordination"],
+     ], -1)}`),
+
+  P("metrics", "header", "metrics", "The project in four numbers", () =>
+    `<p class="note">The same counts the header can carry, as a piece anywhere on the screen.</p>
+     ${nums([["6", "differences"], ["4", "crossings"], ["5", "articles to read"], ["98", "units"]])}`,
+    { grow: 0, from: "C" }),
+
+  P("overview-tiles", "content", "overview", "Four readings of the same project", () =>
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;overflow:auto">
+      ${[["What changed since the last read", "7 lines, newest first"],
+         ["The two connected sources", "A-201 R04 · model 24 Oct"],
+         ["Typical floor — 14 units", "6 differences open"],
+         ["Typology split", "3½ 38 % · 4½ 46 % · 5½ 16 %"]].map(([t, s]) => `<div class="blk">
+        <div class="bb" style="gap:5px">
+          <div><span class="lo bar d" style="width:60%;height:11px"></span><span class="hi" style="font-weight:600">${t}</span></div>
+          <div><span class="lo bar" style="width:80%"></span><span class="lo bar" style="width:64%"></span>
+            <span class="hi note">${s}</span></div>
+        </div></div>`).join("")}
+     </div>`, { from: "C" }),
+
+  /* ------------------------------------------------------------- the site */
+  P("site-plan", "content", "plan + surveyor layer", "Floor with the surveyor's plan under it", () =>
+    `<div class="rowline">${chips(["Level 5", "Ground", "Site"], 0)}<span class="sp"></span>${chips(["Surveyor's plan R2 · on"], 0)}</div>
+     <div class="plan" data-img="plan">${siteSVG}<span class="cap">property lines over the building, every distance drawn</span></div>
+     <p class="note">The overlay is a layer that switches off, never a tint or a filter on the drawing.</p>`,
+    { flag: "high · the surveyor's plan under everything" }),
+
+  P("setbacks", "content", "measured from the line", "Setbacks and coverage", () =>
+    `<p class="note">Each distance names the surveyor's plan it was measured from.</p>
+     ${table(["From the line", "Measured", "Required"], [
+       ["Front", "6.10 m", "6.00 m"],
+       ["Rear", "7.42 m", "7.50 m"],
+       ["Side west", "2.05 m", "2.00 m"],
+       ["Side east", "2.00 m", "2.00 m"],
+       ["Lot coverage", "38.4 %", "40 %"],
+     ])}`),
+
+  P("new-plan", "inspector", "new plan", "A newer plan arrived", () =>
+    `<p class="note">What moved, and which numbers change with it.</p>
+     ${list([
+       ["Rear line moved 80 mm north", "R1 → R2"],
+       ["Lot area 1 462 → 1 459 m²", "−3 m²"],
+       ["3 measurements change", "rear, coverage, density"],
+     ], -1)}
+     <div class="solid"><span class="hi">Apply the new plan</span></div>`, { grow: 0 }),
+
+  /* ------------------------------------------------------------ the units */
+  P("units-list", "list", "units list", "Units on this floor", (mode) =>
+    listBody(mode, { rows: UNIT_ROWS, sel: 1, filters: ["Level 5", "Level 4", "All levels"],
+      note: "One row per unit, a mark where plan and model disagree." })),
+
+  P("plan-vs-model", "content", "plan vs model", "The two drawings side by side", (mode) =>
+    `<div class="rowline">${chips(["2D plan", "3D model"], 0)}<span class="sp"></span>${chips(["100 %"], -1)}</div>
+     ${twoPanes(mode, ["plan", "2D plan, unit outlines on top"], ["model", "3D model, same level"])}
+     <p class="note">Same unit, same zoom, same moment in both panes.</p>`,
+    { flag: "high · 2D plan against the 3D model" }),
+
+  P("unit", "inspector", "unit", "Unit 502", () =>
+    `<div class="rowline">${chips(["Overview", "Openings", "History"], 1)}</div>
+     ${table(["Window W-12", "Value", "Source"], [
+       ["Plan says", "1 800 × 1 500", "A-201 R04"],
+       ["Model says", "1 560 × 1 500", "SU · 24 Oct"],
+       ["Difference", "240 mm", "width"],
+       ["Appeared in", "R04", "24 Oct"],
+     ])}`),
+
+  P("unit-crop", "inspector", "unit crop", "Unit 502, cropped from the sheet", () =>
+    `<div class="plan" data-img="plan" style="min-height:120px;${crop(UNIT_BOXES[6], .25, "height")}">
+       <span class="cap">the unit alone, cut from the floor plan</span></div>
+     <p class="note">A thumbnail shows its own unit, never the whole sheet.</p>`, { from: "C" }),
+
+  P("reason", "inspector", "reason", "Why this change?", () =>
+    `<div class="rowline" style="flex-wrap:wrap">${chips(["client cost", "structure", "code", "city", "drawing error"], -1)}</div>
+     <div class="field"><span class="lo bar" style="width:70%"></span><span class="hi">one sentence for the next person</span></div>
+     <div class="solid"><span class="hi">Record the decision</span></div>
+     <p class="note">Nothing is recorded until a reason is picked and a sentence is written.</p>`,
+    { flag: "high · why was this changed", grow: 0 }),
+
+  P("impact", "footer", "effect of the change", "What the change does to the numbers", () =>
+    `<div class="rowline" style="flex-wrap:wrap">
+       <span><span class="lo bar" style="width:150px"></span><span class="hi">South façade openings</span></span>
+       <span><span class="lo bar" style="width:90px"></span><span class="hi" style="font-weight:600">68.5 m² → 74.2 m²</span></span>
+       <span><span class="lo bar" style="width:50px"></span><span class="hi" style="color:var(--ink-2)">+5.7 m²</span></span>
+       <span class="sp"></span>${chips(["Read article 3.2.3.1"], -1)}</div>`,
+    { grow: 0, from: "C" }),
+
+  /* ----------------------------------------------------------- the counts */
+  P("question-tabs", "content", "question tabs", "One table per question", () =>
+    `<div class="rowline">${chips(["Units and types", "Areas", "Window schedule", "Materials"], 0)}</div>
+     <p class="note">Each tab is one question, answered by one table.</p>
+     ${table(["Type", "Count", "Area m²", "Area ft²", "Floors"], [
+       ["3½", "18", "1 274", "13 714", "2 – 6"],
+       ["3½ + den", "6", "468", "5 038", "3 – 6"],
+       ["4½", "22", "2 046", "22 023", "2 – 6"],
+       ["5½", "8", "892", "9 601", "5 – 6"],
+       ["Total", "48", "4 212", "45 338", "—"],
+     ])}
+     <div class="rowline"><span class="sp"></span>${chips(["Export this table"], -1)}</div>`,
+    { flag: "high · unit count, areas, window schedule" }),
+
+  P("per-floor", "content", "per floor", "The same count, floor by floor", () =>
+    `<p class="note">A floor that differs from the others is flagged in place.</p>
+     ${table(["Level", "Units", "Windows"], [
+       ["2", "8", "34"], ["3", "8", "34"], ["4", "8", "34"],
+       ["5", "8", "30 · differs"], ["6", "8", "34"], ["Roof", "—", "4"],
+     ])}`),
+
+  P("source", "inspector", "source", "Where these numbers came from", () =>
+    `${list([["A-201 Plan niveau 5", "R04 · 24 Oct"], ["A-202 Élévations", "R03 · 02 Oct"], ["Model SU", "24 Oct"]], -1)}
+     <p class="note">File, revision, read time. No number without one.</p>`, { grow: 0 }),
+
+  /* ------------------------------------------------------------ the rules */
+  P("articles", "list", "articles", "Articles that matter here", (mode) =>
+    listBody(mode, { rows: ARTICLE_ROWS, sel: 1, filters: ["All", "To check", "Missing"], cards: false,
+      note: "Filtered to this project, each with a plain state." })),
+
+  P("article", "content", "article", "4.2.4 Marge arrière", () =>
+    `<div class="field q"><span class="lo bar" style="width:92%"></span><span class="lo bar" style="width:64%;margin-top:6px"></span>
+       <span class="hi q">« La marge arrière minimale est de 7,50 m, mesurée depuis la ligne arrière du lot. »</span></div>
+     ${nums([["7.42 m", "measured from the surveyor's plan R2"], ["7.50 m", "required by 4.2.4"]])}
+     <p class="note">Measured against required, side by side, then one sentence of plain reading.
+       It names the gap; it never says the project complies.</p>
+     <div>${line("The rear wall sits 80 mm inside the required setback.", 88)}</div>
+     <div>${line("A minor exemption request covers up to 10 % of the setback.", 76)}</div>`,
+    { flag: "high · the article in words anyone can act on" }),
+
+  P("export-study", "footer", "export", "The code study as a document", () =>
+    `<div class="rowline">${chips(["Print", "PDF"], -1)}<span class="sp"></span>${chips(["Export the study"], 0)}</div>`,
+    { grow: 0 }),
+
+  P("missing-inputs", "inspector", "missing inputs", "What the project still needs", () =>
+    `<p class="note">The answers no drawing can give. One shared list.</p>
+     ${list([
+       ["Lot area", "surveyor"], ["Code edition", "city"], ["Parking ratio", "by-law annex"],
+       ["Amenity area rule", "city"], ["Bike storage count", "client"], ["Street façade width", "surveyor"],
+     ], -1)}
+     <div class="solid"><span class="hi">Write the note to the planner</span></div>`,
+    { flag: "high · say out loud what is missing" }),
+
+  /* ----------------------------------------------------- the coordination */
+  P("crossings", "list", "crossings", "Ducts, beams and columns in the same place", (mode) =>
+    listBody(mode, { rows: CROSSING_ROWS, sel: 1, filters: ["Structure", "Mechanical", "Architecture"],
+      note: "One row per crossing, level and axis named." }),
+    { flag: "high · ducts, beams and columns" }),
+
+  P("overlay", "content", "overlay", "The two drawings on top of each other", (mode) =>
+    `<div class="rowline">${chips(["Structure", "Mechanical", "Architecture"], 0)}<span class="sp"></span>${chips(["Level 5"], -1)}</div>
+     ${mode === "Stacked"
+       ? `<div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0">
+            <div class="plan" data-img="plan"><span class="cap">structure</span></div>
+            <div class="plan" data-img="model"><span class="cap">mechanical</span></div></div>`
+       : `<div class="plan" data-img="plan"><span class="cap">structure over mechanical, the overlap marked</span></div>`}`),
+
+  P("crossing", "inspector", "crossing", "Corridor, axis 4", () =>
+    `${table(["Crossing", "Value", "Source"], [
+       ["Duct underside", "2 310 mm", "MEC R01"],
+       ["Beam underside", "2 280 mm", "STR R02"],
+       ["Overlap", "30 mm", "measured"],
+       ["Clear height left", "2 250 mm", "needs 2 300"],
+     ])}
+     <div class="field"><span class="lo bar" style="width:72%"></span><span class="hi">one sentence for the next person</span></div>
+     <div class="solid"><span class="hi">Record the decision</span></div>
+     <p class="note">Recording it asks for the same reason as any other decision.</p>`),
+
+  /* ------------------------------------------------- pieces carried over
+     from wireframe C: the same ideas, re-drawn in this file's register so a
+     mixed screen still reads as one thing. */
+  P("rules-reading", "content", "measured vs required", "The gap, read out loud", () =>
+    `${nums([["2.70 m", "measured in the drawings"], ["3.00 m", "required by the article"]])}
+     <div>${line("The wall sits 300 mm inside the required setback.", 86)}</div>
+     <div>${line("Nothing here concludes: the code edition is still missing.", 72)}</div>
+     <p class="note">Plain reading of the gap, then what is missing to conclude.</p>`, { from: "C" }),
+
+  P("tracking", "content", "tracking", "One list per phase", () =>
+    `<div class="rowline">${chips(["Programme", "Sketch", "Committee", "Permit", "Site"], 2)}</div>
+     ${list([
+       ["Area table per floor", "done"], ["Typology split", "done"],
+       ["Elevations with materials", "in progress"], ["Minor exemption request written", "to do"],
+       ["Note to the city planner", "to do"],
+     ], -1)}
+     <p class="note">Flags are raised by the drawings, never typed into a tracker.</p>`, { from: "C" }),
+
+  P("deadlines", "inspector", "deadlines", "Deadlines and flags", () =>
+    `${table(["What", "When", "State"], [
+       ["Committee filing", "14 Nov", "8 days"],
+       ["Planner reply", "overdue", "12 days late"],
+       ["Permit issue", "21 Nov", "waiting"],
+       ["Missing inputs", "—", "10 open"],
+     ])}`, { from: "C" }),
+
+  P("decision", "inspector", "decision", "Record the decision", () =>
+    `<div class="rowline" style="flex-wrap:wrap">${chips(["client cost", "structure", "code", "city", "drawing error"], -1)}</div>
+     <div class="field"><span class="lo bar" style="width:80%"></span><span class="lo bar" style="width:54%;margin-top:6px"></span>
+       <span class="hi">one sentence for the next person</span></div>
+     <div class="solid"><span class="hi">Record the decision</span></div>
+     <div class="solid" style="background:var(--fill);color:var(--ink-2)"><span class="hi" style="color:var(--ink-2)">Open in AutoCAD</span></div>`,
+    { from: "C", grow: 0 }),
+
+  P("journey-strip", "footer", "journey", "The six moves this screen serves", () =>
+    `<div class="rowline" style="flex-wrap:wrap">${chips(
+       ["1 A drawing was saved", "2 Open the unit", "3 Both drawings", "4 Decide, and say why",
+        "5 What it breaks", "6 Send the numbers"], 2)}</div>
+     <p class="note">The strip says where the screen sits in the journey, nothing else.</p>`,
+    { grow: 0, from: "C" }),
+
+  P("filter-bar", "list", "filter bar", "Search and filters only", () =>
+    `<div class="rowline" style="flex-wrap:wrap">
+       <span class="chip">${ico("search")}<span class="lo bar" style="width:60px;background:none"></span><span class="hi">Search this floor</span></span>
+       ${chips(["3½", "4½", "5½", "with a difference"], -1)}</div>`,
+    { grow: 0, from: "C" }),
+
+  P("projects", "content", "projects", "Projects", () => HOME_BODY(), { from: "C" }),
+
+  P("project-preview", "inspector", "preview", "Alder Court", () =>
+    `<div class="plan ghost" style="min-height:96px">${ico("image")}</div>
+     ${table(["Read", "Value", "Source"], [["Units", "48", "A-201 R04"], ["Levels", "6", "A-201 R04"], ["Open", "6 differences", "24 Oct"]])}`,
+    { from: "C" }),
+
+  P("new-project", "content", "start", "Start a project", () =>
+    `<div style="display:flex;flex:1;min-height:0">${newCard(true)}</div>`, { from: "C" }),
+];
+
+const BY_ID = Object.fromEntries(PARTS.map((p) => [p.id, p]));
+
+/* The home piece carries the five home layouts from wireframe C, so the
+   control that chose between them still chooses between them here. */
+function HOME_BODY() {
+  const mode = V.homeLayout;
+  if (mode === "Table of projects") {
+    return `${projTable()}
+      <div class="rowline"><span class="sp"></span>${chips(["New project"], 0)}</div>`;
+  }
+  if (mode === "List + preview") {
+    return `<div style="display:flex;gap:9px;flex:1;min-height:0">
+        <div style="flex:.9;display:flex;flex-direction:column;gap:7px;min-width:0">
+          ${list(PROJECTS.map((p) => [p[0], p[3]]), 0)}
+          <div class="solid"><span class="hi">New project</span></div></div>
+        <div style="flex:1.4;display:flex;flex-direction:column;gap:7px;min-width:0">
+          <div class="plan ghost">${ico("image")}</div>
           ${table(["Read", "Value", "Source"], [["Units", "48", "A-201 R04"], ["Levels", "6", "A-201 R04"], ["Open", "6 differences", "24 Oct"]])}
-        </div></section></div>`,
+        </div></div>`;
+  }
+  if (mode === "Recent, then all") {
+    return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px">
+        ${PROJECTS.slice(0, 3).map((p) => card(p)).join("")}</div>
+      ${projTable()}`;
+  }
+  if (mode === "Start first") {
+    return `<div style="display:flex;flex-direction:column;gap:9px;flex:1;min-height:0">
+        <div style="flex:0 0 46%;display:flex">${newCard(true)}</div>
+        ${list(PROJECTS.map((p) => [p[0], p[2]]), -1)}</div>`;
+  }
+  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;overflow:auto">
+      ${newCard()}${PROJECTS.map((p) => card(p)).join("")}</div>`;
+}
 
-  "Recent, then all": () => `<div class="col" style="flex:1">
-      <section class="blk" style="flex:0 0 190px"><span class="tag">recent</span>
-        <div class="bh"><span class="lo bar d" style="width:96px;height:10px"></span><span class="hi">Opened this week</span></div>
-        <div class="bb" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-          ${PROJECTS.slice(0, 3).map((p) => card(p)).join("")}</div></section>
-      <section class="blk"><span class="tag">all projects</span>
-        <div class="bh"><span class="lo bar d" style="width:110px;height:10px"></span><span class="hi">Everything else</span></div>
-        <div class="bb">${projTable()}</div></section></div>
-    <div class="col" style="flex:.55">${newCard(true)}</div>`,
+/* --------------------------------------------------------------- screens */
 
-  "Start first": () => `<div class="col" style="flex:1">
-      <section class="blk" style="flex:0 0 58%">${newCard(true).replace("<section class=\"blk\"", "<div").replace("</section>", "</div>")}</section>
-      <section class="blk"><span class="tag">ongoing</span>
-        <div class="bh"><span class="lo bar d" style="width:110px;height:10px"></span><span class="hi">Or carry on with</span></div>
-        <div class="bb">${list(PROJECTS.map((p) => [p[0], p[2]]), -1)}</div></section></div>`,
+const SCREENS = {
+  Home: { icon: "home", title: "Projects", sub: "4 ongoing · 1 archived",
+    actions: [["plus", "New project"]] },
+  Project: { icon: "layout-dashboard", title: "Alder Court", sub: "48 units · 6 levels · read 6 min ago",
+    actions: [["external-link", "Open in AutoCAD"], ["download", "Export"]] },
+  Site: { icon: "map", title: "Site and property lines", sub: "Surveyor's plan R2 · 12 Sep · lot 1 459 m²",
+    actions: [["layers", "Layers"], ["download", "Export"]] },
+  Units: { icon: "layers", title: "Typical floor — level 5", sub: "14 units · 6 differences open",
+    actions: [["external-link", "Open in AutoCAD"], ["share-2", "Share link"], ["download", "Export"]] },
+  Counts: { icon: "table", title: "Counts read from the drawings", sub: "A-201 R04 · read 6 min ago",
+    actions: [["download", "Export"], ["share-2", "Share link"]] },
+  Rules: { icon: "scale", title: "Rules, measured and missing", sub: "Zoning by-law 2019-45 · code edition to confirm",
+    actions: [["download", "Export the study"], ["mail", "Note to the planner"]] },
+  Coordination: { icon: "git-compare", title: "Where the trades cross", sub: "Structure R02 · mechanical R01 · compared 24 Oct",
+    actions: [["external-link", "Open in AutoCAD"], ["download", "Export"]] },
 };
+
+/* The layout a screen opens with. Everything after this is the user's. */
+const DEFAULTS = {
+  Home: [{ flex: 1, items: ["projects"] }],
+  Project: [
+    { flex: 1.6, items: ["change-log"] },
+    { flex: 1, items: ["counts", "metrics"] },
+    { flex: 1, items: ["blocking"] },
+  ],
+  Site: [
+    { flex: 2, items: ["site-plan"] },
+    { flex: 1.05, items: ["setbacks", "new-plan"] },
+  ],
+  Units: [
+    { flex: .95, items: ["units-list"] },
+    { flex: 1.5, items: ["plan-vs-model", "impact"] },
+    { flex: 1.15, items: ["unit", "reason"] },
+  ],
+  Counts: [
+    { flex: 1.4, items: ["question-tabs"] },
+    { flex: .85, items: ["per-floor", "source"] },
+  ],
+  Rules: [
+    { flex: .85, items: ["articles"] },
+    { flex: 1.45, items: ["article", "export-study"] },
+    { flex: .85, items: ["missing-inputs"] },
+  ],
+  Coordination: [
+    { flex: .95, items: ["crossings"] },
+    { flex: 1.5, items: ["overlay"] },
+    { flex: 1.05, items: ["crossing"] },
+  ],
+};
+
+/* The six moves the prototype is built around, and the piece that serves
+   each one. A step badge only appears where a move actually lands. */
+const JOURNEY = [
+  { n: 1, t: "A drawing was saved", d: "The project page says what moved since the last read.", s: "Project" },
+  { n: 2, t: "Open the unit that moved", d: "Pick it from the list, or from the plan itself.", s: "Units" },
+  { n: 3, t: "See both drawings at once", d: "2D plan beside the 3D model, difference measured.", s: "Units" },
+  { n: 4, t: "Decide, and say why", d: "The decision will not save without a reason.", s: "Units" },
+  { n: 5, t: "Check what it breaks", d: "Which article, which crossing, which deadline.", s: "Rules" },
+  { n: 6, t: "Send the numbers out", d: "Tables and the note for the city committee.", s: "Counts" },
+];
+const STEP_OF = { "change-log": 1, "units-list": 2, "plan-vs-model": 3, reason: 4, decision: 4,
+  article: 5, articles: 5, "question-tabs": 6 };
 
 const KEY = [
   ["Project", "Change log first", "The page opens on what moved since the last read, not on a dashboard."],
@@ -574,6 +821,7 @@ const KEY = [
   ["Counts", "One table per question", "Units and areas, window schedule by floor, each table carrying its source."],
   ["Rules", "Three columns", "Articles, the measured-against-required pair, and the missing inputs that block a verdict."],
   ["Coordination", "List, overlay, detail", "Crossings on the left, the superposition in the middle, the decision on the right."],
+  ["Every screen", "Pieces, not markup", "Drag a block to another column, hide it, or add one from the tray. The layout is saved per screen."],
 ];
 
 const SECTIONS = { 0: "Read", 3: "Decide" };
@@ -590,10 +838,143 @@ const CONTEXT = {
   Coordination: ["Structure", "Mechanical", "Architecture"],
 };
 
+/* ------------------------------------------------------------ the state */
 
-const V = { shell: "Flat", homeLayout: "Card grid", screen: "Project", fidelity: "low", labels: true, notes: true, flags: true,
-  density: "comfortable", nav: "Icon rail + tabs", icons: "Rail only", titles: "Full label",
-  tabStyle: "Plain", tabAlign: "Left" };
+const V = { shell: "Flat", homeLayout: "Card grid", screen: "Project", fidelity: "low", labels: true,
+  notes: true, flags: true, journey: true, isolate: "none", density: "comfortable", compose: true,
+  nav: "Icon rail + tabs", icons: "Rail only", titles: "Full label", tabStyle: "Plain", tabAlign: "Left",
+  region: { nav: { fidelity: "inherit", layout: "" }, header: { fidelity: "inherit", layout: "Title + actions" },
+    list: { fidelity: "inherit", layout: "Vertical list" }, content: { fidelity: "inherit", layout: "Two panes" },
+    inspector: { fidelity: "inherit", layout: "Right panel" }, footer: { fidelity: "inherit", layout: "Impact strip" } },
+  focus: 0 };
+
+const STORE = "wireframe-c2.layout.v1";
+let uidSeq = 1;
+let LAYOUT = load();
+
+function freshLayout() {
+  const out = {};
+  for (const [screen, cols] of Object.entries(DEFAULTS)) {
+    out[screen] = cols.map((c) => ({ flex: c.flex, items: c.items.map((id) => ({ uid: `u${uidSeq++}`, part: id, hidden: false })) }));
+  }
+  return out;
+}
+
+function load() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORE));
+    if (!raw || typeof raw !== "object") return freshLayout();
+    /* A saved layout from an older catalogue may name a piece that no longer
+       exists; it is dropped rather than rendered as an empty box. */
+    for (const cols of Object.values(raw)) {
+      for (const col of cols) col.items = col.items.filter((it) => BY_ID[it.part]);
+    }
+    for (const screen of Object.keys(DEFAULTS)) if (!raw[screen]) raw[screen] = freshLayout()[screen];
+    uidSeq = Object.values(raw).flat().flatMap((c) => c.items)
+      .reduce((m, it) => Math.max(m, Number(String(it.uid).slice(1)) || 0), 0) + 1;
+    return raw;
+  } catch (e) { return freshLayout(); }
+}
+
+const save = () => localStorage.setItem(STORE, JSON.stringify(LAYOUT));
+const cols = () => LAYOUT[V.screen];
+
+function findItem(uid) {
+  const cs = cols();
+  for (let ci = 0; ci < cs.length; ci++) {
+    const ii = cs[ci].items.findIndex((it) => it.uid === uid);
+    if (ii >= 0) return { ci, ii, item: cs[ci].items[ii] };
+  }
+  return null;
+}
+
+function commit() { save(); render(); }
+
+function addPart(partId, ci, index) {
+  const cs = cols();
+  const col = cs[Math.max(0, Math.min(cs.length - 1, ci === undefined ? V.focus : ci))];
+  const item = { uid: `u${uidSeq++}`, part: partId, hidden: false };
+  col.items.splice(index === undefined ? col.items.length : index, 0, item);
+  commit();
+}
+
+function moveItem(uid, ci, index) {
+  const found = findItem(uid);
+  if (!found) return;
+  const cs = cols();
+  cs[found.ci].items.splice(found.ii, 1);
+  const target = cs[Math.max(0, Math.min(cs.length - 1, ci))];
+  let at = index === undefined ? target.items.length : index;
+  if (found.ci === ci && found.ii < at) at -= 1;
+  target.items.splice(Math.max(0, Math.min(target.items.length, at)), 0, found.item);
+  commit();
+}
+
+function shift(uid, dx, dy) {
+  const found = findItem(uid);
+  if (!found) return;
+  if (dy) moveItem(uid, found.ci, found.ii + (dy > 0 ? 2 : -1));
+  else moveItem(uid, found.ci + dx, undefined);
+}
+
+function toggleHidden(uid) {
+  const found = findItem(uid);
+  if (!found) return;
+  found.item.hidden = !found.item.hidden;
+  commit();
+}
+
+function removeItem(uid) {
+  const found = findItem(uid);
+  if (!found) return;
+  cols()[found.ci].items.splice(found.ii, 1);
+  commit();
+}
+
+/* ------------------------------------------------------------ rendering */
+
+const regionOf = (kind) => V.region[kind] || V.region.content;
+const fiClass = (kind) => {
+  const r = regionOf(kind);
+  return "fi-" + (r.fidelity && r.fidelity !== "inherit" ? r.fidelity : V.fidelity);
+};
+const fade = (kind) => (V.isolate !== "none" && V.isolate !== kind ? " faded" : "");
+
+/* A piece can be switched off by its region control rather than by hand:
+   list "Hidden", inspector "Hidden", footer "Hidden". */
+function regionHides(kind) {
+  const r = regionOf(kind);
+  return r.layout === "Hidden";
+}
+
+function partHTML(item, ci) {
+  const part = BY_ID[item.part];
+  const step = V.journey && STEP_OF[part.id] ? `<span class="step">${STEP_OF[part.id]}</span>` : "";
+  const tools = V.compose ? `<div class="bt">
+      <button class="hdl" title="Drag to another column">${ico("grip-vertical")}</button>
+      <button data-act="left" data-uid="${item.uid}" title="Move left">${ico("chevron-left")}</button>
+      <button data-act="up" data-uid="${item.uid}" title="Move up">${ico("chevron-up")}</button>
+      <button data-act="down" data-uid="${item.uid}" title="Move down">${ico("chevron-down")}</button>
+      <button data-act="right" data-uid="${item.uid}" title="Move right">${ico("chevron-right")}</button>
+      <button data-act="hide" data-uid="${item.uid}" title="${item.hidden ? "Show this piece" : "Hide this piece"}">${ico(item.hidden ? "eye" : "eye-off")}</button>
+      <button data-act="remove" data-uid="${item.uid}" title="Back to the tray">${ico("x")}</button>
+    </div>` : "";
+
+  if (item.hidden) {
+    return `<section class="blk off ${fiClass(part.kind)}" data-uid="${item.uid}" data-col="${ci}" draggable="${V.compose}">
+      ${tools}<div class="stub">${ico("eye-off")}<span>${part.tag} — hidden</span></div></section>`;
+  }
+
+  const mode = regionOf(part.kind).layout;
+  return `<section class="blk ${fiClass(part.kind)}${fade(part.kind)}" data-uid="${item.uid}" data-col="${ci}"
+      draggable="${V.compose}" style="flex:${part.grow} 1 auto">
+    ${step}${tools}
+    <span class="tag">${part.tag}</span>
+    ${part.flag ? `<span class="flag">${part.flag}</span>` : ""}
+    <div class="bh"><span class="lo bar d" style="width:${Math.min(210, 90 + part.head.length * 2)}px;height:10px"></span><span class="hi">${part.head}</span></div>
+    <div class="bb">${part.body(mode)}</div>
+  </section>`;
+}
 
 function render() {
   const def = SCREENS[V.screen];
@@ -603,8 +984,10 @@ function render() {
   frame.dataset.labels = V.labels ? "1" : "0";
   frame.dataset.notes = V.notes ? "1" : "0";
   frame.dataset.flags = V.flags ? "1" : "0";
+  frame.dataset.journey = V.journey ? "1" : "0";
+  frame.dataset.compose = V.compose ? "1" : "0";
   frame.dataset.nav = { "Wide rail with labels": "wide", "Wide rail with sections": "wide",
-    "Rail with labels under icons": "stack", "Tabs only, no rail": "none" }[V.nav] || "rail";
+    "Rail with labels under icons": "stack", "Tabs only, no rail": "none", "Top bar only": "none" }[V.nav] || "rail";
   document.getElementById("body").dataset.dense = V.density === "compact" ? "1" : "0";
 
   const names = Object.keys(SCREENS);
@@ -615,7 +998,8 @@ function render() {
   const text = (k, i) => V.titles === "Short code" ? SHORT(k) : V.titles === "Numbered" ? `${i + 1}. ${k}` : k;
 
   const rail = document.getElementById("rail");
-  rail.style.display = V.nav === "Tabs only, no rail" ? "none" : "";
+  rail.style.display = (V.nav === "Tabs only, no rail" || V.nav === "Top bar only") ? "none" : "";
+  rail.className = "rail " + fiClass("nav") + fade("nav");
   rail.dataset.labelsMode = V.titles;
   rail.innerHTML = names.map((k, i) => {
     const head = sections && SECTIONS[i] ? `<div class="sct">${SECTIONS[i]}</div>` : "";
@@ -625,6 +1009,7 @@ function render() {
 
   const tabs = document.getElementById("tabs");
   tabs.style.display = V.nav === "Rail only, no tabs" ? "none" : "";
+  tabs.className = "tabs " + fiClass("nav") + fade("nav");
   tabs.dataset.labelsMode = V.titles;
   tabs.dataset.style = V.tabStyle;
   tabs.dataset.align = V.tabAlign;
@@ -641,7 +1026,7 @@ function render() {
       <span class="crumb on hi">${views[0]}</span>${stamp}`;
   } else if (V.nav === "Rail + view menu") {
     tabs.innerHTML = `<button class="on" data-menu><span class="hi">${views[0]}</span>${ico("chevron-down")}</button>${stamp}`;
-  } else if (V.nav === "Tabs only, no rail") {
+  } else if (V.nav === "Tabs only, no rail" || V.nav === "Top bar only") {
     tabs.innerHTML = names.map(tab).join("") + stamp;
   } else {
     /* A rail is on screen, so the strip shows this screen's own views rather
@@ -651,61 +1036,281 @@ function render() {
         <span class="lo bar" style="width:52px"></span><span class="hi">${t}</span></button>`).join("") + stamp;
   }
 
-  document.getElementById("hd").innerHTML =
+  const hdMode = regionOf("header").layout;
+  const hd = document.getElementById("hd");
+  hd.className = "hd " + fiClass("header") + fade("header");
+  hd.innerHTML =
     `<div class="t"><span class="lo bar d" style="width:230px;height:13px"></span><span class="hi">${def.title}</span>
        <span class="lo bar" style="width:330px"></span><span class="hi">${def.sub}</span></div>` +
-    def.actions.map(([i, t]) => `<span class="btn">${ico(i)}<span class="lo bar" style="width:52px"></span><span class="hi">${t}</span></span>`).join("");
+    (hdMode === "Title only" ? "" : def.actions.map(([i, t]) =>
+      `<span class="btn">${ico(i)}<span class="lo bar" style="width:52px"></span><span class="hi">${t}</span></span>`).join("")) +
+    (hdMode === "Title + metrics"
+      ? `<div class="metrics">${nums([["6", "differences"], ["4", "crossings"], ["5", "articles to read"], ["98", "units"]])}</div>`
+      : "");
 
-  if (def.home) {
-    document.getElementById("body").innerHTML = (HOMES[V.homeLayout] || HOMES["Card grid"])();
-  } else
-  document.getElementById("body").innerHTML = def.cols.map((c) =>
-    `<div class="col" style="flex:${c.flex}">${c.blocks.map((b) => `
-      <section class="blk" style="flex:${b.grow} 1 auto">
-        <span class="tag">${b.label}</span>
-        ${b.flag ? `<span class="flag">${b.flag}</span>` : ""}
-        <div class="bh"><span class="lo bar d" style="width:${90 + b.head.length * 2}px;height:10px"></span><span class="hi">${b.head}</span></div>
-        <div class="bb">${b.body}</div>
-      </section>`).join("")}</div>`).join("");
+  /* The body: columns of pieces, with the inspector pieces pulled out when
+     the inspector is asked to be a sheet or a drawer instead of a column. */
+  const inspectorMode = regionOf("inspector").layout;
+  const pulled = [];
+  const colsHTML = cols().map((col, ci) => {
+    const items = col.items.filter((it) => {
+      const part = BY_ID[it.part];
+      if (!part) return false;
+      if (!it.hidden && regionHides(part.kind)) return false;
+      if (it.hidden && !V.compose) return false;
+      if (!it.hidden && part.kind === "inspector" && inspectorMode !== "Right panel") {
+        pulled.push({ item: it, ci });
+        return false;
+      }
+      return true;
+    });
+    const tools = V.compose ? `<div class="coltools">
+        <button data-col-act="narrow" data-col="${ci}" title="Narrower">−</button>
+        <button data-col-act="focus" data-col="${ci}" title="Add pieces here">${ci + 1}</button>
+        <button data-col-act="wide" data-col="${ci}" title="Wider">+</button>
+        <button data-col-act="drop" data-col="${ci}" title="Remove this column">${ico("trash-2")}</button>
+      </div>` : "";
+    return `<div class="col ${V.focus === ci ? "focus" : ""}" data-col="${ci}" style="flex:${col.flex}">
+      ${tools}${items.map((it) => partHTML(it, ci)).join("")}</div>`;
+  }).join("");
+
+  const pulledHTML = pulled.map((p) => partHTML(p.item, p.ci)).join("");
+  const body = document.getElementById("body");
+  body.innerHTML = `<div class="cols">${colsHTML}</div>`
+    + (pulled.length && inspectorMode === "Bottom sheet" ? `<div class="cols sheet">${pulledHTML}</div>` : "")
+    + (pulled.length && inspectorMode === "Overlay drawer" ? `<div class="col drawer">${pulledHTML}</div>` : "");
+
+  renderTray();
+  renderJourney();
 
   document.querySelectorAll("[data-s]").forEach((el) => el.addEventListener("click", () => {
     V.screen = el.dataset.s;
+    V.focus = 0;
     dial.setValue("screen", V.screen);
     render();
   }));
 
-  /* Selecting a row is the only live behaviour: it says which block answers it. */
+  /* Selecting a row is the only live behaviour inside a piece: it says which
+     block answers it. */
   document.querySelectorAll(".row-sel").forEach((r) => r.addEventListener("click", () => {
     r.parentNode.querySelectorAll(".row-sel").forEach((o) => o.classList.remove("on"));
     r.classList.add("on");
   }));
 
+  wireCompose();
   lucide.createIcons();
+}
+
+function renderJourney() {
+  document.getElementById("journey").innerHTML = V.journey
+    ? `<div class="flow">${JOURNEY.map((s) => `<button class="st ${s.s === V.screen ? "on" : ""}" data-s="${s.s}">
+        <span class="n">${s.n}</span><b>${s.t}</b><span>${s.d}</span><em>${s.s}</em></button>`).join("")}</div>`
+    : "";
+}
+
+function renderTray() {
+  const tray = document.getElementById("tray");
+  tray.style.display = V.compose ? "" : "none";
+  if (!V.compose) return;
+  const placed = new Set(cols().flatMap((c) => c.items.map((it) => it.part)));
+  const GROUPS = [["list", "Lists"], ["content", "Work"], ["inspector", "Detail and decisions"],
+    ["header", "Header"], ["footer", "Strips"]];
+  tray.innerHTML = `<header>
+      <h2>Pieces</h2>
+      <span class="hint">Drag one into a column, or press + to drop it in column ${V.focus + 1}.
+        Every piece can sit on any screen; the layout is saved per screen.</span>
+    </header>
+    ${GROUPS.map(([kind, label]) => {
+      const parts = PARTS.filter((p) => p.kind === kind);
+      if (!parts.length) return "";
+      return `<div class="grp"><h3>${label}</h3><div class="pieces">
+        ${parts.map((p) => `<span class="piece" draggable="true" data-part="${p.id}" data-placed="${placed.has(p.id) ? 1 : 0}"
+            title="${p.head} — from wireframe ${p.from}">
+            ${p.tag}<span class="n">${p.from === "C" ? "C" : "C2"}</span>
+            <button data-add="${p.id}" title="Add to column ${V.focus + 1}">${ico("plus")}</button></span>`).join("")}
+      </div></div>`;
+    }).join("")}`;
+}
+
+/* ------------------------------------------------- picking pieces up */
+
+let DRAG = null;
+
+function wireCompose() {
+  document.querySelectorAll("[data-act]").forEach((b) => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const uid = b.dataset.uid;
+    const act = b.dataset.act;
+    if (act === "hide") toggleHidden(uid);
+    else if (act === "remove") removeItem(uid);
+    else if (act === "left") shift(uid, -1, 0);
+    else if (act === "right") shift(uid, 1, 0);
+    else if (act === "up") shift(uid, 0, -1);
+    else if (act === "down") shift(uid, 0, 1);
+  }));
+
+  document.querySelectorAll("[data-col-act]").forEach((b) => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const ci = Number(b.dataset.col);
+    const act = b.dataset.colAct;
+    const cs = cols();
+    if (act === "focus") { V.focus = ci; render(); return; }
+    if (act === "wide") cs[ci].flex = Math.round((cs[ci].flex + .15) * 100) / 100;
+    if (act === "narrow") cs[ci].flex = Math.max(.3, Math.round((cs[ci].flex - .15) * 100) / 100);
+    if (act === "drop") {
+      if (cs.length === 1) return;
+      const moved = cs[ci].items;
+      cs.splice(ci, 1);
+      cs[Math.max(0, ci - 1)].items.push(...moved);
+      V.focus = Math.max(0, Math.min(cs.length - 1, V.focus > ci ? V.focus - 1 : V.focus));
+    }
+    commit();
+  }));
+
+  document.querySelectorAll(".col").forEach((col) => col.addEventListener("click", () => {
+    const ci = Number(col.dataset.col);
+    if (!Number.isNaN(ci) && V.focus !== ci) { V.focus = ci; renderTray(); 
+      document.querySelectorAll(".col").forEach((c) => c.classList.toggle("focus", Number(c.dataset.col) === ci));
+      lucide.createIcons(); }
+  }));
+
+  document.querySelectorAll("[data-add]").forEach((b) => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    addPart(b.dataset.add);
+  }));
+
+  if (!V.compose) return;
+
+  document.querySelectorAll(".piece").forEach((p) => {
+    p.addEventListener("dragstart", (e) => {
+      DRAG = { type: "add", part: p.dataset.part };
+      e.dataTransfer.effectAllowed = "copy";
+      e.dataTransfer.setData("text/plain", p.dataset.part);
+    });
+    p.addEventListener("dragend", clearDrop);
+  });
+
+  document.querySelectorAll(".blk[data-uid]").forEach((b) => {
+    b.addEventListener("dragstart", (e) => {
+      DRAG = { type: "move", uid: b.dataset.uid };
+      b.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", b.dataset.uid);
+    });
+    b.addEventListener("dragend", () => { b.classList.remove("dragging"); clearDrop(); });
+  });
+
+  document.querySelectorAll(".col").forEach((col) => {
+    col.addEventListener("dragover", (e) => {
+      if (!DRAG) return;
+      e.preventDefault();
+      showDrop(col, e.clientY);
+    });
+    col.addEventListener("dragleave", (e) => {
+      if (!col.contains(e.relatedTarget)) col.classList.remove("over");
+    });
+    col.addEventListener("drop", (e) => {
+      if (!DRAG) return;
+      e.preventDefault();
+      const ci = Number(col.dataset.col);
+      const index = dropIndex(col, e.clientY);
+      const d = DRAG;
+      clearDrop();
+      if (d.type === "add") addPart(d.part, ci, index);
+      else moveItem(d.uid, ci, index);
+    });
+  });
+}
+
+/* Where the piece would land: counted against the midpoint of every block
+   already in the column, so the line sits where the drop will. */
+function dropIndex(col, y) {
+  const blocks = [...col.querySelectorAll(":scope > .blk[data-uid]")];
+  let index = blocks.length;
+  for (let i = 0; i < blocks.length; i++) {
+    const r = blocks[i].getBoundingClientRect();
+    if (y < r.top + r.height / 2) { index = i; break; }
+  }
+  return index;
+}
+
+function showDrop(col, y) {
+  document.querySelectorAll(".col").forEach((c) => c.classList.toggle("over", c === col));
+  document.querySelectorAll(".dropline").forEach((d) => d.remove());
+  const blocks = [...col.querySelectorAll(":scope > .blk[data-uid]")];
+  const index = dropIndex(col, y);
+  const ln = document.createElement("div");
+  ln.className = "dropline";
+  if (index >= blocks.length) col.append(ln);
+  else col.insertBefore(ln, blocks[index]);
+}
+
+function clearDrop() {
+  DRAG = null;
+  document.querySelectorAll(".dropline").forEach((d) => d.remove());
+  document.querySelectorAll(".col.over").forEach((c) => c.classList.remove("over"));
 }
 
 document.getElementById("keylist").innerHTML = KEY.map(([s, t, d]) =>
   `<li><i>${s}</i><span><b>${t}.</b> ${d}</span></li>`).join("");
 
+/* ---------------------------------------------------------- the dial */
+
 const sel = (options) => ({ type: "select", options, default: options[0] });
+const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
+const act = (label) => ({ type: "action", label });
 
 const dial = DialKit.createDialKit("Wireframe C, adapted", {
-  screen: sel(Object.keys(SCREENS)),
+  screen: { type: "select", options: Object.keys(SCREENS), default: "Project" },
   fidelity: sel(["low", "high"]),
   regionLabels: true,
   featureFlags: true,
   notes: true,
-  nav: { _collapsed: true,
-    layout: sel(["Icon rail + tabs", "Wide rail with labels", "Wide rail with sections",
+  journeySteps: true,
+  density: sel(["comfortable", "compact"]),
+  shell: sel(["Flat", "Inset card"]),
+  homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
+  isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
+  compose: { _collapsed: false,
+    editing: true,
+    addColumn: act("Add a column"),
+    showAll: act("Show every hidden piece"),
+    resetScreen: act("Reset this screen"),
+    resetAll: act("Reset every screen") },
+  nav: { _collapsed: true, fidelity: FI,
+    layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels", "Wide rail with sections",
       "Rail with labels under icons", "Rail only, no tabs", "Tabs only, no rail",
       "Rail + view menu", "Rail + breadcrumb"]),
     icons: sel(["Rail only", "Tabs only", "Rail and tabs", "None"]),
     titles: sel(["Full label", "Hover only", "Short code", "Numbered", "Uppercase", "Hidden"]),
-    tabStyle: sel(["Plain", "Underline", "Pills", "Segmented", "Top accent"]),
+    tabStyle: sel(["Plain", "Underline", "Pills", "Segmented", "Top accent", "Boxed"]),
     tabAlign: sel(["Left", "Centred", "Spread"]) },
-  density: sel(["comfortable", "compact"]),
-  shell: sel(["Flat", "Inset card"]),
-  homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
-}, { id: "wireframe-c2", persist: true });
+  header: { _collapsed: true, fidelity: FI, layout: sel(["Title + actions", "Title only", "Title + metrics"]) },
+  list: { _collapsed: true, fidelity: FI, layout: sel(["Vertical list", "Card grid", "Filter bar only", "Hidden"]) },
+  content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
+  inspector: { _collapsed: true, fidelity: FI, layout: sel(["Right panel", "Bottom sheet", "Overlay drawer", "Hidden"]) },
+  footer: { _collapsed: true, fidelity: FI, layout: sel(["Impact strip", "Hidden"]) },
+}, {
+  id: "wireframe-c2", persist: true,
+  onAction(path) {
+    if (path === "compose.addColumn") {
+      cols().push({ flex: 1, items: [] });
+      V.focus = cols().length - 1;
+      commit();
+    } else if (path === "compose.showAll") {
+      cols().forEach((c) => c.items.forEach((it) => { it.hidden = false; }));
+      commit();
+    } else if (path === "compose.resetScreen") {
+      LAYOUT[V.screen] = freshLayout()[V.screen];
+      V.focus = 0;
+      commit();
+    } else if (path === "compose.resetAll") {
+      LAYOUT = freshLayout();
+      V.focus = 0;
+      commit();
+    }
+  },
+});
 
 function applyDial(v) {
   V.screen = v.screen;
@@ -713,14 +1318,21 @@ function applyDial(v) {
   V.labels = v.regionLabels;
   V.flags = v.featureFlags;
   V.notes = v.notes;
+  V.journey = v.journeySteps;
+  V.density = v.density;
+  V.shell = v.shell;
+  V.homeLayout = v.homeLayout;
+  V.isolate = v.isolate;
+  V.compose = v.compose.editing;
   V.nav = v.nav.layout;
   V.icons = v.nav.icons;
   V.titles = v.nav.titles;
   V.tabStyle = v.nav.tabStyle;
   V.tabAlign = v.nav.tabAlign;
-  V.density = v.density;
-  V.shell = v.shell;
-  V.homeLayout = v.homeLayout;
+  ["nav", "header", "list", "content", "inspector", "footer"].forEach((r) => {
+    V.region[r] = { fidelity: v[r].fidelity, layout: v[r].layout || "" };
+  });
+  if (V.focus >= cols().length) V.focus = 0;
   render();
 }
 
