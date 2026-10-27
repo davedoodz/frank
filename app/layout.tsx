@@ -6,6 +6,13 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ça fitte",
   description: "les données des unités, tirées des plans d’étage",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "32x32" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
