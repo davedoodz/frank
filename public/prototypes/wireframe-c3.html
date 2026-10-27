@@ -163,6 +163,10 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .pane > .pb{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;
   padding:var(--pad);display:flex;flex-direction:column;gap:8px}
 .pane.flat > .pb{padding:0}
+/* The decision is the last thing in the column: it sits at the foot of the
+   inspector rather than floating under the rows, so the empty space is above
+   it and the button is where the thumb already is. */
+.pane > .pb > .decide{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:10px}
 
 /* low-fi primitives --------------------------------------------------- */
 .bar{height:9px;border-radius:3px;background:var(--bar)}
@@ -388,6 +392,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 [data-fi="high"] .plan.align[data-img]{background:none}
 [data-fi="high"] .plan.align[data-img="plan"]::before{content:"";position:absolute;inset:0;
   background:var(--plan,url(assets/plan-etage.jpg)) center/contain no-repeat;filter:grayscale(1)}
+/* Vectors instead of the exported picture: the canvas occupies the same box
+   the JPEG did, so every overlay keeps its coordinates, and the raster
+   underneath is dropped rather than drawn behind it. */
+[data-fi="high"] .plan.align[data-img="plan"][data-src="vector"]::before{display:none}
+.plan canvas.sheetpdf{position:absolute;inset:0;width:100%;height:100%;display:block;
+  background:#fff;z-index:0}
 /* The thumbnails are crops of the same plan, so they read the same way. */
 [data-fi="high"] .plan[data-img="plan"]:not(.align){filter:grayscale(1)}
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
@@ -421,6 +431,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
   accent-color:var(--ink);cursor:ns-resize;margin:0}
 .zread{font-size:10.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .zrail .btnw{width:26px;height:26px;padding:0;justify-content:center;flex:0 0 26px}
+/* Folded: the width of one button, no slider, no border against the sheet. */
+.zrail.folded{flex:0 0 22px;padding:6px 0;justify-content:flex-start;gap:0;background:none;border:0}
+.ztoggle{width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  border-radius:4px;color:var(--ink-3);cursor:pointer}
+.ztoggle:hover{background:var(--fill-3);color:var(--ink-1)}
+.ztoggle svg{width:13px;height:13px}
 /* The two drawing panes are the thing being compared, so their edge is
    stated instead of implied — including in the inset shell, where panes
    otherwise give up their border to the grid lines. */
@@ -550,6 +566,11 @@ const V = {
   /* How close the camera is to the model, 0 far to 100 near. The slider on
      the right edge writes it; orbiting or wheeling writes it back. */
   mzoom: 40,
+  /* Both zoom rails start shown; either can be folded to a single button. */
+  zrail: { plan: true, model: true },
+  /* "image" reads the exported JPEG of the sheet, "vector" reads the PDF of
+     the same crop through pdf.js and re-renders it at the zoom in use. */
+  planSrc: "image",
   query: "",         // the text in the list search
   reason: null,      // the reason picked for the decision being recorded
   note: "",          // the sentence written for the next person
@@ -590,7 +611,7 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
    a hidden sprite and referenced by id afterwards. */
 function sprite() {
   const names = ["home", "folder", "image", "layout-grid", "layers", "table", "scale", "git-compare", "calendar-check",
-    "file", "box", "pen-line", "chevron-right", "chevron-down", "search", "plus", "minus", "maximize", "minimize",
+    "file", "box", "pen-line", "chevron-right", "chevron-left", "chevron-down", "search", "plus", "minus", "maximize", "minimize",
     "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "x", "link",
     /* the rail's alternatives, one shortlist per screen; see NAV_ICONS */
     "gauge", "building-2", "clipboard-list", "grid-2x2", "bed-double", "door-open", "ruler",
@@ -672,6 +693,10 @@ const SHEETS = {};
 LEVELS.forEach((lv) => {
   const code = `A-${204 + lv}`;
   SHEETS[`Niveau ${lv}`] = { code, img: `assets/plan-niveau-${lv}.jpg`,
+    /* The same sheet, cropped the same way, kept as vectors: read by pdf.js
+       and re-rendered at the zoom it is being looked at, so a dimension
+       string stays a line and does not turn into four grey pixels. */
+    pdf: `assets/plan-niveau-${lv}.pdf`,
     file: `${code}_PLAN_NIVEAU_${lv}.dwg`, rev: lv === 8 ? "R03" : "R04",
     date: lv === 8 ? "18 Oct" : "24 Oct" };
 });
@@ -1363,17 +1388,31 @@ function contentHTML() {
       /* Each drawing carries its own zoom on its own edge: a vertical slider
          the hand can push, the percentage under it, and on the plan the one
          button that frames the selected unit. */
-      const planRail = () => `<div class="zrail" data-side="left">
+      /* The rail is shown, and it can be folded away: it is the only chrome
+         standing between the hand and the drawing, and on a narrow pane
+         every pixel it takes is a pixel the sheet does not get. Folded, it
+         leaves one button to bring it back. */
+      const railToggle = (side, open) => `<span class="ztoggle" ${act("zrail", side)}
+        title="${open ? "Replier le curseur de zoom" : "Montrer le curseur de zoom"}">
+        ${icon(open ? (side === "plan" ? "chevron-left" : "chevron-right")
+          : (side === "plan" ? "chevron-right" : "chevron-left"))}</span>`;
+      const planRail = () => (V.zrail.plan
+        ? `<div class="zrail" data-side="left">
         <input class="zslider" type="range" min="${ZMIN}" max="${ZMAX}" step="1" value="${V.zoom}"
                data-zoom aria-label="Zoom du plan" title="Zoom du plan">
         <span class="zread hi" data-zread>${V.zoom}%</span>
         <span class="btnw" ${act("fitunit")} title="Cadrer l'unité sélectionnée sur le plan">${icon("search")}</span>
-      </div>`;
-      const modelRail = () => `<div class="zrail" data-side="right">
+        ${railToggle("plan", true)}
+      </div>`
+        : `<div class="zrail folded" data-side="left">${railToggle("plan", false)}</div>`);
+      const modelRail = () => (V.zrail.model
+        ? `<div class="zrail" data-side="right">
         <input class="zslider" type="range" min="0" max="100" step="1" value="${V.mzoom}"
                data-mzoom aria-label="Zoom de la maquette" title="Zoom de la maquette">
         <span class="zread hi" data-mread>${V.mzoom}%</span>
-      </div>`;
+        ${railToggle("model", true)}
+      </div>`
+        : `<div class="zrail folded" data-side="right">${railToggle("model", false)}</div>`);
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane drawing" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>${hostButton(kind === "plan" ? "plan" : "model")}</div>
@@ -1386,9 +1425,10 @@ function contentHTML() {
           ? `<div class="pb" style="padding:0;overflow:hidden;flex-direction:row;gap:0">
               ${planRail()}
               <div class="vp" data-vp>
-              <div class="plan ${cls}" data-img="${kind}"
+              <div class="plan ${cls}" data-img="${kind}" data-src="${planVector() ? "vector" : "image"}"
                    style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})">
                 <span class="lo"></span><span class="hi">${note}</span>
+                ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf></canvas>` : ""}
                 ${layers}${unitMarkHTML()}</div></div></div>`
           : `<div class="pb" style="padding:0;overflow:hidden;flex-direction:row;gap:0">
               <div class="model3d" data-building-model data-state="loading" role="region"
@@ -1526,18 +1566,20 @@ function inspectorHTML() {
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
         <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>
         <span class="hi" style="font-size:12px">${val}</span></div>`).join("")}
-      ${decides ? `<div class="tile" style="border-color:var(--ink)">
+      ${decides ? `<div class="decide">
+      <div class="tile" style="border-color:var(--ink)">
         <div class="lo bar" style="width:50%"></div><div class="hi" style="font-weight:600;font-size:12.5px">Pourquoi ce changement?</div>
         <div class="row" style="flex-wrap:wrap;gap:5px">${REASONS.map((m) => `<span class="chip" ${act("reason", m)} style="${m === V.reason ? "border-color:var(--ink)" : ""}">
           <span class="lo bar" style="width:40px"></span><span class="hi">${m}</span></span>`).join("")}</div>
-        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">${V.reason ? `raison retenue: ${V.reason}` : "aucune raison retenue — le bouton reste inactif"}</div>
+        ${V.reason ? `<div class="hi" style="font-size:11.5px;color:var(--ink-2)">raison retenue: ${V.reason}</div>` : ""}
         <div class="lo bar" style="width:100%;height:34px;border-radius:5px"></div>
         <input class="hi note" value="${V.note.replace(/"/g, "&quot;")}" placeholder="une phrase pour la personne suivante">
         ${V.settled[settleKey()] ? `<div class="hi" style="font-size:11.5px;color:var(--ink-2)">enregistré — ${V.settled[settleKey()]}</div>` : ""}
         <span class="btnw solid ${V.reason ? "" : "off"}" ${act("save")} style="justify-content:center"
           title="${V.reason ? "Enregistrer" : "Choisissez d'abord une raison"}"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Enregistrer la décision</span></span>
       </div>
-      <span class="btnw solid" ${act("autocad")} style="justify-content:center">${icon("external-link")}<span class="lo bar" style="width:70px;background:#fff;opacity:.6"></span><span class="hi">Ouvrir dans AutoCAD</span></span>`
+      <span class="btnw solid" ${act("autocad")} style="justify-content:center">${icon("external-link")}<span class="lo bar" style="width:70px;background:#fff;opacity:.6"></span><span class="hi">Ouvrir dans AutoCAD</span></span>
+      </div>`
       : `<div class="tile"><div class="lo col">${bars(3)}</div>
           <div class="hi" style="font-size:11.5px;color:var(--ink-2)">compté à partir des dessins, rien de saisi</div></div>`}
     </div>`;
@@ -1575,6 +1617,62 @@ function footerHTML() {
 
 const ZMIN = 100, ZMAX = 600;
 const vpEl = () => document.querySelector("[data-vp]");
+
+/* ------------------------------------------------- the sheet as vectors
+   The exported JPEG is one fixed resolution: past about 200 % it is a grid
+   of grey squares where the dimension strings were. The same crop also
+   exists as a PDF, which is the drawing's own lines, and pdf.js redraws it
+   at whatever zoom the pane is at. The toggle is in the panel because the
+   trade is real: vectors cost a megabyte a level and a render per zoom,
+   the picture costs nothing and is always there. */
+const planVector = () => V.planSrc === "vector" && !!sheet().pdf;
+let pdfLib = null;
+const pdfDocs = new Map();
+let pdfSeq = 0;
+let pdfTimer = null;
+
+async function renderSheetPdf() {
+  const el = vpEl();
+  if (!el || !planVector()) return;
+  const canvas = el.querySelector("[data-sheetpdf]");
+  const plan = el.querySelector(".plan");
+  if (!canvas || !plan) return;
+  const url = sheet().pdf;
+  const seq = ++pdfSeq;
+  try {
+    if (!pdfLib) {
+      pdfLib = await import("./vendor/pdfjs/pdf.min.mjs");
+      pdfLib.GlobalWorkerOptions.workerSrc = "./vendor/pdfjs/pdf.worker.min.mjs";
+    }
+    let doc = pdfDocs.get(url);
+    if (!doc) { doc = await pdfLib.getDocument(url).promise; pdfDocs.set(url, doc); }
+    const page = await doc.getPage(1);
+    /* Drawn at the size it is actually seen at: the element's own width,
+       times the zoom, times the screen's pixel ratio, with a ceiling so a
+       600 % view does not ask for a canvas no browser will allocate. */
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const want = Math.min(5000, Math.max(600, Math.round(plan.offsetWidth * (V.zoom / 100) * dpr)));
+    const base = page.getViewport({ scale: 1 });
+    const view = page.getViewport({ scale: want / base.width });
+    if (seq !== pdfSeq) return;                     // a newer request won
+    canvas.width = Math.round(view.width);
+    canvas.height = Math.round(view.height);
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport: view }).promise;
+  } catch (err) {
+    /* A missing or unreadable sheet falls back to the picture rather than
+       leaving an empty pane. */
+    say(`Feuille vectorielle illisible (${url}); retour à l'image.`);
+    V.planSrc = "image";
+    render();
+  }
+}
+
+/* Zooming fires continuously; the redraw waits for the hand to stop. */
+function scheduleSheetPdf() {
+  if (!planVector()) return;
+  clearTimeout(pdfTimer);
+  pdfTimer = setTimeout(renderSheetPdf, 180);
+}
 
 /* The sheet's box, laid out to fit the viewport the way the model fits its
    own: the drawing is contained, never cropped, so the two panes show the
@@ -1662,6 +1760,8 @@ function paintSheet() {
     label.style.transform = `translateY(${(label.dataset.side === "below" ? 2 / z : -(14 / z)).toFixed(2)}px)`;
   }
   el.querySelectorAll(".umark rect").forEach((r) => { r.style.strokeWidth = `${(1.6 / z).toFixed(3)}px`; });
+  /* The vectors are redrawn for the magnification they are now at. */
+  scheduleSheetPdf();
 }
 
 function wireViewport() {
@@ -1705,6 +1805,14 @@ function wireViewport() {
   /* Drawn once here: the markup carries the last transform, but the box it
      is measured against only exists after the pane has been laid out. */
   paintSheet();
+  /* The pane does not settle on one width at first paint: the model beside
+     it loads a canvas and takes its share late, a rail is folded, the panel
+     opens. Every one of those resizes this box, and a sheet laid out
+     against the old width would hang past the edge and be cut. */
+  if (!el.__ro) {
+    el.__ro = new ResizeObserver(() => paintSheet());
+    el.__ro.observe(el);
+  }
 }
 
 /* The pane changes width with the window, and the sheet is centred in it,
@@ -1947,6 +2055,9 @@ function onClick(e) {
     /* The unit the list is on, filling the pane: the move the plan is
        opened for, without hunting for it with the wheel. */
     case "fitunit": fitUnit(); break;
+    /* Folding a rail widens the pane beside it; paintSheet re-fits the
+       drawing to the box it just gained. */
+    case "zrail": V.zrail[value] = !V.zrail[value]; break;
     case "reason": V.reason = V.reason === value ? null : value; break;
     case "save":
       if (!V.reason) { say("Choisissez une raison: une décision sans raison ne s'enregistre pas."); break; }
@@ -2069,6 +2180,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   chrome: sel(["Light", "Black"]),
   homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
+  /* The drawing read as the exported picture, or as the vectors of the same
+     crop redrawn at the zoom in use. */
+  planSource: sel(["Image", "Vector"]),
   /* One shortlist per screen, so the rail can be judged against what the
      screen actually holds rather than against a default grid of squares. */
   railIcons: { _collapsed: false,
@@ -2118,6 +2232,7 @@ function applyDial(v) {
   V.chrome = v.chrome;
   V.homeLayout = v.homeLayout;
   V.isolate = v.isolate;
+  V.planSrc = String(v.planSource || "").toLowerCase() === "vector" ? "vector" : "image";
   /* The panel names the glyph in English and title-cases what it is given,
      so the label is matched without regard to case. */
   const pick = (screen, label) => {
