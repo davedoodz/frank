@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype C3 — où vit le nom du projet</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Same tokens as wireframe-c3, so a panel here can be lifted into the screen
+   without retuning anything. What is being judged is where the project name
+   sits and what it costs, not how it looks. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --bar:#dcdcdc; --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:28px 28px 64px}
+
+h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.lede{color:var(--ink-2);font-size:12.5px;max-width:74ch;margin-top:6px}
+.rule{height:1px;background:var(--line-2);margin:18px 0 22px}
+
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(520px,1fr));gap:22px}
+.panel{display:flex;flex-direction:column;gap:8px;min-width:0}
+.cap{display:flex;align-items:baseline;gap:8px}
+.cap .n{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+.cap .t{font-size:13px;font-weight:600}
+.why{font-size:11.5px;color:var(--ink-2);line-height:1.5}
+.cost{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+
+/* the mock ------------------------------------------------------------- */
+.mock{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--fill-2)}
+.frame{display:grid;grid-template-columns:72px 1fr;height:260px;background:var(--fill-2)}
+.frame.wide{grid-template-columns:132px 1fr}
+.frame.topbar{grid-template-columns:1fr;grid-template-rows:28px 1fr}
+
+.rail{display:flex;flex-direction:column;gap:2px;padding:8px 6px}
+.rail .ic{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 3px;
+  border-radius:8px;color:var(--ink-3);font-size:9px;text-align:center;line-height:1.15}
+.rail .ic.on{background:rgba(17,17,18,.085);color:var(--ink)}
+.rail.wide .ic{flex-direction:row;gap:7px;justify-content:flex-start;padding:6px 8px;font-size:10.5px;text-align:left}
+
+/* the project block, in each of the places it can live */
+.pj{display:flex;align-items:center;gap:7px;min-width:0}
+.pj .mark{width:18px;height:18px;border-radius:5px;background:#dfe7f5;color:#3a4f73;
+  font-size:9px;font-weight:600;display:grid;place-items:center;flex:0 0 18px}
+.pj .nm{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pj .sub{font-size:9.5px;color:var(--ink-3);white-space:nowrap}
+
+.railhead{padding:10px 8px 8px;display:flex;flex-direction:column;gap:5px;align-items:center}
+.railhead .mark{width:26px;height:26px;border-radius:7px;font-size:10px}
+.railhead .nm{font-size:10px;font-weight:600;text-align:center;line-height:1.2}
+.rail.wide .railhead{align-items:flex-start;padding:10px}
+.rail.wide .railhead .nm{text-align:left;font-size:11.5px}
+.railrule{height:1px;background:var(--line-2);margin:4px 6px 6px}
+
+.body{display:flex;flex-direction:column;min-width:0}
+.strip{height:34px;display:flex;align-items:center;gap:4px;padding:0 10px;flex:0 0 auto;min-width:0}
+.strip .tab{font-size:10.5px;color:var(--ink-3);padding:4px 7px;border-radius:7px;white-space:nowrap}
+.strip .tab.on{background:rgba(17,17,18,.085);color:var(--ink);font-weight:500}
+.strip .crumb{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+.strip .crumb.on{color:var(--ink);font-weight:600}
+.strip .div{width:1px;height:14px;background:var(--line-2);margin:0 4px;flex:0 0 1px}
+.strip .scroll{display:flex;align-items:center;gap:4px;overflow:hidden;min-width:0;position:relative;flex:1}
+.strip .scroll::after{content:"";position:absolute;right:0;top:0;bottom:0;width:26px;
+  background:linear-gradient(90deg,rgba(246,246,246,0),var(--fill-2))}
+.pin{display:flex;align-items:center;gap:7px;padding-right:9px;margin-right:5px;
+  border-right:1px solid var(--line-2);flex:0 0 auto}
+.switch{display:inline-flex;align-items:center;gap:6px;padding:3px 7px;border:1px solid var(--line);
+  border-radius:7px;background:#fff;flex:0 0 auto}
+
+.appbar{display:flex;align-items:center;justify-content:center;gap:7px;
+  border-bottom:1px solid var(--line-2);background:var(--fill)}
+.appbar .nm{font-size:11px;font-weight:600}
+.appbar .side{position:absolute;left:10px;font-size:10px;color:var(--ink-3)}
+
+.work{flex:1;margin:0 10px 10px;background:#fff;border:1px solid rgba(17,17,18,.07);
+  border-radius:10px;box-shadow:0 1px 2px rgba(17,17,18,.04);display:flex;flex-direction:column;
+  overflow:hidden;min-width:0}
+.hd{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line-2)}
+.hd .ttl{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.hd .sub{font-size:10.5px;color:var(--ink-2);margin-top:2px}
+.hd .eyebrow{font-size:10px;color:var(--ink-3);font-weight:500;letter-spacing:.02em}
+.hd .acts{margin-left:auto;display:flex;align-items:center;gap:6px}
+.btn{font-size:10px;color:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:3px 7px;white-space:nowrap}
+.chip{font-size:10px;color:var(--ink-2);border:1px solid var(--line-2);border-radius:999px;
+  padding:2px 8px;display:inline-flex;align-items:center;gap:5px;background:var(--fill-2);white-space:nowrap}
+
+.cols{flex:1;display:grid;grid-template-columns:96px 1fr;min-height:0}
+.list{border-right:1px solid var(--line-2);padding:8px;display:flex;flex-direction:column;gap:5px}
+.list .row{height:9px;border-radius:3px;background:var(--bar)}
+.list .row.on{background:var(--ink-3)}
+.plan{margin:8px;border:1px dashed var(--line);border-radius:var(--r);
+  background:repeating-linear-gradient(0deg,var(--fill-2) 0 13px,transparent 13px 14px),
+    repeating-linear-gradient(90deg,var(--fill-2) 0 13px,transparent 13px 14px);
+  display:grid;place-items:center;color:var(--ink-3);font-size:10px}
+
+svg.lu{width:13px;height:13px;stroke-width:1.8;color:currentColor;flex:0 0 13px}
+.rail .ic svg.lu{width:15px;height:15px}
+footer{margin-top:26px;font-size:11.5px;color:var(--ink-3);max-width:74ch}
+</style>
+</head>
+<body>
+<h1>Où vit le nom du projet</h1>
+<p class="lede">Neuf façons de garder « Le Baldwin III » à l'écran en permanence, sur le même écran:
+Unités, niveau 3. Chaque vignette montre l'endroit, ce qu'il gagne et ce qu'il coûte. Le reste de
+l'interface est identique d'une vignette à l'autre, pour que la comparaison porte sur une seule chose.</p>
+<div class="rule"></div>
+<div class="sheet" id="sheet"></div>
+<footer id="foot"></footer>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* ------------------------------------------------------------- the sprite */
+
+const toPascal = (n) => n.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
+function sprite() {
+  const names = ["layout-grid", "layers", "table", "calendar-check", "file", "folder",
+    "chevron-right", "chevron-down", "external-link", "box"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "position:absolute;width:0;height:0;overflow:hidden");
+  s.innerHTML = defs;
+  document.body.appendChild(s);
+}
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+
+/* --------------------------------------------------------------- the data */
+
+const PROJECT = "Le Baldwin III";
+const INITIALS = "LB";
+const NAV = [["layout-grid", "Aperçu"], ["layers", "Unités"], ["table", "Quantités"],
+  ["calendar-check", "Suivi"], ["file", "Fichiers"]];
+const LEVELS = [8, 7, 6, 5, 4, 3, 2, 1];
+
+/* Eight placements. `where` is the single thing that changes; `why` and
+   `cost` are the argument for and against putting the name there. */
+const WAYS = [
+  { id: "crumb", t: "Fil d'Ariane, avant les niveaux",
+    why: "Le nom est sur le chemin: on le lit en même temps qu'on lit où l'on est, et il ramène à l'index d'un clic.",
+    cost: "Il partage la bande avec les niveaux. À huit niveaux la bande est déjà pleine, et le nom se fait pousser." },
+  { id: "railhead", t: "En tête du rail, avec la pastille",
+    why: "Position fixe, jamais touchée par le contenu. La pastille colorée identifie le projet avant même la lecture.",
+    cost: "Le rail étroit coupe un nom long en deux lignes. Lisible, mais petit." },
+  { id: "railwide", t: "Rail large, nom sur une ligne",
+    why: "Le nom entier, à la même place que la pastille, et les destinations gagnent leur libellé au passage.",
+    cost: "60 px de large en moins pour le dessin. C'est le prix le plus élevé de la série." },
+  { id: "switch", t: "Sélecteur de projet, à gauche de la bande",
+    why: "Le nom est aussi le bouton pour en changer: une seule chose à apprendre, et le changement de projet devient visible.",
+    cost: "Un bouton invite à être cliqué. Si changer de projet est rare, c'est une invitation inutile." },
+  { id: "title", t: "Le nom devient le titre",
+    why: "Le plus gros caractère de l'écran est le projet; l'étage passe en sous-titre, où il reste lisible.",
+    cost: "Le titre ne dit plus ce que l'écran montre. Sur Unités, on lit le projet avant de lire le niveau." },
+  { id: "eyebrow", t: "Surtitre au-dessus du titre",
+    why: "Le projet au-dessus, l'écran en dessous: l'ordre de lecture est le bon, et rien n'est perdu.",
+    cost: "Deux lignes de titre au lieu d'une, sur chaque écran." },
+  { id: "pin", t: "Épinglé à gauche, les niveaux défilent dessous",
+    why: "Le nom tient sa place même quand les onglets débordent. La bande peut porter autant de niveaux qu'il en faut.",
+    cost: "Il faut un défilement horizontal et un dégradé pour dire qu'il continue." },
+  { id: "appbar", t: "Barre de document, au-dessus de la carte",
+    why: "Comme un titre de fenêtre: le projet appartient à l'application, pas à l'écran. Vrai partout sans exception.",
+    cost: "28 px de hauteur sur tous les écrans, pour une information qui ne change presque jamais." },
+  { id: "chip", t: "Étiquette dans la carte, près des actions",
+    why: "Le nom est là où l'on agit: juste avant « Ouvrir dans AutoCAD », au moment où il faut savoir sur quel projet on écrit.",
+    cost: "Loin du coin haut-gauche où l'œil cherche une identité. Se lit comme un filtre plutôt que comme le projet." },
+];
+
+/* ------------------------------------------------------------- the pieces */
+
+const pj = (sub) => `<span class="pj"><span class="mark">${INITIALS}</span>
+  <span class="nm">${PROJECT}</span>${sub ? `<span class="sub">${sub}</span>` : ""}</span>`;
+
+const railItems = (wide) => NAV.map(([g, n]) =>
+  `<div class="ic ${n === "Unités" ? "on" : ""}">${icon(g)}<span>${n}</span></div>`).join("");
+
+const levelTabs = (n = LEVELS.length) => LEVELS.slice(0, n).map((lv) =>
+  `<span class="tab ${lv === 3 ? "on" : ""}">Niveau ${lv}</span>`).join("")
+  + `<span class="tab">Tous les niveaux</span>`;
+
+const backCrumb = `<span class="crumb">${icon("folder")}Tous les projets</span>`;
+
+const header = (way) => {
+  if (way === "title") {
+    return `<div class="hd"><div><div class="ttl">${PROJECT}</div>
+      <div class="sub">Étage type — niveau 3 · 14 unités · 1 écart ouvert</div></div>
+      <div class="acts"><span class="btn">${icon("external-link")} AutoCAD</span><span class="btn">Exporter</span></div></div>`;
+  }
+  if (way === "eyebrow") {
+    return `<div class="hd"><div><div class="eyebrow">${PROJECT}</div>
+      <div class="ttl">Étage type — niveau 3</div>
+      <div class="sub">14 unités · 1 écart ouvert</div></div>
+      <div class="acts"><span class="btn">${icon("external-link")} AutoCAD</span><span class="btn">Exporter</span></div></div>`;
+  }
+  /* Only the chip variant puts the name in the card: everywhere else the
+     header stays about the screen, and the name lives elsewhere. */
+  const tag = way === "chip" ? `<span class="chip">${icon("box")}${PROJECT}</span>` : "";
+  return `<div class="hd"><div><div class="ttl">Étage type — niveau 3</div>
+    <div class="sub">14 unités · 1 écart ouvert</div></div>
+    <div class="acts">${tag}<span class="btn">${icon("external-link")} AutoCAD</span><span class="btn">Exporter</span></div></div>`;
+};
+
+const strip = (way) => {
+  if (way === "crumb") {
+    return `<div class="strip">${backCrumb}${icon("chevron-right")}
+      <span class="crumb on">${PROJECT}</span><span class="div"></span>
+      <div class="scroll">${levelTabs(5)}</div></div>`;
+  }
+  if (way === "switch") {
+    return `<div class="strip"><span class="switch">${pj()}${icon("chevron-down")}</span>
+      <span class="div"></span><div class="scroll">${levelTabs(5)}</div></div>`;
+  }
+  if (way === "pin") {
+    return `<div class="strip"><span class="pin">${pj()}</span>
+      <div class="scroll">${levelTabs()}</div></div>`;
+  }
+  return `<div class="strip">${backCrumb}<span class="div"></span>
+    <div class="scroll">${levelTabs(6)}</div></div>`;
+};
+
+const rail = (way) => {
+  const wide = way === "railwide";
+  const head = way === "railhead" || wide
+    ? `<div class="railhead"><span class="mark">${INITIALS}</span><span class="nm">${PROJECT}</span></div>
+       <div class="railrule"></div>` : "";
+  return `<nav class="rail ${wide ? "wide" : ""}">${head}${railItems(wide)}</nav>`;
+};
+
+const work = (way) => `<div class="work">${header(way)}
+  <div class="cols">
+    <div class="list">${[0, 1, 2, 3, 4, 5].map((i) => `<div class="row ${i === 1 ? "on" : ""}"></div>`).join("")}</div>
+    <div class="plan">plan du niveau 3</div>
+  </div></div>`;
+
+function mock(way) {
+  const wide = way === "railwide";
+  if (way === "appbar") {
+    return `<div class="mock"><div class="frame topbar">
+      <div class="appbar" style="position:relative">
+        <span class="side">${icon("folder")}</span>${pj()}</div>
+      <div style="display:grid;grid-template-columns:72px 1fr;min-height:0">
+        ${rail(way)}
+        <div class="body">${strip(way)}${work(way)}</div>
+      </div></div></div>`;
+  }
+  return `<div class="mock"><div class="frame ${wide ? "wide" : ""}">
+    ${rail(way)}
+    <div class="body">${strip(way)}${work(way)}</div>
+  </div></div>`;
+}
+
+/* --------------------------------------------------------------- the page */
+
+sprite();
+document.getElementById("sheet").innerHTML = WAYS.map((w, i) => `<section class="panel">
+  <div class="cap"><span class="n">${String(i + 1).padStart(2, "0")}</span><span class="t">${w.t}</span></div>
+  ${mock(w.id)}
+  <div class="why">${w.why}</div>
+  <div class="cost">Coût: ${w.cost}</div>
+</section>`).join("");
+
+document.getElementById("foot").textContent =
+  "Les neuf sont exclusives deux à deux sauf 06 et 08, qui se cumulent avec n'importe laquelle des "
+  + "autres. Le nom n'a besoin d'être à l'écran qu'une fois: deux endroits à la fois se lisent comme "
+  + "deux projets différents.";
+</script>
+</body>
+</html>
