@@ -39,8 +39,9 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .rail{border-right:1px solid var(--line-2);background:var(--fill-2);
   display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px}
 .rail.wide{align-items:stretch;padding:10px}
-.rail .ic{width:28px;height:28px;border-radius:var(--r);background:var(--fill);
-  display:grid;place-items:center;color:var(--ink-3)}
+.rail .ic{width:52px;height:auto;min-height:28px;border-radius:var(--r);background:var(--fill);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:5px 2px;color:var(--ink-3)}
 .rail .ic.on{background:var(--bar);color:var(--ink)}
 .rail .row{display:flex;align-items:center;gap:8px;padding:4px;border-radius:var(--r)}
 .rail .row.on{background:var(--bar)}
@@ -84,6 +85,9 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .rail[data-labels-mode="Uppercase"] .hi,.tabs[data-labels-mode="Uppercase"] .hi{
   text-transform:uppercase;letter-spacing:.07em;font-size:11px}
 .rail[data-labels-mode="Short code"] .hi,.tabs[data-labels-mode="Short code"] .hi{letter-spacing:.04em}
+.rail .ic .cap{font-size:9px;line-height:1.15;text-align:center;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-3)}
+.rail .ic.on .cap{color:var(--ink)}
 .rail .code{font-size:9.5px;letter-spacing:.03em;color:inherit}
 .rail .sct{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
   padding:8px 4px 2px}
@@ -131,6 +135,10 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .plan{flex:1;background:repeating-linear-gradient(0deg,var(--fill-2) 0 15px,transparent 15px 16px),
   repeating-linear-gradient(90deg,var(--fill-2) 0 15px,transparent 15px 16px);
   border:1px dashed var(--line);border-radius:var(--r);display:grid;place-items:center;color:var(--ink-3);font-size:11.5px}
+/* A card with no drawing behind it shows the picture glyph, not a sentence
+   describing a picture. */
+.plan.ghost{color:var(--line-2)}
+.plan.ghost .lu{width:22px;height:22px;stroke-width:1.5}
 .tbl{width:100%;border-collapse:collapse;font-size:12px}
 .tbl th{font-weight:500;color:var(--ink-3);font-size:11px;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line-2)}
 .tbl td{padding:6px 8px;border-bottom:1px solid var(--line-2);color:var(--ink-2)}
@@ -250,9 +258,9 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
 /* Lucide ships as a sprite-less library, so the icons are stamped once into
    a hidden sprite and referenced by id afterwards. */
 function sprite() {
-  const names = ["layout-grid", "layers", "table", "scale", "git-compare", "calendar-check",
+  const names = ["home", "folder", "layout-grid", "layers", "table", "scale", "git-compare", "calendar-check",
     "file", "box", "pen-line", "chevron-right", "chevron-down", "search", "plus", "minus", "maximize",
-    "external-link", "check", "alert-triangle", "info", "clock", "list", "circle"];
+    "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "image"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
     if (!node) return "";
@@ -382,7 +390,7 @@ const PROJECTS = [
 ];
 
 const pcard = (p, big) => `<div class="tile">
-  <div class="plan" style="min-height:${big ? 92 : 62}px;flex:0 0 auto"><span class="hi">first sheet</span></div>
+  <div class="plan ghost" style="min-height:${big ? 92 : 62}px;flex:0 0 auto">${icon("image")}</div>
   <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
   <div><span class="lo bar lt" style="width:72%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
   <div><span class="lo bar lt" style="width:60%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[2]} · ${p[3]}</span></div>
@@ -418,7 +426,7 @@ const HOMES = {
 
   "List + preview": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
       ${pane("projects", "All projects", `${plist(0)}<span class="btnw solid" style="justify-content:center">${icon("plus")}<span class="hi">New project</span></span>`, "flex:.85")}
-      ${pane("preview", "Alder Court", `<div class="plan" style="min-height:140px"><span class="hi">first sheet of the selected project</span></div>
+      ${pane("preview", "Alder Court", `<div class="plan ghost" style="min-height:140px">${icon("image")}</div>
         <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">48 units · 6 levels · read 6 min ago</span></div></div>`, "flex:1.5")}
     </div>`,
 
@@ -450,7 +458,7 @@ function navHTML() {
     const head = sections && SECTIONS[i] ? `<div class="sct hi">${SECTIONS[i]}</div>` : "";
     if (wide) return `${head}<div class="row ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%"></span>${text}</div>`;
     if (stack) return `<div class="stk ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%;height:6px"></span>${text}</div>`;
-    return `<div class="ic ${on}" data-screen="${name}" title="${name}">${g || `<span class="code hi">${SHORT(name)}</span>`}</div>`;
+    return `<div class="ic ${on}" data-screen="${name}" title="${name}">${g || `<span class="code hi">${SHORT(name)}</span>`}${g && name !== "Home" ? `<span class="cap hi">${navLabel(name, i)}</span>` : ""}</div>`;
   }).join("");
   const cls = wide ? "wide" : stack ? "stack" : "";
   return `<nav class="rail rg ${solo("nav")} ${cls}" data-rg="nav" data-fi="${fiOf("nav")}"

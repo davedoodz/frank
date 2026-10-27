@@ -23,7 +23,7 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 
 /* ------------------------------------------------------------- frame */
 .frame{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;
-  display:grid;grid-template-columns:56px 1fr;height:min(78vh,720px);min-height:560px}
+  display:grid;grid-template-columns:78px 1fr;height:min(78vh,720px);min-height:560px}
 .frame[data-nav="wide"]{grid-template-columns:184px 1fr}
 .frame[data-nav="stack"]{grid-template-columns:76px 1fr}
 .frame[data-nav="none"]{grid-template-columns:1fr}
@@ -34,6 +34,12 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .rail svg{width:15px;height:15px;stroke-width:1.9;flex:0 0 15px}
 .rail .r span{display:none;font-size:12px;color:var(--ink-2)}
 .frame[data-nav="wide"] .rail .r span,.frame[data-nav="stack"] .rail .r span{display:block}
+/* The icon rail carries a caption under each icon. Home is the one exception:
+   the house reads on its own and sits apart at the top. */
+.frame[data-nav="rail"] .rail .r span{display:block;font-size:9px;line-height:1.15;
+  text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frame[data-nav="rail"] .rail .r[data-s="Home"] span{display:none}
+.frame[data-nav="rail"] .rail .r{height:auto;min-height:30px;flex-direction:column;gap:2px;padding:5px 3px}
 .frame[data-nav="stack"] .rail .r{height:auto;flex-direction:column;gap:4px;padding:6px 2px;
   font-size:10px;text-align:center}
 .rail .code{font-size:9.5px;letter-spacing:.03em;color:var(--ink-2)}
@@ -157,6 +163,10 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
   position:relative;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:11px;text-align:center;padding:8px}
 .plan svg{position:absolute;inset:0;width:100%;height:100%}
 .plan .cap{position:relative;z-index:2}
+/* A card with no drawing behind it shows the picture glyph, not a sentence
+   describing a picture. */
+.plan.ghost{color:var(--line-2)}
+.plan.ghost svg{position:static;inset:auto;width:22px;height:22px;stroke-width:1.5}
 /* High fidelity swaps the hatch for the drawing it stands for: the floor
    plan, the elevation, or the massing view, all from the platform assets. */
 .frame[data-fi="high"] .plan[data-img]{background-repeat:no-repeat;background-position:center;
@@ -499,7 +509,7 @@ const PROJECTS = [
 
 const card = (p, big) => `<section class="blk">
   <div class="bb">
-    <div class="plan" style="min-height:${big ? 92 : 64}px"><span class="cap">floor plan, first sheet</span></div>
+    <div class="plan ghost" style="min-height:${big ? 92 : 64}px">${ico("image")}</div>
     <div><span class="lo bar d" style="width:52%;height:11px"></span><span class="hi" style="font-weight:600">${p[0]}</span></div>
     <div><span class="lo bar" style="width:70%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
     <div><span class="lo bar" style="width:58%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[2]} · ${p[3]}</span></div>
@@ -536,7 +546,7 @@ const HOMES = {
     <div class="col" style="flex:1.6">
       <section class="blk"><span class="tag">preview</span>
         <div class="bh"><span class="lo bar d" style="width:120px;height:10px"></span><span class="hi">Alder Court</span></div>
-        <div class="bb"><div class="plan"><span class="cap">first sheet of the selected project</span></div>
+        <div class="bb"><div class="plan ghost">${ico("image")}</div>
           ${table(["Read", "Value", "Source"], [["Units", "48", "A-201 R04"], ["Levels", "6", "A-201 R04"], ["Open", "6 differences", "24 Oct"]])}
         </div></section></div>`,
 
