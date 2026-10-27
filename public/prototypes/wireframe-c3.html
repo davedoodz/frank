@@ -409,7 +409,7 @@ const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1))
 
 const SCREENS = {
   "Projets": { icon: "folder", regions: ["header", "content"], steps: {}, home: true, index: true },
-  "Vue d'ensemble": {
+  "Aperçu": {
     icon: "layout-grid",
     regions: ["header", "content", "inspector"],
     steps: { content: 1, inspector: 2 },
@@ -600,17 +600,17 @@ const typoHTML = () => {
   }).join("");
 };
 
-const NAV = [["layout-grid", "Vue d'ensemble"], ["layers", "Unités"], ["table", "Quantités"],
+const NAV = [["layout-grid", "Aperçu"], ["layers", "Unités"], ["table", "Quantités"],
   ["git-compare", "Coordination"], ["calendar-check", "Suivi"], ["file", "Fichiers"]];
 
 /* The cross-screen journey the prototype is built around. Everything else
    on the screen exists to serve one of these six moves. */
 const JOURNEY = [
-  { n: 1, t: "Un dessin a été enregistré", d: "La page du projet dit ce qui a bougé depuis la dernière lecture.", s: "Vue d'ensemble" },
+  { n: 1, t: "Un dessin a été enregistré", d: "La page du projet dit ce qui a bougé depuis la dernière lecture.", s: "Aperçu" },
   { n: 2, t: "Ouvrir l'unité qui a bougé", d: "Choisissez-la dans la liste, ou sur le plan lui-même.", s: "Unités" },
   { n: 3, t: "Voir les deux dessins à la fois", d: "Le plan 2D à côté de la maquette 3D, l'écart mesuré.", s: "Unités" },
   { n: 4, t: "Décider, et dire pourquoi", d: "La décision ne s'enregistre pas sans raison.", s: "Unités" },
-  { n: 5, t: "Vérifier ce que ça brise", d: "Quel article, quel conflit, quelle échéance.", s: "Vue d'ensemble" },
+  { n: 5, t: "Vérifier ce que ça brise", d: "Quel article, quel conflit, quelle échéance.", s: "Aperçu" },
   { n: 6, t: "Sortir les chiffres", d: "Les tableaux et la note pour le comité de la ville.", s: "Quantités" },
 ];
 
@@ -813,7 +813,8 @@ function navHTML() {
    rail lists the screens, the strip drops to the current screen's own views. */
 const CONTEXT = {
   "Projets": ["En cours", "Archivés"],
-  "Vue d'ensemble": ["Ce qui a changé", "Totaux", "Zonage et code", "Ce qui bloque"],
+  /* Aperçu has no views: the whole project reads on one page, so the strip
+     above it carries nothing but the way back to the index. */
   "Unités": [...LEVELS.map((lv) => `Niveau ${lv}`), "Tous les niveaux"],
   "Quantités": ["Unités", "Superficies", "Fenêtres", "Matériaux"],
   "Coordination": ["Structure", "Mécanique", "Architecture"],
@@ -835,12 +836,16 @@ function tabsHTML() {
       ${bare ? `<span class="hi code">${SHORT(name)}</span>` : `<span class="hi">${navLabel(name, i)}</span>`}</button>`;
 
   let items;
-  const views = CONTEXT[V.screen] || ["Vue d'ensemble"];
+  const views = CONTEXT[V.screen] || [];
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
   const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
   if (SCREENS[V.screen].index) {
     items = `<span class="crumb on hi">${icon("folder")}Tous les projets</span><span class="sp"></span>`;
+  } else if (!views.length) {
+    /* A screen that reads on one page has nothing to filter, so the strip
+       carries the project's name and the way back, and no tabs at all. */
+    items = `${back}${icon("chevron-right")}<span class="crumb on hi">${V.project}</span><span class="sp"></span>`;
   } else if (mode === "Rail + view menu") {
     /* One button that steps through the views, because a menu that cannot
        open is not a control. */
@@ -875,7 +880,7 @@ function headerHTML() {
   const unresolved = ARTICLES.filter((a) => a[4] !== "conforme").length;
   const open = Object.keys(V.settled).length;
   const title = { "Projets": ["Projets", `${PROJECTS.length} en cours`],
-    "Vue d'ensemble": [V.project, `8 étages · 104 unités · ${unresolved} articles non résolus`],
+    "Aperçu": [V.project, `8 étages · 104 unités · ${unresolved} articles non résolus`],
     "Unités": [`Étage type — ${viewOf("Unités").toLowerCase()}`, `${rowsOf("Unités").length} unités · ${rowsOf("Unités").filter((r) => r[1] === "1 écart").length} écarts ouverts`],
     "Quantités": ["Quantités", `${viewOf("Quantités")} · compté à partir des dessins, rien de saisi`],
     "Coordination": ["Coordination", `${rowsOf("Coordination").length} croisements en ${viewOf("Coordination").toLowerCase()} · ${open} réglés`],
@@ -959,25 +964,21 @@ function contentHTML() {
         <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div></div>`;
       return `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap)">${plan()}${model()}</div>`;
     },
-    /* The overview carries the four readings of the project and, under them,
-       the zoning and code block that used to be its own screen: the articles
-       that touch this project, the measured number against the required one,
-       and the inputs still missing to conclude. The view above decides which
-       of the two is on screen, so the strip is a filter and not a label. */
-    "Vue d'ensemble": () => {
-      const view = viewOf("Vue d'ensemble");
+    /* Aperçu is one page, not four tabs. The project opens on everything it
+       knows at once: what changed, the totals, and the zoning and code block
+       that used to be its own screen. Nothing here is worth a click to see. */
+    "Aperçu": () => {
       const a = ARTICLES[V.article];
-      const tiles = {
-        "Ce qui a changé": ["Ce qui a changé depuis la dernière lecture", "Les deux sources connectées"],
-        "Totaux": ["Étage type — 14 unités", "Répartition des typologies"],
-        "Ce qui bloque": ["Croisements ouverts", "Articles non résolus"],
-      }[view];
-      const grid = tiles ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)">
-        ${tiles.map((t) => `<div class="tile">
+      const tiles = [["Ce qui a changé depuis la dernière lecture", "lignes lues dans les dessins"],
+        ["Les deux sources connectées", "plan et maquette, même niveau"],
+        ["Étage type — 14 unités", "typologies et superficies"],
+        ["Répartition des typologies", "part de chaque type au projet"]];
+      const grid = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)">
+        ${tiles.map(([t, note]) => `<div class="tile">
           <div class="lo bar" style="width:60%"></div><div class="hi" style="font-weight:600">${t}</div>
           <div class="lo col">${bars(4)}</div>
-          <div class="hi" style="color:var(--ink-2);font-size:11.5px">liste de lignes lues dans les dessins</div></div>`).join("")}</div>` : "";
-      const zoning = (view === "Zonage et code" || view === "Ce qui bloque") ? `<div class="pane" style="flex:0 0 auto">
+          <div class="hi" style="color:var(--ink-2);font-size:11.5px">${note}</div></div>`).join("")}</div>`;
+      const zoning = `<div class="pane" style="flex:0 0 auto">
           <div class="ph">${icon("scale")}<span class="lo bar" style="width:90px"></span>
             <span class="hi">Zonage et code</span><span style="flex:1"></span>
             <span class="chip"><span class="lo bar" style="width:52px"></span><span class="hi">${ARTICLES.filter((x) => x[4] !== "conforme").length} non résolus</span></span></div>
@@ -996,7 +997,7 @@ function contentHTML() {
               <div class="hi" style="font-size:12px;color:var(--ink-2)">lecture simple de l'écart, puis ce qui manque pour conclure</div></div>
             <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
               <span class="hi" style="font-size:11.5px">données manquantes, communes à tous les articles</span></div></div>
-          </div></div>` : "";
+          </div></div>`;
       return `<div class="col" style="flex:1;gap:var(--gap)">${grid}${zoning}</div>`;
     },
     "Quantités": () => {
@@ -1055,7 +1056,7 @@ function inspectorHTML() {
   if (mode === "Hidden") return "";
   const step = V.journey ? SCREENS[V.screen].steps.inspector : null;
   const row = selRow(V.screen);
-  const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`, "Vue d'ensemble": "Ce qui bloque",
+  const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`, "Aperçu": "Ce qui bloque",
     "Coordination": "Décision", "Suivi": "Échéances et signaux" }[V.screen] || "Détail";
   /* A decision panel on the screens where something is decided; a short
      read-only column everywhere else. */
@@ -1072,7 +1073,7 @@ function inspectorHTML() {
   const rows = {
     "Unités": unitRows[UNIT_TABS[V.utab]],
     "Coordination": [["Niveau", "5"], ["Où", "corridor, axe 4"], ["Dessins", "mécanique + structure"], ["Unité", "507"]],
-    "Vue d'ensemble": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Émission du permis", "21 Nov"], ["Données manquantes", "10"]],
+    "Aperçu": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Émission du permis", "21 Nov"], ["Données manquantes", "10"]],
     "Suivi": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Croisements ouverts", "4"], ["Articles à lire", "5"]],
   }[V.screen] || [["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"]];
 
@@ -1299,7 +1300,7 @@ function onClick(e) {
     }
     case "open":
       V.project = value;
-      V.screen = "Vue d'ensemble";
+      V.screen = "Aperçu";
       dial.setValue("screen", FR_SCREEN[V.screen]);
       break;
     /* A project is not created by a click: it is a folder on the server that
@@ -1340,9 +1341,10 @@ function onClick(e) {
     case "autocad": say("Remise à AutoCAD: le dessin s'ouvre sur l'unité, la décision suit."); break;
     case "export": say(`Export préparé: ${screen}${CONTEXT[screen] ? ` · ${viewOf(screen)}` : ""}.`); break;
     case "readarticle":
-      V.screen = "Vue d'ensemble";
+      /* Aperçu holds the articles on the same page, so the link only has to
+         select the one the strip is talking about. */
+      V.screen = "Aperçu";
       dial.setValue("screen", FR_SCREEN[V.screen]);
-      V.view["Vue d'ensemble"] = viewsOf("Vue d'ensemble").indexOf("Zonage et code");
       V.article = ARTICLES.findIndex((a) => a[0].startsWith("3.2.3.1"));
       break;
     default: return;
@@ -1354,7 +1356,7 @@ function onClick(e) {
 
 const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
 /* The panel names a screen in English; the prototype knows it in French. */
-const SCREEN_FR = { Projects: "Projets", Overview: "Vue d'ensemble", Units: "Unités",
+const SCREEN_FR = { Projects: "Projets", Overview: "Aperçu", Units: "Unités",
   Quantities: "Quantités", Coordination: "Coordination", Tracking: "Suivi", Files: "Fichiers" };
 const FR_SCREEN = Object.fromEntries(Object.entries(SCREEN_FR).map(([en, fr]) => [fr, en]));
 
