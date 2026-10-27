@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Where the projects live — five ways</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<link rel="stylesheet" href="vendor/dialkit/styles.css">
+<style>
+/* Same grey ramp, type and spacing as wireframe C. Nothing here is coloured. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2; --fill:#ededed; --fill-2:#f6f6f6;
+  --paper:#fff; --page:#fafafa; --bar:#dcdcdc;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+html{-webkit-font-smoothing:antialiased}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45}
+
+.stage{padding:22px 24px 44px;max-width:1560px;margin:0 auto}
+@media (min-width:1200px){.stage{padding-right:356px}}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);font-size:12.5px;margin:3px 0 18px;max-width:78ch}
+
+/* one option --------------------------------------------------------- */
+.opt{border:1px solid var(--line-2);border-radius:8px;background:var(--paper);margin-bottom:14px;overflow:hidden}
+.opt > .oh{display:flex;align-items:baseline;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-2)}
+.opt > .oh .n{font-size:11px;color:var(--ink-3);min-width:14px}
+.opt > .oh h2{font-size:13.5px;font-weight:600}
+.opt > .oh .rule{font-size:12px;color:var(--ink-2)}
+.opt > .oh .pick{margin-left:auto;font-size:11px;color:var(--ink);border:1px solid var(--line);
+  border-radius:999px;padding:2px 9px;background:var(--fill-2)}
+.opt > .ob{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+.opt .cost{grid-column:1/-1;font-size:11.5px;color:var(--ink-3);border-top:1px solid var(--line-2);padding-top:9px}
+
+.shot{min-width:0}
+.shot > .cap{font-size:11px;color:var(--ink-3);margin-bottom:6px}
+
+/* the miniature screen ------------------------------------------------ */
+.frame{border:1px solid var(--line-2);border-radius:6px;background:var(--paper);overflow:hidden;
+  display:grid;grid-template-columns:76px 1fr;height:268px}
+.frame.norail{grid-template-columns:1fr}
+.frame.sw{grid-template-columns:116px 1fr}
+.frame.twocol{grid-template-columns:40px 76px 1fr}
+.frame.twocol.sw{grid-template-columns:40px 116px 1fr}
+
+.rail{border-right:1px solid var(--line-2);background:var(--fill-2);padding:8px 6px;
+  display:flex;flex-direction:column;gap:4px;min-width:0}
+.rail .r{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;border-radius:6px;
+  color:var(--ink-3);cursor:pointer}
+.rail .r span{font-size:9.5px;line-height:1.15;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rail .r:hover{background:var(--fill-2);color:var(--ink-2)}
+.rail .r.on{background:var(--fill);color:var(--ink)}
+.rail svg{width:15px;height:15px;stroke-width:1.9}
+.rail .sep{height:1px;background:var(--line-2);margin:5px 2px}
+.rail .sct{font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:4px 3px 1px}
+
+/* the project switcher at the top of the rail */
+.switch{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:5px;
+  background:var(--paper);padding:5px 6px;cursor:pointer;min-width:0}
+.rail .switch svg:last-child{margin-left:auto}
+.switch:hover{background:var(--fill-2)}
+.switch .nm{font-size:10px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.switch svg{width:12px;height:12px;flex:0 0 12px;color:var(--ink-3)}
+.switch.idx{background:var(--fill);border-color:var(--line)}
+
+/* the narrow projects column */
+.pcol{border-right:1px solid var(--line-2);background:var(--fill);padding:8px 5px;display:flex;
+  flex-direction:column;align-items:center;gap:6px}
+.pcol .av{width:26px;height:26px;border-radius:6px;border:1px solid var(--line-2);background:var(--paper);
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-2);cursor:pointer}
+.pcol .av:hover{border-color:var(--line);color:var(--ink)}
+.pcol .av.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.pcol .av.add{border-style:dashed;color:var(--ink-3)}
+
+.main{display:flex;flex-direction:column;min-width:0}
+.tabs{height:32px;flex:0 0 auto;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:4px;padding:0 8px;min-width:0}
+.tabs button{font:inherit;font-size:11px;border:0;background:transparent;color:var(--ink-2);
+  padding:4px 7px;border-radius:5px;cursor:pointer;white-space:nowrap}
+.tabs button:hover{background:var(--fill-2);color:var(--ink)}
+.tabs button.on{background:var(--fill);color:var(--ink);font-weight:500}
+.tabs svg{width:12px;height:12px;flex:0 0 12px;color:var(--ink-3)}
+.tabs .crumb{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap}
+.tabs .crumb:hover{color:var(--ink)}
+.tabs .crumb.on{color:var(--ink);font-weight:500;cursor:default}
+.tabs .crumb svg{width:11px;height:11px;color:var(--ink-3)}
+
+.hd{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line-2)}
+.hd .t{font-size:12.5px;font-weight:600}
+.hd .s{font-size:11px;color:var(--ink-3)}
+.hd .btn{margin-left:auto;height:22px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:flex;align-items:center;gap:5px;padding:0 8px;font-size:10.5px;color:var(--ink-2);cursor:pointer}
+.hd .btn:hover{background:var(--fill);color:var(--ink)}
+.hd .btn svg{width:11px;height:11px}
+
+.body{flex:1;min-height:0;padding:9px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.card{border:1px solid var(--line-2);border-radius:6px;padding:7px;display:flex;flex-direction:column;gap:5px;cursor:pointer}
+.card:hover{border-color:var(--line);background:var(--fill-2)}
+.card .ph{height:34px;border:1px dashed var(--line-2);border-radius:4px;background:var(--fill-2)}
+.card .nm{font-size:10.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .mt{font-size:9.5px;color:var(--ink-3)}
+.card.add{align-items:center;justify-content:center;border-style:dashed;color:var(--ink-3);font-size:10.5px;gap:4px}
+.card.add svg{width:14px;height:14px}
+.panes{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pane{border:1px solid var(--line-2);border-radius:6px;display:flex;flex-direction:column;overflow:hidden}
+.pane .ph{height:24px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;padding:0 7px;
+  font-size:10px;color:var(--ink-2)}
+.pane .pb{flex:1;padding:7px;display:flex;flex-direction:column;gap:5px}
+.bar{height:7px;border-radius:3px;background:var(--bar)}
+.bar.lt{background:var(--fill)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <h1>Where the projects live</h1>
+  <p class="sub">Five ways to remove the Home / Project confusion. Each one is shown twice: the list of every project,
+    and a project once it is open. The rule under each title is the whole idea; the grey line at the bottom is what it
+    costs. Nothing else about prototype C changes.</p>
+  <div id="opts"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script src="vendor/dialkit/browser.global.js"></script>
+<script>
+/* ------------------------------------------------------------- icons */
+const ico = (n) => {
+  const node = lucide.icons[n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase())];
+  if (!node) return "";
+  const inner = node[2].map(([t, at]) => `<${t} ${Object.entries(at).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+};
+
+/* The screens that belong to one open project. "Project" is renamed in every
+   option: it was the half of the pair that read as "all projects". */
+const SCREENS = [["layout-dashboard", "Overview"], ["map", "Site"], ["layers", "Units"],
+  ["table", "Counts"], ["scale", "Rules"], ["git-compare", "Coordination"]];
+
+const PROJECTS = [["Alder Court", "48 units · 6 levels"], ["Rivière Nord", "112 units · 9 levels"],
+  ["Îlot Papineau", "26 units · 4 levels"], ["Maison Clark", "8 units · 3 levels"]];
+
+/* ------------------------------------------------------------- pieces */
+const railItems = (on) => SCREENS.map(([g, n]) =>
+  `<div class="r ${n === on ? "on" : ""}" title="${n}">${ico(g)}<span>${n}</span></div>`).join("");
+
+const tabs = (items, cur) => `<div class="tabs">${items.map((t) =>
+  `<button class="${t === cur ? "on" : ""}">${t}</button>`).join("")}</div>`;
+
+const crumbs = (open) => `<div class="tabs">
+  <span class="crumb">${ico("folder")}All projects</span>
+  ${open ? `${ico("chevron-right")}<span class="crumb on">${open}</span>` : ""}</div>`;
+
+const header = (t, s, btn) => `<div class="hd"><span class="t">${t}</span><span class="s">${s}</span>
+  ${btn ? `<span class="btn">${ico("plus")}New project</span>` : `<span class="btn">${ico("external-link")}Open in AutoCAD</span>`}</div>`;
+
+const indexBody = () => `<div class="body"><div class="grid">
+  <div class="card add">${ico("plus")}New project</div>
+  ${PROJECTS.map(([n, m]) => `<div class="card"><div class="ph"></div><div class="nm">${n}</div>
+    <div class="mt">${m}</div></div>`).join("")}
+</div></div>`;
+
+const projectBody = () => `<div class="body"><div class="panes">
+  ${["What changed", "Running totals"].map((t) => `<div class="pane"><div class="ph">${t}</div>
+    <div class="pb">${[82, 64, 74, 56, 68].map((w) => `<div class="bar lt" style="width:${w}%"></div>`).join("")}</div></div>`).join("")}
+</div></div>`;
+
+/* The open project's name needs the room, so only the index state carries a
+   leading icon. */
+const switcher = (label, idx) => `<div class="switch ${idx ? "idx" : ""}" title="Switch project">
+  ${idx ? ico("folder") : ""}<span class="nm">${label}</span>${ico("chevron-down")}</div>`;
+
+/* --------------------------------------------------------- the options */
+const OPTIONS = [
+  { title: "Name it, and put it on top",
+    rule: "The rail starts with All projects. The old Project screen is renamed Overview.",
+    cost: "Cheapest change: two labels and one divider. The project list still sits in the same column as the screens inside a project, so the two levels look equal.",
+    index: () => `<div class="frame">
+      <nav class="rail"><div class="r on">${ico("folder")}<span>All projects</span></div><div class="sep"></div>
+        ${railItems(null)}</nav>
+      <div class="main">${tabs(["Ongoing", "Archived"], "Ongoing")}
+        ${header("Projects", "4 ongoing · 1 archived", true)}${indexBody()}</div></div>`,
+    open: () => `<div class="frame">
+      <nav class="rail"><div class="r">${ico("folder")}<span>All projects</span></div><div class="sep"></div>
+        ${railItems("Overview")}</nav>
+      <div class="main">${tabs(["What changed", "Totals", "Blocking"], "What changed")}
+        ${header("Alder Court", "48 units · 6 levels")}${projectBody()}</div></div>` },
+
+  { title: "A project switcher above the rail",
+    rule: "The top of the rail names the open project. Press it to go back to every project.",
+    cost: "One control, always in the same place, and it answers which project am I in. The rail below it is unambiguously inside this project.",
+    index: () => `<div class="frame sw">
+      <nav class="rail">${switcher("All projects", true)}<div class="sep"></div>
+        <div class="sct">No project open</div></nav>
+      <div class="main">${tabs(["Ongoing", "Archived"], "Ongoing")}
+        ${header("Projects", "4 ongoing · 1 archived", true)}${indexBody()}</div></div>`,
+    open: () => `<div class="frame sw">
+      <nav class="rail">${switcher("Alder Court")}<div class="sep"></div>${railItems("Overview")}</nav>
+      <div class="main">${tabs(["What changed", "Totals", "Blocking"], "What changed")}
+        ${header("Alder Court", "48 units · 6 levels")}${projectBody()}</div></div>` },
+
+  { title: "The breadcrumb owns the way back",
+    rule: "The rail only ever lists the screens of one project. The strip above reads All projects › Alder Court.",
+    cost: "Nothing is duplicated and the rail gets shorter. The way out is text, not an icon, so it is quieter and easier to miss on a wide screen.",
+    index: () => `<div class="frame">
+      <nav class="rail"><div class="sct">No project open</div></nav>
+      <div class="main">${crumbs(null)}${header("Projects", "4 ongoing · 1 archived", true)}${indexBody()}</div></div>`,
+    open: () => `<div class="frame">
+      <nav class="rail">${railItems("Overview")}</nav>
+      <div class="main">${crumbs("Alder Court")}${header("Alder Court", "48 units · 6 levels")}${projectBody()}</div></div>` },
+
+  { title: "Two columns: projects, then screens",
+    rule: "A narrow column of projects on the far left. The rail beside it belongs to whichever one is lit.",
+    cost: "Switching projects takes one click from anywhere. It costs 40 px of width for ever, and it only pays off once there are several live projects.",
+    index: () => `<div class="frame twocol">
+      <div class="pcol"><div class="av on">${ico("folder")}</div>
+        ${PROJECTS.map(([n]) => `<div class="av" title="${n}">${n[0]}</div>`).join("")}
+        <div class="av add">+</div></div>
+      <nav class="rail"><div class="sct">No project open</div></nav>
+      <div class="main">${tabs(["Ongoing", "Archived"], "Ongoing")}
+        ${header("Projects", "4 ongoing · 1 archived", true)}${indexBody()}</div></div>`,
+    open: () => `<div class="frame twocol">
+      <div class="pcol"><div class="av">${ico("folder")}</div>
+        ${PROJECTS.map(([n], i) => `<div class="av ${i === 0 ? "on" : ""}" title="${n}">${n[0]}</div>`).join("")}
+        <div class="av add">+</div></div>
+      <nav class="rail">${railItems("Overview")}</nav>
+      <div class="main">${tabs(["What changed", "Totals", "Blocking"], "What changed")}
+        ${header("Alder Court", "48 units · 6 levels")}${projectBody()}</div></div>` },
+
+  { title: "No rail until a project is open",
+    rule: "The projects page has no rail at all. The rail is the proof that a project is open.",
+    cost: "The strongest signal of the five, and nothing to misread on the index. The way back has to live in the header, and the frame visibly changes shape between the two pages.",
+    index: () => `<div class="frame norail">
+      <div class="main">${crumbs(null)}${header("Projects", "4 ongoing · 1 archived", true)}${indexBody()}</div></div>`,
+    open: () => `<div class="frame">
+      <nav class="rail">${railItems("Overview")}</nav>
+      <div class="main">${crumbs("Alder Court")}${header("Alder Court", "48 units · 6 levels")}${projectBody()}</div></div>` },
+];
+
+const V = { show: "Both states", recommend: true };
+
+function render() {
+  const both = V.show === "Both states";
+  document.getElementById("opts").innerHTML = OPTIONS.map((o, i) => `<section class="opt">
+    <div class="oh"><span class="n">${i + 1}</span><h2>${o.title}</h2><span class="rule">${o.rule}</span>
+      ${V.recommend && i === 1 ? `<span class="pick">simplest</span>` : ""}</div>
+    <div class="ob" style="grid-template-columns:${both ? "1fr 1fr" : "1fr"}">
+      ${!both && V.show === "Inside a project" ? "" : `<div class="shot"><div class="cap">Every project</div>${o.index()}</div>`}
+      ${!both && V.show === "Every project" ? "" : `<div class="shot"><div class="cap">Inside Alder Court</div>${o.open()}</div>`}
+      <div class="cost">${o.cost}</div>
+    </div></section>`).join("");
+}
+
+const sel = (options) => ({ type: "select", options, default: options[0] });
+DialKit.createDialRoot({ position: "top-right", theme: "light" });
+const dial = DialKit.createDialKit("Where the projects live", {
+  show: sel(["Both states", "Every project", "Inside a project"]),
+  recommend: true,
+}, { id: "wireframe-c4", persist: true });
+dial.subscribe((v) => { V.show = v.show; V.recommend = v.recommend; render(); });
+render();
+</script>
+</body>
+</html>

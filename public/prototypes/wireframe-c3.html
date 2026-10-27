@@ -60,9 +60,9 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 
 /* how the tab strip presents itself */
 .tabs[data-align="Centred"]{justify-content:center}
-.tabs[data-align="Centred"] .sp,.tabs[data-align="Centred"] .stamp{display:none}
+.tabs[data-align="Centred"] .sp{display:none}
 .tabs[data-align="Spread"] button{flex:1;justify-content:center}
-.tabs[data-align="Spread"] .sp,.tabs[data-align="Spread"] .stamp{display:none}
+.tabs[data-align="Spread"] .sp{display:none}
 .tabs[data-style="Underline"] button{border-radius:0;border-color:transparent}
 .tabs[data-style="Underline"] button.on{background:none;box-shadow:inset 0 -2px 0 var(--ink)}
 .tabs[data-style="Pills"] button{border-color:var(--line-2);border-radius:999px}
@@ -91,7 +91,6 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .tabs button:hover{background:var(--fill-2);color:var(--ink)}
 .tabs button.on{background:var(--fill);color:var(--ink);font-weight:500;border-color:transparent}
 .tabs .sp{flex:1}
-.tabs .stamp{font-size:11.5px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:999px;padding:3px 10px}
 
 .hd{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .hd .t{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
@@ -766,7 +765,7 @@ function HOME_BODY() {
 const SCREENS = {
   Home: { icon: "home", title: "Projects", sub: "4 ongoing · 1 archived",
     actions: [["plus", "New project"]] },
-  Project: { icon: "layout-dashboard", title: "Alder Court", sub: "48 units · 6 levels · read 6 min ago",
+  Project: { icon: "layout-dashboard", title: "Alder Court", sub: "48 units · 6 levels",
     actions: [["external-link", "Open in AutoCAD"], ["download", "Export"]] },
   Site: { icon: "map", title: "Site and property lines", sub: "Surveyor's plan R2 · 12 Sep · lot 1 459 m²",
     actions: [["layers", "Layers"], ["download", "Export"]] },
@@ -1033,7 +1032,7 @@ function render() {
   const tab = (k, i) => `<button class="${k === V.screen ? "on" : ""}" data-s="${k}" title="${k}">
       ${tabIc ? ico(SCREENS[k].icon) : ""}<span class="lo bar" style="width:52px"></span>
       ${!tabIc && away ? `<span class="hi code">${SHORT(k)}</span>` : `<span class="hi">${text(k, i)}</span>`}</button>`;
-  const stamp = `<span class="sp"></span><span class="stamp"><span class="lo bar" style="width:62px"></span><span class="hi">read 6 min ago</span></span>`;
+  const stamp = `<span class="sp"></span>`;
 
   const views = CONTEXT[V.screen] || ["Overview"];
   if (V.nav === "Rail + breadcrumb") {
