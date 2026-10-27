@@ -677,10 +677,12 @@ const SCREENS = {
    are reading. One table per question, so a control can change the answer
    instead of only changing a border colour. */
 
-/* Le Baldwin III is eight storeys: levels 1 to 7 repeat the typical floor,
-   fourteen units read off BAL3_Étage_Type.dwg, and level 8 is the six
-   penthouses. 104 units in all, the number the surveyor's sheet carries.
-   The units come from the typical floor, so a level only renumbers them. */
+/* Le Baldwin III is eight storeys. Level 1 is ground-floor commerce, no
+   residential suites at all (assets/plan-niveau-1.jpg). Levels 2–7 repeat
+   the typical floor, fourteen units read off BAL3_Étage_Type.dwg. Level 8
+   is the real penthouse, three suites visible on its sheet. 87 units in
+   all. The typical floor's units come from BAL3_Étage_Type.dwg, so a
+   level in 2–7 only renumbers them; level 8 has its own three. */
 /* ty, net pi², and the unit's box on assets/plan-etage.jpg normalised 0–1,
    the same numbers the platform uses. */
 const TYPICAL = [
@@ -786,34 +788,9 @@ const ARTICLES = [
     needs: "grille des usages et normes de la zone",
     url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
     img: "assets/code/art-9-hauteur.png", ratio: "1649 / 954" },
-  { id: "art. 43", topic: "Taux d'implantation",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
-    quote: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
-    measured: "48,2 %", required: "55 %", state: "conforme",
-    needs: "superficie du terrain confirmée par l'arpenteur",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    img: "assets/code/art-43-implantation.png", ratio: "1545 / 1018" },
-  { id: "art. 22", topic: "Marge arrière",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
-    quote: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
-    measured: "2,70 m", required: "3,00 m", state: "non résolu",
-    needs: "limite arrière relevée, exceptions et saillies admises",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    img: "assets/code/art-22-marge.png", ratio: "1602 / 982" },
-  { id: "art. 71", topic: "Stationnement",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
-    quote: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
-    measured: "22 cases", required: "30 cases", state: "non résolu",
-    needs: "réductions applicables près du transport collectif",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    img: "assets/code/art-71-stationnement.png", ratio: "1859 / 846" },
-  { id: "art. 134", topic: "Verdissement et pleine terre",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
-    quote: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
-    measured: "17 %", required: "20 %", state: "non résolu",
-    needs: "plan d'aménagement paysager coté",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    img: "assets/code/art-134-verdissement.png", ratio: "1597 / 985" },
+  /* The Québec code and the enabling law come right after the height, before
+     the borough's own dimensions: they are the two the project is read
+     against first, and the comité asks about them first. */
   { id: "3.2.3.1", topic: "Baies non protégées",
     doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
     quote: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
@@ -829,6 +806,34 @@ const ARTICLES = [
     /* Nothing to measure, so no drawing to show: the chain of authority is
        the article, and it is traced in the card itself. */
     url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1", chain: true },
+  { id: "art. 71", topic: "Stationnement",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
+    quote: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
+    measured: "22 cases", required: "30 cases", state: "non résolu",
+    needs: "réductions applicables près du transport collectif",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    img: "assets/code/art-71-stationnement.png", ratio: "1859 / 846" },
+  { id: "art. 134", topic: "Verdissement et pleine terre",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
+    quote: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
+    measured: "17 %", required: "20 %", state: "non résolu",
+    needs: "plan d'aménagement paysager coté",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    img: "assets/code/art-134-verdissement.png", ratio: "1597 / 985" },
+  { id: "art. 43", topic: "Taux d'implantation",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
+    quote: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
+    measured: "48,2 %", required: "55 %", state: "conforme",
+    needs: "superficie du terrain confirmée par l'arpenteur",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    img: "assets/code/art-43-implantation.png", ratio: "1545 / 1018" },
+  { id: "art. 22", topic: "Marge arrière",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
+    quote: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
+    measured: "2,70 m", required: "3,00 m", state: "non résolu",
+    needs: "limite arrière relevée, exceptions et saillies admises",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    img: "assets/code/art-22-marge.png", ratio: "1602 / 982" },
 ];
 
 const QTABS = {
@@ -1283,7 +1288,7 @@ const tabIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Tabs 
 /* One real project, the one every drawing in assets/ belongs to:
    Le Baldwin III, boulevard Saint-Jean, Dollard-des-Ormeaux. */
 const PROJECTS = [
-  ["Le Baldwin III", "104 unités · 8 niveaux", "BAL3_Étage_Type R04 · 24 Oct", "6 écarts", 1],
+  ["Le Baldwin III", `${UNITS_BY_LEVEL["Tous les niveaux"].length} unités · 8 niveaux`, "BAL3_Étage_Type R04 · 24 Oct", "6 écarts", 1],
 ];
 
 /* The state is the one word on a card allowed colour: a project with
@@ -1356,7 +1361,7 @@ const HOMES = {
   "List + preview": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
       ${pane("projets", "Tous les projets", `${plist(0)}<span class="btnw solid" ${act("newproject")} style="justify-content:center">${icon("plus")}<span class="hi">Nouveau projet</span></span>`, "flex:.85")}
       ${pane("aperçu", "Le Baldwin III", `<div class="plan ghost cover" style="min-height:140px">${icon("image")}</div>
-        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">104 unités · 8 niveaux · lu il y a 6 min</span></div></div>`, "flex:1.5")}
+        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">${UNITS_BY_LEVEL["Tous les niveaux"].length} unités · 8 niveaux · lu il y a 6 min</span></div></div>`, "flex:1.5")}
     </div>`,
 
   "Recent, then all": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
@@ -1469,7 +1474,7 @@ function headerHTML() {
   const unresolved = unresolvedCount();
   const open = Object.keys(V.settled).length;
   const title = { "Projets": ["Projets", `${PROJECTS.length} en cours`],
-    "Aperçu": [V.project, `8 étages · 104 unités · ${unresolved} articles non résolus`],
+    "Aperçu": [V.project, `8 étages · ${UNITS_BY_LEVEL["Tous les niveaux"].length} unités · ${unresolved} articles non résolus`],
     "Unités": [`Étage type — ${viewOf("Unités").toLowerCase()}`,
       `${rowsOf("Unités").length} unités · ${rowsOf("Unités").filter((r) => /croisement/.test(r[1])).length} avec un croisement ouvert`],
     "Quantités": ["Quantités", `${viewOf("Quantités")} · compté à partir des dessins, rien de saisi`],
