@@ -392,14 +392,16 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 [data-fi="high"] .plan.align[data-img]{background:none}
 [data-fi="high"] .plan.align[data-img="plan"]::before{content:"";position:absolute;inset:0;
   background:var(--plan,url(assets/plan-etage.jpg)) center/contain no-repeat;filter:grayscale(1)}
-/* Vectors instead of the exported picture: the canvas occupies the same box
-   the JPEG did, so every overlay keeps its coordinates, and the raster
-   underneath is dropped rather than drawn behind it. */
-[data-fi="high"] .plan.align[data-img="plan"][data-src="vector"]::before{display:none}
-/* Same treatment as the picture it replaces, so switching the source
-   changes the sharpness and nothing else. */
+/* Vectors over the picture, not instead of it: a pass takes a few seconds
+   on a permit sheet, and the pane must never be empty while it runs. The
+   canvas is transparent until the sheet lands on it, then it covers the
+   JPEG exactly, in the same box, so every overlay keeps its coordinates. */
 .plan canvas.sheetpdf{position:absolute;inset:0;width:100%;height:100%;display:block;
-  background:#fff;z-index:0;filter:grayscale(1)}
+  z-index:0;filter:grayscale(1)}
+.plan canvas.sheetpdf[data-ready="1"]{background:#fff}
+/* While the pass runs, the pane says so where the file name is. */
+.pane[data-pdf="busy"] .fpath::after{content:"rendu vectoriel…";margin-left:auto;
+  color:var(--ink-3);font-size:10.5px}
 /* The thumbnails are crops of the same plan, so they read the same way. */
 [data-fi="high"] .plan[data-img="plan"]:not(.align){filter:grayscale(1)}
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
@@ -1633,31 +1635,44 @@ const ZMIN = 100, ZMAX = 600;
 const vpEl = () => document.querySelector("[data-vp]");
 
 /* ------------------------------------------------- the sheet as vectors
-   The exported JPEG is one fixed resolution: past about 200 % it is a grid
-   of grey squares where the dimension strings were. The same crop also
-   exists as a PDF, which is the drawing's own lines, and pdf.js redraws it
-   at whatever zoom the pane is at. The toggle is in the panel because the
-   trade is real: vectors cost a megabyte a level and a render per zoom,
-   the picture costs nothing and is always there. */
+   The exported JPEG is one resolution: past about 200 % a dimension string
+   is four grey pixels. The same crop also exists as the drawing's own
+   lines, in a PDF read by pdf.js.
+
+   Measured on these sheets: one pass costs about fifteen seconds, and the
+   cost is the geometry, not the pixels — 1 200 px and 3 400 px take the
+   same time, because a permit floor plan is a hundred thousand little
+   paths. So the sheet is not redrawn as the zoom moves. It is drawn once
+   per level, at a fixed resolution well above the picture's, in the
+   background, with the picture left in place underneath until it lands.
+   The result is kept, so coming back to a level is instant. */
+const PDF_W = 3000;                     // the width every sheet is drawn at
 const planVector = () => V.planSrc === "vector" && !!sheet().pdf;
 let pdfLib = null;
 const pdfDocs = new Map();
-let pdfTimer = null;
-let pdfBusy = false;
-let pdfDirty = false;
+const pdfBitmaps = new Map();           // url → the finished sheet
+let pdfBusy = null;                     // the url being drawn, if any
+
+function blitSheet(bmp) {
+  const el = vpEl();
+  const live = el && el.querySelector("[data-sheetpdf]");
+  if (!live) return;
+  live.width = bmp.width;
+  live.height = bmp.height;
+  live.getContext("2d").drawImage(bmp, 0, 0);
+  live.dataset.ready = "1";
+}
 
 async function renderSheetPdf() {
   const el = vpEl();
   if (!el || !planVector()) return;
-  const canvas = el.querySelector("[data-sheetpdf]");
-  const plan = el.querySelector(".plan");
-  if (!canvas || !plan) return;
-  /* One render at a time, and the last request always wins: cancelling the
-     pass in flight used to leave the canvas half-drawn with nobody coming
-     back for it, so a late resize could wipe the sheet off the pane. */
-  if (pdfBusy) { pdfDirty = true; return; }
-  pdfBusy = true;
   const url = sheet().pdf;
+  const done = pdfBitmaps.get(url);
+  if (done) { blitSheet(done); return; }
+  if (pdfBusy) return;                  // one sheet at a time
+  pdfBusy = url;
+  const pane = el.closest(".pane");
+  if (pane) pane.dataset.pdf = "busy";
   try {
     if (!pdfLib) {
       pdfLib = await import("./vendor/pdfjs/pdf.min.mjs");
@@ -1666,50 +1681,37 @@ async function renderSheetPdf() {
     let doc = pdfDocs.get(url);
     if (!doc) { doc = await pdfLib.getDocument(url).promise; pdfDocs.set(url, doc); }
     const page = await doc.getPage(1);
-    /* Drawn at the size it is actually seen at: the element's own width,
-       times the zoom, times the screen's pixel ratio, with a ceiling so a
-       600 % view does not ask for a canvas no browser will allocate. */
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const want = Math.min(4800, Math.max(600, Math.round(plan.offsetWidth * (V.zoom / 100) * dpr)));
     const base = page.getViewport({ scale: 1 });
-    const view = page.getViewport({ scale: want / base.width });
-    /* Drawn on a canvas of its own and copied over when it is finished:
-       pdf.js refuses to share a canvas between two passes, and the pane is
-       rebuilt often enough that two passes do overlap. The visible canvas
-       therefore never holds a half-drawn sheet. */
+    const view = page.getViewport({ scale: PDF_W / base.width });
+    /* Drawn on a canvas of its own and copied over when it is finished, so
+       the pane never holds a half-drawn sheet and pdf.js never finds two
+       passes on one canvas. */
     const off = document.createElement("canvas");
     off.width = Math.round(view.width);
     off.height = Math.round(view.height);
     await page.render({ canvasContext: off.getContext("2d"), viewport: view }).promise;
-    const live = (vpEl() || el).querySelector("[data-sheetpdf]");
-    if (!live) return;
-    live.width = off.width;
-    live.height = off.height;
-    live.getContext("2d").drawImage(off, 0, 0);
+    const bmp = typeof createImageBitmap === "function" ? await createImageBitmap(off) : off;
+    pdfBitmaps.set(url, bmp);
+    if (sheet().pdf === url && planVector()) blitSheet(bmp);
   } catch (err) {
-    /* A missing or unreadable sheet falls back to the picture rather than
-       leaving an empty pane, and says why. */
+    /* An unreadable sheet falls back to the picture, which is still there,
+       rather than leaving the pane empty. */
     console.error("plan vectoriel", url, err);
     say(`Feuille vectorielle illisible (${url}): ${err && err.message ? err.message : err}`);
     V.planSrc = "image";
     render();
   } finally {
-    pdfBusy = false;
-    if (pdfDirty) { pdfDirty = false; renderSheetPdf(); }
+    pdfBusy = null;
+    const p = (vpEl() || el).closest(".pane");
+    if (p) p.dataset.pdf = "";
   }
 }
 
-/* Zooming fires continuously; the redraw waits for the hand to stop. */
+/* Called on every paint; it is cheap once the sheet is in hand. */
 function scheduleSheetPdf() {
   if (!planVector()) return;
-  clearTimeout(pdfTimer);
-  pdfTimer = setTimeout(renderSheetPdf, 180);
+  renderSheetPdf();
 }
-
-/* The sheet's box, laid out to fit the viewport the way the model fits its
-   own: the drawing is contained, never cropped, so the two panes show the
-   same amount of their subject and line up top and bottom. Returns the
-   untransformed size the pan and the zoom are measured against. */
 const SHEET_AR = 1280 / 1160;
 function layoutSheet(el) {
   const plan = el.querySelector(".plan");
