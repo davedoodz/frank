@@ -14,7 +14,7 @@
   --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
   --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
   --line:#c9c9c9; --line-2:#e2e2e2;
-  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa; --page-field:#f4f4f5;
   --bar:#dcdcdc;
   --hi:#111;
   --gap:10px; --pad:12px; --r:6px;
@@ -198,17 +198,19 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 [data-fi="high"] .pane{border-color:var(--line)}
 
 /* inset card: the chrome sinks into a grey field and the work becomes one
-   white card floating on it, the way a document-first app reads */
-.frame[data-shell="inset"]{background:var(--fill-2);border-color:#eaeaec}
+   white card floating on it, the way a document-first app reads. The card
+   is held by its own light edge and a soft drop, not by a hard border. */
+.frame[data-shell="inset"]{background:var(--page-field);border-color:#eaeaec}
 .frame[data-shell="inset"] .rail{background:none;border-right:0}
 .frame[data-shell="inset"] .tabs{border-bottom:0}
 .frame[data-shell="inset"] .body{padding:0 10px 10px}
-.frame[data-shell="inset"] .work{background:#fff;border:1px solid var(--line);border-radius:12px;
-  gap:0;padding:0;overflow:hidden}
+.frame[data-shell="inset"] .work{background:#fff;border:1px solid rgba(17,17,18,.07);border-radius:12px;
+  gap:0;padding:0;overflow:hidden;box-shadow:0 1px 2px rgba(17,17,18,.04),0 10px 26px rgba(17,17,18,.045)}
 .frame[data-shell="inset"] .pane{border:0;border-radius:0;background:none}
 .frame[data-shell="inset"] .work > div > .pane,
 .frame[data-shell="inset"] .work > .pane{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
-.frame[data-shell="inset"] .pane.sheet,.frame[data-shell="inset"] .pane.drawer{background:#fff;border:1px solid var(--line)}
+.frame[data-shell="inset"] .pane.sheet,.frame[data-shell="inset"] .pane.drawer{background:#fff;
+  border:1px solid rgba(17,17,18,.07);box-shadow:0 10px 26px rgba(17,17,18,.06)}
 
 /* High fidelity swaps the hatch for the drawing it stands for: the floor
    plan, the elevation, or the massing view, all from the platform assets. */
@@ -291,7 +293,7 @@ const V = {
   labels: true,
   journey: true,
   density: "comfortable",
-  shell: "Flat",
+  shell: "Inset card",
   homeLayout: "Card grid",
   isolate: "none",
   nav: { fidelity: "inherit", layout: "Icon rail + tabs" },
@@ -890,7 +892,7 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   regionLabels: true,
   journeySteps: true,
   density: sel(["comfortable", "compact"]),
-  shell: sel(["Flat", "Inset card"]),
+  shell: sel(["Inset card", "Flat"]),
   homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
   layers: { _collapsed: false,
