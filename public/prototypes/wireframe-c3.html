@@ -67,6 +67,13 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs button:active{background:rgba(17,17,18,.11)}
 .tabs button[aria-current="true"]{background:rgba(17,17,18,.085);color:var(--ink);font-weight:500}
 .tabs .sp{flex:1}
+/* The project name holds its place; the views are what gives way when the
+   strip runs out of room, so they scroll instead of pushing the name off. */
+.tabs .crumb{flex:0 0 auto;max-width:34ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs .views{display:flex;align-items:center;gap:4px;min-width:0;overflow-x:auto;
+  scrollbar-width:none;mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent)}
+.tabs .views::-webkit-scrollbar{display:none}
+.tabs .views button{flex:0 0 auto}
 
 /* rail with the label under the icon */
 .rail.stack{align-items:stretch;padding:10px 6px}
@@ -310,6 +317,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 [data-fi="high"] .plan[data-img="plan"]{background-image:var(--plan,url(assets/plan-etage.jpg))}
 [data-fi="high"] .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
 [data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
+/* The opening schedules: the sheets a window or door size is read from,
+   which is what the Ouvertures tab is about — not another floor plan. */
+[data-fi="high"] .plan[data-img="openings"]{background-image:url(assets/ouvertures-fenetres.jpg);
+  background-size:contain;background-color:#fff}
+[data-fi="high"] .plan[data-img="doors"]{background-image:url(assets/ouvertures-portes.jpg);
+  background-size:contain;background-color:#fff}
 
 /* The consultants' sheets sit over the floor plan in one shared coordinate
    space: the plan box takes the drawing's own aspect, so the drawing fills
@@ -1037,12 +1050,16 @@ function tabsHTML() {
       <span class="crumb on hi">${V.project}</span>
       <span class="sp"></span>`;
   } else if (top || mode === "Tabs only, no rail") {
-    items = `${back}<span class="div"></span>${names.map(tab).join("")}<span class="sp"></span>`;
+    items = `${back}${icon("chevron-right")}<span class="crumb on hi">${V.project}</span>
+      <span class="div"></span><div class="views">${names.map(tab).join("")}</div><span class="sp"></span>`;
   } else {
-    /* A rail is on screen, so the strip shows this screen's views instead
-       of repeating the screen list. Picking one changes what is read. */
-    items = `${back}<span class="div"></span>${views.map((t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen)}" title="${t}">
-        <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`).join("")}
+    /* The project name is on the path, before the views: it is read at the
+       same time as where one is, and it is the way back to the index. The
+       views scroll under it rather than pushing it off the strip. */
+    items = `${back}${icon("chevron-right")}<span class="crumb on hi">${V.project}</span>
+      <span class="div"></span>
+      <div class="views">${views.map((t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen)}" title="${t}">
+        <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`).join("")}</div>
       <span class="sp"></span>`;
   }
 
@@ -1256,7 +1273,12 @@ function inspectorHTML() {
     <div class="pb">
       ${V.screen === "Unités" ? `<div class="row">${UNIT_TABS.map((t, i) => `<span class="chip" ${act("utab", i)} style="${i === V.utab ? "border-color:var(--ink)" : ""}">
         <span class="lo bar" style="width:40px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-      <div class="plan" data-img="plan" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[((selRow("Unités") || [])[2] ?? 0) % UNIT_BOXES.length], .25, "height")}"><span class="hi">${UNIT_TABS[V.utab]} — recadrage de l'unité</span></div>` : ""}
+      ${V.utab === 1
+        /* Ouvertures is about doors and windows, so it shows the schedule
+           sheet the sizes are read from, not a crop of the floor plan. */
+        ? `<div class="plan" data-img="openings" style="height:110px;flex:0 0 110px"><span class="hi">A-308 · tableau des fenêtres</span></div>
+           <div class="plan" data-img="doors" style="height:96px;flex:0 0 96px"><span class="hi">A-314 · tableau des portes</span></div>`
+        : `<div class="plan" data-img="plan" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[((selRow("Unités") || [])[2] ?? 0) % UNIT_BOXES.length], .25, "height")}"><span class="hi">${UNIT_TABS[V.utab]} — recadrage de l'unité</span></div>`}` : ""}
       ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
         <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>
