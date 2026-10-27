@@ -314,6 +314,37 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .frame[data-shell="inset"] .pane.sheet,.frame[data-shell="inset"] .pane.drawer{background:#fff;
   border:1px solid rgba(17,17,18,.07);box-shadow:0 10px 26px rgba(17,17,18,.06)}
 
+/* --------------------------------------------------------- black chrome
+   The navigation goes black and the white card is the only lit surface, so
+   the drawing gets all the attention. Green marks one thing: the view being
+   read. The rail stays sober — where one came from is not the question. */
+.frame[data-chrome="black"]{background:#141416;border-color:#141416;--vert:#C3E05A}
+.frame[data-chrome="black"] .rail .ic,
+.frame[data-chrome="black"] .rail .row,
+.frame[data-chrome="black"] .rail .stk{color:rgba(255,255,255,.52)}
+.frame[data-chrome="black"] .rail .ic:hover,
+.frame[data-chrome="black"] .rail .row:hover,
+.frame[data-chrome="black"] .rail .stk:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.8)}
+.frame[data-chrome="black"] .rail .ic.on,
+.frame[data-chrome="black"] .rail .row.on,
+.frame[data-chrome="black"] .rail .stk.on{background:rgba(255,255,255,.12);color:#fff}
+.frame[data-chrome="black"] .rail .ic.on .cap{color:rgba(255,255,255,.72)}
+.frame[data-chrome="black"] .tabs button{color:rgba(255,255,255,.5)}
+.frame[data-chrome="black"] .tabs button:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.8)}
+/* The view being read is the one green thing in the chrome. Dark ink on it,
+   because the green is light enough to read against black but not to carry
+   white text. */
+.frame[data-chrome="black"] .tabs button[aria-current="true"]{background:var(--vert);color:#111112;font-weight:600}
+.frame[data-chrome="black"] .tabs .crumb{color:rgba(255,255,255,.5)}
+.frame[data-chrome="black"] .tabs .crumb.on{color:#fff}
+.frame[data-chrome="black"] .tabs .div,
+.frame[data-chrome="black"] .tabs .sep{background:rgba(255,255,255,.16)}
+.frame[data-chrome="black"] .tabs .views{mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent)}
+/* The card is the same white card; only what holds it changes. */
+.frame[data-chrome="black"][data-shell="inset"] .work{border-color:rgba(255,255,255,.1);
+  box-shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px rgba(0,0,0,.35)}
+.frame[data-chrome="black"] .rg::before{color:rgba(255,255,255,.45)}
+
 /* High fidelity swaps the hatch for the drawing it stands for: the floor
    plan, the elevation, or the massing view, all from the platform assets. */
 [data-fi="high"] .plan{background:none;border-style:solid}
@@ -444,6 +475,7 @@ const V = {
   journey: true,
   density: "comfortable",
   shell: "Inset card",
+  chrome: "Light",
   homeLayout: "Card grid",
   isolate: "none",
 
@@ -1613,6 +1645,7 @@ function render() {
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
          data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
          data-shell="${V.shell === "Inset card" ? "inset" : "flat"}"
+         data-chrome="${V.chrome === "Black" ? "black" : "light"}"
          style="--plan:url(${sheet().img})">
       ${navHTML()}
       <div class="body">
@@ -1922,6 +1955,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   journeySteps: true,
   density: sel(["comfortable", "compact"]),
   shell: sel(["Inset card", "Flat"]),
+  /* Light grey chrome, or black chrome with the office green on the view
+     being read. The card stays white in both: the drawing never changes. */
+  chrome: sel(["Light", "Black"]),
   homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
   /* The plan is black and white until a typology is asked for. */
@@ -1962,6 +1998,7 @@ function applyDial(v) {
   V.journey = v.journeySteps;
   V.density = v.density;
   V.shell = v.shell;
+  V.chrome = v.chrome;
   V.homeLayout = v.homeLayout;
   V.isolate = v.isolate;
   const la = v.layers, al = la.align;
