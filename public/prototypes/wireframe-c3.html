@@ -158,9 +158,11 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
   display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;overflow:hidden}
 .pane > .ph{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);
   display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12px;color:var(--ink-2)}
-/* overscroll-behavior:contain stops a pane that has reached its end from
-   handing the gesture to the window behind it. */
-.pane > .pb{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;
+/* No overscroll-behavior here. A pane whose content fits still counts as a
+   scroller, and `contain` on it swallows the wheel instead of handing it to
+   the region behind — which is what actually scrolls on Aperçu. The window
+   itself is already locked on html and body, so chaining stops there. */
+.pane > .pb{flex:1;min-height:0;overflow:auto;
   padding:var(--pad);display:flex;flex-direction:column;gap:8px}
 .pane.flat > .pb{padding:0}
 /* The decision is the last thing in the column: it sits at the foot of the
@@ -309,6 +311,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 /* fidelity ------------------------------------------------------------ */
 [data-fi="high"] .bar{display:none}
 [data-fi="high"] .hi{display:block}
+/* A button that only exists at high fidelity still has to be a row: without
+   this, display:block wins over .btnw's inline-flex and the icon falls back
+   to the text baseline instead of the centre of the button. */
+[data-fi="high"] .btnw.hi,[data-fi="high"] .chip.hi{display:inline-flex}
 .hi{display:none}
 /* The dialog and the toast are not part of the fidelity study: they are the
    application answering, so their words show at any fidelity. */
