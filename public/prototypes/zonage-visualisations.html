@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zonage et code — six façons de le lire</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e6e6e6;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --ok:#3d6b52; --open:#8a5a2b; --ref:#6b6b6b;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 24px 80px}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.lede{color:var(--ink-2);margin-top:4px;max-width:70ch}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+
+/* The six options are stacked on one page: the comparison is the point, so
+   nothing is hidden behind a tab. */
+section{margin-top:34px;background:#fff;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+section > header{display:flex;align-items:baseline;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-2)}
+section > header b{font-size:13.5px}
+section > header .tag{font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  border:1px solid var(--line-2);border-radius:4px;padding:1px 6px}
+section > header .why{color:var(--ink-2);font-size:12px;margin-left:auto;text-align:right;max-width:52ch}
+section > .body{padding:16px}
+
+/* state ---------------------------------------------------------------- */
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.s-open .dot,.dot.open{background:var(--open)}
+.s-ok .dot,.dot.ok{background:var(--ok)}
+.s-ref .dot,.dot.ref{background:var(--line)}
+.state{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-2)}
+
+/* 1 — the ledger ------------------------------------------------------- */
+.ledger{width:100%;border-collapse:collapse}
+.ledger th{text-align:left;font-size:11px;font-weight:500;color:var(--ink-3);
+  padding:0 10px 7px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+.ledger td{padding:9px 10px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.ledger tr:last-child td{border-bottom:0}
+.ledger .id{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);white-space:nowrap}
+.ledger .topic{font-weight:500}
+.ledger .n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ledger .miss{color:var(--ink-3);font-size:11.5px}
+.ledger tr.open td{background:#fffdf9}
+
+/* 2 — one axis, the limit at zero -------------------------------------- */
+.axis{position:relative;padding:10px 0 4px}
+.axis .zero{position:absolute;top:0;bottom:16px;left:50%;width:1px;background:var(--ink)}
+.axis .zlab{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:11px;color:var(--ink-2)}
+.axis .scale{position:absolute;top:0;bottom:16px;width:1px;background:var(--line-2)}
+.arow{position:relative;height:30px;display:flex;align-items:center}
+.arow .nm{position:absolute;left:0;width:46%;padding-right:12px;text-align:right;
+  font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arow .bar{position:absolute;height:9px;border-radius:2px}
+.arow .val{position:absolute;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar.over{background:#d9b08c}
+.bar.under{background:#9fc3a9}
+.axis-head{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);
+  margin:0 0 6px;padding-left:46%}
+
+/* 3 — measured against required, one bar per rule ---------------------- */
+.bars{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.brow{border:1px solid var(--line-2);border-radius:var(--r);padding:11px 12px}
+.brow .top{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
+.brow .top .id{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.brow .top b{font-size:12.5px;font-weight:500}
+.brow .top .state{margin-left:auto}
+.track{position:relative;height:22px;background:var(--fill-2);border-radius:3px;overflow:hidden}
+.track .fill{position:absolute;top:0;bottom:0;left:0;background:#dfe6e0}
+.track .fill.over{background:#f0ddc9}
+.track .lim{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.brow .foot{display:flex;justify-content:space-between;margin-top:6px;font-size:11.5px;color:var(--ink-2)}
+.brow .foot .m{font-variant-numeric:tabular-nums;color:var(--ink)}
+
+/* 4 — the board: three columns, one per state -------------------------- */
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+.col > .h{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-2);
+  padding:0 2px 8px;border-bottom:1px solid var(--line-2);margin-bottom:10px}
+.col > .h .n{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.mini{border:1px solid var(--line-2);border-radius:var(--r);padding:10px 11px;margin-bottom:8px}
+.mini .id{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.mini b{display:block;font-size:12.5px;font-weight:500;margin:2px 0 6px}
+.mini .pair{display:flex;gap:6px;align-items:baseline;font-variant-numeric:tabular-nums}
+.mini .pair .m{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.mini .pair .r{font-size:11.5px;color:var(--ink-2)}
+.mini .lack{margin-top:6px;font-size:11px;color:var(--ink-3)}
+
+/* 5 — what is missing, not what is broken ------------------------------ */
+.needs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.need{border:1px solid var(--line-2);border-radius:var(--r);padding:11px 12px}
+.need .src{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+.need b{display:block;font-size:12.5px;font-weight:500;margin:4px 0 8px}
+.need .chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-family:var(--mono);font-size:11px;border:1px solid var(--line-2);border-radius:4px;
+  padding:1px 6px;color:var(--ink-2)}
+.need .note{margin-top:8px;font-size:11.5px;color:var(--ink-2)}
+
+/* 6 — the sheet: the rule as it is written ----------------------------- */
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));column-gap:34px;
+  border-top:1px solid var(--line-2)}
+.srow{display:grid;grid-template-columns:76px 1fr auto;gap:14px;align-items:start;
+  padding:13px 4px;border-bottom:1px solid var(--line-2)}
+.srow .id{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);padding-top:2px}
+.srow q{display:block;color:var(--ink-2);font-size:12px;quotes:'« ' ' »'}
+.srow .tp{font-weight:500;margin-bottom:3px}
+.srow .verdict{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.srow .verdict .m{font-size:15px;font-weight:600}
+.srow .verdict .r{font-size:11.5px;color:var(--ink-2)}
+.srow .verdict .d{font-size:11px;margin-top:2px}
+.d.over{color:var(--open)} .d.under{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Zonage et code — six façons de lire les mêmes sept règles</h1>
+  <p class="lede">Les mêmes données que la page Aperçu du prototype C : sept articles, ce que les dessins
+    mesurent, ce que l'article exige, et ce qui manque pour conclure. Chaque bloc est une façon de les
+    montrer; rien d'autre ne change.</p>
+
+  <section>
+    <header><b>1 · Le registre</b><span class="tag">table</span>
+      <span class="why">Une ligne par article, l'écart calculé. Le plus dense, le plus rapide à balayer,
+        le moins explicite sur la citation.</span></header>
+    <div class="body"><table class="ledger" id="t-ledger"></table></div>
+  </section>
+
+  <section>
+    <header><b>2 · L'axe de l'écart</b><span class="tag">graphique</span>
+      <span class="why">La limite est au centre. À gauche on respecte, à droite on dépasse. La seule vue
+        où l'ampleur des écarts se compare d'un coup d'œil.</span></header>
+    <div class="body"><div id="t-axis"></div></div>
+  </section>
+
+  <section>
+    <header><b>3 · Mesuré contre exigé</b><span class="tag">jauges</span>
+      <span class="why">Une jauge par règle, le trait noir est l'exigence. Lisible sans entraînement,
+        mais sept jauges prennent la place de sept lignes.</span></header>
+    <div class="body"><div class="bars" id="t-bars"></div></div>
+  </section>
+
+  <section>
+    <header><b>4 · Le tableau d'état</b><span class="tag">colonnes</span>
+      <span class="why">Trois colonnes : conforme, non résolu, pour référence. Répond d'abord à
+        « qu'est-ce qui bloque », pas à « de combien ».</span></header>
+    <div class="body"><div class="board" id="t-board"></div></div>
+  </section>
+
+  <section>
+    <header><b>5 · Ce qui manque</b><span class="tag">liste de travail</span>
+      <span class="why">Regroupé par donnée absente, pas par article. Cinq articles non résolus tiennent
+        souvent à quatre renseignements à aller chercher.</span></header>
+    <div class="body"><div class="needs" id="t-needs"></div></div>
+  </section>
+
+  <section>
+    <header><b>6 · La feuille</b><span class="tag">texte + chiffre</span>
+      <span class="why">La règle telle qu'elle est écrite, le chiffre à droite. La vue à montrer à
+        l'urbaniste; la plus lente à balayer.</span></header>
+    <div class="body"><div class="sheet" id="t-sheet"></div></div>
+  </section>
+</div>
+
+<script>
+/* The seven provisions, as the prototype carries them, plus two things the
+   cards never state: whether the number is a ceiling or a floor, and the
+   number behind the formatted string. Without those an écart cannot be
+   drawn, only written. */
+const A = [
+  { id: "art. 9", topic: "Hauteur en étages", kind: "max", m: 6, r: 5, unit: " étages",
+    doc: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal",
+    quote: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
+    state: "non résolu", needs: "grille des usages et normes de la zone", from: "ville" },
+  { id: "art. 43", topic: "Taux d'implantation", kind: "max", m: 48.2, r: 55, unit: " %",
+    doc: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal",
+    quote: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
+    state: "conforme", needs: "superficie du terrain confirmée par l'arpenteur", from: "arpenteur" },
+  { id: "art. 22", topic: "Marge arrière", kind: "min", m: 2.70, r: 3.00, unit: " m",
+    doc: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal",
+    quote: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
+    state: "non résolu", needs: "limite arrière relevée, exceptions et saillies admises", from: "arpenteur" },
+  { id: "art. 71", topic: "Stationnement", kind: "min", m: 22, r: 30, unit: " cases",
+    doc: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal",
+    quote: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
+    state: "non résolu", needs: "réductions applicables près du transport collectif", from: "ville" },
+  { id: "art. 134", topic: "Verdissement et pleine terre", kind: "min", m: 17, r: 20, unit: " %",
+    doc: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal",
+    quote: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
+    state: "non résolu", needs: "plan d'aménagement paysager coté", from: "consultant" },
+  { id: "3.2.3.1", topic: "Baies non protégées", kind: "max", m: 74.2, r: 68.5, unit: " m²",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment · CNB 2020 modifié",
+    quote: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
+    state: "non résolu", needs: "distance limitative mesurée, surface de la façade de rayonnement", from: "dessins" },
+  { id: "A-19.1", topic: "Cadre légal du zonage", kind: "none", m: null, r: null, unit: "",
+    doc: "Loi sur l'aménagement et l'urbanisme · Québec",
+    quote: "La loi habilite la municipalité à régir, par règlement, l'usage du sol et l'implantation des bâtiments sur son territoire.",
+    state: "pour référence", needs: "aucun chiffre: la règle applicable vient du règlement de l'arrondissement", from: "référence" },
+];
+
+const fr = (n, d = 1) => n === null ? "—" : (Math.round(n * 10 ** d) / 10 ** d).toLocaleString("fr-CA");
+const shown = (a, v) => v === null ? "—" : fr(v, Number.isInteger(a.r) && Number.isInteger(a.m) ? 0 : 1) + a.unit;
+
+/* How far the measured number is from the limit, signed so that positive
+   always means "past the limit", whichever side the limit is on. */
+function slack(a) {
+  if (a.kind === "none") return null;
+  const d = (a.m - a.r) / a.r * 100;
+  return a.kind === "max" ? d : -d;
+}
+const cls = (a) => a.state === "conforme" ? "ok" : a.state === "pour référence" ? "ref" : "open";
+const pct = (n) => (n > 0 ? "+" : "") + fr(n, 1) + " %";
+
+/* 1 — the ledger ------------------------------------------------------- */
+document.getElementById("t-ledger").innerHTML =
+  `<thead><tr><th>Article</th><th>Règle</th><th class="n">Mesuré</th><th class="n">Exigé</th>
+     <th class="n">Écart</th><th>État</th><th>Manque pour conclure</th></tr></thead>
+   <tbody>${A.map((a) => {
+     const s = slack(a);
+     return `<tr class="${cls(a) === "open" ? "open" : ""}">
+       <td class="id">${a.id}</td><td class="topic">${a.topic}</td>
+       <td class="n">${shown(a, a.m)}</td><td class="n">${shown(a, a.r)}</td>
+       <td class="n">${s === null ? "—" : pct(s)}</td>
+       <td><span class="state"><span class="dot ${cls(a)}"></span>${a.state}</span></td>
+       <td class="miss">${a.needs}</td></tr>`;
+   }).join("")}</tbody>`;
+
+/* 2 — one axis, the limit at zero -------------------------------------- */
+(() => {
+  const rows = A.filter((a) => slack(a) !== null)
+    .sort((x, y) => slack(y) - slack(x));
+  const max = Math.max(...rows.map((a) => Math.abs(slack(a)))) * 1.25;
+  const half = 27;                                   /* % of the box each side of the limit */
+  const el = document.getElementById("t-axis");
+  el.innerHTML = `<div class="axis-head"><span>respecte la limite</span><span>dépasse la limite</span></div>
+    <div class="axis">
+      <div class="zero"></div><div class="zlab">la limite</div>
+      ${rows.map((a) => {
+        const s = slack(a), w = Math.abs(s) / max * half;
+        const left = s >= 0 ? 50 : 50 - w;
+        return `<div class="arow">
+          <span class="nm">${a.topic} <span class="mono" style="color:var(--ink-3)">${a.id}</span></span>
+          <span class="bar ${s >= 0 ? "over" : "under"}" style="left:${left}%;width:${w}%"></span>
+          <!-- The reading always sits on the open side of the limit, so a
+               short bar on the left never runs into its own name. -->
+          <span class="val" style="left:${s >= 0 ? left + w : 50}%;margin-left:7px">
+            ${pct(s)} · ${shown(a, a.m)} pour ${shown(a, a.r)}</span>
+        </div>`;
+      }).join("")}
+      <div style="height:16px"></div>
+    </div>`;
+})();
+
+/* 3 — measured against required ---------------------------------------- */
+document.getElementById("t-bars").innerHTML = A.map((a) => {
+  const s = slack(a);
+  if (s === null) {
+    return `<div class="brow"><div class="top"><span class="id">${a.id}</span><b>${a.topic}</b>
+        <span class="state"><span class="dot ref"></span>${a.state}</span></div>
+      <div class="track"></div>
+      <div class="foot"><span>aucun chiffre à comparer</span><span class="m">cadre habilitant</span></div></div>`;
+  }
+  /* The limit sits at two thirds of the track, so a rule can overshoot it
+     and still be drawn inside the same box as one that does not. */
+  const lim = 66, scale = lim / a.r;
+  return `<div class="brow"><div class="top"><span class="id">${a.id}</span><b>${a.topic}</b>
+      <span class="state"><span class="dot ${cls(a)}"></span>${a.state}</span></div>
+    <div class="track">
+      <div class="fill ${s > 0 ? "over" : ""}" style="width:${Math.min(100, a.m * scale)}%"></div>
+      <div class="lim" style="left:${lim}%"></div>
+    </div>
+    <div class="foot"><span>mesuré <span class="m">${shown(a, a.m)}</span></span>
+      <span>${a.kind === "max" ? "maximum" : "minimum"} <span class="m">${shown(a, a.r)}</span></span></div></div>`;
+}).join("");
+
+/* 4 — the board -------------------------------------------------------- */
+document.getElementById("t-board").innerHTML =
+  [["non résolu", "open"], ["conforme", "ok"], ["pour référence", "ref"]].map(([st, c]) => {
+    const list = A.filter((a) => a.state === st);
+    return `<div class="col"><div class="h"><span class="dot ${c}"></span>${st}<span class="n">${list.length}</span></div>
+      ${list.map((a) => `<div class="mini"><span class="id">${a.id}</span><b>${a.topic}</b>
+        <div class="pair">${a.m === null ? `<span class="r">aucun chiffre à comparer</span>`
+          : `<span class="m">${shown(a, a.m)}</span>
+             <span class="r">pour ${shown(a, a.r)}${a.kind === "max" ? " au plus" : " au moins"}</span>`}</div>
+        <div class="lack">manque: ${a.needs}</div></div>`).join("")}</div>`;
+  }).join("");
+
+/* 5 — what is missing -------------------------------------------------- */
+(() => {
+  const by = {};
+  A.forEach((a) => { (by[a.from] = by[a.from] || []).push(a); });
+  const label = { ville: "À demander à la ville", arpenteur: "À demander à l'arpenteur",
+    consultant: "À demander au consultant", dessins: "À mesurer dans les dessins",
+    référence: "Rien à aller chercher" };
+  document.getElementById("t-needs").innerHTML = Object.entries(by).map(([k, list]) =>
+    `<div class="need"><span class="src">${k}</span><b>${label[k]}</b>
+      <div class="chips">${list.map((a) => `<span class="chip">${a.id}</span>`).join("")}</div>
+      <div class="note">${[...new Set(list.map((a) => a.needs))].join(" · ")}</div></div>`).join("");
+})();
+
+/* 6 — the sheet -------------------------------------------------------- */
+document.getElementById("t-sheet").innerHTML = A.map((a) => {
+  const s = slack(a);
+  return `<div class="srow">
+    <span class="id">${a.id}</span>
+    <span><span class="tp">${a.topic}</span><q>${a.quote}</q>
+      <span class="mono" style="font-size:11px;color:var(--ink-3)">${a.doc}</span></span>
+    <span class="verdict"><span class="m">${shown(a, a.m)}</span>
+      <span class="r"> / ${shown(a, a.r)}</span>
+      <span class="d ${s === null ? "" : s > 0 ? "over" : "under"}">${s === null ? a.state : pct(s)}</span></span>
+  </div>`;
+}).join("");
+</script>
+</body>
+</html>
