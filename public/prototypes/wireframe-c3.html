@@ -2,315 +2,819 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Prototype C3 — the projects page, eight ways</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype C — wireframe</title>
 <link rel="stylesheet" href="vendor/geist/geist.css">
 <link rel="stylesheet" href="vendor/dialkit/styles.css">
 <style>
+/* Low fidelity on purpose: one grey, one line weight, one type size ramp.
+   What is being tested here is where things sit and in what order they are
+   read, not how they look. */
 :root{
-  --ink:#111112; --ink-2:#55565b; --ink-3:#8c8d94;
-  --line:#e3e3e6; --line-2:#cfcfd4; --fill:#ececef; --fill-2:#f4f4f6;
-  --paper:#fff; --page:#f6f6f7; --tag:#4b4bd6; --tag-soft:#eeeeff;
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --bar:#dcdcdc;
+  --hi:#111;
+  --gap:10px; --pad:12px; --r:6px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-font-smoothing:antialiased}
-body{font-family:'Geist',system-ui,sans-serif;background:var(--page);color:var(--ink);font-size:14px;line-height:1.5}
-.stage{padding:22px 24px 64px;max-width:1560px;margin:0 auto}
-@media (min-width:1200px){.stage{padding-right:356px}}
-h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
-.sub{color:var(--ink-2);font-size:13px;margin:5px 0 20px;max-width:780px}
+[data-density="compact"]{--gap:6px;--pad:8px}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
 
-/* one white page per layout, so each is judged as a page and not as a swatch */
-.v{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden}
-.v > header{display:flex;align-items:baseline;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.v h2{font-size:13.5px;font-weight:600;letter-spacing:-.01em}
-.v .ratio{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--tag);
-  border:1px solid var(--tag);border-radius:4px;padding:1px 6px}
-.v .why{font-size:12px;color:var(--ink-2);flex:1;min-width:260px}
-.v .page{padding:16px}
-.v.off{display:none}
+/* The prototype is the screen: no page chrome around it, no explainer under
+   it. What is being judged fills the window. */
+.stage{padding:0;max-width:none;margin:0;height:100vh;display:flex}
+/* render() writes the frame into this wrapper, so the wrapper has to carry
+   the stretch as well. */
+#frame{flex:1;display:flex;min-width:0}
 
-/* the page header a projects list carries */
-.ph{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.ph .t{font-size:15.5px;font-weight:600;letter-spacing:-.01em}
-.ph .c{font-size:12.5px;color:var(--ink-3)}
-.ph .sp{flex:1}
-.ph .btn{height:29px;border-radius:7px;background:var(--ink);color:#fff;display:flex;align-items:center;gap:6px;
-  padding:0 12px;font-size:12.5px}
-.ph .btn svg{width:14px;height:14px;stroke-width:2}
+/* screen frame -------------------------------------------------------- */
+.frame{margin:0;border:0;border-radius:0;background:#fff;
+  flex:1;height:100vh;display:grid;overflow:hidden;position:relative}
+.frame[data-nav="rail"]{grid-template-columns:48px 1fr;grid-template-rows:1fr}
+.frame[data-nav="wide"]{grid-template-columns:180px 1fr;grid-template-rows:1fr}
+.frame[data-nav="top"]{grid-template-columns:1fr;grid-template-rows:1fr}
+.frame[data-nav="stack"]{grid-template-columns:72px 1fr;grid-template-rows:1fr}
 
-/* grids */
-.grid{display:grid;gap:16px}
-.grid[data-cols="2"]{grid-template-columns:repeat(2,1fr)}
-.grid[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
-.grid[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
-.grid[data-cols="auto"]{grid-template-columns:repeat(auto-fill,minmax(248px,1fr))}
-.rows{display:flex;flex-direction:column}
+.rail{border-right:1px solid var(--line-2);background:var(--fill-2);
+  display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px}
+.rail.wide{align-items:stretch;padding:10px}
+.rail .ic{width:52px;height:auto;min-height:28px;border-radius:var(--r);background:var(--fill);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:5px 2px;color:var(--ink-3)}
+.rail .ic.on{background:var(--bar);color:var(--ink)}
+.rail .row{display:flex;align-items:center;gap:8px;padding:4px;border-radius:var(--r)}
+.rail .row.on{background:var(--bar)}
 
-/* the card */
-.card{display:flex;flex-direction:column;gap:9px;text-align:left;font:inherit;color:inherit;cursor:pointer;
-  background:none;border:0;padding:0;min-width:0}
-.meta{display:flex;flex-direction:column;gap:3px;min-width:0}
-.nm{font-size:13.5px;font-weight:600;letter-spacing:-.01em}
-.sz{font-size:12.5px;color:var(--ink-2)}
-.st{font-size:12px;color:var(--ink-3)}
-.st b{font-weight:500;color:var(--ink-2)}
+.body{display:flex;flex-direction:column;min-width:0}
+.tabs{height:40px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:4px;padding:0 10px;flex:0 0 auto}
+.tabs button{border:0;background:transparent;font-size:12.5px;color:var(--ink-2);
+  padding:6px 9px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.tabs button[aria-current="true"]{background:var(--fill);color:var(--ink);font-weight:500}
+.tabs .sp{flex:1}
 
-/* card chrome presets */
-.grid[data-chrome="Bordered"] .card,.rows[data-chrome="Bordered"] .card{border:1px solid var(--line);border-radius:10px;padding:10px;gap:10px}
-.grid[data-chrome="Filled"] .card,.rows[data-chrome="Filled"] .card{background:var(--fill-2);border-radius:10px;padding:10px;gap:10px}
-.grid[data-chrome="Bordered"] .card:hover,.grid[data-chrome="Filled"] .card:hover{border-color:var(--line-2)}
-.card:hover .nm{text-decoration:underline;text-underline-offset:2px}
+/* rail with the label under the icon */
+.rail.stack{align-items:stretch;padding:10px 6px}
+.rail .stk{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;
+  border-radius:var(--r);font-size:10px;color:var(--ink-2);text-align:center}
+.rail .stk.on{background:var(--bar);color:var(--ink)}
 
-/* the thumbnail. One ratio per layout, set on the element, never on the drawing. */
-.th{position:relative;border:1px solid var(--line);border-radius:8px;background:var(--fill-2);overflow:hidden;
-  display:flex;align-items:center;justify-content:center;color:var(--line-2);flex:0 0 auto}
-.th svg{width:22px;height:22px;stroke-width:1.5}
-.th .n{position:absolute;right:6px;bottom:5px;font-size:10px;color:var(--ink-3);background:rgba(255,255,255,.86);
-  border-radius:4px;padding:1px 5px}
-/* drawings: the floor plan fills its frame and is never tinted or filtered */
-[data-fi="drawing"] .th{background-image:url(assets/plan-etage.jpg);background-size:cover;background-position:center;
-  border-color:var(--line)}
-[data-fi="drawing"] .th svg{display:none}
-[data-fi="drawing"] .th.crop{background-size:150%;background-position:38% 32%}
+/* how the tab strip presents itself */
+.tabs[data-align="Centred"]{justify-content:center}
+.tabs[data-align="Centred"] .sp{display:none}
+.tabs[data-align="Spread"] button{flex:1;justify-content:center}
+.tabs[data-align="Spread"] .sp{display:none}
+.tabs[data-style="Underline"] button{border-radius:0}
+.tabs[data-style="Underline"] button[aria-current="true"]{background:transparent;
+  box-shadow:inset 0 -2px 0 var(--ink)}
+.tabs[data-style="Pills"] button{border:1px solid var(--line-2);border-radius:999px}
+.tabs[data-style="Pills"] button[aria-current="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tabs[data-style="Segmented"]{gap:0}
+.tabs[data-style="Segmented"] button{border-radius:0;border-right:1px solid var(--line-2);background:var(--fill-2)}
+.tabs[data-style="Segmented"] button:first-of-type{border-top-left-radius:6px;border-bottom-left-radius:6px}
+.tabs[data-style="Segmented"] button:last-of-type{border-right:0;border-top-right-radius:6px;border-bottom-right-radius:6px}
+.tabs[data-style="Segmented"] button[aria-current="true"]{background:#fff;color:var(--ink)}
 
-/* the new-project tile, matched to the card it stands beside */
-.new{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;
-  border:1px dashed var(--line-2);border-radius:10px;background:var(--fill-2);color:var(--ink-2);cursor:pointer;
-  font:inherit;padding:14px;min-width:0}
-.new svg{width:17px;height:17px;stroke-width:2}
-.new b{font-size:13px;font-weight:600;color:var(--ink)}
-.new span{font-size:11.5px;color:var(--ink-3);max-width:220px;line-height:1.4}
-.new.row{flex-direction:row;justify-content:flex-start;text-align:left;gap:10px;padding:11px 12px}
-.new.row span{max-width:none}
+/* label presets, shared by the rail and the tab strip */
+.rail[data-labels-mode="Hidden"] .hi:not(.code),.tabs[data-labels-mode="Hidden"] .hi:not(.code),
+.rail[data-labels-mode="Hover only"] .hi:not(.code),.tabs[data-labels-mode="Hover only"] .hi:not(.code){display:none}
+.tabs[data-labels-mode="Hover only"] button:hover .hi,
+.rail[data-labels-mode="Hover only"] .row:hover .hi,
+.rail[data-labels-mode="Hover only"] .stk:hover .hi{display:inline}
+.rail[data-labels-mode="Uppercase"] .hi,.tabs[data-labels-mode="Uppercase"] .hi{
+  text-transform:uppercase;letter-spacing:.07em;font-size:11px}
+.rail[data-labels-mode="Short code"] .hi,.tabs[data-labels-mode="Short code"] .hi{letter-spacing:.04em}
+.rail .ic .cap{font-size:9px;line-height:1.15;text-align:center;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-3)}
+.rail .ic.on .cap{color:var(--ink)}
+.rail .code{font-size:9.5px;letter-spacing:.03em;color:inherit}
+.rail .sct{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  padding:8px 4px 2px}
+.rail.stack .stk .hi{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rail.wide .row .hi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* row list */
-.rows .ln{display:flex;align-items:center;gap:13px;padding:11px 2px;border-bottom:1px solid var(--line);
-  cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;font:inherit;color:inherit;text-align:left}
-.rows .ln:hover{background:var(--fill-2)}
-.rows .ln:last-child{border-bottom:0}
-.rows .ln .meta{flex:1}
-.rows .ln .tail{font-size:12px;color:var(--ink-3);text-align:right;white-space:nowrap}
-.rows .ln .tail b{display:block;font-size:12.5px;font-weight:500;color:var(--ink-2)}
+/* breadcrumb, screen menu and grouped tabs live in the tab strip */
+.tabs .crumb{font-size:12.5px;color:var(--ink-3)}
+.tabs .crumb.on{color:var(--ink);font-weight:500}
+.tabs .grp{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  padding:0 6px 0 2px}
+.tabs .div{width:1px;height:18px;background:var(--line-2);margin:0 6px}
+.tabs [data-menu]{cursor:pointer}
+.tabs[data-style="Top accent"] button{border-radius:0}
+.tabs[data-style="Top accent"] button[aria-current="true"]{background:transparent;
+  box-shadow:inset 0 2px 0 var(--ink)}
+.tabs[data-style="Boxed"] button{border:1px solid transparent}
+.tabs[data-style="Boxed"] button[aria-current="true"]{background:#fff;border-color:var(--line-2);
+  box-shadow:0 1px 2px rgba(0,0,0,.05)}
 
-/* table */
-table{width:100%;border-collapse:collapse}
-th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--ink-2);
-  white-space:nowrap}
-th{font-size:11px;color:var(--ink-3);font-weight:500}
-td.nm{color:var(--ink);font-weight:500}
-td.thc{width:1%;padding-right:0}
-tbody tr{cursor:pointer}
-tbody tr:hover{background:var(--fill-2)}
+.work{flex:1;min-height:0;display:grid;gap:var(--gap);padding:var(--gap)}
+.pane{border:1px solid var(--line-2);border-radius:var(--r);background:#fff;
+  display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;overflow:hidden}
+.pane > .ph{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);
+  display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12px;color:var(--ink-2)}
+.pane > .pb{flex:1;min-height:0;overflow:auto;padding:var(--pad);display:flex;flex-direction:column;gap:8px}
+.pane.flat > .pb{padding:0}
 
-/* split card: drawing on one side, words on the other */
-.split{display:flex;gap:12px;align-items:stretch;border:1px solid var(--line);border-radius:10px;padding:10px;
-  cursor:pointer;background:none;font:inherit;color:inherit;text-align:left;min-width:0}
-.split:hover{border-color:var(--line-2)}
-.split .th{width:40%;min-width:110px}
-.split .meta{flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;min-width:0}
+/* low-fi primitives --------------------------------------------------- */
+.bar{height:9px;border-radius:3px;background:var(--bar)}
+.bar.lt{background:var(--fill)}
+.box{background:var(--fill);border-radius:var(--r);flex:1}
+.row{display:flex;align-items:center;gap:8px}
+.col{display:flex;flex-direction:column;gap:8px}
+.chip{height:22px;border:1px solid var(--line-2);border-radius:999px;background:var(--fill-2);
+  display:inline-flex;align-items:center;gap:5px;padding:0 9px;font-size:11.5px;color:var(--ink-2)}
+.btnw{height:26px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:inline-flex;align-items:center;gap:6px;padding:0 9px;font-size:12px;color:var(--ink-2)}
+.btnw.solid{background:var(--bar);border-color:var(--line);color:var(--ink)}
+.tile{border:1px solid var(--line-2);border-radius:var(--r);padding:10px;display:flex;
+  flex-direction:column;gap:6px;min-width:0}
+.listrow{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:5px}
+.listrow.on{background:var(--fill)}
+.listrow .dot{width:8px;height:8px;border-radius:50%;background:var(--bar);flex:0 0 8px}
+.plan{flex:1;background:repeating-linear-gradient(0deg,var(--fill-2) 0 15px,transparent 15px 16px),
+  repeating-linear-gradient(90deg,var(--fill-2) 0 15px,transparent 15px 16px);
+  border:1px dashed var(--line);border-radius:var(--r);display:grid;place-items:center;color:var(--ink-3);font-size:11.5px}
+/* A card with no drawing behind it shows the picture glyph, not a sentence
+   describing a picture. */
+.plan.ghost{color:var(--line-2)}
+.plan.ghost .lu{width:22px;height:22px;stroke-width:1.5}
+/* the projects page: one ratio for every project, so the rows line up */
+.pcard{cursor:pointer}
+.pcard .thumb{aspect-ratio:16 / 9;flex:0 0 auto;position:relative}
+.pcard .thumb .lv{position:absolute;right:6px;bottom:5px;z-index:2;font-size:10px;color:var(--ink-3);
+  background:rgba(255,255,255,.86);border-radius:4px;padding:1px 5px}
+.pnew .newbox{aspect-ratio:16 / 9;border:1px dashed var(--line-2);border-radius:var(--r);background:var(--fill-2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:12px}
+.state{display:inline-flex;align-items:center;gap:5px}
+/* the home fills the width it is given, whatever the window is */
+.work > div > .pane{flex:1 1 auto;min-width:0}
+.state .d{width:6px;height:6px;border-radius:50%;background:var(--bar)}
+.state[data-open="1"]{color:var(--hi)}
+.state[data-open="1"] .d{background:var(--hi)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{font-weight:500;color:var(--ink-3);font-size:11px;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line-2)}
+.tbl td{padding:6px 8px;border-bottom:1px solid var(--line-2);color:var(--ink-2)}
+.tbl td.n{text-align:right;font-variant-numeric:tabular-nums}
+.sheet{position:absolute;left:0;right:0;bottom:0;border-top:1px solid var(--line);
+  background:#fff;box-shadow:0 -8px 24px rgba(0,0,0,.07);z-index:3}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:360px;border-left:1px solid var(--line);
+  background:#fff;box-shadow:-10px 0 28px rgba(0,0,0,.08);z-index:3}
 
-/* type-only tile */
-.type{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:10px;padding:13px;
-  cursor:pointer;background:none;font:inherit;color:inherit;text-align:left;min-width:0}
-.type:hover{border-color:var(--line-2)}
-.type .big{display:flex;gap:16px}
-.type .big div{display:flex;flex-direction:column}
-.type .big b{font-size:17px;font-weight:600;letter-spacing:-.02em}
-.type .big span{font-size:11px;color:var(--ink-3)}
-.type .st{font-size:12px;color:var(--ink-3)}
+/* fidelity ------------------------------------------------------------ */
+[data-fi="high"] .bar{display:none}
+[data-fi="high"] .hi{display:block}
+.hi{display:none}
+[data-fi="high"] .lo{display:none}
+[data-fi="high"] .pane{border-color:var(--line)}
 
-/* state word, the one piece of colour a card is allowed */
-.state{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-2)}
-.state .d{width:6px;height:6px;border-radius:50%;background:var(--line-2)}
-.state[data-open="1"] .d{background:var(--tag)}
-.state[data-open="1"]{color:var(--tag)}
+/* inset card: the chrome sinks into a grey field and the work becomes one
+   white card floating on it, the way a document-first app reads */
+.frame[data-shell="inset"]{background:var(--fill-2);border-color:#eaeaec}
+.frame[data-shell="inset"] .rail{background:none;border-right:0}
+.frame[data-shell="inset"] .tabs{border-bottom:0}
+.frame[data-shell="inset"] .body{padding:0 10px 10px}
+.frame[data-shell="inset"] .work{background:#fff;border:1px solid var(--line);border-radius:12px;
+  gap:0;padding:0;overflow:hidden}
+.frame[data-shell="inset"] .pane{border:0;border-radius:0;background:none}
+.frame[data-shell="inset"] .work > div > .pane,
+.frame[data-shell="inset"] .work > .pane{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.frame[data-shell="inset"] .pane.sheet,.frame[data-shell="inset"] .pane.drawer{background:#fff;border:1px solid var(--line)}
 
-.key{margin-top:18px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:16px 18px}
-.key h2{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
-.key ul{list-style:none;margin:11px 0 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:9px 22px}
-.key li{display:flex;gap:9px;font-size:12.5px;color:var(--ink-2);line-height:1.45}
-.key li b{color:var(--ink);font-weight:600}
+/* High fidelity swaps the hatch for the drawing it stands for: the floor
+   plan, the elevation, or the massing view, all from the platform assets. */
+[data-fi="high"] .plan{background:none;border-style:solid}
+[data-fi="high"] .plan[data-img]{background-repeat:no-repeat;background-position:center;
+  background-size:cover;border-color:var(--line)}
+[data-fi="high"] .plan[data-img] > .hi{display:none}
+[data-fi="high"] .plan[data-img="plan"]{background-image:url(assets/plan-etage.jpg)}
+[data-fi="high"] .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
+[data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
+[data-fi="high"] .btnw.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
+[data-fi="high"] .listrow.on{background:#eef1e0}
+[data-fi="high"] .listrow .dot{background:#8ba00f}
+
+/* region tagging ------------------------------------------------------ */
+.rg{position:relative}
+[data-labels="true"] .rg{outline:1px dashed #b9b9ff;outline-offset:-1px}
+[data-labels="true"] .pane.rg,[data-labels="true"] .rail.rg,[data-labels="true"] .tabs.rg{padding-top:14px}  /* room for the tag */
+[data-labels="true"] .rg::after{content:attr(data-rg);position:absolute;top:0;left:0;z-index:4;
+  background:#4b4bd6;color:#fff;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
+  padding:1px 5px;border-bottom-right-radius:4px;pointer-events:none}
+[data-isolate]:not([data-isolate="none"]) .rg{opacity:.12;filter:grayscale(1)}
+[data-isolate]:not([data-isolate="none"]) .rg.solo{opacity:1;filter:none;outline:1px solid #4b4bd6}
+.step{position:absolute;z-index:5;width:19px;height:19px;border-radius:50%;background:var(--hi);
+  color:#fff;font-size:11px;display:none;place-items:center;top:6px;right:6px}
+[data-journey="true"] .step{display:grid}
+
+/* journey strip ------------------------------------------------------- */
+.journey{margin-top:14px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:12px 14px}
+.journey h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.flow .st{flex:1;min-width:150px;border:1px solid var(--line-2);border-radius:6px;padding:9px 10px;margin-right:18px;position:relative}
+.flow .st:last-child{margin-right:0}
+.flow .st::after{content:"";position:absolute;right:-13px;top:50%;width:8px;height:8px;
+  border-top:1.5px solid var(--line);border-right:1.5px solid var(--line);transform:translateY(-50%) rotate(45deg)}
+.flow .st:last-child::after{display:none}
+.flow .st.on{border-color:var(--hi)}
+.flow .st b{display:block;font-size:12.5px;font-weight:600}
+.flow .st span{display:block;font-size:11.5px;color:var(--ink-2);margin-top:2px}
+.flow .st em{display:block;font-style:normal;font-size:10.5px;color:var(--ink-3);margin-top:4px;
+  letter-spacing:.06em;text-transform:uppercase}
+.flow .st .num{position:absolute;top:-8px;left:9px;width:17px;height:17px;border-radius:50%;
+  background:var(--hi);color:#fff;font-size:10.5px;display:grid;place-items:center}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:13px;height:13px;border-radius:3px;background:var(--bar);display:inline-block}
+.legend i.dash{background:none;border:1px dashed #b9b9ff}
+svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
 </style>
 </head>
 <body>
 <div class="stage">
-
-<h1>The projects page, eight ways</h1>
-<p class="sub">The complaint is the thumbnail: a 16:9 box over a drawing that is nearly square, so every project is
-letterboxed and the grid loses its rhythm when the new-project tile is taller than the cards beside it.
-Each layout below answers it differently. Switch <b>Thumbnail</b> to <b>drawing</b> in the panel to see
-what a real floor plan does to each ratio, and use <b>Only</b> to compare two at a time.</p>
-
-<div id="sheet"></div>
-
-<div class="key">
-  <h2>What to decide</h2>
-  <ul>
-    <li><span><b>Ratio.</b> A floor plan is nearly square. Any wide box crops the building away or
-      shrinks it to the middle of a grey field.</span></li>
-    <li><span><b>Is the drawing worth the room?</b> At 248 px wide a plan is a texture, not information.
-      If it cannot be read, a smaller thumbnail or none at all buys a denser list.</span></li>
-    <li><span><b>The new-project tile.</b> It should be the same shape as a card, not a slab that spans two rows.</span></li>
-    <li><span><b>What identifies a project.</b> The name and the numbers are read; the drawing is recognised.
-      Layouts 6 to 8 bet that recognition is not worth a row of its own.</span></li>
-  </ul>
-</div>
-
+  <div id="frame"></div>
 </div>
 
 <script src="vendor/lucide/lucide.min.js"></script>
 <script src="vendor/dialkit/browser.global.js"></script>
 <script>
-const ico = (n) => '<i data-lucide="' + n + '"></i>';
+/* ---------------------------------------------------------------- state */
+
+const V = {
+  screen: "Units",
+  fidelity: "low",
+  labels: true,
+  journey: true,
+  density: "comfortable",
+  shell: "Flat",
+  homeLayout: "Card grid",
+  isolate: "none",
+  nav: { fidelity: "inherit", layout: "Icon rail + tabs" },
+  header: { fidelity: "inherit", layout: "Title + actions" },
+  list: { fidelity: "inherit", layout: "Vertical list" },
+  content: { fidelity: "inherit", layout: "Two panes" },
+  inspector: { fidelity: "inherit", layout: "Right panel" },
+  footer: { fidelity: "inherit", layout: "Impact strip" },
+};
+
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+
+/* Lucide ships as a sprite-less library, so the icons are stamped once into
+   a hidden sprite and referenced by id afterwards. */
+function sprite() {
+  const names = ["home", "folder", "image", "layout-grid", "layers", "table", "scale", "git-compare", "calendar-check",
+    "file", "box", "pen-line", "chevron-right", "chevron-down", "search", "plus", "minus", "maximize",
+    "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "image"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs + '<symbol id="x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#111"/></symbol>';
+  document.body.append(s);
+}
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+
+/* --------------------------------------------------------------- screens */
+
+const SCREENS = {
+  Home: { icon: "home", regions: ["header", "content"], steps: {}, home: true },
+  Overview: {
+    icon: "layout-grid",
+    regions: ["header", "content", "inspector"],
+    steps: { content: 1, inspector: 2 },
+  },
+  Units: {
+    icon: "layers",
+    regions: ["header", "list", "content", "inspector", "footer"],
+    steps: { list: 1, content: 2, inspector: 3, footer: 4 },
+  },
+  Quantities: { icon: "table", regions: ["header", "content"], steps: { header: 1, content: 2 } },
+  Rules: { icon: "scale", regions: ["header", "list", "content"], steps: { list: 1, content: 2, header: 3 } },
+  Coordination: {
+    icon: "git-compare",
+    regions: ["header", "list", "content", "inspector"],
+    steps: { list: 1, content: 2, inspector: 3 },
+  },
+  Tracking: { icon: "calendar-check", regions: ["header", "content", "inspector"], steps: { inspector: 1, content: 2 } },
+};
+
+/* Unit boxes measured on assets/plan-etage.jpg, normalised 0–1, same numbers
+   the platform uses. A thumbnail shows its own unit, never the whole sheet. */
+const UNIT_BOXES = [
+  [0.3953, 0.5862, 0.1203, 0.1586], [0.5063, 0.0328, 0.1141, 0.1552],
+  [0.6281, 0.0328, 0.1172, 0.1552], [0.1609, 0.7293, 0.1266, 0.2172],
+  [0.2203, 0.5207, 0.1422, 0.1724], [0.2203, 0.3483, 0.1422, 0.1724],
+  [0.4891, 0.2259, 0.1984, 0.1552], [0.2203, 0.1362, 0.1625, 0.2034],
+];
+
+/* Frames one box with air around it: the drawing is scaled so the box fills
+   the element, then slid so the box sits in the middle. */
+function crop(box, pad = 0.45, axis = "width") {
+  const [x, y, w, h] = box;
+  const fw = Math.min(1, w * (1 + pad * 2));
+  const fh = Math.min(1, h * (1 + pad * 2));
+  const px = Math.max(0, Math.min(1 - fw, x + w / 2 - fw / 2));
+  const py = Math.max(0, Math.min(1 - fh, y + h / 2 - fh / 2));
+  /* A wide, short box reads better scaled off its height: the unit fills the
+     strip and the neighbouring units supply the context on either side. */
+  const size = axis === "height" ? `auto ${(100 / fh).toFixed(1)}%` : `${(100 / fw).toFixed(1)}% auto`;
+  return `background-size:${size};`
+    + `background-position:${(px / (1 - fw) * 100).toFixed(1)}% ${(py / (1 - fh) * 100).toFixed(1)}%`;
+}
+
+const NAV = [["home", "Home"], ["layout-grid", "Overview"], ["layers", "Units"], ["table", "Quantities"],
+  ["scale", "Rules"], ["git-compare", "Coordination"], ["calendar-check", "Tracking"], ["file", "Files"]];
+
+/* The cross-screen journey the prototype is built around. Everything else
+   on the screen exists to serve one of these six moves. */
+const JOURNEY = [
+  { n: 1, t: "A drawing was saved", d: "The project page says what moved since the last read.", s: "Overview" },
+  { n: 2, t: "Open the unit that moved", d: "Pick it from the list, or from the plan itself.", s: "Units" },
+  { n: 3, t: "See both drawings at once", d: "2D plan beside the 3D model, difference measured.", s: "Units" },
+  { n: 4, t: "Decide, and say why", d: "The decision will not save without a reason.", s: "Units" },
+  { n: 5, t: "Check what it breaks", d: "Which article, which conflict, which deadline.", s: "Rules" },
+  { n: 6, t: "Send the numbers out", d: "Tables and the note for the city committee.", s: "Quantities" },
+];
+
+/* ------------------------------------------------------------- fidelity */
+
+/* Isolation keeps the frame intact and fades everything that is not the
+   region under study, so a variant is judged in place rather than alone. */
+const solo = (region) => (V.isolate !== "none" && V.isolate === region ? "solo" : "");
+
+const fiOf = (region) => (V[region] && V[region].fidelity !== "inherit" ? V[region].fidelity : V.fidelity);
+const wrap = (region, label, html, step) =>
+  `<div class="rg" data-rg="${label}" data-fi="${fiOf(region)}" style="display:contents">${html}</div>`
+    .replace("</div>", "</div>"); // regions are grid children; see region()
+
+/* A region is a grid child, so the tag and fidelity attributes live on the
+   element itself rather than on a wrapper that would break the layout. */
+function region(name, label, inner, step) {
+  const s = step ? `<span class="step">${step}</span>` : "";
+  return `<section class="pane rg ${solo(name)}" data-rg="${label}" data-fi="${fiOf(name)}" data-region="${name}">${s}${inner}</section>`;
+}
+
+const bars = (n, w = [100, 70, 85]) =>
+  Array.from({ length: n }, (_, i) => `<div class="bar" style="width:${w[i % w.length]}%"></div>`).join("");
+
+/* ------------------------------------------------------------ the parts */
+
+/* Sections only appear in the grouped rail: the first three screens read a
+   project, the next three act on it, the last one stores it. */
+const SECTIONS = { 0: "Read", 3: "Decide", 6: "Keep" };
+const SHORT = (name) => name.slice(0, 3).toUpperCase();
+
+/* One label rule for the rail and the tabs, so a title never reads two ways
+   on the same screen. Hover and Hidden are CSS, the rest rewrite the text. */
+function navLabel(name, i) {
+  const m = V.nav.labels;
+  if (m === "Short code") return SHORT(name);
+  if (m === "Numbered") return `${i + 1}. ${name}`;
+  return name;
+}
+
+const railIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Rail only";
+const tabIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Tabs only";
+
+/* ------------------------------------------------------------ the home
+   Open a project that is running, or start one. The layouts differ only in
+   which of those two is louder. */
 
 const PROJECTS = [
-  { nm: "Alder Court", units: 48, levels: 6, src: "A-201 R04", date: "24 Oct", state: "6 differences", open: 1 },
-  { nm: "Rivière Nord", units: 112, levels: 9, src: "A-110 R07", date: "21 Oct", state: "2 differences", open: 1 },
-  { nm: "Îlot Papineau", units: 26, levels: 4, src: "A-201 R02", date: "17 Oct", state: "10 missing inputs", open: 1 },
-  { nm: "Maison Clark", units: 8, levels: 3, src: "A-100 R01", date: "02 Oct", state: "up to date", open: 0 },
-  { nm: "Rue Fabre", units: 14, levels: 3, src: "A-201 R01", date: "28 Sep", state: "up to date", open: 0 },
+  ["Alder Court", "48 units · 6 levels", "A-201 R04 · 24 Oct", "6 differences", 1],
+  ["Rivière Nord", "112 units · 9 levels", "A-110 R07 · 21 Oct", "2 differences", 1],
+  ["Îlot Papineau", "26 units · 4 levels", "A-201 R02 · 17 Oct", "10 missing inputs", 1],
+  ["Maison Clark", "8 units · 3 levels", "A-100 R01 · 02 Oct", "up to date", 0],
+  ["Rue Fabre", "14 units · 3 levels", "A-201 R01 · 28 Sep", "up to date", 0],
 ];
 
-const V = { fi: "ghost", cols: "3", chrome: "Plain", caption: "Full", newTile: "In the grid",
-  only: "All", gap: "16", crop: false };
+/* The state is the one word on a card allowed colour: a project with
+   differences or missing inputs reads in the accent, a settled one stays grey. */
+const pstate = (p) => `<span class="state" data-open="${p[4]}"><span class="d"></span>${p[3]}</span>`;
 
-const sz = (p) => `${p.units} units · ${p.levels} levels`;
-const state = (p) => `<span class="state" data-open="${p.open}"><span class="d"></span>${p.state}</span>`;
+/* One 16:9 thumbnail per project, whatever the building. The ratio is set on
+   the frame; the drawing is cropped by it and never stretched to fit. */
+const pcard = (p) => `<div class="tile pcard">
+  <div class="plan ghost thumb" data-img="plan">${icon("image")}<span class="lv hi">level 5</span></div>
+  <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
+  <div><span class="lo bar lt" style="width:72%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
+  <div><span class="lo bar lt" style="width:60%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[2]} · ${pstate(p)}</span></div>
+</div>`;
 
-/* The caption is a dial, not a constant: a card can carry the full source
-   line, the state alone, or nothing but its name. */
-function meta(p) {
-  if (V.caption === "Name only") return `<span class="meta"><span class="nm">${p.nm}</span></span>`;
-  if (V.caption === "Name + state") {
-    return `<span class="meta"><span class="nm">${p.nm}</span><span class="st">${state(p)}</span></span>`;
+/* The tile takes the thumbnail's shape, so it sits in the row instead of
+   spanning two of them. */
+const pnew = () => `<div class="tile pnew">
+  <div class="thumb newbox">
+    ${icon("plus")}
+    <div><span class="lo bar" style="width:92px"></span><span class="hi" style="font-weight:600;font-size:13px">New project</span></div>
+    <div style="max-width:260px"><span class="lo bar lt" style="width:150px"></span>
+      <span class="hi" style="font-size:11.5px;color:var(--ink-3)">Drop a DXF or a PDF. The first read names the units and the levels; nothing is drawn.</span></div>
+  </div></div>`;
+
+const ptable = () => `<table class="tbl"><thead><tr>${["Project", "Size", "Last read", "Open"].map((h) =>
+    `<th><span class="lo bar lt" style="width:60%"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
+  <tbody>${PROJECTS.map((p) => `<tr>${p.slice(0, 4).map((c) =>
+    `<td><span class="lo bar lt" style="width:${c.length > 12 ? 86 : 54}%"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>`;
+
+const plist = (sel) => PROJECTS.map((p, i) => `<div class="listrow ${i === sel ? "on" : ""}"><span class="dot"></span>
+  <span class="lo bar" style="width:${70 - i * 6}%"></span><span class="hi" style="flex:1">${p[0]}</span>
+  <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[3]}</span></div>`).join("");
+
+const pane = (label, title, inner, style) => `<div class="pane rg" data-rg="${label}" data-fi="${fiOf("content")}" style="${style || ""}">
+  <div class="ph">${icon("folder")}<span class="lo bar" style="width:110px"></span><span class="hi">${title}</span></div>
+  <div class="pb">${inner}</div></div>`;
+
+const HOMES = {
+  "Card grid": () => pane("projects", "All projects",
+    `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-content:start">${PROJECTS.map((p) => pcard(p)).join("")}${pnew()}</div>`),
+
+  "Table of projects": () => pane("projects", "Ongoing projects",
+    `${ptable()}<div class="row"><span class="sp" style="flex:1"></span>
+      <span class="btnw solid">${icon("plus")}<span class="hi">New project</span></span></div>`),
+
+  "List + preview": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
+      ${pane("projects", "All projects", `${plist(0)}<span class="btnw solid" style="justify-content:center">${icon("plus")}<span class="hi">New project</span></span>`, "flex:.85")}
+      ${pane("preview", "Alder Court", `<div class="plan ghost" style="min-height:140px">${icon("image")}</div>
+        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">48 units · 6 levels · read 6 min ago</span></div></div>`, "flex:1.5")}
+    </div>`,
+
+  "Recent, then all": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
+      <div class="col" style="flex:1;min-height:0">
+        ${pane("recent", "Opened this week", `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${PROJECTS.slice(0, 3).map((p) => pcard(p)).join("")}</div>`, "flex:0 0 210px")}
+        ${pane("all projects", "Everything else", ptable())}
+      </div>
+      <div class="col" style="flex:.5;min-height:0">${pane("start", "Start a project", pnew(true))}</div>
+    </div>`,
+
+  "Start first": () => `<div class="col" style="flex:1;min-height:0;gap:var(--gap)">
+      ${pane("start", "Start a project", pnew(true), "flex:0 0 55%")}
+      ${pane("ongoing", "Or carry on with", plist(-1))}
+    </div>`,
+};
+
+function navHTML() {
+  const mode = V.nav.layout;
+  if (mode === "Top bar only" || mode === "Tabs only, no rail") return "";
+  const sections = mode === "Wide rail with sections";
+  const wide = mode === "Wide rail with labels" || sections;
+  const stack = mode === "Rail with labels under icons";
+  const ic = railIcons();
+  const items = NAV.map(([glyph, name], i) => {
+    const on = name === V.screen ? "on" : "";
+    const g = ic ? icon(glyph) : "";
+    const text = `<span class="hi">${navLabel(name, i)}</span>`;
+    const head = sections && SECTIONS[i] ? `<div class="sct hi">${SECTIONS[i]}</div>` : "";
+    if (wide) return `${head}<div class="row ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%"></span>${text}</div>`;
+    if (stack) return `<div class="stk ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%;height:6px"></span>${text}</div>`;
+    return `<div class="ic ${on}" data-screen="${name}" title="${name}">${g || `<span class="code hi">${SHORT(name)}</span>`}${g && name !== "Home" ? `<span class="cap hi">${navLabel(name, i)}</span>` : ""}</div>`;
+  }).join("");
+  const cls = wide ? "wide" : stack ? "stack" : "";
+  return `<nav class="rail rg ${solo("nav")} ${cls}" data-rg="nav" data-fi="${fiOf("nav")}"
+       data-labels-mode="${V.nav.labels}">${items}</nav>`;
+}
+
+/* The rail and the tab strip never carry the same destinations. When the
+   rail lists the screens, the strip drops to the current screen's own views. */
+const CONTEXT = {
+  Home: ["Ongoing", "Archived"],
+  Overview: ["What changed", "Totals", "Blocking"],
+  Units: ["Level 5", "Level 4", "Level 3", "All levels"],
+  Quantities: ["Units", "Areas", "Windows", "Materials"],
+  Rules: ["All", "To check", "Missing input"],
+  Coordination: ["Structure", "Mechanical", "Architecture"],
+  Tracking: ["Programme", "Sketch", "Committee", "Permit", "Site"],
+  Files: ["Drawings", "Model", "Surveyor", "Correspondence"],
+};
+
+function tabsHTML() {
+  const mode = V.nav.layout;
+  if (mode === "Rail only, no tabs") return "";
+  const top = mode === "Top bar only";
+  const ic = tabIcons();
+  const names = Object.keys(SCREENS);
+  /* Icons off and labels away would leave an empty strip, so the short code
+     stands in: a tab target never renders without something to read. */
+  const bare = !ic && (V.nav.labels === "Hidden" || V.nav.labels === "Hover only");
+  const tab = (name, i) => `<button data-screen="${name}" aria-current="${name === V.screen}" title="${name}">
+      ${ic ? icon(SCREENS[name].icon) : ""}<span class="lo bar" style="width:46px"></span>
+      ${bare ? `<span class="hi code">${SHORT(name)}</span>` : `<span class="hi">${navLabel(name, i)}</span>`}</button>`;
+
+  let items;
+  const views = CONTEXT[V.screen] || ["Overview"];
+  if (mode === "Rail + view menu") {
+    items = `<span class="btnw solid" data-menu><span class="hi">${views[0]}</span>${icon("chevron-down")}</span>
+      <span class="sp"></span>
+      <span class="chip hi">1 of ${views.length}</span>`;
+  } else if (mode === "Rail + breadcrumb") {
+    items = `<span class="crumb hi">Le Hauterive III</span>${icon("chevron-right")}
+      <span class="crumb on hi">${views[0]}</span>
+      <span class="sp"></span>`;
+  } else if (top || mode === "Tabs only, no rail") {
+    items = `${names.map(tab).join("")}<span class="sp"></span>`;
+  } else {
+    /* A rail is on screen, so the strip shows this screen's views instead
+       of repeating the screen list. */
+    items = `${views.map((t, i) => `<button aria-current="${i === 0}" title="${t}">
+        <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`).join("")}
+      <span class="sp"></span>`;
   }
-  return `<span class="meta"><span class="nm">${p.nm}</span><span class="sz">${sz(p)}</span>
-    <span class="st">${p.src} · ${p.date} · ${state(p)}</span></span>`;
+
+  return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "nav + tabs" : "tabs"}" data-fi="${fiOf("nav")}"
+       data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
+    ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
+    ${items}
+  </div>`;
 }
 
-/* The level badge belongs on a thumbnail big enough to hold it; a 40 px
-   glyph in a table row is not. */
-const thumb = (ratio, extra = "", badge = true) =>
-  `<span class="th ${V.crop ? "crop" : ""}" style="aspect-ratio:${ratio};${extra}">${ico("image")}
-     ${badge && V.caption === "Full" ? '<span class="n">level 5</span>' : ""}</span>`;
-
-const newTile = (ratio) => `<button class="new" ${ratio ? `style="aspect-ratio:${ratio}"` : ""}>
-  ${ico("plus")}<b>New project</b><span>Drop a DXF or a PDF. The first read names the units and the levels.</span></button>`;
-
-const newRow = () => `<button class="new row">${ico("plus")}<b>New project</b>
-  <span>Drop a DXF or a PDF.</span></button>`;
-
-/* The tile can stand in the grid, lead it, sit above it as a button, or be
-   left out entirely when the page is a table. */
-function withNew(cardsHTML, ratio) {
-  if (V.newTile === "Hidden") return cardsHTML.join("");
-  if (V.newTile === "First card") return newTile(ratio) + cardsHTML.join("");
-  if (V.newTile === "Button above") return cardsHTML.join("");
-  return cardsHTML.join("") + newTile(ratio);
+function headerHTML() {
+  const step = V.journey ? SCREENS[V.screen].steps.header : null;
+  const title = { Home: ["Projects", "5 ongoing · 1 archived"],
+    Overview: ["Le Hauterive III", "8 floors · 98 units · 2 sources connected"],
+    Units: ["Typical floor — level 5", "14 units · 6 differences open"],
+    Quantities: ["Quantities", "counted from the drawings, nothing typed"],
+    Rules: ["Zoning and code", "7 articles · 5 unresolved · 1 possible exemption"],
+    Coordination: ["Coordination", "4 crossings open · 1 settled"],
+    Files: ["Files", "what was read, and when"],
+    Tracking: ["Tracking", "one list per phase, flags raised by the drawings"] }[V.screen] || [V.screen, ""];
+  const metrics = V.header.layout === "Title + metrics";
+  const bare = V.header.layout === "Title only";
+  return `<header class="pane rg ${solo("header")}" data-rg="header" data-fi="${fiOf("header")}" style="flex:0 0 auto">
+    ${step ? `<span class="step">${step}</span>` : ""}
+    <div class="pb" style="padding:10px 12px;gap:8px">
+      <div class="row">
+        <div class="col" style="flex:1;gap:5px">
+          <div class="lo bar" style="width:170px;height:13px"></div>
+          <div class="lo bar lt" style="width:260px;height:8px"></div>
+          <div class="hi" style="font-size:16px;font-weight:600">${title[0]}</div>
+          <div class="hi" style="font-size:12px;color:var(--ink-2)">${title[1]}</div>
+        </div>
+        ${bare ? "" : SCREENS[V.screen].home
+          ? `<span class="btnw solid">${icon("plus")}<span class="lo bar" style="width:52px"></span><span class="hi">New project</span></span>`
+          : `<span class="btnw">${icon("external-link")}<span class="lo bar" style="width:52px"></span><span class="hi">Open in AutoCAD</span></span>
+        <span class="btnw">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Export</span></span>`}
+      </div>
+      ${metrics ? `<div class="row" style="gap:var(--gap)">${[1, 2, 3, 4].map((i) => `<div class="tile" style="flex:1">
+        <div class="lo bar" style="width:38px;height:14px"></div><div class="lo bar lt" style="width:70%"></div>
+        <div class="hi" style="font-size:17px;font-weight:600">${["6", "4", "5", "98"][i - 1]}</div>
+        <div class="hi" style="font-size:11px;color:var(--ink-2)">${["differences", "crossings", "articles to read", "units"][i - 1]}</div>
+      </div>`).join("")}</div>` : ""}
+    </div>
+  </header>`;
 }
 
-const header = (title, count) => `<div class="ph">
-  <span class="t">${title}</span><span class="c">${count}</span><span class="sp"></span>
-  ${V.newTile === "Button above" ? `<span class="btn">${ico("plus")}New project</span>` : ""}</div>`;
+function listHTML() {
+  const mode = V.list.layout;
+  if (mode === "Hidden") return "";
+  const step = V.journey ? SCREENS[V.screen].steps.list : null;
+  const label = { Units: "Units", Rules: "Articles", Coordination: "Crossings" }[V.screen] || "List";
+  const rows = {
+    Units: ["501 · 3½ · 707 sq ft", "502 · 4½ · 1 difference", "503 · 3½ · 753 sq ft", "504 · 3½+den", "505 · 4½ · 968 sq ft", "506 · 4½ · 1 difference", "507 · 4½ · 1203 sq ft", "508 · 5½ · 1 difference"],
+    Rules: ["art. 9 — height in storeys", "art. 43 — site coverage", "art. 22 — rear setback", "art. 71 — parking", "art. 134 — greening", "3.2.3.1 — unprotected openings", "3.3.1.9 — travel distance"],
+    Coordination: ["C-05-02 duct through column", "C-05-07 beam under ceiling", "C-TT-03 drain off column", "C-05-11 column missing", "C-02-05 settled"],
+  }[V.screen] || ["item", "item", "item", "item"];
 
-const grid = (inner, cols) =>
-  `<div class="grid" data-cols="${cols || V.cols}" data-chrome="${V.chrome}" style="gap:${V.gap}px">${inner}</div>`;
+  if (mode === "Filter bar only") {
+    return `<section class="pane rg ${solo("list")}" data-rg="list → filter bar" data-fi="${fiOf("list")}" style="flex:0 0 auto;grid-column:1/-1">
+      ${step ? `<span class="step">${step}</span>` : ""}
+      <div class="pb" style="flex-direction:row;align-items:center;padding:8px 10px">
+        <span class="chip">${icon("search")}<span class="lo bar" style="width:70px"></span><span class="hi">Search ${label.toLowerCase()}</span></span>
+        ${rows.slice(0, 4).map((r) => `<span class="chip"><span class="lo bar" style="width:46px"></span><span class="hi">${r.split(" ")[0]}</span></span>`).join("")}
+      </div></section>`;
+  }
+  const inner = mode === "Card grid"
+    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${rows.map((r, i) => `<div class="tile">
+        <div class="plan"${V.screen === "Units" ? ` data-img="plan" style="height:54px;flex:0 0 54px;${crop(UNIT_BOXES[i % UNIT_BOXES.length])}"` : ` style="height:54px;flex:0 0 54px"`}></div>
+        <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r}</div></div>`).join("")}</div>`
+    : rows.map((r, i) => `<div class="listrow ${i === 1 ? "on" : ""}"><span class="dot"></span>
+        <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}</span></div>`).join("");
 
-/* ----------------------------------------------------------- the layouts */
+  return region("list", `list — ${label.toLowerCase()}`,
+    `<div class="ph">${icon("list")}<span class="lo bar" style="width:60px"></span><span class="hi">${label}</span></div>
+     <div class="pb">${inner}</div>`, step);
+}
 
-const LAYOUTS = [
-  { id: "wide", nm: "1 · Wide thumbnail, as drawn today", ratio: "16 / 9",
-    why: "The mockup. A plan sits in a letterbox: the building shrinks to the middle and the two long grey margins carry nothing.",
-    render: () => header("Projects", "5 projects · 1 archived")
-      + grid(withNew(PROJECTS.map((p) => `<button class="card">${thumb("16 / 9")}${meta(p)}</button>`), "16 / 9")) },
+function contentHTML() {
+  const step = V.journey ? SCREENS[V.screen].steps.content : null;
+  const mode = V.content.layout;
+  const body = {
+    Units: () => {
+      const pane = (t, note, kind) => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
+        <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span></div>
+        <div class="pb"><div class="plan" data-img="${kind}"><span class="lo"></span><span class="hi">${note}</span></div></div></div>`;
+      const plan = () => pane("2D plan", "floor plan, outlines on top", "plan");
+      const model = () => pane("3D model", "massing, same level", "model");
+      if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
+      if (mode === "Single pane + inset") return `<div style="position:relative;flex:1;display:flex">${plan()}
+        <div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
+        <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div></div>`;
+      return `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap)">${plan()}${model()}</div>`;
+    },
+    Overview: () => `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)">
+        ${["What changed since the last read", "The two connected sources", "Typical floor — 14 units", "Typology split"].map((t) => `<div class="tile">
+          <div class="lo bar" style="width:60%"></div><div class="hi" style="font-weight:600">${t}</div>
+          <div class="lo col">${bars(4)}</div>
+          <div class="hi" style="color:var(--ink-2);font-size:11.5px">list of rows read from the drawings</div></div>`).join("")}</div>`,
+    Quantities: () => `<div class="col" style="flex:1">
+        <div class="row">${["Units", "Area per floor", "Windows", "Materials"].map((t, i) => `<span class="chip" style="${i === 0 ? "border-color:var(--ink)" : ""}">
+          <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></span>`).join("")}</div>
+        <table class="tbl"><thead><tr>${["Type", "Per floor", "Project", "sq ft avg", "sq ft total", "Share"].map((h) => `<th><span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
+        <tbody>${[["3½", 3, 21, 729, 2187, "21 %"], ["3½+den", 1, 7, 880, 880, "7 %"], ["4½", 5, 35, 1147, 5733, "36 %"], ["4½+den", 1, 7, 1494, 1494, "7 %"], ["5½", 4, 28, 1424, 5695, "29 %"]]
+          .map((r) => `<tr>${r.map((c, i) => `<td class="${i ? "n" : ""}"><span class="lo bar" style="width:${i ? 34 : 50}px"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>
+        <div class="tile"><div class="row">${icon("info")}<span class="lo bar" style="width:60%"></span>
+          <span class="hi" style="font-size:11.5px">source file, revision and read time under every table</span></div></div></div>`,
+    Rules: () => `<div class="col" style="flex:1">
+        <div class="tile"><div class="lo bar" style="width:55%"></div><div class="hi" style="font-weight:600">art. 22 — rear setback</div>
+          <div class="lo bar lt" style="width:90%"></div><div class="hi" style="font-size:11.5px;color:var(--ink-2)">“the minimum rear setback is 3.00 m”</div></div>
+        <div class="row" style="gap:var(--gap)">
+          ${[["2.70 m", "measured in the drawings"], ["3.00 m", "required by the article"]].map(([a, b]) => `<div class="tile" style="flex:1">
+            <div class="lo bar" style="width:60px;height:16px"></div><div class="hi" style="font-size:17px;font-weight:600">${a}</div>
+            <div class="lo bar lt" style="width:80%"></div><div class="hi" style="font-size:11.5px;color:var(--ink-2)">${b}</div></div>`).join("")}
+        </div>
+        <div class="tile"><div class="lo col">${bars(3)}</div>
+          <div class="hi" style="font-size:12px;color:var(--ink-2)">plain reading of the gap, then what is missing to conclude</div></div>
+        <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
+          <span class="hi" style="font-size:11.5px">missing inputs, shared across every article</span></div></div></div>`,
+    Coordination: () => `<div class="col" style="flex:1">
+        <div class="pane" style="max-width:420px"><div class="pb"><div class="plan" data-img="plan" style="height:170px;flex:0 0 170px">
+          <span class="lo"></span><span class="hi">two drawings overlaid, overlap marked</span></div></div></div>
+        <div class="tile"><div class="lo col">${bars(3)}</div>
+          <div class="hi" style="font-size:12px;color:var(--ink-2)">which two files, which level, which unit is affected</div></div></div>`,
+    Tracking: () => `<div class="col" style="flex:1">
+        <div class="row">${["Programme", "Sketch", "Committee", "Permit", "Site"].map((t, i) => `<span class="chip" style="${i === 2 ? "border-color:var(--ink)" : ""}">
+          <span class="lo bar" style="width:44px"></span><span class="hi">${t}</span></span>`).join("")}</div>
+        ${[1, 2, 3, 4, 5].map((i) => `<div class="listrow"><span class="dot" style="border-radius:3px"></span>
+          <span class="lo bar" style="flex:1"></span>
+          <span class="hi" style="font-size:12px">${["Area table per floor", "Typology split", "Elevations with materials", "Minor exemption request written", "Note to the city planner"][i - 1]}</span></div>`).join("")}</div>`,
+  }[V.screen]();
 
-  { id: "plan", nm: "2 · Plan ratio", ratio: "4 / 3",
-    why: "The thumbnail follows the drawing instead of the other way round. The building fills the frame, the card keeps its rhythm.",
-    render: () => header("Projects", "5 projects · 1 archived")
-      + grid(withNew(PROJECTS.map((p) => `<button class="card">${thumb("4 / 3")}${meta(p)}</button>`), "4 / 3")) },
+  return region("content", "content", `<div class="ph">${icon("box")}
+    <span class="lo bar" style="width:80px"></span><span class="hi">${V.screen}</span>
+    <span style="flex:1"></span>
+    ${V.screen === "Units" ? `<span class="btnw">${icon("minus")}</span><span class="btnw">100%</span><span class="btnw">${icon("plus")}</span><span class="btnw">${icon("maximize")}</span>` : ""}
+    </div><div class="pb">${body}</div>`, step);
+}
 
-  { id: "square", nm: "3 · Square", ratio: "1 / 1",
-    why: "One shape whatever the building: a long bar and a point tower both sit in it. The grid is the most even of the eight.",
-    render: () => header("Projects", "5 projects · 1 archived")
-      + grid(withNew(PROJECTS.map((p) => `<button class="card">${thumb("1 / 1")}${meta(p)}</button>`), "1 / 1")) },
+function inspectorHTML() {
+  const mode = V.inspector.layout;
+  if (mode === "Hidden") return "";
+  const step = V.journey ? SCREENS[V.screen].steps.inspector : null;
+  const title = { Units: "Unit 502", Overview: "What is blocking", Coordination: "Decision", Tracking: "Deadlines and flags" }[V.screen] || "Detail";
+  /* A decision panel on the screens where something is decided; a short
+     read-only column everywhere else. */
+  const decides = V.screen === "Units" || V.screen === "Coordination";
+  const rows = {
+    Units: [["Plan says", "1800 × 1500"], ["Model says", "1560 × 1500"], ["Difference", "240 mm"], ["Appeared in", "R04 · 24 Oct"]],
+    Coordination: [["Level", "5"], ["Where", "corridor, axis 4"], ["Drawings", "mechanical + structure"], ["Unit", "507"]],
+    Overview: [["Committee filing", "14 Nov"], ["Planner reply", "12 days late"], ["Permit issue", "21 Nov"], ["Missing inputs", "10"]],
+    Tracking: [["Committee filing", "14 Nov"], ["Planner reply", "12 days late"], ["Crossings open", "4"], ["Articles to read", "5"]],
+  }[V.screen] || [["Field", "value"], ["Field", "value"], ["Field", "value"], ["Field", "value"]];
 
-  { id: "portrait", nm: "4 · Portrait", ratio: "3 / 4",
-    why: "Taller than wide, like most typical floors in these projects. Fewer cards per screen; the drawing is actually legible.",
-    render: () => header("Projects", "5 projects · 1 archived")
-      + grid(withNew(PROJECTS.map((p) => `<button class="card">${thumb("3 / 4")}${meta(p)}</button>`), "3 / 4"), "4") },
+  const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
+    <div class="pb">
+      ${V.screen === "Units" ? `<div class="row">${["Overview", "Openings", "Coordination", "History"].map((t, i) => `<span class="chip" style="${i === 1 ? "border-color:var(--ink)" : ""}">
+        <span class="lo bar" style="width:40px"></span><span class="hi">${t}</span></span>`).join("")}</div>
+      <div class="plan" data-img="plan" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[6], .25, "height")}"><span class="hi">unit crop</span></div>` : ""}
+      ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
+        <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
+        <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>
+        <span class="hi" style="font-size:12px">${val}</span></div>`).join("")}
+      ${decides ? `<div class="tile" style="border-color:var(--ink)">
+        <div class="lo bar" style="width:50%"></div><div class="hi" style="font-weight:600;font-size:12.5px">Why this change?</div>
+        <div class="row" style="flex-wrap:wrap;gap:5px">${["client cost", "structure", "code", "city", "drawing error"].map((m) => `<span class="chip">
+          <span class="lo bar" style="width:40px"></span><span class="hi">${m}</span></span>`).join("")}</div>
+        <div class="lo bar" style="width:100%;height:34px;border-radius:5px"></div>
+        <div class="hi" style="border:1px solid var(--line-2);border-radius:5px;padding:7px;color:var(--ink-3);font-size:11.5px">one sentence for the next person</div>
+        <span class="btnw solid" style="justify-content:center"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Record the decision</span></span>
+      </div>
+      <span class="btnw solid" style="justify-content:center">${icon("external-link")}<span class="lo bar" style="width:70px;background:#fff;opacity:.6"></span><span class="hi">Open in AutoCAD</span></span>`
+      : `<div class="tile"><div class="lo col">${bars(3)}</div>
+          <div class="hi" style="font-size:11.5px;color:var(--ink-2)">counted from the drawings, nothing typed</div></div>`}
+    </div>`;
 
-  { id: "split", nm: "5 · Drawing beside the words", ratio: "card 2 : 1",
-    why: "The thumbnail stops being a lid. Two columns of wide cards read as a list but keep the drawing at a useful size.",
-    render: () => header("Projects", "5 projects · 1 archived")
-      + grid(withNew(PROJECTS.map((p) => `<button class="split">${thumb("4 / 3", "align-self:stretch")}${meta(p)}</button>`)), "2") },
+  if (mode === "Bottom sheet") {
+    return `<section class="pane rg sheet ${solo("inspector")}" data-rg="inspector → bottom sheet" data-fi="${fiOf("inspector")}" style="height:260px">
+      ${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
+  }
+  if (mode === "Overlay drawer") {
+    return `<section class="pane rg drawer ${solo("inspector")}" data-rg="inspector → overlay" data-fi="${fiOf("inspector")}">
+      ${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
+  }
+  return region("inspector", "inspector", inner, step);
+}
 
-  { id: "rows", nm: "6 · Rows with a small drawing", ratio: "96 × 68",
-    why: "The drawing is a recognition mark, not a picture. Every project is one line, so the state column lines up and scans.",
-    render: () => header("Projects", "5 projects · 1 archived")
-      + `<div class="rows" data-chrome="Plain">
-          ${PROJECTS.map((p) => `<button class="ln">${thumb("3 / 2", "width:96px", false)}
-            <span class="meta"><span class="nm">${p.nm}</span><span class="sz">${sz(p)}</span></span>
-            <span class="tail"><b>${p.src} · ${p.date}</b>${state(p)}</span></button>`).join("")}
-          ${V.newTile === "Hidden" || V.newTile === "Button above" ? "" : newRow()}</div>` },
+function footerHTML() {
+  if (V.footer.layout === "Hidden" || !SCREENS[V.screen].regions.includes("footer")) return "";
+  const step = V.journey ? SCREENS[V.screen].steps.footer : null;
+  return `<section class="pane rg ${solo("footer")}" data-rg="footer — effect of the change" data-fi="${fiOf("footer")}" style="flex:0 0 auto;grid-column:1/-1">
+    ${step ? `<span class="step">${step}</span>` : ""}
+    <div class="pb" style="flex-direction:row;align-items:center;gap:10px;padding:8px 12px">
+      <span class="lo bar" style="width:150px"></span><span class="lo bar" style="width:60px"></span><span class="lo bar" style="width:60px"></span>
+      <span class="hi" style="font-size:12px">South façade openings</span>
+      <span class="hi" style="font-size:12px;font-weight:600">68.5 m² → 74.2 m²</span>
+      <span class="hi" style="font-size:12px;color:var(--ink-2)">+5.7 m²</span>
+      <span style="flex:1"></span>
+      <span class="btnw"><span class="lo bar" style="width:70px"></span><span class="hi">Read article 3.2.3.1</span></span>
+    </div></section>`;
+}
 
-  { id: "table", nm: "7 · Table", ratio: "40 × 40",
-    why: "The densest reading. Sortable columns, one glyph per project. Right when there are forty projects and the list is a working tool.",
-    render: () => header("Projects", "5 projects · 1 archived")
-      + `<table><thead><tr><th></th><th>Project</th><th>Units</th><th>Levels</th><th>Last read</th><th>Open</th></tr></thead>
-        <tbody>${PROJECTS.map((p) => `<tr><td class="thc">${thumb("1 / 1", "width:40px;border-radius:6px", false)}</td>
-          <td class="nm">${p.nm}</td><td>${p.units}</td><td>${p.levels}</td>
-          <td>${p.src} · ${p.date}</td><td>${state(p)}</td></tr>`).join("")}</tbody></table>
-        ${V.newTile === "Hidden" || V.newTile === "Button above" ? "" : `<div style="padding-top:12px">${newRow()}</div>`}` },
-
-  { id: "type", nm: "8 · No drawing at all", ratio: "type only",
-    why: "The numbers identify the project faster than a grey square does. The drawing waits on the project page, where it can be read.",
-    render: () => header("Projects", "5 projects · 1 archived")
-      + grid(withNew(PROJECTS.map((p) => `<button class="type">
-          <span class="nm">${p.nm}</span>
-          <span class="big"><div><b>${p.units}</b><span>units</span></div><div><b>${p.levels}</b><span>levels</span></div></span>
-          <span class="st">${p.src} · ${p.date} · ${state(p)}</span></button>`), null), "4") },
-];
+/* ---------------------------------------------------------------- frame */
 
 function render() {
-  document.getElementById("sheet").innerHTML = LAYOUTS.map((l) => {
-    const off = V.only !== "All" && V.only !== l.nm;
-    return `<section class="v ${off ? "off" : ""}" data-fi="${V.fi}">
-      <header><h2>${l.nm}</h2><span class="ratio">${l.ratio}</span><span class="why">${l.why}</span></header>
-      <div class="page">${l.render()}</div></section>`;
-  }).join("");
-  lucide.createIcons();
+  const def = SCREENS[V.screen];
+  const hasList = def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
+  const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Right panel";
+  const cols = [hasList ? "260px" : null, "1fr", hasInsp ? "340px" : null].filter(Boolean).join(" ");
+  const navMode = { "Top bar only": "top", "Tabs only, no rail": "top",
+    "Wide rail with labels": "wide", "Wide rail with sections": "wide",
+    "Rail with labels under icons": "stack" }[V.nav.layout] || "rail";
+
+  document.getElementById("frame").innerHTML = `
+    <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
+         data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
+         data-shell="${V.shell === "Inset card" ? "inset" : "flat"}">
+      ${navHTML()}
+      <div class="body">
+        ${tabsHTML()}
+        <div class="work" style="grid-template-columns:${SCREENS[V.screen].home ? "1fr" : cols};grid-auto-rows:min-content 1fr min-content;align-content:stretch">
+          <div style="grid-column:1/-1">${headerHTML()}</div>
+          ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
+          ${SCREENS[V.screen].home ? "" : `${V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
+          ${hasList ? listHTML() : ""}
+          ${contentHTML()}
+          ${hasInsp ? inspectorHTML() : ""}
+          ${footerHTML()}`}
+        </div>
+        ${def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
+      </div>
+    </div>`;
+
+  /* The journey strip lived under the frame; with the frame filling the
+     window, the step badges on the screen carry it alone. */
+
+  document.querySelectorAll("[data-screen]").forEach((b) => b.addEventListener("click", () => {
+    V.screen = b.dataset.screen;
+    dial.setValue("screen", V.screen);
+    render();
+  }));
 }
 
-/* ---------------------------------------------------------------- dial */
+/* -------------------------------------------------------------- the dial */
 
-const sel = (options, def) => ({ type: "select", options, default: def ?? options[0] });
+const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
+const sel = (options) => ({ type: "select", options, default: options[0] });
 
-const dial = DialKit.createDialKit("Projects page, C3", {
-  thumbnail: sel(["ghost", "drawing"]),
-  cropToUnit: false,
-  only: sel(["All", ...LAYOUTS.map((l) => l.nm)]),
-  columns: sel(["3", "2", "4", "auto"]),
-  gap: sel(["16", "10", "24"]),
-  cardChrome: sel(["Plain", "Bordered", "Filled"]),
-  caption: sel(["Full", "Name + state", "Name only"]),
-  newProject: sel(["In the grid", "First card", "Button above", "Hidden"]),
+const dial = DialKit.createDialKit("Wireframe C3", {
+  screen: sel(Object.keys(SCREENS)),
+  fidelity: sel(["low", "high"]),
+  regionLabels: true,
+  journeySteps: true,
+  density: sel(["comfortable", "compact"]),
+  shell: sel(["Flat", "Inset card"]),
+  homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
+  isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
+  nav: { _collapsed: true, fidelity: FI,
+    layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels",
+      "Wide rail with sections", "Rail with labels under icons", "Rail only, no tabs",
+      "Tabs only, no rail", "Rail + view menu", "Rail + breadcrumb"]),
+    icons: sel(["Rail only", "Tabs only", "Rail and tabs", "None"]),
+    labels: sel(["Full label", "Hover only", "Short code", "Numbered", "Uppercase", "Hidden"]),
+    tabStyle: sel(["Plain", "Underline", "Pills", "Segmented", "Top accent", "Boxed"]),
+    tabAlign: sel(["Left", "Centred", "Spread"]) },
+  header: { _collapsed: true, fidelity: FI, layout: sel(["Title + actions", "Title only", "Title + metrics"]) },
+  list: { _collapsed: true, fidelity: FI, layout: sel(["Vertical list", "Card grid", "Filter bar only", "Hidden"]) },
+  content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
+  inspector: { _collapsed: true, fidelity: FI, layout: sel(["Right panel", "Bottom sheet", "Overlay drawer", "Hidden"]) },
+  footer: { _collapsed: true, fidelity: FI, layout: sel(["Impact strip", "Hidden"]) },
 }, { id: "wireframe-c3", persist: true });
 
-dial.subscribe((v) => {
-  V.fi = v.thumbnail;
-  V.crop = v.cropToUnit;
-  V.only = v.only;
-  V.cols = v.columns;
-  V.gap = v.gap;
-  V.chrome = v.cardChrome;
-  V.caption = v.caption;
-  V.newTile = v.newProject;
-  render();
-});
-
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
-render();
+
+function applyDial(v) {
+  V.screen = v.screen;
+  V.fidelity = v.fidelity;
+  V.labels = v.regionLabels;
+  V.journey = v.journeySteps;
+  V.density = v.density;
+  V.shell = v.shell;
+  V.homeLayout = v.homeLayout;
+  V.isolate = v.isolate;
+  ["nav", "header", "list", "content", "inspector", "footer"].forEach((r) => { V[r] = v[r]; });
+  render();
+}
+
+dial.subscribe(applyDial);
+
+sprite();
+applyDial(dial.values);
 </script>
 </body>
 </html>

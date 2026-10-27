@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prototype C3 — the projects page, eight ways</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<link rel="stylesheet" href="vendor/dialkit/styles.css">
+<style>
+:root{
+  --ink:#111112; --ink-2:#55565b; --ink-3:#8c8d94;
+  --line:#e3e3e6; --line-2:#cfcfd4; --fill:#ececef; --fill-2:#f4f4f6;
+  --paper:#fff; --page:#f6f6f7; --tag:#4b4bd6; --tag-soft:#eeeeff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:'Geist',system-ui,sans-serif;background:var(--page);color:var(--ink);font-size:14px;line-height:1.5}
+.stage{padding:22px 24px 64px;max-width:1560px;margin:0 auto}
+@media (min-width:1200px){.stage{padding-right:356px}}
+h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
+.sub{color:var(--ink-2);font-size:13px;margin:5px 0 20px;max-width:780px}
+
+/* one white page per layout, so each is judged as a page and not as a swatch */
+.v{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.v > header{display:flex;align-items:baseline;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.v h2{font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+.v .ratio{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--tag);
+  border:1px solid var(--tag);border-radius:4px;padding:1px 6px}
+.v .why{font-size:12px;color:var(--ink-2);flex:1;min-width:260px}
+.v .page{padding:16px}
+.v.off{display:none}
+
+/* the page header a projects list carries */
+.ph{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ph .t{font-size:15.5px;font-weight:600;letter-spacing:-.01em}
+.ph .c{font-size:12.5px;color:var(--ink-3)}
+.ph .sp{flex:1}
+.ph .btn{height:29px;border-radius:7px;background:var(--ink);color:#fff;display:flex;align-items:center;gap:6px;
+  padding:0 12px;font-size:12.5px}
+.ph .btn svg{width:14px;height:14px;stroke-width:2}
+
+/* grids */
+.grid{display:grid;gap:16px}
+.grid[data-cols="2"]{grid-template-columns:repeat(2,1fr)}
+.grid[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+.grid[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+.grid[data-cols="auto"]{grid-template-columns:repeat(auto-fill,minmax(248px,1fr))}
+.rows{display:flex;flex-direction:column}
+
+/* the card */
+.card{display:flex;flex-direction:column;gap:9px;text-align:left;font:inherit;color:inherit;cursor:pointer;
+  background:none;border:0;padding:0;min-width:0}
+.meta{display:flex;flex-direction:column;gap:3px;min-width:0}
+.nm{font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+.sz{font-size:12.5px;color:var(--ink-2)}
+.st{font-size:12px;color:var(--ink-3)}
+.st b{font-weight:500;color:var(--ink-2)}
+
+/* card chrome presets */
+.grid[data-chrome="Bordered"] .card,.rows[data-chrome="Bordered"] .card{border:1px solid var(--line);border-radius:10px;padding:10px;gap:10px}
+.grid[data-chrome="Filled"] .card,.rows[data-chrome="Filled"] .card{background:var(--fill-2);border-radius:10px;padding:10px;gap:10px}
+.grid[data-chrome="Bordered"] .card:hover,.grid[data-chrome="Filled"] .card:hover{border-color:var(--line-2)}
+.card:hover .nm{text-decoration:underline;text-underline-offset:2px}
+
+/* the thumbnail. One ratio per layout, set on the element, never on the drawing. */
+.th{position:relative;border:1px solid var(--line);border-radius:8px;background:var(--fill-2);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;color:var(--line-2);flex:0 0 auto}
+.th svg{width:22px;height:22px;stroke-width:1.5}
+.th .n{position:absolute;right:6px;bottom:5px;font-size:10px;color:var(--ink-3);background:rgba(255,255,255,.86);
+  border-radius:4px;padding:1px 5px}
+/* drawings: the floor plan fills its frame and is never tinted or filtered */
+[data-fi="drawing"] .th{background-image:url(assets/plan-etage.jpg);background-size:cover;background-position:center;
+  border-color:var(--line)}
+[data-fi="drawing"] .th svg{display:none}
+[data-fi="drawing"] .th.crop{background-size:150%;background-position:38% 32%}
+
+/* the new-project tile, matched to the card it stands beside */
+.new{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;
+  border:1px dashed var(--line-2);border-radius:10px;background:var(--fill-2);color:var(--ink-2);cursor:pointer;
+  font:inherit;padding:14px;min-width:0}
+.new svg{width:17px;height:17px;stroke-width:2}
+.new b{font-size:13px;font-weight:600;color:var(--ink)}
+.new span{font-size:11.5px;color:var(--ink-3);max-width:220px;line-height:1.4}
+.new.row{flex-direction:row;justify-content:flex-start;text-align:left;gap:10px;padding:11px 12px}
+.new.row span{max-width:none}
+
+/* row list */
+.rows .ln{display:flex;align-items:center;gap:13px;padding:11px 2px;border-bottom:1px solid var(--line);
+  cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;font:inherit;color:inherit;text-align:left}
+.rows .ln:hover{background:var(--fill-2)}
+.rows .ln:last-child{border-bottom:0}
+.rows .ln .meta{flex:1}
+.rows .ln .tail{font-size:12px;color:var(--ink-3);text-align:right;white-space:nowrap}
+.rows .ln .tail b{display:block;font-size:12.5px;font-weight:500;color:var(--ink-2)}
+
+/* table */
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--ink-2);
+  white-space:nowrap}
+th{font-size:11px;color:var(--ink-3);font-weight:500}
+td.nm{color:var(--ink);font-weight:500}
+td.thc{width:1%;padding-right:0}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--fill-2)}
+
+/* split card: drawing on one side, words on the other */
+.split{display:flex;gap:12px;align-items:stretch;border:1px solid var(--line);border-radius:10px;padding:10px;
+  cursor:pointer;background:none;font:inherit;color:inherit;text-align:left;min-width:0}
+.split:hover{border-color:var(--line-2)}
+.split .th{width:40%;min-width:110px}
+.split .meta{flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;min-width:0}
+
+/* type-only tile */
+.type{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:10px;padding:13px;
+  cursor:pointer;background:none;font:inherit;color:inherit;text-align:left;min-width:0}
+.type:hover{border-color:var(--line-2)}
+.type .big{display:flex;gap:16px}
+.type .big div{display:flex;flex-direction:column}
+.type .big b{font-size:17px;font-weight:600;letter-spacing:-.02em}
+.type .big span{font-size:11px;color:var(--ink-3)}
+.type .st{font-size:12px;color:var(--ink-3)}
+
+/* state word, the one piece of colour a card is allowed */
+.state{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-2)}
+.state .d{width:6px;height:6px;border-radius:50%;background:var(--line-2)}
+.state[data-open="1"] .d{background:var(--tag)}
+.state[data-open="1"]{color:var(--tag)}
+
+.key{margin-top:18px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:16px 18px}
+.key h2{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.key ul{list-style:none;margin:11px 0 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:9px 22px}
+.key li{display:flex;gap:9px;font-size:12.5px;color:var(--ink-2);line-height:1.45}
+.key li b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<div class="stage">
+
+<h1>The projects page, eight ways</h1>
+<p class="sub">The complaint is the thumbnail: a 16:9 box over a drawing that is nearly square, so every project is
+letterboxed and the grid loses its rhythm when the new-project tile is taller than the cards beside it.
+Each layout below answers it differently. Switch <b>Thumbnail</b> to <b>drawing</b> in the panel to see
+what a real floor plan does to each ratio, and use <b>Only</b> to compare two at a time.</p>
+
+<div id="sheet"></div>
+
+<div class="key">
+  <h2>What to decide</h2>
+  <ul>
+    <li><span><b>Ratio.</b> A floor plan is nearly square. Any wide box crops the building away or
+      shrinks it to the middle of a grey field.</span></li>
+    <li><span><b>Is the drawing worth the room?</b> At 248 px wide a plan is a texture, not information.
+      If it cannot be read, a smaller thumbnail or none at all buys a denser list.</span></li>
+    <li><span><b>The new-project tile.</b> It should be the same shape as a card, not a slab that spans two rows.</span></li>
+    <li><span><b>What identifies a project.</b> The name and the numbers are read; the drawing is recognised.
+      Layouts 6 to 8 bet that recognition is not worth a row of its own.</span></li>
+  </ul>
+</div>
+
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script src="vendor/dialkit/browser.global.js"></script>
+<script>
+const ico = (n) => '<i data-lucide="' + n + '"></i>';
+
+const PROJECTS = [
+  { nm: "Alder Court", units: 48, levels: 6, src: "A-201 R04", date: "24 Oct", state: "6 differences", open: 1 },
+  { nm: "Rivière Nord", units: 112, levels: 9, src: "A-110 R07", date: "21 Oct", state: "2 differences", open: 1 },
+  { nm: "Îlot Papineau", units: 26, levels: 4, src: "A-201 R02", date: "17 Oct", state: "10 missing inputs", open: 1 },
+  { nm: "Maison Clark", units: 8, levels: 3, src: "A-100 R01", date: "02 Oct", state: "up to date", open: 0 },
+  { nm: "Rue Fabre", units: 14, levels: 3, src: "A-201 R01", date: "28 Sep", state: "up to date", open: 0 },
+];
+
+const V = { fi: "ghost", cols: "3", chrome: "Plain", caption: "Full", newTile: "In the grid",
+  only: "All", gap: "16", crop: false };
+
+const sz = (p) => `${p.units} units · ${p.levels} levels`;
+const state = (p) => `<span class="state" data-open="${p.open}"><span class="d"></span>${p.state}</span>`;
+
+/* The caption is a dial, not a constant: a card can carry the full source
+   line, the state alone, or nothing but its name. */
+function meta(p) {
+  if (V.caption === "Name only") return `<span class="meta"><span class="nm">${p.nm}</span></span>`;
+  if (V.caption === "Name + state") {
+    return `<span class="meta"><span class="nm">${p.nm}</span><span class="st">${state(p)}</span></span>`;
+  }
+  return `<span class="meta"><span class="nm">${p.nm}</span><span class="sz">${sz(p)}</span>
+    <span class="st">${p.src} · ${p.date} · ${state(p)}</span></span>`;
+}
+
+/* The level badge belongs on a thumbnail big enough to hold it; a 40 px
+   glyph in a table row is not. */
+const thumb = (ratio, extra = "", badge = true) =>
+  `<span class="th ${V.crop ? "crop" : ""}" style="aspect-ratio:${ratio};${extra}">${ico("image")}
+     ${badge && V.caption === "Full" ? '<span class="n">level 5</span>' : ""}</span>`;
+
+const newTile = (ratio) => `<button class="new" ${ratio ? `style="aspect-ratio:${ratio}"` : ""}>
+  ${ico("plus")}<b>New project</b><span>Drop a DXF or a PDF. The first read names the units and the levels.</span></button>`;
+
+const newRow = () => `<button class="new row">${ico("plus")}<b>New project</b>
+  <span>Drop a DXF or a PDF.</span></button>`;
+
+/* The tile can stand in the grid, lead it, sit above it as a button, or be
+   left out entirely when the page is a table. */
+function withNew(cardsHTML, ratio) {
+  if (V.newTile === "Hidden") return cardsHTML.join("");
+  if (V.newTile === "First card") return newTile(ratio) + cardsHTML.join("");
+  if (V.newTile === "Button above") return cardsHTML.join("");
+  return cardsHTML.join("") + newTile(ratio);
+}
+
+const header = (title, count) => `<div class="ph">
+  <span class="t">${title}</span><span class="c">${count}</span><span class="sp"></span>
+  ${V.newTile === "Button above" ? `<span class="btn">${ico("plus")}New project</span>` : ""}</div>`;
+
+const grid = (inner, cols) =>
+  `<div class="grid" data-cols="${cols || V.cols}" data-chrome="${V.chrome}" style="gap:${V.gap}px">${inner}</div>`;
+
+/* ----------------------------------------------------------- the layouts */
+
+const LAYOUTS = [
+  { id: "wide", nm: "1 · Wide thumbnail, as drawn today", ratio: "16 / 9",
+    why: "The mockup. A plan sits in a letterbox: the building shrinks to the middle and the two long grey margins carry nothing.",
+    render: () => header("Projects", "5 projects · 1 archived")
+      + grid(withNew(PROJECTS.map((p) => `<button class="card">${thumb("16 / 9")}${meta(p)}</button>`), "16 / 9")) },
+
+  { id: "plan", nm: "2 · Plan ratio", ratio: "4 / 3",
+    why: "The thumbnail follows the drawing instead of the other way round. The building fills the frame, the card keeps its rhythm.",
+    render: () => header("Projects", "5 projects · 1 archived")
+      + grid(withNew(PROJECTS.map((p) => `<button class="card">${thumb("4 / 3")}${meta(p)}</button>`), "4 / 3")) },
+
+  { id: "square", nm: "3 · Square", ratio: "1 / 1",
+    why: "One shape whatever the building: a long bar and a point tower both sit in it. The grid is the most even of the eight.",
+    render: () => header("Projects", "5 projects · 1 archived")
+      + grid(withNew(PROJECTS.map((p) => `<button class="card">${thumb("1 / 1")}${meta(p)}</button>`), "1 / 1")) },
+
+  { id: "portrait", nm: "4 · Portrait", ratio: "3 / 4",
+    why: "Taller than wide, like most typical floors in these projects. Fewer cards per screen; the drawing is actually legible.",
+    render: () => header("Projects", "5 projects · 1 archived")
+      + grid(withNew(PROJECTS.map((p) => `<button class="card">${thumb("3 / 4")}${meta(p)}</button>`), "3 / 4"), "4") },
+
+  { id: "split", nm: "5 · Drawing beside the words", ratio: "card 2 : 1",
+    why: "The thumbnail stops being a lid. Two columns of wide cards read as a list but keep the drawing at a useful size.",
+    render: () => header("Projects", "5 projects · 1 archived")
+      + grid(withNew(PROJECTS.map((p) => `<button class="split">${thumb("4 / 3", "align-self:stretch")}${meta(p)}</button>`)), "2") },
+
+  { id: "rows", nm: "6 · Rows with a small drawing", ratio: "96 × 68",
+    why: "The drawing is a recognition mark, not a picture. Every project is one line, so the state column lines up and scans.",
+    render: () => header("Projects", "5 projects · 1 archived")
+      + `<div class="rows" data-chrome="Plain">
+          ${PROJECTS.map((p) => `<button class="ln">${thumb("3 / 2", "width:96px", false)}
+            <span class="meta"><span class="nm">${p.nm}</span><span class="sz">${sz(p)}</span></span>
+            <span class="tail"><b>${p.src} · ${p.date}</b>${state(p)}</span></button>`).join("")}
+          ${V.newTile === "Hidden" || V.newTile === "Button above" ? "" : newRow()}</div>` },
+
+  { id: "table", nm: "7 · Table", ratio: "40 × 40",
+    why: "The densest reading. Sortable columns, one glyph per project. Right when there are forty projects and the list is a working tool.",
+    render: () => header("Projects", "5 projects · 1 archived")
+      + `<table><thead><tr><th></th><th>Project</th><th>Units</th><th>Levels</th><th>Last read</th><th>Open</th></tr></thead>
+        <tbody>${PROJECTS.map((p) => `<tr><td class="thc">${thumb("1 / 1", "width:40px;border-radius:6px", false)}</td>
+          <td class="nm">${p.nm}</td><td>${p.units}</td><td>${p.levels}</td>
+          <td>${p.src} · ${p.date}</td><td>${state(p)}</td></tr>`).join("")}</tbody></table>
+        ${V.newTile === "Hidden" || V.newTile === "Button above" ? "" : `<div style="padding-top:12px">${newRow()}</div>`}` },
+
+  { id: "type", nm: "8 · No drawing at all", ratio: "type only",
+    why: "The numbers identify the project faster than a grey square does. The drawing waits on the project page, where it can be read.",
+    render: () => header("Projects", "5 projects · 1 archived")
+      + grid(withNew(PROJECTS.map((p) => `<button class="type">
+          <span class="nm">${p.nm}</span>
+          <span class="big"><div><b>${p.units}</b><span>units</span></div><div><b>${p.levels}</b><span>levels</span></div></span>
+          <span class="st">${p.src} · ${p.date} · ${state(p)}</span></button>`), null), "4") },
+];
+
+function render() {
+  document.getElementById("sheet").innerHTML = LAYOUTS.map((l) => {
+    const off = V.only !== "All" && V.only !== l.nm;
+    return `<section class="v ${off ? "off" : ""}" data-fi="${V.fi}">
+      <header><h2>${l.nm}</h2><span class="ratio">${l.ratio}</span><span class="why">${l.why}</span></header>
+      <div class="page">${l.render()}</div></section>`;
+  }).join("");
+  lucide.createIcons();
+}
+
+/* ---------------------------------------------------------------- dial */
+
+const sel = (options, def) => ({ type: "select", options, default: def ?? options[0] });
+
+const dial = DialKit.createDialKit("Projects page, C3", {
+  thumbnail: sel(["ghost", "drawing"]),
+  cropToUnit: false,
+  only: sel(["All", ...LAYOUTS.map((l) => l.nm)]),
+  columns: sel(["3", "2", "4", "auto"]),
+  gap: sel(["16", "10", "24"]),
+  cardChrome: sel(["Plain", "Bordered", "Filled"]),
+  caption: sel(["Full", "Name + state", "Name only"]),
+  newProject: sel(["In the grid", "First card", "Button above", "Hidden"]),
+}, { id: "wireframe-c3", persist: true });
+
+dial.subscribe((v) => {
+  V.fi = v.thumbnail;
+  V.crop = v.cropToUnit;
+  V.only = v.only;
+  V.cols = v.columns;
+  V.gap = v.gap;
+  V.chrome = v.cardChrome;
+  V.caption = v.caption;
+  V.newTile = v.newProject;
+  render();
+});
+
+DialKit.createDialRoot({ position: "top-right", theme: "light" });
+render();
+</script>
+</body>
+</html>
