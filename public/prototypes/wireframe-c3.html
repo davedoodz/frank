@@ -358,6 +358,34 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png);transform:rotate(180deg)}
 /* One typology, one colour, laid on the unit it belongs to. */
 .plan .utag{position:absolute;z-index:1;opacity:.45;pointer-events:none;mix-blend-mode:multiply}
+/* The 2D pane is a window onto a sheet that is larger than it: the drawing
+   and everything laid over it move and scale together inside .vp, so a
+   percentage keeps meaning the same thing at every zoom. */
+.vp{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab}
+.vp.drag{cursor:grabbing}
+.vp > .plan{position:absolute;left:0;top:0;width:100%;transform-origin:0 0;will-change:transform}
+/* The selected unit, drawn over the sheet and never into it: a thin outline
+   and a light wash, both in the one accent the screen already uses. */
+.umark{position:absolute;inset:0;z-index:3;overflow:visible}
+.umark rect.hit{fill:transparent;pointer-events:auto;cursor:pointer}
+.umark rect.on{fill:rgba(139,160,15,.16);stroke:#8ba00f;stroke-width:1.6;
+  vector-effect:non-scaling-stroke;pointer-events:auto;cursor:pointer}
+.ulabel{position:absolute;z-index:4;pointer-events:none;white-space:nowrap;
+  font-weight:600;color:#4c5906;background:rgba(255,255,255,.88);
+  border:1px solid rgba(139,160,15,.5);border-radius:4px;padding:1px 4px;line-height:1.25}
+/* In wireframe fidelity the mark keeps its shape and loses its words, the
+   way every other label on the screen does. */
+[data-fi="low"] .ulabel{display:none}
+/* The same unit on the model: the level band it is on, and its own windows
+   inside that band. */
+.fmark{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+.fmark .band{fill:rgba(139,160,15,.10);stroke:rgba(139,160,15,.55);stroke-width:1;
+  vector-effect:non-scaling-stroke}
+.fmark .win{fill:rgba(139,160,15,.34);stroke:#6f8206;stroke-width:1.4;vector-effect:non-scaling-stroke}
+/* The model is read whole, at its own aspect, or the windows marked on it
+   would sit beside the windows drawn in it. */
+.plan.fit{aspect-ratio:1700 / 1389;height:auto;flex:0 0 auto}
+[data-fi="high"] .plan.fit[data-img="model"]{background-size:contain;background-color:#fff}
 [data-fi="high"] .btnw.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
 [data-fi="high"] .listrow.on{background:#eef1e0}
 [data-fi="high"] .listrow .dot{background:#8ba00f}
@@ -428,6 +456,9 @@ const V = {
   article: 2,        // which article is open under Zonage et code
   utab: 1,           // which tab of the unit inspector
   zoom: 100,         // plan zoom, in percent
+  /* Where the sheet has been dragged to inside the 2D pane, in pixels of
+     the pane. Zoom and pan are one pair: the wheel writes both. */
+  pan: { x: 0, y: 0 },
   focus: false,      // the drawing alone, list and inspector folded away
   query: "",         // the text in the list search
   reason: null,      // the reason picked for the decision being recorded
@@ -684,6 +715,48 @@ const FILES = {
 /* A thumbnail shows its own unit, never the whole sheet. */
 const UNIT_BOXES = TYPICAL.map((u) => u[2]);
 
+/* The same fourteen units, measured a second time on the permit sheets. The
+   typology plan and the permit set are the same floor of the same building
+   drawn twice, at different offsets, so a box measured on one lands beside
+   the unit on the other. UNIT_BOXES frames the thumbnails on the typology
+   plan; PLAN_BOXES marks the unit on the sheet the level tabs open, in the
+   same order, 0–1 on the 1280 × 1160 crop shared by every level. */
+const PLAN_BOXES = [
+  [0.195, 0.470, 0.165, 0.205], [0.370, 0.015, 0.125, 0.195], [0.495, 0.015, 0.135, 0.195],
+  [0.015, 0.600, 0.155, 0.150], [0.015, 0.325, 0.160, 0.145], [0.015, 0.165, 0.155, 0.145],
+  [0.465, 0.235, 0.135, 0.215], [0.335, 0.235, 0.125, 0.215], [0.255, 0.015, 0.115, 0.195],
+  [0.010, 0.760, 0.185, 0.215], [0.195, 0.235, 0.130, 0.215], [0.855, 0.235, 0.135, 0.215],
+  [0.800, 0.015, 0.190, 0.195], [0.200, 0.735, 0.170, 0.245],
+];
+
+/* Where the floors and the window bays sit in the model view, measured off
+   the render itself: two visible façades, one row of windows per level on
+   each, the ground floor being the commerces. A unit is tied to the bay its
+   windows are in, so selecting it in the list lights that bay on that floor
+   and nothing else. Coordinates are 0–1 on assets/skp-facade.jpg. */
+const FACADE = {
+  wings: [
+    { top: 0.226, pitch: 0.0868, h: 0.076,
+      bays: [[0.044, 0.098], [0.120, 0.152], [0.188, 0.215], [0.218, 0.244], [0.265, 0.300], [0.320, 0.340], [0.378, 0.420]] },
+    { top: 0.198, pitch: 0.0900, h: 0.080,
+      bays: [[0.458, 0.502], [0.549, 0.604], [0.628, 0.658], [0.690, 0.726], [0.766, 0.788], [0.818, 0.840], [0.886, 0.902]] },
+  ],
+  /* unit index → [which façade, which bay on it]. The west wing of the plan
+     reads on the pale façade, the north wing on the dark one. */
+  of: { 5: [0, 0], 4: [0, 1], 3: [0, 2], 10: [0, 3], 9: [0, 4], 13: [0, 5], 0: [0, 6],
+    8: [1, 0], 1: [1, 1], 2: [1, 2], 12: [1, 3], 11: [1, 4], 6: [1, 5], 7: [1, 6] },
+};
+/* Which floor of the render a level tab is on: level 1 is the commerces, so
+   the eight tabs land on the eight rows counted from the top. */
+const levelOf = (view) => {
+  const m = /(\d+)/.exec(view || "");
+  return m ? Number(m[1]) : 5;
+};
+const facadeBand = (wing, level) => {
+  const w = FACADE.wings[wing];
+  return [w.top + (8 - level) * w.pitch, w.h];
+};
+
 /* Frames one box with air around it: the drawing is scaled so the box fills
    the element, then slid so the box sits in the middle. */
 function crop(box, pad = 0.45, axis = "width") {
@@ -739,18 +812,79 @@ const layersHTML = () => ["arp", "pay"].filter((k) => V.lay[k].on)
 /* The plan is read in black and white. Colour only arrives when a typology
    is asked for, and then only on the units that answer. */
 const typosOn = () => TYPOS.filter((t) => V.typo[t]);
-
 const typoHTML = () => {
   const on = typosOn();
   if (!on.length) return "";
-  return TYPICAL.map(([ty, , box]) => {
+  /* Laid on the sheet the level tabs opened, so the fill sits on the unit
+     and not on the courtyard beside it. */
+  return TYPICAL.map(([ty], i) => {
     const t = baseTypo(ty);
     if (!on.includes(t)) return "";
-    const [x, y, w, h] = box;
+    const [x, y, w, h] = PLAN_BOXES[i];
     return `<div class="utag" style="left:${(x * 100).toFixed(2)}%;top:${(y * 100).toFixed(2)}%;`
       + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;background:${TYPO_INK[t]}"></div>`;
   }).join("");
 };
+
+/* The selected unit, outlined on the sheet. Every other unit keeps an
+   invisible hit box, so the plan can be clicked the way the list can: the
+   journey says the unit is chosen in the list or on the drawing itself. */
+function unitMarkHTML() {
+  const rows = rowsOf("Unités");
+  const sel = selIndex("Unités");
+  const seen = new Set();
+  const zs = V.zoom / 100;
+  const parts = rows.map((r, i) => {
+    const u = r[2];
+    if (seen.has(u)) return "";   // Tous les niveaux repeats the same plan
+    seen.add(u);
+    const [x, y, w, h] = PLAN_BOXES[u];
+    const on = i === sel;
+    /* The whole pane is scaled by a CSS transform, which thickens a stroke
+       along with everything else; dividing by the zoom keeps the outline
+       the hairline it is meant to be at any magnification. */
+    return `<rect class="${on ? "on" : "hit"}" x="${x}" y="${y}" width="${w}" height="${h}" rx=".004"
+      style="stroke-width:${(1.6 / zs).toFixed(3)}px" data-act="row" data-value="${i}"><title>${r[0]} · ${r[1]}</title></rect>`;
+  }).join("");
+
+  /* The label is HTML, not SVG text: the overlay is stretched to the sheet's
+     own ratio, and a glyph inside it would be stretched with it. Its size is
+     divided by the zoom so it stays a label and does not grow into a sign. */
+  const cur = rows[sel];
+  const z = V.zoom / 100;
+  const tag = cur ? (() => {
+    const [x, y, , h] = PLAN_BOXES[cur[2]];
+    const below = y + h + 0.06 < 1;
+    return `<div class="ulabel" data-side="${below ? "below" : "above"}" style="left:${(x * 100).toFixed(2)}%;`
+      + `top:${((below ? y + h : y) * 100).toFixed(2)}%;`
+      + `font-size:${(11 / z).toFixed(2)}px;transform:translateY(${below ? 2 / z : -(14 / z)}px)">`
+      + `${cur[0]} · ${cur[1]}</div>`;
+  })() : "";
+  return `<svg class="umark" viewBox="0 0 1 1" preserveAspectRatio="none">${parts}</svg>${tag}`;
+}
+
+/* The same unit on the model: the floor it is on, and its windows inside
+   that floor. Nothing is drawn into the render; this sits over it. */
+function facadeMarkHTML() {
+  const row = selRow("Unités");
+  if (!row) return "";
+  const place = FACADE.of[row[2]];
+  if (!place) return "";
+  const [wi, bi] = place;
+  const view = viewOf("Unités");
+  const levels = view === "Tous les niveaux" ? [8, 7, 6, 5, 4, 3, 2] : [levelOf(view)];
+  const [bx0, bx1] = FACADE.wings[wi].bays[bi];
+  const wing = FACADE.wings[wi];
+  const x0 = wi === 0 ? 0.030 : 0.455, x1 = wi === 0 ? 0.447 : 0.905;
+  const g = levels.filter((l) => l >= 2).map((l) => {
+    const [ty, h] = facadeBand(wi, l);
+    return `<rect class="band" x="${x0}" y="${ty.toFixed(4)}" width="${(x1 - x0).toFixed(4)}" height="${h}"/>
+      <rect class="win" x="${bx0}" y="${(ty + wing.h * 0.04).toFixed(4)}"
+        width="${(bx1 - bx0).toFixed(4)}" height="${(wing.h * 0.92).toFixed(4)}" rx=".003"/>`;
+  }).join("");
+  return `<svg class="fmark" viewBox="0 0 1 1" preserveAspectRatio="none">${g}</svg>`;
+}
+
 
 const NAV = [["layout-grid", "Aperçu"], ["layers", "Unités"], ["table", "Quantités"],
   ["calendar-check", "Suivi"], ["file", "Fichiers"]];
@@ -1167,11 +1301,23 @@ function contentHTML() {
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>${hostButton(kind === "plan" ? "plan" : "model")}</div>
         ${fileStrip(kind === "plan" ? "plan" : "model")}
-        <div class="pb" style="overflow:hidden"><div class="plan ${cls}" data-img="${kind}" style="zoom:${V.zoom / 100}"><span class="lo"></span><span class="hi">${note}</span>${layers}</div></div></div>`;
+        ${kind === "plan"
+          /* The sheet is larger than the pane, so the pane is a window onto
+             it: the drawing, the consultants' layers, the typology fills and
+             the unit outline all sit inside one transformed box and move
+             together. The wheel zooms where the pointer is; dragging pans. */
+          ? `<div class="pb" style="padding:0;overflow:hidden"><div class="vp" data-vp>
+              <div class="plan ${cls}" data-img="${kind}"
+                   style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})">
+                <span class="lo"></span><span class="hi">${note}</span>
+                ${layers}${unitMarkHTML()}</div></div></div>`
+          : `<div class="pb" style="overflow:hidden"><div class="plan ${cls}" data-img="${kind}">
+              <span class="lo"></span><span class="hi">${note}</span>${layers}${facadeMarkHTML()}</div></div>`}
+        </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
       const plan = () => pane("Plan 2D", `${unit} — contours par-dessus`, "plan", "align", typoHTML() + layersHTML());
-      const model = () => pane("Maquette 3D", `${unit} — volumétrie, même niveau`, "model");
+      const model = () => pane("Maquette 3D", `${unit} — volumétrie, même niveau`, "model", "fit");
       if (V.focus) return `<div style="flex:1;display:flex">${plan()}</div>`;
       if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
       if (mode === "Single pane + inset") return `<div style="position:relative;flex:1;display:flex">${plan()}
@@ -1242,8 +1388,10 @@ function contentHTML() {
     <span class="lo bar" style="width:80px"></span><span class="hi">${V.screen}</span>
     <span style="flex:1"></span>
     ${zoomable ? `<span class="btnw" ${act("zoom", -25)} title="Réduire">${icon("minus")}</span>
-      <span class="btnw" ${act("zoom", 0)} title="Revenir à 100 %">${V.zoom}%</span>
+      <span class="btnw" ${act("zoom", 0)} title="Revenir à la feuille entière">${V.zoom}%</span>
       <span class="btnw" ${act("zoom", 25)} title="Agrandir">${icon("plus")}</span>
+      <span class="btnw" ${act("fitunit")} title="Cadrer l'unité sélectionnée sur le plan">${icon("search")}
+        <span class="lo bar" style="width:40px"></span><span class="hi">Cadrer l'unité</span></span>
       <span class="btnw" ${act("focus")} title="${V.focus ? "Revenir à l'écran complet" : "Le dessin seul"}">${icon(V.focus ? "minimize" : "maximize")}</span>` : ""}
     </div><div class="pb">${body}</div>`, step);
 }
@@ -1341,6 +1489,111 @@ function footerHTML() {
     </div></section>`;
 }
 
+/* ------------------------------------------------- reading the sheet
+   The pane is a fixed window; the sheet moves behind it. Zoom is a number
+   in percent, pan two pixel offsets, both on V, so a re-render draws the
+   drawing exactly where it was left. Nothing here touches the file. */
+
+const ZMIN = 100, ZMAX = 600;
+const vpEl = () => document.querySelector("[data-vp]");
+
+/* The sheet never leaves the pane: at 100 % it fills it, above that it may
+   be dragged until an edge reaches the opposite edge of the pane. */
+function clampPan(rect, zoom) {
+  const z = zoom / 100;
+  const w = rect.width * (z - 1), h = rect.height * (z - 1);
+  V.pan.x = Math.min(0, Math.max(-w, V.pan.x));
+  V.pan.y = Math.min(0, Math.max(-h, V.pan.y));
+}
+
+/* Zooms around a point of the pane, the pointer under the wheel or the
+   middle of the pane for the buttons, so what is being read stays put. */
+function zoomTo(next, cx, cy, rect) {
+  const z0 = V.zoom / 100;
+  const z1 = Math.min(ZMAX, Math.max(ZMIN, next)) / 100;
+  V.pan.x = cx - (cx - V.pan.x) * (z1 / z0);
+  V.pan.y = cy - (cy - V.pan.y) * (z1 / z0);
+  V.zoom = Math.round(z1 * 100);
+  clampPan(rect, V.zoom);
+}
+
+function zoomBy(next) {
+  const el = vpEl();
+  if (!el) { V.zoom = Math.min(ZMAX, Math.max(ZMIN, next)); return; }
+  const r = el.getBoundingClientRect();
+  zoomTo(next, r.width / 2, r.height / 2, r);
+}
+
+/* The selected unit, filling the pane with a little air: the box is 0–1 on
+   the sheet, so the zoom that frames it is the pane over the box. */
+function fitUnit() {
+  const el = vpEl();
+  const row = selRow("Unités");
+  if (!el || !row) return;
+  const r = el.getBoundingClientRect();
+  const [x, y, w, h] = PLAN_BOXES[row[2]];
+  const z = Math.min(ZMAX, Math.max(ZMIN, Math.min(1 / (w * 1.5), 1 / (h * 1.5)) * 100));
+  V.zoom = Math.round(z);
+  V.pan.x = r.width / 2 - (x + w / 2) * r.width * (z / 100);
+  V.pan.y = r.height / 2 - (y + h / 2) * r.height * (z / 100);
+  clampPan(r, V.zoom);
+}
+
+/* The wheel and the drag write straight to the element and to V, without a
+   re-render: a re-render per wheel tick would rebuild the whole screen and
+   the drag would stutter. The percentage in the header is patched in place
+   and the next real action draws from the same numbers. */
+function wireViewport() {
+  const el = vpEl();
+  if (!el) return;
+  const plan = el.querySelector(".plan");
+  const paint = () => {
+    plan.style.transform = `translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})`;
+    const read = document.querySelector('[data-act="zoom"][data-value="0"]');
+    if (read) read.textContent = `${V.zoom}%`;
+    const z = V.zoom / 100;
+    const label = el.querySelector(".ulabel");
+    if (label) {
+      label.style.fontSize = `${(11 / z).toFixed(2)}px`;
+      label.style.transform = `translateY(${(label.dataset.side === "below" ? 2 / z : -(14 / z)).toFixed(2)}px)`;
+    }
+    el.querySelectorAll(".umark rect").forEach((r) => { r.style.strokeWidth = `${(1.6 / z).toFixed(3)}px`; });
+  };
+  el.onwheel = (e) => {
+    e.preventDefault();
+    const r = el.getBoundingClientRect();
+    zoomTo(V.zoom * Math.exp(-e.deltaY * 0.0016), e.clientX - r.left, e.clientY - r.top, r);
+    paint();
+  };
+  el.ondblclick = () => { V.zoom = 100; V.pan = { x: 0, y: 0 }; paint(); };
+  el.onpointerdown = (e) => {
+    if (e.button !== 0) return;
+    const r = el.getBoundingClientRect();
+    const start = { x: e.clientX, y: e.clientY, px: V.pan.x, py: V.pan.y };
+    let moved = false;
+    el.onpointermove = (m) => {
+      if (!moved && Math.abs(m.clientX - start.x) + Math.abs(m.clientY - start.y) <= 3) return;
+      if (!moved) {
+        /* The pointer is captured only once the hand has actually moved: a
+           capture taken on press retargets the click to this element, and
+           the unit under the finger would never be selected. */
+        moved = true;
+        el.setPointerCapture(m.pointerId);
+        el.classList.add("drag");
+      }
+      V.pan.x = start.px + (m.clientX - start.x);
+      V.pan.y = start.py + (m.clientY - start.y);
+      clampPan(r, V.zoom);
+      paint();
+    };
+    el.onpointerup = (u) => {
+      el.classList.remove("drag");
+      el.onpointermove = null; el.onpointerup = null;
+      /* A drag is not a click: only a still pointer picks the unit under it. */
+      if (moved) { u.stopPropagation(); u.preventDefault(); }
+    };
+  };
+}
 /* ---------------------------------------------------------------- frame */
 
 function render() {
@@ -1394,6 +1647,9 @@ function render() {
      several times. Every control carries data-act, so a new control is wired
      the moment it is drawn. */
   document.getElementById("frame").onclick = onClick;
+  /* The pane that holds the sheet is rebuilt with the screen, so its wheel
+     and drag are hooked back up every time it is drawn. */
+  wireViewport();
   const find = document.querySelector(".find");
   if (find) find.oninput = (e) => {
     V.query = e.target.value;
@@ -1527,15 +1783,27 @@ function onClick(e) {
       V.view[screen] = (viewIndex(screen) + 1) % viewsOf(screen).length;
       V.sel[screen] = 0;
       break;
-    case "row": V.sel[screen] = Number(value); break;
+    /* Picking a unit while the sheet is zoomed in moves the sheet to it:
+       otherwise the unit that was asked for is outlined off-screen. */
+    case "row":
+      V.sel[screen] = Number(value);
+      if (screen === "Unités" && V.zoom > 130) fitUnit();
+      break;
     case "article": V.article = Number(value); break;
     /* The source link is a real link: the browser follows it, and the screen
        only notes what was opened. */
     case "source": say(`${value} — texte officiel ouvert dans un onglet. Lecture seule.`); return render();
     case "utab": V.utab = Number(value); break;
-    case "zoom":
-      V.zoom = Number(value) === 0 ? 100 : Math.min(200, Math.max(50, V.zoom + Number(value)));
+    /* Zooming from the buttons holds the middle of the pane still, the way
+       the wheel holds the pointer still. 0 is back to the whole sheet. */
+    case "zoom": {
+      if (Number(value) === 0) { V.zoom = 100; V.pan = { x: 0, y: 0 }; break; }
+      zoomBy(V.zoom + Number(value));
       break;
+    }
+    /* The unit the list is on, filling the pane: the move the plan is
+       opened for, without hunting for it with the wheel. */
+    case "fitunit": fitUnit(); break;
     case "focus": V.focus = !V.focus; break;
     case "reason": V.reason = V.reason === value ? null : value; break;
     case "save":
