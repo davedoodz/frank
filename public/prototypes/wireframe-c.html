@@ -64,8 +64,6 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs[data-align="Centred"] .sp{display:none}
 .tabs[data-align="Spread"] button{flex:1;justify-content:center}
 .tabs[data-align="Spread"] .sp{display:none}
-.tabs[data-style="Label only"] button > svg{display:none}
-.tabs[data-style="Icon only"] button > .hi,.tabs[data-style="Icon only"] button > .lo{display:none}
 .tabs[data-style="Underline"] button{border-radius:0}
 .tabs[data-style="Underline"] button[aria-current="true"]{background:transparent;
   box-shadow:inset 0 -2px 0 var(--ink)}
@@ -76,6 +74,35 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs[data-style="Segmented"] button:first-of-type{border-top-left-radius:6px;border-bottom-left-radius:6px}
 .tabs[data-style="Segmented"] button:last-of-type{border-right:0;border-top-right-radius:6px;border-bottom-right-radius:6px}
 .tabs[data-style="Segmented"] button[aria-current="true"]{background:#fff;color:var(--ink)}
+
+/* label presets, shared by the rail and the tab strip */
+.rail[data-labels-mode="Hidden"] .hi:not(.code),.tabs[data-labels-mode="Hidden"] .hi:not(.code),
+.rail[data-labels-mode="Hover only"] .hi:not(.code),.tabs[data-labels-mode="Hover only"] .hi:not(.code){display:none}
+.tabs[data-labels-mode="Hover only"] button:hover .hi,
+.rail[data-labels-mode="Hover only"] .row:hover .hi,
+.rail[data-labels-mode="Hover only"] .stk:hover .hi{display:inline}
+.rail[data-labels-mode="Uppercase"] .hi,.tabs[data-labels-mode="Uppercase"] .hi{
+  text-transform:uppercase;letter-spacing:.07em;font-size:11px}
+.rail[data-labels-mode="Short code"] .hi,.tabs[data-labels-mode="Short code"] .hi{letter-spacing:.04em}
+.rail .code{font-size:9.5px;letter-spacing:.03em;color:inherit}
+.rail .sct{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  padding:8px 4px 2px}
+.rail.stack .stk .hi{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rail.wide .row .hi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* breadcrumb, screen menu and grouped tabs live in the tab strip */
+.tabs .crumb{font-size:12.5px;color:var(--ink-3)}
+.tabs .crumb.on{color:var(--ink);font-weight:500}
+.tabs .grp{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  padding:0 6px 0 2px}
+.tabs .div{width:1px;height:18px;background:var(--line-2);margin:0 6px}
+.tabs [data-menu]{cursor:pointer}
+.tabs[data-style="Top accent"] button{border-radius:0}
+.tabs[data-style="Top accent"] button[aria-current="true"]{background:transparent;
+  box-shadow:inset 0 2px 0 var(--ink)}
+.tabs[data-style="Boxed"] button{border:1px solid transparent}
+.tabs[data-style="Boxed"] button[aria-current="true"]{background:#fff;border-color:var(--line-2);
+  box-shadow:0 1px 2px rgba(0,0,0,.05)}
 
 .work{flex:1;min-height:0;display:grid;gap:var(--gap);padding:var(--gap)}
 .pane{border:1px solid var(--line-2);border-radius:var(--r);background:#fff;
@@ -200,7 +227,7 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
    a hidden sprite and referenced by id afterwards. */
 function sprite() {
   const names = ["layout-grid", "layers", "table", "scale", "git-compare", "calendar-check",
-    "file", "box", "pen-line", "chevron-right", "search", "plus", "minus", "maximize",
+    "file", "box", "pen-line", "chevron-right", "chevron-down", "search", "plus", "minus", "maximize",
     "external-link", "check", "alert-triangle", "info", "clock", "list", "circle"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
@@ -277,30 +304,79 @@ const bars = (n, w = [100, 70, 85]) =>
 
 /* ------------------------------------------------------------ the parts */
 
+/* Sections only appear in the grouped rail: the first three screens read a
+   project, the next three act on it, the last one stores it. */
+const SECTIONS = { 0: "Read", 3: "Decide", 6: "Keep" };
+const SHORT = (name) => name.slice(0, 3).toUpperCase();
+
+/* One label rule for the rail and the tabs, so a title never reads two ways
+   on the same screen. Hover and Hidden are CSS, the rest rewrite the text. */
+function navLabel(name, i) {
+  const m = V.nav.labels;
+  if (m === "Short code") return SHORT(name);
+  if (m === "Numbered") return `${i + 1}. ${name}`;
+  return name;
+}
+
+const railIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Rail only";
+const tabIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Tabs only";
+
 function navHTML() {
   const mode = V.nav.layout;
   if (mode === "Top bar only" || mode === "Tabs only, no rail") return "";
-  const wide = mode === "Wide rail with labels";
+  const sections = mode === "Wide rail with sections";
+  const wide = mode === "Wide rail with labels" || sections;
   const stack = mode === "Rail with labels under icons";
-  const items = NAV.map(([ic, name]) => wide
-    ? `<div class="row ${name === V.screen ? "on" : ""}" data-screen="${name}">${icon(ic)}<span class="lo bar" style="width:70%"></span><span class="hi">${name}</span></div>`
-    : stack
-      ? `<div class="stk ${name === V.screen ? "on" : ""}" data-screen="${name}">${icon(ic)}<span class="lo bar" style="width:70%;height:6px"></span><span class="hi">${name}</span></div>`
-      : `<div class="ic ${name === V.screen ? "on" : ""}" data-screen="${name}">${icon(ic)}</div>`).join("");
+  const ic = railIcons();
+  const items = NAV.map(([glyph, name], i) => {
+    const on = name === V.screen ? "on" : "";
+    const g = ic ? icon(glyph) : "";
+    const text = `<span class="hi">${navLabel(name, i)}</span>`;
+    const head = sections && SECTIONS[i] ? `<div class="sct hi">${SECTIONS[i]}</div>` : "";
+    if (wide) return `${head}<div class="row ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%"></span>${text}</div>`;
+    if (stack) return `<div class="stk ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%;height:6px"></span>${text}</div>`;
+    return `<div class="ic ${on}" data-screen="${name}" title="${name}">${g || `<span class="code hi">${SHORT(name)}</span>`}</div>`;
+  }).join("");
   const cls = wide ? "wide" : stack ? "stack" : "";
-  return `<nav class="rail rg ${solo("nav")} ${cls}" data-rg="nav" data-fi="${fiOf("nav")}">${items}</nav>`;
+  return `<nav class="rail rg ${solo("nav")} ${cls}" data-rg="nav" data-fi="${fiOf("nav")}"
+       data-labels-mode="${V.nav.labels}">${items}</nav>`;
 }
 
 function tabsHTML() {
   const mode = V.nav.layout;
   if (mode === "Rail only, no tabs") return "";
   const top = mode === "Top bar only";
-  const items = Object.entries(SCREENS).map(([name, s]) =>
-    `<button data-screen="${name}" aria-current="${name === V.screen}">${icon(s.icon)}<span class="lo bar" style="width:46px"></span><span class="hi">${name}</span></button>`).join("");
+  const ic = tabIcons();
+  const names = Object.keys(SCREENS);
+  /* Icons off and labels away would leave an empty strip, so the short code
+     stands in: a tab target never renders without something to read. */
+  const bare = !ic && (V.nav.labels === "Hidden" || V.nav.labels === "Hover only");
+  const tab = (name, i) => `<button data-screen="${name}" aria-current="${name === V.screen}" title="${name}">
+      ${ic ? icon(SCREENS[name].icon) : ""}<span class="lo bar" style="width:46px"></span>
+      ${bare ? `<span class="hi code">${SHORT(name)}</span>` : `<span class="hi">${navLabel(name, i)}</span>`}</button>`;
+
+  let items;
+  if (mode === "Rail + screen menu") {
+    items = `<span class="btnw solid" data-menu>${ic ? icon(SCREENS[V.screen].icon) : ""}
+        <span class="hi">${navLabel(V.screen, names.indexOf(V.screen))}</span>${icon("chevron-down")}</span>
+      <span class="sp"></span>
+      <span class="chip hi">${names.indexOf(V.screen) + 1} of ${names.length}</span>`;
+  } else if (mode === "Rail + breadcrumb") {
+    items = `<span class="crumb hi">Le Hauterive III</span>${icon("chevron-right")}
+      ${ic ? icon(SCREENS[V.screen].icon) : ""}<span class="crumb on hi">${navLabel(V.screen, names.indexOf(V.screen))}</span>
+      <span class="sp"></span>`;
+  } else if (mode === "Rail + grouped tabs") {
+    items = `<span class="grp hi">Read</span>${names.slice(0, 3).map(tab).join("")}
+      <span class="div"></span><span class="grp hi">Decide</span>${names.slice(3).map((n, i) => tab(n, i + 3)).join("")}
+      <span class="sp"></span>`;
+  } else {
+    items = `${names.map(tab).join("")}<span class="sp"></span>`;
+  }
+
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "nav + tabs" : "tabs"}" data-fi="${fiOf("nav")}"
-       data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}">
+       data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
-    ${items}<span class="sp"></span>
+    ${items}
   </div>`;
 }
 
@@ -497,7 +573,8 @@ function render() {
   const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Right panel";
   const cols = [hasList ? "260px" : null, "1fr", hasInsp ? "340px" : null].filter(Boolean).join(" ");
   const navMode = { "Top bar only": "top", "Tabs only, no rail": "top",
-    "Wide rail with labels": "wide", "Rail with labels under icons": "stack" }[V.nav.layout] || "rail";
+    "Wide rail with labels": "wide", "Wide rail with sections": "wide",
+    "Rail with labels under icons": "stack" }[V.nav.layout] || "rail";
 
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
@@ -543,8 +620,11 @@ const dial = DialKit.createDialKit("Wireframe C", {
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
   nav: { _collapsed: true, fidelity: FI,
     layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels",
-      "Rail with labels under icons", "Rail only, no tabs", "Tabs only, no rail"]),
-    tabStyle: sel(["Icon + label", "Label only", "Icon only", "Underline", "Pills", "Segmented"]),
+      "Wide rail with sections", "Rail with labels under icons", "Rail only, no tabs",
+      "Tabs only, no rail", "Rail + screen menu", "Rail + breadcrumb", "Rail + grouped tabs"]),
+    icons: sel(["Rail only", "Tabs only", "Rail and tabs", "None"]),
+    labels: sel(["Full label", "Hover only", "Short code", "Numbered", "Uppercase", "Hidden"]),
+    tabStyle: sel(["Plain", "Underline", "Pills", "Segmented", "Top accent", "Boxed"]),
     tabAlign: sel(["Left", "Centred", "Spread"]) },
   header: { _collapsed: true, fidelity: FI, layout: sel(["Title + actions", "Title only", "Title + metrics"]) },
   list: { _collapsed: true, fidelity: FI, layout: sel(["Vertical list", "Card grid", "Filter bar only", "Hidden"]) },

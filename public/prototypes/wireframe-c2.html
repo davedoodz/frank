@@ -24,14 +24,52 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 /* ------------------------------------------------------------- frame */
 .frame{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;
   display:grid;grid-template-columns:56px 1fr;height:min(78vh,720px);min-height:560px}
-.frame[data-wide="1"]{grid-template-columns:184px 1fr}
+.frame[data-nav="wide"]{grid-template-columns:184px 1fr}
+.frame[data-nav="stack"]{grid-template-columns:76px 1fr}
+.frame[data-nav="none"]{grid-template-columns:1fr}
 .rail{border-right:1px solid var(--line);padding:10px 8px;display:flex;flex-direction:column;gap:6px;background:var(--fill-2)}
 .rail .r{height:30px;border-radius:7px;background:var(--fill);display:flex;align-items:center;gap:8px;
   padding:0 8px;color:var(--ink-3);cursor:pointer}
 .rail .r.on{background:var(--line-2)}
 .rail svg{width:15px;height:15px;stroke-width:1.9;flex:0 0 15px}
 .rail .r span{display:none;font-size:12px;color:var(--ink-2)}
-.frame[data-wide="1"] .rail .r span{display:block}
+.frame[data-nav="wide"] .rail .r span,.frame[data-nav="stack"] .rail .r span{display:block}
+.frame[data-nav="stack"] .rail .r{height:auto;flex-direction:column;gap:4px;padding:6px 2px;
+  font-size:10px;text-align:center}
+.rail .code{font-size:9.5px;letter-spacing:.03em;color:var(--ink-2)}
+.rail .r .code{display:block}
+.frame[data-nav="stack"] .rail .r span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rail .sct{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:8px 4px 2px}
+
+/* label presets, shared by the rail and the tab strip */
+.rail[data-labels-mode="Hidden"] .r span:not(.code),.tabs[data-labels-mode="Hidden"] .hi:not(.code),
+.rail[data-labels-mode="Hover only"] .r span:not(.code),.tabs[data-labels-mode="Hover only"] .hi:not(.code){display:none}
+.tabs[data-labels-mode="Hover only"] button:hover .hi,
+.rail[data-labels-mode="Hover only"] .r:hover span{display:block}
+.rail[data-labels-mode="Uppercase"] .r span,.tabs[data-labels-mode="Uppercase"] .hi{
+  text-transform:uppercase;letter-spacing:.07em;font-size:11px}
+
+/* how the tab strip presents itself */
+.tabs[data-align="Centred"]{justify-content:center}
+.tabs[data-align="Centred"] .sp,.tabs[data-align="Centred"] .stamp{display:none}
+.tabs[data-align="Spread"] button{flex:1;justify-content:center}
+.tabs[data-align="Spread"] .sp,.tabs[data-align="Spread"] .stamp{display:none}
+.tabs[data-style="Underline"] button{border-radius:0;border-color:transparent}
+.tabs[data-style="Underline"] button.on{background:none;box-shadow:inset 0 -2px 0 var(--ink)}
+.tabs[data-style="Pills"] button{border-color:var(--line-2);border-radius:999px}
+.tabs[data-style="Pills"] button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tabs[data-style="Pills"] button.on .hi,.tabs[data-style="Pills"] button.on span{color:inherit}
+.tabs[data-style="Segmented"]{gap:0}
+.tabs[data-style="Segmented"] button{border-radius:0;border-color:var(--line);background:var(--fill-2)}
+.tabs[data-style="Segmented"] button:first-of-type{border-radius:7px 0 0 7px}
+.tabs[data-style="Segmented"] button:last-of-type{border-radius:0 7px 7px 0}
+.tabs[data-style="Segmented"] button.on{background:var(--paper)}
+.tabs[data-style="Top accent"] button{border-radius:0;border-color:transparent}
+.tabs[data-style="Top accent"] button.on{background:none;box-shadow:inset 0 2px 0 var(--ink)}
+.tabs .crumb{font-size:12.5px;color:var(--ink-3)}
+.tabs .crumb.on{color:var(--ink);font-weight:500}
+.tabs .grp{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 6px 0 2px}
+.tabs .div{width:1px;height:18px;background:var(--line);margin:0 6px}
 
 .main{display:flex;flex-direction:column;min-width:0}
 .tabs{display:flex;gap:4px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
@@ -425,7 +463,12 @@ const KEY = [
   ["Coordination", "List, overlay, detail", "Crossings on the left, the superposition in the middle, the decision on the right."],
 ];
 
-const V = { screen: "Project", fidelity: "low", labels: true, notes: true, flags: true, wide: false, density: "comfortable" };
+const SECTIONS = { 0: "Read", 3: "Decide" };
+const SHORT = (name) => name.slice(0, 3).toUpperCase();
+
+const V = { screen: "Project", fidelity: "low", labels: true, notes: true, flags: true,
+  density: "comfortable", nav: "Icon rail + tabs", icons: "Rail only", titles: "Full label",
+  tabStyle: "Plain", tabAlign: "Left" };
 
 function render() {
   const def = SCREENS[V.screen];
@@ -434,15 +477,50 @@ function render() {
   frame.dataset.labels = V.labels ? "1" : "0";
   frame.dataset.notes = V.notes ? "1" : "0";
   frame.dataset.flags = V.flags ? "1" : "0";
-  frame.dataset.wide = V.wide ? "1" : "0";
+  frame.dataset.nav = { "Wide rail with labels": "wide", "Wide rail with sections": "wide",
+    "Rail with labels under icons": "stack", "Tabs only, no rail": "none" }[V.nav] || "rail";
   document.getElementById("body").dataset.dense = V.density === "compact" ? "1" : "0";
 
-  document.getElementById("rail").innerHTML = Object.entries(SCREENS).map(([k, s]) =>
-    `<div class="r ${k === V.screen ? "on" : ""}" data-s="${k}">${ico(s.icon)}<span>${k}</span></div>`).join("");
+  const names = Object.keys(SCREENS);
+  const sections = V.nav === "Wide rail with sections";
+  const railIc = V.icons === "Rail only" || V.icons === "Rail and tabs";
+  const tabIc = V.icons === "Tabs only" || V.icons === "Rail and tabs";
+  const away = V.titles === "Hidden" || V.titles === "Hover only";
+  const text = (k, i) => V.titles === "Short code" ? SHORT(k) : V.titles === "Numbered" ? `${i + 1}. ${k}` : k;
 
-  document.getElementById("tabs").innerHTML = Object.entries(SCREENS).map(([k, s]) =>
-    `<button class="${k === V.screen ? "on" : ""}" data-s="${k}">${ico(s.icon)}<span class="lo bar" style="width:52px"></span><span class="hi">${k}</span></button>`).join("") +
-    `<span class="sp"></span><span class="stamp"><span class="lo bar" style="width:62px"></span><span class="hi">read 6 min ago</span></span>`;
+  const rail = document.getElementById("rail");
+  rail.style.display = V.nav === "Tabs only, no rail" ? "none" : "";
+  rail.dataset.labelsMode = V.titles;
+  rail.innerHTML = names.map((k, i) => {
+    const head = sections && SECTIONS[i] ? `<div class="sct">${SECTIONS[i]}</div>` : "";
+    const body = railIc ? ico(SCREENS[k].icon) : `<span class="code">${SHORT(k)}</span>`;
+    return `${head}<div class="r ${k === V.screen ? "on" : ""}" data-s="${k}" title="${k}">${body}<span>${text(k, i)}</span></div>`;
+  }).join("");
+
+  const tabs = document.getElementById("tabs");
+  tabs.style.display = V.nav === "Rail only, no tabs" ? "none" : "";
+  tabs.dataset.labelsMode = V.titles;
+  tabs.dataset.style = V.tabStyle;
+  tabs.dataset.align = V.tabAlign;
+  /* Icons off and labels away would leave an empty strip, so the short code
+     stands in: a tab target never renders without something to read. */
+  const tab = (k, i) => `<button class="${k === V.screen ? "on" : ""}" data-s="${k}" title="${k}">
+      ${tabIc ? ico(SCREENS[k].icon) : ""}<span class="lo bar" style="width:52px"></span>
+      ${!tabIc && away ? `<span class="hi code">${SHORT(k)}</span>` : `<span class="hi">${text(k, i)}</span>`}</button>`;
+  const stamp = `<span class="sp"></span><span class="stamp"><span class="lo bar" style="width:62px"></span><span class="hi">read 6 min ago</span></span>`;
+
+  if (V.nav === "Rail + breadcrumb") {
+    tabs.innerHTML = `<span class="crumb hi">Le Hauterive III</span>${ico("chevron-right")}
+      ${tabIc ? ico(SCREENS[V.screen].icon) : ""}<span class="crumb on hi">${text(V.screen, names.indexOf(V.screen))}</span>${stamp}`;
+  } else if (V.nav === "Rail + screen menu") {
+    tabs.innerHTML = `<button class="on" data-menu>${tabIc ? ico(SCREENS[V.screen].icon) : ""}
+      <span class="hi">${text(V.screen, names.indexOf(V.screen))}</span>${ico("chevron-down")}</button>${stamp}`;
+  } else if (V.nav === "Rail + grouped tabs") {
+    tabs.innerHTML = `<span class="grp hi">Read</span>${names.slice(0, 3).map(tab).join("")}
+      <span class="div"></span><span class="grp hi">Decide</span>${names.slice(3).map((k, i) => tab(k, i + 3)).join("")}${stamp}`;
+  } else {
+    tabs.innerHTML = names.map(tab).join("") + stamp;
+  }
 
   document.getElementById("hd").innerHTML =
     `<div class="t"><span class="lo bar d" style="width:230px;height:13px"></span><span class="hi">${def.title}</span>
@@ -484,7 +562,14 @@ const dial = DialKit.createDialKit("Wireframe C, adapted", {
   regionLabels: true,
   featureFlags: true,
   notes: true,
-  wideRail: false,
+  nav: { _collapsed: true,
+    layout: sel(["Icon rail + tabs", "Wide rail with labels", "Wide rail with sections",
+      "Rail with labels under icons", "Rail only, no tabs", "Tabs only, no rail",
+      "Rail + screen menu", "Rail + breadcrumb", "Rail + grouped tabs"]),
+    icons: sel(["Rail only", "Tabs only", "Rail and tabs", "None"]),
+    titles: sel(["Full label", "Hover only", "Short code", "Numbered", "Uppercase", "Hidden"]),
+    tabStyle: sel(["Plain", "Underline", "Pills", "Segmented", "Top accent"]),
+    tabAlign: sel(["Left", "Centred", "Spread"]) },
   density: sel(["comfortable", "compact"]),
 }, { id: "wireframe-c2", persist: true });
 
@@ -494,7 +579,11 @@ function applyDial(v) {
   V.labels = v.regionLabels;
   V.flags = v.featureFlags;
   V.notes = v.notes;
-  V.wide = v.wideRail;
+  V.nav = v.nav.layout;
+  V.icons = v.nav.icons;
+  V.titles = v.nav.titles;
+  V.tabStyle = v.nav.tabStyle;
+  V.tabAlign = v.nav.tabAlign;
   V.density = v.density;
   render();
 }
