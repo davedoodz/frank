@@ -49,3 +49,7 @@ Log it, keep going, report at the end of the block. A failed DXF parse or a wron
 - Do not generate, edit, or redraw any plan.
 - Do not write to any drawing file, ever. CAD updates are proposed records a human applies inside AutoCAD.
 - Do not write client, developer, or consultant names or street addresses anywhere, including logs and fixtures.
+
+## Prototype dials
+
+Any prototype page with a DialKit panel keeps its settings across a refresh. Pass a stable id and turn persistence on, `createDialKit(name, config, { id: "<page-slug>", persist: true })`, and drive the first paint from `dial.values` rather than from the code defaults, so a restored panel and the screen agree. The id is the storage key, so keep it unique per page and never change it casually: a new id drops the settings the page was holding.

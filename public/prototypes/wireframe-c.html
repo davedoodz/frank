@@ -551,11 +551,11 @@ const dial = DialKit.createDialKit("Wireframe C", {
   content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
   inspector: { _collapsed: true, fidelity: FI, layout: sel(["Right panel", "Bottom sheet", "Overlay drawer", "Hidden"]) },
   footer: { _collapsed: true, fidelity: FI, layout: sel(["Impact strip", "Hidden"]) },
-});
+}, { id: "wireframe-c", persist: true });
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
 
-dial.subscribe((v) => {
+function applyDial(v) {
   V.screen = v.screen;
   V.fidelity = v.fidelity;
   V.labels = v.regionLabels;
@@ -564,10 +564,12 @@ dial.subscribe((v) => {
   V.isolate = v.isolate;
   ["nav", "header", "list", "content", "inspector", "footer"].forEach((r) => { V[r] = v[r]; });
   render();
-});
+}
+
+dial.subscribe(applyDial);
 
 sprite();
-render();
+applyDial(dial.values);
 </script>
 </body>
 </html>

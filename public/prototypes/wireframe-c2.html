@@ -486,9 +486,9 @@ const dial = DialKit.createDialKit("Wireframe C, adapted", {
   notes: true,
   wideRail: false,
   density: sel(["comfortable", "compact"]),
-});
+}, { id: "wireframe-c2", persist: true });
 
-dial.subscribe((v) => {
+function applyDial(v) {
   V.screen = v.screen;
   V.fidelity = v.fidelity;
   V.labels = v.regionLabels;
@@ -497,10 +497,12 @@ dial.subscribe((v) => {
   V.wide = v.wideRail;
   V.density = v.density;
   render();
-});
+}
+
+dial.subscribe(applyDial);
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
-render();
+applyDial(dial.values);
 </script>
 </body>
 </html>
