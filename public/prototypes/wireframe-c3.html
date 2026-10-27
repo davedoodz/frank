@@ -1611,15 +1611,8 @@ function contentHTML() {
        their own and none of them was worth a trip. A section keeps its own
        chips, so the four tables and the five phases still switch in place. */
     "Aperçu": () => {
-      const tiles = [["Ce qui a changé depuis la dernière lecture", "lignes lues dans les dessins"],
-        ["Les deux sources connectées", "plan et maquette, même niveau"],
-        ["Étage type — 14 unités", "typologies et superficies"],
-        ["Répartition des typologies", "part de chaque type au projet"]];
-      const grid = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)">
-        ${tiles.map(([t, note]) => `<div class="tile">
-          <div class="lo bar" style="width:60%"></div><div class="hi" style="font-weight:600">${t}</div>
-          <div class="lo col">${bars(4)}</div>
-          <div class="hi" style="color:var(--ink-2);font-size:11.5px">${note}</div></div>`).join("")}</div>`;
+      /* No summary tiles: four boxes that only named what the tables below
+         already say were a second heading for every section. */
       /* The chips belong to the section, not to the screen, so they carry
          the section's name with them and never move the strip above. */
       const chips = (name) => `<div class="row" style="gap:6px">${viewsOf(name).map((t, i) =>
@@ -1660,7 +1653,7 @@ function contentHTML() {
             <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
               <span class="hi" style="font-size:11.5px;color:var(--ink-2)">Extraits de travail, abrégés. La version qui fait foi est celle de l'arrondissement ou de la RBQ, liée sur chaque carte. Une lecture automatique ne déclare pas une non-conformité.</span></div></div>
           </div></div>`;
-      return `<div class="col" style="flex:1;gap:var(--gap)">${grid}${quant}${suivi}${zoning}</div>`;
+      return `<div class="col" style="flex:1;gap:var(--gap)">${quant}${suivi}${zoning}</div>`;
     },
     /* Files: what was read, and when. The view picks the kind. */
     "Fichiers": () => `<div class="col" style="flex:1">
