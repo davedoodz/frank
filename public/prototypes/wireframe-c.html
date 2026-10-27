@@ -106,6 +106,8 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 [data-labels="true"] .rg::after{content:attr(data-rg);position:absolute;top:0;left:0;z-index:4;
   background:#4b4bd6;color:#fff;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
   padding:1px 5px;border-bottom-right-radius:4px;pointer-events:none}
+[data-isolate]:not([data-isolate="none"]) .rg{opacity:.12;filter:grayscale(1)}
+[data-isolate]:not([data-isolate="none"]) .rg.solo{opacity:1;filter:none;outline:1px solid #4b4bd6}
 .step{position:absolute;z-index:5;width:19px;height:19px;border-radius:50%;background:var(--hi);
   color:#fff;font-size:11px;display:none;place-items:center;top:6px;right:6px}
 [data-journey="true"] .step{display:grid}
@@ -158,6 +160,7 @@ const V = {
   labels: true,
   journey: true,
   density: "comfortable",
+  isolate: "none",
   nav: { fidelity: "inherit", layout: "Icon rail + tabs" },
   header: { fidelity: "inherit", layout: "Title + actions" },
   list: { fidelity: "inherit", layout: "Vertical list" },
@@ -228,6 +231,10 @@ const JOURNEY = [
 
 /* ------------------------------------------------------------- fidelity */
 
+/* Isolation keeps the frame intact and fades everything that is not the
+   region under study, so a variant is judged in place rather than alone. */
+const solo = (region) => (V.isolate !== "none" && V.isolate === region ? "solo" : "");
+
 const fiOf = (region) => (V[region] && V[region].fidelity !== "inherit" ? V[region].fidelity : V.fidelity);
 const wrap = (region, label, html, step) =>
   `<div class="rg" data-rg="${label}" data-fi="${fiOf(region)}" style="display:contents">${html}</div>`
@@ -237,7 +244,7 @@ const wrap = (region, label, html, step) =>
    element itself rather than on a wrapper that would break the layout. */
 function region(name, label, inner, step) {
   const s = step ? `<span class="step">${step}</span>` : "";
-  return `<section class="pane rg" data-rg="${label}" data-fi="${fiOf(name)}" data-region="${name}">${s}${inner}</section>`;
+  return `<section class="pane rg ${solo(name)}" data-rg="${label}" data-fi="${fiOf(name)}" data-region="${name}">${s}${inner}</section>`;
 }
 
 const bars = (n, w = [100, 70, 85]) =>
@@ -252,14 +259,14 @@ function navHTML() {
   const items = NAV.map(([ic, name]) => wide
     ? `<div class="row ${name === V.screen ? "on" : ""}">${icon(ic)}<span class="lo bar" style="width:70%"></span><span class="hi">${name}</span></div>`
     : `<div class="ic ${name === V.screen ? "on" : ""}">${icon(ic)}</div>`).join("");
-  return `<nav class="rail rg ${wide ? "wide" : ""}" data-rg="nav" data-fi="${fiOf("nav")}">${items}</nav>`;
+  return `<nav class="rail rg ${solo("nav")} ${wide ? "wide" : ""}" data-rg="nav" data-fi="${fiOf("nav")}">${items}</nav>`;
 }
 
 function tabsHTML() {
   const top = V.nav.layout === "Top bar only";
   const items = Object.entries(SCREENS).map(([name, s]) =>
     `<button data-screen="${name}" aria-current="${name === V.screen}">${icon(s.icon)}<span class="lo bar" style="width:46px"></span><span class="hi">${name}</span></button>`).join("");
-  return `<div class="tabs rg" data-rg="${top ? "nav + tabs" : "tabs"}" data-fi="${fiOf("nav")}">
+  return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "nav + tabs" : "tabs"}" data-fi="${fiOf("nav")}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
     ${items}<span class="sp"></span>
     <span class="chip">${icon("clock")}<span class="lo bar" style="width:52px"></span><span class="hi">read 6 min ago</span></span>
@@ -276,7 +283,7 @@ function headerHTML() {
     Tracking: ["Tracking", "one list per phase, flags raised by the drawings"] }[V.screen];
   const metrics = V.header.layout === "Title + metrics";
   const bare = V.header.layout === "Title only";
-  return `<header class="pane rg" data-rg="header" data-fi="${fiOf("header")}" style="flex:0 0 auto">
+  return `<header class="pane rg ${solo("header")}" data-rg="header" data-fi="${fiOf("header")}" style="flex:0 0 auto">
     ${step ? `<span class="step">${step}</span>` : ""}
     <div class="pb" style="padding:10px 12px;gap:8px">
       <div class="row">
@@ -310,7 +317,7 @@ function listHTML() {
   }[V.screen] || ["item", "item", "item", "item"];
 
   if (mode === "Filter bar only") {
-    return `<section class="pane rg" data-rg="list → filter bar" data-fi="${fiOf("list")}" style="flex:0 0 auto;grid-column:1/-1">
+    return `<section class="pane rg ${solo("list")}" data-rg="list → filter bar" data-fi="${fiOf("list")}" style="flex:0 0 auto;grid-column:1/-1">
       ${step ? `<span class="step">${step}</span>` : ""}
       <div class="pb" style="flex-direction:row;align-items:center;padding:8px 10px">
         <span class="chip">${icon("search")}<span class="lo bar" style="width:70px"></span><span class="hi">Search ${label.toLowerCase()}</span></span>
@@ -426,11 +433,11 @@ function inspectorHTML() {
     </div>`;
 
   if (mode === "Bottom sheet") {
-    return `<section class="pane rg sheet" data-rg="inspector → bottom sheet" data-fi="${fiOf("inspector")}" style="height:260px">
+    return `<section class="pane rg sheet ${solo("inspector")}" data-rg="inspector → bottom sheet" data-fi="${fiOf("inspector")}" style="height:260px">
       ${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
   }
   if (mode === "Overlay drawer") {
-    return `<section class="pane rg drawer" data-rg="inspector → overlay" data-fi="${fiOf("inspector")}">
+    return `<section class="pane rg drawer ${solo("inspector")}" data-rg="inspector → overlay" data-fi="${fiOf("inspector")}">
       ${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
   }
   return region("inspector", "inspector", inner, step);
@@ -439,7 +446,7 @@ function inspectorHTML() {
 function footerHTML() {
   if (V.footer.layout === "Hidden" || !SCREENS[V.screen].regions.includes("footer")) return "";
   const step = V.journey ? SCREENS[V.screen].steps.footer : null;
-  return `<section class="pane rg" data-rg="footer — effect of the change" data-fi="${fiOf("footer")}" style="flex:0 0 auto;grid-column:1/-1">
+  return `<section class="pane rg ${solo("footer")}" data-rg="footer — effect of the change" data-fi="${fiOf("footer")}" style="flex:0 0 auto;grid-column:1/-1">
     ${step ? `<span class="step">${step}</span>` : ""}
     <div class="pb" style="flex-direction:row;align-items:center;gap:10px;padding:8px 12px">
       <span class="lo bar" style="width:150px"></span><span class="lo bar" style="width:60px"></span><span class="lo bar" style="width:60px"></span>
@@ -462,7 +469,7 @@ function render() {
 
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
-         data-density="${V.density}" data-fi="${V.fidelity}">
+         data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}">
       ${navHTML()}
       <div class="body">
         ${tabsHTML()}
@@ -501,6 +508,7 @@ const dial = DialKit.createDialKit("Wireframe C", {
   regionLabels: true,
   journeySteps: true,
   density: sel(["comfortable", "compact"]),
+  isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
   nav: { _collapsed: true, fidelity: FI, layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels"]) },
   header: { _collapsed: true, fidelity: FI, layout: sel(["Title + actions", "Title only", "Title + metrics"]) },
   list: { _collapsed: true, fidelity: FI, layout: sel(["Vertical list", "Card grid", "Filter bar only", "Hidden"]) },
@@ -517,6 +525,7 @@ dial.subscribe((v) => {
   V.labels = v.regionLabels;
   V.journey = v.journeySteps;
   V.density = v.density;
+  V.isolate = v.isolate;
   ["nav", "header", "list", "content", "inspector", "footer"].forEach((r) => { V[r] = v[r]; });
   render();
 });
