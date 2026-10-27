@@ -175,128 +175,53 @@ footer{max-width:1500px;margin:26px auto 0;font-size:11.5px;color:var(--ink-3);l
 <script>
 const ARROW = `<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>`;
 
-/* Les sept dispositions, reprises telles quelles de zonage-en-contexte.html:
-   chaque dessin est écrit pour sa règle — des étages pour une hauteur, des
-   cases pour un stationnement. L'image est la règle, pas son chiffre. */
+/* Les sept dispositions. Six d'entre elles ont désormais leur dessin en
+   fichier — un trait noir sur blanc par règle, des étages pour une hauteur,
+   des cases pour un stationnement. La septième n'a rien à mesurer, donc rien
+   à dessiner: sa chaîne d'autorité reste tracée ici. Le ratio voyage avec
+   l'image pour que la fiche réserve sa place avant que le fichier n'arrive. */
 const A = [
   { id: "art. 9", topic: "Hauteur en étages", state: "non résolu", m: "6 étages", r: "5 étages",
     ecart: "1 étage de trop",
     q: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
     src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
     url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    draw: (w, h) => {
-      const n = 6, lim = 5, fh = h / (n + 1.2), x = 10, bw = w * .38;
-      let s = `<rect x="${x}" y="${h - fh * n}" width="${bw}" height="${fh * n}" fill="var(--over-2)" stroke="var(--ink)" stroke-width="1"/>`;
-      for (let i = 1; i < n; i++) s += `<line x1="${x}" x2="${x + bw}" y1="${h - fh * i}" y2="${h - fh * i}" stroke="var(--ink)" stroke-width=".6" stroke-opacity=".5"/>`;
-      for (let i = 0; i < n; i++) s += `<rect x="${x + bw * .18}" y="${h - fh * (i + 1) + fh * .25}" width="${bw * .22}" height="${fh * .4}" fill="var(--paper)" stroke="var(--ink)" stroke-width=".5"/>
-        <rect x="${x + bw * .58}" y="${h - fh * (i + 1) + fh * .25}" width="${bw * .22}" height="${fh * .4}" fill="var(--paper)" stroke="var(--ink)" stroke-width=".5"/>`;
-      s += `<line x1="${x}" x2="${x + bw + 14}" y1="${h - fh * lim}" y2="${h - fh * lim}" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="5 3"/>
-        <text x="${x + bw + 18}" y="${h - fh * lim + 3}">5 étages exigés</text>
-        <line x1="${x}" x2="${x + bw + 14}" y1="${h - fh * n}" y2="${h - fh * n}" stroke="var(--over)" stroke-width="1.4"/>
-        <text class="v" x="${x + bw + 18}" y="${h - fh * n + 3}" fill="var(--over)">6e étage dessiné</text>
-        <line x1="0" x2="${w}" y1="${h}" y2="${h}" stroke="var(--ink)" stroke-width="1.2"/>`;
-      return s;
-    } },
+    img: "assets/code/art-9-hauteur.png", ratio: "1649 / 954" },
 
   { id: "art. 43", topic: "Taux d'implantation", state: "conforme", m: "48,2 %", r: "55 %",
     ecart: "6,8 % de marge",
     q: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
     src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
     url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    draw: (w, h) => {
-      const pad = 14, W = w - pad * 2, H = h - pad * 2;
-      const aW = W * .82, aH = H * (.55 / .82);
-      const bW = W * .82, bH = H * (.482 / .82);
-      return `<rect x="${pad}" y="${pad}" width="${W}" height="${H}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1"/>
-        <rect x="${pad + 6}" y="${pad + 6}" width="${aW}" height="${aH}" fill="none" stroke="var(--ink)"
-          stroke-width="1.1" stroke-dasharray="5 3"/>
-        <rect x="${pad + 6}" y="${pad + 6}" width="${bW}" height="${bH}" fill="var(--ok-2)" stroke="var(--ok)" stroke-width="1.2"/>
-        <text class="v" x="${pad + 14}" y="${pad + 6 + bH / 2}" fill="var(--ok)">48,2 %</text>
-        <text x="${pad + 14}" y="${pad + 6 + aH - 5}">55 % permis</text>
-        <text x="${pad + W - 4}" y="${pad + H + 11}" text-anchor="end">terrain 1 459 m²</text>`;
-    } },
+    img: "assets/code/art-43-implantation.png", ratio: "1545 / 1018" },
 
   { id: "art. 22", topic: "Marge arrière", state: "non résolu", m: "2,70 m", r: "3,00 m",
     ecart: "30 cm manquants",
     q: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
     src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
     url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    draw: (w, h) => {
-      const lot = h - 18, b = h - 18 - (h * .42);
-      const need = lot - (h * .42) * (3.00 / 2.70);
-      return `<line x1="10" x2="${w - 10}" y1="${lot}" y2="${lot}" stroke="var(--ink)" stroke-width="1.4"/>
-        <text x="10" y="${lot + 12}">limite arrière du terrain</text>
-        <rect x="10" y="10" width="${w - 20}" height="${b - 10}" fill="var(--fill)" stroke="var(--ink)" stroke-width="1"/>
-        <text x="${w / 2}" y="${(b + 10) / 2}" text-anchor="middle">bâtiment</text>
-        <rect x="10" y="${b}" width="${w - 20}" height="${lot - b}" fill="var(--over-2)" fill-opacity=".6"/>
-        <line x1="${w * .3}" x2="${w * .3}" y1="${b}" y2="${lot}" stroke="var(--over)" stroke-width="1.2"/>
-        <text class="v" x="${w * .34}" y="${(b + lot) / 2 + 4}" fill="var(--over)">2,70 m</text>
-        <line x1="${w - 56}" x2="${w - 56}" y1="${need}" y2="${lot}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="4 3"/>
-        <line x1="${w - 64}" x2="${w - 48}" y1="${need}" y2="${need}" stroke="var(--ink)" stroke-width="1.2"/>
-        <text x="${w - 12}" y="${need - 5}" text-anchor="end">3,00 m exigés</text>`;
-    } },
+    img: "assets/code/art-22-marge.png", ratio: "1602 / 982" },
 
   { id: "art. 71", topic: "Stationnement", state: "non résolu", m: "22 cases", r: "30 cases",
     ecart: "8 cases manquantes",
     q: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
     src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
     url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    draw: (w, h) => {
-      const per = 10, cw = (w - 20) / per, ch = Math.min((h - 26) / 3, 20);
-      let s = "";
-      for (let i = 0; i < 30; i++) {
-        const x = 10 + (i % per) * cw, y = 8 + Math.floor(i / per) * (ch + 5), built = i < 22;
-        s += `<rect x="${x + 1}" y="${y}" width="${cw - 4}" height="${ch}" rx="1.5"
-          fill="${built ? "var(--over-2)" : "none"}" stroke="${built ? "var(--ink)" : "var(--over)"}"
-          stroke-width="${built ? .9 : 1}" ${built ? "" : 'stroke-dasharray="3 2"'}/>`;
-      }
-      return s + `<text class="v" x="10" y="${h - 2}">22 dessinées</text>
-        <text x="${w - 10}" y="${h - 2}" text-anchor="end" fill="var(--over)">8 manquantes sur 30</text>`;
-    } },
+    img: "assets/code/art-71-stationnement.png", ratio: "1859 / 846" },
 
   { id: "art. 134", topic: "Verdissement et pleine terre", state: "non résolu", m: "17 %", r: "20 %",
     ecart: "3 % manquants",
     q: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
     src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
     url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    draw: (w, h) => {
-      const pad = 12, W = w - pad * 2, H = h - pad * 2;
-      const green = W * .17, need = W * .20;
-      return `<rect x="${pad}" y="${pad}" width="${W}" height="${H}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1"/>
-        <rect x="${pad}" y="${pad}" width="${green}" height="${H}" fill="var(--ok-2)"/>
-        <rect x="${pad + green}" y="${pad}" width="${need - green}" height="${H}" fill="none" stroke="var(--over)"
-          stroke-width="1" stroke-dasharray="3 2"/>
-        <line x1="${pad + need}" x2="${pad + need}" y1="${pad - 5}" y2="${pad + H}" stroke="var(--ink)" stroke-width="1.2"/>
-        ${[...Array(5)].map((_, i) => `<circle cx="${pad + green * .5}" cy="${pad + H * (i + .5) / 5}" r="${Math.min(green * .3, 7)}"
-          fill="none" stroke="var(--ok)" stroke-width="1"/>`).join("")}
-        <text class="v" x="${pad + need + 8}" y="${pad + 12}" fill="var(--ok)">17 % en pleine terre</text>
-        <text x="${pad + need + 8}" y="${pad + 26}" fill="var(--over)">20 % exigés · 3 % manquants</text>`;
-    } },
+    img: "assets/code/art-134-verdissement.png", ratio: "1597 / 985" },
 
   { id: "3.2.3.1", topic: "Baies non protégées", state: "non résolu", m: "74,2 m²", r: "68,5 m²",
     ecart: "5,7 m² de trop",
     q: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
     src: "Code de construction du Québec, chapitre I — Bâtiment · CNB 2020 modifié, en vigueur le 17 avril 2025",
     url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
-    draw: (w, h) => {
-      const fx = 12, fw = w * .52, fy = 10, fh = h - 30;
-      let s = `<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.1"/>`;
-      const cols = 4, rows = 3, gw = fw / (cols + 1.6), gh = fh / (rows + 1.4);
-      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-        const i = r * cols + c, past = i >= 11;
-        s += `<rect x="${fx + gw * .4 + c * gw * 1.3}" y="${fy + gh * .35 + r * gh * 1.3}"
-          width="${gw * .95}" height="${gh * .8}" fill="${past ? "var(--over)" : "var(--over-2)"}"
-          fill-opacity="${past ? .85 : 1}" stroke="var(--ink)" stroke-width=".7"/>`;
-      }
-      s += `<line x1="${fx + fw + 10}" x2="${w - 14}" y1="${fy + fh / 2}" y2="${fy + fh / 2}"
-          stroke="var(--ink)" stroke-width="1" stroke-dasharray="4 3"/>
-        <line x1="${w - 14}" x2="${w - 14}" y1="${fy + 6}" y2="${fy + fh - 6}" stroke="var(--ink)" stroke-width="1.2"/>
-        <text x="${fx + fw + 12}" y="${fy + fh / 2 - 6}">distance</text>
-        <text x="${fx + fw + 12}" y="${fy + fh / 2 + 16}">limitative</text>
-        <text class="v" x="${fx}" y="${h - 4}">74,2 m² de baies</text>
-        <text x="${w - 10}" y="${h - 4}" text-anchor="end" fill="var(--over)">68,5 m² permis</text>`;
-      return s;
-    } },
+    img: "assets/code/art-3231-baies.png", ratio: "1642 / 958" },
 
   { id: "A-19.1", topic: "Cadre légal du zonage", state: "pour référence", m: "—", r: "cadre habilitant",
     ecart: "rien à mesurer",
@@ -318,8 +243,15 @@ const A = [
 ];
 
 const cl = (a) => a.state === "conforme" ? "ok" : a.state === "pour référence" ? "ref" : "open";
-const box = (a, w, h) => `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet"
-  style="width:100%;height:auto">${a.draw(w, h)}</svg>`;
+/* Le fichier dessiné quand il existe, le tracé calculé sinon. L'image garde
+   son rapport par aspect-ratio, donc la fiche a sa hauteur avant même le
+   chargement; multiply efface le blanc du fichier sur le fond gris du
+   plateau, sans teinter le trait. */
+const box = (a, w, h) => (a.img
+  ? `<img src="${a.img}" alt="${a.topic} — ${a.m} mesuré, ${a.r} exigé" loading="lazy"
+      style="width:100%;height:auto;display:block;aspect-ratio:${a.ratio};mix-blend-mode:multiply">`
+  : `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet"
+      style="width:100%;height:auto">${a.draw(w, h)}</svg>`);
 const lien = (a) => `<a class="lien" href="${a.url}" target="_blank" rel="noopener noreferrer">Lire le texte officiel ${ARROW}</a>`;
 const plain = (a) => `<a class="plain" href="${a.url}" target="_blank" rel="noopener noreferrer">Texte officiel</a>`;
 const st = (a) => `<span class="state"><span class="dot ${cl(a)}"></span>${a.state}</span>`;
