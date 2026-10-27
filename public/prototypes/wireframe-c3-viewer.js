@@ -120,7 +120,10 @@ function createRenderer() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.domElement.className = "model3d-canvas";
-  renderer.domElement.setAttribute("aria-label", "Maquette 3D interactive du Baldwin III");
+  renderer.domElement.setAttribute(
+    "aria-label",
+    "Contrôle 3D : glisser pour orbiter, molette pour zoomer, flèches pour déplacer la vue",
+  );
   renderer.domElement.tabIndex = 0;
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x8c9094, 2.1));
@@ -136,6 +139,7 @@ function createRenderer() {
   controls.dampingFactor = 0.075;
   controls.screenSpacePanning = true;
   controls.zoomToCursor = true;
+  controls.listenToKeyEvents(renderer.domElement);
 
   // Orbiting and the wheel change the same number the slider shows, so the
   // viewer announces it. Only whole percents are sent: damping fires this
@@ -148,7 +152,8 @@ function createRenderer() {
   });
 
   renderer.setAnimationLoop(() => {
-    if (!renderer.domElement.isConnected) return;
+    const canvas = renderer.domElement;
+    if (!canvas.isConnected || canvas.offsetParent === null) return;
     controls.update();
     renderer.render(scene, camera);
   });
@@ -188,7 +193,15 @@ async function mountBuildingViewer() {
   const host = document.querySelector("[data-building-model]");
   if (!host) return;
 
-  if (!renderer) createRenderer();
+  if (!renderer) {
+    try {
+      createRenderer();
+    } catch (error) {
+      console.error("WebGL unavailable for the building model", error);
+      setStatus(host, "error", "Impossible de charger la maquette 3D.");
+      return;
+    }
+  }
   if (renderer.domElement.parentElement !== host) host.prepend(renderer.domElement);
 
   resizeObserver?.disconnect();
@@ -223,7 +236,8 @@ async function mountBuildingViewer() {
     if (currentHost) setStatus(currentHost, "ready", "");
   } catch (error) {
     console.error("Building model failed to load", error);
-    setStatus(host, "error", "Impossible de charger la maquette 3D.");
+    const currentHost = document.querySelector("[data-building-model]") || host;
+    setStatus(currentHost, "error", "Impossible de charger la maquette 3D.");
   }
 }
 
