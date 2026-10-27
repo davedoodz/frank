@@ -353,6 +353,35 @@ function crop(box, pad = 0.45, axis = "width") {
     + `background-position:${(px / (1 - fw) * 100).toFixed(1)}% ${(py / (1 - fh) * 100).toFixed(1)}%`;
 }
 
+/* Where each consultant's building sits inside its own sheet, measured once
+   and normalised 0–1. The surveyor's box is the teal implantation outline;
+   the landscaping box is the same outline carried across by the two property
+   lines, which agree to within half a percent on the drive island. */
+const SHEETS = {
+  arp: { box: [.159, .246, .818, .814] },
+  pay: { box: [.138, .224, .808, .796] },
+};
+/* The floor plan's own building, in the same terms. */
+const BASE_BOX = [.014, .019, .978, .961];
+
+/* Places one sheet so its building lands on the floor plan's building, then
+   adds the nudge the panel holds. The ground sheets cover the podium, so
+   they bound the typical floor rather than trace it. */
+function sheetStyle(key) {
+  const L = V.lay[key];
+  const [bx0, by0, bx1, by1] = BASE_BOX;
+  const [sx0, sy0, sx1, sy1] = SHEETS[key].box;
+  const w = (bx1 - bx0) / (sx1 - sx0) * L.scale / 100;
+  const h = (by1 - by0) / (sy1 - sy0) * L.scale / 100;
+  const left = bx0 - sx0 * w + L.x / 100;
+  const top = by0 - sy0 * h + L.y / 100;
+  return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;opacity:${L.opacity / 100}`;
+}
+
+const layersHTML = () => ["arp", "pay"].filter((k) => V.lay[k].on)
+  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"></div>`).join("");
+
 const NAV = [["layout-grid", "Overview"], ["layers", "Units"], ["table", "Quantities"],
   ["scale", "Rules"], ["git-compare", "Coordination"], ["calendar-check", "Tracking"], ["file", "Files"]];
 
@@ -566,7 +595,7 @@ function tabsHTML() {
 function headerHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.header : null;
   const title = { Projects: ["Projects", "5 ongoing · 1 archived"],
-    Overview: ["Le Hauterive III", "8 floors · 98 units · 2 sources connected"],
+    Overview: ["Alder Court", "6 floors · 48 units · 2 sources connected"],
     Units: ["Typical floor — level 5", "14 units · 6 differences open"],
     Quantities: ["Quantities", "counted from the drawings, nothing typed"],
     Rules: ["Zoning and code", "7 articles · 5 unresolved · 1 possible exemption"],
@@ -635,10 +664,12 @@ function contentHTML() {
   const mode = V.content.layout;
   const body = {
     Units: () => {
-      const pane = (t, note, kind) => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
+      const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span></div>
-        <div class="pb"><div class="plan" data-img="${kind}"><span class="lo"></span><span class="hi">${note}</span></div></div></div>`;
-      const plan = () => pane("2D plan", "floor plan, outlines on top", "plan");
+        <div class="pb"><div class="plan ${cls}" data-img="${kind}"><span class="lo"></span><span class="hi">${note}</span>${layers}</div></div></div>`;
+      /* The 2D pane carries the surveyor's and the landscaper's sheets, which
+         is why it is the one pane drawn at the plan's own aspect. */
+      const plan = () => pane("2D plan", "floor plan, outlines on top", "plan", "align", layersHTML());
       const model = () => pane("3D model", "massing, same level", "model");
       if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
       if (mode === "Single pane + inset") return `<div style="position:relative;flex:1;display:flex">${plan()}
@@ -811,6 +842,18 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   shell: sel(["Flat", "Inset card"]),
   homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
+  layers: { _collapsed: false,
+    surveyor: true,
+    surveyorOpacity: [55, 0, 100, 5],
+    landscaping: false,
+    landscapingOpacity: [55, 0, 100, 5],
+    align: { _collapsed: true,
+      surveyorScale: [100, 60, 160, 1],
+      surveyorX: [0, -40, 40, .5],
+      surveyorY: [0, -40, 40, .5],
+      landscapingScale: [100, 60, 160, 1],
+      landscapingX: [0, -40, 40, .5],
+      landscapingY: [0, -40, 40, .5] } },
   nav: { _collapsed: true, fidelity: FI,
     layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels",
       "Wide rail with sections", "Rail with labels under icons", "Rail only, no tabs",
@@ -837,6 +880,11 @@ function applyDial(v) {
   V.shell = v.shell;
   V.homeLayout = v.homeLayout;
   V.isolate = v.isolate;
+  const la = v.layers, al = la.align;
+  V.lay.arp = { on: la.surveyor, opacity: la.surveyorOpacity,
+    scale: al.surveyorScale, x: al.surveyorX, y: al.surveyorY };
+  V.lay.pay = { on: la.landscaping, opacity: la.landscapingOpacity,
+    scale: al.landscapingScale, x: al.landscapingX, y: al.landscapingY };
   ["nav", "header", "list", "content", "inspector", "footer"].forEach((r) => { V[r] = v[r]; });
   render();
 }
