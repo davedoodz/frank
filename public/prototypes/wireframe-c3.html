@@ -33,17 +33,19 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 /* screen frame -------------------------------------------------------- */
 .frame{margin:0;border:0;border-radius:0;background:#fff;
   flex:1;height:100vh;display:grid;overflow:hidden;position:relative}
-.frame[data-nav="rail"]{grid-template-columns:48px 1fr;grid-template-rows:1fr}
+.frame[data-nav="rail"]{grid-template-columns:86px 1fr;grid-template-rows:1fr}
 .frame[data-nav="wide"]{grid-template-columns:180px 1fr;grid-template-rows:1fr}
 .frame[data-nav="top"]{grid-template-columns:1fr;grid-template-rows:1fr}
 .frame[data-nav="stack"]{grid-template-columns:72px 1fr;grid-template-rows:1fr}
 
+/* The rail is as wide as its items: the tile stretches to the column instead
+   of overflowing a column narrower than itself. */
 .rail{border-right:1px solid var(--line-2);background:var(--fill-2);
-  display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px}
+  display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:10px 8px}
 .rail.wide{align-items:stretch;padding:10px}
-.rail .ic{width:52px;height:auto;min-height:28px;border-radius:var(--r);background:var(--fill);
+.rail .ic{width:auto;height:auto;min-height:30px;border-radius:var(--r);background:var(--fill);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;padding:5px 2px;color:var(--ink-3)}
+  gap:4px;padding:7px 4px;color:var(--ink-3)}
 .rail .ic.on{background:var(--bar);color:var(--ink)}
 .rail .row{display:flex;align-items:center;gap:8px;padding:4px;border-radius:var(--r)}
 .rail .row.on{background:var(--bar)}
@@ -87,8 +89,10 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .rail[data-labels-mode="Uppercase"] .hi,.tabs[data-labels-mode="Uppercase"] .hi{
   text-transform:uppercase;letter-spacing:.07em;font-size:11px}
 .rail[data-labels-mode="Short code"] .hi,.tabs[data-labels-mode="Short code"] .hi{letter-spacing:.04em}
-.rail .ic .cap{font-size:9px;line-height:1.15;text-align:center;max-width:100%;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-3)}
+/* a caption that does not fit on one line wraps rather than truncating:
+   "Coordination" is a destination, not an ellipsis */
+.rail .ic .cap{font-size:9px;line-height:1.2;text-align:center;max-width:100%;
+  white-space:normal;overflow-wrap:normal;hyphens:none;color:var(--ink-3)}
 .rail .ic.on .cap{color:var(--ink)}
 .rail .code{font-size:9.5px;letter-spacing:.03em;color:inherit}
 .rail .sct{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
