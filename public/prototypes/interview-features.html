@@ -56,9 +56,15 @@ h2.theme svg{width:15px;height:15px;stroke-width:1.8;color:var(--ink-2)}
 .feat.drag{opacity:.4}
 .feat.over{box-shadow:0 -2px 0 0 var(--accent-dk)}
 .feat.over-after{box-shadow:0 2px 0 0 var(--accent-dk)}
-.bar{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:12px;color:var(--ink-3)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;margin-top:18px;padding-top:14px;
+  border-top:1px solid var(--line);font-size:12px;color:var(--ink-3)}
+.bar p{flex:1 1 100%;margin:0;line-height:1.55;color:var(--ink-2)}
+.bar .key:last-child{margin-left:auto}
+.bar .key{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.bar .key b{font-weight:600;color:var(--ink-2);letter-spacing:.04em}
 .bar button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--paper);
   border-radius:6px;padding:3px 9px;cursor:pointer;color:var(--ink-2)}
+.bar button:hover{border-color:var(--line-2);color:var(--ink)}
 dl{display:grid;grid-template-columns:118px 1fr;gap:4px 14px;font-size:13.5px}
 dt{color:var(--ink-3);font-size:12px;padding-top:2px}
 dd{color:var(--ink-2)}
@@ -82,8 +88,12 @@ dd.look{color:var(--ink)}
     <span class="who ben"><i data-lucide="pen-line"></i>Benoît · 2D, drawings, execution</span>
     <span class="who both"><i data-lucide="users"></i>Both</span>
   </div>
-  <div class="bar">Drag a card by its handle to move it up or down the list. Click a priority or a stage pill to change it — <b>DD</b> design development, <b>CD</b> construction documentation. Your order is kept in this browser.
-    <button id="reset" type="button">Reset</button></div>
+  <div class="bar">
+    <p>Drag a card by its handle to move it up or down. Click a priority or a stage pill to change it.</p>
+    <span class="key"><b>DD</b> design development</span>
+    <span class="key"><b>CD</b> construction documentation</span>
+    <span class="key">Saved in this browser<button id="reset" type="button">Reset</button></span>
+  </div>
 </header>
 
 <h2 class="theme"><i data-lucide="calculator"></i>Counting what is already in the drawings</h2>
