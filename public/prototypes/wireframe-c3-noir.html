@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype C3 — chrome noir, neuf façons d'y mettre le vert</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Le chrome est noir dans les neuf vignettes. Ce qui change: la nuance de
+   noir, l'endroit où le vert se pose, et la quantité. Le dessin ne change
+   jamais — noir sur blanc, dans une carte blanche. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --bar:#dcdcdc; --r:6px;
+  --accent:#C3E05A; --accent-08:rgba(195,224,90,.10); --accent-ink:#111112;
+  --noir:#141416;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:26px 26px 60px}
+h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.lede{color:var(--ink-2);font-size:12.5px;max-width:78ch;margin-top:6px}
+.rule{height:1px;background:var(--line-2);margin:16px 0 18px}
+
+/* ------------------------------------------------------------ les réglages */
+.picker{display:flex;align-items:flex-start;gap:26px;flex-wrap:wrap;
+  border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;background:#fff}
+.grp{display:flex;flex-direction:column;gap:7px}
+.grp .lab{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sw{width:26px;height:26px;border-radius:7px;border:1px solid rgba(17,17,18,.12);cursor:pointer;
+  display:grid;place-items:center;font-size:9px;color:#fff}
+.sw.on{box-shadow:0 0 0 2px #fff inset,0 0 0 3px var(--ink)}
+.hex{border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;width:108px}
+.ratio{font-size:11.5px;color:var(--ink-2);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.verdict{font-size:11px;padding:2px 7px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink-2)}
+.verdict[data-ok="non"]{border-color:#b3261e;color:#b3261e}
+
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(520px,1fr));gap:22px;margin-top:26px}
+.panel{display:flex;flex-direction:column;gap:8px;min-width:0}
+.cap{display:flex;align-items:baseline;gap:8px}
+.cap .n{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+.cap .t{font-size:13px;font-weight:600}
+.why{font-size:11.5px;color:var(--ink-2);line-height:1.5}
+.cost{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+
+/* -------------------------------------------------------------- la vignette */
+.mock{border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.frame{display:grid;grid-template-columns:76px 1fr;height:292px;background:var(--bg);color:#f2f2f2}
+.frame.railtint{grid-template-columns:76px 1fr}
+.rail{display:flex;flex-direction:column;gap:2px;padding:8px 6px;background:var(--railbg,transparent)}
+.rail .ic{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 3px;
+  border-radius:8px;color:rgba(255,255,255,.52);font-size:9px;text-align:center;line-height:1.15}
+.rail .ic.on{background:rgba(255,255,255,.12);color:#fff}
+.rail .ic.on.edge{box-shadow:inset 2px 0 0 var(--accent);background:var(--accent-08);color:#fff}
+.rail .ic.on.ring{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.rail .ic.on.fill{background:var(--accent);color:var(--accent-ink)}
+.rail .ic.on.dot::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--accent)}
+
+.body{display:flex;flex-direction:column;min-width:0;min-height:0;padding:0 10px 10px}
+.strip{height:34px;display:flex;align-items:center;gap:4px;padding:0 2px;flex:0 0 auto;min-width:0}
+.crumb{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:rgba(255,255,255,.5);white-space:nowrap}
+.crumb.on{color:#fff;font-weight:600}
+.crumb.on.acc{color:var(--accent)}
+.div{width:1px;height:14px;background:rgba(255,255,255,.16);margin:0 5px}
+.tab{font-size:10.5px;color:rgba(255,255,255,.5);padding:4px 7px;border-radius:7px;white-space:nowrap}
+.tab.on{background:rgba(255,255,255,.12);color:#fff;font-weight:500}
+.tab.on.under{background:transparent;color:#fff;box-shadow:inset 0 -2px 0 var(--accent)}
+.tab.on.fill{background:var(--accent);color:var(--accent-ink)}
+.tab.on.ring{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+
+.work{flex:1;min-height:0;background:#fff;color:var(--ink);border-radius:10px;
+  border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;overflow:hidden}
+.work.hdark .hd{background:var(--bg);color:#f2f2f2;border-bottom:0}
+.work.hdark .hd .sub{color:rgba(255,255,255,.55)}
+.work.hdark .hd .btn{border-color:rgba(255,255,255,.22);color:rgba(255,255,255,.8)}
+.work.rim{box-shadow:0 0 0 1px var(--accent)}
+.hd{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line-2)}
+.hd .ttl{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.hd .sub{font-size:10.5px;color:var(--ink-2);margin-top:2px}
+.hd .acts{margin-left:auto;display:flex;align-items:center;gap:6px}
+.btn{font-size:10px;color:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:3px 7px;white-space:nowrap}
+.btn.acc{border-color:var(--accent);color:#4c6b12}
+.btn.solid{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.cols{flex:1;display:grid;grid-template-columns:116px 1fr;min-height:0}
+.list{border-right:1px solid var(--line-2);padding:7px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.li{display:flex;align-items:center;gap:5px;padding:3px 5px;border-radius:5px;font-size:9.5px;color:var(--ink-2)}
+.li .dot{width:5px;height:5px;border-radius:50%;background:var(--bar);flex:0 0 5px}
+.li.on{background:var(--fill-2);color:var(--ink);font-weight:500}
+.li.on.acc{background:var(--accent-08);box-shadow:inset 2px 0 0 var(--accent)}
+.li.gap .dot{background:var(--accent)}
+.li.gap.grey .dot{background:var(--ink)}
+.chipline{display:flex;gap:5px;padding:7px 8px 0;flex-wrap:wrap}
+.chip{font-size:9.5px;color:var(--ink-2);border:1px solid var(--line-2);border-radius:999px;padding:2px 7px;
+  display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.chip.on{border-color:var(--accent);color:#4c6b12;background:var(--accent-08)}
+.chip .st{width:6px;height:6px;border-radius:50%;background:var(--bar)}
+.chip .st.ok{background:var(--accent)}
+.plan{margin:8px;border:1px dashed var(--line);border-radius:var(--r);position:relative;
+  background:repeating-linear-gradient(0deg,var(--fill-2) 0 13px,transparent 13px 14px),
+    repeating-linear-gradient(90deg,var(--fill-2) 0 13px,transparent 13px 14px);
+  display:grid;place-items:center;color:var(--ink-3);font-size:10px}
+.plan .unit{position:absolute;left:22%;top:26%;width:30%;height:34%;
+  border:1.5px solid var(--accent);background:var(--accent-08)}
+.plan .unit.grey{border-color:var(--ink);background:rgba(17,17,18,.06)}
+
+svg.lu{width:13px;height:13px;stroke-width:1.8;color:currentColor;flex:0 0 13px}
+.rail .ic svg.lu{width:15px;height:15px}
+footer{margin-top:28px;font-size:11.5px;color:var(--ink-3);max-width:78ch;line-height:1.55}
+</style>
+</head>
+<body>
+<h1>Chrome noir, neuf façons d'y mettre le vert</h1>
+<p class="lede">Variantes de la vignette 05. Le chrome est noir partout; la carte reste blanche et le
+plan reste noir sur blanc. Ce qui change d'une vignette à l'autre: la nuance de noir, l'endroit où
+le vert se pose, et combien on en laisse. Le coût annoncé la dernière fois — « un vert trop foncé
+disparaît » — est mesuré en haut: le rapport de contraste du vert sur le noir choisi.</p>
+<div class="rule"></div>
+
+<div class="picker" id="picker"></div>
+<div class="sheet" id="sheet"></div>
+<footer id="foot"></footer>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* ---------------------------------------------------------------- le sprite */
+const toPascal = (n) => n.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
+function sprite() {
+  const names = ["layout-grid", "layers", "table", "calendar-check", "file", "folder",
+    "chevron-right", "external-link"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "position:absolute;width:0;height:0;overflow:hidden");
+  s.innerHTML = defs;
+  document.body.appendChild(s);
+}
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+
+/* ------------------------------------------------------ le vert et le noir */
+const GREENS = [
+  ["#C3E05A", "lime"], ["#9BC53D", "pomme"], ["#6FBF73", "pousse"],
+  ["#3FA06B", "feuillage"], ["#2E6B4F", "sapin"], ["#1F4D3A", "forêt"],
+];
+const NOIRS = [
+  ["#0B0B0C", "encre"], ["#141416", "charbon"], ["#1A1A1E", "ardoise"],
+  ["#17151A", "noir chaud"], ["#0E1A14", "noir vert"],
+];
+let GREEN = GREENS[0][0];
+let NOIR = NOIRS[1][0];
+
+const rgb = (hex) => { const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const rgba = (hex, a) => { const [r, g, b] = rgb(hex); return `rgba(${r},${g},${b},${a})`; };
+const lum = (hex) => {
+  const c = rgb(hex).map((v) => { const s = v / 255; return s <= .03928 ? s / 12.92 : ((s + .055) / 1.055) ** 2.4; });
+  return .2126 * c[0] + .7152 * c[1] + .0722 * c[2];
+};
+/* WCAG: le rapport dit si le vert se lit sur le noir. Sous 3, un filet de
+   1 px disparaît; sous 4.5, un petit texte vert devient pénible. */
+const ratio = (a, b) => { const l1 = lum(a), l2 = lum(b); const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1];
+  return (hi + .05) / (lo + .05); };
+const readableInk = (hex) => (lum(hex) > .35 ? "#111112" : "#ffffff");
+
+/* ------------------------------------------------------------ les variantes
+   `acc` dit où le vert se pose. Tout le reste est identique. */
+const WAYS = [
+  { id: "01", t: "Filet sous l'onglet seulement",
+    tab: "under", unit: true,
+    why: "Un seul trait de vert dans tout l'écran, sous le niveau courant, plus le contour de l'unité choisie. Le reste du chrome reste gris sur noir.",
+    cost: "À 1 px, c'est le vert le plus fragile de la série: un vert sombre y devient invisible." },
+  { id: "02", t: "Bord vert sur la destination",
+    rail: "edge", tab: "plain", unit: true, row: true,
+    why: "La marque est dans le rail, là où l'on revient sans arrêt, et elle se répète sur la ligne sélectionnée de la liste. Deux fois le même signe, donc une seule chose à apprendre.",
+    cost: "Le rail et la liste disent tous deux « ici »; sur un écran chargé, deux marques identiques se concurrencent." },
+  { id: "03", t: "Pastille pleine dans le rail",
+    rail: "fill", tab: "plain", unit: true,
+    why: "La destination courante est un bloc vert plein, lisible d'un coup d'œil de l'autre bout du bureau.",
+    cost: "Le vert plein sur fond noir est l'objet le plus lumineux de l'écran: il gagne contre le dessin." },
+  { id: "04", t: "Onglet plein, rail sobre",
+    tab: "fill", unit: true,
+    why: "Le vert marque ce que l'on est en train de lire — le niveau — plutôt que l'endroit d'où l'on vient.",
+    cost: "La bande attire l'œil vers le haut alors que le travail se passe dans la carte." },
+  { id: "05", t: "Contours seulement, rien de plein",
+    rail: "ring", tab: "ring", unit: true, chip: true,
+    why: "Vert en trait partout, jamais en aplat: contour du rail, contour de l'onglet, contour du chip, contour de l'unité. Le plus léger des traitements saturés.",
+    cost: "Quatre contours verts, c'est déjà beaucoup de signaux de même poids." },
+  { id: "06", t: "Le vert ne dit que l'état",
+    tab: "plain", dots: true, chip: true,
+    why: "Aucune sélection n'est verte: le vert est réservé à ce qui est calé, mesuré, réglé. Ce qui est choisi reste gris.",
+    cost: "La marque devient discrète au point qu'on ne la remarque plus; l'identité repose alors sur le noir seul." },
+  { id: "07", t: "En-tête de carte noir",
+    tab: "under", unit: true, darkHead: true,
+    why: "Le noir déborde dans la carte: le titre partage la couleur du chrome, et le blanc commence au contenu.",
+    cost: "La carte perd son bord supérieur franc; elle se lit comme un panneau collé à la navigation." },
+  { id: "08", t: "Point vert, et rien d'autre",
+    rail: "dot", tab: "plain", dots: true,
+    why: "Un point de 4 px sous l'icône courante, les pastilles d'état dans la liste. Le vert existe sans jamais occuper de surface.",
+    cost: "Trop discret pour servir d'identité de bureau; c'est un réglage, pas une marque." },
+  { id: "09", t: "Liseré vert autour de la carte",
+    tab: "plain", unit: true, rim: true,
+    why: "Un filet vert fait le tour de la carte blanche: la marque encadre le travail sans entrer dedans.",
+    cost: "DESIGN.md interdit d'encadrer le plan; ici c'est la carte et non le plan, mais la limite est mince." },
+];
+
+const NAV = [["layout-grid", "Aperçu"], ["layers", "Unités"], ["table", "Quantités"],
+  ["calendar-check", "Suivi"], ["file", "Fichiers"]];
+const LEVELS = [5, 4, 3, 2];
+const UNITS = [["301 · 3½", 0], ["302 · 4½", 1], ["303 · 3½", 0], ["304 · 5½", 0], ["305 · 4½", 1], ["306 · 4½", 0]];
+
+/* ----------------------------------------------------------------- le mock */
+const rail = (w) => `<nav class="rail" style="${w.railTint ? "--railbg:rgba(195,224,90,.05)" : ""}">
+  ${NAV.map(([g, n]) => {
+    const on = n === "Unités";
+    return `<div class="ic ${on ? "on" : ""} ${on && w.rail ? w.rail : ""}">${icon(g)}<span>${n}</span></div>`;
+  }).join("")}</nav>`;
+
+const strip = (w) => `<div class="strip"><span class="crumb">${icon("folder")}Tous les projets</span>
+  ${icon("chevron-right")}<span class="crumb on">Le Baldwin III</span><span class="div"></span>
+  ${LEVELS.map((lv) => `<span class="tab ${lv === 3 ? `on ${w.tab === "plain" ? "" : (w.tab || "")}` : ""}">Niveau ${lv}</span>`).join("")}</div>`;
+
+const work = (w) => `<div class="work ${w.darkHead ? "hdark" : ""} ${w.rim ? "rim" : ""}">
+  <div class="hd"><div><div class="ttl">Étage type — niveau 3</div>
+    <div class="sub">14 unités · 1 écart ouvert</div></div>
+    <div class="acts"><span class="btn">${icon("external-link")} AutoCAD</span><span class="btn">Exporter</span></div></div>
+  <div class="cols">
+    <div class="list">${UNITS.map(([n, gap], i) => `<div class="li ${i === 1 ? `on ${w.row ? "acc" : ""}` : ""} ${gap ? "gap" : ""} ${gap && !w.dots ? "grey" : ""}">
+      <span class="dot"></span>${n}</div>`).join("")}</div>
+    <div>
+      <div class="chipline">
+        <span class="chip ${w.chip ? "on" : ""}">3½</span><span class="chip">4½</span><span class="chip">5½</span>
+        <span class="chip"><span class="st ${w.dots || w.chip ? "ok" : ""}"></span>arpenteur calé</span>
+      </div>
+      <div class="plan" style="height:calc(100% - 34px)">plan du niveau 3
+        <span class="unit ${w.unit ? "" : "grey"}"></span></div>
+    </div>
+  </div></div>`;
+
+const mock = (w) => `<div class="mock"><div class="frame" style="--bg:${NOIR}">
+  ${rail(w)}<div class="body">${strip(w)}${work(w)}</div></div></div>`;
+
+/* ----------------------------------------------------------------- la page */
+function paint() {
+  const root = document.documentElement.style;
+  root.setProperty("--accent", GREEN);
+  root.setProperty("--accent-08", rgba(GREEN, .10));
+  root.setProperty("--accent-ink", readableInk(GREEN));
+  root.setProperty("--noir", NOIR);
+  document.querySelectorAll(".sw").forEach((s) => {
+    s.classList.toggle("on", s.dataset.green === GREEN || s.dataset.noir === NOIR);
+  });
+  document.querySelectorAll(".frame").forEach((f) => f.style.setProperty("--bg", NOIR));
+  const r = ratio(GREEN, NOIR);
+  const ok = r >= 3;
+  document.querySelector(".ratio").textContent = `vert sur noir — ${r.toFixed(2)} : 1`;
+  const v = document.querySelector(".verdict");
+  v.dataset.ok = ok ? "oui" : "non";
+  v.textContent = r >= 4.5 ? "tient même en petit texte"
+    : ok ? "tient en trait et en aplat, pas en petit texte"
+      : "trop faible: un filet de 1 px disparaît";
+  [".hexg", ".hexn"].forEach((sel, i) => {
+    const f = document.querySelector(sel);
+    if (document.activeElement !== f) f.value = i === 0 ? GREEN : NOIR;
+  });
+}
+
+function build() {
+  document.getElementById("picker").innerHTML = `
+    <div class="grp"><span class="lab">Le vert</span>
+      <div class="row">${GREENS.map(([hex, nm]) => `<span class="sw" data-green="${hex}" style="background:${hex}" title="${nm} ${hex}"></span>`).join("")}
+        <input class="hex hexg" value="${GREEN}" aria-label="vert hexadécimal"></div></div>
+    <div class="grp"><span class="lab">Le noir</span>
+      <div class="row">${NOIRS.map(([hex, nm]) => `<span class="sw" data-noir="${hex}" style="background:${hex}" title="${nm} ${hex}"></span>`).join("")}
+        <input class="hex hexn" value="${NOIR}" aria-label="noir hexadécimal"></div></div>
+    <div class="grp"><span class="lab">Contraste</span>
+      <div class="row"><span class="ratio"></span><span class="verdict"></span></div></div>`;
+
+  document.getElementById("sheet").innerHTML = WAYS.map((w) => `<section class="panel">
+    <div class="cap"><span class="n">${w.id}</span><span class="t">${w.t}</span></div>
+    ${mock(w)}
+    <div class="why">${w.why}</div>
+    <div class="cost">Coût: ${w.cost}</div>
+  </section>`).join("");
+
+  document.getElementById("foot").textContent =
+    "Le plan n'est jamais teinté ni encadré: dans les neuf, le vert ne touche au dessin qu'au contour "
+    + "de l'unité choisie. 01, 08 et 09 ne posent le vert qu'à un seul endroit; 02 et 06 à deux; 05 à "
+    + "quatre, ce qui dépasse la limite d'un accent par écran. Le rapport de contraste en haut tranche "
+    + "la question posée la dernière fois: sous 3 : 1, les variantes en filet (01, 07, 09) ne sont plus tenables.";
+
+  document.getElementById("picker").addEventListener("click", (e) => {
+    const sw = e.target.closest(".sw");
+    if (!sw) return;
+    if (sw.dataset.green) GREEN = sw.dataset.green; else NOIR = sw.dataset.noir;
+    paint();
+  });
+  document.querySelector(".hexg").addEventListener("input", (e) => {
+    if (/^#[0-9a-fA-F]{6}$/.test(e.target.value.trim())) { GREEN = e.target.value.trim(); paint(); }
+  });
+  document.querySelector(".hexn").addEventListener("input", (e) => {
+    if (/^#[0-9a-fA-F]{6}$/.test(e.target.value.trim())) { NOIR = e.target.value.trim(); paint(); }
+  });
+  paint();
+}
+
+sprite();
+build();
+</script>
+</body>
+</html>
