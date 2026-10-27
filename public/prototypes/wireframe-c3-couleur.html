@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype C3 — le vert du bureau, et le chrome noir</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Tokens de wireframe-c3. Deux variables de plus, et elles seules changent
+   d'une vignette à l'autre: --accent, le vert du bureau, et le chrome, qui
+   est soit le gris clair actuel, soit noir, soit vert. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --bar:#dcdcdc; --r:6px;
+  --accent:#2E6B4F;           /* le vert, remplaçable en haut de page */
+  --accent-08:rgba(46,107,79,.08);
+  --accent-ink:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:26px 26px 60px}
+h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.lede{color:var(--ink-2);font-size:12.5px;max-width:78ch;margin-top:6px}
+.rule{height:1px;background:var(--line-2);margin:16px 0 18px}
+
+/* ---------------------------------------------------------- la barre verte */
+.picker{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  border:1px solid var(--line-2);border-radius:10px;padding:10px 12px 22px;background:#fff}
+.picker .lab{font-size:11.5px;color:var(--ink-2)}
+.sw{width:26px;height:26px;border-radius:7px;border:1px solid rgba(17,17,18,.12);cursor:pointer;position:relative}
+.sw.on{box-shadow:0 0 0 2px #fff inset,0 0 0 3px var(--ink)}
+.sw .nm{position:absolute;top:30px;left:50%;transform:translateX(-50%);font-size:9.5px;
+  color:var(--ink-3);white-space:nowrap}
+.picker .hex{border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:12px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;width:110px}
+.picker .note{font-size:11px;color:var(--ink-3);flex:1;min-width:220px}
+
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(520px,1fr));gap:22px;margin-top:34px}
+.panel{display:flex;flex-direction:column;gap:8px;min-width:0}
+.cap{display:flex;align-items:baseline;gap:8px}
+.cap .n{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+.cap .t{font-size:13px;font-weight:600}
+.why{font-size:11.5px;color:var(--ink-2);line-height:1.5}
+.cost{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+
+/* ------------------------------------------------------------- la vignette
+   Chaque vignette porte ses propres valeurs de chrome; le reste est partagé,
+   pour que la comparaison tienne sur la couleur et rien d'autre. */
+.mock{border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.frame{display:grid;grid-template-columns:76px 1fr;height:290px;
+  background:var(--chrome);color:var(--chrome-ink)}
+.rail{display:flex;flex-direction:column;gap:2px;padding:8px 6px}
+.rail .ic{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 3px;
+  border-radius:8px;color:var(--chrome-ink-3);font-size:9px;text-align:center;line-height:1.15}
+.rail .ic.on{background:var(--chrome-on);color:var(--chrome-on-ink)}
+.rail .ic.on.edge{box-shadow:inset 2px 0 0 var(--accent)}
+
+.body{display:flex;flex-direction:column;min-width:0;min-height:0;padding:0 10px 10px}
+.strip{height:34px;display:flex;align-items:center;gap:4px;padding:0 2px;flex:0 0 auto;min-width:0}
+.strip .crumb{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--chrome-ink-3);white-space:nowrap}
+.strip .crumb.on{color:var(--chrome-ink);font-weight:600}
+.strip .div{width:1px;height:14px;background:var(--chrome-line);margin:0 5px}
+.strip .tab{font-size:10.5px;color:var(--chrome-ink-3);padding:4px 7px;border-radius:7px;white-space:nowrap}
+.strip .tab.on{background:var(--chrome-on);color:var(--chrome-on-ink);font-weight:500}
+.strip .tab.on.acc{background:var(--accent);color:var(--accent-ink)}
+.strip .tab.on.under{background:transparent;color:var(--chrome-ink);box-shadow:inset 0 -2px 0 var(--accent)}
+
+/* La carte est blanche quel que soit le chrome, donc son texte reprend
+   l'encre du document et n'hérite pas de la couleur de la navigation. */
+.work{flex:1;min-height:0;background:#fff;color:var(--ink);
+  border:1px solid rgba(17,17,18,.07);border-radius:10px;
+  box-shadow:0 1px 2px rgba(17,17,18,.04),0 10px 26px rgba(17,17,18,.045);
+  display:flex;flex-direction:column;overflow:hidden}
+.hd{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line-2)}
+.hd .ttl{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.hd .sub{font-size:10.5px;color:var(--ink-2);margin-top:2px}
+.hd .acts{margin-left:auto;display:flex;align-items:center;gap:6px}
+.btn{font-size:10px;color:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:3px 7px;white-space:nowrap}
+.btn.acc{border-color:var(--accent);color:var(--accent)}
+.btn.solid{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+.cols{flex:1;display:grid;grid-template-columns:112px 1fr;min-height:0}
+.list{border-right:1px solid var(--line-2);padding:7px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.list .row{display:flex;align-items:center;gap:5px;padding:3px 5px;border-radius:5px;font-size:9.5px;color:var(--ink-2)}
+.list .row .dot{width:5px;height:5px;border-radius:50%;background:var(--bar);flex:0 0 5px}
+.list .row.on{background:var(--fill-2);color:var(--ink);font-weight:500}
+.list .row.on.acc{background:var(--accent-08);box-shadow:inset 2px 0 0 var(--accent)}
+.list .row.gap .dot{background:var(--accent)}
+.plan{margin:8px;border:1px dashed var(--line);border-radius:var(--r);position:relative;
+  background:repeating-linear-gradient(0deg,var(--fill-2) 0 13px,transparent 13px 14px),
+    repeating-linear-gradient(90deg,var(--fill-2) 0 13px,transparent 13px 14px);
+  display:grid;place-items:center;color:var(--ink-3);font-size:10px}
+/* L'unité choisie sur le plan: c'est le seul endroit où la couleur touche le dessin. */
+.plan .unit{position:absolute;left:22%;top:26%;width:30%;height:34%;border:1.5px solid var(--accent);
+  background:var(--accent-08)}
+.plan .unit.grey{border-color:var(--ink);background:rgba(17,17,18,.06)}
+.chipline{display:flex;gap:5px;padding:7px 8px 0;flex-wrap:wrap}
+.chip{font-size:9.5px;color:var(--ink-2);border:1px solid var(--line-2);border-radius:999px;padding:2px 7px;
+  display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.chip.on{border-color:var(--accent);color:var(--accent)}
+.chip .st{width:6px;height:6px;border-radius:50%;background:var(--bar)}
+.chip .st.ok{background:var(--accent)}
+
+svg.lu{width:13px;height:13px;stroke-width:1.8;color:currentColor;flex:0 0 13px}
+.rail .ic svg.lu{width:15px;height:15px}
+footer{margin-top:28px;font-size:11.5px;color:var(--ink-3);max-width:78ch;line-height:1.55}
+</style>
+</head>
+<body>
+<h1>Le vert du bureau, et le chrome noir</h1>
+<p class="lede">Six vignettes du même écran — Unités, niveau 3. Le dessin ne change jamais: il reste
+du noir sur blanc dans une carte blanche. Ce qui change est le chrome autour (gris clair, noir ou
+vert) et la quantité de vert qu'on laisse entrer. Choisissez le vert en haut: les six vignettes
+suivent, y compris en tapant l'hexadécimal exact du bureau.</p>
+<div class="rule"></div>
+
+<div class="picker" id="picker"></div>
+
+<div class="sheet" id="sheet"></div>
+<footer id="foot"></footer>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* --------------------------------------------------------------- le sprite */
+const toPascal = (n) => n.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
+function sprite() {
+  const names = ["layout-grid", "layers", "table", "calendar-check", "file", "folder",
+    "chevron-right", "external-link", "box"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "position:absolute;width:0;height:0;overflow:hidden");
+  s.innerHTML = defs;
+  document.body.appendChild(s);
+}
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+
+/* ----------------------------------------------------------------- le vert
+   Aucun vert du bureau n'est écrit dans le dépôt, et aucun n'a pu être
+   relevé dans les PDF d'esquisse: ils sont en noir et blanc. Ces six-là sont
+   des candidats; le champ à droite accepte la valeur exacte. */
+const GREENS = [
+  ["#1F4D3A", "forêt"], ["#2E6B4F", "sapin"], ["#3F7D4F", "feuillage"],
+  ["#6B7F58", "sauge"], ["#0F7B5A", "émeraude"], ["#4A6B2F", "mousse"],
+];
+let GREEN = GREENS[1][0];
+
+const hexToRgba = (hex, a) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+};
+/* Un vert clair demande du texte foncé; un vert foncé demande du blanc. */
+const readableInk = (hex) => {
+  const n = parseInt(hex.slice(1), 16);
+  const l = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+  return l > 0.55 ? "#111112" : "#ffffff";
+};
+
+/* --------------------------------------------------------------- le chrome */
+const CHROME = {
+  /* gris clair: ce que l'écran fait aujourd'hui */
+  light: { "--chrome": "#f6f6f6", "--chrome-ink": "#1b1b1b", "--chrome-ink-3": "#9b9b9b",
+    "--chrome-line": "#e2e2e2", "--chrome-on": "rgba(17,17,18,.085)", "--chrome-on-ink": "#1b1b1b" },
+  /* noir: le chrome recule, la carte blanche avance */
+  black: { "--chrome": "#141416", "--chrome-ink": "#f2f2f2", "--chrome-ink-3": "#8b8b8f",
+    "--chrome-line": "rgba(255,255,255,.14)", "--chrome-on": "rgba(255,255,255,.12)", "--chrome-on-ink": "#ffffff" },
+  /* vert: le chrome est la marque */
+  green: { "--chrome": "var(--accent)", "--chrome-ink": "var(--accent-ink)", "--chrome-ink-3": "rgba(255,255,255,.62)",
+    "--chrome-line": "rgba(255,255,255,.22)", "--chrome-on": "rgba(255,255,255,.16)", "--chrome-on-ink": "#ffffff" },
+};
+
+const WAYS = [
+  { id: "a", chrome: "light", accentOn: [], t: "Gris clair, aucun vert",
+    why: "L'état actuel, pour comparer. Tout est gris: la sélection, l'onglet courant, l'unité sur le plan.",
+    cost: "Rien ne dit à qui appartient l'outil, et l'unité choisie se distingue mal des autres." },
+  { id: "b", chrome: "light", accentOn: ["unit", "rail", "chip"], t: "Gris clair, vert sur ce qui est choisi",
+    why: "Le vert ne sert qu'à une chose: dire ce qui est sélectionné — l'unité sur le plan, la ligne dans la liste, la destination dans le rail.",
+    cost: "Trois endroits à la fois, c'est déjà la limite. Un quatrième et le vert ne veut plus rien dire." },
+  { id: "c", chrome: "light", accentOn: ["unit", "tabfill", "button", "chip", "rail"], t: "Gris clair, vert partout où c'est actif",
+    why: "Onglet courant plein, bouton principal plein, chips actifs: la marque est visible sans toucher au dessin.",
+    cost: "Le plan noir et blanc se retrouve encerclé de vert; l'œil va au chrome avant d'aller au dessin." },
+  { id: "d", chrome: "black", accentOn: [], t: "Chrome noir, aucun vert",
+    why: "Le noir fait reculer la navigation et pousse la carte blanche en avant. Le dessin n'a jamais eu autant de poids.",
+    cost: "Sobre au point d'être anonyme, et le noir plein attire l'œil dans un bureau éclairé au néon." },
+  { id: "e", chrome: "black", accentOn: ["unit", "tabunder", "rail", "chip"], t: "Chrome noir, vert en marque",
+    why: "Sur le noir, le vert tient sans être criard: filet sous l'onglet courant, bord sur la destination, contour de l'unité.",
+    cost: "Il faut vérifier le contraste du vert sur noir: un vert trop foncé disparaît." },
+  { id: "f", chrome: "green", accentOn: ["unit"], t: "Chrome vert",
+    why: "Le vert est le chrome lui-même. Aucun doute sur l'appartenance de l'outil, et la carte blanche reste intacte.",
+    cost: "Une couleur saturée sur toute la hauteur, toute la journée. C'est la version qui vieillit le moins bien." },
+];
+
+/* ------------------------------------------------------------- les pièces */
+const NAV = [["layout-grid", "Aperçu"], ["layers", "Unités"], ["table", "Quantités"],
+  ["calendar-check", "Suivi"], ["file", "Fichiers"]];
+const LEVELS = [5, 4, 3, 2];
+const UNITS = [["301 · 3½", 0], ["302 · 4½", 1], ["303 · 3½", 0], ["304 · 5½", 0], ["305 · 4½", 1], ["306 · 4½", 0]];
+
+const rail = (w) => `<nav class="rail">${NAV.map(([g, n]) => {
+  const on = n === "Unités";
+  return `<div class="ic ${on ? "on" : ""} ${on && w.accentOn.includes("rail") ? "edge" : ""}">${icon(g)}<span>${n}</span></div>`;
+}).join("")}</nav>`;
+
+const strip = (w) => {
+  const cls = w.accentOn.includes("tabfill") ? "acc" : w.accentOn.includes("tabunder") ? "under" : "";
+  return `<div class="strip"><span class="crumb">${icon("folder")}Tous les projets</span>
+    ${icon("chevron-right")}<span class="crumb on">Le Baldwin III</span><span class="div"></span>
+    ${LEVELS.map((lv) => `<span class="tab ${lv === 3 ? `on ${cls}` : ""}">Niveau ${lv}</span>`).join("")}</div>`;
+};
+
+const work = (w) => {
+  const accRow = w.accentOn.includes("unit") || w.accentOn.includes("rail") ? "acc" : "";
+  const btn = w.accentOn.includes("button");
+  return `<div class="work">
+    <div class="hd"><div><div class="ttl">Étage type — niveau 3</div>
+      <div class="sub">14 unités · 1 écart ouvert</div></div>
+      <div class="acts"><span class="btn ${btn ? "solid" : ""}">${icon("external-link")} AutoCAD</span>
+        <span class="btn ${btn ? "acc" : ""}">Exporter</span></div></div>
+    <div class="cols">
+      <div class="list">${UNITS.map(([n, gap], i) => `<div class="row ${i === 1 ? `on ${accRow}` : ""} ${gap ? "gap" : ""}">
+        <span class="dot"></span>${n}</div>`).join("")}</div>
+      <div>
+        <div class="chipline">
+          <span class="chip ${w.accentOn.includes("chip") ? "on" : ""}">3½</span>
+          <span class="chip">4½</span><span class="chip">5½</span>
+          <span class="chip"><span class="st ${w.accentOn.includes("chip") ? "ok" : ""}"></span>arpenteur calé</span>
+        </div>
+        <div class="plan" style="height:calc(100% - 34px)">plan du niveau 3
+          <span class="unit ${w.accentOn.includes("unit") ? "" : "grey"}"></span></div>
+      </div>
+    </div></div>`;
+};
+
+const mock = (w) => {
+  const vars = Object.entries(CHROME[w.chrome]).map(([k, v]) => `${k}:${v}`).join(";");
+  return `<div class="mock"><div class="frame" style="${vars}">
+    ${rail(w)}<div class="body">${strip(w)}${work(w)}</div></div></div>`;
+};
+
+/* ---------------------------------------------------------------- la page */
+function paint() {
+  document.documentElement.style.setProperty("--accent", GREEN);
+  document.documentElement.style.setProperty("--accent-08", hexToRgba(GREEN, .09));
+  document.documentElement.style.setProperty("--accent-ink", readableInk(GREEN));
+  document.querySelectorAll(".sw").forEach((s) => s.classList.toggle("on", s.dataset.hex === GREEN));
+  const field = document.querySelector(".hex");
+  if (field && document.activeElement !== field) field.value = GREEN;
+}
+
+function build() {
+  document.getElementById("picker").innerHTML = `<span class="lab">Le vert du bureau</span>
+    ${GREENS.map(([hex, nm]) => `<span class="sw" data-hex="${hex}" style="background:${hex}" title="${nm} ${hex}">
+      <span class="nm">${nm}</span></span>`).join("")}
+    <input class="hex" value="${GREEN}" aria-label="hexadécimal">
+    <span class="note">Aucun vert n'est inscrit dans le dépôt et les esquisses sont en noir et blanc:
+      collez ici la valeur exacte du bureau, les six vignettes la prennent.</span>`;
+
+  document.getElementById("sheet").innerHTML = WAYS.map((w, i) => `<section class="panel">
+    <div class="cap"><span class="n">${String(i + 1).padStart(2, "0")}</span><span class="t">${w.t}</span></div>
+    ${mock(w)}
+    <div class="why">${w.why}</div>
+    <div class="cost">Coût: ${w.cost}</div>
+  </section>`).join("");
+
+  document.getElementById("foot").textContent =
+    "Règle de DESIGN.md, inchangée: le plan n'est jamais teinté, jamais filtré, jamais encadré. "
+    + "La couleur ne touche au dessin qu'au contour de l'unité choisie. Un seul usage de l'accent par "
+    + "écran reste la bonne limite: 02 et 05 la respectent, 03 la dépasse déjà.";
+
+  document.getElementById("picker").addEventListener("click", (e) => {
+    const sw = e.target.closest(".sw");
+    if (!sw) return;
+    GREEN = sw.dataset.hex;
+    paint();
+  });
+  document.querySelector(".hex").addEventListener("input", (e) => {
+    const v = e.target.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) { GREEN = v; paint(); }
+  });
+  paint();
+}
+
+sprite();
+build();
+</script>
+</body>
+</html>
