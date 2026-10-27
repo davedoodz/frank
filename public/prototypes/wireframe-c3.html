@@ -1402,7 +1402,10 @@ function contentHTML() {
         <span class="zsep"></span>
         <span class="zread hi" ${side === "plan" ? "data-zread" : "data-mread"}>${side === "plan" ? V.zoom : V.mzoom}%</span>
         ${side === "plan"
-          ? `<span class="zb" ${act("fitunit")} title="Cadrer l'unité sélectionnée">${icon("search")}</span>`
+          /* Two framings, read as one pair: the corners pushed out show the
+             whole sheet, the corners pulled in close on the unit. */
+          ? `<span class="zb" ${act("fitsheet")} title="Voir toute la feuille">${icon("maximize")}</span>
+             <span class="zb" ${act("fitunit")} title="Cadrer l'unité sélectionnée">${icon("minimize")}</span>`
           : `<span class="zb" data-model-reset title="Recentrer la maquette">${icon("maximize")}</span>`}
       </div>`;
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane drawing" style="flex:1"><div class="ph">${icon("file")}
@@ -2091,6 +2094,12 @@ function onClick(e) {
     /* The unit the list is on, filling the pane: the move the plan is
        opened for, without hunting for it with the wheel. */
     case "fitunit": fitUnit(); break;
+    /* The way back out: the sheet at its own size, centred, which is the
+       state the pane opens in. No render — only the transform moves. */
+    case "fitsheet":
+      V.zoom = ZMIN; V.pan = { x: 0, y: 0 };
+      paintSheet(); wakeBar("plan");
+      return;
     /* The two steppers move the same numbers the sliders move, so they do
        not go through render: the drawing must not be rebuilt to be pushed
        one notch. */
