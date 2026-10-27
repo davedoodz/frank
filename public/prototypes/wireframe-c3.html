@@ -419,39 +419,32 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    and everything laid over it move and scale together inside .vp, so a
    percentage keeps meaning the same thing at every zoom. */
 /* Same box as the model pane beside it: the field is the pane, the drawing
-   is centred in it, and neither drawing states an edge of its own. */
-.vp{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab;background:#f1f3f4}
+   is centred in it, and neither drawing states an edge of its own. The
+   field is the sheet's own white — the paper of these plans is #fff — so
+   the drawing has no visible edge and the pane reads as one surface. */
+.vp{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab;background:#fff}
 .vp.drag{cursor:grabbing}
 
-/* Zoom belongs on the frame of the drawing it zooms, not in a toolbar two
-   panes away. One vertical slider per pane, against the outer edge of the
-   card: the plan's on its left, the model's on its right, so the two sliders
-   sit at the edges of the pair and never between the two drawings. */
-/* The rail is a piece of glass laid on the sheet, not a wall beside it: it
-   keeps a margin off every edge of the pane and lets the drawing show
-   through, so the sheet reads as continuing underneath. */
-.zrail{flex:0 0 42px;display:flex;flex-direction:column;align-items:center;gap:7px;
-  margin:8px 7px;padding:10px 0 8px;border-radius:13px;border:1px solid var(--line-2);
-  background:color-mix(in srgb, var(--paper) 55%, transparent);
+/* Zoom belongs on the drawing it zooms, and only while the hand is there.
+   One bar of glass at the foot of each pane: it leaves 1.6 s after the last
+   gesture and returns at the first movement over the sheet, so at rest the
+   pane is nothing but drawing. */
+.pb.zone{position:relative}
+.zbar{position:absolute;left:50%;bottom:12px;z-index:4;transform:translateX(-50%);
+  height:34px;display:flex;align-items:center;gap:4px;padding:0 7px;border-radius:999px;
+  border:1px solid var(--line-2);background:color-mix(in srgb, var(--paper) 58%, transparent);
   backdrop-filter:blur(10px) saturate(1.3);-webkit-backdrop-filter:blur(10px) saturate(1.3);
-  box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.zslider{appearance:slider-vertical;-webkit-appearance:slider-vertical;
-  writing-mode:vertical-lr;direction:rtl;width:16px;flex:1;min-height:60px;
-  accent-color:var(--ink);cursor:ns-resize;margin:0}
-.zread{font-size:10.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
-.zrail .btnw{width:26px;height:26px;padding:0;justify-content:center;flex:0 0 26px;
-  background:color-mix(in srgb, var(--paper) 70%, transparent)}
-/* The plan has one more button than the model. The gap keeps the fold
-   control on the same line in both panes, which is the only way it stops
-   moving when the eye crosses from one drawing to the other. */
-.zgap{flex:0 0 26px}
-/* Folded: one button wide, still glass, still a margin — and the control
-   stays at the foot, where it was before it folded. */
-.zrail.folded{flex:0 0 30px;padding:8px 0;justify-content:flex-end;gap:0}
-.ztoggle{width:22px;height:22px;display:flex;align-items:center;justify-content:center;
-  border-radius:4px;color:var(--ink-3);cursor:pointer;flex:0 0 22px}
-.ztoggle:hover{background:var(--fill-3);color:var(--ink-1)}
-.ztoggle svg{width:13px;height:13px}
+  box-shadow:0 1px 4px rgba(0,0,0,.07);opacity:1;transition:opacity .4s,transform .4s}
+.zbar.gone{opacity:0;transform:translateX(-50%) translateY(14px);pointer-events:none}
+.zslider{appearance:auto;-webkit-appearance:auto;width:112px;accent-color:var(--ink);
+  cursor:ew-resize;margin:0}
+.zread{font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;min-width:40px;
+  text-align:center}
+.zsep{width:1px;height:16px;background:var(--line-2)}
+.zb{width:26px;height:26px;border-radius:999px;display:flex;align-items:center;
+  justify-content:center;color:var(--ink-2);cursor:pointer;flex:0 0 26px}
+.zb:hover{background:rgba(0,0,0,.06);color:var(--ink)}
+.zb svg{width:14px;height:14px}
 /* The two drawing panes are the thing being compared, so their edge is
    stated instead of implied — including in the inset shell, where panes
    otherwise give up their border to the grid lines. */
@@ -495,11 +488,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .model3d-hint{position:absolute;left:10px;top:10px;z-index:2;border-radius:5px;
   background:rgba(255,255,255,.84);padding:4px 7px;color:var(--ink-2);font-size:10.5px;
   pointer-events:none;backdrop-filter:blur(8px)}
-.model3d-reset{position:absolute;right:10px;bottom:10px;z-index:2;height:28px;
-  border:1px solid rgba(17,17,18,.16);border-radius:5px;background:rgba(255,255,255,.9);
-  padding:0 8px;color:var(--ink-2);font:inherit;font-size:11px;cursor:pointer;backdrop-filter:blur(8px)}
-.model3d-reset:hover{color:var(--ink);background:#fff}
-[data-fi="low"] .model3d-canvas,[data-fi="low"] .model3d-hint,[data-fi="low"] .model3d-reset,
+[data-fi="low"] .model3d-canvas,[data-fi="low"] .model3d-hint,
 [data-fi="low"] .model3d-status{display:none}
 [data-fi="high"] .btnw.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
 [data-fi="high"] .listrow.on{background:#eef1e0}
@@ -581,8 +570,8 @@ const V = {
   /* How close the camera is to the model, 0 far to 100 near. The slider on
      the right edge writes it; orbiting or wheeling writes it back. */
   mzoom: 40,
-  /* Both zoom rails start shown; either can be folded to a single button. */
-  zrail: { plan: true, model: true },
+  /* The zoom bars have no stored state: they show themselves when the hand
+     is on the drawing and leave on their own. */
   /* "image" reads the exported JPEG of the sheet, "vector" reads the PDF of
      the same crop through pdf.js and re-renders it at the zoom in use. */
   planSrc: "image",
@@ -1400,35 +1389,22 @@ function contentHTML() {
   const body = {
     "Unités": () => {
       const unit = (selRow("Unités") || ["—"])[0];
-      /* Each drawing carries its own zoom on its own edge: a vertical slider
-         the hand can push, the percentage under it, and on the plan the one
-         button that frames the selected unit. */
-      /* The rail is shown, and it can be folded away: it is the only chrome
-         standing between the hand and the drawing, and on a narrow pane
-         every pixel it takes is a pixel the sheet does not get. Folded, it
-         leaves one button to bring it back. */
-      const railToggle = (side, open) => `<span class="ztoggle" ${act("zrail", side)}
-        title="${open ? "Replier le curseur de zoom" : "Montrer le curseur de zoom"}">
-        ${icon(open ? (side === "plan" ? "chevron-left" : "chevron-right")
-          : (side === "plan" ? "chevron-right" : "chevron-left"))}</span>`;
-      const planRail = () => (V.zrail.plan
-        ? `<div class="zrail" data-side="left">
-        <input class="zslider" type="range" min="${ZMIN}" max="${ZMAX}" step="1" value="${V.zoom}"
-               data-zoom aria-label="Zoom du plan" title="Zoom du plan">
-        <span class="zread hi" data-zread>${V.zoom}%</span>
-        <span class="btnw" ${act("fitunit")} title="Cadrer l'unité sélectionnée sur le plan">${icon("search")}</span>
-        ${railToggle("plan", true)}
-      </div>`
-        : `<div class="zrail folded" data-side="left">${railToggle("plan", false)}</div>`);
-      const modelRail = () => (V.zrail.model
-        ? `<div class="zrail" data-side="right">
-        <input class="zslider" type="range" min="0" max="100" step="1" value="${V.mzoom}"
-               data-mzoom aria-label="Zoom de la maquette" title="Zoom de la maquette">
-        <span class="zread hi" data-mread>${V.mzoom}%</span>
-        <span class="zgap"></span>
-        ${railToggle("model", true)}
-      </div>`
-        : `<div class="zrail folded" data-side="right">${railToggle("model", false)}</div>`);
+      /* The zoom does not stand beside the drawing any more: it lies on it,
+         at the foot, as one piece of glass that leaves 1.6 s after the last
+         gesture and comes back at the first movement over the sheet. At rest
+         the whole pane is drawing. */
+      const zbar = (side) => `<div class="zbar glass gone" data-zbar="${side}">
+        <span class="zb" ${act("zstep", side + ":-")} title="Reculer">${icon("minus")}</span>
+        <input class="zslider" type="range" ${side === "plan"
+          ? `min="${ZMIN}" max="${ZMAX}" step="1" value="${V.zoom}" data-zoom aria-label="Zoom du plan"`
+          : `min="0" max="100" step="1" value="${V.mzoom}" data-mzoom aria-label="Zoom de la maquette"`}>
+        <span class="zb" ${act("zstep", side + ":+")} title="Agrandir">${icon("plus")}</span>
+        <span class="zsep"></span>
+        <span class="zread hi" ${side === "plan" ? "data-zread" : "data-mread"}>${side === "plan" ? V.zoom : V.mzoom}%</span>
+        ${side === "plan"
+          ? `<span class="zb" ${act("fitunit")} title="Cadrer l'unité sélectionnée">${icon("search")}</span>`
+          : `<span class="zb" data-model-reset title="Recentrer la maquette">${icon("maximize")}</span>`}
+      </div>`;
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane drawing" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>${hostButton(kind === "plan" ? "plan" : "model")}</div>
@@ -1438,22 +1414,21 @@ function contentHTML() {
              it: the drawing, the consultants' layers, the typology fills and
              the unit outline all sit inside one transformed box and move
              together. The wheel zooms where the pointer is; dragging pans. */
-          ? `<div class="pb" style="padding:0;overflow:hidden;flex-direction:row;gap:0">
-              ${planRail()}
+          ? `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="plan">
               <div class="vp" data-vp>
               <div class="plan ${cls}" data-img="${kind}" data-src="${planVector() ? "vector" : "image"}"
                    style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})">
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf></canvas>` : ""}
-                ${layers}${unitMarkHTML()}</div></div></div>`
-          : `<div class="pb" style="padding:0;overflow:hidden;flex-direction:row;gap:0">
+                ${layers}${unitMarkHTML()}</div></div>
+              ${zbar("plan")}</div>`
+          : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
                 <div class="model3d-hint hi">Glisser pour orbiter · molette pour zoomer</div>
-                <button class="model3d-reset hi" type="button" data-model-reset>Recentrer</button>
               </div>
-              ${modelRail()}
+              ${zbar("model")}
             </div>`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
@@ -1860,7 +1835,7 @@ window.addEventListener("resize", () => paintSheet());
    number the slider shows. */
 function wireZoomRails() {
   const sheet = document.querySelector("[data-zoom]");
-  if (sheet) sheet.oninput = () => { zoomBy(Number(sheet.value)); paintSheet(); };
+  if (sheet) sheet.oninput = () => { zoomBy(Number(sheet.value)); paintSheet(); wakeBar("plan"); };
   const cam = document.querySelector("[data-mzoom]");
   if (cam) {
     cam.value = String(V.mzoom);
@@ -1868,9 +1843,36 @@ function wireZoomRails() {
       V.mzoom = Number(cam.value);
       paintModelRead();
       window.fitteModel?.writeZoom(V.mzoom);
+      wakeBar("model");
     };
   }
   paintModelRead();
+  /* Recentrer moved out of the canvas and into the bar, so the viewer's own
+     lookup inside its host no longer finds it: it is wired here, against the
+     module's public reset. */
+  const reset = document.querySelector("[data-model-reset]");
+  if (reset) reset.onclick = (e) => { e.stopPropagation(); window.fitteModel?.reset?.(); wakeBar("model"); };
+  /* The bar answers the hand, not the clock alone: any movement, wheel or
+     press inside the pane brings it back, and 1.6 s of stillness takes it
+     away again. The listeners sit on the pane, so they survive a drag that
+     leaves the bar's own box. */
+  document.querySelectorAll("[data-zone]").forEach((zone) => {
+    const side = zone.dataset.zone;
+    const wake = () => wakeBar(side);
+    zone.onpointermove = wake;
+    zone.onpointerdown = wake;
+    zone.addEventListener("wheel", wake, { passive: true });
+    wake();
+  });
+}
+
+const BAR_TIMERS = {};
+function wakeBar(side) {
+  const bar = document.querySelector(`[data-zbar="${side}"]`);
+  if (!bar) return;
+  bar.classList.remove("gone");
+  clearTimeout(BAR_TIMERS[side]);
+  BAR_TIMERS[side] = setTimeout(() => bar.classList.add("gone"), 1600);
 }
 
 function paintModelRead() {
@@ -2089,9 +2091,25 @@ function onClick(e) {
     /* The unit the list is on, filling the pane: the move the plan is
        opened for, without hunting for it with the wheel. */
     case "fitunit": fitUnit(); break;
-    /* Folding a rail widens the pane beside it; paintSheet re-fits the
-       drawing to the box it just gained. */
-    case "zrail": V.zrail[value] = !V.zrail[value]; break;
+    /* The two steppers move the same numbers the sliders move, so they do
+       not go through render: the drawing must not be rebuilt to be pushed
+       one notch. */
+    case "zstep": {
+      const [side, dir] = value.split(":");
+      const k = dir === "+" ? 1 : -1;
+      if (side === "plan") {
+        zoomBy(Math.round(V.zoom * (dir === "+" ? 1.25 : 1 / 1.25)));
+        paintSheet();
+      } else {
+        V.mzoom = Math.max(0, Math.min(100, V.mzoom + k * 8));
+        const cam = document.querySelector("[data-mzoom]");
+        if (cam) cam.value = String(V.mzoom);
+        paintModelRead();
+        window.fitteModel?.writeZoom(V.mzoom);
+      }
+      wakeBar(side);
+      return;
+    }
     case "reason": V.reason = V.reason === value ? null : value; break;
     case "save":
       if (!V.reason) { say("Choisissez une raison: une décision sans raison ne s'enregistre pas."); break; }
