@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype C3 — dix façons de donner de la place au dessin</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Les dix vignettes partent du même écran: rail, bande de niveaux, carte
+   blanche, liste à gauche, les deux dessins au milieu, l'inspecteur à droite.
+   Ce qui change, c'est la manière de rendre de la place aux dessins — et
+   surtout la manière de revenir. Chaque vignette est cliquable: le geste
+   d'agrandir et le geste de revenir se font ici, pas en imagination. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2; --edge:#b4b4b7;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa; --chrome:#f4f4f5;
+  --bar:#dcdcdc; --r:6px; --vert:#8ba00f; --vert-08:rgba(139,160,15,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:26px 26px 60px}
+h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.lede{color:var(--ink-2);font-size:12.5px;max-width:80ch;margin-top:6px}
+.rule{height:1px;background:var(--line-2);margin:16px 0 18px}
+
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(540px,1fr));gap:24px}
+.panel{display:flex;flex-direction:column;gap:8px;min-width:0}
+.cap{display:flex;align-items:baseline;gap:8px}
+.cap .n{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+.cap .t{font-size:13px;font-weight:600}
+.cap .meas{margin-left:auto;font-size:11px;color:var(--ink-2);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.how{font-size:11.5px;color:var(--ink);line-height:1.5}
+.why{font-size:11.5px;color:var(--ink-2);line-height:1.5}
+.cost{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+
+/* ------------------------------------------------------------- la vignette */
+.mock{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;user-select:none}
+.frame{display:grid;grid-template-columns:54px 1fr;height:330px;background:var(--chrome)}
+.rail{display:flex;flex-direction:column;gap:2px;padding:7px 5px}
+.rail .ic{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;
+  border-radius:7px;color:var(--ink-3);font-size:8.5px;text-align:center;line-height:1.15}
+.rail .ic.on{background:#fff;color:var(--ink);border:1px solid var(--line-2)}
+.body{display:flex;flex-direction:column;min-width:0;min-height:0;padding:0 8px 8px}
+.strip{height:30px;display:flex;align-items:center;gap:4px;flex:0 0 auto;min-width:0;overflow:hidden}
+.crumb{font-size:10px;color:var(--ink-3);white-space:nowrap}
+.crumb.on{color:var(--ink);font-weight:600}
+.div{width:1px;height:12px;background:var(--line);margin:0 5px;flex:0 0 1px}
+.tab{font-size:10px;color:var(--ink-3);padding:3px 6px;border-radius:6px;white-space:nowrap}
+.tab.on{background:#dfe9b4;color:#3f4a07;font-weight:600}
+.strip .right{margin-left:auto;display:flex;gap:5px;align-items:center}
+
+.work{flex:1;min-height:0;background:#fff;border:1px solid var(--line-2);border-radius:9px;
+  display:flex;flex-direction:column;overflow:hidden;position:relative}
+.hd{display:flex;align-items:center;gap:8px;padding:7px 9px;border-bottom:1px solid var(--line-2);flex:0 0 auto}
+.hd .ttl{font-size:11.5px;font-weight:600}
+.hd .sub{font-size:9.5px;color:var(--ink-3)}
+.hd .acts{margin-left:auto;display:flex;align-items:center;gap:5px}
+.cols{flex:1;display:grid;min-height:0;position:relative}
+
+.list{border-right:1px solid var(--line-2);padding:6px;display:flex;flex-direction:column;gap:3px;
+  min-width:0;overflow:hidden;background:#fff}
+.li{display:flex;align-items:center;gap:5px;padding:3px 5px;border-radius:5px;font-size:9px;
+  color:var(--ink-2);white-space:nowrap}
+.li .dot{width:5px;height:5px;border-radius:50%;background:var(--bar);flex:0 0 5px}
+.li.on{background:var(--vert-08);color:var(--ink);font-weight:600}
+.insp{border-left:1px solid var(--line-2);padding:6px;display:flex;flex-direction:column;gap:5px;
+  min-width:0;overflow:hidden;background:#fff}
+.ir{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:9px;
+  color:var(--ink-2);white-space:nowrap}
+.ir b{font-weight:600;color:var(--ink)}
+
+/* Les deux dessins. Le cadre est franc: c'est l'objet que l'on regarde. */
+.draws{display:grid;gap:6px;padding:6px;min-width:0;min-height:0}
+.dw{border:1px solid var(--edge);border-radius:7px;display:flex;flex-direction:column;
+  min-width:0;min-height:0;overflow:hidden;background:#fff}
+.dw .dh{display:flex;align-items:center;gap:6px;padding:4px 6px;font-size:9px;color:var(--ink-2);
+  border-bottom:1px solid var(--line-2);flex:0 0 auto}
+.dw .dh .b{margin-left:auto;font-size:8.5px;border:1px solid var(--line-2);border-radius:4px;padding:1px 4px}
+.dw .cv{flex:1;min-height:0;position:relative;
+  background:repeating-linear-gradient(0deg,var(--fill-2) 0 11px,transparent 11px 12px),
+    repeating-linear-gradient(90deg,var(--fill-2) 0 11px,transparent 11px 12px)}
+.dw .cv .unit{position:absolute;left:24%;top:28%;width:30%;height:32%;
+  border:1.5px solid var(--vert);background:var(--vert-08)}
+.dw.model .cv{background:linear-gradient(170deg,#eef1f3,#e2e6e9)}
+.dw .cv .mass{position:absolute;left:22%;right:22%;bottom:16%;top:30%;background:#cfd6da;
+  border:1px solid #b9c1c6}
+.dw.on{box-shadow:0 0 0 2px rgba(139,160,15,.35)}
+
+/* ------------------------------------------------- les gestes et le retour */
+.b{font-size:9px;color:var(--ink-2);border:1px solid var(--line);border-radius:5px;
+  padding:2px 6px;background:var(--fill-2);cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:4px}
+.b:hover{border-color:var(--ink-3);color:var(--ink)}
+.b.on{background:var(--vert-08);border-color:var(--vert);color:#3f4a07;font-weight:600}
+/* Le chemin du retour n'est jamais implicite: il est toujours un objet
+   visible, et toujours le même vert sourd. */
+.back{display:inline-flex;align-items:center;gap:5px;font-size:9px;cursor:pointer;
+  border:1px solid var(--vert);background:var(--vert-08);color:#3f4a07;font-weight:600;
+  border-radius:999px;padding:2px 8px;white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg span{font-size:9px;padding:2px 7px;color:var(--ink-2);cursor:pointer;background:var(--fill-2)}
+.seg span+span{border-left:1px solid var(--line)}
+.seg span.on{background:#fff;color:var(--ink);font-weight:600}
+
+/* L'onglet laissé par une colonne repliée: 18 px, la flèche du retour. */
+.stub{display:flex;flex-direction:column;align-items:center;gap:6px;padding:7px 0;cursor:pointer;
+  background:var(--fill-2);color:var(--ink-3);font-size:8px;writing-mode:vertical-rl;
+  border-right:1px solid var(--line-2)}
+.stub.right{border-right:0;border-left:1px solid var(--line-2)}
+.stub:hover{background:var(--fill);color:var(--ink)}
+.stub .ar{writing-mode:horizontal-tb;font-size:10px}
+
+/* Les volets: la colonne glisse par-dessus le dessin au lieu de le pousser. */
+.flyout{position:absolute;top:0;bottom:0;width:132px;background:#fff;z-index:3;
+  box-shadow:0 6px 24px rgba(17,17,18,.18)}
+.flyout.left{left:0;border-right:1px solid var(--line)}
+.flyout.right{right:0;border-left:1px solid var(--line)}
+.grip{width:7px;cursor:col-resize;background:var(--fill-2);border-left:1px solid var(--line-2);
+  border-right:1px solid var(--line-2)}
+.grip:hover{background:var(--vert-08)}
+.drawer{flex:0 0 auto;border-top:1px solid var(--line-2);background:#fff}
+.drawer .dl{display:flex;align-items:center;gap:8px;padding:4px 8px;font-size:9px;
+  color:var(--ink-2);cursor:pointer}
+.drawer .dl b{color:var(--ink)}
+.drawer .dbody{display:flex;gap:14px;padding:4px 8px 7px;font-size:9px;color:var(--ink-2)}
+.film{flex:0 0 auto;border-top:1px solid var(--line-2);display:flex;gap:5px;padding:5px 7px;
+  overflow:hidden;background:#fff}
+.film .f{flex:0 0 54px;height:34px;border:1px solid var(--line-2);border-radius:5px;
+  font-size:8px;color:var(--ink-3);display:grid;place-items:center}
+.film .f.on{border-color:var(--vert);background:var(--vert-08);color:#3f4a07;font-weight:600}
+.card{position:absolute;right:10px;top:10px;width:124px;z-index:4;background:#fff;
+  border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 22px rgba(17,17,18,.16);padding:6px}
+.card .ch{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:600;margin-bottom:4px}
+.card .ch .x{margin-left:auto;cursor:pointer;color:var(--ink-3)}
+.edgetab{position:absolute;right:0;top:12px;z-index:4;writing-mode:vertical-rl;font-size:8.5px;
+  padding:6px 3px;border:1px solid var(--line);border-right:0;border-radius:6px 0 0 6px;
+  background:#fff;color:var(--ink-2);cursor:pointer}
+.hint{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:5;
+  font-size:9px;border-radius:999px;padding:2px 9px;background:rgba(255,255,255,.94);
+  border:1px solid var(--vert);color:#3f4a07;cursor:pointer;white-space:nowrap}
+.zrail{flex:0 0 22px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 0;
+  background:var(--fill-2);border-right:1px solid var(--line-2)}
+.zrail input{appearance:slider-vertical;-webkit-appearance:slider-vertical;writing-mode:vertical-lr;
+  direction:rtl;width:12px;flex:1;accent-color:var(--ink);margin:0}
+.zrail .pc{font-size:7.5px;color:var(--ink-3);font-family:ui-monospace,Menlo,monospace}
+
+svg.lu{width:12px;height:12px;stroke-width:1.8;flex:0 0 12px}
+.rail .ic svg.lu{width:14px;height:14px}
+footer{margin-top:30px;font-size:11.5px;color:var(--ink-3);max-width:82ch;line-height:1.55}
+</style>
+</head>
+<body>
+<h1>Dix façons de donner de la place au dessin</h1>
+<p class="lede">Le même écran dans les dix vignettes: la liste à gauche, les deux dessins au milieu,
+l'inspecteur à droite. Aujourd'hui le dessin que l'on lit occupe un cinquième de la carte. Chaque
+vignette propose un geste pour lui donner davantage — et, surtout, un chemin de retour visible. Les
+vignettes sont vivantes: agrandissez, puis revenez. Le pourcentage à droite du titre est mesuré sur
+la vignette elle-même, dans l'état où elle se trouve: le plus grand des deux cadres de dessin,
+rapporté à la carte blanche.</p>
+<div class="rule"></div>
+
+<div class="sheet" id="sheet"></div>
+<footer id="foot"></footer>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* ---------------------------------------------------------------- le sprite */
+const toPascal = (n) => n.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
+function sprite() {
+  const names = ["layout-grid", "layers", "table", "calendar-check", "file", "chevron-left",
+    "chevron-right", "chevron-up", "chevron-down", "maximize", "minimize", "search", "x", "panel-left"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "position:absolute;width:0;height:0;overflow:hidden");
+  s.innerHTML = defs;
+  document.body.appendChild(s);
+}
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+
+const NAV = [["layout-grid", "Aperçu"], ["layers", "Unités"], ["table", "Quantités"],
+  ["calendar-check", "Suivi"], ["file", "Fichiers"]];
+const LEVELS = [5, 4, 3, 2];
+const UNITS = ["201 · 3½", "202 · 3½", "203 · 3½", "204 · 4½", "205 · 4½", "206 · 5½"];
+const INSP = [["Le plan dit", "1800 × 1500"], ["La maquette dit", "1560 × 1500"],
+  ["Écart", "240 mm"], ["Apparu dans", "R04"]];
+
+/* ------------------------------------------------------------ les variantes
+   `st` est l'état de la vignette; chaque variante lit et écrit le sien. Les
+   largeurs par défaut sont celles de l'écran réel, ramenées à l'échelle. */
+const WAYS = [
+  { id: "01", t: "Replier les deux colonnes",
+    how: "Un chevron sur le bord intérieur de chaque colonne. Repliée, la colonne laisse un onglet de 18 px avec la flèche inverse et son nom à la verticale.",
+    why: "Le geste est réversible au même endroit où il a été fait: on replie où l'on dépliera. Rien ne disparaît, tout rétrécit.",
+    cost: "Deux gestes pour tout élargir, deux pour tout rendre. L'onglet replié occupe quand même une bande." },
+  { id: "02", t: "Un seul dessin à la fois",
+    how: "Un sélecteur à trois positions dans l'en-tête: Plan 2D, Maquette 3D, les deux. Le dessin choisi prend toute la largeur du milieu.",
+    why: "La comparaison n'est pas la tâche de chaque minute. Quand on lit le plan, la maquette ne sert à rien et prend la moitié.",
+    cost: "L'écart entre le plan et la maquette est la raison d'être de l'écran; côte à côte, il saute aux yeux, seul, il faut s'en souvenir." },
+  { id: "03", t: "Double-clic sur un dessin",
+    how: "Double-clic dans un dessin: il prend toute la carte. Une pastille « Échap pour revenir » reste en bas; Échap ou la pastille rendent les colonnes.",
+    why: "Aucun bouton permanent à loger, et le geste se fait là où les yeux sont déjà — dans le dessin.",
+    cost: "Un geste qui ne se voit pas ne s'apprend pas tout seul; la pastille est le seul indice qu'il existe." },
+  { id: "04", t: "Les colonnes passent en volets",
+    how: "La liste et l'inspecteur ne poussent plus le dessin: ils glissent par-dessus depuis le bord, appelés par l'onglet, refermés par le même onglet.",
+    why: "Le dessin garde la largeur entière en permanence; les colonnes sont là à la demande, une seconde à la fois.",
+    cost: "Le volet couvre le dessin au moment précis où on le lit. Il manque une épingle, donc un troisième état." },
+  { id: "05", t: "Poignées de largeur",
+    how: "Deux poignées glissantes, une par colonne. Un double-clic sur une poignée rétablit la largeur d'origine; un bouton « Rétablir » apparaît dès qu'une largeur a bougé.",
+    why: "Chaque projet a sa proportion: des unités aux noms longs, un inspecteur peu lu. L'écran s'ajuste une fois et se tient.",
+    cost: "Rien ne revient tout seul; sans le bouton, on finit avec des largeurs héritées d'un autre projet." },
+  { id: "06", t: "Plein cadre, la bande reste",
+    how: "Un bouton « Plein cadre » dans l'en-tête. Les dessins prennent toute la carte; la bande de niveaux reste en haut et porte le bouton « Quitter ».",
+    why: "C'est l'état le plus simple à comprendre: tout ou rien, et le retour est écrit en toutes lettres au même endroit chaque fois.",
+    cost: "La liste disparaît entièrement: changer d'unité demande de sortir, ou de la déplacer dans la bande." },
+  { id: "07", t: "L'inspecteur en tiroir bas",
+    how: "La colonne de droite devient une ligne en bas de carte: l'écart et la révision y tiennent. Un clic sur la ligne l'ouvre, un clic la referme.",
+    why: "L'inspecteur est large parce qu'il est une colonne; en ligne, quatre mesures suffisent et 340 px reviennent au dessin.",
+    cost: "Ce qui tient en une ligne est un résumé: les quatre chiffres y sont, les plans d'ouvertures n'y sont plus." },
+  { id: "08", t: "Le zoom replie les côtés",
+    how: "Au-delà de 200 %, la liste et l'inspecteur se replient d'eux-mêmes. Une pastille permanente dit « panneaux repliés » et les rend d'un clic.",
+    why: "Zoomer est déjà la déclaration qu'on veut voir le dessin de près. L'écran suit l'intention au lieu d'attendre un deuxième geste.",
+    cost: "Une interface qui bouge toute seule surprend; sans la pastille permanente, elle serait inacceptable." },
+  { id: "09", t: "L'inspecteur flotte sur le dessin",
+    how: "L'inspecteur devient une carte posée dans un coin du dessin, déplaçable, réductible en onglet sur le bord droit.",
+    why: "Les mesures restent lisibles pendant que le dessin occupe toute la largeur; l'œil ne traverse plus l'écran pour comparer.",
+    cost: "Une carte posée sur le plan masque une partie du dessin — exactement ce que DESIGN.md évite." },
+  { id: "10", t: "La liste passe en bande sous le dessin",
+    how: "Les unités deviennent des vignettes en bande horizontale sous les dessins. 260 px de largeur reviennent au dessin; la bande se range d'un clic.",
+    why: "Une unité se reconnaît à sa forme autant qu'à son numéro; en vignettes, la liste devient utile en plus d'être compacte.",
+    cost: "Quatorze unités en bande se parcourent moins vite qu'en colonne, et la bande reprend de la hauteur." },
+];
+
+/* L'état de départ est le même pour toutes: rien n'est replié. */
+const ST = WAYS.map(() => ({ list: true, insp: true, pane: "both", full: null,
+  lw: 116, iw: 128, drawer: false, fly: null, zoom: 100, film: false, float: true, floatMin: false }));
+
+/* --------------------------------------------------------------- le dessin */
+const draw = (st, w, which) => `<div class="dw ${which === "model" ? "model" : ""} ${st.full === which ? "on" : ""}"
+  data-a="dbl" data-v="${which}">
+  <div class="dh">${icon("file")}${which === "model" ? "Maquette 3D" : "Plan 2D"}
+    <span class="b">${which === "model" ? "SketchUp" : "AutoCAD"}</span></div>
+  <div class="cv">${which === "model" ? '<span class="mass"></span>' : '<span class="unit"></span>'}</div>
+</div>`;
+
+const draws = (st, w) => {
+  const only = st.full || (w.id === "02" && st.pane !== "both" ? st.pane : null);
+  const inner = only
+    ? draw(st, w, only)
+    : draw(st, w, "plan") + draw(st, w, "model");
+  const cols = only ? "1fr" : "1fr 1fr";
+  const zoom = w.id === "08"
+    ? `<div class="zrail"><input type="range" min="100" max="600" value="${st.zoom}" data-a="zoom">
+       <span class="pc">${st.zoom}%</span></div>` : "";
+  return `<div style="display:flex;min-width:0;min-height:0">${zoom}
+    <div class="draws" style="flex:1;grid-template-columns:${cols}">${inner}</div></div>`;
+};
+
+/* ---------------------------------------------------- les colonnes latérales */
+const listCol = (st, w) => `<div class="list">
+  <div class="ir" style="margin-bottom:2px">Unités
+    ${w.id === "01" || w.id === "05" ? `<span class="b" data-a="list">${icon("chevron-left")}</span>` : ""}</div>
+  ${UNITS.map((u, i) => `<div class="li ${i === 0 ? "on" : ""}"><span class="dot"></span>${u}</div>`).join("")}</div>`;
+
+const inspCol = (st, w) => `<div class="insp">
+  <div class="ir" style="margin-bottom:2px"><b>Unité 201</b>
+    ${w.id === "01" || w.id === "05" ? `<span class="b" data-a="insp">${icon("chevron-right")}</span>` : ""}</div>
+  ${INSP.map(([k, v]) => `<div class="ir">${k}<b>${v}</b></div>`).join("")}</div>`;
+
+const stub = (side, label, a) => `<div class="stub ${side}" data-a="${a}">
+  <span class="ar">${side === "right" ? "‹" : "›"}</span>${label}</div>`;
+
+/* ------------------------------------------------------------- l'en-tête */
+function head(st, w) {
+  const acts = [];
+  if (w.id === "02") acts.push(`<span class="seg">
+    ${[["plan", "Plan 2D"], ["model", "Maquette"], ["both", "Les deux"]].map(([v, n]) =>
+      `<span class="${st.pane === v ? "on" : ""}" data-a="pane" data-v="${v}">${n}</span>`).join("")}</span>`);
+  if (w.id === "05" && (st.lw !== 116 || st.iw !== 128))
+    acts.push(`<span class="back" data-a="reset">${icon("minimize")}Rétablir les largeurs</span>`);
+  if (w.id === "06") acts.push(st.full
+    ? `<span class="back" data-a="exit">${icon("minimize")}Quitter le plein cadre</span>`
+    : `<span class="b" data-a="cinema">${icon("maximize")}Plein cadre</span>`);
+  if (w.id === "10") acts.push(`<span class="b ${st.film ? "on" : ""}" data-a="film">
+    ${icon("panel-left")}${st.film ? "Liste en colonne" : "Liste en bande"}</span>`);
+  if (w.id === "09" && st.floatMin) acts.push(`<span class="back" data-a="float">Rouvrir l'inspecteur</span>`);
+  if (w.id === "04") acts.push(`<span class="b">volets · survol des bords</span>`);
+  return `<div class="hd"><div><div class="ttl">Étage type — niveau 2</div>
+    <div class="sub">14 unités · 1 écart ouvert</div></div>
+    <div class="acts">${acts.join("")}<span class="b">Exporter</span></div></div>`;
+}
+
+/* ------------------------------------------------------------- la vignette */
+function mock(st, w, i) {
+  const hideSides = st.full !== null;
+  const showList = w.id === "10" ? (!st.film && st.list) : (w.id === "04" ? false : st.list && !hideSides);
+  const showInsp = w.id === "07" ? false
+    : w.id === "09" ? false
+      : w.id === "04" ? false
+        : st.insp && !hideSides;
+  /* Les variantes qui laissent un onglet le laissent des deux côtés: c'est
+     l'onglet qui porte le retour. */
+  const stubs = ["01", "04", "08"].includes(w.id);
+  const grip = w.id === "05";
+
+  const cells = [];
+  const widths = [];
+  if (showList) { cells.push(listCol(st, w)); widths.push(`${w.id === "05" ? st.lw : 116}px`); }
+  else if (stubs && !hideSides) { cells.push(stub("", "Unités", w.id === "04" ? "fly-list" : "list")); widths.push("18px"); }
+  if (grip) { cells.push(`<div class="grip" data-a="grip" data-v="list"></div>`); widths.push("7px"); }
+
+  cells.push(draws(st, w)); widths.push("minmax(0,1fr)");
+
+  if (grip) { cells.push(`<div class="grip" data-a="grip" data-v="insp"></div>`); widths.push("7px"); }
+  if (showInsp) { cells.push(inspCol(st, w)); widths.push(`${w.id === "05" ? st.iw : 128}px`); }
+  else if (stubs && !hideSides) { cells.push(stub("right", "Unité 201", w.id === "04" ? "fly-insp" : "insp")); widths.push("18px"); }
+
+  const flyout = st.fly === "list" ? `<div class="flyout left">${listCol(st, w)}</div>`
+    : st.fly === "insp" ? `<div class="flyout right">${inspCol(st, w)}</div>` : "";
+
+  const floating = w.id === "09" && !st.floatMin
+    ? `<div class="card"><div class="ch">Unité 201<span class="x" data-a="float">${icon("x")}</span></div>
+       ${INSP.map(([k, v]) => `<div class="ir">${k}<b>${v}</b></div>`).join("")}</div>`
+    : w.id === "09" ? `<div class="edgetab" data-a="float">Unité 201</div>` : "";
+
+  const hint = st.full && w.id === "03"
+    ? `<span class="hint" data-a="exit">Échap pour revenir</span>` : "";
+  const folded = w.id === "08" && (!st.list || !st.insp)
+    ? `<span class="hint" data-a="unfold">panneaux repliés · rétablir</span>` : "";
+
+  const drawer = w.id === "07" ? `<div class="drawer">
+      <div class="dl" data-a="drawer">${icon(st.drawer ? "chevron-down" : "chevron-up")}
+        Unité 201 · écart <b>240 mm</b> · R04
+        <span style="margin-left:auto">${st.drawer ? "refermer" : "ouvrir"}</span></div>
+      ${st.drawer ? `<div class="dbody">${INSP.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>` : ""}
+    </div>` : "";
+
+  const film = w.id === "10" && st.film ? `<div class="film">
+      ${UNITS.map((u, i2) => `<div class="f ${i2 === 0 ? "on" : ""}">${u.split(" ")[0]}</div>`).join("")}
+      <div class="f">+8</div></div>` : "";
+
+  const stripRight = w.id === "06" && st.full
+    ? `<div class="right"><span class="back" data-a="exit">${icon("minimize")}Quitter le plein cadre</span></div>` : "";
+
+  return `<div class="mock" data-i="${i}"><div class="frame">
+    <nav class="rail">${NAV.map(([g, n]) => `<div class="ic ${n === "Unités" ? "on" : ""}">${icon(g)}<span>${n}</span></div>`).join("")}</nav>
+    <div class="body">
+      <div class="strip"><span class="crumb">Tous les projets</span><span class="crumb on">Le Baldwin III</span>
+        <span class="div"></span>
+        ${LEVELS.map((lv) => `<span class="tab ${lv === 2 ? "on" : ""}">Niveau ${lv}</span>`).join("")}
+        ${stripRight}</div>
+      <div class="work">
+        ${head(st, w)}
+        <div class="cols" style="grid-template-columns:${widths.join(" ")}">
+          ${cells.join("")}${flyout}${floating}${hint}${folded}</div>
+        ${drawer}${film}
+      </div>
+    </div></div></div>`;
+}
+
+/* --------------------------------------------------------------- la mesure
+   Ce qui compte n'est pas la surface des dessins mis ensemble: c'est la
+   taille du dessin que l'on est en train de lire. La mesure est donc le plus
+   grand des deux cadres rapporté à la carte, lue sur la vignette après le
+   rendu — d'où le fait que montrer un seul dessin double le chiffre. */
+function measure() {
+  document.querySelectorAll(".panel").forEach((p) => {
+    const work = p.querySelector(".work");
+    if (!work) return;
+    const area = work.getBoundingClientRect();
+    let biggest = 0;
+    p.querySelectorAll(".dw").forEach((d) => {
+      const r = d.getBoundingClientRect();
+      biggest = Math.max(biggest, r.width * r.height);
+    });
+    const pc = Math.round((biggest / (area.width * area.height)) * 100);
+    p.querySelector(".meas").textContent = `le dessin lu · ${pc} % de la carte`;
+  });
+}
+
+function paintOne(i) {
+  const panel = document.querySelector(`.panel[data-i="${i}"]`);
+  panel.querySelector(".mockslot").innerHTML = mock(ST[i], WAYS[i], i);
+  measure();
+}
+
+function build() {
+  document.getElementById("sheet").innerHTML = WAYS.map((w, i) => `<section class="panel" data-i="${i}">
+    <div class="cap"><span class="n">${w.id}</span><span class="t">${w.t}</span><span class="meas"></span></div>
+    <div class="mockslot">${mock(ST[i], w, i)}</div>
+    <div class="how">${w.how}</div>
+    <div class="why">${w.why}</div>
+    <div class="cost">Coût: ${w.cost}</div>
+  </section>`).join("");
+
+  document.getElementById("foot").textContent =
+    "Toutes rendent de la place; elles ne coûtent pas la même chose. 01, 05 et 07 gardent les deux "
+    + "sources visibles et le retour au même endroit que l'aller. 02, 03 et 06 donnent le plus de "
+    + "surface et demandent le plus de confiance dans le chemin du retour. 04 et 09 posent quelque "
+    + "chose sur le dessin, ce que DESIGN.md évite. 08 bouge sans qu'on le lui demande: elle n'est "
+    + "tenable qu'avec la pastille permanente. 10 ne libère que la largeur de la liste, mais c'est "
+    + "la seule qui rend la liste plus utile qu'avant.";
+
+  document.getElementById("sheet").addEventListener("click", onClick);
+  document.getElementById("sheet").addEventListener("dblclick", onDouble);
+  document.getElementById("sheet").addEventListener("input", onInput);
+  document.getElementById("sheet").addEventListener("pointerdown", onGrip);
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    ST.forEach((st, i) => { if (st.full) { st.full = null; paintOne(i); } });
+  });
+  measure();
+}
+
+/* ------------------------------------------------------------- les gestes */
+function ctx(e) {
+  const m = e.target.closest(".mock");
+  if (!m) return null;
+  const i = Number(m.dataset.i);
+  return { i, st: ST[i], w: WAYS[i], el: e.target.closest("[data-a]") };
+}
+
+function onClick(e) {
+  const c = ctx(e);
+  if (!c || !c.el) return;
+  const { st, w } = c;
+  const v = c.el.dataset.v;
+  switch (c.el.dataset.a) {
+    case "list": st.list = !st.list; break;
+    case "insp": st.insp = !st.insp; break;
+    case "fly-list": st.fly = st.fly === "list" ? null : "list"; break;
+    case "fly-insp": st.fly = st.fly === "insp" ? null : "insp"; break;
+    case "pane": st.pane = v; break;
+    case "cinema": st.full = "plan"; break;
+    case "exit": st.full = null; break;
+    case "reset": st.lw = 116; st.iw = 128; break;
+    case "drawer": st.drawer = !st.drawer; break;
+    case "film": st.film = !st.film; break;
+    case "float": st.floatMin = !st.floatMin; break;
+    case "unfold": st.list = true; st.insp = true; st.zoom = 100; break;
+    default: return;
+  }
+  paintOne(c.i);
+}
+
+/* Le double-clic n'existe que dans la vignette 03: ailleurs, un dessin
+   double-cliqué ne doit rien faire de surprenant. */
+function onDouble(e) {
+  const c = ctx(e);
+  if (!c || c.w.id !== "03") return;
+  const dw = e.target.closest(".dw");
+  if (!dw) return;
+  c.st.full = c.st.full ? null : dw.dataset.v;
+  paintOne(c.i);
+}
+
+function onInput(e) {
+  const c = ctx(e);
+  if (!c || c.w.id !== "08") return;
+  c.st.zoom = Number(e.target.value);
+  const near = c.st.zoom > 200;
+  c.st.list = !near; c.st.insp = !near;
+  paintOne(c.i);
+}
+
+/* La poignée: on écrit la largeur pendant le glissement, sans re-rendre la
+   vignette entière — sinon la poignée disparaît sous le doigt. */
+function onGrip(e) {
+  const c = ctx(e);
+  if (!c || !c.el || c.el.dataset.a !== "grip") return;
+  const side = c.el.dataset.v;
+  const start = e.clientX;
+  const from = side === "list" ? c.st.lw : c.st.iw;
+  const cols = c.el.closest(".cols");
+  const move = (m) => {
+    const d = side === "list" ? m.clientX - start : start - m.clientX;
+    const next = Math.max(0, Math.min(190, from + d));
+    if (side === "list") c.st.lw = next; else c.st.iw = next;
+    const w = cols.style.gridTemplateColumns.split(" ");
+    w[side === "list" ? 0 : w.length - 1] = `${next}px`;
+    cols.style.gridTemplateColumns = w.join(" ");
+    measure();
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    paintOne(c.i);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+}
+
+sprite();
+build();
+window.addEventListener("resize", measure);
+</script>
+</body>
+</html>
