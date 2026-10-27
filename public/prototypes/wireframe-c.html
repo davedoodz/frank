@@ -34,6 +34,7 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .frame[data-nav="rail"]{grid-template-columns:48px 1fr;grid-template-rows:1fr}
 .frame[data-nav="wide"]{grid-template-columns:180px 1fr;grid-template-rows:1fr}
 .frame[data-nav="top"]{grid-template-columns:1fr;grid-template-rows:1fr}
+.frame[data-nav="stack"]{grid-template-columns:72px 1fr;grid-template-rows:1fr}
 
 .rail{border-right:1px solid var(--line-2);background:var(--fill-2);
   display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 6px}
@@ -51,6 +52,30 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
   padding:6px 9px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:6px}
 .tabs button[aria-current="true"]{background:var(--fill);color:var(--ink);font-weight:500}
 .tabs .sp{flex:1}
+
+/* rail with the label under the icon */
+.rail.stack{align-items:stretch;padding:10px 6px}
+.rail .stk{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;
+  border-radius:var(--r);font-size:10px;color:var(--ink-2);text-align:center}
+.rail .stk.on{background:var(--bar);color:var(--ink)}
+
+/* how the tab strip presents itself */
+.tabs[data-align="Centred"]{justify-content:center}
+.tabs[data-align="Centred"] .sp{display:none}
+.tabs[data-align="Spread"] button{flex:1;justify-content:center}
+.tabs[data-align="Spread"] .sp{display:none}
+.tabs[data-style="Label only"] button > svg{display:none}
+.tabs[data-style="Icon only"] button > .hi,.tabs[data-style="Icon only"] button > .lo{display:none}
+.tabs[data-style="Underline"] button{border-radius:0}
+.tabs[data-style="Underline"] button[aria-current="true"]{background:transparent;
+  box-shadow:inset 0 -2px 0 var(--ink)}
+.tabs[data-style="Pills"] button{border:1px solid var(--line-2);border-radius:999px}
+.tabs[data-style="Pills"] button[aria-current="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tabs[data-style="Segmented"]{gap:0}
+.tabs[data-style="Segmented"] button{border-radius:0;border-right:1px solid var(--line-2);background:var(--fill-2)}
+.tabs[data-style="Segmented"] button:first-of-type{border-top-left-radius:6px;border-bottom-left-radius:6px}
+.tabs[data-style="Segmented"] button:last-of-type{border-right:0;border-top-right-radius:6px;border-bottom-right-radius:6px}
+.tabs[data-style="Segmented"] button[aria-current="true"]{background:#fff;color:var(--ink)}
 
 .work{flex:1;min-height:0;display:grid;gap:var(--gap);padding:var(--gap)}
 .pane{border:1px solid var(--line-2);border-radius:var(--r);background:#fff;
@@ -254,22 +279,28 @@ const bars = (n, w = [100, 70, 85]) =>
 
 function navHTML() {
   const mode = V.nav.layout;
-  if (mode === "Top bar only") return "";
+  if (mode === "Top bar only" || mode === "Tabs only, no rail") return "";
   const wide = mode === "Wide rail with labels";
+  const stack = mode === "Rail with labels under icons";
   const items = NAV.map(([ic, name]) => wide
-    ? `<div class="row ${name === V.screen ? "on" : ""}">${icon(ic)}<span class="lo bar" style="width:70%"></span><span class="hi">${name}</span></div>`
-    : `<div class="ic ${name === V.screen ? "on" : ""}">${icon(ic)}</div>`).join("");
-  return `<nav class="rail rg ${solo("nav")} ${wide ? "wide" : ""}" data-rg="nav" data-fi="${fiOf("nav")}">${items}</nav>`;
+    ? `<div class="row ${name === V.screen ? "on" : ""}" data-screen="${name}">${icon(ic)}<span class="lo bar" style="width:70%"></span><span class="hi">${name}</span></div>`
+    : stack
+      ? `<div class="stk ${name === V.screen ? "on" : ""}" data-screen="${name}">${icon(ic)}<span class="lo bar" style="width:70%;height:6px"></span><span class="hi">${name}</span></div>`
+      : `<div class="ic ${name === V.screen ? "on" : ""}" data-screen="${name}">${icon(ic)}</div>`).join("");
+  const cls = wide ? "wide" : stack ? "stack" : "";
+  return `<nav class="rail rg ${solo("nav")} ${cls}" data-rg="nav" data-fi="${fiOf("nav")}">${items}</nav>`;
 }
 
 function tabsHTML() {
-  const top = V.nav.layout === "Top bar only";
+  const mode = V.nav.layout;
+  if (mode === "Rail only, no tabs") return "";
+  const top = mode === "Top bar only";
   const items = Object.entries(SCREENS).map(([name, s]) =>
     `<button data-screen="${name}" aria-current="${name === V.screen}">${icon(s.icon)}<span class="lo bar" style="width:46px"></span><span class="hi">${name}</span></button>`).join("");
-  return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "nav + tabs" : "tabs"}" data-fi="${fiOf("nav")}">
+  return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "nav + tabs" : "tabs"}" data-fi="${fiOf("nav")}"
+       data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
     ${items}<span class="sp"></span>
-    <span class="chip">${icon("clock")}<span class="lo bar" style="width:52px"></span><span class="hi">read 6 min ago</span></span>
   </div>`;
 }
 
@@ -465,7 +496,8 @@ function render() {
   const hasList = def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
   const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Right panel";
   const cols = [hasList ? "260px" : null, "1fr", hasInsp ? "340px" : null].filter(Boolean).join(" ");
-  const navMode = V.nav.layout === "Top bar only" ? "top" : V.nav.layout === "Wide rail with labels" ? "wide" : "rail";
+  const navMode = { "Top bar only": "top", "Tabs only, no rail": "top",
+    "Wide rail with labels": "wide", "Rail with labels under icons": "stack" }[V.nav.layout] || "rail";
 
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
@@ -509,7 +541,11 @@ const dial = DialKit.createDialKit("Wireframe C", {
   journeySteps: true,
   density: sel(["comfortable", "compact"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
-  nav: { _collapsed: true, fidelity: FI, layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels"]) },
+  nav: { _collapsed: true, fidelity: FI,
+    layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels",
+      "Rail with labels under icons", "Rail only, no tabs", "Tabs only, no rail"]),
+    tabStyle: sel(["Icon + label", "Label only", "Icon only", "Underline", "Pills", "Segmented"]),
+    tabAlign: sel(["Left", "Centred", "Spread"]) },
   header: { _collapsed: true, fidelity: FI, layout: sel(["Title + actions", "Title only", "Title + metrics"]) },
   list: { _collapsed: true, fidelity: FI, layout: sel(["Vertical list", "Card grid", "Filter bar only", "Hidden"]) },
   content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
