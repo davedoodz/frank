@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zoom, replier, montrer — huit façons de rendre le dessin au dessin</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#a4a4a4;
+  --line:#d2d2d2; --line-2:#e9e9e9; --fill:#f2f2f2; --fill-2:#f8f8f8;
+  --page:#f2f2f2; --paper:#fff;
+  --glass:color-mix(in srgb, #fff 58%, transparent);
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.top{max-width:1560px;margin:0 auto;padding:20px 20px 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.top h1{font-size:14px;font-weight:600}
+.top p{font-size:12px;color:var(--ink-2);max-width:62ch}
+
+.grid{max-width:1560px;margin:16px auto 70px;padding:0 20px;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:1100px){.grid{grid-template-columns:1fr}}
+
+/* one option = one pane, exactly as the app draws it -------------------- */
+.card{background:var(--paper);border:1px solid var(--line-2);border-radius:12px;overflow:hidden;
+  display:flex;flex-direction:column}
+.card > h2{font-size:12.5px;font-weight:600;padding:11px 13px 0;display:flex;gap:8px;align-items:baseline}
+.card > h2 span{font-family:var(--mono);color:var(--ink-3);font-size:11px}
+.card > .say{font-size:11.5px;color:var(--ink-2);padding:3px 13px 10px;min-height:34px}
+.ph{display:flex;align-items:center;gap:7px;padding:8px 11px;border-top:1px solid var(--line-2);
+  border-bottom:1px solid var(--line-2);font-size:12px;color:var(--ink-2);background:var(--fill-2)}
+.ph .nm{color:var(--ink);font-weight:500}
+.ph .sp{flex:1}
+
+/* the window onto the sheet -------------------------------------------- */
+.stage{position:relative;height:360px;overflow:hidden;background:var(--fill-2);
+  cursor:grab;touch-action:none;user-select:none}
+.stage.drag{cursor:grabbing}
+.stage.marquee{cursor:crosshair}
+/* The sheet takes focus so the keys can reach it; a ring around the whole
+   drawing would read as a selection, so the state is said with one inset
+   hairline instead. */
+.stage:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--line)}
+.sheet{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+.sheet img{display:block;max-width:none}
+
+/* shared pieces of glass ----------------------------------------------- */
+.glass{background:var(--glass);backdrop-filter:blur(10px) saturate(1.3);
+  -webkit-backdrop-filter:blur(10px) saturate(1.3);border:1px solid var(--line-2);
+  box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.btn{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  border:0;background:none;color:var(--ink-2);cursor:pointer;flex:0 0 26px}
+.btn:hover{background:rgba(0,0,0,.06);color:var(--ink)}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.val{font-family:var(--mono);font-size:11px;color:var(--ink-2);min-width:38px;text-align:center}
+
+/* 1 — nothing at all, a readout that passes ---------------------------- */
+.hud{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:7px 12px;
+  border-radius:9px;font-family:var(--mono);font-size:13px;color:var(--ink);
+  opacity:0;transition:opacity .35s;pointer-events:none}
+.hud.on{opacity:1;transition:opacity .08s}
+.hint{position:absolute;left:10px;bottom:10px;font-size:10.5px;color:var(--ink-3);
+  pointer-events:none;letter-spacing:.01em}
+
+/* 2 — a dot that becomes a slider when the hand arrives ---------------- */
+.dot{position:absolute;right:10px;bottom:10px;height:28px;border-radius:999px;display:flex;
+  align-items:center;gap:0;padding:0 9px;overflow:hidden;width:52px;
+  transition:width .22s cubic-bezier(.3,.8,.3,1);cursor:pointer}
+.dot:hover,.dot.open{width:188px;gap:7px;padding:0 10px}
+.dot input{width:0;opacity:0;transition:width .22s,opacity .18s;accent-color:var(--ink);cursor:ew-resize}
+.dot:hover input,.dot.open input{width:100px;opacity:1}
+
+/* 3 — a bar at the foot that leaves when the hand stops ---------------- */
+.bar{position:absolute;left:50%;bottom:12px;transform:translateX(-50%) translateY(0);
+  height:34px;border-radius:999px;display:flex;align-items:center;gap:4px;padding:0 6px;
+  opacity:1;transition:opacity .4s,transform .4s}
+.bar.gone{opacity:0;transform:translateX(-50%) translateY(14px);pointer-events:none}
+.bar input{width:110px;accent-color:var(--ink);cursor:ew-resize}
+.bar .sep{width:1px;height:16px;background:var(--line-2)}
+
+/* 4 — the edge calls the rail back ------------------------------------- */
+.edge{position:absolute;right:0;top:0;bottom:0;width:58px;z-index:3}
+.vrail{position:absolute;right:9px;top:9px;bottom:9px;width:40px;border-radius:13px;
+  display:flex;flex-direction:column;align-items:center;gap:7px;padding:9px 0;
+  opacity:0;transform:translateX(12px);transition:opacity .22s,transform .22s;pointer-events:none}
+.edge:hover .vrail,.vrail.on{opacity:1;transform:none;pointer-events:auto}
+.vrail input{appearance:slider-vertical;-webkit-appearance:slider-vertical;writing-mode:vertical-lr;
+  direction:rtl;width:16px;flex:1;accent-color:var(--ink);cursor:ns-resize}
+.tab{position:absolute;right:0;top:50%;transform:translateY(-50%);width:13px;height:46px;
+  border-radius:7px 0 0 7px;border-right:0;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-3);transition:opacity .2s}
+.edge:hover .tab{opacity:0}
+
+/* 5 — draw the frame you want ------------------------------------------ */
+.marq{position:absolute;border:1px solid var(--ink);background:rgba(27,27,27,.06);
+  pointer-events:none;display:none}
+.corner{position:absolute;right:10px;bottom:10px;height:28px;border-radius:9px;display:flex;
+  align-items:center;padding:0 4px;gap:2px}
+
+/* 6 — keys, and a small map of where you are --------------------------- */
+.map{position:absolute;right:10px;bottom:10px;width:112px;border-radius:9px;padding:5px;
+  cursor:crosshair}
+.map .mi{position:relative;display:block;width:100%;border-radius:5px;overflow:hidden}
+.map img{display:block;width:100%;filter:grayscale(1) contrast(.75);opacity:.8}
+.map .vp{position:absolute;border:1.5px solid var(--ink);border-radius:2px;
+  background:rgba(27,27,27,.07)}
+.keys{position:absolute;left:10px;bottom:10px;display:flex;gap:5px}
+.kbd{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);border-radius:6px;padding:3px 7px}
+
+/* 7 — one knob, pushed like a loupe ------------------------------------ */
+.knob{position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;cursor:ns-resize;touch-action:none}
+.knob .ring{position:absolute;inset:3px;border-radius:999px;transform:rotate(-90deg)}
+.knob .ring circle{fill:none;stroke-width:2.5}
+.knob .ring .t{stroke:var(--line-2)}
+.knob .ring .p{stroke:var(--ink);stroke-linecap:round}
+.knob b{font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--ink)}
+
+/* 8 — the control lives in chrome that already exists ------------------ */
+.ph .zoomer{display:flex;align-items:center;gap:3px}
+.ph .zoomer input{width:92px;accent-color:var(--ink);cursor:ew-resize}
+.ph .btn{width:22px;height:22px;flex:0 0 22px}
+
+/* the compare strip ----------------------------------------------------- */
+.score{max-width:1560px;margin:0 auto 70px;padding:0 20px}
+table{border-collapse:collapse;width:100%;font-size:12px;background:var(--paper);
+  border:1px solid var(--line-2);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line-2)}
+th{font-weight:500;color:var(--ink-2);background:var(--fill-2);font-size:11.5px}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--mono);color:var(--ink-2)}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>Zoom, replier, montrer</h1>
+  <p>Huit contrôles, tous vivants: molette pour zoomer, glisser pour déplacer. Le dessin occupe la même fenêtre dans chaque cas; ce qui change, c'est le nombre de pixels que le contrôle lui prend et le moment où il apparaît.</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="score">
+  <table>
+    <tr><th>Option</th><th>Pixels pris au dessin au repos</th><th>Comment on revient</th><th>Ce que ça coûte</th></tr>
+    <tr><td>1 · Rien, molette et glissé</td><td class="n">0</td><td>rien à revenir</td><td>le niveau se devine; aucun repère pour la souris sans molette</td></tr>
+    <tr><td>2 · Pastille qui s'ouvre</td><td class="n">52 × 28</td><td>le survol l'ouvre</td><td>il faut viser le coin</td></tr>
+    <tr><td>3 · Barre qui s'efface</td><td class="n">0 après 1,6 s</td><td>un mouvement de souris</td><td>réapparaît parfois sans qu'on l'ait demandé</td></tr>
+    <tr><td>4 · Bord qui appelle</td><td class="n">13 × 46</td><td>la souris approche du bord</td><td>invisible pour qui ne longe pas le bord</td></tr>
+    <tr><td>5 · Cadre tracé</td><td class="n">28 de haut, un coin</td><td>double-clic pour tout revoir</td><td>geste à apprendre</td></tr>
+    <tr><td>6 · Touches et mini-carte</td><td class="n">112 × 96</td><td>toujours là</td><td>la carte mange un coin du dessin</td></tr>
+    <tr><td>7 · Un seul bouton poussé</td><td class="n">44 × 44</td><td>toujours là</td><td>le geste vertical n'est pas annoncé</td></tr>
+    <tr><td>8 · Dans l'en-tête</td><td class="n">0 sur le dessin</td><td>toujours là</td><td>loin de la main quand elle est au centre</td></tr>
+  </table>
+</div>
+
+<script>
+const IMG = "assets/plan-niveau-2.jpg";
+const svg = (d) => `<svg viewBox="0 0 24 24">${d}</svg>`;
+const I = {
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
+  minus: svg('<path d="M5 12h14"/>'),
+  fit: svg('<path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4"/>'),
+  grip: svg('<path d="M9 6l-4 6 4 6"/>'),
+  search: svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>'),
+};
+
+/* One engine under every option: the sheet is a transformed box, the wheel
+   zooms where the pointer is, a drag moves it. The control only ever writes
+   a number into this; nothing below knows which control did it. */
+function viewer(stage, opts = {}) {
+  const sheet = stage.querySelector(".sheet");
+  const img = sheet.querySelector("img");
+  const V = { s: 1, x: 0, y: 0, min: .25, max: 4, fitS: 1, onChange: opts.onChange || (() => {}) };
+
+  const apply = () => {
+    sheet.style.transform = `translate(${V.x}px, ${V.y}px) scale(${V.s})`;
+    V.onChange(V);
+  };
+  const fit = () => {
+    const r = stage.getBoundingClientRect();
+    const iw = img.naturalWidth || 1280, ih = img.naturalHeight || 1160;
+    V.fitS = Math.min(r.width / iw, r.height / ih);
+    V.min = V.fitS * .6; V.max = V.fitS * 7;
+    V.s = V.fitS; V.x = (r.width - iw * V.s) / 2; V.y = (r.height - ih * V.s) / 2;
+    apply();
+  };
+  /* Zoom holds the point under the pointer still: the sheet grows around the
+     thing being looked at, not around a corner nobody is watching. */
+  const zoomAt = (ns, cx, cy) => {
+    ns = Math.max(V.min, Math.min(V.max, ns));
+    const r = stage.getBoundingClientRect();
+    const px = (cx - r.left - V.x) / V.s, py = (cy - r.top - V.y) / V.s;
+    V.x = cx - r.left - px * ns; V.y = cy - r.top - py * ns; V.s = ns;
+    apply();
+  };
+  const zoomCenter = (ns) => {
+    const r = stage.getBoundingClientRect();
+    zoomAt(ns, r.left + r.width / 2, r.top + r.height / 2);
+  };
+  stage.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    zoomAt(V.s * Math.exp(-e.deltaY * .0016), e.clientX, e.clientY);
+    if (opts.onWheel) opts.onWheel();
+  }, { passive: false });
+
+  let drag = null;
+  stage.addEventListener("pointerdown", (e) => {
+    if (opts.grab && !opts.grab(e)) return;
+    if (e.target.closest(".noDrag")) return;
+    drag = { x: e.clientX, y: e.clientY };
+    stage.classList.add("drag"); stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    V.x += e.clientX - drag.x; V.y += e.clientY - drag.y;
+    drag = { x: e.clientX, y: e.clientY }; apply();
+  });
+  const end = () => { drag = null; stage.classList.remove("drag"); };
+  stage.addEventListener("pointerup", end); stage.addEventListener("pointercancel", end);
+  stage.addEventListener("dblclick", fit);
+
+  img.complete ? fit() : img.addEventListener("load", fit);
+  window.addEventListener("resize", fit);
+  return Object.assign(V, { apply, fit, zoomAt, zoomCenter,
+    pct: () => Math.round(V.s / V.fitS * 100),
+    setPct: (p) => zoomCenter(V.fitS * p / 100) });
+}
+
+const OPTIONS = [
+  {
+    n: 1, name: "Rien, molette et glissé",
+    say: "Aucun contrôle posé sur le dessin. La molette zoome, le glissé déplace, le double-clic recadre. Le pourcentage ne s'affiche qu'au moment où il change, puis s'en va.",
+    over: `<div class="hud glass" data-hud></div>
+           <div class="hint">molette · glisser · double-clic pour recadrer</div>`,
+    wire(card, stage) {
+      const hud = card.querySelector("[data-hud]");
+      let t = null;
+      const v = viewer(stage, {
+        onChange: (V) => { hud.textContent = Math.round(V.s / V.fitS * 100) + "%"; },
+        onWheel: () => {
+          hud.classList.add("on"); clearTimeout(t);
+          t = setTimeout(() => hud.classList.remove("on"), 700);
+        },
+      });
+      return v;
+    },
+  },
+  {
+    n: 2, name: "Pastille qui s'ouvre",
+    say: "Une pastille de la taille d'un chiffre. Le survol la déroule en curseur, le départ la referme. Au repos elle ne cache qu'un coin vide.",
+    over: `<div class="dot glass noDrag" data-dot>
+             <span class="val" data-val>100%</span>
+             <input type="range" min="60" max="700" value="100" data-slider>
+           </div>`,
+    wire(card, stage) {
+      const val = card.querySelector("[data-val]"), sl = card.querySelector("[data-slider]");
+      const v = viewer(stage, { onChange: (V) => {
+        const p = Math.round(V.s / V.fitS * 100); val.textContent = p + "%"; sl.value = p;
+      } });
+      sl.addEventListener("input", () => v.setPct(+sl.value));
+      return v;
+    },
+  },
+  {
+    n: 3, name: "Barre qui s'efface",
+    say: "Une barre de verre au pied du dessin. Elle s'efface 1,6 s après le dernier geste et revient au premier mouvement de la souris sur le dessin.",
+    over: `<div class="bar glass noDrag" data-bar>
+             <button class="btn" data-out>${I.minus}</button>
+             <input type="range" min="60" max="700" value="100" data-slider>
+             <button class="btn" data-in>${I.plus}</button>
+             <span class="sep"></span>
+             <span class="val" data-val>100%</span>
+             <button class="btn" data-fit title="Recadrer">${I.fit}</button>
+           </div>`,
+    wire(card, stage) {
+      const bar = card.querySelector("[data-bar]"), val = card.querySelector("[data-val]");
+      const sl = card.querySelector("[data-slider]");
+      let t = null;
+      const wake = () => {
+        bar.classList.remove("gone"); clearTimeout(t);
+        t = setTimeout(() => bar.classList.add("gone"), 1600);
+      };
+      const v = viewer(stage, { onChange: (V) => {
+        const p = Math.round(V.s / V.fitS * 100); val.textContent = p + "%"; sl.value = p;
+      } });
+      stage.addEventListener("pointermove", wake);
+      stage.addEventListener("wheel", wake, { passive: true });
+      bar.addEventListener("pointermove", wake);
+      sl.addEventListener("input", () => { v.setPct(+sl.value); wake(); });
+      card.querySelector("[data-in]").onclick = () => { v.zoomCenter(v.s * 1.25); wake(); };
+      card.querySelector("[data-out]").onclick = () => { v.zoomCenter(v.s / 1.25); wake(); };
+      card.querySelector("[data-fit]").onclick = () => { v.fit(); wake(); };
+      wake();
+      return v;
+    },
+  },
+  {
+    n: 4, name: "Le bord appelle le curseur",
+    say: "Le curseur vertical vit hors du dessin. Un onglet de 13 px dit qu'il existe; approcher la souris du bord droit le fait glisser en place, la quitter le renvoie.",
+    over: `<div class="edge noDrag">
+             <div class="tab glass">${I.grip}</div>
+             <div class="vrail glass">
+               <input type="range" min="60" max="700" value="100" data-slider>
+               <span class="val" data-val>100%</span>
+               <button class="btn" data-fit title="Recadrer">${I.search}</button>
+             </div>
+           </div>`,
+    wire(card, stage) {
+      const val = card.querySelector("[data-val]"), sl = card.querySelector("[data-slider]");
+      const v = viewer(stage, { onChange: (V) => {
+        const p = Math.round(V.s / V.fitS * 100); val.textContent = p + "%"; sl.value = p;
+      } });
+      sl.addEventListener("input", () => v.setPct(+sl.value));
+      card.querySelector("[data-fit]").onclick = () => v.fit();
+      return v;
+    },
+  },
+  {
+    n: 5, name: "Le cadre que l'on trace",
+    say: "On ne règle pas un niveau, on désigne une zone: glisser trace un cadre, le lâcher y amène le dessin. Le double-clic revient à la feuille entière. Shift pour déplacer.",
+    over: `<div class="marq" data-marq></div>
+           <div class="corner glass noDrag">
+             <span class="val" data-val>100%</span>
+             <button class="btn" data-fit title="Revoir la feuille">${I.fit}</button>
+           </div>
+           <div class="hint">tracer un cadre · maj + glisser pour déplacer</div>`,
+    wire(card, stage) {
+      const val = card.querySelector("[data-val]"), marq = card.querySelector("[data-marq]");
+      stage.classList.add("marquee");
+      const v = viewer(stage, {
+        onChange: (V) => { val.textContent = Math.round(V.s / V.fitS * 100) + "%"; },
+        grab: (e) => e.shiftKey,
+      });
+      card.querySelector("[data-fit]").onclick = () => v.fit();
+      let a = null;
+      stage.addEventListener("pointerdown", (e) => {
+        if (e.shiftKey || e.target.closest(".noDrag")) return;
+        const r = stage.getBoundingClientRect();
+        a = { x: e.clientX - r.left, y: e.clientY - r.top };
+        marq.style.display = "block"; stage.setPointerCapture(e.pointerId);
+      });
+      stage.addEventListener("pointermove", (e) => {
+        if (!a) return;
+        const r = stage.getBoundingClientRect();
+        const x = e.clientX - r.left, y = e.clientY - r.top;
+        marq.style.left = Math.min(a.x, x) + "px"; marq.style.top = Math.min(a.y, y) + "px";
+        marq.style.width = Math.abs(x - a.x) + "px"; marq.style.height = Math.abs(y - a.y) + "px";
+      });
+      stage.addEventListener("pointerup", (e) => {
+        if (!a) return;
+        const r = stage.getBoundingClientRect();
+        const x = e.clientX - r.left, y = e.clientY - r.top;
+        const w = Math.abs(x - a.x), h = Math.abs(y - a.y);
+        marq.style.display = "none";
+        const start = a; a = null;
+        /* A flick is not a frame: under 24 px the gesture was a click. */
+        if (w < 24 || h < 24) return;
+        const k = Math.min(r.width / w, r.height / h);
+        const cx = Math.min(start.x, x) + w / 2, cy = Math.min(start.y, y) + h / 2;
+        const ns = Math.max(v.min, Math.min(v.max, v.s * k));
+        const px = (cx - v.x) / v.s, py = (cy - v.y) / v.s;
+        v.s = ns; v.x = r.width / 2 - px * ns; v.y = r.height / 2 - py * ns; v.apply();
+      });
+      return v;
+    },
+  },
+  {
+    n: 6, name: "Touches, et une carte du lieu",
+    say: "Le zoom passe au clavier — + − 0 — une fois le dessin cliqué. La mini-carte dit où l'on est dans la feuille; on peut y cliquer pour s'y rendre.",
+    over: `<div class="keys">
+             <span class="kbd glass">+</span><span class="kbd glass">−</span><span class="kbd glass">0</span>
+           </div>
+           <div class="map glass noDrag" data-map>
+             <span class="mi"><img src="${IMG}" alt=""><span class="vp" data-vp></span></span>
+           </div>`,
+    wire(card, stage) {
+      const map = card.querySelector("[data-map]"), vp = card.querySelector("[data-vp]");
+      const mi = card.querySelector(".mi");
+      const v = viewer(stage, { onChange: (V) => {
+        /* The viewport rectangle is the stage, expressed in sheet units and
+           then in the thumbnail's units: one rectangle, two divisions. */
+        const r = stage.getBoundingClientRect(), b = mi.getBoundingClientRect();
+        const img = stage.querySelector("img");
+        const iw = img.naturalWidth || 1280, ih = img.naturalHeight || 1160;
+        const k = b.width / iw;
+        vp.style.left = (-V.x / V.s) * k + "px";
+        vp.style.top = (-V.y / V.s) * k + "px";
+        vp.style.width = (r.width / V.s) * k + "px";
+        vp.style.height = (r.height / V.s) * k + "px";
+      } });
+      stage.tabIndex = 0;
+      stage.addEventListener("keydown", (e) => {
+        if (e.key === "+" || e.key === "=") { v.zoomCenter(v.s * 1.3); e.preventDefault(); }
+        if (e.key === "-") { v.zoomCenter(v.s / 1.3); e.preventDefault(); }
+        if (e.key === "0") { v.fit(); e.preventDefault(); }
+      });
+      map.addEventListener("pointerdown", (e) => {
+        const b = mi.getBoundingClientRect(), r = stage.getBoundingClientRect();
+        const img = stage.querySelector("img");
+        const iw = img.naturalWidth || 1280;
+        const k = b.width / iw;
+        v.x = r.width / 2 - ((e.clientX - b.left) / k) * v.s;
+        v.y = r.height / 2 - ((e.clientY - b.top) / k) * v.s;
+        v.apply();
+      });
+      return v;
+    },
+  },
+  {
+    n: 7, name: "Un bouton que l'on pousse",
+    say: "Un seul rond, gradué comme une bague. On le pousse vers le haut pour agrandir, vers le bas pour reculer; un clic simple recadre. Pas de rail, pas de piste.",
+    over: `<div class="knob glass noDrag" data-knob title="Pousser pour zoomer · cliquer pour recadrer">
+             <svg class="ring" viewBox="0 0 44 44">
+               <circle class="t" cx="22" cy="22" r="18"></circle>
+               <circle class="p" cx="22" cy="22" r="18" data-arc></circle>
+             </svg>
+             <b data-val>100</b>
+           </div>`,
+    wire(card, stage) {
+      const knob = card.querySelector("[data-knob]"), val = card.querySelector("[data-val]");
+      const arc = card.querySelector("[data-arc]");
+      const C = 2 * Math.PI * 18;
+      arc.style.strokeDasharray = C;
+      const v = viewer(stage, { onChange: (V) => {
+        const p = Math.round(V.s / V.fitS * 100);
+        val.textContent = p;
+        const f = Math.max(0, Math.min(1, (V.s - V.min) / (V.max - V.min)));
+        arc.style.strokeDashoffset = C * (1 - f);
+      } });
+      let g = null;
+      knob.addEventListener("pointerdown", (e) => {
+        g = { y: e.clientY, moved: 0 }; knob.setPointerCapture(e.pointerId); e.stopPropagation();
+      });
+      knob.addEventListener("pointermove", (e) => {
+        if (!g) return;
+        const d = g.y - e.clientY; g.moved += Math.abs(d); g.y = e.clientY;
+        v.zoomCenter(v.s * Math.exp(d * .007));
+      });
+      knob.addEventListener("pointerup", () => {
+        if (g && g.moved < 3) v.fit();
+        g = null;
+      });
+      return v;
+    },
+  },
+  {
+    n: 8, name: "Dans l'en-tête du volet",
+    say: "Le zoom rejoint la barre qui existe déjà au-dessus du dessin, à côté du nom du fichier. Rien ne flotte: la fenêtre entière est au dessin.",
+    head: `<span class="zoomer noDrag">
+             <button class="btn" data-out>${I.minus}</button>
+             <input type="range" min="60" max="700" value="100" data-slider>
+             <button class="btn" data-in>${I.plus}</button>
+             <span class="val" data-val>100%</span>
+             <button class="btn" data-fit title="Recadrer">${I.fit}</button>
+           </span>`,
+    wire(card, stage) {
+      const val = card.querySelector("[data-val]"), sl = card.querySelector("[data-slider]");
+      const v = viewer(stage, { onChange: (V) => {
+        const p = Math.round(V.s / V.fitS * 100); val.textContent = p + "%"; sl.value = p;
+      } });
+      sl.addEventListener("input", () => v.setPct(+sl.value));
+      card.querySelector("[data-in]").onclick = () => v.zoomCenter(v.s * 1.25);
+      card.querySelector("[data-out]").onclick = () => v.zoomCenter(v.s / 1.25);
+      card.querySelector("[data-fit]").onclick = () => v.fit();
+      return v;
+    },
+  },
+];
+
+const grid = document.getElementById("grid");
+OPTIONS.forEach((o) => {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <h2><span>${o.n}</span>${o.name}</h2>
+    <div class="say">${o.say}</div>
+    <div class="ph">
+      <span class="nm">Plan 2D</span>
+      <span class="mono" style="color:var(--ink-3);font-size:11px">A-209_PLAN_NIVEAU_02 · R04</span>
+      <span class="sp"></span>${o.head || ""}
+    </div>
+    <div class="stage"><div class="sheet"><img src="${IMG}" alt="plan du niveau 2"></div>${o.over || ""}</div>`;
+  grid.appendChild(card);
+  o.wire(card, card.querySelector(".stage"));
+});
+</script>
+</body>
+</html>
