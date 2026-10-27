@@ -45,6 +45,11 @@ h2.theme svg{width:15px;height:15px;stroke-width:1.8;color:var(--ink-2)}
 .pri.med{border-color:#dcc07a;background:#fdf6e3;color:#7a5a12}
 .pri.low{border-color:#e0a7a7;background:#fdeded;color:#8d2f2f}
 
+.ph{font:inherit;font-size:11px;border-radius:5px;padding:2px 8px;white-space:nowrap;cursor:pointer;
+  border:1px solid var(--line);background:var(--paper);color:var(--ink-2);line-height:1.5;letter-spacing:.04em}
+.ph:hover{filter:brightness(.97)}
+.ph.both{border-color:var(--line-2);background:#f4f4f5;color:var(--ink)}
+
 .grip{flex:0 0 auto;display:flex;align-items:center;color:var(--line);cursor:grab;margin:-2px 0 0 -6px;padding:2px}
 .grip svg{width:15px;height:15px;stroke-width:2}
 .feat:hover .grip{color:var(--ink-3)}
@@ -89,7 +94,7 @@ dd.look{color:var(--ink)}
     <span class="who ben"><i data-lucide="pen-line"></i>Benoît · 2D, drawings, execution</span>
     <span class="who both"><i data-lucide="users"></i>Both</span>
   </div>
-  <div class="bar">Drag a card by its handle to move it up or down the list. Click a priority to change it. Your order is kept in this browser.
+  <div class="bar">Drag a card by its handle to move it up or down the list. Click a priority or a stage pill to change it — <b>DD</b> design development, <b>CD</b> construction documentation. Your order is kept in this browser.
     <button id="reset" type="button">Reset</button></div>
 </header>
 
@@ -97,7 +102,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Unit count, types and areas, without counting them</h3>
-    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="high"></span></div>
+    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="high"></span><span class="rank" data-phase="both"></span></div>
   <dl>
     <dt>Today</dt><dd>He measures each unit with AutoCAD polylines, floor by floor, and types the result into a table. Every revision, again.</dd>
     <dt>Should do</dt><dd>Read the numbers already written on the sheet and keep a running tally: <b>how many units, which types, how many square feet per unit and per floor</b>.</dd>
@@ -107,7 +112,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Window schedule by floor</h3>
-    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="high"></span></div>
+    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="high"></span><span class="rank" data-phase="cd"></span></div>
   <dl>
     <dt>Today</dt><dd>Window types are counted off the plans when the schedule is needed.</dd>
     <dt>Should do</dt><dd>Count every window type on every floor, and show where a floor differs from the others.</dd>
@@ -117,7 +122,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>How much brick, metal and glass on the elevations</h3>
-    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="med"></span></div>
+    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="med"></span><span class="rank" data-phase="cd"></span></div>
   <dl>
     <dt>Today</dt><dd>Material quantities for the elevations are measured by hand when someone asks.</dd>
     <dt>Should do</dt><dd>Add up each material per elevation, openings removed.</dd>
@@ -129,7 +134,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>The article, in words anyone can act on</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="high"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="high"></span><span class="rank" data-phase="dd"></span></div>
   <dl>
     <dt>Today</dt><dd>Finding the article is easy. Understanding what it means for this project is the slow part, and the wording is open to reading.</dd>
     <dt>Should do</dt><dd>For each rule that matters: quote it, say what the project measures, say what is required, and explain the gap in one sentence.</dd>
@@ -139,7 +144,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Say out loud what is missing instead of guessing</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="high"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="high"></span><span class="rank" data-phase="dd"></span></div>
   <dl>
     <dt>Today</dt><dd>Some answers cannot come from the drawings at all: lot area, distance to the property line, which code edition applies.</dd>
     <dt>Should do</dt><dd>Never fake a verdict. Show the measurement, then name the missing inputs that block the conclusion.</dd>
@@ -149,7 +154,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>The surveyor's plan under everything</h3>
-    <span class="who both"><i data-lucide="users"></i>Both</span><span class="rank" data-pri="high"></span></div>
+    <span class="who both"><i data-lucide="users"></i>Both</span><span class="rank" data-pri="high"></span><span class="rank" data-phase="both"></span></div>
   <dl>
     <dt>Today</dt><dd>The property lines are copied by hand from the surveyor's plan into the drawing. When the surveyor issues a newer one, nobody is sure which setbacks were measured from the old line.</dd>
     <dt>Should do</dt><dd>Carry the surveyor's plan as its own layer, lined up with the building, and <b>measure every setback and the lot coverage from it</b>. When a newer plan arrives, say what moved and which numbers change with it.</dd>
@@ -159,7 +164,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Spot a minor exemption early</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span><span class="rank" data-phase="dd"></span></div>
   <dl>
     <dt>Today</dt><dd>A small gap, like a rear setback 30 cm short, is noticed late and costs a resubmission.</dd>
     <dt>Should do</dt><dd>Flag the gap as soon as the drawing shows it, with the measured value and the article.</dd>
@@ -169,7 +174,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>A note the city planner can read</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span><span class="rank" data-phase="dd"></span></div>
   <dl>
     <dt>Today</dt><dd>Writing to the city is slow, and the exchange restarts every revision.</dd>
     <dt>Should do</dt><dd>Assemble a draft: the articles, the measured values, the date, the open questions. The argument stays human.</dd>
@@ -179,7 +184,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Stop redoing the ten-page code study</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="low"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="low"></span><span class="rank" data-phase="dd"></span></div>
   <dl>
     <dt>Today</dt><dd>About ten pages of code analysis, rewritten by hand for each project and each major revision.</dd>
     <dt>Should do</dt><dd>Keep the study as a living list that updates when a drawing changes, and export it as the document.</dd>
@@ -191,7 +196,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Why was this changed?</h3>
-    <span class="who both"><i data-lucide="users"></i>Both</span><span class="rank" data-pri="high"></span></div>
+    <span class="who both"><i data-lucide="users"></i>Both</span><span class="rank" data-pri="high"></span><span class="rank" data-phase="both"></span></div>
   <dl>
     <dt>Today</dt><dd>A balcony moves, a window shrinks. Two years later nobody remembers who asked or why.</dd>
     <dt>Should do</dt><dd>Refuse to record a decision without a reason. One line is enough, and it travels with the revision.</dd>
@@ -201,7 +206,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>What changed between two revisions</h3>
-    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="high"></span></div>
+    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="high"></span><span class="rank" data-phase="cd"></span></div>
   <dl>
     <dt>Today</dt><dd>Version tracking is manual, so differences are found by eye.</dd>
     <dt>Should do</dt><dd>List what moved since the last read: which units, which openings, which totals.</dd>
@@ -211,7 +216,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Show the knock-on effect of a change</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span><span class="rank" data-phase="both"></span></div>
   <dl>
     <dt>Today</dt><dd>Clients ask for changes to cut cost; roughly seven in ten are small, and some arrive after the city submission.</dd>
     <dt>Should do</dt><dd>When a change lands, say what it moves: glazed area, unit count, floor area, and which articles are affected.</dd>
@@ -223,7 +228,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>2D plan against the 3D model</h3>
-    <span class="who both"><i data-lucide="users"></i>Both</span><span class="rank" data-pri="high"></span></div>
+    <span class="who both"><i data-lucide="users"></i>Both</span><span class="rank" data-pri="high"></span><span class="rank" data-phase="dd"></span></div>
   <dl>
     <dt>Today</dt><dd>Benoît draws in AutoCAD, Guy retraces it in SketchUp. The two drift apart and nobody is told.</dd>
     <dt>Should do</dt><dd>Compare them and list the differences, unit by unit, with both measurements side by side.</dd>
@@ -233,7 +238,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Ducts, beams and columns in the same place</h3>
-    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="high"></span></div>
+    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="high"></span><span class="rank" data-phase="cd"></span></div>
   <dl>
     <dt>Today</dt><dd>He opens the mechanical and structural drawings and hunts for conflicts by overlaying them mentally.</dd>
     <dt>Should do</dt><dd>Overlay the engineers' drawings on the architecture and list where two things occupy one spot.</dd>
@@ -243,7 +248,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Things that should line up through the building</h3>
-    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="med"></span></div>
+    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="med"></span><span class="rank" data-phase="cd"></span></div>
   <dl>
     <dt>Today</dt><dd>Roof drains, columns and shafts are checked floor against floor by hand.</dd>
     <dt>Should do</dt><dd>Flag anything that is aligned on most floors and off on one.</dd>
@@ -255,7 +260,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>A checklist that fills itself in</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span><span class="rank" data-phase="both"></span></div>
   <dl>
     <dt>Today</dt><dd>Requirements live in handwritten notes and memory, carried from project to project.</dd>
     <dt>Should do</dt><dd>Keep one list per phase, and let the drawings tick off and raise items on their own.</dd>
@@ -265,7 +270,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Dates and waiting</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span><span class="rank" data-phase="both"></span></div>
   <dl>
     <dt>Today</dt><dd>Approvals and planner replies are waited on without a visible clock.</dd>
     <dt>Should do</dt><dd>Show what is due, what is late and what the city has answered.</dd>
@@ -277,7 +282,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Send a link instead of a file</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="med"></span><span class="rank" data-phase="both"></span></div>
   <dl>
     <dt>Today</dt><dd>Sharing means exporting a PDF or a screenshot and emailing it. The next revision makes it wrong, and there is no way to know who is still reading the old one.</dd>
     <dt>Should do</dt><dd>Share <b>a link to what is on screen</b> — one unit, one floor, one table, the whole project — that a client, an engineer or the city can open in a browser without an account.</dd>
@@ -287,7 +292,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Let the client turn the building</h3>
-    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="low"></span></div>
+    <span class="who guy"><i data-lucide="box"></i>Guy</span><span class="rank" data-pri="low"></span><span class="rank" data-phase="dd"></span></div>
   <dl>
     <dt>Today</dt><dd>Renders take a long time and the client still cannot look around.</dd>
     <dt>Should do</dt><dd>Open the model in the browser so a client can orbit it and step into one unit.</dd>
@@ -297,7 +302,7 @@ dd.look{color:var(--ink)}
 
 <div class="feat">
   <div class="hd"><h3>Numbers for the city committee, not a 3D show</h3>
-    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="med"></span></div>
+    <span class="who ben"><i data-lucide="pen-line"></i>Benoît</span><span class="rank" data-pri="med"></span><span class="rank" data-phase="dd"></span></div>
   <dl>
     <dt>Today</dt><dd>Submissions need area tables; extra tools during early design only slow the work down.</dd>
     <dt>Should do</dt><dd>Export the tables and the elevations as a clean document, with source file and date on the page.</dd>
@@ -325,7 +330,9 @@ dd.look{color:var(--ink)}
    both survive a reload on this machine only. Nothing is sent anywhere. */
 const PRI = ["high", "med", "low"];
 const LABEL = { high: "High priority", med: "Medium priority", low: "Low priority" };
-const KEY = "fitte.interview-features.v1";
+const PHASE = ["dd", "cd", "both"];
+const PLABEL = { dd: "DD", cd: "CD", both: "DD + CD" };
+const KEY = "fitte.interview-features.v2";
 const cards = [...document.querySelectorAll(".feat")];
 const titleOf = (c) => c.querySelector("h3").textContent.trim();
 
@@ -347,6 +354,21 @@ cards.forEach((card) => {
   card.pri(span.dataset.pri);
   btn.addEventListener("click", () => {
     card.pri(PRI[(PRI.indexOf(card.dataset.pri) + 1) % 3]);
+    save();
+  });
+
+  /* Which stage of the work the feature serves: design development,
+     construction documentation, or both. */
+  const pspan = card.querySelector('[data-phase]');
+  const pbtn = document.createElement("button");
+  pbtn.className = "ph";
+  pbtn.type = "button";
+  pbtn.title = "Design development, construction documentation, or both";
+  pspan.replaceWith(pbtn);
+  card.phase = (p) => { pbtn.className = "ph " + p; pbtn.textContent = PLABEL[p]; card.dataset.phase = p; };
+  card.phase(pspan.dataset.phase);
+  pbtn.addEventListener("click", () => {
+    card.phase(PHASE[(PHASE.indexOf(card.dataset.phase) + 1) % 3]);
     save();
   });
 });
@@ -394,7 +416,7 @@ cards.forEach((card) => {
 const slots = () => [...document.querySelectorAll(".feat")].map((c) => ({ parent: c.parentNode, next: c.nextSibling }));
 
 function save() {
-  const list = [...document.querySelectorAll(".feat")].map((c) => [titleOf(c), c.dataset.pri]);
+  const list = [...document.querySelectorAll(".feat")].map((c) => [titleOf(c), c.dataset.pri, c.dataset.phase]);
   localStorage.setItem(KEY, JSON.stringify(list));
 }
 
@@ -403,11 +425,12 @@ function load() {
   if (!Array.isArray(list) || list.length !== cards.length) return;
   const by = new Map(cards.map((c) => [titleOf(c), c]));
   const spots = slots();
-  list.forEach(([t, p], i) => {
+  list.forEach(([t, p, ph], i) => {
     const c = by.get(t);
     if (!c || !spots[i]) return;
     spots[i].parent.insertBefore(c, spots[i].next);
     if (PRI.includes(p)) c.pri(p);
+    if (PHASE.includes(ph)) c.phase(ph);
   });
 }
 load();
