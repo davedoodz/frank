@@ -169,8 +169,6 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 [data-fi="high"] .plan[data-img="plan"]{background-image:url(assets/plan-etage.jpg)}
 [data-fi="high"] .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
 [data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
-[data-fi="high"] .plan[data-img="crop"]{background-image:url(assets/plan-etage.jpg);
-  background-size:320%;background-position:30% 20%}
 [data-fi="high"] .btnw.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
 [data-fi="high"] .listrow.on{background:#eef1e0}
 [data-fi="high"] .listrow .dot{background:#8ba00f}
@@ -294,6 +292,30 @@ const SCREENS = {
   Tracking: { icon: "calendar-check", regions: ["header", "content", "inspector"], steps: { inspector: 1, content: 2 } },
 };
 
+/* Unit boxes measured on assets/plan-etage.jpg, normalised 0–1, same numbers
+   the platform uses. A thumbnail shows its own unit, never the whole sheet. */
+const UNIT_BOXES = [
+  [0.3953, 0.5862, 0.1203, 0.1586], [0.5063, 0.0328, 0.1141, 0.1552],
+  [0.6281, 0.0328, 0.1172, 0.1552], [0.1609, 0.7293, 0.1266, 0.2172],
+  [0.2203, 0.5207, 0.1422, 0.1724], [0.2203, 0.3483, 0.1422, 0.1724],
+  [0.4891, 0.2259, 0.1984, 0.1552], [0.2203, 0.1362, 0.1625, 0.2034],
+];
+
+/* Frames one box with air around it: the drawing is scaled so the box fills
+   the element, then slid so the box sits in the middle. */
+function crop(box, pad = 0.45, axis = "width") {
+  const [x, y, w, h] = box;
+  const fw = Math.min(1, w * (1 + pad * 2));
+  const fh = Math.min(1, h * (1 + pad * 2));
+  const px = Math.max(0, Math.min(1 - fw, x + w / 2 - fw / 2));
+  const py = Math.max(0, Math.min(1 - fh, y + h / 2 - fh / 2));
+  /* A wide, short box reads better scaled off its height: the unit fills the
+     strip and the neighbouring units supply the context on either side. */
+  const size = axis === "height" ? `auto ${(100 / fh).toFixed(1)}%` : `${(100 / fw).toFixed(1)}% auto`;
+  return `background-size:${size};`
+    + `background-position:${(px / (1 - fw) * 100).toFixed(1)}% ${(py / (1 - fh) * 100).toFixed(1)}%`;
+}
+
 const NAV = [["home", "Home"], ["layout-grid", "Overview"], ["layers", "Units"], ["table", "Quantities"],
   ["scale", "Rules"], ["git-compare", "Coordination"], ["calendar-check", "Tracking"], ["file", "Files"]];
 
@@ -360,7 +382,7 @@ const PROJECTS = [
 ];
 
 const pcard = (p, big) => `<div class="tile">
-  <div class="plan" data-img="plan" style="min-height:${big ? 92 : 62}px;flex:0 0 auto"><span class="hi">first sheet</span></div>
+  <div class="plan" style="min-height:${big ? 92 : 62}px;flex:0 0 auto"><span class="hi">first sheet</span></div>
   <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
   <div><span class="lo bar lt" style="width:72%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
   <div><span class="lo bar lt" style="width:60%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[2]} · ${p[3]}</span></div>
@@ -396,7 +418,7 @@ const HOMES = {
 
   "List + preview": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
       ${pane("projects", "All projects", `${plist(0)}<span class="btnw solid" style="justify-content:center">${icon("plus")}<span class="hi">New project</span></span>`, "flex:.85")}
-      ${pane("preview", "Alder Court", `<div class="plan" data-img="plan" style="min-height:140px"><span class="hi">first sheet of the selected project</span></div>
+      ${pane("preview", "Alder Court", `<div class="plan" style="min-height:140px"><span class="hi">first sheet of the selected project</span></div>
         <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">48 units · 6 levels · read 6 min ago</span></div></div>`, "flex:1.5")}
     </div>`,
 
@@ -545,7 +567,7 @@ function listHTML() {
   }
   const inner = mode === "Card grid"
     ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${rows.map((r, i) => `<div class="tile">
-        <div class="plan" data-img="plan" style="height:54px;flex:0 0 54px"></div>
+        <div class="plan"${V.screen === "Units" ? ` data-img="plan" style="height:54px;flex:0 0 54px;${crop(UNIT_BOXES[i % UNIT_BOXES.length])}"` : ` style="height:54px;flex:0 0 54px"`}></div>
         <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r}</div></div>`).join("")}</div>`
     : rows.map((r, i) => `<div class="listrow ${i === 1 ? "on" : ""}"><span class="dot"></span>
         <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}</span></div>`).join("");
@@ -635,7 +657,7 @@ function inspectorHTML() {
     <div class="pb">
       ${V.screen === "Units" ? `<div class="row">${["Overview", "Openings", "Coordination", "History"].map((t, i) => `<span class="chip" style="${i === 1 ? "border-color:var(--ink)" : ""}">
         <span class="lo bar" style="width:40px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-      <div class="plan" data-img="crop" style="height:110px;flex:0 0 110px"><span class="hi">unit crop</span></div>` : ""}
+      <div class="plan" data-img="plan" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[6], .25, "height")}"><span class="hi">unit crop</span></div>` : ""}
       ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
         <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>

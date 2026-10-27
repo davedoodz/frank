@@ -165,8 +165,6 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .frame[data-fi="high"] .plan[data-img="plan"]{background-image:url(assets/plan-etage.jpg)}
 .frame[data-fi="high"] .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
 .frame[data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
-.frame[data-fi="high"] .plan[data-img="crop"]{background-image:url(assets/plan-etage.jpg);
-  background-size:320%;background-position:30% 20%}
 /* Over a real drawing the footprint block would hide it; the overlay keeps
    its property line and its measured distances only. */
 .frame[data-fi="high"] .plan[data-img] svg rect{fill:none}
@@ -501,7 +499,7 @@ const PROJECTS = [
 
 const card = (p, big) => `<section class="blk">
   <div class="bb">
-    <div class="plan" data-img="plan" style="min-height:${big ? 92 : 64}px"><span class="cap">floor plan, first sheet</span></div>
+    <div class="plan" style="min-height:${big ? 92 : 64}px"><span class="cap">floor plan, first sheet</span></div>
     <div><span class="lo bar d" style="width:52%;height:11px"></span><span class="hi" style="font-weight:600">${p[0]}</span></div>
     <div><span class="lo bar" style="width:70%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
     <div><span class="lo bar" style="width:58%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[2]} · ${p[3]}</span></div>
@@ -538,7 +536,7 @@ const HOMES = {
     <div class="col" style="flex:1.6">
       <section class="blk"><span class="tag">preview</span>
         <div class="bh"><span class="lo bar d" style="width:120px;height:10px"></span><span class="hi">Alder Court</span></div>
-        <div class="bb"><div class="plan" data-img="plan"><span class="cap">first sheet of the selected project</span></div>
+        <div class="bb"><div class="plan"><span class="cap">first sheet of the selected project</span></div>
           ${table(["Read", "Value", "Source"], [["Units", "48", "A-201 R04"], ["Levels", "6", "A-201 R04"], ["Open", "6 differences", "24 Oct"]])}
         </div></section></div>`,
 
