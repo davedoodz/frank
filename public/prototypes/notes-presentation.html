@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ça fitte — six ways to open the user notes</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111111; --ink-2:#5a5a5a; --ink-3:#8f8f8f;
+  --line:#e6e6e4; --line-2:#d4d4d1; --paper:#ffffff; --bg:#f7f7f5;
+  --accent:#C0D739;
+  --sans:"Geist",sans-serif; --mono:"Geist Mono",monospace;
+  --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{overscroll-behavior:none}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;overscroll-behavior:none}
+svg{display:block}
+a{color:inherit}
+
+.wrap{max-width:1040px;margin:0 auto;padding:56px 28px 90px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-size:32px;font-weight:600;letter-spacing:-.025em;line-height:1.12;margin-top:10px}
+.lede{font-size:14.5px;color:var(--ink-2);margin-top:12px;max-width:66ch}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+@media (max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:620px){.grid{grid-template-columns:1fr}}
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px 16px 14px;
+  display:flex;flex-direction:column;gap:10px}
+.card h2{font-size:15px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.card h2 span{font-family:var(--mono);font-size:11px;color:var(--ink-3);font-weight:400}
+.card p{font-size:13px;color:var(--ink-2);text-wrap:balance}
+.card .cost{font-size:12px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:9px;margin-top:auto}
+.card button{font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;align-self:flex-start;
+  border:1px solid var(--line-2);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 14px;
+  transition:background-color .15s,color .15s,border-color .15s}
+.card button:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* the miniature: a grey page with the black pill in its corner */
+.mini{position:relative;height:104px;border:1px solid var(--line);border-radius:7px;background:var(--bg);overflow:hidden}
+.mini i{position:absolute;background:var(--line-2);border-radius:2px}
+.mini .t{left:50%;transform:translateX(-50%);top:14px;width:52px;height:5px}
+.mini .r{left:50%;transform:translateX(-50%);top:25px;width:18px;height:3px;background:var(--accent)}
+.mini .c1,.mini .c2{top:40px;width:38%;height:34px;background:#dedede;border-radius:3px}
+.mini .c1{left:9%} .mini .c2{right:9%}
+.mini .pill{position:absolute;right:7px;bottom:7px;width:40px;height:13px;border-radius:999px;background:#111110}
+.mini .sheet{position:absolute;background:var(--paper);border:1px solid var(--line-2);box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.mini.side .sheet{top:0;bottom:0;right:0;width:52%}
+.mini.modal .sheet{top:14px;bottom:14px;left:16%;right:16%;border-radius:5px}
+.mini.sheet-up .sheet{left:10px;right:10px;bottom:0;height:62%;border-radius:5px 5px 0 0}
+.mini.full .sheet{inset:0;border:0}
+.mini.tab .sheet{inset:0 0 auto 0;height:16px;border-radius:0;display:flex;align-items:center;gap:4px;padding:0 5px}
+.mini.tab .sheet em{width:22px;height:7px;border-radius:2px;background:var(--line-2);display:block}
+.mini.tab .sheet em.on{background:var(--accent)}
+.mini.inline .sheet{left:10px;right:10px;top:40px;bottom:10px;border-radius:5px}
+
+/* ——— the live presentations ——— */
+.scrim{position:fixed;inset:0;background:rgba(17,17,17,.42);opacity:0;pointer-events:none;
+  transition:opacity .28s ease;z-index:50}
+body.on .scrim{opacity:1;pointer-events:auto}
+
+.stage{position:fixed;z-index:60;background:var(--paper);display:flex;flex-direction:column;
+  box-shadow:0 24px 70px rgba(0,0,0,.22);opacity:0;pointer-events:none;
+  transition:transform .34s cubic-bezier(.2,.8,.2,1),opacity .24s ease}
+body.on .stage{opacity:1;pointer-events:auto;transform:none}
+
+body[data-mode="side"] .stage{top:0;right:0;bottom:0;width:min(640px,92vw);transform:translateX(24px)}
+body[data-mode="modal"] .stage{top:5vh;bottom:5vh;left:50%;width:min(960px,92vw);margin-left:min(-480px,-46vw);
+  border-radius:12px;transform:translateY(12px) scale(.985)}
+body[data-mode="sheet"] .stage{left:0;right:0;bottom:0;height:88vh;border-radius:14px 14px 0 0;transform:translateY(28px)}
+body[data-mode="full"] .stage{inset:0;transform:scale(.992)}
+body[data-mode="inline"] .stage{top:96px;left:50%;width:min(1040px,94vw);margin-left:min(-520px,-47vw);
+  bottom:24px;border-radius:12px;transform:translateY(10px)}
+
+.stage header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:11px 14px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.stage header b{font-size:13px;font-weight:600}
+.stage header .how{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.stage header button{font:inherit;font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--paper);
+  border-radius:999px;padding:4px 11px;color:var(--ink-2)}
+.stage header button:hover{border-color:var(--line-2);color:var(--ink)}
+.stage iframe{flex:1;width:100%;border:0;background:var(--bg)}
+
+@media (prefers-reduced-motion:reduce){.stage,.scrim{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">User notes · presentation</div>
+  <h1>Six ways to open the interview page</h1>
+  <p class="lede">The black pill sits in the bottom-right corner of the chooser. Press <b>Open it</b> on any card to see that behaviour for real, with the actual interview page inside. Escape closes.</p>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>Its own page <span>01</span></h2>
+      <div class="mini tab"><i class="t"></i><i class="r"></i><i class="c1"></i><i class="c2"></i>
+        <div class="sheet"><em class="on"></em><em></em></div></div>
+      <p>The pill is an ordinary link. The chooser is replaced; the browser Back button returns to it.</p>
+      <div class="cost">Simplest. Loses the chooser on screen, keeps a shareable URL.</div>
+      <button type="button" data-go="page">Open it</button>
+    </div>
+
+    <div class="card">
+      <h2>Slide-over panel <span>02</span></h2>
+      <div class="mini side"><i class="t"></i><i class="r"></i><i class="c1"></i><i class="c2"></i>
+        <div class="pill"></div><div class="sheet"></div></div>
+      <p>A column slides in from the right. The chooser stays visible and dimmed on the left.</p>
+      <div class="cost">Keeps context. Narrow column; the table of items wraps more.</div>
+      <button type="button" data-go="side">Open it</button>
+    </div>
+
+    <div class="card">
+      <h2>Centred modal <span>03</span></h2>
+      <div class="mini modal"><i class="t"></i><i class="r"></i><i class="c1"></i><i class="c2"></i>
+        <div class="pill"></div><div class="sheet"></div></div>
+      <p>A window lifts over the middle of the screen, the page behind it dimmed.</p>
+      <div class="cost">Familiar. Reads as a detour you must close before going on.</div>
+      <button type="button" data-go="modal">Open it</button>
+    </div>
+
+    <div class="card">
+      <h2>Bottom sheet <span>04</span></h2>
+      <div class="mini sheet-up"><i class="t"></i><i class="r"></i><i class="c1"></i><i class="c2"></i>
+        <div class="pill"></div><div class="sheet"></div></div>
+      <p>The page rises from the same edge as the pill, stopping short of the top.</p>
+      <div class="cost">The movement explains where it came from. Tall lists scroll inside.</div>
+      <button type="button" data-go="sheet">Open it</button>
+    </div>
+
+    <div class="card">
+      <h2>Full-screen overlay <span>05</span></h2>
+      <div class="mini full"><i class="t"></i><i class="r"></i><i class="c1"></i><i class="c2"></i>
+        <div class="sheet"></div></div>
+      <p>The notes take the whole window, with a close button where the pill was.</p>
+      <div class="cost">Most room to read. No visible way back except the close button.</div>
+      <button type="button" data-go="full">Open it</button>
+    </div>
+
+    <div class="card">
+      <h2>Inline under the header <span>06</span></h2>
+      <div class="mini inline"><i class="t"></i><i class="r"></i>
+        <div class="pill"></div><div class="sheet"></div></div>
+      <p>The cards give way and the notes open in place, under the same title.</p>
+      <div class="cost">One screen, one story. The chooser is no longer clickable while open.</div>
+      <button type="button" data-go="inline">Open it</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="scrim" hidden></div>
+<div class="stage" hidden role="dialog" aria-modal="true" aria-label="What Guy and Benoît asked for">
+  <header>
+    <b>What Guy and Benoît asked for</b>
+    <span class="how"></span>
+    <button type="button" data-close>Close · Esc</button>
+  </header>
+  <iframe title="Interview features"></iframe>
+</div>
+
+<script>
+const scrim = document.querySelector(".scrim");
+const stage = document.querySelector(".stage");
+const frame = stage.querySelector("iframe");
+const how = stage.querySelector(".how");
+const PAGE = "interview-features.html";
+const NOM = { side:"Slide-over panel", modal:"Centred modal", sheet:"Bottom sheet",
+              full:"Full-screen overlay", inline:"Inline under the header" };
+
+function ouvrir(mode) {
+  if (mode === "page") { location.href = PAGE; return; }
+  scrim.hidden = false; stage.hidden = false;
+  how.textContent = NOM[mode];
+  if (!frame.src) frame.src = PAGE;
+  document.body.dataset.mode = mode;
+  // one frame on the closed transform, then animate to the open one
+  requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add("on")));
+}
+
+function fermer() {
+  document.body.classList.remove("on");
+  setTimeout(() => { scrim.hidden = true; stage.hidden = true; delete document.body.dataset.mode; }, 300);
+}
+
+document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => ouvrir(b.dataset.go)));
+document.querySelector("[data-close]").addEventListener("click", fermer);
+scrim.addEventListener("click", fermer);
+addEventListener("keydown", (e) => { if (e.key === "Escape" && document.body.classList.contains("on")) fermer(); });
+</script>
+</body>
+</html>

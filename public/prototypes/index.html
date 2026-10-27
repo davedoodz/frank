@@ -125,10 +125,6 @@ a{color:inherit;text-decoration:none}
 .notes-pill .faces img{width:24px;height:24px;border-radius:999px}
 .notes-pill .faces img+img{margin-left:-8px;border:2px solid #111110;transition:border-color .2s}
 .notes-pill:hover .faces img+img{border-color:var(--accent)}
-.notes-pill .ext{width:var(--dial-parrow-size, 14.3px);height:var(--dial-parrow-size, 14.3px);
-  position:relative;top:var(--dial-parrow-y, 0px);
-  stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;
-  stroke-linejoin:round;flex:0 0 auto}
 </style>
 </head>
 <body data-hover="lift" data-align="center">
@@ -166,11 +162,10 @@ a{color:inherit;text-decoration:none}
   <footer class="sign"><img src="assets/lafond.png" alt="Lafond Architecte"></footer>
 </div>
 
-<a class="notes-pill" href="https://docs.google.com/document/d/15q07ueqG374PNpKiemFzhmYMHLMKdSaA1K31OJOB91E/edit?tab=t.nbxprq7k3t4w"
-   target="_blank" rel="noopener" title="Open the interview notes in Google Docs">
+<a class="notes-pill" href="interview-features.html"
+   title="What Guy and Benoît asked for">
   <span class="faces"><img src="assets/personas/guy-duo.svg" alt="Guy"><img src="assets/personas/benoit-duo.svg" alt="Benoît"></span>
   <span>User notes</span>
-  <svg class="ext" viewBox="0 0 18 18" aria-hidden="true"><path d="M6.5 4.5h7v7"/><path d="M6.5 11.5 13.5 4.5"/></svg>
 </a>
 
 <script src="vendor/dialkit/browser.global.js"></script>
@@ -229,8 +224,6 @@ const dial = DialKit.createDialKit("Prototype 01", {
     // Y is a nudge: negative lifts the arrow, positive drops it.
     cardSize: [17, 6, 40, 0.5],
     cardY: [3, -20, 30, 0.5],
-    pillSize: [14.3, 6, 30, 0.1],
-    pillY: [0, -12, 12, 0.5],
   },
   marks: {
     // Negative pulls the letter outward, positive pushes it under the thumbnail.
@@ -286,8 +279,6 @@ dial.subscribe((v) => {
   root.setProperty("--dial-stroke-w", v.outline.thickness + "px");
   root.setProperty("--dial-harrow-size", v.arrows.cardSize + "px");
   root.setProperty("--dial-harrow-y", v.arrows.cardY + "px");
-  root.setProperty("--dial-parrow-size", v.arrows.pillSize + "px");
-  root.setProperty("--dial-parrow-y", v.arrows.pillY + "px");
   root.setProperty("--dial-mark-size", v.marks.size + "px");
   root.setProperty("--dial-mark-a", v.marks.offsetA + "px");
   root.setProperty("--dial-mark-b", v.marks.offsetB + "px");
