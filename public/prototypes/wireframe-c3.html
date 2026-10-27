@@ -316,6 +316,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    level, not one picture relabelled. */
 [data-fi="high"] .plan[data-img="plan"]{background-image:var(--plan,url(assets/plan-etage.jpg))}
 [data-fi="high"] .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
+/* Une vignette est recadrée sur une boîte mesurée sur l'étage type: elle lit
+   donc toujours cette feuille-là, pas celle du niveau courant, sinon le
+   cadrage tombe à côté de l'unité. */
+[data-fi="high"] .plan[data-img="unit"]{background-image:url(assets/plan-etage.jpg)}
 [data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
 /* The opening schedules: the sheets a window or door size is read from,
    which is what the Ouvertures tab is about — not another floor plan. */
@@ -1132,7 +1136,7 @@ function listHTML() {
   }
   const inner = mode === "Card grid"
     ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${pairs.map((r, i) => `<div class="tile ${i === sel ? "on" : ""}" ${act("row", i)}>
-        <div class="plan"${V.screen === "Unités" ? ` data-img="plan" style="height:54px;flex:0 0 54px;${crop(UNIT_BOXES[(r[2] ?? i) % UNIT_BOXES.length])}"` : ` style="height:54px;flex:0 0 54px"`}></div>
+        <div class="plan"${V.screen === "Unités" ? ` data-img="unit" style="height:54px;flex:0 0 54px;${crop(UNIT_BOXES[(r[2] ?? i) % UNIT_BOXES.length])}"` : ` style="height:54px;flex:0 0 54px"`}></div>
         <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r[0]} · ${r[1]}</div></div>`).join("")}</div>`
     : rows.map((r, i) => `<div class="listrow ${i === sel ? "on" : ""}" ${pairs.length ? act("row", i) : ""}><span class="dot"></span>
         <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}${V.settled[`${V.screen} · ${(pairs[i] || [""])[0]}`] ? " · réglé" : ""}</span></div>`).join("");
@@ -1278,7 +1282,7 @@ function inspectorHTML() {
            sheet the sizes are read from, not a crop of the floor plan. */
         ? `<div class="plan" data-img="openings" style="height:110px;flex:0 0 110px"><span class="hi">A-308 · tableau des fenêtres</span></div>
            <div class="plan" data-img="doors" style="height:96px;flex:0 0 96px"><span class="hi">A-314 · tableau des portes</span></div>`
-        : `<div class="plan" data-img="plan" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[((selRow("Unités") || [])[2] ?? 0) % UNIT_BOXES.length], .25, "height")}"><span class="hi">${UNIT_TABS[V.utab]} — recadrage de l'unité</span></div>`}` : ""}
+        : `<div class="plan" data-img="unit" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[((selRow("Unités") || [])[2] ?? 0) % UNIT_BOXES.length], .25, "height")}"><span class="hi">${UNIT_TABS[V.utab]} — recadrage de l'unité</span></div>`}` : ""}
       ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
         <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>

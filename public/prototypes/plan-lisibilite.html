@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lire le plan — six solutions</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Même langage que le prototype C: un seul gris, une seule graisse de
+   filet, une seule échelle de corps. Ce qui est jugé ici, c'est la
+   lisibilité du dessin, pas la décoration autour. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:4px;max-width:70ch}
+.note{color:var(--ink-3);margin-top:10px;max-width:70ch;font-size:12px}
+
+.card{background:#fff;border:1px solid var(--line-2);border-radius:8px;margin-top:22px;overflow:hidden}
+.ch{display:flex;align-items:baseline;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line-2)}
+.num{font-family:var(--mono);font-size:11px;color:var(--ink-3);min-width:16px}
+.ct{font-size:14px;font-weight:600}
+.cr{color:var(--ink-2);font-size:12px}
+.cb{padding:14px}
+.cf{display:flex;gap:18px;padding:10px 14px;border-top:1px solid var(--line-2);
+  color:var(--ink-3);font-size:11.5px;flex-wrap:wrap}
+.cf b{font-weight:500;color:var(--ink-2)}
+
+.bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+button{height:26px;padding:0 10px;border:1px solid var(--line-2);border-radius:5px;
+  background:var(--fill-2);color:var(--ink-2);font-size:12px;cursor:pointer}
+button:hover{border-color:var(--line);background:var(--fill);color:var(--ink)}
+button.on{border-color:var(--ink);color:var(--ink);background:#fff}
+.val{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);min-width:46px;text-align:center}
+.spacer{flex:1}
+
+/* Le plan: jamais teinté, jamais encadré d'une couleur, jamais filtré.
+   Le trait doit rester net à tous les zooms. */
+.view{position:relative;border:1px solid var(--line-2);border-radius:6px;background:#fff;
+  overflow:hidden;height:420px}
+.pan{position:absolute;inset:0;cursor:grab;touch-action:none}
+.pan.drag{cursor:grabbing}
+.sheet{position:absolute;top:0;left:0;transform-origin:0 0;
+  background:url(assets/plan-niveau-5.jpg) center/contain no-repeat;
+  width:1280px;height:1160px}
+.tag{position:absolute;border:1px solid rgba(27,27,27,.55);border-radius:2px;
+  background:rgba(27,27,27,.05);pointer-events:none}
+.tag span{position:absolute;left:0;top:-15px;font-size:9.5px;color:var(--ink-2);
+  background:#fff;padding:0 2px;white-space:nowrap}
+
+/* 1 — recadrage sur l'unité: la même image, cadrée sur ce qui est demandé. */
+.crop{position:relative;border:1px solid var(--line-2);border-radius:6px;overflow:hidden;
+  background:#fff url(assets/plan-etage.jpg) no-repeat}
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tile{border:1px solid var(--line-2);border-radius:6px;padding:6px;background:#fff;cursor:pointer}
+.tile.on{border-color:var(--ink)}
+.tile .crop{height:90px;border-radius:4px}
+.tile .lbl{font-size:11.5px;color:var(--ink-2);margin-top:5px}
+.side{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.side h4{font-size:11.5px;font-weight:500;color:var(--ink-3);margin-bottom:6px}
+
+/* 2 — loupe: le plan reste à sa taille, une fenêtre lit par-dessus. */
+.lens{position:absolute;width:190px;height:190px;border:1px solid var(--ink);border-radius:50%;
+  pointer-events:none;background-repeat:no-repeat;background-color:#fff;display:none;
+  box-shadow:0 0 0 3px #fff}
+
+/* 3 — le volet plein cadre */
+.split{display:flex;gap:10px;height:420px}
+.col{border:1px solid var(--line-2);border-radius:6px;background:#fff;overflow:hidden;
+  display:flex;flex-direction:column;transition:flex-basis .18s ease}
+.col .hd{padding:7px 10px;border-bottom:1px solid var(--line-2);font-size:11.5px;color:var(--ink-2);
+  white-space:nowrap;overflow:hidden}
+.col .bd{flex:1;overflow:auto;padding:8px}
+.row{display:flex;align-items:center;gap:7px;padding:5px 4px;border-bottom:1px solid var(--line-2);
+  font-size:11.5px;color:var(--ink-2);white-space:nowrap}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--line);flex:0 0 5px}
+
+/* 4 — plein écran */
+.full{position:fixed;inset:0;background:#fff;z-index:9;display:none;flex-direction:column}
+.full.on{display:flex}
+.full .hd{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line-2)}
+.full .vw{flex:1;position:relative;overflow:hidden}
+
+/* 5 — vignettes: comparaison */
+.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.strip .crop{height:74px}
+.cap{font-size:11px;color:var(--ink-3);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Lire le plan</h1>
+  <p class="sub">Le plan d'étage fait 204 pieds de large et tient dans un volet de 320 pixels. À cette taille, aucune cote, aucun nom de pièce, aucun numéro d'unité n'est lisible — l'image sert de décor, pas de preuve. Six solutions, toutes implémentables dans le prototype, chacune démontrée ici sur la vraie feuille A-209.</p>
+  <p class="note">Le plan n'est jamais redessiné, teinté ni filtré. Chaque solution ne touche qu'au cadrage, à l'échelle ou à la place qu'on lui donne à l'écran.</p>
+
+  <!-- 1 ------------------------------------------------------------- -->
+  <div class="card">
+    <div class="ch"><span class="num">1</span><span class="ct">Recadrer sur l'unité</span>
+      <span class="cr">la liste et l'inspecteur montrent l'unité, jamais l'étage entier</span></div>
+    <div class="cb">
+      <div class="side">
+        <div>
+          <h4>Aujourd'hui — l'étage entier dans 150 px</h4>
+          <div class="strip" id="strip-avant"></div>
+        </div>
+        <div>
+          <h4>Recadré sur la boîte de l'unité</h4>
+          <div class="strip" id="strip-apres"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cf"><span><b>Coût</b> aucun: les boîtes d'unités existent déjà</span>
+      <span><b>Limite</b> ne règle que les vignettes, pas le grand plan</span></div>
+  </div>
+
+  <!-- 2 ------------------------------------------------------------- -->
+  <div class="card">
+    <div class="ch"><span class="num">2</span><span class="ct">Zoom et déplacement</span>
+      <span class="cr">molette pour zoomer, glisser pour déplacer, double-clic pour ajuster</span></div>
+    <div class="cb">
+      <div class="bar">
+        <button data-z="-25">−</button><span class="val" id="zval">100 %</span><button data-z="25">+</button>
+        <button data-z="fit">Ajuster</button><button data-z="unit">Aller à l'unité 507</button>
+        <span class="spacer"></span><span class="cr" id="zhint">glisser pour déplacer</span>
+      </div>
+      <div class="view"><div class="pan" id="pan"><div class="sheet" id="sheet"></div></div></div>
+    </div>
+    <div class="cf"><span><b>Coût</b> une trentaine de lignes, aucune dépendance</span>
+      <span><b>Limite</b> demande une action avant de lire</span></div>
+  </div>
+
+  <!-- 3 ------------------------------------------------------------- -->
+  <div class="card">
+    <div class="ch"><span class="num">3</span><span class="ct">Loupe au survol</span>
+      <span class="cr">le plan reste entier, une fenêtre lit par-dessus à 300 %</span></div>
+    <div class="cb">
+      <div class="bar"><button id="lens-on" class="on">Loupe active</button>
+        <span class="cr">passer la souris sur le plan</span></div>
+      <div class="view" id="lensview"><div class="sheet" id="lsheet" style="width:100%;height:100%"></div>
+        <div class="lens" id="lens"></div></div>
+    </div>
+    <div class="cf"><span><b>Coût</b> une vingtaine de lignes</span>
+      <span><b>Limite</b> inutilisable au doigt; ne lit qu'un cercle à la fois</span></div>
+  </div>
+
+  <!-- 4 ------------------------------------------------------------- -->
+  <div class="card">
+    <div class="ch"><span class="num">4</span><span class="ct">Le plan prend le volet</span>
+      <span class="cr">la liste et l'inspecteur se replient en bandes</span></div>
+    <div class="cb">
+      <div class="bar"><button id="focus" >Replier la liste et l'inspecteur</button>
+        <span class="cr">le dessin passe de 320 à 900 pixels de large</span></div>
+      <div class="split" id="split">
+        <div class="col" id="c-list" style="flex:0 0 190px"><div class="hd">Unités</div><div class="bd" id="list"></div></div>
+        <div class="col" style="flex:1"><div class="hd">Plan 2D · A-209</div>
+          <div class="bd" style="padding:0"><div style="width:100%;height:100%;
+            background:url(assets/plan-niveau-5.jpg) center/contain no-repeat"></div></div></div>
+        <div class="col" id="c-insp" style="flex:0 0 190px"><div class="hd">Unité 507</div>
+          <div class="bd"><div class="row">4½ · 1170 pi²</div><div class="row">Niveau 5</div>
+            <div class="row">A-209 R04 · 24 Oct</div><div class="row">1 croisement ouvert</div></div></div>
+      </div>
+    </div>
+    <div class="cf"><span><b>Coût</b> un état, deux largeurs</span>
+      <span><b>Limite</b> on perd la liste de vue pendant la lecture</span></div>
+  </div>
+
+  <!-- 5 ------------------------------------------------------------- -->
+  <div class="card">
+    <div class="ch"><span class="num">5</span><span class="ct">Plein écran</span>
+      <span class="cr">le plan seul, à la taille de la fenêtre, Échap pour sortir</span></div>
+    <div class="cb">
+      <div class="bar"><button id="openfull">Ouvrir le plan en plein écran</button>
+        <span class="cr">1280 × 1160 dans une fenêtre de 1400 px: les cotes redeviennent lisibles</span></div>
+      <div class="view" style="height:220px"><div class="sheet" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="cf"><span><b>Coût</b> une superposition, aucune route</span>
+      <span><b>Limite</b> quitte le contexte: plus de liste, plus d'inspecteur</span></div>
+  </div>
+
+  <!-- 6 ------------------------------------------------------------- -->
+  <div class="card">
+    <div class="ch"><span class="num">6</span><span class="ct">Découper la feuille par unité à l'import</span>
+      <span class="cr">une image par unité, au lieu d'un recadrage CSS d'une image d'étage</span></div>
+    <div class="cb">
+      <div class="side">
+        <div>
+          <h4>Recadrage CSS sur l'image d'étage (1280 px)</h4>
+          <div class="crop" id="demo-css" style="height:200px"></div>
+          <p class="cap">L'unité occupe 12 % de la largeur du fichier: agrandie, elle devient floue.</p>
+        </div>
+        <div>
+          <h4>Tuile découpée à 2 400 px au moment de l'import</h4>
+          <div class="crop" id="demo-sharp" style="height:200px"></div>
+          <p class="cap">Même cadrage, rendu depuis le PDF à l'échelle de l'unité: le trait reste net.</p>
+        </div>
+      </div>
+    </div>
+    <div class="cf"><span><b>Coût</b> une passe de rendu à l'import, ~14 images par niveau</span>
+      <span><b>Limite</b> stockage, et il faut re-rendre à chaque révision</span>
+      <span><b>C'est la seule solution qui ajoute de la résolution; les cinq autres n'en déplacent que la lecture.</b></span></div>
+  </div>
+
+  <p class="note">Recommandation: 1 et 4 tout de suite — ils coûtent presque rien et règlent le cas courant, « je veux voir cette unité ». 2 en complément pour l'examen détaillé. 6 seulement quand l'import réel existera, parce que c'est la seule qui donne vraiment des pixels en plus.</p>
+</div>
+
+<div class="full" id="full">
+  <div class="hd"><b style="font-weight:600">A-209 · Plan du niveau 5</b>
+    <span class="cr">R04 · 24 Oct · lecture seule</span><span class="spacer"></span>
+    <button id="closefull">Fermer (Échap)</button></div>
+  <div class="vw"><div class="sheet" style="width:100%;height:100%"></div></div>
+</div>
+
+<script>
+/* Les boîtes d'unités du prototype, normalisées 0–1 sur la feuille. */
+const UNITS = [
+  ["501", "3½ · 707 pi²", [0.3953, 0.5862, 0.1203, 0.1586]],
+  ["502", "3½ · 727 pi²", [0.5063, 0.0328, 0.1141, 0.1552]],
+  ["503", "3½ · 753 pi²", [0.6281, 0.0328, 0.1172, 0.1552]],
+  ["504", "3½+bureau · 880 pi²", [0.1609, 0.7293, 0.1266, 0.2172]],
+  ["505", "4½ · 968 pi²", [0.2203, 0.5207, 0.1422, 0.1724]],
+  ["506", "4½ · 1012 pi²", [0.2203, 0.3483, 0.1422, 0.1724]],
+  ["507", "4½ · 1170 pi²", [0.4891, 0.2259, 0.1984, 0.1552]],
+  ["508", "4½ · 1203 pi²", [0.2203, 0.1362, 0.1625, 0.2034]],
+  ["509", "5½ · 1249 pi²", [0.303, 0.0276, 0.1969, 0.1603]],
+  ["510", "5½ · 1350 pi²", [0.0266, 0.6966, 0.1859, 0.25]],
+  ["511", "4½ · 1380 pi²", [0.3938, 0.3155, 0.1438, 0.2638]],
+  ["512", "5½ · 1470 pi²", [0.6953, 0.1966, 0.2719, 0.1845]],
+  ["513", "4½+bureau · 1494 pi²", [0.7516, 0.0328, 0.2156, 0.1741]],
+  ["514", "5½ · 1626 pi²", [0.2953, 0.7293, 0.2016, 0.2172]],
+];
+/* Deux feuilles: le niveau 5 du jeu de permis pour tout ce qui se zoome, et
+   l'étage type pour tout ce qui se recadre — les boîtes d'unités ont été
+   mesurées sur celle-là, et le même recadrage sur une autre feuille tombe
+   à côté de l'unité. */
+const SHEET_ZOOM = "assets/plan-niveau-5.jpg";
+const SHEET = "assets/plan-etage.jpg";
+const AR = 1280 / 1160;
+
+/* Cadre une boîte dans un élément: l'image est agrandie jusqu'à ce que la
+   boîte remplisse l'élément, puis glissée pour la centrer. air = marge
+   autour de la boîte, en fraction de sa taille. */
+function frame(el, box, air = 0.18) {
+  const [x, y, w, h] = box;
+  const bw = w * (1 + air * 2), bh = h * (1 + air * 2);
+  const bx = x - w * air, by = y - h * air;
+  el.style.backgroundImage = "url(" + SHEET + ")";
+  el.style.backgroundSize = (100 / bw) + "% " + (100 / bh) + "%";
+  /* En pourcentage, 0 % colle le bord gauche et 100 % le bord droit: la
+     position est donc la fraction du dépassement que l'on décale. */
+  el.style.backgroundPosition = (bx / (1 - bw)) * 100 + "% " + (by / (1 - bh)) * 100 + "%";
+}
+
+/* 1 — vignettes ------------------------------------------------------ */
+const avant = document.getElementById("strip-avant");
+const apres = document.getElementById("strip-apres");
+UNITS.slice(0, 6).forEach((u) => {
+  const a = document.createElement("div");
+  a.className = "cell";
+  a.innerHTML = `<div class="crop" style="background-size:contain;background-position:center"></div>
+    <div class="cap">${u[0]} · ${u[1]}</div>`;
+  avant.appendChild(a);
+  const b = document.createElement("div");
+  b.className = "cell";
+  b.innerHTML = `<div class="crop"></div><div class="cap">${u[0]} · ${u[1]}</div>`;
+  apres.appendChild(b);
+  frame(b.querySelector(".crop"), u[2]);
+});
+
+/* 2 — zoom et déplacement -------------------------------------------- */
+const pan = document.getElementById("pan"), sheet = document.getElementById("sheet");
+let z = 1, tx = 0, ty = 0;
+function fit() {
+  const r = pan.getBoundingClientRect();
+  z = Math.min(r.width / 1280, r.height / 1160);
+  tx = (r.width - 1280 * z) / 2; ty = (r.height - 1160 * z) / 2;
+  apply();
+}
+function apply() {
+  sheet.style.transform = `translate(${tx}px,${ty}px) scale(${z})`;
+  const r = pan.getBoundingClientRect();
+  document.getElementById("zval").textContent = Math.round(z / (r.width / 1280) * 100) + " %";
+}
+function zoomAt(cx, cy, factor) {
+  const r = pan.getBoundingClientRect();
+  const x = cx - r.left, y = cy - r.top;
+  const nz = Math.max(0.1, Math.min(6, z * factor));
+  tx = x - (x - tx) * (nz / z); ty = y - (y - ty) * (nz / z); z = nz;
+  apply();
+}
+pan.addEventListener("wheel", (e) => { e.preventDefault(); zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.12 : 1 / 1.12); }, { passive: false });
+let drag = null;
+pan.addEventListener("pointerdown", (e) => { drag = [e.clientX - tx, e.clientY - ty]; pan.classList.add("drag"); pan.setPointerCapture(e.pointerId); });
+pan.addEventListener("pointermove", (e) => { if (!drag) return; tx = e.clientX - drag[0]; ty = e.clientY - drag[1]; apply(); });
+pan.addEventListener("pointerup", () => { drag = null; pan.classList.remove("drag"); });
+pan.addEventListener("dblclick", fit);
+document.querySelectorAll("[data-z]").forEach((b) => b.addEventListener("click", () => {
+  const v = b.dataset.z;
+  const r = pan.getBoundingClientRect();
+  if (v === "fit") return fit();
+  if (v === "unit") {
+    const [x, y, w, h] = UNITS[6][2];
+    z = Math.min(r.width / (w * 1280), r.height / (h * 1160)) * 0.85;
+    tx = r.width / 2 - (x + w / 2) * 1280 * z;
+    ty = r.height / 2 - (y + h / 2) * 1160 * z;
+    return apply();
+  }
+  zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1 + Number(v) / 100);
+}));
+fit();
+addEventListener("resize", fit);
+
+/* 3 — loupe ----------------------------------------------------------- */
+const lv = document.getElementById("lensview"), lens = document.getElementById("lens");
+let lensOn = true;
+document.getElementById("lens-on").addEventListener("click", (e) => {
+  lensOn = !lensOn; e.target.classList.toggle("on", lensOn);
+  e.target.textContent = lensOn ? "Loupe active" : "Loupe arrêtée";
+  if (!lensOn) lens.style.display = "none";
+});
+lv.addEventListener("pointermove", (e) => {
+  if (!lensOn) return;
+  const r = lv.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  /* L'image est en « contain »: on refait le même calcul pour viser juste. */
+  const dw = Math.min(r.width, r.height * AR), dh = dw / AR;
+  const ox = (r.width - dw) / 2, oy = (r.height - dh) / 2;
+  const k = 3;
+  lens.style.display = "block";
+  lens.style.left = (x - 95) + "px"; lens.style.top = (y - 95) + "px";
+  lens.style.backgroundImage = "url(" + SHEET_ZOOM + ")";
+  lens.style.backgroundSize = (dw * k) + "px " + (dh * k) + "px";
+  lens.style.backgroundPosition = (-(x - ox) * k + 95) + "px " + (-(y - oy) * k + 95) + "px";
+});
+lv.addEventListener("pointerleave", () => { lens.style.display = "none"; });
+
+/* 4 — le volet plein cadre -------------------------------------------- */
+const list = document.getElementById("list");
+list.innerHTML = UNITS.map((u) => `<div class="row"><span class="dot"></span>${u[0]} · ${u[1]}</div>`).join("");
+let folded = false;
+document.getElementById("focus").addEventListener("click", (e) => {
+  folded = !folded;
+  document.getElementById("c-list").style.flexBasis = folded ? "34px" : "190px";
+  document.getElementById("c-insp").style.flexBasis = folded ? "34px" : "190px";
+  e.target.classList.toggle("on", folded);
+  e.target.textContent = folded ? "Déplier la liste et l'inspecteur" : "Replier la liste et l'inspecteur";
+});
+
+/* 5 — plein écran ------------------------------------------------------ */
+const full = document.getElementById("full");
+document.getElementById("openfull").addEventListener("click", () => full.classList.add("on"));
+document.getElementById("closefull").addEventListener("click", () => full.classList.remove("on"));
+addEventListener("keydown", (e) => { if (e.key === "Escape") full.classList.remove("on"); });
+
+/* 6 — comparaison de résolution ---------------------------------------- */
+frame(document.getElementById("demo-css"), UNITS[6][2], 0.1);
+const sharp = document.getElementById("demo-sharp");
+sharp.style.backgroundImage = "url(assets/unite-507.jpg)";
+sharp.style.backgroundSize = "cover";
+sharp.style.backgroundPosition = "center";
+</script>
+</body>
+</html>
