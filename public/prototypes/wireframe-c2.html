@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prototype C, adapted — low-fidelity wireframe</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+:root{
+  --ink:#111112; --ink-2:#55565b; --ink-3:#8c8d94;
+  --line:#e3e3e6; --line-2:#cfcfd4; --fill:#ececef; --fill-2:#f4f4f6;
+  --paper:#fff; --page:#f6f6f7; --tag:#4b4bd6; --tag-soft:#eeeeff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:'Geist',system-ui,sans-serif;background:var(--page);color:var(--ink);font-size:14px;line-height:1.5}
+
+.stage{padding:22px 24px 44px;max-width:1540px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
+.sub{color:var(--ink-2);font-size:13px;margin-top:5px;max-width:720px}
+
+/* ---------------------------------------------------------- controls */
+.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:16px 0 14px;
+  padding-top:13px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3)}
+.ctl .grp{display:flex;gap:5px}
+.ctl button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--paper);
+  color:var(--ink-2);border-radius:7px;padding:4px 10px;cursor:pointer}
+.ctl button:hover{border-color:var(--line-2)}
+.ctl button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.ctl .sp{flex:1}
+
+/* ------------------------------------------------------------- frame */
+.frame{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  display:grid;grid-template-columns:56px 1fr;height:min(78vh,720px);min-height:560px}
+.frame[data-wide="1"]{grid-template-columns:184px 1fr}
+.rail{border-right:1px solid var(--line);padding:10px 8px;display:flex;flex-direction:column;gap:6px;background:var(--fill-2)}
+.rail .r{height:30px;border-radius:7px;background:var(--fill);display:flex;align-items:center;gap:8px;padding:0 8px;color:var(--ink-3)}
+.rail .r.on{background:var(--line-2)}
+.rail svg{width:15px;height:15px;stroke-width:1.9}
+.rail .r span{display:none;font-size:12px;color:var(--ink-2)}
+.frame[data-wide="1"] .rail .r span{display:block}
+
+.main{display:flex;flex-direction:column;min-width:0}
+.tabs{display:flex;gap:4px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.tabs button{font:inherit;font-size:12.5px;display:flex;align-items:center;gap:7px;cursor:pointer;
+  border:1px solid transparent;background:none;border-radius:7px;padding:5px 10px;color:var(--ink-3)}
+.tabs button svg{width:14px;height:14px;stroke-width:1.9}
+.tabs button:hover{background:var(--fill-2)}
+.tabs button.on{background:var(--fill);color:var(--ink);border-color:var(--line)}
+.tabs .sp{flex:1}
+.tabs .stamp{font-size:11.5px;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+
+.hd{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.hd .t{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.hd .btn{height:28px;border-radius:7px;background:var(--fill);min-width:96px}
+
+.body{flex:1;display:flex;gap:10px;padding:10px;min-height:0;background:var(--fill-2)}
+.body[data-dense="1"]{gap:7px;padding:7px}
+.col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.body[data-dense="1"] .col{gap:7px}
+
+.blk{background:var(--paper);border:1px solid var(--line);border-radius:9px;display:flex;flex-direction:column;
+  min-height:0;position:relative;overflow:hidden}
+.blk > .bh{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line)}
+.blk > .bb{padding:9px 10px;display:flex;flex-direction:column;gap:7px;overflow:hidden;flex:1;min-height:0}
+
+/* grey matter */
+.bar{height:8px;border-radius:3px;background:var(--fill)}
+.bar.d{background:var(--line-2)}
+.chip{height:20px;border-radius:999px;background:var(--fill);min-width:58px}
+.chip.on{background:var(--line-2)}
+.cell{border:1px dashed var(--line-2);border-radius:7px;background:var(--fill-2);flex:1;min-height:52px;
+  display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:11px;text-align:center;padding:6px}
+.rowline{display:flex;align-items:center;gap:8px}
+.rowline .bar{flex:1}
+.rowline.sel{background:var(--fill-2);border-radius:6px;margin:0 -4px;padding:4px;cursor:pointer}
+.rowline.sel.on{background:var(--tag-soft);box-shadow:inset 2px 0 0 var(--tag)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line-2);flex:0 0 7px}
+.num{height:30px;border-radius:6px;background:var(--fill);flex:1}
+.tbl{display:flex;flex-direction:column;gap:0}
+.tbl .tr{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.tbl .tr:last-child{border-bottom:0}
+.tbl .tr .bar{flex:1}
+.tbl .tr .bar:first-child{flex:2}
+
+/* plan + overlay */
+.plan{flex:1;min-height:90px;border:1px dashed var(--line-2);border-radius:8px;background:var(--fill-2);
+  position:relative;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:11px}
+.plan svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* labels and notes */
+.tag{position:absolute;top:0;left:0;transform:translateY(-1px);background:var(--tag);color:#fff;
+  font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:0 0 5px 0;z-index:3}
+.frame[data-labels="0"] .tag{display:none}
+.note{font-size:11px;color:var(--ink-3);line-height:1.45}
+.frame[data-notes="0"] .note{display:none}
+.frame[data-labels="1"] .blk > .bh{padding-top:16px}
+.flag{position:absolute;top:6px;right:8px;font-size:9.5px;color:var(--tag);background:var(--tag-soft);
+  border-radius:4px;padding:2px 6px;z-index:3}
+.frame[data-notes="0"] .flag{display:none}
+
+/* legend under the frame */
+.key{margin-top:18px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:16px 18px}
+.key h2{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.key ul{list-style:none;margin:11px 0 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:9px 22px}
+.key li{display:flex;gap:9px;font-size:12.5px;color:var(--ink-2);line-height:1.45}
+.key li b{color:var(--ink);font-weight:600}
+.key li i{font-style:normal;color:var(--tag);font-size:10px;letter-spacing:.05em;text-transform:uppercase;
+  border:1px solid var(--tag);border-radius:4px;padding:1px 5px;height:fit-content;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="stage">
+
+<h1>Prototype C, adapted to the nine high-priority features</h1>
+<p class="sub">Boxes only: how much room each thing gets, what sits next to what, and the order it is read in.
+No colour, no final wording, no real drawings. Switch screens to see where each high-priority feature lands.</p>
+
+<div class="ctl">
+  <div class="grp" id="screens"></div>
+  <span class="sp"></span>
+  <button id="labels" class="on">Region labels</button>
+  <button id="notes" class="on">Notes</button>
+  <button id="wide">Wide rail</button>
+  <button id="dense">Dense</button>
+</div>
+
+<div class="frame" id="frame" data-labels="1" data-notes="1" data-wide="0">
+  <nav class="rail" id="rail"></nav>
+  <div class="main">
+    <div class="tabs" id="tabs"></div>
+    <div class="hd" id="hd"></div>
+    <div class="body" id="body" data-dense="0"></div>
+  </div>
+</div>
+
+<div class="key">
+  <h2>What each screen is carrying</h2>
+  <ul id="keylist"></ul>
+</div>
+
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* Every block below exists because of a high-priority feature. The wireframe
+   is only here to argue about room and order, so the content is grey. */
+
+const ico = (n) => '<i data-lucide="' + n + '"></i>';
+const bars = (n, w) => Array.from({ length: n }, (_, i) =>
+  '<div class="bar" style="width:' + (w ? w[i % w.length] : 100 - (i % 3) * 12) + '%"></div>').join("");
+const rows = (n, sel) => Array.from({ length: n }, (_, i) =>
+  '<div class="rowline sel ' + (i === (sel ?? 1) ? "on" : "") + '"><span class="dot"></span>' +
+  '<div class="bar" style="width:' + (72 - (i % 4) * 9) + '%"></div></div>').join("");
+const table = (r, c) => '<div class="tbl">' + Array.from({ length: r }, () =>
+  '<div class="tr">' + Array.from({ length: c }, () => '<div class="bar"></div>').join("") + "</div>").join("") + "</div>";
+
+/* A property line drawn over the floor: the surveyor's plan as its own layer. */
+const siteSVG = `<svg viewBox="0 0 100 60" preserveAspectRatio="none">
+  <polygon points="8,6 92,10 90,54 10,50" fill="none" stroke="#cfcfd4" stroke-width=".7" stroke-dasharray="3 2"/>
+  <rect x="26" y="18" width="48" height="26" fill="#ececef" stroke="#8c8d94" stroke-width=".5"/>
+  <line x1="26" y1="31" x2="9" y2="31" stroke="#4b4bd6" stroke-width=".5"/>
+  <line x1="74" y1="31" x2="91" y2="31" stroke="#4b4bd6" stroke-width=".5"/>
+  <line x1="50" y1="18" x2="50" y2="8" stroke="#4b4bd6" stroke-width=".5"/>
+  <line x1="50" y1="44" x2="50" y2="52" stroke="#4b4bd6" stroke-width=".5"/>
+</svg>`;
+
+const blk = (label, head, body, flag, grow = 1) => ({ label, head, body, flag, grow });
+
+const SCREENS = {
+  Project: {
+    icon: "layout-dashboard",
+    title: "Project",
+    head: ["title", "two lines of state", 2],
+    cols: [
+      { flex: 1.6, blocks: [
+        blk("change log", "What changed since you last looked",
+          `<p class="note">Newest first. Every line points at the unit, the floor or the table it touched, and carries the revision it came from.</p>
+           ${rows(7, 0)}`, "high · what changed between two revisions"),
+      ] },
+      { flex: 1, blocks: [
+        blk("counts", "Running totals",
+          `<p class="note">Read from the drawings, never typed.</p>
+           <div class="rowline">${'<div class="num"></div>'.repeat(3)}</div>${table(3, 3)}`, "high · unit count and areas", 0),
+        blk("open", "What is blocking",
+          `<p class="note">Differences, missing inputs, answers waited on.</p>${rows(4, -1)}`, null, 1),
+      ] },
+    ],
+  },
+
+  Site: {
+    icon: "map",
+    title: "Site and property lines",
+    head: ["title", "surveyor's plan, number and date", 2],
+    cols: [
+      { flex: 2, blocks: [
+        blk("plan + surveyor layer", "Floor with the surveyor's plan under it",
+          `<div class="rowline">${'<div class="chip"></div>'.repeat(3)}<span class="sp"></span><div class="chip on" style="min-width:118px"></div></div>
+           <div class="plan">${siteSVG}<span>property lines over the building, every distance drawn</span></div>
+           <p class="note">The overlay is a layer that can be switched off, never a filter or a tint on the drawing.</p>`,
+          "high · the surveyor's plan under everything"),
+      ] },
+      { flex: 1, blocks: [
+        blk("measured from the line", "Setbacks and coverage",
+          `<p class="note">Each distance names the surveyor's plan it was measured from.</p>${table(5, 2)}`, null, 1),
+        blk("new plan", "A newer plan arrived",
+          `<p class="note">What moved, and which numbers change with it.</p>${rows(3, -1)}
+           <div class="rowline"><div class="bar d" style="width:44%;height:26px;border-radius:6px"></div></div>`, null, 0),
+      ] },
+    ],
+  },
+
+  Units: {
+    icon: "layers",
+    title: "Units, plan against model",
+    head: ["title", "floor, count, differences open", 3],
+    cols: [
+      { flex: .9, blocks: [
+        blk("units list", "Units on this floor",
+          `<p class="note">One row per unit, a mark where plan and model disagree.</p>${rows(9, 1)}`),
+      ] },
+      { flex: 1.5, blocks: [
+        blk("plan vs model", "The two drawings side by side",
+          `<div class="rowline">${'<div class="chip"></div>'.repeat(2)}<span class="sp"></span><div class="chip"></div></div>
+           <div style="display:flex;gap:8px;flex:1;min-height:0">
+             <div class="plan">2D plan, outlines on top</div><div class="plan">3D model, same level</div>
+           </div>
+           <p class="note">Same unit, same zoom, same moment in both panes.</p>`,
+          "high · 2D plan against the 3D model"),
+      ] },
+      { flex: 1.1, blocks: [
+        blk("unit", "The unit, and the difference",
+          `<div class="rowline">${'<div class="chip"></div>'.repeat(4)}</div>
+           ${table(4, 2)}`),
+        blk("reason", "Why this change?",
+          `<div class="rowline" style="flex-wrap:wrap">${'<div class="chip"></div>'.repeat(5)}</div>
+           <div class="bar" style="height:34px;border-radius:6px;width:100%"></div>
+           <div class="bar d" style="height:28px;border-radius:6px;width:100%"></div>
+           <p class="note">Nothing is recorded until a reason is picked and one sentence is written.</p>`,
+          "high · why was this changed", 0),
+      ] },
+    ],
+  },
+
+  Counts: {
+    icon: "table",
+    title: "Counts read from the drawings",
+    head: ["title", "source file and read time", 2],
+    cols: [
+      { flex: 1, blocks: [
+        blk("question tabs", "One table per question",
+          `<div class="rowline">${'<div class="chip on"></div>' + '<div class="chip"></div>'.repeat(3)}</div>
+           <p class="note">Units and types · areas per unit and per floor · window schedule · materials per elevation.</p>
+           ${table(7, 5)}
+           <div class="rowline"><span class="sp"></span><div class="chip"></div></div>`,
+          "high · unit count, areas, window schedule"),
+      ] },
+      { flex: .7, blocks: [
+        blk("per floor", "The same count, floor by floor",
+          `<p class="note">A floor that differs from the others is flagged in place.</p>${table(6, 3)}`),
+        blk("source", "Where these numbers came from",
+          `${rows(3, -1)}<p class="note">File, revision, read time. No number without one.</p>`, null, 0),
+      ] },
+    ],
+  },
+
+  Rules: {
+    icon: "scale",
+    title: "Rules, measured and missing",
+    head: ["title", "zoning by-law and code edition", 2],
+    cols: [
+      { flex: .8, blocks: [
+        blk("articles", "Articles that matter here",
+          `<div class="rowline">${'<div class="chip"></div>'.repeat(3)}</div>
+           <p class="note">Filtered to this project, each with a plain state.</p>${rows(9, 2)}`),
+      ] },
+      { flex: 1.4, blocks: [
+        blk("article", "The article, and what the project measures",
+          `<div class="bar" style="width:100%;height:40px;border-radius:6px"></div>
+           <div class="rowline"><div class="num" style="height:54px"></div><div class="num" style="height:54px"></div></div>
+           <p class="note">Measured against required, side by side, then one sentence of plain reading. It never says the project complies.</p>
+           ${bars(3)}`,
+          "high · the article in words anyone can act on"),
+        blk("export", "The code study as a document",
+          `<div class="rowline">${'<div class="chip"></div>'.repeat(2)}<span class="sp"></span><div class="chip on"></div></div>`, null, 0),
+      ] },
+      { flex: .8, blocks: [
+        blk("missing inputs", "What the project still needs",
+          `<p class="note">The answers no drawing can give: lot area, code edition, a surveyor's figure. One shared list.</p>
+           ${rows(6, -1)}<div class="bar d" style="height:26px;border-radius:6px;width:60%"></div>`,
+          "high · say out loud what is missing"),
+      ] },
+    ],
+  },
+
+  Coordination: {
+    icon: "git-compare",
+    title: "Where the trades cross",
+    head: ["title", "drawings compared, date of each", 2],
+    cols: [
+      { flex: .9, blocks: [
+        blk("crossings", "Ducts, beams and columns in the same place",
+          `<p class="note">One row per crossing, level and axis named.</p>${rows(8, 1)}`,
+          "high · ducts, beams and columns"),
+      ] },
+      { flex: 1.5, blocks: [
+        blk("overlay", "The two drawings on top of each other",
+          `<div class="rowline">${'<div class="chip"></div>'.repeat(3)}<span class="sp"></span><div class="chip"></div></div>
+           <div class="plan">structure over mechanical, the overlap marked</div>`),
+      ] },
+      { flex: 1, blocks: [
+        blk("crossing", "What is in the way",
+          `${table(4, 2)}
+           <div class="bar" style="height:34px;border-radius:6px;width:100%"></div>
+           <div class="bar d" style="height:28px;border-radius:6px;width:100%"></div>
+           <p class="note">Recording it asks for the same reason as any other decision.</p>`),
+      ] },
+    ],
+  },
+};
+
+const KEY = [
+  ["Project", "Change log first", "The page opens on what moved since the last read, not on a dashboard."],
+  ["Site", "Surveyor's plan as a layer", "Property lines over the floor; every setback names the plan and its date."],
+  ["Units", "Plan and model in one row", "Two panes of equal weight, differences in the right column, reason prompt under them."],
+  ["Counts", "One table per question", "Units and areas, window schedule by floor, each table carrying its source."],
+  ["Rules", "Three columns", "Articles, the measured-against-required pair, and the missing inputs that block a verdict."],
+  ["Coordination", "List, overlay, detail", "Crossings on the left, the superposition in the middle, the decision on the right."],
+];
+
+let screen = "Project";
+
+function render() {
+  const def = SCREENS[screen];
+
+  document.getElementById("rail").innerHTML = Object.entries(SCREENS).map(([k, s]) =>
+    `<div class="r ${k === screen ? "on" : ""}" data-s="${k}">${ico(s.icon)}<span>${k}</span></div>`).join("");
+
+  document.getElementById("tabs").innerHTML = Object.entries(SCREENS).map(([k, s]) =>
+    `<button class="${k === screen ? "on" : ""}" data-s="${k}">${ico(s.icon)}${k}</button>`).join("") +
+    `<span class="sp"></span><span class="stamp">read 6 min ago</span>`;
+
+  document.getElementById("hd").innerHTML =
+    `<div class="t"><div class="bar d" style="width:230px;height:13px"></div>
+      <div class="bar" style="width:330px"></div></div>` +
+    '<div class="btn"></div>'.repeat(def.head[2]);
+
+  document.getElementById("body").innerHTML = def.cols.map((c) =>
+    `<div class="col" style="flex:${c.flex}">${c.blocks.map((b) => `
+      <section class="blk" style="flex:${b.grow} 1 auto">
+        <span class="tag">${b.label}</span>
+        ${b.flag ? `<span class="flag">${b.flag}</span>` : ""}
+        <div class="bh"><div class="bar d" style="width:${90 + b.head.length * 2}px;height:10px"></div></div>
+        <div class="bb">${b.body}</div>
+      </section>`).join("")}</div>`).join("");
+
+  document.querySelectorAll("[data-s]").forEach((el) => el.addEventListener("click", () => {
+    screen = el.dataset.s;
+    render();
+  }));
+
+  /* Selecting a row is the only live behaviour: it shows which block answers it. */
+  document.querySelectorAll(".rowline.sel").forEach((r) => r.addEventListener("click", () => {
+    r.parentNode.querySelectorAll(".rowline.sel").forEach((o) => o.classList.remove("on"));
+    r.classList.add("on");
+  }));
+
+  lucide.createIcons();
+}
+
+document.getElementById("screens").innerHTML = Object.keys(SCREENS).map((k) =>
+  `<button data-s="${k}" class="${k === screen ? "on" : ""}">${k}</button>`).join("");
+document.getElementById("screens").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  screen = b.dataset.s;
+  document.querySelectorAll("#screens button").forEach((x) => x.classList.toggle("on", x === b));
+  render();
+});
+
+const toggle = (id, attr, node) => document.getElementById(id).addEventListener("click", (e) => {
+  const on = e.target.classList.toggle("on");
+  node().setAttribute(attr, on ? "1" : "0");
+});
+const frame = () => document.getElementById("frame");
+toggle("labels", "data-labels", frame);
+toggle("notes", "data-notes", frame);
+toggle("wide", "data-wide", frame);
+toggle("dense", "data-dense", () => document.getElementById("body"));
+
+document.getElementById("keylist").innerHTML = KEY.map(([s, t, d]) =>
+  `<li><i>${s}</i><span><b>${t}.</b> ${d}</span></li>`).join("");
+
+render();
+</script>
+</body>
+</html>
