@@ -274,20 +274,20 @@ svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
 /* ---------------------------------------------------------------- state */
 
 const V = {
-  screen: "Units",
-  fidelity: "low",
+  screen: "Unités",
+  fidelity: "basse",
   labels: true,
   journey: true,
-  density: "comfortable",
-  shell: "Flat",
-  homeLayout: "Card grid",
+  density: "confortable",
+  shell: "À plat",
+  homeLayout: "Grille de fiches",
   isolate: "none",
-  nav: { fidelity: "inherit", layout: "Icon rail + tabs" },
-  header: { fidelity: "inherit", layout: "Title + actions" },
-  list: { fidelity: "inherit", layout: "Vertical list" },
-  content: { fidelity: "inherit", layout: "Two panes" },
-  inspector: { fidelity: "inherit", layout: "Right panel" },
-  footer: { fidelity: "inherit", layout: "Impact strip" },
+  nav: { fidelity: "héritée", layout: "Rail d'icônes + onglets" },
+  header: { fidelity: "héritée", layout: "Titre + actions" },
+  list: { fidelity: "héritée", layout: "Liste verticale" },
+  content: { fidelity: "héritée", layout: "Deux volets" },
+  inspector: { fidelity: "héritée", layout: "Panneau de droite" },
+  footer: { fidelity: "héritée", layout: "Bandeau d'impact" },
   lay: { arp: { on: true, opacity: 55, scale: 100, x: 0, y: 0 },
     pay: { on: false, opacity: 55, scale: 100, x: 0, y: 0 } },
 };
@@ -318,26 +318,26 @@ const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1))
 /* --------------------------------------------------------------- screens */
 
 const SCREENS = {
-  Projects: { icon: "folder", regions: ["header", "content"], steps: {}, home: true, index: true },
-  Overview: {
+  "Projets": { icon: "folder", regions: ["header", "content"], steps: {}, home: true, index: true },
+  "Vue d'ensemble": {
     icon: "layout-grid",
     regions: ["header", "content", "inspector"],
     steps: { content: 1, inspector: 2 },
   },
-  Units: {
+  "Unités": {
     icon: "layers",
     regions: ["header", "list", "content", "inspector", "footer"],
     steps: { list: 1, content: 2, inspector: 3, footer: 4 },
   },
-  Quantities: { icon: "table", regions: ["header", "content"], steps: { header: 1, content: 2 } },
+  "Quantités": { icon: "table", regions: ["header", "content"], steps: { header: 1, content: 2 } },
   /* Rules is not a destination: an article is only read against a number the
      drawings produced, so it lives inside the overview. */
-  Coordination: {
+  "Coordination": {
     icon: "git-compare",
     regions: ["header", "list", "content", "inspector"],
     steps: { list: 1, content: 2, inspector: 3 },
   },
-  Tracking: { icon: "calendar-check", regions: ["header", "content", "inspector"], steps: { inspector: 1, content: 2 } },
+  "Suivi": { icon: "calendar-check", regions: ["header", "content", "inspector"], steps: { inspector: 1, content: 2 } },
 };
 
 /* Unit boxes measured on assets/plan-etage.jpg, normalised 0–1, same numbers
@@ -393,27 +393,33 @@ function sheetStyle(key) {
 const layersHTML = () => ["arp", "pay"].filter((k) => V.lay[k].on)
   .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"></div>`).join("");
 
-const NAV = [["layout-grid", "Overview"], ["layers", "Units"], ["table", "Quantities"],
-  ["git-compare", "Coordination"], ["calendar-check", "Tracking"], ["file", "Files"]];
+const NAV = [["layout-grid", "Vue d'ensemble"], ["layers", "Unités"], ["table", "Quantités"],
+  ["git-compare", "Coordination"], ["calendar-check", "Suivi"], ["file", "Fichiers"]];
 
 /* The cross-screen journey the prototype is built around. Everything else
    on the screen exists to serve one of these six moves. */
 const JOURNEY = [
-  { n: 1, t: "A drawing was saved", d: "The project page says what moved since the last read.", s: "Overview" },
-  { n: 2, t: "Open the unit that moved", d: "Pick it from the list, or from the plan itself.", s: "Units" },
-  { n: 3, t: "See both drawings at once", d: "2D plan beside the 3D model, difference measured.", s: "Units" },
-  { n: 4, t: "Decide, and say why", d: "The decision will not save without a reason.", s: "Units" },
-  { n: 5, t: "Check what it breaks", d: "Which article, which conflict, which deadline.", s: "Overview" },
-  { n: 6, t: "Send the numbers out", d: "Tables and the note for the city committee.", s: "Quantities" },
+  { n: 1, t: "Un dessin a été enregistré", d: "La page du projet dit ce qui a bougé depuis la dernière lecture.", s: "Vue d'ensemble" },
+  { n: 2, t: "Ouvrir l'unité qui a bougé", d: "Choisissez-la dans la liste, ou sur le plan lui-même.", s: "Unités" },
+  { n: 3, t: "Voir les deux dessins à la fois", d: "Le plan 2D à côté de la maquette 3D, l'écart mesuré.", s: "Unités" },
+  { n: 4, t: "Décider, et dire pourquoi", d: "La décision ne s'enregistre pas sans raison.", s: "Unités" },
+  { n: 5, t: "Vérifier ce que ça brise", d: "Quel article, quel conflit, quelle échéance.", s: "Vue d'ensemble" },
+  { n: 6, t: "Sortir les chiffres", d: "Les tableaux et la note pour le comité de la ville.", s: "Quantités" },
 ];
 
 /* ------------------------------------------------------------- fidelity */
 
 /* Isolation keeps the frame intact and fades everything that is not the
    region under study, so a variant is judged in place rather than alone. */
-const solo = (region) => (V.isolate !== "none" && V.isolate === region ? "solo" : "");
+const ISO = { navigation: "nav", "entête": "header", liste: "list", contenu: "content",
+  inspecteur: "inspector", "pied de page": "footer" };
+const solo = (region) => (V.isolate !== "aucune" && ISO[V.isolate] === region ? "solo" : "");
 
-const fiOf = (region) => (V[region] && V[region].fidelity !== "inherit" ? V[region].fidelity : V.fidelity);
+/* The panel speaks French; the data attribute stays English because the
+   stylesheet keys off it. */
+const FI_ATTR = { haute: "high", basse: "low" };
+const fiOf = (region) => FI_ATTR[(V[region] && V[region].fidelity !== "héritée"
+  ? V[region].fidelity : V.fidelity)] || "low";
 const wrap = (region, label, html, step) =>
   `<div class="rg" data-rg="${label}" data-fi="${fiOf(region)}" style="display:contents">${html}</div>`
     .replace("</div>", "</div>"); // regions are grid children; see region()
@@ -432,31 +438,31 @@ const bars = (n, w = [100, 70, 85]) =>
 
 /* Sections only appear in the grouped rail: the first three screens read a
    project, the next three act on it, the last one stores it. */
-const SECTIONS = { 0: "Read", 3: "Decide", 6: "Keep" };
+const SECTIONS = { 0: "Lecture", 3: "Décision", 6: "Archive" };
 const SHORT = (name) => name.slice(0, 3).toUpperCase();
 
 /* One label rule for the rail and the tabs, so a title never reads two ways
    on the same screen. Hover and Hidden are CSS, the rest rewrite the text. */
 function navLabel(name, i) {
   const m = V.nav.labels;
-  if (m === "Short code") return SHORT(name);
-  if (m === "Numbered") return `${i + 1}. ${name}`;
+  if (m === "Code court") return SHORT(name);
+  if (m === "Numéroté") return `${i + 1}. ${name}`;
   return name;
 }
 
-const railIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Rail only";
-const tabIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Tabs only";
+const railIcons = () => V.nav.icons === "Rail et onglets" || V.nav.icons === "Rail seulement";
+const tabIcons = () => V.nav.icons === "Rail et onglets" || V.nav.icons === "Onglets seulement";
 
 /* ------------------------------------------------------------ the home
    Open a project that is running, or start one. The layouts differ only in
    which of those two is louder. */
 
 const PROJECTS = [
-  ["Alder Court", "48 units · 6 levels", "A-201 R04 · 24 Oct", "6 differences", 1],
-  ["Rivière Nord", "112 units · 9 levels", "A-110 R07 · 21 Oct", "2 differences", 1],
-  ["Îlot Papineau", "26 units · 4 levels", "A-201 R02 · 17 Oct", "10 missing inputs", 1],
-  ["Maison Clark", "8 units · 3 levels", "A-100 R01 · 02 Oct", "up to date", 0],
-  ["Rue Fabre", "14 units · 3 levels", "A-201 R01 · 28 Sep", "up to date", 0],
+  ["Alder Court", "48 unités · 6 niveaux", "A-201 R04 · 24 Oct", "6 écarts", 1],
+  ["Rivière Nord", "112 unités · 9 niveaux", "A-110 R07 · 21 Oct", "2 écarts", 1],
+  ["Îlot Papineau", "26 unités · 4 niveaux", "A-201 R02 · 17 Oct", "10 données manquantes", 1],
+  ["Maison Clark", "8 unités · 3 niveaux", "A-100 R01 · 02 Oct", "à jour", 0],
+  ["Rue Fabre", "14 unités · 3 niveaux", "A-201 R01 · 28 Sep", "à jour", 0],
 ];
 
 /* The state is the one word on a card allowed colour: a project with
@@ -471,7 +477,7 @@ const TINTS = [["#e8eef7", "#3f5a80"], ["#e6f1ea", "#3d6b52"], ["#f7ece3", "#855
 const initials = (name) => name.split(/[\s—-]+/).filter(Boolean).slice(0, 2)
   .map((w) => w[0]).join("").toUpperCase() || name.slice(0, 2).toUpperCase();
 
-const pcard = (p, i = 0) => `<div class="tile pcard" data-screen="Overview" title="Open ${p[0]}">
+const pcard = (p, i = 0) => `<div class="tile pcard" data-screen="Vue d'ensemble" title="Open ${p[0]}">
   <div class="thumb mark" style="background:${TINTS[i % TINTS.length][0]};color:${TINTS[i % TINTS.length][1]}">
     <span>${initials(p[0])}</span></div>
   <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
@@ -484,12 +490,12 @@ const pcard = (p, i = 0) => `<div class="tile pcard" data-screen="Overview" titl
 const pnew = () => `<div class="tile pnew">
   <div class="thumb newbox">
     ${icon("plus")}
-    <div><span class="lo bar" style="width:92px"></span><span class="hi" style="font-weight:600;font-size:13px">New project</span></div>
+    <div><span class="lo bar" style="width:92px"></span><span class="hi" style="font-weight:600;font-size:13px">Nouveau projet</span></div>
     <div style="max-width:260px"><span class="lo bar lt" style="width:150px"></span>
-      <span class="hi" style="font-size:11.5px;color:var(--ink-3)">Drop a DXF or a PDF. The first read names the units and the levels; nothing is drawn.</span></div>
+      <span class="hi" style="font-size:11.5px;color:var(--ink-3)">Déposez un DXF ou un PDF. La première lecture nomme les unités et les niveaux; rien n'est dessiné.</span></div>
   </div></div>`;
 
-const ptable = () => `<table class="tbl"><thead><tr>${["Project", "Size", "Last read", "Open"].map((h) =>
+const ptable = () => `<table class="tbl"><thead><tr>${["Projet", "Taille", "Dernière lecture", "Ouvrir"].map((h) =>
     `<th><span class="lo bar lt" style="width:60%"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
   <tbody>${PROJECTS.map((p) => `<tr>${p.slice(0, 4).map((c) =>
     `<td><span class="lo bar lt" style="width:${c.length > 12 ? 86 : 54}%"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>`;
@@ -503,40 +509,40 @@ const pane = (label, title, inner, style) => `<div class="pane rg" data-rg="${la
   <div class="pb">${inner}</div></div>`;
 
 const HOMES = {
-  "Card grid": () => pane("projects", "All projects",
+  "Grille de fiches": () => pane("projets", "Tous les projets",
     `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-content:start">${PROJECTS.map((p, i) => pcard(p, i)).join("")}${pnew()}</div>`),
 
-  "Table of projects": () => pane("projects", "Ongoing projects",
+  "Tableau des projets": () => pane("projets", "Projets en cours",
     `${ptable()}<div class="row"><span class="sp" style="flex:1"></span>
-      <span class="btnw solid">${icon("plus")}<span class="hi">New project</span></span></div>`),
+      <span class="btnw solid">${icon("plus")}<span class="hi">Nouveau projet</span></span></div>`),
 
-  "List + preview": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
-      ${pane("projects", "All projects", `${plist(0)}<span class="btnw solid" style="justify-content:center">${icon("plus")}<span class="hi">New project</span></span>`, "flex:.85")}
-      ${pane("preview", "Alder Court", `<div class="plan ghost" style="min-height:140px">${icon("image")}</div>
+  "Liste + aperçu": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
+      ${pane("projets", "Tous les projets", `${plist(0)}<span class="btnw solid" style="justify-content:center">${icon("plus")}<span class="hi">Nouveau projet</span></span>`, "flex:.85")}
+      ${pane("aperçu", "Alder Court", `<div class="plan ghost" style="min-height:140px">${icon("image")}</div>
         <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">48 units · 6 levels · read 6 min ago</span></div></div>`, "flex:1.5")}
     </div>`,
 
-  "Recent, then all": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
+  "Récents, puis tous": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
       <div class="col" style="flex:1;min-height:0">
-        ${pane("recent", "Opened this week", `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${PROJECTS.slice(0, 3).map((p, i) => pcard(p, i)).join("")}</div>`, "flex:0 0 210px")}
-        ${pane("all projects", "Everything else", ptable())}
+        ${pane("récents", "Ouverts cette semaine", `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${PROJECTS.slice(0, 3).map((p, i) => pcard(p, i)).join("")}</div>`, "flex:0 0 210px")}
+        ${pane("tous les projets", "Tout le reste", ptable())}
       </div>
-      <div class="col" style="flex:.5;min-height:0">${pane("start", "Start a project", pnew(true))}</div>
+      <div class="col" style="flex:.5;min-height:0">${pane("démarrer", "Démarrer un projet", pnew(true))}</div>
     </div>`,
 
-  "Start first": () => `<div class="col" style="flex:1;min-height:0;gap:var(--gap)">
-      ${pane("start", "Start a project", pnew(true), "flex:0 0 55%")}
-      ${pane("ongoing", "Or carry on with", plist(-1))}
+  "Commencer d'abord": () => `<div class="col" style="flex:1;min-height:0;gap:var(--gap)">
+      ${pane("démarrer", "Démarrer un projet", pnew(true), "flex:0 0 55%")}
+      ${pane("en cours", "Ou poursuivre avec", plist(-1))}
     </div>`,
 };
 
 function navHTML() {
   if (SCREENS[V.screen].index) return "";
   const mode = V.nav.layout;
-  if (mode === "Top bar only" || mode === "Tabs only, no rail") return "";
-  const sections = mode === "Wide rail with sections";
-  const wide = mode === "Wide rail with labels" || sections;
-  const stack = mode === "Rail with labels under icons";
+  if (mode === "Barre du haut seulement" || mode === "Onglets seulement, sans rail") return "";
+  const sections = mode === "Rail large avec sections";
+  const wide = mode === "Rail large avec libellés" || sections;
+  const stack = mode === "Rail avec libellés sous les icônes";
   const ic = railIcons();
   const items = NAV.map(([glyph, name], i) => {
     const on = name === V.screen ? "on" : "";
@@ -548,51 +554,51 @@ function navHTML() {
     return `<div class="ic ${on}" data-screen="${name}" title="${name}">${g || `<span class="code hi">${SHORT(name)}</span>`}${g ? `<span class="cap hi">${navLabel(name, i)}</span>` : ""}</div>`;
   }).join("");
   const cls = wide ? "wide" : stack ? "stack" : "";
-  return `<nav class="rail rg ${solo("nav")} ${cls}" data-rg="nav" data-fi="${fiOf("nav")}"
+  return `<nav class="rail rg ${solo("nav")} ${cls}" data-rg="navigation" data-fi="${fiOf("nav")}"
        data-labels-mode="${V.nav.labels}">${items}</nav>`;
 }
 
 /* The rail and the tab strip never carry the same destinations. When the
    rail lists the screens, the strip drops to the current screen's own views. */
 const CONTEXT = {
-  Projects: ["Ongoing", "Archived"],
-  Overview: ["What changed", "Totals", "Zoning and code", "Blocking"],
-  Units: ["Level 5", "Level 4", "Level 3", "All levels"],
-  Quantities: ["Units", "Areas", "Windows", "Materials"],
-  Coordination: ["Structure", "Mechanical", "Architecture"],
-  Tracking: ["Programme", "Sketch", "Committee", "Permit", "Site"],
-  Files: ["Drawings", "Model", "Surveyor", "Correspondence"],
+  "Projets": ["En cours", "Archivés"],
+  "Vue d'ensemble": ["Ce qui a changé", "Totaux", "Zonage et code", "Ce qui bloque"],
+  "Unités": ["Niveau 5", "Niveau 4", "Niveau 3", "Tous les niveaux"],
+  "Quantités": ["Unités", "Superficies", "Fenêtres", "Matériaux"],
+  "Coordination": ["Structure", "Mécanique", "Architecture"],
+  "Suivi": ["Programme", "Esquisse", "Comité", "Permis", "Site"],
+  "Fichiers": ["Dessins", "Maquette", "Arpenteur", "Correspondance"],
 };
 
 function tabsHTML() {
   const mode = V.nav.layout;
-  if (mode === "Rail only, no tabs") return "";
-  const top = mode === "Top bar only";
+  if (mode === "Rail seulement, sans onglets") return "";
+  const top = mode === "Barre du haut seulement";
   const ic = tabIcons();
   const names = Object.keys(SCREENS).filter((n) => !SCREENS[n].index);
   /* Icons off and labels away would leave an empty strip, so the short code
      stands in: a tab target never renders without something to read. */
-  const bare = !ic && (V.nav.labels === "Hidden" || V.nav.labels === "Hover only");
+  const bare = !ic && (V.nav.labels === "Masqué" || V.nav.labels === "Au survol seulement");
   const tab = (name, i) => `<button data-screen="${name}" aria-current="${name === V.screen}" title="${name}">
       ${ic ? icon(SCREENS[name].icon) : ""}<span class="lo bar" style="width:46px"></span>
       ${bare ? `<span class="hi code">${SHORT(name)}</span>` : `<span class="hi">${navLabel(name, i)}</span>`}</button>`;
 
   let items;
-  const views = CONTEXT[V.screen] || ["Overview"];
-  /* The index is reached from the words "All projects". They sit in the strip
+  const views = CONTEXT[V.screen] || ["Vue d'ensemble"];
+  /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
-  const back = `<span class="crumb hi" data-screen="Projects" title="All projects">${icon("folder")}All projects</span>`;
+  const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
   if (SCREENS[V.screen].index) {
-    items = `<span class="crumb on hi">${icon("folder")}All projects</span><span class="sp"></span>`;
-  } else if (mode === "Rail + view menu") {
+    items = `<span class="crumb on hi">${icon("folder")}Tous les projets</span><span class="sp"></span>`;
+  } else if (mode === "Rail + menu des vues") {
     items = `<span class="btnw solid" data-menu><span class="hi">${views[0]}</span>${icon("chevron-down")}</span>
       <span class="sp"></span>
       <span class="chip hi">1 of ${views.length}</span>`;
-  } else if (mode === "Rail + breadcrumb") {
+  } else if (mode === "Rail + fil d'Ariane") {
     items = `${back}${icon("chevron-right")}
       <span class="crumb on hi">Alder Court</span>
       <span class="sp"></span>`;
-  } else if (top || mode === "Tabs only, no rail") {
+  } else if (top || mode === "Onglets seulement, sans rail") {
     items = `${back}<span class="div"></span>${names.map(tab).join("")}<span class="sp"></span>`;
   } else {
     /* A rail is on screen, so the strip shows this screen's views instead
@@ -602,7 +608,7 @@ function tabsHTML() {
       <span class="sp"></span>`;
   }
 
-  return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "nav + tabs" : "tabs"}" data-fi="${fiOf("nav")}"
+  return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
        data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
     ${items}
@@ -611,16 +617,16 @@ function tabsHTML() {
 
 function headerHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.header : null;
-  const title = { Projects: ["Projects", "5 ongoing · 1 archived"],
-    Overview: ["Alder Court", "6 floors · 48 units · 5 articles unresolved"],
-    Units: ["Typical floor — level 5", "14 units · 6 differences open"],
-    Quantities: ["Quantities", "counted from the drawings, nothing typed"],
-    Coordination: ["Coordination", "4 crossings open · 1 settled"],
-    Files: ["Files", "what was read, and when"],
-    Tracking: ["Tracking", "one list per phase, flags raised by the drawings"] }[V.screen] || [V.screen, ""];
-  const metrics = V.header.layout === "Title + metrics";
-  const bare = V.header.layout === "Title only";
-  return `<header class="pane rg ${solo("header")}" data-rg="header" data-fi="${fiOf("header")}" style="flex:0 0 auto">
+  const title = { "Projets": ["Projets", "5 en cours · 1 archivé"],
+    "Vue d'ensemble": ["Alder Court", "6 étages · 48 unités · 5 articles non résolus"],
+    "Unités": ["Étage type — niveau 5", "14 unités · 6 écarts ouverts"],
+    "Quantités": ["Quantités", "compté à partir des dessins, rien de saisi"],
+    "Coordination": ["Coordination", "4 croisements ouverts · 1 réglé"],
+    "Fichiers": ["Fichiers", "ce qui a été lu, et quand"],
+    "Suivi": ["Suivi", "une liste par phase, les signaux viennent des dessins"] }[V.screen] || [V.screen, ""];
+  const metrics = V.header.layout === "Titre + chiffres";
+  const bare = V.header.layout === "Titre seulement";
+  return `<header class="pane rg ${solo("header")}" data-rg="entête" data-fi="${fiOf("header")}" style="flex:0 0 auto">
     ${step ? `<span class="step">${step}</span>` : ""}
     <div class="pb" style="padding:10px 12px;gap:8px">
       <div class="row">
@@ -631,14 +637,14 @@ function headerHTML() {
           <div class="hi" style="font-size:12px;color:var(--ink-2)">${title[1]}</div>
         </div>
         ${bare ? "" : SCREENS[V.screen].home
-          ? `<span class="btnw solid">${icon("plus")}<span class="lo bar" style="width:52px"></span><span class="hi">New project</span></span>`
-          : `<span class="btnw">${icon("external-link")}<span class="lo bar" style="width:52px"></span><span class="hi">Open in AutoCAD</span></span>
-        <span class="btnw">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Export</span></span>`}
+          ? `<span class="btnw solid">${icon("plus")}<span class="lo bar" style="width:52px"></span><span class="hi">Nouveau projet</span></span>`
+          : `<span class="btnw">${icon("external-link")}<span class="lo bar" style="width:52px"></span><span class="hi">Ouvrir dans AutoCAD</span></span>
+        <span class="btnw">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Exporter</span></span>`}
       </div>
       ${metrics ? `<div class="row" style="gap:var(--gap)">${[1, 2, 3, 4].map((i) => `<div class="tile" style="flex:1">
         <div class="lo bar" style="width:38px;height:14px"></div><div class="lo bar lt" style="width:70%"></div>
         <div class="hi" style="font-size:17px;font-weight:600">${["6", "4", "5", "98"][i - 1]}</div>
-        <div class="hi" style="font-size:11px;color:var(--ink-2)">${["differences", "crossings", "articles to read", "units"][i - 1]}</div>
+        <div class="hi" style="font-size:11px;color:var(--ink-2)">${["écarts", "croisements", "articles à lire", "unités"][i - 1]}</div>
       </div>`).join("")}</div>` : ""}
     </div>
   </header>`;
@@ -646,25 +652,25 @@ function headerHTML() {
 
 function listHTML() {
   const mode = V.list.layout;
-  if (mode === "Hidden") return "";
+  if (mode === "Masqué") return "";
   const step = V.journey ? SCREENS[V.screen].steps.list : null;
-  const label = { Units: "Units", Coordination: "Crossings" }[V.screen] || "List";
+  const label = { "Unités": "Unités", "Coordination": "Croisements" }[V.screen] || "List";
   const rows = {
-    Units: ["501 · 3½ · 707 sq ft", "502 · 4½ · 1 difference", "503 · 3½ · 753 sq ft", "504 · 3½+den", "505 · 4½ · 968 sq ft", "506 · 4½ · 1 difference", "507 · 4½ · 1203 sq ft", "508 · 5½ · 1 difference"],
-    Coordination: ["C-05-02 duct through column", "C-05-07 beam under ceiling", "C-TT-03 drain off column", "C-05-11 column missing", "C-02-05 settled"],
+    "Unités": ["501 · 3½ · 707 pi²", "502 · 4½ · 1 écart", "503 · 3½ · 753 pi²", "504 · 3½+bureau", "505 · 4½ · 968 pi²", "506 · 4½ · 1 écart", "507 · 4½ · 1203 pi²", "508 · 5½ · 1 écart"],
+    "Coordination": ["C-05-02 conduit dans une colonne", "C-05-07 poutre sous le plafond", "C-TT-03 drain hors colonne", "C-05-11 colonne absente", "C-02-05 réglé"],
   }[V.screen] || ["item", "item", "item", "item"];
 
-  if (mode === "Filter bar only") {
-    return `<section class="pane rg ${solo("list")}" data-rg="list → filter bar" data-fi="${fiOf("list")}" style="flex:0 0 auto;grid-column:1/-1">
+  if (mode === "Barre de filtres seulement") {
+    return `<section class="pane rg ${solo("list")}" data-rg="liste → barre de filtres" data-fi="${fiOf("list")}" style="flex:0 0 auto;grid-column:1/-1">
       ${step ? `<span class="step">${step}</span>` : ""}
       <div class="pb" style="flex-direction:row;align-items:center;padding:8px 10px">
         <span class="chip">${icon("search")}<span class="lo bar" style="width:70px"></span><span class="hi">Search ${label.toLowerCase()}</span></span>
         ${rows.slice(0, 4).map((r) => `<span class="chip"><span class="lo bar" style="width:46px"></span><span class="hi">${r.split(" ")[0]}</span></span>`).join("")}
       </div></section>`;
   }
-  const inner = mode === "Card grid"
+  const inner = mode === "Grille de fiches"
     ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${rows.map((r, i) => `<div class="tile">
-        <div class="plan"${V.screen === "Units" ? ` data-img="plan" style="height:54px;flex:0 0 54px;${crop(UNIT_BOXES[i % UNIT_BOXES.length])}"` : ` style="height:54px;flex:0 0 54px"`}></div>
+        <div class="plan"${V.screen === "Unités" ? ` data-img="plan" style="height:54px;flex:0 0 54px;${crop(UNIT_BOXES[i % UNIT_BOXES.length])}"` : ` style="height:54px;flex:0 0 54px"`}></div>
         <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r}</div></div>`).join("")}</div>`
     : rows.map((r, i) => `<div class="listrow ${i === 1 ? "on" : ""}"><span class="dot"></span>
         <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}</span></div>`).join("");
@@ -678,16 +684,16 @@ function contentHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.content : null;
   const mode = V.content.layout;
   const body = {
-    Units: () => {
+    "Unités": () => {
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span></div>
         <div class="pb"><div class="plan ${cls}" data-img="${kind}"><span class="lo"></span><span class="hi">${note}</span>${layers}</div></div></div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
-      const plan = () => pane("2D plan", "floor plan, outlines on top", "plan", "align", layersHTML());
-      const model = () => pane("3D model", "massing, same level", "model");
-      if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
-      if (mode === "Single pane + inset") return `<div style="position:relative;flex:1;display:flex">${plan()}
+      const plan = () => pane("Plan 2D", "plan d'étage, contours par-dessus", "plan", "align", layersHTML());
+      const model = () => pane("Maquette 3D", "volumétrie, même niveau", "model");
+      if (mode === "Empilé") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
+      if (mode === "Volet unique + encart") return `<div style="position:relative;flex:1;display:flex">${plan()}
         <div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
         <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div></div>`;
       return `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap)">${plan()}${model()}</div>`;
@@ -696,122 +702,122 @@ function contentHTML() {
        the zoning and code block that used to be its own screen: the articles
        that touch this project, the measured number against the required one,
        and the inputs still missing to conclude. */
-    Overview: () => `<div class="col" style="flex:1;gap:var(--gap)">
+    "Vue d'ensemble": () => `<div class="col" style="flex:1;gap:var(--gap)">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)">
-        ${["What changed since the last read", "The two connected sources", "Typical floor — 14 units", "Typology split"].map((t) => `<div class="tile">
+        ${["Ce qui a changé depuis la dernière lecture", "Les deux sources connectées", "Étage type — 14 unités", "Répartition des typologies"].map((t) => `<div class="tile">
           <div class="lo bar" style="width:60%"></div><div class="hi" style="font-weight:600">${t}</div>
           <div class="lo col">${bars(4)}</div>
-          <div class="hi" style="color:var(--ink-2);font-size:11.5px">list of rows read from the drawings</div></div>`).join("")}</div>
+          <div class="hi" style="color:var(--ink-2);font-size:11.5px">liste de lignes lues dans les dessins</div></div>`).join("")}</div>
         <div class="pane" style="flex:0 0 auto">
           <div class="ph">${icon("scale")}<span class="lo bar" style="width:90px"></span>
-            <span class="hi">Zoning and code</span><span style="flex:1"></span>
-            <span class="chip"><span class="lo bar" style="width:52px"></span><span class="hi">5 unresolved</span></span></div>
+            <span class="hi">Zonage et code</span><span style="flex:1"></span>
+            <span class="chip"><span class="lo bar" style="width:52px"></span><span class="hi">5 non résolus</span></span></div>
           <div class="pb">
-            <div class="row" style="flex-wrap:wrap">${["art. 9 height", "art. 43 coverage", "art. 22 rear setback", "art. 71 parking", "art. 134 greening", "3.2.3.1 openings"]
+            <div class="row" style="flex-wrap:wrap">${["art. 9 hauteur", "art. 43 implantation", "art. 22 marge arrière", "art. 71 stationnement", "art. 134 verdissement", "3.2.3.1 ouvertures"]
               .map((t, i) => `<span class="chip" style="${i === 2 ? "border-color:var(--ink)" : ""}">
               <span class="lo bar" style="width:54px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-            <div class="tile"><div class="lo bar" style="width:55%"></div><div class="hi" style="font-weight:600">art. 22 — rear setback</div>
+            <div class="tile"><div class="lo bar" style="width:55%"></div><div class="hi" style="font-weight:600">art. 22 — marge arrière</div>
               <div class="lo bar lt" style="width:90%"></div>
-              <div class="hi" style="font-size:11.5px;color:var(--ink-2)">“the minimum rear setback is 3.00 m”</div></div>
+              <div class="hi" style="font-size:11.5px;color:var(--ink-2)">« La marge arrière minimale est de 3,00 m »</div></div>
             <div class="row" style="gap:var(--gap)">
-              ${[["2.70 m", "measured in the drawings"], ["3.00 m", "required by the article"]].map(([a, b]) => `<div class="tile" style="flex:1">
+              ${[["2.70 m", "mesuré dans les dessins"], ["3.00 m", "exigé par l'article"]].map(([a, b]) => `<div class="tile" style="flex:1">
                 <div class="lo bar" style="width:60px;height:16px"></div><div class="hi" style="font-size:17px;font-weight:600">${a}</div>
                 <div class="lo bar lt" style="width:80%"></div>
                 <div class="hi" style="font-size:11.5px;color:var(--ink-2)">${b}</div></div>`).join("")}</div>
             <div class="tile"><div class="lo col">${bars(2)}</div>
-              <div class="hi" style="font-size:12px;color:var(--ink-2)">plain reading of the gap, then what is missing to conclude</div></div>
+              <div class="hi" style="font-size:12px;color:var(--ink-2)">lecture simple de l'écart, puis ce qui manque pour conclure</div></div>
             <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
-              <span class="hi" style="font-size:11.5px">missing inputs, shared across every article</span></div></div>
+              <span class="hi" style="font-size:11.5px">données manquantes, communes à tous les articles</span></div></div>
           </div></div></div>`,
-    Quantities: () => `<div class="col" style="flex:1">
-        <div class="row">${["Units", "Area per floor", "Windows", "Materials"].map((t, i) => `<span class="chip" style="${i === 0 ? "border-color:var(--ink)" : ""}">
+    "Quantités": () => `<div class="col" style="flex:1">
+        <div class="row">${["Unités", "Superficie par étage", "Fenêtres", "Matériaux"].map((t, i) => `<span class="chip" style="${i === 0 ? "border-color:var(--ink)" : ""}">
           <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-        <table class="tbl"><thead><tr>${["Type", "Per floor", "Project", "sq ft avg", "sq ft total", "Share"].map((h) => `<th><span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
+        <table class="tbl"><thead><tr>${["Type", "Par étage", "Projet", "pi² moy", "pi² total", "Part"].map((h) => `<th><span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
         <tbody>${[["3½", 3, 21, 729, 2187, "21 %"], ["3½+den", 1, 7, 880, 880, "7 %"], ["4½", 5, 35, 1147, 5733, "36 %"], ["4½+den", 1, 7, 1494, 1494, "7 %"], ["5½", 4, 28, 1424, 5695, "29 %"]]
           .map((r) => `<tr>${r.map((c, i) => `<td class="${i ? "n" : ""}"><span class="lo bar" style="width:${i ? 34 : 50}px"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>
         <div class="tile"><div class="row">${icon("info")}<span class="lo bar" style="width:60%"></span>
-          <span class="hi" style="font-size:11.5px">source file, revision and read time under every table</span></div></div></div>`,
+          <span class="hi" style="font-size:11.5px">fichier source, révision et heure de lecture sous chaque tableau</span></div></div></div>`,
 
-    Coordination: () => `<div class="col" style="flex:1">
+    "Coordination": () => `<div class="col" style="flex:1">
         <div class="pane" style="max-width:420px"><div class="pb"><div class="plan" data-img="plan" style="height:170px;flex:0 0 170px">
-          <span class="lo"></span><span class="hi">two drawings overlaid, overlap marked</span></div></div></div>
+          <span class="lo"></span><span class="hi">deux dessins superposés, chevauchement marqué</span></div></div></div>
         <div class="tile"><div class="lo col">${bars(3)}</div>
-          <div class="hi" style="font-size:12px;color:var(--ink-2)">which two files, which level, which unit is affected</div></div></div>`,
-    Tracking: () => `<div class="col" style="flex:1">
-        <div class="row">${["Programme", "Sketch", "Committee", "Permit", "Site"].map((t, i) => `<span class="chip" style="${i === 2 ? "border-color:var(--ink)" : ""}">
+          <div class="hi" style="font-size:12px;color:var(--ink-2)">quels deux fichiers, quel niveau, quelle unité est touchée</div></div></div>`,
+    "Suivi": () => `<div class="col" style="flex:1">
+        <div class="row">${["Programme", "Esquisse", "Comité", "Permis", "Site"].map((t, i) => `<span class="chip" style="${i === 2 ? "border-color:var(--ink)" : ""}">
           <span class="lo bar" style="width:44px"></span><span class="hi">${t}</span></span>`).join("")}</div>
         ${[1, 2, 3, 4, 5].map((i) => `<div class="listrow"><span class="dot" style="border-radius:3px"></span>
           <span class="lo bar" style="flex:1"></span>
-          <span class="hi" style="font-size:12px">${["Area table per floor", "Typology split", "Elevations with materials", "Minor exemption request written", "Note to the city planner"][i - 1]}</span></div>`).join("")}</div>`,
+          <span class="hi" style="font-size:12px">${["Tableau des superficies par étage", "Répartition des typologies", "Élévations avec matériaux", "Demande de dérogation mineure rédigée", "Note à l'urbaniste"][i - 1]}</span></div>`).join("")}</div>`,
   }[V.screen]();
 
-  return region("content", "content", `<div class="ph">${icon("box")}
+  return region("content", "contenu", `<div class="ph">${icon("box")}
     <span class="lo bar" style="width:80px"></span><span class="hi">${V.screen}</span>
     <span style="flex:1"></span>
-    ${V.screen === "Units" ? `<span class="btnw">${icon("minus")}</span><span class="btnw">100%</span><span class="btnw">${icon("plus")}</span><span class="btnw">${icon("maximize")}</span>` : ""}
+    ${V.screen === "Unités" ? `<span class="btnw">${icon("minus")}</span><span class="btnw">100%</span><span class="btnw">${icon("plus")}</span><span class="btnw">${icon("maximize")}</span>` : ""}
     </div><div class="pb">${body}</div>`, step);
 }
 
 function inspectorHTML() {
   const mode = V.inspector.layout;
-  if (mode === "Hidden") return "";
+  if (mode === "Masqué") return "";
   const step = V.journey ? SCREENS[V.screen].steps.inspector : null;
-  const title = { Units: "Unit 502", Overview: "What is blocking", Coordination: "Decision", Tracking: "Deadlines and flags" }[V.screen] || "Detail";
+  const title = { "Unités": "Unité 502", "Vue d'ensemble": "Ce qui bloque", "Coordination": "Décision", "Suivi": "Échéances et signaux" }[V.screen] || "Détail";
   /* A decision panel on the screens where something is decided; a short
      read-only column everywhere else. */
-  const decides = V.screen === "Units" || V.screen === "Coordination";
+  const decides = V.screen === "Unités" || V.screen === "Coordination";
   const rows = {
-    Units: [["Plan says", "1800 × 1500"], ["Model says", "1560 × 1500"], ["Difference", "240 mm"], ["Appeared in", "R04 · 24 Oct"]],
-    Coordination: [["Level", "5"], ["Where", "corridor, axis 4"], ["Drawings", "mechanical + structure"], ["Unit", "507"]],
-    Overview: [["Committee filing", "14 Nov"], ["Planner reply", "12 days late"], ["Permit issue", "21 Nov"], ["Missing inputs", "10"]],
-    Tracking: [["Committee filing", "14 Nov"], ["Planner reply", "12 days late"], ["Crossings open", "4"], ["Articles to read", "5"]],
-  }[V.screen] || [["Field", "value"], ["Field", "value"], ["Field", "value"], ["Field", "value"]];
+    "Unités": [["Le plan dit", "1800 × 1500"], ["La maquette dit", "1560 × 1500"], ["Écart", "240 mm"], ["Apparu dans", "R04 · 24 Oct"]],
+    "Coordination": [["Niveau", "5"], ["Where", "corridor, axe 4"], ["Dessins", "mécanique + structure"], ["Unité", "507"]],
+    "Vue d'ensemble": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Émission du permis", "21 Nov"], ["Données manquantes", "10"]],
+    "Suivi": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Croisements ouverts", "4"], ["Articles à lire", "5"]],
+  }[V.screen] || [["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"]];
 
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
     <div class="pb">
-      ${V.screen === "Units" ? `<div class="row">${["Overview", "Openings", "Coordination", "History"].map((t, i) => `<span class="chip" style="${i === 1 ? "border-color:var(--ink)" : ""}">
+      ${V.screen === "Unités" ? `<div class="row">${["Vue d'ensemble", "Ouvertures", "Coordination", "Historique"].map((t, i) => `<span class="chip" style="${i === 1 ? "border-color:var(--ink)" : ""}">
         <span class="lo bar" style="width:40px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-      <div class="plan" data-img="plan" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[6], .25, "height")}"><span class="hi">unit crop</span></div>` : ""}
+      <div class="plan" data-img="plan" style="height:110px;flex:0 0 110px;${crop(UNIT_BOXES[6], .25, "height")}"><span class="hi">recadrage de l'unité</span></div>` : ""}
       ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
         <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>
         <span class="hi" style="font-size:12px">${val}</span></div>`).join("")}
       ${decides ? `<div class="tile" style="border-color:var(--ink)">
-        <div class="lo bar" style="width:50%"></div><div class="hi" style="font-weight:600;font-size:12.5px">Why this change?</div>
-        <div class="row" style="flex-wrap:wrap;gap:5px">${["client cost", "structure", "code", "city", "drawing error"].map((m) => `<span class="chip">
+        <div class="lo bar" style="width:50%"></div><div class="hi" style="font-weight:600;font-size:12.5px">Pourquoi ce changement?</div>
+        <div class="row" style="flex-wrap:wrap;gap:5px">${["coût client", "structure", "code", "ville", "erreur de dessin"].map((m) => `<span class="chip">
           <span class="lo bar" style="width:40px"></span><span class="hi">${m}</span></span>`).join("")}</div>
         <div class="lo bar" style="width:100%;height:34px;border-radius:5px"></div>
-        <div class="hi" style="border:1px solid var(--line-2);border-radius:5px;padding:7px;color:var(--ink-3);font-size:11.5px">one sentence for the next person</div>
-        <span class="btnw solid" style="justify-content:center"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Record the decision</span></span>
+        <div class="hi" style="border:1px solid var(--line-2);border-radius:5px;padding:7px;color:var(--ink-3);font-size:11.5px">une phrase pour la personne suivante</div>
+        <span class="btnw solid" style="justify-content:center"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Enregistrer la décision</span></span>
       </div>
-      <span class="btnw solid" style="justify-content:center">${icon("external-link")}<span class="lo bar" style="width:70px;background:#fff;opacity:.6"></span><span class="hi">Open in AutoCAD</span></span>`
+      <span class="btnw solid" style="justify-content:center">${icon("external-link")}<span class="lo bar" style="width:70px;background:#fff;opacity:.6"></span><span class="hi">Ouvrir dans AutoCAD</span></span>`
       : `<div class="tile"><div class="lo col">${bars(3)}</div>
-          <div class="hi" style="font-size:11.5px;color:var(--ink-2)">counted from the drawings, nothing typed</div></div>`}
+          <div class="hi" style="font-size:11.5px;color:var(--ink-2)">compté à partir des dessins, rien de saisi</div></div>`}
     </div>`;
 
-  if (mode === "Bottom sheet") {
-    return `<section class="pane rg sheet ${solo("inspector")}" data-rg="inspector → bottom sheet" data-fi="${fiOf("inspector")}" style="height:260px">
+  if (mode === "Feuille du bas") {
+    return `<section class="pane rg sheet ${solo("inspector")}" data-rg="inspecteur → feuille du bas" data-fi="${fiOf("inspector")}" style="height:260px">
       ${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
   }
-  if (mode === "Overlay drawer") {
-    return `<section class="pane rg drawer ${solo("inspector")}" data-rg="inspector → overlay" data-fi="${fiOf("inspector")}">
+  if (mode === "Tiroir superposé") {
+    return `<section class="pane rg drawer ${solo("inspector")}" data-rg="inspecteur → superposition" data-fi="${fiOf("inspector")}">
       ${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
   }
-  return region("inspector", "inspector", inner, step);
+  return region("inspector", "inspecteur", inner, step);
 }
 
 function footerHTML() {
-  if (V.footer.layout === "Hidden" || !SCREENS[V.screen].regions.includes("footer")) return "";
+  if (V.footer.layout === "Masqué" || !SCREENS[V.screen].regions.includes("footer")) return "";
   const step = V.journey ? SCREENS[V.screen].steps.footer : null;
-  return `<section class="pane rg ${solo("footer")}" data-rg="footer — effect of the change" data-fi="${fiOf("footer")}" style="flex:0 0 auto;grid-column:1/-1">
+  return `<section class="pane rg ${solo("footer")}" data-rg="pied de page — effet du changement" data-fi="${fiOf("footer")}" style="flex:0 0 auto;grid-column:1/-1">
     ${step ? `<span class="step">${step}</span>` : ""}
     <div class="pb" style="flex-direction:row;align-items:center;gap:10px;padding:8px 12px">
       <span class="lo bar" style="width:150px"></span><span class="lo bar" style="width:60px"></span><span class="lo bar" style="width:60px"></span>
-      <span class="hi" style="font-size:12px">South façade openings</span>
+      <span class="hi" style="font-size:12px">Ouvertures de la façade sud</span>
       <span class="hi" style="font-size:12px;font-weight:600">68.5 m² → 74.2 m²</span>
       <span class="hi" style="font-size:12px;color:var(--ink-2)">+5.7 m²</span>
       <span style="flex:1"></span>
-      <span class="btnw"><span class="lo bar" style="width:70px"></span><span class="hi">Read article 3.2.3.1</span></span>
+      <span class="btnw"><span class="lo bar" style="width:70px"></span><span class="hi">Lire l'article 3.2.3.1</span></span>
     </div></section>`;
 }
 
@@ -819,26 +825,26 @@ function footerHTML() {
 
 function render() {
   const def = SCREENS[V.screen];
-  const hasList = def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
-  const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Right panel";
+  const hasList = def.regions.includes("list") && V.list.layout !== "Masqué" && V.list.layout !== "Barre de filtres seulement";
+  const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Panneau de droite";
   const cols = [hasList ? "260px" : null, "1fr", hasInsp ? "340px" : null].filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
-    : { "Top bar only": "top", "Tabs only, no rail": "top",
-        "Wide rail with labels": "wide", "Wide rail with sections": "wide",
-        "Rail with labels under icons": "stack" }[V.nav.layout] || "rail";
+    : { "Barre du haut seulement": "top", "Onglets seulement, sans rail": "top",
+        "Rail large avec libellés": "wide", "Rail large avec sections": "wide",
+        "Rail avec libellés sous les icônes": "stack" }[V.nav.layout] || "rail";
 
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
-         data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
-         data-shell="${V.shell === "Inset card" ? "inset" : "flat"}">
+         data-density="${V.density}" data-fi="${fiOf("")}" data-isolate="${ISO[V.isolate] || "none"}"
+         data-shell="${V.shell === "Carte encastrée" ? "inset" : "flat"}">
       ${navHTML()}
       <div class="body">
         ${tabsHTML()}
         <div class="work" style="grid-template-columns:${SCREENS[V.screen].home ? "1fr" : cols};grid-auto-rows:min-content 1fr min-content;align-content:stretch">
           <div style="grid-column:1/-1">${headerHTML()}</div>
-          ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
-          ${SCREENS[V.screen].home ? "" : `${V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
+          ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Grille de fiches"])()}</div>` : ""}
+          ${SCREENS[V.screen].home ? "" : `${V.list.layout === "Barre de filtres seulement" && def.regions.includes("list") ? listHTML() : ""}
           ${hasList ? listHTML() : ""}
           ${contentHTML()}
           ${hasInsp ? inspectorHTML() : ""}
@@ -860,62 +866,69 @@ function render() {
 
 /* -------------------------------------------------------------- the dial */
 
-const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
-const sel = (options) => ({ type: "select", options, default: options[0] });
+const FI = { type: "select", options: ["héritée", "basse", "haute"], default: "héritée" };
+const sel = (options) => ({ type: "select",
+  options: options.map((o) => ({ value: o, label: o })) });
 
-const dial = DialKit.createDialKit("Wireframe C3", {
-  screen: sel(Object.keys(SCREENS)),
-  fidelity: sel(["low", "high"]),
-  regionLabels: true,
-  journeySteps: true,
-  density: sel(["comfortable", "compact"]),
-  shell: sel(["Flat", "Inset card"]),
-  homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
-  isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
-  layers: { _collapsed: false,
-    surveyor: true,
-    surveyorOpacity: [55, 0, 100, 5],
-    landscaping: false,
-    landscapingOpacity: [55, 0, 100, 5],
-    align: { _collapsed: true,
-      surveyorScale: [100, 60, 160, 1],
-      surveyorX: [0, -40, 40, .5],
-      surveyorY: [0, -40, 40, .5],
-      landscapingScale: [100, 60, 160, 1],
-      landscapingX: [0, -40, 40, .5],
-      landscapingY: [0, -40, 40, .5] } },
-  nav: { _collapsed: true, fidelity: FI,
-    layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels",
-      "Wide rail with sections", "Rail with labels under icons", "Rail only, no tabs",
-      "Tabs only, no rail", "Rail + view menu", "Rail + breadcrumb"]),
-    icons: sel(["Rail only", "Tabs only", "Rail and tabs", "None"]),
-    labels: sel(["Full label", "Hover only", "Short code", "Numbered", "Uppercase", "Hidden"]),
-    tabStyle: sel(["Plain", "Underline", "Pills", "Segmented", "Top accent", "Boxed"]),
-    tabAlign: sel(["Left", "Centred", "Spread"]) },
-  header: { _collapsed: true, fidelity: FI, layout: sel(["Title + actions", "Title only", "Title + metrics"]) },
-  list: { _collapsed: true, fidelity: FI, layout: sel(["Vertical list", "Card grid", "Filter bar only", "Hidden"]) },
-  content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
-  inspector: { _collapsed: true, fidelity: FI, layout: sel(["Right panel", "Bottom sheet", "Overlay drawer", "Hidden"]) },
-  footer: { _collapsed: true, fidelity: FI, layout: sel(["Impact strip", "Hidden"]) },
-}, { id: "wireframe-c3", persist: true });
+const dial = DialKit.createDialKit("Fil de fer C3", {
+  "Écran": sel(Object.keys(SCREENS)),
+  "Fidélité": sel(["haute", "basse"]),
+  "Étiquettes de zone": true,
+  "Étapes du parcours": true,
+  "Densité": sel(["confortable", "compact"]),
+  "Cadre": sel(["À plat", "Carte encastrée"]),
+  "Page d'accueil": sel(["Grille de fiches", "Tableau des projets", "Liste + aperçu", "Récents, puis tous", "Commencer d'abord"]),
+  "Isoler": sel(["aucune", "navigation", "entête", "liste", "contenu", "inspecteur", "pied de page"]),
+  "Calques": { _collapsed: false,
+    "Arpenteur": true,
+    "Opacité arpenteur": [55, 0, 100, 5],
+    "Aménagement": false,
+    "Opacité aménagement": [55, 0, 100, 5],
+    "Alignement": { _collapsed: true,
+      "Échelle arpenteur": [100, 60, 160, 1],
+      "Arpenteur X": [0, -40, 40, .5],
+      "Arpenteur Y": [0, -40, 40, .5],
+      "Échelle aménagement": [100, 60, 160, 1],
+      "Aménagement X": [0, -40, 40, .5],
+      "Aménagement Y": [0, -40, 40, .5] } },
+  "Navigation": { _collapsed: true, "Fidélité": FI,
+    "Disposition": sel(["Rail d'icônes + onglets", "Barre du haut seulement", "Rail large avec libellés",
+      "Rail large avec sections", "Rail avec libellés sous les icônes", "Rail seulement, sans onglets",
+      "Onglets seulement, sans rail", "Rail + menu des vues", "Rail + fil d'Ariane"]),
+    "Icônes": sel(["Rail seulement", "Onglets seulement", "Rail et onglets", "Aucune"]),
+    "Libellés": sel(["Libellé complet", "Au survol seulement", "Code court", "Numéroté", "Majuscules", "Masqué"]),
+    "Style des onglets": sel(["Simple", "Souligné", "Pastilles", "Segmenté", "Accent en haut", "Encadré"]),
+    "Alignement des onglets": sel(["Gauche", "Centré", "Réparti"]) },
+  "Entête": { _collapsed: true, "Fidélité": FI, "Disposition": sel(["Titre + actions", "Titre seulement", "Titre + chiffres"]) },
+  "Liste": { _collapsed: true, "Fidélité": FI, "Disposition": sel(["Liste verticale", "Grille de fiches", "Barre de filtres seulement", "Masqué"]) },
+  "Contenu": { _collapsed: true, "Fidélité": FI, "Disposition": sel(["Deux volets", "Volet unique + encart", "Empilé"]) },
+  "Inspecteur": { _collapsed: true, "Fidélité": FI, "Disposition": sel(["Panneau de droite", "Feuille du bas", "Tiroir superposé", "Masqué"]) },
+  "Pied de page": { _collapsed: true, "Fidélité": FI, "Disposition": sel(["Bandeau d'impact", "Masqué"]) },
+}, { id: "wireframe-c3-fr", persist: true });;
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
 
 function applyDial(v) {
-  V.screen = v.screen;
-  V.fidelity = v.fidelity;
-  V.labels = v.regionLabels;
-  V.journey = v.journeySteps;
-  V.density = v.density;
-  V.shell = v.shell;
-  V.homeLayout = v.homeLayout;
-  V.isolate = v.isolate;
-  const la = v.layers, al = la.align;
-  V.lay.arp = { on: la.surveyor, opacity: la.surveyorOpacity,
-    scale: al.surveyorScale, x: al.surveyorX, y: al.surveyorY };
-  V.lay.pay = { on: la.landscaping, opacity: la.landscapingOpacity,
-    scale: al.landscapingScale, x: al.landscapingX, y: al.landscapingY };
-  ["nav", "header", "list", "content", "inspector", "footer"].forEach((r) => { V[r] = v[r]; });
+  V.screen = v["Écran"];
+  V.fidelity = v["Fidélité"];
+  V.labels = v["Étiquettes de zone"];
+  V.journey = v["Étapes du parcours"];
+  V.density = v["Densité"];
+  V.shell = v["Cadre"];
+  V.homeLayout = v["Page d'accueil"];
+  V.isolate = v["Isoler"];
+  const la = v["Calques"], al = la["Alignement"];
+  V.lay.arp = { on: la["Arpenteur"], opacity: la["Opacité arpenteur"],
+    scale: al["Échelle arpenteur"], x: al["Arpenteur X"], y: al["Arpenteur Y"] };
+  V.lay.pay = { on: la["Aménagement"], opacity: la["Opacité aménagement"],
+    scale: al["Échelle aménagement"], x: al["Aménagement X"], y: al["Aménagement Y"] };
+  /* The region state keeps its short English ids because they are also CSS
+     hooks; only the panel speaks French. */
+  [["nav", "Navigation"], ["header", "Entête"], ["list", "Liste"], ["content", "Contenu"],
+   ["inspector", "Inspecteur"], ["footer", "Pied de page"]].forEach(([id, fr]) => {
+    const f = v[fr];
+    V[id] = { fidelity: f["Fidélité"], layout: f["Disposition"] };
+  });
   render();
 }
 
