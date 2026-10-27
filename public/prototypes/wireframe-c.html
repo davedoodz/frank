@@ -146,7 +146,31 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .hi{display:none}
 [data-fi="high"] .lo{display:none}
 [data-fi="high"] .pane{border-color:var(--line)}
+
+/* inset card: the chrome sinks into a grey field and the work becomes one
+   white card floating on it, the way a document-first app reads */
+.frame[data-shell="inset"]{background:var(--fill-2);border-color:#eaeaec}
+.frame[data-shell="inset"] .rail{background:none;border-right:0}
+.frame[data-shell="inset"] .tabs{border-bottom:0}
+.frame[data-shell="inset"] .body{padding:0 10px 10px}
+.frame[data-shell="inset"] .work{background:#fff;border:1px solid var(--line);border-radius:12px;
+  gap:0;padding:0;overflow:hidden}
+.frame[data-shell="inset"] .pane{border:0;border-radius:0;background:none}
+.frame[data-shell="inset"] .work > div > .pane,
+.frame[data-shell="inset"] .work > .pane{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.frame[data-shell="inset"] .pane.sheet,.frame[data-shell="inset"] .pane.drawer{background:#fff;border:1px solid var(--line)}
+
+/* High fidelity swaps the hatch for the drawing it stands for: the floor
+   plan, the elevation, or the massing view, all from the platform assets. */
 [data-fi="high"] .plan{background:none;border-style:solid}
+[data-fi="high"] .plan[data-img]{background-repeat:no-repeat;background-position:center;
+  background-size:cover;border-color:var(--line)}
+[data-fi="high"] .plan[data-img] > .hi{display:none}
+[data-fi="high"] .plan[data-img="plan"]{background-image:url(assets/plan-etage.jpg)}
+[data-fi="high"] .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
+[data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
+[data-fi="high"] .plan[data-img="crop"]{background-image:url(assets/plan-etage.jpg);
+  background-size:320%;background-position:30% 20%}
 [data-fi="high"] .btnw.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
 [data-fi="high"] .listrow.on{background:#eef1e0}
 [data-fi="high"] .listrow .dot{background:#8ba00f}
@@ -212,6 +236,8 @@ const V = {
   labels: true,
   journey: true,
   density: "comfortable",
+  shell: "Flat",
+  homeLayout: "Card grid",
   isolate: "none",
   nav: { fidelity: "inherit", layout: "Icon rail + tabs" },
   header: { fidelity: "inherit", layout: "Title + actions" },
@@ -247,6 +273,7 @@ const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1))
 /* --------------------------------------------------------------- screens */
 
 const SCREENS = {
+  Home: { icon: "home", regions: ["header", "content"], steps: {}, home: true },
   Overview: {
     icon: "layout-grid",
     regions: ["header", "content", "inspector"],
@@ -267,7 +294,7 @@ const SCREENS = {
   Tracking: { icon: "calendar-check", regions: ["header", "content", "inspector"], steps: { inspector: 1, content: 2 } },
 };
 
-const NAV = [["layout-grid", "Overview"], ["layers", "Units"], ["table", "Quantities"],
+const NAV = [["home", "Home"], ["layout-grid", "Overview"], ["layers", "Units"], ["table", "Quantities"],
   ["scale", "Rules"], ["git-compare", "Coordination"], ["calendar-check", "Tracking"], ["file", "Files"]];
 
 /* The cross-screen journey the prototype is built around. Everything else
@@ -321,6 +348,72 @@ function navLabel(name, i) {
 const railIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Rail only";
 const tabIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Tabs only";
 
+/* ------------------------------------------------------------ the home
+   Open a project that is running, or start one. The layouts differ only in
+   which of those two is louder. */
+
+const PROJECTS = [
+  ["Alder Court", "48 units · 6 levels", "A-201 R04 · 24 Oct", "6 differences"],
+  ["Rivière Nord", "112 units · 9 levels", "A-110 R07 · 21 Oct", "2 differences"],
+  ["Îlot Papineau", "26 units · 4 levels", "A-201 R02 · 17 Oct", "10 missing inputs"],
+  ["Maison Clark", "8 units · 3 levels", "A-100 R01 · 02 Oct", "up to date"],
+];
+
+const pcard = (p, big) => `<div class="tile">
+  <div class="plan" data-img="plan" style="min-height:${big ? 92 : 62}px;flex:0 0 auto"><span class="hi">first sheet</span></div>
+  <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
+  <div><span class="lo bar lt" style="width:72%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
+  <div><span class="lo bar lt" style="width:60%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[2]} · ${p[3]}</span></div>
+</div>`;
+
+const pnew = (big) => `<div class="tile" style="border-style:dashed;align-items:center;justify-content:center;text-align:center;gap:8px;min-height:${big ? 150 : 0}px">
+  ${icon("plus")}
+  <div><span class="lo bar" style="width:92px"></span><span class="hi" style="font-weight:600;font-size:13px">New project</span></div>
+  <div style="max-width:260px"><span class="lo bar lt" style="width:150px"></span>
+    <span class="hi" style="font-size:11.5px;color:var(--ink-3)">Drop a DXF or a PDF. The first read names the units and the levels; nothing is drawn.</span></div>
+</div>`;
+
+const ptable = () => `<table class="tbl"><thead><tr>${["Project", "Size", "Last read", "Open"].map((h) =>
+    `<th><span class="lo bar lt" style="width:60%"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
+  <tbody>${PROJECTS.map((p) => `<tr>${p.map((c) =>
+    `<td><span class="lo bar lt" style="width:${c.length > 12 ? 86 : 54}%"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>`;
+
+const plist = (sel) => PROJECTS.map((p, i) => `<div class="listrow ${i === sel ? "on" : ""}"><span class="dot"></span>
+  <span class="lo bar" style="width:${70 - i * 6}%"></span><span class="hi" style="flex:1">${p[0]}</span>
+  <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[3]}</span></div>`).join("");
+
+const pane = (label, title, inner, style) => `<div class="pane rg" data-rg="${label}" data-fi="${fiOf("content")}" style="${style || ""}">
+  <div class="ph">${icon("folder")}<span class="lo bar" style="width:110px"></span><span class="hi">${title}</span></div>
+  <div class="pb">${inner}</div></div>`;
+
+const HOMES = {
+  "Card grid": () => pane("projects", "All projects",
+    `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${pnew()}${PROJECTS.map((p) => pcard(p)).join("")}</div>`),
+
+  "Table of projects": () => pane("projects", "Ongoing projects",
+    `${ptable()}<div class="row"><span class="sp" style="flex:1"></span>
+      <span class="btnw solid">${icon("plus")}<span class="hi">New project</span></span></div>`),
+
+  "List + preview": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
+      ${pane("projects", "All projects", `${plist(0)}<span class="btnw solid" style="justify-content:center">${icon("plus")}<span class="hi">New project</span></span>`, "flex:.85")}
+      ${pane("preview", "Alder Court", `<div class="plan" data-img="plan" style="min-height:140px"><span class="hi">first sheet of the selected project</span></div>
+        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">48 units · 6 levels · read 6 min ago</span></div></div>`, "flex:1.5")}
+    </div>`,
+
+  "Recent, then all": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
+      <div class="col" style="flex:1;min-height:0">
+        ${pane("recent", "Opened this week", `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${PROJECTS.slice(0, 3).map((p) => pcard(p)).join("")}</div>`, "flex:0 0 210px")}
+        ${pane("all projects", "Everything else", ptable())}
+      </div>
+      <div class="col" style="flex:.5;min-height:0">${pane("start", "Start a project", pnew(true))}</div>
+    </div>`,
+
+  "Start first": () => `<div class="col" style="flex:1;min-height:0;gap:var(--gap)">
+      ${pane("start", "Start a project", pnew(true), "flex:0 0 55%")}
+      ${pane("ongoing", "Or carry on with", plist(-1))}
+    </div>`,
+};
+
 function navHTML() {
   const mode = V.nav.layout;
   if (mode === "Top bar only" || mode === "Tabs only, no rail") return "";
@@ -342,6 +435,19 @@ function navHTML() {
        data-labels-mode="${V.nav.labels}">${items}</nav>`;
 }
 
+/* The rail and the tab strip never carry the same destinations. When the
+   rail lists the screens, the strip drops to the current screen's own views. */
+const CONTEXT = {
+  Home: ["Ongoing", "Archived"],
+  Overview: ["What changed", "Totals", "Blocking"],
+  Units: ["Level 5", "Level 4", "Level 3", "All levels"],
+  Quantities: ["Units", "Areas", "Windows", "Materials"],
+  Rules: ["All", "To check", "Missing input"],
+  Coordination: ["Structure", "Mechanical", "Architecture"],
+  Tracking: ["Programme", "Sketch", "Committee", "Permit", "Site"],
+  Files: ["Drawings", "Model", "Surveyor", "Correspondence"],
+};
+
 function tabsHTML() {
   const mode = V.nav.layout;
   if (mode === "Rail only, no tabs") return "";
@@ -356,21 +462,23 @@ function tabsHTML() {
       ${bare ? `<span class="hi code">${SHORT(name)}</span>` : `<span class="hi">${navLabel(name, i)}</span>`}</button>`;
 
   let items;
-  if (mode === "Rail + screen menu") {
-    items = `<span class="btnw solid" data-menu>${ic ? icon(SCREENS[V.screen].icon) : ""}
-        <span class="hi">${navLabel(V.screen, names.indexOf(V.screen))}</span>${icon("chevron-down")}</span>
+  const views = CONTEXT[V.screen] || ["Overview"];
+  if (mode === "Rail + view menu") {
+    items = `<span class="btnw solid" data-menu><span class="hi">${views[0]}</span>${icon("chevron-down")}</span>
       <span class="sp"></span>
-      <span class="chip hi">${names.indexOf(V.screen) + 1} of ${names.length}</span>`;
+      <span class="chip hi">1 of ${views.length}</span>`;
   } else if (mode === "Rail + breadcrumb") {
     items = `<span class="crumb hi">Le Hauterive III</span>${icon("chevron-right")}
-      ${ic ? icon(SCREENS[V.screen].icon) : ""}<span class="crumb on hi">${navLabel(V.screen, names.indexOf(V.screen))}</span>
+      <span class="crumb on hi">${views[0]}</span>
       <span class="sp"></span>`;
-  } else if (mode === "Rail + grouped tabs") {
-    items = `<span class="grp hi">Read</span>${names.slice(0, 3).map(tab).join("")}
-      <span class="div"></span><span class="grp hi">Decide</span>${names.slice(3).map((n, i) => tab(n, i + 3)).join("")}
-      <span class="sp"></span>`;
-  } else {
+  } else if (top || mode === "Tabs only, no rail") {
     items = `${names.map(tab).join("")}<span class="sp"></span>`;
+  } else {
+    /* A rail is on screen, so the strip shows this screen's views instead
+       of repeating the screen list. */
+    items = `${views.map((t, i) => `<button aria-current="${i === 0}" title="${t}">
+        <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`).join("")}
+      <span class="sp"></span>`;
   }
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "nav + tabs" : "tabs"}" data-fi="${fiOf("nav")}"
@@ -382,12 +490,14 @@ function tabsHTML() {
 
 function headerHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.header : null;
-  const title = { Overview: ["Le Hauterive III", "8 floors · 98 units · 2 sources connected"],
+  const title = { Home: ["Projects", "4 ongoing · 1 archived"],
+    Overview: ["Le Hauterive III", "8 floors · 98 units · 2 sources connected"],
     Units: ["Typical floor — level 5", "14 units · 6 differences open"],
     Quantities: ["Quantities", "counted from the drawings, nothing typed"],
     Rules: ["Zoning and code", "7 articles · 5 unresolved · 1 possible exemption"],
     Coordination: ["Coordination", "4 crossings open · 1 settled"],
-    Tracking: ["Tracking", "one list per phase, flags raised by the drawings"] }[V.screen];
+    Files: ["Files", "what was read, and when"],
+    Tracking: ["Tracking", "one list per phase, flags raised by the drawings"] }[V.screen] || [V.screen, ""];
   const metrics = V.header.layout === "Title + metrics";
   const bare = V.header.layout === "Title only";
   return `<header class="pane rg ${solo("header")}" data-rg="header" data-fi="${fiOf("header")}" style="flex:0 0 auto">
@@ -400,7 +510,9 @@ function headerHTML() {
           <div class="hi" style="font-size:16px;font-weight:600">${title[0]}</div>
           <div class="hi" style="font-size:12px;color:var(--ink-2)">${title[1]}</div>
         </div>
-        ${bare ? "" : `<span class="btnw">${icon("external-link")}<span class="lo bar" style="width:52px"></span><span class="hi">Open in AutoCAD</span></span>
+        ${bare ? "" : SCREENS[V.screen].home
+          ? `<span class="btnw solid">${icon("plus")}<span class="lo bar" style="width:52px"></span><span class="hi">New project</span></span>`
+          : `<span class="btnw">${icon("external-link")}<span class="lo bar" style="width:52px"></span><span class="hi">Open in AutoCAD</span></span>
         <span class="btnw">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Export</span></span>`}
       </div>
       ${metrics ? `<div class="row" style="gap:var(--gap)">${[1, 2, 3, 4].map((i) => `<div class="tile" style="flex:1">
@@ -433,7 +545,7 @@ function listHTML() {
   }
   const inner = mode === "Card grid"
     ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${rows.map((r, i) => `<div class="tile">
-        <div class="plan" style="height:54px;flex:0 0 54px"></div>
+        <div class="plan" data-img="plan" style="height:54px;flex:0 0 54px"></div>
         <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r}</div></div>`).join("")}</div>`
     : rows.map((r, i) => `<div class="listrow ${i === 1 ? "on" : ""}"><span class="dot"></span>
         <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}</span></div>`).join("");
@@ -448,14 +560,16 @@ function contentHTML() {
   const mode = V.content.layout;
   const body = {
     Units: () => {
-      const pane = (t, note) => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
+      const pane = (t, note, kind) => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span></div>
-        <div class="pb"><div class="plan"><span class="lo"></span><span class="hi">${note}</span></div></div></div>`;
-      if (mode === "Stacked") return `<div class="col" style="flex:1">${pane("2D plan", "floor plan, outlines on top")}${pane("3D model", "massing, same level")}</div>`;
-      if (mode === "Single pane + inset") return `<div style="position:relative;flex:1;display:flex">${pane("2D plan", "floor plan, outlines on top")}
+        <div class="pb"><div class="plan" data-img="${kind}"><span class="lo"></span><span class="hi">${note}</span></div></div></div>`;
+      const plan = () => pane("2D plan", "floor plan, outlines on top", "plan");
+      const model = () => pane("3D model", "massing, same level", "model");
+      if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
+      if (mode === "Single pane + inset") return `<div style="position:relative;flex:1;display:flex">${plan()}
         <div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
-        <div class="pb"><div class="plan"><span class="hi">3D inset</span></div></div></div></div>`;
-      return `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap)">${pane("2D plan", "floor plan, outlines on top")}${pane("3D model", "massing, same level")}</div>`;
+        <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div></div>`;
+      return `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap)">${plan()}${model()}</div>`;
     },
     Overview: () => `<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)">
         ${["What changed since the last read", "The two connected sources", "Typical floor — 14 units", "Typology split"].map((t) => `<div class="tile">
@@ -483,7 +597,7 @@ function contentHTML() {
         <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
           <span class="hi" style="font-size:11.5px">missing inputs, shared across every article</span></div></div></div>`,
     Coordination: () => `<div class="col" style="flex:1">
-        <div class="pane" style="max-width:420px"><div class="pb"><div class="plan" style="height:170px">
+        <div class="pane" style="max-width:420px"><div class="pb"><div class="plan" data-img="plan" style="height:170px;flex:0 0 170px">
           <span class="lo"></span><span class="hi">two drawings overlaid, overlap marked</span></div></div></div>
         <div class="tile"><div class="lo col">${bars(3)}</div>
           <div class="hi" style="font-size:12px;color:var(--ink-2)">which two files, which level, which unit is affected</div></div></div>`,
@@ -521,7 +635,7 @@ function inspectorHTML() {
     <div class="pb">
       ${V.screen === "Units" ? `<div class="row">${["Overview", "Openings", "Coordination", "History"].map((t, i) => `<span class="chip" style="${i === 1 ? "border-color:var(--ink)" : ""}">
         <span class="lo bar" style="width:40px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-      <div class="plan" style="height:110px;flex:0 0 110px"><span class="hi">unit crop</span></div>` : ""}
+      <div class="plan" data-img="crop" style="height:110px;flex:0 0 110px"><span class="hi">unit crop</span></div>` : ""}
       ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
         <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>
@@ -578,17 +692,19 @@ function render() {
 
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
-         data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}">
+         data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
+         data-shell="${V.shell === "Inset card" ? "inset" : "flat"}">
       ${navHTML()}
       <div class="body">
         ${tabsHTML()}
-        <div class="work" style="grid-template-columns:${cols};grid-auto-rows:min-content 1fr min-content;align-content:stretch">
+        <div class="work" style="grid-template-columns:${SCREENS[V.screen].home ? "1fr" : cols};grid-auto-rows:min-content 1fr min-content;align-content:stretch">
           <div style="grid-column:1/-1">${headerHTML()}</div>
-          ${V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
+          ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
+          ${SCREENS[V.screen].home ? "" : `${V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
           ${hasList ? listHTML() : ""}
           ${contentHTML()}
           ${hasInsp ? inspectorHTML() : ""}
-          ${footerHTML()}
+          ${footerHTML()}`}
         </div>
         ${def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
       </div>
@@ -617,11 +733,13 @@ const dial = DialKit.createDialKit("Wireframe C", {
   regionLabels: true,
   journeySteps: true,
   density: sel(["comfortable", "compact"]),
+  shell: sel(["Flat", "Inset card"]),
+  homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
   nav: { _collapsed: true, fidelity: FI,
     layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels",
       "Wide rail with sections", "Rail with labels under icons", "Rail only, no tabs",
-      "Tabs only, no rail", "Rail + screen menu", "Rail + breadcrumb", "Rail + grouped tabs"]),
+      "Tabs only, no rail", "Rail + view menu", "Rail + breadcrumb"]),
     icons: sel(["Rail only", "Tabs only", "Rail and tabs", "None"]),
     labels: sel(["Full label", "Hover only", "Short code", "Numbered", "Uppercase", "Hidden"]),
     tabStyle: sel(["Plain", "Underline", "Pills", "Segmented", "Top accent", "Boxed"]),
@@ -641,6 +759,8 @@ function applyDial(v) {
   V.labels = v.regionLabels;
   V.journey = v.journeySteps;
   V.density = v.density;
+  V.shell = v.shell;
+  V.homeLayout = v.homeLayout;
   V.isolate = v.isolate;
   ["nav", "header", "list", "content", "inspector", "footer"].forEach((r) => { V[r] = v[r]; });
   render();
