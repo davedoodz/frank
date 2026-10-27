@@ -296,6 +296,22 @@ const V = {
   shell: "Inset card",
   homeLayout: "Card grid",
   isolate: "none",
+
+  /* Everything below is what the screen is actually doing, as opposed to how
+     it is drawn: which view, which row, which article, what has been decided.
+     Every control on the screen writes one of these. */
+  project: "Alder Court",
+  view: {},          // screen → index of the view in its tab strip
+  sel: {},           // screen → index of the selected row
+  article: 2,        // which article is open under Zonage et code
+  utab: 1,           // which tab of the unit inspector
+  zoom: 100,         // plan zoom, in percent
+  focus: false,      // the drawing alone, list and inspector folded away
+  query: "",         // the text in the list search
+  reason: null,      // the reason picked for the decision being recorded
+  note: "",          // the sentence written for the next person
+  settled: {},       // "screen · row" → the reason it was settled with
+  toast: null,       // what the last action answered
   nav: { fidelity: "inherit", layout: "Icon rail + tabs" },
   header: { fidelity: "inherit", layout: "Title + actions" },
   list: { fidelity: "inherit", layout: "Vertical list" },
@@ -352,6 +368,75 @@ const SCREENS = {
     steps: { list: 1, content: 2, inspector: 3 },
   },
   "Suivi": { icon: "calendar-check", regions: ["header", "content", "inspector"], steps: { inspector: 1, content: 2 } },
+  /* The rail offered Fichiers before the screen existed, so the entry threw
+     on click. It is a screen now: what was read, and when. */
+  "Fichiers": { icon: "file", regions: ["header", "content"], steps: {} },
+};
+
+/* ------------------------------------------------------- what the screens
+   are reading. One table per question, so a control can change the answer
+   instead of only changing a border colour. */
+
+const UNITS_BY_LEVEL = {
+  "Niveau 5": [["501 · 3½", "707 pi²"], ["502 · 4½", "1 écart"], ["503 · 3½", "753 pi²"],
+    ["504 · 3½+bureau", "822 pi²"], ["505 · 4½", "968 pi²"], ["506 · 4½", "1 écart"],
+    ["507 · 4½", "1203 pi²"], ["508 · 5½", "1 écart"]],
+  "Niveau 4": [["401 · 3½", "707 pi²"], ["402 · 4½", "985 pi²"], ["403 · 3½", "753 pi²"],
+    ["404 · 3½+bureau", "822 pi²"], ["405 · 4½", "968 pi²"], ["406 · 5½", "1 écart"]],
+  "Niveau 3": [["301 · 3½", "707 pi²"], ["302 · 4½", "985 pi²"], ["303 · 4½", "1 écart"],
+    ["304 · 5½", "1424 pi²"]],
+};
+UNITS_BY_LEVEL["Tous les niveaux"] = Object.values(UNITS_BY_LEVEL).flat();
+
+const CROSSINGS = {
+  "Structure": [["C-05-07 poutre sous le plafond", "niveau 5"], ["C-05-11 colonne absente", "niveau 5"],
+    ["C-02-05 poutre contre la dalle", "réglé"]],
+  "Mécanique": [["C-05-02 conduit dans une colonne", "niveau 5"], ["C-TT-03 drain hors colonne", "toiture"]],
+  "Architecture": [["C-05-09 retombée sous la fenêtre", "niveau 5"], ["C-04-01 gaine dans le rangement", "niveau 4"]],
+};
+
+/* The articles that touch this project, each with the number the drawings
+   produced and the number the article asks for. */
+const ARTICLES = [
+  ["art. 9 hauteur", "« La hauteur maximale est de 5 étages. »", "6 étages", "5 étages", "non résolu"],
+  ["art. 43 implantation", "« Le taux d'implantation maximal est de 55 %. »", "48,2 %", "55 %", "conforme"],
+  ["art. 22 marge arrière", "« La marge arrière minimale est de 3,00 m. »", "2.70 m", "3.00 m", "non résolu"],
+  ["art. 71 stationnement", "« Une case par logement de 2 chambres et plus. »", "22 cases", "30 cases", "non résolu"],
+  ["art. 134 verdissement", "« 20 % de la superficie du terrain en pleine terre. »", "17 %", "20 %", "non résolu"],
+  ["3.2.3.1 ouvertures", "« Surface maximale des baies non protégées selon la distance limitative. »", "74.2 m²", "68.5 m²", "non résolu"],
+];
+
+const QTABS = {
+  "Unités": { head: ["Type", "Par étage", "Projet", "pi² moy", "pi² total", "Part"],
+    rows: [["3½", 3, 21, 729, 2187, "21 %"], ["3½+bureau", 1, 7, 880, 880, "7 %"],
+      ["4½", 5, 35, 1147, 5733, "36 %"], ["4½+bureau", 1, 7, 1494, 1494, "7 %"], ["5½", 4, 28, 1424, 5695, "29 %"]] },
+  "Superficie par étage": { head: ["Niveau", "Unités", "Net pi²", "Brut pi²", "Circulation", "Part"],
+    rows: [["6", 8, 9120, 10980, "17 %", "18 %"], ["5", 14, 11860, 13940, "15 %", "23 %"],
+      ["4", 14, 11860, 13940, "15 %", "23 %"], ["3", 8, 9120, 10980, "17 %", "18 %"], ["2", 4, 4580, 5610, "18 %", "9 %"]] },
+  "Fenêtres": { head: ["Repère", "Largeur", "Hauteur", "Quantité", "Façade", "Source"],
+    rows: [["W-12", "1800", "1500", 24, "sud", "A-201 R04"], ["W-14", "1560", "1500", 6, "sud", "A-201 R04"],
+      ["W-21", "900", "1500", 18, "est", "A-202 R03"], ["W-33", "2400", "2100", 8, "ouest", "A-202 R03"]] },
+  "Matériaux": { head: ["Matériau", "Façade", "m²", "Part", "Révision", "Source"],
+    rows: [["brique grise", "sud", 412, "46 %", "R04", "A-202"], ["brique rouge", "est", 198, "22 %", "R03", "A-202"],
+      ["panneau fibrociment", "ouest", 186, "21 %", "R03", "A-202"], ["verre", "toutes", 98, "11 %", "R04", "A-201"]] },
+};
+
+const PHASES = {
+  "Programme": ["Programme reçu du client", "Nombre d'unités visé fixé", "Mix de typologies arrêté"],
+  "Esquisse": ["Implantation testée sur le lot", "Étage type dessiné", "Hauteur vérifiée contre art. 9"],
+  "Comité": ["Tableau des superficies par étage", "Répartition des typologies",
+    "Élévations avec matériaux", "Demande de dérogation mineure rédigée", "Note à l'urbaniste"],
+  "Permis": ["Plans d'émission pour permis", "Calculs de conformité joints", "Réponse de l'urbaniste"],
+  "Site": ["Relevé d'implantation", "Carnet de chantier", "Tel que construit"],
+};
+
+const FILES = {
+  "Dessins": [["A-201 Plan niveau 5", "R04 · 24 Oct · lu"], ["A-202 Élévations", "R03 · 02 Oct · lu"],
+    ["A-100 Implantation", "R02 · 12 Sep · lu"], ["S-301 Structure", "R02 · 19 Oct · lu"]],
+  "Maquette": [["Maquette SketchUp", "24 Oct · lue"], ["Volumétrie d'ensemble", "21 Oct · lue"]],
+  "Arpenteur": [["Plan d'arpentage", "R2 · 12 Sep · calé sur A-100"], ["Certificat de localisation", "R1 · 03 Mar · lu"]],
+  "Correspondance": [["Note à l'urbaniste", "envoyée 15 Oct"], ["Réponse de l'urbaniste", "en retard de 12 jours"],
+    ["Compte rendu de comité", "14 Nov · à venir"]],
 };
 
 /* Unit boxes measured on assets/plan-etage.jpg, normalised 0–1, same numbers
@@ -443,6 +528,34 @@ function region(name, label, inner, step) {
 
 const bars = (n, w = [100, 70, 85]) =>
   Array.from({ length: n }, (_, i) => `<div class="bar" style="width:${w[i % w.length]}%"></div>`).join("");
+
+/* ------------------------------------------------------- what is selected
+   The tab strip, the list and the chips all read from here, so a click
+   changes the answer on the screen and not just the border of the control. */
+
+const viewsOf = (screen) => CONTEXT[screen] || [];
+const viewIndex = (screen) => Math.min(V.view[screen] || 0, Math.max(0, viewsOf(screen).length - 1));
+const viewOf = (screen) => viewsOf(screen)[viewIndex(screen)];
+
+/* The rows the current screen is showing, after its view and its search. */
+function rowsOf(screen) {
+  const all = screen === "Unités" ? (UNITS_BY_LEVEL[viewOf(screen)] || UNITS_BY_LEVEL["Niveau 5"])
+    : screen === "Coordination" ? (CROSSINGS[viewOf(screen)] || [])
+      : [];
+  const q = V.query.trim().toLowerCase();
+  return q ? all.filter((r) => r.join(" ").toLowerCase().includes(q)) : all;
+}
+
+const selIndex = (screen) => {
+  const n = rowsOf(screen).length;
+  if (!n) return -1;
+  return Math.min(V.sel[screen] === undefined ? 0 : V.sel[screen], n - 1);
+};
+const selRow = (screen) => rowsOf(screen)[selIndex(screen)];
+const settleKey = () => `${V.screen} · ${(selRow(V.screen) || [""])[0]}`;
+
+/* A control is a control: it says what it does and it is clickable. */
+const act = (name, value) => `data-act="${name}"${value === undefined ? "" : ` data-value="${value}"`}`;
 
 /* ------------------------------------------------------------ the parts */
 
@@ -869,7 +982,9 @@ function render() {
 
   document.querySelectorAll("[data-screen]").forEach((b) => b.addEventListener("click", () => {
     V.screen = b.dataset.screen;
-    dial.setValue("screen", V.screen);
+    /* The panel speaks English: hand it the English name, or it rejects the
+       value and the first click is swallowed. */
+    dial.setValue("screen", FR_SCREEN[V.screen]);
     render();
   }));
 }
@@ -879,7 +994,7 @@ function render() {
 const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
 /* The panel names a screen in English; the prototype knows it in French. */
 const SCREEN_FR = { Projects: "Projets", Overview: "Vue d'ensemble", Units: "Unités",
-  Quantities: "Quantités", Coordination: "Coordination", Tracking: "Suivi" };
+  Quantities: "Quantités", Coordination: "Coordination", Tracking: "Suivi", Files: "Fichiers" };
 const FR_SCREEN = Object.fromEntries(Object.entries(SCREEN_FR).map(([en, fr]) => [fr, en]));
 
 const sel = (options) => ({ type: "select", options, default: options[0] });
@@ -925,7 +1040,7 @@ const dial = DialKit.createDialKit("Wireframe C3", {
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
 
 function applyDial(v) {
-  V.screen = SCREEN_FR[v.screen];
+  V.screen = SCREEN_FR[v.screen] || V.screen;
   V.fidelity = v.fidelity;
   V.labels = v.regionLabels;
   V.journey = v.journeySteps;
