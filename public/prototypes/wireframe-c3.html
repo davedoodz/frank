@@ -495,6 +495,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 [data-fi="low"] .model3d-canvas,[data-fi="low"] .model3d-hint,[data-fi="low"] .model3d-selection,
 [data-fi="low"] .model3d-status{display:none}
 [data-fi="high"] .btnw.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
+/* Ready to be saved: the project's green, the same one the selected level
+   wears, so the one colour means "this is live" everywhere. */
+[data-fi="high"] .btnw.solid.go{background:#8ba00f;border-color:#8ba00f;color:#fff}
 [data-fi="high"] .listrow.on{background:#eef1e0}
 [data-fi="high"] .listrow .dot{background:#8ba00f}
 
@@ -1148,6 +1151,17 @@ const selIndex = (screen) => {
 };
 const selRow = (screen) => rowsOf(screen)[selIndex(screen)];
 const settleKey = () => `${V.screen} · ${(selRow(V.screen) || [""])[0]}`;
+/* A decision is saveable as soon as there is something to save: a reason
+   from the list, or a sentence written by hand. */
+const saveReady = () => Boolean(V.reason || V.note.trim());
+function paintSaveButton() {
+  const b = document.querySelector("[data-save]");
+  if (!b) return;
+  const ok = saveReady();
+  b.classList.toggle("go", ok);
+  b.classList.toggle("off", !ok);
+  b.title = ok ? "Enregistrer" : "Choisissez une raison ou écrivez une phrase";
+}
 
 /* A control is a control: it says what it does and it is clickable. */
 const act = (name, value) => `data-act="${name}"${value === undefined ? "" : ` data-value="${value}"`}`;
@@ -2108,8 +2122,10 @@ function render() {
     const f = document.querySelector(".find");
     f.focus(); f.setSelectionRange(f.value.length, f.value.length);
   };
+  /* Typing must not re-render — the field would lose the caret — so the one
+     thing that changes with the text is patched in place. */
   const note = document.querySelector(".note");
-  if (note) note.oninput = (e) => { V.note = e.target.value; };
+  if (note) note.oninput = (e) => { V.note = e.target.value; paintSaveButton(); };
 
   /* The dialog's fields write straight into state without a re-render, so
      typing is never interrupted; the button validates when it is pressed. */
@@ -2302,8 +2318,8 @@ function onClick(e) {
     }
     case "reason": V.reason = V.reason === value ? null : value; break;
     case "save":
-      if (!V.reason) { say("Choisissez une raison: une décision sans raison ne s'enregistre pas."); break; }
-      V.settled[settleKey()] = V.reason + (V.note.trim() ? ` · ${V.note.trim()}` : "");
+      if (!saveReady()) { say("Rien à enregistrer: choisissez une raison ou écrivez une phrase."); break; }
+      V.settled[settleKey()] = [V.reason, V.note.trim()].filter(Boolean).join(" · ");
       say(`Décision enregistrée sur ${settleKey()}.`);
       V.reason = null; V.note = "";
       break;
