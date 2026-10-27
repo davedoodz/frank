@@ -158,6 +158,11 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .col{display:flex;flex-direction:column;gap:8px}
 .chip{height:22px;border:1px solid var(--line-2);border-radius:999px;background:var(--fill-2);
   display:inline-flex;align-items:center;gap:5px;padding:0 9px;font-size:11.5px;color:var(--ink-2)}
+/* An icon chip: square, no label, the name carried by the tooltip and by the
+   line beside the row. Four of them fit where two words did not. */
+.chip.ico{width:26px;height:26px;padding:0;justify-content:center;border-radius:7px;flex:0 0 26px}
+.chip.ico.on{border-color:var(--ink);color:var(--ink);background:var(--fill)}
+.utabs{gap:5px;align-items:center}
 .btnw{height:26px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
   display:inline-flex;align-items:center;gap:6px;padding:0 9px;font-size:12px;color:var(--ink-2)}
 .btnw.solid{background:var(--bar);border-color:var(--line);color:var(--ink)}
@@ -581,8 +586,11 @@ LEVELS.forEach((lv) => {
 UNITS_BY_LEVEL["Tous les niveaux"] = LEVELS.flatMap((lv) => UNITS_BY_LEVEL[`Niveau ${lv}`]);
 
 /* The inspector's own tabs, and the five reasons a change is allowed to have.
-   A decision without one of them does not save. */
+   A decision without one of them does not save.
+   Four words wrapped onto two lines in a 300 px panel, so the tabs are icons
+   now: the name stays in the title and in the caption under the crop. */
 const UNIT_TABS = ["Vue d'ensemble", "Ouvertures", "Coordination", "Historique"];
+const UNIT_TAB_ICONS = ["box", "image", "git-compare", "clock"];
 const REASONS = ["coût client", "structure", "code", "ville", "erreur de dessin"];
 
 /* The provisions that touch this project. Each one carries where it comes
@@ -1278,8 +1286,9 @@ function inspectorHTML() {
 
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
     <div class="pb">
-      ${V.screen === "Unités" ? `<div class="row">${UNIT_TABS.map((t, i) => `<span class="chip" ${act("utab", i)} style="${i === V.utab ? "border-color:var(--ink)" : ""}">
-        <span class="lo bar" style="width:40px"></span><span class="hi">${t}</span></span>`).join("")}</div>
+      ${V.screen === "Unités" ? `<div class="row utabs">${UNIT_TABS.map((t, i) => `<span class="chip ico ${i === V.utab ? "on" : ""}" ${act("utab", i)} title="${t}" aria-label="${t}">
+        ${icon(UNIT_TAB_ICONS[i])}</span>`).join("")}
+        <span class="hi" style="font-size:11.5px;color:var(--ink-2);padding-left:2px">${UNIT_TABS[V.utab]}</span></div>
       ${V.utab === 1
         /* Ouvertures is about doors and windows, so it shows the schedule
            sheet the sizes are read from, not a crop of the floor plan. */
