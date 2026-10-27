@@ -642,8 +642,11 @@ const PHASES = {
 };
 
 const FILES = {
-  "Dessins": [["A-201 Plan niveau 5", "R04 · 24 Oct · lu"], ["A-202 Élévations", "R03 · 02 Oct · lu"],
-    ["A-100 Implantation", "R02 · 12 Sep · lu"], ["S-301 Structure", "R02 · 19 Oct · lu"]],
+  /* The same sheet codes the level tabs read: A-205 to A-212, one per
+     level, plus the sheets that are not a floor plan. */
+  "Dessins": [["A-209 Plan du niveau 5", "R04 · 24 Oct · lu"], ["A-212 Plan du niveau 8", "R03 · 18 Oct · lu"],
+    ["A-301 Élévations", "R03 · 02 Oct · lu"], ["A-100 Implantation", "R02 · 12 Sep · lu"],
+    ["S-301 Structure", "R02 · 19 Oct · lu"]],
   "Maquette": [["Maquette SketchUp", "24 Oct · lue"], ["Volumétrie d'ensemble", "21 Oct · lue"]],
   "Arpenteur": [["Plan d'arpentage", "R2 · 12 Sep · calé sur A-100"], ["Certificat de localisation", "R1 · 03 Mar · lu"]],
   "Correspondance": [["Note à l'urbaniste", "envoyée 15 Oct"], ["Réponse de l'urbaniste", "en retard de 12 jours"],
@@ -796,19 +799,28 @@ const sheet = () => SHEETS[viewOf("Unités")] || SHEETS["Tous les niveaux"];
 const dwgName = () => V.docs.names[viewOf("Unités")] || sheet().file;
 
 /* What a drawing pane says about its file: where it is, what it is called,
-   which revision was read — and the two ways out of fitte, next to the
-   drawing they act on rather than up in the header. */
+   which revision was read. The button that hands the drawing back to the
+   application sits in the pane header, a thumb away from the drawing
+   instead of up in the screen header. */
+const HOSTS = { plan: ["autocad", "Ouvrir dans AutoCAD"], model: ["sketchup", "Ouvrir dans SketchUp"] };
+
+function hostButton(kind) {
+  const [a, label] = HOSTS[kind];
+  return `<span class="btnw" ${act(a)} title="${label}">${icon("external-link")}
+    <span class="lo bar" style="width:46px"></span><span class="hi">${label}</span></span>`;
+}
+
 function fileStrip(kind) {
   const dir = kind === "plan" ? V.docs.dir : V.docs.skpDir;
   const name = kind === "plan" ? dwgName() : V.docs.skp;
   const stamp = kind === "plan" ? `${sheet().rev} · ${sheet().date}` : "R07 · 22 Oct";
-  const host = kind === "plan" ? ["autocad", "Ouvrir dans AutoCAD"] : ["sketchup", "Ouvrir dans SketchUp"];
+  /* The chip itself is never a .hi: that class switches display, which
+     would stop it being a flex row and let the path spill out of it. */
   return `<div class="fstrip rg" data-rg="fichier">
-    <span class="fpath hi" ${act("renamefile", kind)} title="Changer le dossier ou le nom du fichier">
-      ${icon("file")}<span class="fdir">${dir}</span><span class="fname">${name}</span>
-      <span class="frev">${stamp}</span>${icon("pen-line")}</span>
-    <span class="btnw" ${act(host[0])} title="${host[1]}">${icon("external-link")}
-      <span class="lo bar" style="width:52px"></span><span class="hi">${host[1]}</span></span>
+    <span class="fpath" ${act("renamefile", kind)} title="${dir}${name}  ·  changer le dossier ou le nom">
+      ${icon("file")}<span class="lo bar" style="width:84px"></span>
+      <span class="hi fdir">${dir}</span><span class="hi fname">${name}</span>
+      <span class="hi frev">${stamp}</span>${icon("pen-line")}</span>
   </div>`;
 }
 
@@ -1120,7 +1132,8 @@ function contentHTML() {
     "Unités": () => {
       const unit = (selRow("Unités") || ["—"])[0];
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
-        <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span></div>
+        <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
+        <span style="flex:1"></span>${hostButton(kind === "plan" ? "plan" : "model")}</div>
         ${fileStrip(kind === "plan" ? "plan" : "model")}
         <div class="pb" style="overflow:hidden"><div class="plan ${cls}" data-img="${kind}" style="zoom:${V.zoom / 100}"><span class="lo"></span><span class="hi">${note}</span>${layers}</div></div></div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
