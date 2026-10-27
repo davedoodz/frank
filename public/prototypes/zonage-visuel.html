@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zonage et code — dix lectures graphiques</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#a2a2a2;
+  --line:#cfcfcf; --line-2:#e8e8e8; --fill:#f1f1f1; --fill-2:#f7f7f7;
+  --page:#fbfbfb;
+  --over:#c0794a; --over-2:#efd9c6; --ok:#4b7d5e; --ok-2:#d7e6dc; --ref:#b4b4b4;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+
+/* The page is a wall of graphics on the left and one block of law on the
+   right: every mark is clickable and the panel is the only place words are
+   spent. */
+.layout{display:grid;grid-template-columns:1fr 340px;gap:22px;max-width:1420px;margin:0 auto;padding:22px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-content:start}
+figure{background:#fff;border:1px solid var(--line-2);border-radius:10px;padding:14px 15px 16px;min-width:0}
+figcaption{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
+  color:var(--ink-3);margin-bottom:12px}
+figcaption i{font-style:normal;color:var(--ink);font-family:var(--sans);font-size:12.5px;font-weight:500}
+svg{display:block;width:100%;overflow:visible}
+text{font-family:var(--sans);fill:var(--ink)}
+text.m{font-family:var(--mono)}
+.hit{cursor:pointer}
+.hit:hover{opacity:.72}
+/* Touching a mark anywhere dims the other six, so the same provision can be
+   followed from one reading to the next. */
+[data-i]{transition:opacity .12s}
+[data-i][data-on="0"]{opacity:.32}
+
+/* the law, the only prose on the page */
+aside{position:sticky;top:22px;align-self:start;background:#fff;border:1px solid var(--line-2);
+  border-radius:10px;padding:16px 17px 17px}
+aside .pick{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+aside .pick button{font-family:var(--mono);font-size:11px;border:1px solid var(--line-2);background:#fff;
+  border-radius:5px;padding:3px 7px;color:var(--ink-2);cursor:pointer}
+aside .pick button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink)}
+aside q{display:block;font-size:14.5px;line-height:1.5;quotes:'« ' ' »'}
+aside .src{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--ink-3);line-height:1.5}
+aside .nums{display:flex;gap:18px;margin:14px 0 4px;font-variant-numeric:tabular-nums}
+aside .nums div span{display:block;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+aside .nums div b{font-size:20px;font-weight:600;letter-spacing:-.01em}
+a.cta{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;
+  background:var(--ink);color:#fff;text-decoration:none;border-radius:7px;padding:10px 12px;
+  font-size:13px;font-weight:500}
+a.cta:hover{background:#000}
+a.cta svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}.grid{grid-template-columns:1fr}
+  aside{position:static}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="grid" id="grid"></div>
+  <aside>
+    <div class="pick" id="pick"></div>
+    <q id="q"></q>
+    <div class="nums" id="nums"></div>
+    <div class="src" id="src"></div>
+    <a class="cta" id="cta" target="_blank" rel="noopener noreferrer">
+      <span>Texte officiel</span>
+      <svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>
+    </a>
+  </aside>
+</div>
+
+<script>
+/* The provisions, their numbers, and where the official text lives. kind
+   says which side of the number is allowed: a ceiling or a floor. */
+const A = [
+  { id: "art. 9", topic: "Hauteur en étages", kind: "max", m: 6, r: 5, u: " étages", step: 1,
+    q: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "art. 43", topic: "Taux d'implantation", kind: "max", m: 48.2, r: 55, u: " %",
+    q: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "art. 22", topic: "Marge arrière", kind: "min", m: 2.70, r: 3.00, u: " m",
+    q: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "art. 71", topic: "Stationnement", kind: "min", m: 22, r: 30, u: " cases", step: 1,
+    q: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "art. 134", topic: "Verdissement", kind: "min", m: 17, r: 20, u: " %",
+    q: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "3.2.3.1", topic: "Baies non protégées", kind: "max", m: 74.2, r: 68.5, u: " m²",
+    q: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
+    src: "Code de construction du Québec, chapitre I — Bâtiment · CNB 2020 modifié",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202" },
+  { id: "A-19.1", topic: "Cadre légal", kind: "none", m: null, r: null, u: "",
+    q: "La loi habilite la municipalité à régir, par règlement, l'usage du sol et l'implantation des bâtiments sur son territoire.",
+    src: "Loi sur l'aménagement et l'urbanisme · Québec · texte consolidé",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1" },
+];
+const N = A.filter((a) => a.kind !== "none");          /* the ones with a number */
+
+const dec = (a) => Number.isInteger(a.m) && Number.isInteger(a.r) ? 0 : 1;
+const fmt = (a, v) => v === null ? "—" : v.toLocaleString("fr-CA",
+  { minimumFractionDigits: dec(a), maximumFractionDigits: dec(a) }) + a.u;
+/* Positive always means past the limit, whichever side the limit is on. */
+const slack = (a) => a.kind === "none" ? null
+  : (a.kind === "max" ? 1 : -1) * (a.m - a.r) / a.r * 100;
+const over = (a) => slack(a) > 0;
+const ink = (a) => a.kind === "none" ? "var(--ref)" : over(a) ? "var(--over)" : "var(--ok)";
+const wash = (a) => a.kind === "none" ? "var(--fill)" : over(a) ? "var(--over-2)" : "var(--ok-2)";
+const pct = (n) => (n > 0 ? "+" : "") + n.toLocaleString("fr-CA", { maximumFractionDigits: 1 }) + " %";
+/* How much of what the rule allows is used. Above 1 is past the limit for a
+   ceiling; for a floor it is the share of the required amount reached. */
+const use = (a) => a.kind === "max" ? a.m / a.r : a.m / a.r;
+
+let sel = 0;
+const hit = (i) => `class="hit" data-i="${i}"`;
+
+/* ---------------------------------------------------------------- 01 arcs */
+function arcs() {
+  const R = 26, C = Math.PI * R;                       /* half ring */
+  return A.map((a, i) => {
+    const u = a.kind === "none" ? 0 : Math.min(use(a), 1.4);
+    const sweep = Math.min(u, 1.4) / 1.4 * C;
+    const lim = (1 / 1.4) * C;
+    return `<g ${hit(i)} transform="translate(${(i % 4) * 95 + 48},${Math.floor(i / 4) * 92 + 42})">
+      <path d="M -${R} 0 A ${R} ${R} 0 0 1 ${R} 0" fill="none" stroke="var(--fill)" stroke-width="9"/>
+      <path d="M -${R} 0 A ${R} ${R} 0 0 1 ${R} 0" fill="none" stroke="${ink(a)}" stroke-width="9"
+        stroke-dasharray="${sweep} ${C}"/>
+      <path d="M -${R} 0 A ${R} ${R} 0 0 1 ${R} 0" fill="none" stroke="var(--ink)" stroke-width="13"
+        stroke-dasharray="1.6 ${C}" stroke-dashoffset="${-lim}"/>
+      <text text-anchor="middle" y="16" font-size="12" font-weight="600">${a.kind === "none" ? "—" : fmt(a, a.m)}</text>
+      <text text-anchor="middle" y="30" font-size="9.5" class="m" fill="var(--ink-3)">${a.id}</text>
+    </g>`;
+  }).join("");
+}
+
+/* -------------------------------------------------------- 02 dumbbells */
+function dumbbell() {
+  const W = 300, x0 = 54;
+  return N.map((a, k) => {
+    const i = A.indexOf(a), y = k * 30 + 16;
+    const max = Math.max(a.m, a.r) * 1.25;
+    const X = (v) => x0 + v / max * (W - x0);
+    return `<g ${hit(i)}>
+      <text x="0" y="${y + 4}" font-size="10" class="m" fill="var(--ink-3)">${a.id}</text>
+      <line x1="${X(Math.min(a.m, a.r))}" x2="${X(Math.max(a.m, a.r))}" y1="${y}" y2="${y}"
+        stroke="${ink(a)}" stroke-width="3"/>
+      <circle cx="${X(a.r)}" cy="${y}" r="4.5" fill="#fff" stroke="var(--ink)" stroke-width="1.5"/>
+      <circle cx="${X(a.m)}" cy="${y}" r="4.5" fill="${ink(a)}"/>
+      <text x="${X(Math.max(a.m, a.r)) + 9}" y="${y + 4}" font-size="10.5" class="m"
+        fill="var(--ink-2)">${fmt(a, a.m)} / ${fmt(a, a.r)}</text></g>`;
+  }).join("");
+}
+
+/* ----------------------------------------------------------- 03 bullets */
+function bullets() {
+  const W = 320, x0 = 50;
+  return N.map((a, k) => {
+    const i = A.indexOf(a), y = k * 28 + 10, max = Math.max(a.m, a.r) * 1.3;
+    const X = (v) => v / max * (W - x0);
+    return `<g ${hit(i)} transform="translate(${x0},${y})">
+      <text x="${-x0}" y="9" font-size="10" class="m" fill="var(--ink-3)">${a.id}</text>
+      <rect x="0" y="0" width="${W - x0}" height="12" rx="2" fill="var(--fill-2)"/>
+      <rect x="0" y="0" width="${X(a.r)}" height="12" rx="2" fill="${wash(a)}"/>
+      <rect x="0" y="3" width="${X(a.m)}" height="6" rx="1" fill="${ink(a)}"/>
+      <line x1="${X(a.r)}" x2="${X(a.r)}" y1="-3" y2="15" stroke="var(--ink)" stroke-width="2"/>
+    </g>`;
+  }).join("");
+}
+
+/* -------------------------------------------------------------- 04 heat */
+function heat() {
+  return A.map((a, i) => {
+    const s = slack(a), mag = s === null ? 0 : Math.min(Math.abs(s) / 30, 1);
+    return `<g ${hit(i)} transform="translate(${(i % 4) * 92 + 4},${Math.floor(i / 4) * 80 + 4})">
+      <rect width="84" height="72" rx="6" fill="${a.kind === "none" ? "var(--fill-2)" : ink(a)}"
+        fill-opacity="${a.kind === "none" ? 1 : .12 + mag * .78}"/>
+      <text x="10" y="20" font-size="10" class="m" fill="var(--ink-2)">${a.id}</text>
+      <text x="10" y="46" font-size="17" font-weight="600">${s === null ? "—" : pct(s)}</text>
+      <text x="10" y="62" font-size="10" fill="var(--ink-2)">${a.kind === "none" ? "cadre" : a.kind === "max" ? "plafond" : "plancher"}</text>
+    </g>`;
+  }).join("");
+}
+
+/* ------------------------------------------------------------ 05 nested */
+function nested() {
+  return N.map((a, k) => {
+    const i = A.indexOf(a), S = 62, s = Math.sqrt(Math.min(use(a), 1.45)) * S;
+    return `<g ${hit(i)} transform="translate(${(k % 3) * 112 + 14},${Math.floor(k / 3) * 104 + 8})">
+      <rect width="${S}" height="${S}" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+      <rect x="${(S - s) / 2}" y="${(S - s) / 2}" width="${s}" height="${s}" fill="${ink(a)}" fill-opacity=".55"/>
+      <text x="0" y="${S + 15}" font-size="10" class="m" fill="var(--ink-3)">${a.id}</text>
+      <text x="0" y="${S + 28}" font-size="11" class="m">${fmt(a, a.m)}</text></g>`;
+  }).join("");
+}
+
+/* -------------------------------------------------------------- 06 dots */
+function waffle() {
+  /* Only the rules counted in whole things can be drawn one dot per thing. */
+  const C = A.filter((a) => a.step === 1);
+  return C.map((a, k) => {
+    const i = A.indexOf(a), n = Math.max(a.m, a.r), per = n > 12 ? 10 : 6;
+    let d = "";
+    for (let j = 0; j < n; j++) {
+      const inM = j < a.m, inR = j < a.r;
+      d += `<circle cx="${(j % per) * 15}" cy="${Math.floor(j / per) * 15}" r="5"
+        fill="${inM ? ink(a) : "#fff"}" stroke="${inR ? "var(--ink)" : ink(a)}" stroke-width="1.2"
+        stroke-dasharray="${inM || inR ? "" : "2 2"}"/>`;
+    }
+    return `<g ${hit(i)} transform="translate(${k * 172 + 6},14)">${d}
+      <text x="0" y="${Math.ceil(n / per) * 15 + 8}" font-size="10" class="m" fill="var(--ink-3)">${a.id}</text>
+      <text x="0" y="${Math.ceil(n / per) * 15 + 22}" font-size="11" class="m">${fmt(a, a.m)} / ${fmt(a, a.r)}</text></g>`;
+  }).join("");
+}
+
+/* ------------------------------------------------------------- 07 radar */
+function radar() {
+  const cx = 150, cy = 118, R = 86, n = N.length;
+  const pt = (k, rad) => [cx + Math.sin(k / n * 2 * Math.PI) * rad,
+    cy - Math.cos(k / n * 2 * Math.PI) * rad];
+  const limit = N.map((_, k) => pt(k, R * (1 / 1.4)).join(",")).join(" ");
+  const shape = N.map((a, k) => pt(k, R * Math.min(use(a), 1.4) / 1.4).join(",")).join(" ");
+  return `<polygon points="${limit}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <polygon points="${shape}" fill="var(--over)" fill-opacity=".16" stroke="var(--over)" stroke-width="1.5"/>
+    ${N.map((a, k) => {
+      const i = A.indexOf(a), [x, y] = pt(k, R * Math.min(use(a), 1.4) / 1.4), [lx, ly] = pt(k, R + 16);
+      return `<g ${hit(i)}><line x1="${cx}" y1="${cy}" x2="${pt(k, R)[0]}" y2="${pt(k, R)[1]}"
+          stroke="var(--line-2)"/>
+        <circle cx="${x}" cy="${y}" r="4" fill="${ink(a)}"/>
+        <text x="${lx}" y="${ly + 3}" font-size="9.5" class="m" fill="var(--ink-3)"
+          text-anchor="${lx > cx + 4 ? "start" : lx < cx - 4 ? "end" : "middle"}">${a.id}</text></g>`;
+    }).join("")}`;
+}
+
+/* ------------------------------------------------------- 08 thermometers */
+function thermo() {
+  const H = 120, base = 150;
+  return N.map((a, k) => {
+    const i = A.indexOf(a), x = k * 56 + 24, max = Math.max(a.m, a.r) * 1.25;
+    const h = (v) => v / max * H;
+    return `<g ${hit(i)}>
+      <rect x="${x}" y="${base - H}" width="26" height="${H}" rx="3" fill="var(--fill-2)"/>
+      <rect x="${x}" y="${base - h(a.m)}" width="26" height="${h(a.m)}" rx="3" fill="${ink(a)}" fill-opacity=".85"/>
+      <line x1="${x - 5}" x2="${x + 31}" y1="${base - h(a.r)}" y2="${base - h(a.r)}" stroke="var(--ink)" stroke-width="2"/>
+      <text x="${x + 13}" y="${base - Math.max(h(a.m), h(a.r)) - 10}" font-size="10.5" class="m" text-anchor="middle">${fmt(a, a.m)}</text>
+      <text x="${x + 13}" y="${base + 14}" font-size="9.5" class="m" fill="var(--ink-3)" text-anchor="middle">${a.id}</text></g>`;
+  }).join("");
+}
+
+/* ----------------------------------------------------------- 09 donuts */
+function donuts() {
+  const R = 22, C = 2 * Math.PI * R;
+  return N.map((a, k) => {
+    const i = A.indexOf(a), u = Math.min(use(a), 1);
+    return `<g ${hit(i)} transform="translate(${(k % 3) * 104 + 52},${Math.floor(k / 3) * 100 + 40})">
+      <circle r="${R}" fill="none" stroke="var(--fill)" stroke-width="8"/>
+      <circle r="${R}" fill="none" stroke="${ink(a)}" stroke-width="8"
+        stroke-dasharray="${u * C} ${C}" transform="rotate(-90)"/>
+      <text text-anchor="middle" y="5" font-size="13" font-weight="600" class="num">${Math.round(use(a) * 100)} %</text>
+      <text text-anchor="middle" y="38" font-size="9.5" class="m" fill="var(--ink-3)">${a.id}</text></g>`;
+  }).join("");
+}
+
+/* ------------------------------------------------------------ 10 swarm */
+function swarm() {
+  const W = 320, mid = W / 2, span = 120;
+  const max = Math.max(...N.map((a) => Math.abs(slack(a)))) * 1.15;
+  return `<line x1="${mid}" x2="${mid}" y1="4" y2="96" stroke="var(--ink)" stroke-width="1.5"/>
+    <text x="${mid}" y="112" font-size="9.5" class="m" fill="var(--ink-2)" text-anchor="middle">la limite</text>
+    ${N.map((a, k) => {
+      const i = A.indexOf(a), s = slack(a), x = mid + s / max * span, y = 20 + (k % 5) * 16;
+      return `<g ${hit(i)}><circle cx="${x}" cy="${y}" r="7" fill="${ink(a)}" fill-opacity=".9"/>
+        <text x="${x}" y="${y - 11}" font-size="9" class="m" fill="var(--ink-3)" text-anchor="middle">${a.id}</text>
+        <text x="${x}" y="${y + 3.5}" font-size="8.5" fill="#fff" text-anchor="middle" class="num">${Math.round(s)}</text></g>`;
+    }).join("")}`;
+}
+
+const FIGS = [
+  ["01", "Arcs", 380, 200, arcs],
+  ["02", "Haltères", 380, 190, dumbbell],
+  ["03", "Jauges fines", 380, 180, bullets],
+  ["04", "Trame de chaleur", 380, 170, heat],
+  ["05", "Carrés emboîtés", 380, 220, nested],
+  ["06", "Points comptés", 380, 120, waffle],
+  ["07", "Toile", 300, 240, radar],
+  ["08", "Colonnes", 380, 170, thermo],
+  ["09", "Anneaux", 330, 210, donuts],
+  ["10", "Essaim", 330, 120, swarm],
+];
+
+document.getElementById("grid").innerHTML = FIGS.map(([n, name, w, h, fn]) =>
+  `<figure><figcaption>${n}<i>${name}</i></figcaption>
+    <svg viewBox="0 0 ${w} ${h}">${fn()}</svg></figure>`).join("");
+
+/* The law, written once, for whichever mark was last touched. */
+function paint() {
+  const a = A[sel];
+  document.getElementById("q").textContent = a.q;
+  document.getElementById("src").textContent = a.src;
+  document.getElementById("cta").href = a.url;
+  document.getElementById("nums").innerHTML = a.kind === "none" ? "" :
+    `<div><span>mesuré</span><b>${fmt(a, a.m)}</b></div>
+     <div><span>${a.kind === "max" ? "maximum" : "minimum"}</span><b>${fmt(a, a.r)}</b></div>
+     <div><span>écart</span><b style="color:${ink(a)}">${pct(slack(a))}</b></div>`;
+  document.querySelectorAll("#pick button").forEach((b, i) =>
+    b.setAttribute("aria-pressed", String(i === sel)));
+  document.querySelectorAll("svg [data-i]").forEach((g) =>
+    g.dataset.on = Number(g.dataset.i) === sel ? "1" : "0");
+}
+document.getElementById("pick").innerHTML = A.map((a, i) =>
+  `<button data-i="${i}">${a.id}</button>`).join("");
+document.addEventListener("click", (e) => {
+  const g = e.target.closest("[data-i]");
+  if (!g) return;
+  sel = Number(g.dataset.i);
+  paint();
+});
+paint();
+</script>
+</body>
+</html>
