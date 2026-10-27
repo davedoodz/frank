@@ -98,7 +98,10 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 
 /* breadcrumb, screen menu and grouped tabs live in the tab strip */
 .tabs .crumb{font-size:12.5px;color:var(--ink-3);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
-.tabs .crumb .lu{width:13px;height:13px}
+/* the crumb is a .hi too, and the fidelity rule sets .hi to block: this wins
+   on specificity so the folder keeps its gap from the label */
+.tabs .crumb.hi{display:inline-flex}
+.tabs .crumb .lu{width:13px;height:13px;flex:0 0 13px}
 .tabs .crumb:hover{color:var(--ink)}
 .tabs .crumb.on{cursor:default}
 .tabs .crumb.on{color:var(--ink);font-weight:500}
