@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zonage et code — quatre mises en place, un dessin par règle</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#a4a4a4;
+  --line:#d2d2d2; --line-2:#e9e9e9; --fill:#f2f2f2; --fill-2:#f8f8f8;
+  --page:#f2f2f2; --paper:#fff;
+  --over:#b9743f; --over-2:#f0ddcb; --ok:#4b7d5e; --ok-2:#d9e7de; --ref:#b6b6b6;
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono)}
+svg{display:block;overflow:visible}
+text{font-family:var(--mono);fill:var(--ink-2);font-size:9px}
+text.v{font-family:var(--sans);fill:var(--ink);font-size:11px;font-weight:600}
+
+/* the option switcher, the only chrome that is not the app ------------- */
+.top{max-width:1500px;margin:0 auto;padding:18px 20px 0;display:flex;align-items:baseline;gap:14px}
+.top h1{font-size:14px;font-weight:600}
+.top .tabs{display:flex;gap:6px;margin-left:auto}
+.top button{font-size:12px;border:1px solid var(--line-2);background:var(--paper);border-radius:7px;
+  padding:5px 11px;cursor:pointer;color:var(--ink-2)}
+.top button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:500}
+
+/* the app, as it stands ------------------------------------------------ */
+.app{max-width:1500px;margin:14px auto 60px;background:var(--paper);border-radius:12px;
+  border:1px solid var(--line-2);display:grid;grid-template-columns:76px 1fr;overflow:hidden;min-height:760px}
+.rail{background:#1b1b1b;padding:12px 0;display:flex;flex-direction:column;align-items:center;gap:3px}
+.rail a{width:52px;padding:8px 0;border-radius:8px;display:flex;flex-direction:column;align-items:center;
+  gap:5px;color:#8e8e8e;font-size:9px;text-decoration:none}
+.rail a.on{background:#333;color:#fff}
+.rail svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.main{display:grid;grid-template-columns:1fr 300px}
+.crumbs{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:11px 18px;
+  border-bottom:1px solid var(--line-2);font-size:12px;color:var(--ink-3)}
+.crumbs b{color:var(--ink);font-weight:500}
+.head{grid-column:1/-1;display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line-2)}
+.head h2{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.head p{font-size:12px;color:var(--ink-2);margin-top:2px}
+.head .exp{margin-left:auto;border:1px solid var(--line-2);border-radius:7px;padding:6px 11px;font-size:12px;color:var(--ink-2)}
+.body{padding:16px 18px 26px;border-right:1px solid var(--line-2);min-width:0}
+.side{padding:16px}
+.side .h{display:flex;align-items:center;gap:7px;font-size:12.5px;margin-bottom:10px}
+.side .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line-2);font-size:12px}
+.side .row span:last-child{font-variant-numeric:tabular-nums}
+.side .note{margin-top:12px;border:1px solid var(--line-2);border-radius:var(--r);padding:9px 10px;
+  font-size:11.5px;color:var(--ink-3)}
+.sec{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);margin:6px 0 12px}
+.sec .cnt{margin-left:auto;font-size:11.5px;background:var(--fill);border-radius:20px;padding:3px 10px}
+
+/* shared pieces -------------------------------------------------------- */
+.id{font-family:var(--mono);font-size:11px;color:var(--ink-2);background:var(--fill);
+  border-radius:4px;padding:1px 6px}
+q{display:block;font-size:12px;line-height:1.5;color:var(--ink-2);quotes:'« ' ' »';
+  border-left:2px solid var(--line-2);padding-left:9px}
+.src{font-family:var(--mono);font-size:10px;color:var(--ink-3);line-height:1.45}
+.state{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-2);margin-left:auto}
+.dot{width:6px;height:6px;border-radius:50%}
+.dot.open{background:var(--over)} .dot.ok{background:var(--ok)} .dot.ref{background:var(--ref)}
+a.lien{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink);
+  border:1px solid var(--line);border-radius:6px;padding:5px 9px;font-size:11.5px}
+a.lien:hover{background:var(--fill-2)}
+a.lien svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.6}
+a.cta{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ink);color:#fff;
+  text-decoration:none;border-radius:7px;padding:9px 12px;font-size:12.5px;font-weight:500;margin-top:12px}
+a.cta svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:1.6}
+
+/* A — fiches dessinées -------------------------------------------------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(282px,1fr));gap:12px}
+.card{border:1px solid var(--line-2);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:9px}
+.card .hd{display:flex;align-items:center;gap:8px}
+.card .hd b{font-size:12.5px;font-weight:500}
+.card .draw{background:var(--fill-2);border-radius:6px;padding:8px}
+.card .draw svg{width:100%;height:auto}
+
+/* B — dessin d'abord ---------------------------------------------------- */
+.firsts{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:12px}
+.tile{border:1px solid var(--line-2);border-radius:var(--r);padding:10px;cursor:pointer}
+.tile[aria-pressed="true"]{border-color:var(--ink)}
+/* At thumbnail size a drawing carries its shape only: the words are already
+   below it, and a label that has to be read small is a label nobody reads. */
+.tile svg{width:100%;height:auto}
+.tile svg text,.srow svg text{display:none}
+.tile .cap{display:flex;align-items:center;gap:6px;margin-top:8px}
+.reader{margin-top:14px;border:1px solid var(--line-2);border-radius:var(--r);padding:13px;
+  display:grid;grid-template-columns:1fr 210px;gap:16px;align-items:start}
+
+/* C — un seul bâtiment -------------------------------------------------- */
+.one{display:grid;grid-template-columns:1fr 290px;gap:16px;align-items:start}
+.one .scene{border:1px solid var(--line-2);border-radius:var(--r);padding:14px;background:var(--fill-2)}
+.one .scene svg{width:100%;height:auto}
+.pin{cursor:pointer}
+.pin circle{fill:var(--paper);stroke:var(--ink);stroke-width:1.2}
+.pin[data-on="1"] circle{fill:var(--ink)}
+.pin[data-on="1"] text{fill:var(--paper)}
+.pin text{font-family:var(--mono);font-size:9px;fill:var(--ink);text-anchor:middle}
+.legend{display:flex;flex-direction:column;gap:7px}
+.legend button{display:flex;align-items:center;gap:8px;text-align:left;background:none;cursor:pointer;
+  border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;font-size:12px}
+.legend button[aria-pressed="true"]{border-color:var(--ink)}
+.legend .n{font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+
+/* D — bande compacte ---------------------------------------------------- */
+.strip{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden}
+.srow{display:grid;grid-template-columns:72px 150px 1fr auto;gap:14px;align-items:center;
+  padding:10px 12px;border-bottom:1px solid var(--line-2)}
+.srow:last-child{border-bottom:0}
+.srow:hover{background:var(--fill-2)}
+.srow svg{width:150px;height:46px}
+.srow q{border:0;padding:0;font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>Zonage et code — un dessin par règle</h1>
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div class="app">
+  <nav class="rail">
+    <a class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Aperçu</a>
+    <a><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="M3 16l9 5 9-5M3 12l9 5 9-5"/></svg>Unités</a>
+    <a><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>Quantités</a>
+    <a><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M9 14l2 2 4-4"/></svg>Suivi</a>
+    <a><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>Fichiers</a>
+  </nav>
+  <div class="main">
+    <div class="crumbs"><span>Tous les projets</span><b>Le Baldwin III</b></div>
+    <div class="head">
+      <div><h2>Le Baldwin III</h2><p>8 étages · 104 unités · 5 articles non résolus</p></div>
+      <span class="exp">Exporter</span>
+    </div>
+    <div class="body">
+      <div class="sec">Zonage et code<span class="cnt" id="cnt"></span></div>
+      <div id="stage"></div>
+    </div>
+    <div class="side">
+      <div class="h"><span class="dot ref"></span>Ce qui bloque</div>
+      <div class="row"><span>Dépôt au comité</span><span>14 Nov</span></div>
+      <div class="row"><span>Réponse de l'urbaniste</span><span>12 jours de retard</span></div>
+      <div class="row"><span>Émission du permis</span><span>21 Nov</span></div>
+      <div class="row"><span>Données manquantes</span><span>10</span></div>
+      <div class="note">compté à partir des dessins, rien de saisi</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ARROW = `<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>`;
+
+/* Seven provisions. draw() is written per article: a rule about height is
+   drawn as storeys, a rule about parking as stalls. The picture is the rule,
+   not a bar chart wearing its number. */
+const A = [
+  { id: "art. 9", topic: "Hauteur en étages", state: "non résolu", m: "6 étages", r: "5 étages",
+    q: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    /* an elevation: six floors built, the prescribed ceiling after the fifth */
+    draw: (w, h) => {
+      const n = 6, lim = 5, fh = h / (n + 1.2), x = 10, bw = w * .38;
+      let s = `<rect x="${x}" y="${h - fh * n}" width="${bw}" height="${fh * n}" fill="var(--over-2)" stroke="var(--ink)" stroke-width="1"/>`;
+      for (let i = 1; i < n; i++) s += `<line x1="${x}" x2="${x + bw}" y1="${h - fh * i}" y2="${h - fh * i}" stroke="var(--ink)" stroke-width=".6" stroke-opacity=".5"/>`;
+      for (let i = 0; i < n; i++) s += `<rect x="${x + bw * .18}" y="${h - fh * (i + 1) + fh * .25}" width="${bw * .22}" height="${fh * .4}" fill="var(--paper)" stroke="var(--ink)" stroke-width=".5"/>
+        <rect x="${x + bw * .58}" y="${h - fh * (i + 1) + fh * .25}" width="${bw * .22}" height="${fh * .4}" fill="var(--paper)" stroke="var(--ink)" stroke-width=".5"/>`;
+      s += `<line x1="${x}" x2="${x + bw + 14}" y1="${h - fh * lim}" y2="${h - fh * lim}" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="5 3"/>
+        <text x="${x + bw + 18}" y="${h - fh * lim + 3}">5 étages exigés</text>
+        <line x1="${x}" x2="${x + bw + 14}" y1="${h - fh * n}" y2="${h - fh * n}" stroke="var(--over)" stroke-width="1.4"/>
+        <text class="v" x="${x + bw + 18}" y="${h - fh * n + 3}" fill="var(--over)">6e étage dessiné</text>
+        <line x1="0" x2="${w}" y1="${h}" y2="${h}" stroke="var(--ink)" stroke-width="1.2"/>`;
+      return s;
+    } },
+
+  { id: "art. 43", topic: "Taux d'implantation", state: "conforme", m: "48,2 %", r: "55 %",
+    q: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    /* the lot seen from above: the footprint inside the share the zone allows */
+    draw: (w, h) => {
+      const pad = 14, W = w - pad * 2, H = h - pad * 2;
+      const aW = W * .82, aH = H * (.55 / .82);        /* 55 % of the lot */
+      const bW = W * .82, bH = H * (.482 / .82);       /* 48,2 % of the lot */
+      return `<rect x="${pad}" y="${pad}" width="${W}" height="${H}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1"/>
+        <rect x="${pad + 6}" y="${pad + 6}" width="${aW}" height="${aH}" fill="none" stroke="var(--ink)"
+          stroke-width="1.1" stroke-dasharray="5 3"/>
+        <rect x="${pad + 6}" y="${pad + 6}" width="${bW}" height="${bH}" fill="var(--ok-2)" stroke="var(--ok)" stroke-width="1.2"/>
+        <text class="v" x="${pad + 14}" y="${pad + 6 + bH / 2}" fill="var(--ok)">48,2 %</text>
+        <text x="${pad + 14}" y="${pad + 6 + aH - 5}">55 % permis</text>
+        <text x="${pad + W - 4}" y="${pad + H + 11}" text-anchor="end">terrain 1 459 m²</text>`;
+    } },
+
+  { id: "art. 22", topic: "Marge arrière", state: "non résolu", m: "2,70 m", r: "3,00 m",
+    q: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    /* a section through the rear: the strip kept, and the strip required */
+    draw: (w, h) => {
+      const lot = h - 18, b = h - 18 - (h * .42);      /* rear wall */
+      const need = lot - (h * .42) * (3.00 / 2.70);
+      return `<line x1="10" x2="${w - 10}" y1="${lot}" y2="${lot}" stroke="var(--ink)" stroke-width="1.4"/>
+        <text x="10" y="${lot + 12}">limite arrière du terrain</text>
+        <rect x="10" y="10" width="${w - 20}" height="${b - 10}" fill="var(--fill)" stroke="var(--ink)" stroke-width="1"/>
+        <text x="${w / 2}" y="${(b + 10) / 2}" text-anchor="middle">bâtiment</text>
+        <rect x="10" y="${b}" width="${w - 20}" height="${lot - b}" fill="var(--over-2)" fill-opacity=".6"/>
+        <line x1="${w * .3}" x2="${w * .3}" y1="${b}" y2="${lot}" stroke="var(--over)" stroke-width="1.2"/>
+        <text class="v" x="${w * .34}" y="${(b + lot) / 2 + 4}" fill="var(--over)">2,70 m</text>
+        <line x1="${w - 56}" x2="${w - 56}" y1="${need}" y2="${lot}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="${w - 64}" x2="${w - 48}" y1="${need}" y2="${need}" stroke="var(--ink)" stroke-width="1.2"/>
+        <text x="${w - 12}" y="${need - 5}" text-anchor="end">3,00 m exigés</text>`;
+    } },
+
+  { id: "art. 71", topic: "Stationnement", state: "non résolu", m: "22 cases", r: "30 cases",
+    q: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    /* the garage counted stall by stall: the eight that are not drawn */
+    draw: (w, h) => {
+      const per = 10, cw = (w - 20) / per, ch = Math.min((h - 26) / 3, 20);
+      let s = "";
+      for (let i = 0; i < 30; i++) {
+        const x = 10 + (i % per) * cw, y = 8 + Math.floor(i / per) * (ch + 5), built = i < 22;
+        s += `<rect x="${x + 1}" y="${y}" width="${cw - 4}" height="${ch}" rx="1.5"
+          fill="${built ? "var(--over-2)" : "none"}" stroke="${built ? "var(--ink)" : "var(--over)"}"
+          stroke-width="${built ? .9 : 1}" ${built ? "" : 'stroke-dasharray="3 2"'}/>`;
+      }
+      return s + `<text class="v" x="10" y="${h - 2}">22 dessinées</text>
+        <text x="${w - 10}" y="${h - 2}" text-anchor="end" fill="var(--over)">8 manquantes sur 30</text>`;
+    } },
+
+  { id: "art. 134", topic: "Verdissement et pleine terre", state: "non résolu", m: "17 %", r: "20 %",
+    q: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    /* the lot again, but the green strips: what is planted and the sliver short */
+    draw: (w, h) => {
+      const pad = 12, W = w - pad * 2, H = h - pad * 2;
+      const green = W * .17, need = W * .20;
+      return `<rect x="${pad}" y="${pad}" width="${W}" height="${H}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1"/>
+        <rect x="${pad}" y="${pad}" width="${green}" height="${H}" fill="var(--ok-2)"/>
+        <rect x="${pad + green}" y="${pad}" width="${need - green}" height="${H}" fill="none" stroke="var(--over)"
+          stroke-width="1" stroke-dasharray="3 2"/>
+        <line x1="${pad + need}" x2="${pad + need}" y1="${pad - 5}" y2="${pad + H}" stroke="var(--ink)" stroke-width="1.2"/>
+        ${[...Array(5)].map((_, i) => `<circle cx="${pad + green * .5}" cy="${pad + H * (i + .5) / 5}" r="${Math.min(green * .3, 7)}"
+          fill="none" stroke="var(--ok)" stroke-width="1"/>`).join("")}
+        <text class="v" x="${pad + need + 8}" y="${pad + 12}" fill="var(--ok)">17 % en pleine terre</text>
+        <text x="${pad + need + 8}" y="${pad + 26}" fill="var(--over)">20 % exigés · 3 % manquants</text>`;
+    } },
+
+  { id: "3.2.3.1", topic: "Baies non protégées", state: "non résolu", m: "74,2 m²", r: "68,5 m²",
+    q: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
+    src: "Code de construction du Québec, chapitre I — Bâtiment · CNB 2020 modifié, en vigueur le 17 avril 2025",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    /* the facade of radiation, its openings, and the limiting distance that
+       sets how much glass is allowed */
+    draw: (w, h) => {
+      const fx = 12, fw = w * .52, fy = 10, fh = h - 30;
+      let s = `<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.1"/>`;
+      const cols = 4, rows = 3, gw = fw / (cols + 1.6), gh = fh / (rows + 1.4);
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const i = r * cols + c, past = i >= 11;        /* the last opening is the one over */
+        s += `<rect x="${fx + gw * .4 + c * gw * 1.3}" y="${fy + gh * .35 + r * gh * 1.3}"
+          width="${gw * .95}" height="${gh * .8}" fill="${past ? "var(--over)" : "var(--over-2)"}"
+          fill-opacity="${past ? .85 : 1}" stroke="var(--ink)" stroke-width=".7"/>`;
+      }
+      s += `<line x1="${fx + fw + 10}" x2="${w - 14}" y1="${fy + fh / 2}" y2="${fy + fh / 2}"
+          stroke="var(--ink)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="${w - 14}" x2="${w - 14}" y1="${fy + 6}" y2="${fy + fh - 6}" stroke="var(--ink)" stroke-width="1.2"/>
+        <text x="${fx + fw + 12}" y="${fy + fh / 2 - 6}">distance</text>
+        <text x="${fx + fw + 12}" y="${fy + fh / 2 + 16}">limitative</text>
+        <text class="v" x="${fx}" y="${h - 4}">74,2 m² de baies</text>
+        <text x="${w - 10}" y="${h - 4}" text-anchor="end" fill="var(--over)">68,5 m² permis</text>`;
+      return s;
+    } },
+
+  { id: "A-19.1", topic: "Cadre légal du zonage", state: "pour référence", m: "—", r: "cadre habilitant",
+    q: "La loi habilite la municipalité à régir, par règlement, l'usage du sol et l'implantation des bâtiments sur son territoire.",
+    src: "Loi sur l'aménagement et l'urbanisme · Québec · texte consolidé",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1",
+    /* no number to draw: the chain of authority, which is what the article is */
+    draw: (w, h) => {
+      const steps = [["Loi", "A-19.1"], ["Règlement", "01-277"], ["Article", "art. 9, 22"]];
+      const bw = (w - 24 - 28) / 3;
+      return steps.map(([t, n], i) => {
+        const x = 12 + i * (bw + 14);
+        return `<rect x="${x}" y="${h * .22}" width="${bw}" height="${h * .45}" rx="5"
+            fill="${i === 0 ? "var(--fill)" : "var(--paper)"}" stroke="var(--ink)" stroke-width="${i === 0 ? 1.3 : .9}"/>
+          <text class="v" x="${x + bw / 2}" y="${h * .42}" text-anchor="middle">${t}</text>
+          <text x="${x + bw / 2}" y="${h * .58}" text-anchor="middle">${n}</text>
+          ${i < 2 ? `<path d="M${x + bw + 3} ${h * .445} h8 m-3 -3 l3 3 -3 3" stroke="var(--ink)" fill="none" stroke-width="1"/>` : ""}`;
+      }).join("") + `<text x="12" y="${h - 4}">habilite</text>`;
+    } },
+];
+
+const cl = (a) => a.state === "conforme" ? "ok" : a.state === "pour référence" ? "ref" : "open";
+const box = (a, w, h) => `<svg viewBox="0 0 ${w} ${h}">${a.draw(w, h)}</svg>`;
+const lien = (a) => `<a class="lien" href="${a.url}" target="_blank" rel="noopener noreferrer">Lire le texte officiel ${ARROW}</a>`;
+document.getElementById("cnt").textContent =
+  `${A.filter((a) => a.state === "non résolu").length} non résolus sur ${A.length}`;
+
+/* A — the drawing replaces the pair of numbers on the card ------------- */
+const optA = () => `<div class="cards">${A.map((a) => `<div class="card">
+  <div class="hd"><span class="id">${a.id}</span><b>${a.topic}</b>
+    <span class="state"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+  <div class="draw">${box(a, 258, 150)}</div>
+  <q>${a.q}</q>
+  <div class="src">${a.src}</div>
+  ${lien(a)}</div>`).join("")}</div>`;
+
+/* B — drawings first, one article read at a time ----------------------- */
+let sel = 0;
+const optB = () => `<div class="firsts">${A.map((a, i) => `<div class="tile" data-i="${i}"
+    aria-pressed="${i === sel}">${box(a, 168, 112)}
+    <div class="cap"><span class="id">${a.id}</span><span class="state"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+  </div>`).join("")}</div>
+  <div class="reader"><div><q>${A[sel].q}</q><div class="src" style="margin-top:9px">${A[sel].src}</div></div>
+    <div><div style="font-size:12.5px;font-weight:500">${A[sel].topic}</div>
+      <div class="src" style="margin-top:6px">${A[sel].m} mesuré · ${A[sel].r} exigé</div>
+      <a class="cta" href="${A[sel].url}" target="_blank" rel="noopener noreferrer">Texte officiel ${ARROW}</a></div>
+  </div>`;
+
+/* C — one building, the articles pinned where they apply ---------------- */
+/* Each pin sits on the part of the lot its article governs: the storeys, the
+   footprint, the rear strip, the parking, the planted edge, the façade. */
+const PINS = [[.38, .18], [.38, .46], [.38, .88], [.83, .46], [.05, .55], [.64, .30], [.93, .06]];
+const optC = () => {
+  const a = A[sel];
+  return `<div class="one">
+    <div class="scene">
+      <svg viewBox="0 0 560 330">
+        <rect x="26" y="26" width="508" height="278" fill="var(--paper)" stroke="var(--ink)" stroke-width="1"/>
+        <rect x="70" y="60" width="300" height="190" fill="var(--fill)" stroke="var(--ink)" stroke-width="1.1"/>
+        <text x="220" y="160" text-anchor="middle">emprise du bâtiment</text>
+        <rect x="390" y="60" width="120" height="190" fill="none" stroke="var(--ink)" stroke-width=".8" stroke-dasharray="4 3"/>
+        <text x="450" y="155" text-anchor="middle">stationnement</text>
+        <line x1="70" y1="270" x2="370" y2="270" stroke="var(--ink)" stroke-width="1"/>
+        <text x="220" y="285" text-anchor="middle">marge arrière</text>
+        ${A.map((x, i) => `<g class="pin" data-i="${i}" data-on="${i === sel ? 1 : 0}">
+          <circle cx="${26 + PINS[i][0] * 508}" cy="${26 + PINS[i][1] * 278}" r="11"/>
+          <text x="${26 + PINS[i][0] * 508}" y="${26 + PINS[i][1] * 278 + 3.5}">${i + 1}</text></g>`).join("")}
+      </svg>
+      <div style="margin-top:12px">${box(a, 520, 190)}</div>
+    </div>
+    <div>
+      <div class="legend">${A.map((x, i) => `<button data-i="${i}" aria-pressed="${i === sel}">
+        <span class="n">${i + 1}</span><span class="dot ${cl(x)}"></span>${x.topic}</button>`).join("")}</div>
+      <div style="margin-top:14px"><q>${a.q}</q>
+        <div class="src" style="margin-top:9px">${a.src}</div>
+        <a class="cta" href="${a.url}" target="_blank" rel="noopener noreferrer">Texte officiel ${ARROW}</a></div>
+    </div>
+  </div>`;
+};
+
+/* D — one line per article, the drawing as the thumbnail ---------------- */
+const optD = () => `<div class="strip">${A.map((a) => `<div class="srow">
+  <span class="id">${a.id}</span>
+  ${box(a, 150, 46)}
+  <q>${a.q}</q>
+  ${lien(a)}</div>`).join("")}</div>`;
+
+const OPTS = [["A", "Fiches dessinées", optA], ["B", "Dessin d'abord", optB],
+  ["C", "Un seul terrain", optC], ["D", "Bande compacte", optD]];
+let opt = 0;
+
+document.getElementById("tabs").innerHTML = OPTS.map(([k, n], i) =>
+  `<button data-o="${i}" aria-pressed="${i === 0}">${k} · ${n}</button>`).join("");
+
+function paint() {
+  document.getElementById("stage").innerHTML = OPTS[opt][2]();
+  document.querySelectorAll("#tabs button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === opt)));
+}
+document.addEventListener("click", (e) => {
+  const o = e.target.closest("[data-o]"), i = e.target.closest("[data-i]");
+  if (o) { opt = Number(o.dataset.o); paint(); return; }
+  if (i) { sel = Number(i.dataset.i); paint(); }
+});
+paint();
+</script>
+</body>
+</html>
