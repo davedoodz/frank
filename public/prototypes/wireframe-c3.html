@@ -33,7 +33,8 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .rail{border-right:1px solid var(--line);padding:10px 8px;display:flex;flex-direction:column;gap:6px;background:var(--fill-2)}
 .rail .r{height:30px;border-radius:6px;background:var(--fill);display:flex;align-items:center;gap:8px;
   padding:0 8px;color:var(--ink-3);cursor:pointer}
-.rail .r.on{background:var(--line-2)}
+.rail .r:hover{background:var(--fill);color:var(--ink-2)}
+.rail .r.on{background:var(--bar);color:var(--ink)}
 .rail svg{width:15px;height:15px;stroke-width:1.9;flex:0 0 15px}
 .rail .r span{display:none;font-size:12px;color:var(--ink-2)}
 .frame[data-nav="wide"] .rail .r span,.frame[data-nav="stack"] .rail .r span{display:block}
@@ -82,21 +83,25 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .tabs .div{width:1px;height:18px;background:var(--line);margin:0 6px}
 
 .main{display:flex;flex-direction:column;min-width:0}
-.tabs{display:flex;gap:4px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
-.tabs button{font:inherit;font-size:12.5px;display:flex;align-items:center;gap:7px;cursor:pointer;
-  border:1px solid transparent;background:none;border-radius:6px;padding:5px 10px;color:var(--ink-3)}
+.tabs{display:flex;gap:4px;align-items:center;height:40px;padding:0 10px;flex:0 0 auto;
+  border-bottom:1px solid var(--line-2)}
+.tabs button{font:inherit;font-size:12.5px;display:flex;align-items:center;gap:6px;cursor:pointer;
+  border:1px solid transparent;background:transparent;border-radius:5px;padding:6px 9px;color:var(--ink-2)}
 .tabs button svg{width:14px;height:14px;stroke-width:1.9}
-.tabs button:hover{background:var(--fill-2)}
-.tabs button.on{background:var(--fill);color:var(--ink);border-color:var(--line)}
+.tabs button:hover{background:var(--fill-2);color:var(--ink)}
+.tabs button.on{background:var(--fill);color:var(--ink);font-weight:500;border-color:transparent}
 .tabs .sp{flex:1}
-.tabs .stamp{font-size:11.5px;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.tabs .stamp{font-size:11.5px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:999px;padding:3px 10px}
 
 .hd{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .hd .t{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
 .hd .t .hi:first-child{font-size:15px;font-weight:600;letter-spacing:-.01em}
 .hd .t .hi+.hi{font-size:12.5px;color:var(--ink-2)}
-.hd .btn{height:28px;min-width:96px;border-radius:6px;background:var(--fill);display:flex;align-items:center;
-  justify-content:center;gap:6px;font-size:12px;color:var(--ink-2);padding:0 10px;white-space:nowrap}
+.hd .t .hi:first-child{font-size:16px}
+.hd .btn{height:26px;min-width:96px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--ink-2);
+  padding:0 9px;white-space:nowrap;cursor:pointer}
+.hd .btn:hover{background:var(--fill);color:var(--ink)}
 .hd .btn svg{width:13px;height:13px;stroke-width:1.9}
 .hd .metrics{flex:0 0 100%;display:flex;gap:8px}
 
@@ -107,10 +112,11 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .col{display:flex;flex-direction:column;gap:10px;min-width:0;position:relative}
 .body[data-dense="1"] .col{gap:7px}
 
-.blk{background:var(--paper);border:1px solid var(--line);border-radius:6px;display:flex;flex-direction:column;
+.blk{background:var(--paper);border:1px solid var(--line-2);border-radius:6px;display:flex;flex-direction:column;
   min-height:0;position:relative;overflow:hidden}
-.blk > .bh{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line)}
-.blk > .bh .hi{font-size:12.5px;font-weight:600}
+.blk > .bh{display:flex;align-items:center;gap:8px;height:34px;flex:0 0 auto;padding:0 10px;
+  border-bottom:1px solid var(--line-2)}
+.blk > .bh .hi{font-size:12px;font-weight:400;color:var(--ink-2)}
 .blk > .bb{padding:9px 10px;display:flex;flex-direction:column;gap:7px;overflow:hidden;flex:1;min-height:0}
 
 /* inset card: chrome sinks into a grey field, the work becomes one white card */
@@ -139,14 +145,18 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 /* grey matter */
 .bar{height:8px;border-radius:3px;background:var(--bar);display:block}
 .bar.d{background:var(--line-2)}
-.chip{border-radius:999px;background:var(--fill);min-width:58px;height:21px;display:inline-flex;align-items:center;
-  justify-content:center;padding:0 10px;font-size:11.5px;color:var(--ink-2);white-space:nowrap}
+.chip{height:22px;border:1px solid var(--line-2);border-radius:999px;background:var(--fill-2);
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:58px;padding:0 9px;
+  font-size:11.5px;color:var(--ink-2);white-space:nowrap;cursor:pointer}
+.chip:hover{background:var(--fill);color:var(--ink)}
+.chip.on{background:var(--fill);border-color:var(--line);color:var(--ink)}
 .chip.on{background:var(--line-2);color:var(--ink)}
 .rowline{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
 .rowline > .bar{flex:1}
 .rowline .sp{flex:1}
-.row-sel{display:flex;align-items:flex-start;gap:8px;border-radius:6px;padding:4px;margin:0 -4px;cursor:pointer}
-.row-sel.on{background:var(--tag-soft);box-shadow:inset 2px 0 0 var(--tag)}
+.row-sel{display:flex;align-items:flex-start;gap:8px;border-radius:5px;padding:5px 6px;margin:0 -6px;cursor:pointer}
+.row-sel:hover{background:var(--fill-2)}
+.row-sel.on{background:var(--fill);color:var(--ink)}
 .row-sel .dot{margin-top:6px}
 .row-sel .hi{flex:1;min-width:0;line-height:1.35}
 .row-sel .tail{font-size:11.5px;color:var(--ink-3);white-space:nowrap}
@@ -156,14 +166,16 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .num .hi{font-size:15px;font-weight:600;letter-spacing:-.02em;white-space:nowrap}
 .num .cap{font-size:11px;color:var(--ink-3)}
 .tbl{display:flex;flex-direction:column}
-.tbl .tr{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);align-items:center}
+.tbl .tr{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-2);align-items:center}
 .tbl .tr:last-child{border-bottom:0}
 .tbl .tr > *{flex:1;min-width:0;font-size:12px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tbl .tr > *:first-child{flex:1.9;color:var(--ink)}
 .tbl .tr.head > *{font-size:11px;color:var(--ink-3)}
 .tbl .tr .bar{height:8px}
-.field{border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;font-size:11.5px;color:var(--ink-3)}
-.solid{background:var(--ink);color:#fff;border-radius:6px;padding:7px;text-align:center;font-size:12px}
+.field{border:1px solid var(--line-2);border-radius:5px;padding:7px 9px;font-size:11.5px;color:var(--ink-3);cursor:text}
+.field:hover{border-color:var(--line)}
+.solid{background:var(--ink);color:#fff;border-radius:5px;padding:7px;text-align:center;font-size:12px;cursor:pointer}
+.solid:hover{background:#000}
 .solid .hi{color:#fff}
 
 /* plan + overlay */
@@ -247,15 +259,6 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .blk > .stub{display:none}
 .col.over{outline:1px dashed var(--line);outline-offset:-2px;border-radius:6px}
 .dropline{height:2px;background:var(--tag);border-radius:2px;flex:0 0 2px}
-/* Editing controls are furniture, not content: they sit at a third of the
-   ink until the column is approached. */
-.coltools{display:flex;align-items:center;gap:1px;justify-content:center;padding:1px 0;
-  opacity:.28;transition:opacity .12s}
-.col:hover > .coltools,.col.focus > .coltools{opacity:1}
-.coltools button{font:inherit;font-size:10.5px;border:0;background:none;
-  border-radius:4px;height:18px;min-width:18px;padding:0 4px;cursor:pointer;color:var(--ink-3)}
-.coltools button:hover{color:var(--ink);background:var(--fill)}
-.col.focus > .coltools button{color:var(--ink-2)}
 
 .tray{margin-top:14px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
 .tray header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
@@ -849,8 +852,8 @@ const CONTEXT = {
 
 /* ------------------------------------------------------------ the state */
 
-const V = { shell: "Flat", homeLayout: "Card grid", screen: "Project", fidelity: "low", labels: true,
-  notes: true, flags: true, journey: true, isolate: "none", density: "comfortable", compose: true,
+const V = { shell: "Inset card", homeLayout: "Card grid", screen: "Project", fidelity: "high", labels: false,
+  notes: true, flags: false, journey: false, isolate: "none", density: "comfortable", compose: true,
   nav: "Icon rail + tabs", icons: "Rail only", titles: "Full label", tabStyle: "Plain", tabAlign: "Left",
   region: { nav: { fidelity: "inherit", layout: "" }, header: { fidelity: "inherit", layout: "Title + actions" },
     list: { fidelity: "inherit", layout: "Vertical list" }, content: { fidelity: "inherit", layout: "Two panes" },
@@ -1076,14 +1079,10 @@ function render() {
       }
       return true;
     });
-    const tools = V.compose ? `<div class="coltools">
-        <button data-col-act="narrow" data-col="${ci}" title="Narrower">−</button>
-        <button data-col-act="focus" data-col="${ci}" title="Add pieces here">${ci + 1}</button>
-        <button data-col-act="wide" data-col="${ci}" title="Wider">+</button>
-        <button data-col-act="drop" data-col="${ci}" title="Remove this column">${ico("trash-2")}</button>
-      </div>` : "";
+    /* Column width and column removal live in the DialKit panel, not on the
+       canvas: the screen stays the thing being judged. */
     return `<div class="col ${V.focus === ci ? "focus" : ""}" data-col="${ci}" style="flex:${col.flex}">
-      ${tools}${items.map((it) => partHTML(it, ci)).join("")}</div>`;
+      ${items.map((it) => partHTML(it, ci)).join("")}</div>`;
   }).join("");
 
   const pulledHTML = pulled.map((p) => partHTML(p.item, p.ci)).join("");
@@ -1161,27 +1160,9 @@ function wireCompose() {
     else if (act === "down") shift(uid, 0, 1);
   }));
 
-  document.querySelectorAll("[data-col-act]").forEach((b) => b.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const ci = Number(b.dataset.col);
-    const act = b.dataset.colAct;
-    const cs = cols();
-    if (act === "focus") { V.focus = ci; render(); return; }
-    if (act === "wide") cs[ci].flex = Math.round((cs[ci].flex + .15) * 100) / 100;
-    if (act === "narrow") cs[ci].flex = Math.max(.3, Math.round((cs[ci].flex - .15) * 100) / 100);
-    if (act === "drop") {
-      if (cs.length === 1) return;
-      const moved = cs[ci].items;
-      cs.splice(ci, 1);
-      cs[Math.max(0, ci - 1)].items.push(...moved);
-      V.focus = Math.max(0, Math.min(cs.length - 1, V.focus > ci ? V.focus - 1 : V.focus));
-    }
-    commit();
-  }));
-
   document.querySelectorAll(".col").forEach((col) => col.addEventListener("click", () => {
     const ci = Number(col.dataset.col);
-    if (!Number.isNaN(ci) && V.focus !== ci) { V.focus = ci; renderTray(); 
+    if (!Number.isNaN(ci) && V.focus !== ci) { V.focus = ci; dial.setValue("compose.column", COLNAMES[ci]); renderTray(); 
       document.querySelectorAll(".col").forEach((c) => c.classList.toggle("focus", Number(c.dataset.col) === ci));
       lucide.createIcons(); }
   }));
@@ -1282,19 +1263,27 @@ function pieceSwitches() {
   return group;
 }
 
+/* Up to six columns can exist on a screen; the select clamps to the ones
+   the current screen actually has. */
+const COLNAMES = [1, 2, 3, 4, 5, 6].map((n) => `Column ${n}`);
+
 const dialConfig = () => ({
   screen: { type: "select", options: Object.keys(SCREENS), default: "Project" },
-  fidelity: sel(["low", "high"]),
-  regionLabels: true,
-  featureFlags: true,
+  fidelity: sel(["high", "low"]),
+  regionLabels: false,
+  featureFlags: false,
   notes: true,
-  journeySteps: true,
+  journeySteps: false,
   density: sel(["comfortable", "compact"]),
-  shell: sel(["Flat", "Inset card"]),
+  shell: sel(["Inset card", "Flat"]),
   homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
   compose: { _collapsed: false,
     editing: true,
+    column: { type: "select", options: COLNAMES, default: "Column 1" },
+    narrower: act("Narrower"),
+    wider: act("Wider"),
+    removeColumn: act("Remove this column"),
     addColumn: act("Add a column"),
     showAll: act("Show every hidden piece"),
     resetScreen: act("Reset this screen"),
@@ -1318,9 +1307,26 @@ const dialConfig = () => ({
 const dial = DialKit.createDialKit("Wireframe C, adapted — C skin", dialConfig(), {
   id: "wireframe-c2", persist: true,
   onAction(path) {
-    if (path === "compose.addColumn") {
+    const cs = cols();
+    if (path === "compose.wider" || path === "compose.narrower") {
+      const c = cs[Math.min(V.focus, cs.length - 1)];
+      c.flex = path === "compose.wider"
+        ? Math.round((c.flex + .15) * 100) / 100
+        : Math.max(.3, Math.round((c.flex - .15) * 100) / 100);
+      commit();
+    } else if (path === "compose.removeColumn") {
+      if (cs.length === 1) return;
+      const ci = Math.min(V.focus, cs.length - 1);
+      const moved = cs[ci].items;
+      cs.splice(ci, 1);
+      cs[Math.max(0, ci - 1)].items.push(...moved);
+      V.focus = Math.max(0, Math.min(cs.length - 1, ci - 1));
+      dial.setValue("compose.column", COLNAMES[V.focus]);
+      commit();
+    } else if (path === "compose.addColumn") {
       cols().push({ flex: 1, items: [] });
       V.focus = cols().length - 1;
+      dial.setValue("compose.column", COLNAMES[V.focus]);
       commit();
     } else if (path === "compose.showAll") {
       cols().forEach((c) => c.items.forEach((it) => { it.hidden = false; }));
@@ -1365,6 +1371,7 @@ function applyDial(v) {
   V.homeLayout = v.homeLayout;
   V.isolate = v.isolate;
   V.compose = v.compose.editing;
+  V.focus = Math.max(0, Math.min(cols().length - 1, COLNAMES.indexOf(v.compose.column)));
   V.nav = v.nav.layout;
   V.icons = v.nav.icons;
   V.titles = v.nav.titles;
