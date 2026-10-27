@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Prototype C, adapted — low-fidelity wireframe</title>
 <link rel="stylesheet" href="vendor/geist/geist.css">
+<link rel="stylesheet" href="vendor/dialkit/styles.css">
 <style>
 :root{
   --ink:#111112; --ink-2:#55565b; --ink-3:#8c8d94;
@@ -15,28 +16,20 @@
 html{-webkit-font-smoothing:antialiased}
 body{font-family:'Geist',system-ui,sans-serif;background:var(--page);color:var(--ink);font-size:14px;line-height:1.5}
 
-.stage{padding:22px 24px 44px;max-width:1540px;margin:0 auto}
+.stage{padding:22px 24px 44px;max-width:1560px;margin:0 auto}
+@media (min-width:1200px){.stage{padding-right:356px}}
 h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
-.sub{color:var(--ink-2);font-size:13px;margin-top:5px;max-width:720px}
-
-/* ---------------------------------------------------------- controls */
-.ctl{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:16px 0 14px;
-  padding-top:13px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3)}
-.ctl .grp{display:flex;gap:5px}
-.ctl button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--paper);
-  color:var(--ink-2);border-radius:7px;padding:4px 10px;cursor:pointer}
-.ctl button:hover{border-color:var(--line-2)}
-.ctl button.on{background:var(--ink);border-color:var(--ink);color:#fff}
-.ctl .sp{flex:1}
+.sub{color:var(--ink-2);font-size:13px;margin:5px 0 16px;max-width:760px}
 
 /* ------------------------------------------------------------- frame */
 .frame{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;
   display:grid;grid-template-columns:56px 1fr;height:min(78vh,720px);min-height:560px}
 .frame[data-wide="1"]{grid-template-columns:184px 1fr}
 .rail{border-right:1px solid var(--line);padding:10px 8px;display:flex;flex-direction:column;gap:6px;background:var(--fill-2)}
-.rail .r{height:30px;border-radius:7px;background:var(--fill);display:flex;align-items:center;gap:8px;padding:0 8px;color:var(--ink-3)}
+.rail .r{height:30px;border-radius:7px;background:var(--fill);display:flex;align-items:center;gap:8px;
+  padding:0 8px;color:var(--ink-3);cursor:pointer}
 .rail .r.on{background:var(--line-2)}
-.rail svg{width:15px;height:15px;stroke-width:1.9}
+.rail svg{width:15px;height:15px;stroke-width:1.9;flex:0 0 15px}
 .rail .r span{display:none;font-size:12px;color:var(--ink-2)}
 .frame[data-wide="1"] .rail .r span{display:block}
 
@@ -52,7 +45,11 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 
 .hd{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
 .hd .t{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
-.hd .btn{height:28px;border-radius:7px;background:var(--fill);min-width:96px}
+.hd .t .hi:first-child{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.hd .t .hi+.hi{font-size:12.5px;color:var(--ink-2)}
+.hd .btn{height:28px;min-width:96px;border-radius:7px;background:var(--fill);display:flex;align-items:center;
+  justify-content:center;gap:6px;font-size:12px;color:var(--ink-2);padding:0 10px;white-space:nowrap}
+.hd .btn svg{width:13px;height:13px;stroke-width:1.9}
 
 .body{flex:1;display:flex;gap:10px;padding:10px;min-height:0;background:var(--fill-2)}
 .body[data-dense="1"]{gap:7px;padding:7px}
@@ -62,42 +59,62 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 .blk{background:var(--paper);border:1px solid var(--line);border-radius:9px;display:flex;flex-direction:column;
   min-height:0;position:relative;overflow:hidden}
 .blk > .bh{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line)}
+.blk > .bh .hi{font-size:12.5px;font-weight:600}
 .blk > .bb{padding:9px 10px;display:flex;flex-direction:column;gap:7px;overflow:hidden;flex:1;min-height:0}
 
+/* fidelity -------------------------------------------------------- */
+.frame[data-fi="low"] .hi{display:none}
+.frame[data-fi="high"] .lo{display:none}
+.hi{font-size:12.5px;color:var(--ink)}
+.hi.q{color:var(--ink-2)}
+
 /* grey matter */
-.bar{height:8px;border-radius:3px;background:var(--fill)}
+.bar{height:8px;border-radius:3px;background:var(--fill);display:block}
 .bar.d{background:var(--line-2)}
-.chip{height:20px;border-radius:999px;background:var(--fill);min-width:58px}
-.chip.on{background:var(--line-2)}
-.cell{border:1px dashed var(--line-2);border-radius:7px;background:var(--fill-2);flex:1;min-height:52px;
-  display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:11px;text-align:center;padding:6px}
-.rowline{display:flex;align-items:center;gap:8px}
-.rowline .bar{flex:1}
-.rowline.sel{background:var(--fill-2);border-radius:6px;margin:0 -4px;padding:4px;cursor:pointer}
-.rowline.sel.on{background:var(--tag-soft);box-shadow:inset 2px 0 0 var(--tag)}
+.chip{border-radius:999px;background:var(--fill);min-width:58px;height:21px;display:inline-flex;align-items:center;
+  justify-content:center;padding:0 10px;font-size:11.5px;color:var(--ink-2);white-space:nowrap}
+.chip.on{background:var(--line-2);color:var(--ink)}
+.rowline{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.rowline > .bar{flex:1}
+.rowline .sp{flex:1}
+.row-sel{display:flex;align-items:center;gap:8px;border-radius:6px;padding:4px;margin:0 -4px;cursor:pointer}
+.row-sel.on{background:var(--tag-soft);box-shadow:inset 2px 0 0 var(--tag)}
+.row-sel{align-items:flex-start}
+.row-sel .dot{margin-top:6px}
+.row-sel .hi{flex:1;min-width:0;line-height:1.35}
+.row-sel .tail{font-size:11.5px;color:var(--ink-3);white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--line-2);flex:0 0 7px}
-.num{height:30px;border-radius:6px;background:var(--fill);flex:1}
-.tbl{display:flex;flex-direction:column;gap:0}
-.tbl .tr{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.num{flex:1;min-width:0;border-radius:6px;background:var(--fill);min-height:30px;display:flex;flex-direction:column;
+  justify-content:center;padding:6px 10px}
+.num .hi{font-size:15.5px;font-weight:600;letter-spacing:-.02em;white-space:nowrap}
+.num .cap{font-size:11px;color:var(--ink-3)}
+.tbl{display:flex;flex-direction:column}
+.tbl .tr{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);align-items:center}
 .tbl .tr:last-child{border-bottom:0}
-.tbl .tr .bar{flex:1}
-.tbl .tr .bar:first-child{flex:2}
+.tbl .tr > *{flex:1;min-width:0;font-size:12px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl .tr > *:first-child{flex:1.9;color:var(--ink)}
+.tbl .tr.head > *{font-size:11px;color:var(--ink-3)}
+.tbl .tr .bar{height:8px}
+.field{border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;font-size:11.5px;color:var(--ink-3)}
+.solid{background:var(--ink);color:#fff;border-radius:6px;padding:7px;text-align:center;font-size:12px}
+.solid .hi{color:#fff}
+.frame[data-fi="low"] .solid{color:transparent}
 
 /* plan + overlay */
 .plan{flex:1;min-height:90px;border:1px dashed var(--line-2);border-radius:8px;background:var(--fill-2);
-  position:relative;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:11px}
+  position:relative;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:11px;text-align:center;padding:8px}
 .plan svg{position:absolute;inset:0;width:100%;height:100%}
+.plan .cap{position:relative;z-index:2}
 
 /* labels and notes */
-.tag{position:absolute;top:0;left:0;transform:translateY(-1px);background:var(--tag);color:#fff;
-  font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:0 0 5px 0;z-index:3}
-.frame[data-labels="0"] .tag{display:none}
+.tag{position:absolute;top:0;left:0;background:var(--tag);color:#fff;font-size:9.5px;letter-spacing:.05em;
+  text-transform:uppercase;padding:2px 6px;border-radius:0 0 5px 0;z-index:3}
+.flag{position:absolute;top:5px;right:8px;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9.5px;color:var(--tag);background:var(--tag-soft);
+  border-radius:4px;padding:2px 6px;z-index:3}
+.frame[data-labels="0"] .tag,.frame[data-flags="0"] .flag{display:none}
+.frame[data-labels="1"] .blk > .bh{padding-top:16px}
 .note{font-size:11px;color:var(--ink-3);line-height:1.45}
 .frame[data-notes="0"] .note{display:none}
-.frame[data-labels="1"] .blk > .bh{padding-top:16px}
-.flag{position:absolute;top:6px;right:8px;font-size:9.5px;color:var(--tag);background:var(--tag-soft);
-  border-radius:4px;padding:2px 6px;z-index:3}
-.frame[data-notes="0"] .flag{display:none}
 
 /* legend under the frame */
 .key{margin-top:18px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:16px 18px}
@@ -113,19 +130,10 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.015em}
 <div class="stage">
 
 <h1>Prototype C, adapted to the nine high-priority features</h1>
-<p class="sub">Boxes only: how much room each thing gets, what sits next to what, and the order it is read in.
-No colour, no final wording, no real drawings. Switch screens to see where each high-priority feature lands.</p>
+<p class="sub">Space, composition and order of reading. Low fidelity is the working state: boxes only.
+Raise <b>Fidelity</b> in the DialKit panel to read the same layout with the real words and numbers in it.</p>
 
-<div class="ctl">
-  <div class="grp" id="screens"></div>
-  <span class="sp"></span>
-  <button id="labels" class="on">Region labels</button>
-  <button id="notes" class="on">Notes</button>
-  <button id="wide">Wide rail</button>
-  <button id="dense">Dense</button>
-</div>
-
-<div class="frame" id="frame" data-labels="1" data-notes="1" data-wide="0">
+<div class="frame" id="frame" data-fi="low" data-labels="1" data-notes="1" data-flags="1" data-wide="0">
   <nav class="rail" id="rail"></nav>
   <div class="main">
     <div class="tabs" id="tabs"></div>
@@ -142,18 +150,36 @@ No colour, no final wording, no real drawings. Switch screens to see where each 
 </div>
 
 <script src="vendor/lucide/lucide.min.js"></script>
+<script src="vendor/dialkit/browser.global.js"></script>
 <script>
-/* Every block below exists because of a high-priority feature. The wireframe
-   is only here to argue about room and order, so the content is grey. */
+/* Every block exists because of a high-priority feature. Low fidelity argues
+   about room and order; high fidelity checks the same boxes hold real content. */
 
 const ico = (n) => '<i data-lucide="' + n + '"></i>';
-const bars = (n, w) => Array.from({ length: n }, (_, i) =>
-  '<div class="bar" style="width:' + (w ? w[i % w.length] : 100 - (i % 3) * 12) + '%"></div>').join("");
-const rows = (n, sel) => Array.from({ length: n }, (_, i) =>
-  '<div class="rowline sel ' + (i === (sel ?? 1) ? "on" : "") + '"><span class="dot"></span>' +
-  '<div class="bar" style="width:' + (72 - (i % 4) * 9) + '%"></div></div>').join("");
-const table = (r, c) => '<div class="tbl">' + Array.from({ length: r }, () =>
-  '<div class="tr">' + Array.from({ length: c }, () => '<div class="bar"></div>').join("") + "</div>").join("") + "</div>";
+
+/* lo = the grey bar, hi = what will actually sit there. Both are authored
+   together so a block can never promise more room than its content needs. */
+const lo = (w, h) => '<span class="lo bar" style="width:' + w + '%' + (h ? ";height:" + h + "px" : "") + '"></span>';
+const line = (text, w) => lo(w || 80, 0) + '<span class="hi">' + text + "</span>";
+
+const list = (items, sel) => items.map((it, i) => {
+  const [t, tail] = Array.isArray(it) ? it : [it, ""];
+  return `<div class="row-sel ${i === sel ? "on" : ""}"><span class="dot"></span>
+    <span class="lo bar" style="width:${72 - (i % 4) * 9}%"></span>
+    <span class="hi">${t}</span>${tail ? `<span class="tail hi">${tail}</span>` : ""}</div>`;
+}).join("");
+
+const chips = (items, on) => items.map((t, i) =>
+  `<span class="chip ${i === on ? "on" : ""}"><span class="lo bar" style="width:46px;background:none"></span>
+   <span class="hi">${t}</span></span>`).join("");
+
+const table = (head, rowsIn) => `<div class="tbl">
+  <div class="tr head">${head.map((h) => `<span><span class="lo bar" style="width:60%"></span><span class="hi">${h}</span></span>`).join("")}</div>
+  ${rowsIn.map((r) => `<div class="tr">${r.map((c) => `<span><span class="lo bar" style="width:${c.length > 10 ? 86 : 54}%"></span><span class="hi">${c}</span></span>`).join("")}</div>`).join("")}</div>`;
+
+const nums = (pairs) => `<div class="rowline">${pairs.map(([v, c]) =>
+  `<span class="num"><span class="lo bar" style="width:62%;height:11px"></span>
+   <span class="hi">${v}</span><span class="cap hi">${c}</span></span>`).join("")}</div>`;
 
 /* A property line drawn over the floor: the surveyor's plan as its own layer. */
 const siteSVG = `<svg viewBox="0 0 100 60" preserveAspectRatio="none">
@@ -169,150 +195,221 @@ const blk = (label, head, body, flag, grow = 1) => ({ label, head, body, flag, g
 
 const SCREENS = {
   Project: {
-    icon: "layout-dashboard",
-    title: "Project",
-    head: ["title", "two lines of state", 2],
+    icon: "layout-dashboard", title: "Alder Court", sub: "48 units · 6 levels · read 6 min ago",
+    actions: [["external-link", "Open in AutoCAD"], ["download", "Export"]],
     cols: [
       { flex: 1.6, blocks: [
         blk("change log", "What changed since you last looked",
-          `<p class="note">Newest first. Every line points at the unit, the floor or the table it touched, and carries the revision it came from.</p>
-           ${rows(7, 0)}`, "high · what changed between two revisions"),
+          `<p class="note">Newest first. Every line points at the unit, the floor or the table it touched.</p>
+           ${list([
+             ["Unit 502 · window 240 mm narrower", "R04 · 24 Oct"],
+             ["Level 5 · corridor widened 150 mm", "R04 · 24 Oct"],
+             ["Unit 507 · balcony moved 400 mm", "R04 · 24 Oct"],
+             ["Areas table · level 5 total −18 m²", "R04 · 24 Oct"],
+             ["Surveyor's plan R2 replaced R1", "12 Sep"],
+             ["Unit 311 · type 3½ → 4½", "R03 · 02 Oct"],
+             ["Window schedule · 4 openings added", "R03 · 02 Oct"],
+           ], 0)}`,
+          "high · what changed between two revisions"),
       ] },
       { flex: 1, blocks: [
         blk("counts", "Running totals",
           `<p class="note">Read from the drawings, never typed.</p>
-           <div class="rowline">${'<div class="num"></div>'.repeat(3)}</div>${table(3, 3)}`, "high · unit count and areas", 0),
+           ${nums([["48", "units"], ["4 212 m²", "net area"], ["45 338", "ft²"]])}
+           ${table(["Type", "Count", "Area m²"], [["3½", "18", "1 274"], ["4½", "22", "2 046"], ["5½", "8", "892"]])}`,
+          "high · unit count and areas", 0),
+      ] },
+      { flex: 1, blocks: [
         blk("open", "What is blocking",
-          `<p class="note">Differences, missing inputs, answers waited on.</p>${rows(4, -1)}`, null, 1),
+          `<p class="note">Differences, missing inputs, answers waited on.</p>
+           ${list([
+             ["6 differences between plan and model", "units"],
+             ["10 missing inputs", "rules"],
+             ["Planner reply", "12 days late"],
+             ["4 crossings not decided", "coordination"],
+           ], -1)}`),
       ] },
     ],
   },
 
   Site: {
-    icon: "map",
-    title: "Site and property lines",
-    head: ["title", "surveyor's plan, number and date", 2],
+    icon: "map", title: "Site and property lines", sub: "Surveyor's plan R2 · 12 Sep · lot 1 459 m²",
+    actions: [["layers", "Layers"], ["download", "Export"]],
     cols: [
       { flex: 2, blocks: [
         blk("plan + surveyor layer", "Floor with the surveyor's plan under it",
-          `<div class="rowline">${'<div class="chip"></div>'.repeat(3)}<span class="sp"></span><div class="chip on" style="min-width:118px"></div></div>
-           <div class="plan">${siteSVG}<span>property lines over the building, every distance drawn</span></div>
-           <p class="note">The overlay is a layer that can be switched off, never a filter or a tint on the drawing.</p>`,
+          `<div class="rowline">${chips(["Level 5", "Ground", "Site"], 0)}<span class="sp"></span>${chips(["Surveyor's plan R2 · on"], 0)}</div>
+           <div class="plan">${siteSVG}<span class="cap">property lines over the building, every distance drawn</span></div>
+           <p class="note">The overlay is a layer that switches off, never a tint or a filter on the drawing.</p>`,
           "high · the surveyor's plan under everything"),
       ] },
-      { flex: 1, blocks: [
+      { flex: 1.05, blocks: [
         blk("measured from the line", "Setbacks and coverage",
-          `<p class="note">Each distance names the surveyor's plan it was measured from.</p>${table(5, 2)}`, null, 1),
+          `<p class="note">Each distance names the surveyor's plan it was measured from.</p>
+           ${table(["From the line", "Measured", "Required"], [
+             ["Front", "6.10 m", "6.00 m"],
+             ["Rear", "7.42 m", "7.50 m"],
+             ["Side west", "2.05 m", "2.00 m"],
+             ["Side east", "2.00 m", "2.00 m"],
+             ["Lot coverage", "38.4 %", "40 %"],
+           ])}`),
         blk("new plan", "A newer plan arrived",
-          `<p class="note">What moved, and which numbers change with it.</p>${rows(3, -1)}
-           <div class="rowline"><div class="bar d" style="width:44%;height:26px;border-radius:6px"></div></div>`, null, 0),
+          `<p class="note">What moved, and which numbers change with it.</p>
+           ${list([
+             ["Rear line moved 80 mm north", "R1 → R2"],
+             ["Lot area 1 462 → 1 459 m²", "−3 m²"],
+             ["3 measurements change", "rear, coverage, density"],
+           ], -1)}
+           <div class="solid"><span class="hi">Apply the new plan</span></div>`, null, 0),
       ] },
     ],
   },
 
   Units: {
-    icon: "layers",
-    title: "Units, plan against model",
-    head: ["title", "floor, count, differences open", 3],
+    icon: "layers", title: "Typical floor — level 5", sub: "14 units · 6 differences open",
+    actions: [["external-link", "Open in AutoCAD"], ["share-2", "Share link"], ["download", "Export"]],
     cols: [
-      { flex: .9, blocks: [
+      { flex: .95, blocks: [
         blk("units list", "Units on this floor",
-          `<p class="note">One row per unit, a mark where plan and model disagree.</p>${rows(9, 1)}`),
+          `<p class="note">One row per unit, a mark where plan and model disagree.</p>
+           ${list([
+             ["501 · 3½", "707 ft²"], ["502 · 4½", "1 difference"], ["503 · 3½", "753 ft²"],
+             ["504 · 3½+den", "822 ft²"], ["505 · 4½", "968 ft²"], ["506 · 4½", "1 difference"],
+             ["507 · 4½", "1 203 ft²"], ["508 · 5½", "1 difference"], ["509 · 3½", "714 ft²"],
+           ], 1)}`),
       ] },
       { flex: 1.5, blocks: [
         blk("plan vs model", "The two drawings side by side",
-          `<div class="rowline">${'<div class="chip"></div>'.repeat(2)}<span class="sp"></span><div class="chip"></div></div>
+          `<div class="rowline">${chips(["2D plan", "3D model"], 0)}<span class="sp"></span>${chips(["100 %"], -1)}</div>
            <div style="display:flex;gap:8px;flex:1;min-height:0">
-             <div class="plan">2D plan, outlines on top</div><div class="plan">3D model, same level</div>
+             <div class="plan"><span class="cap">2D plan, unit outlines on top</span></div>
+             <div class="plan"><span class="cap">3D model, same level</span></div>
            </div>
            <p class="note">Same unit, same zoom, same moment in both panes.</p>`,
           "high · 2D plan against the 3D model"),
       ] },
-      { flex: 1.1, blocks: [
-        blk("unit", "The unit, and the difference",
-          `<div class="rowline">${'<div class="chip"></div>'.repeat(4)}</div>
-           ${table(4, 2)}`),
+      { flex: 1.15, blocks: [
+        blk("unit", "Unit 502",
+          `<div class="rowline">${chips(["Overview", "Openings", "History"], 1)}</div>
+           ${table(["Window W-12", "Value", "Source"], [
+             ["Plan says", "1 800 × 1 500", "A-201 R04"],
+             ["Model says", "1 560 × 1 500", "SU · 24 Oct"],
+             ["Difference", "240 mm", "width"],
+             ["Appeared in", "R04", "24 Oct"],
+           ])}`),
         blk("reason", "Why this change?",
-          `<div class="rowline" style="flex-wrap:wrap">${'<div class="chip"></div>'.repeat(5)}</div>
-           <div class="bar" style="height:34px;border-radius:6px;width:100%"></div>
-           <div class="bar d" style="height:28px;border-radius:6px;width:100%"></div>
-           <p class="note">Nothing is recorded until a reason is picked and one sentence is written.</p>`,
+          `<div class="rowline" style="flex-wrap:wrap">${chips(["client cost", "structure", "code", "city", "drawing error"], -1)}</div>
+           <div class="field"><span class="lo bar" style="width:70%"></span><span class="hi">one sentence for the next person</span></div>
+           <div class="solid"><span class="hi">Record the decision</span></div>
+           <p class="note">Nothing is recorded until a reason is picked and a sentence is written.</p>`,
           "high · why was this changed", 0),
       ] },
     ],
   },
 
   Counts: {
-    icon: "table",
-    title: "Counts read from the drawings",
-    head: ["title", "source file and read time", 2],
+    icon: "table", title: "Counts read from the drawings", sub: "A-201 R04 · read 6 min ago",
+    actions: [["download", "Export"], ["share-2", "Share link"]],
     cols: [
-      { flex: 1, blocks: [
+      { flex: 1.4, blocks: [
         blk("question tabs", "One table per question",
-          `<div class="rowline">${'<div class="chip on"></div>' + '<div class="chip"></div>'.repeat(3)}</div>
-           <p class="note">Units and types · areas per unit and per floor · window schedule · materials per elevation.</p>
-           ${table(7, 5)}
-           <div class="rowline"><span class="sp"></span><div class="chip"></div></div>`,
+          `<div class="rowline">${chips(["Units and types", "Areas", "Window schedule", "Materials"], 0)}</div>
+           <p class="note">Each tab is one question, answered by one table.</p>
+           ${table(["Type", "Count", "Area m²", "Area ft²", "Floors"], [
+             ["3½", "18", "1 274", "13 714", "2 – 6"],
+             ["3½ + den", "6", "468", "5 038", "3 – 6"],
+             ["4½", "22", "2 046", "22 023", "2 – 6"],
+             ["5½", "8", "892", "9 601", "5 – 6"],
+             ["Total", "48", "4 212", "45 338", "—"],
+           ])}
+           <div class="rowline"><span class="sp"></span>${chips(["Export this table"], -1)}</div>`,
           "high · unit count, areas, window schedule"),
       ] },
-      { flex: .7, blocks: [
+      { flex: .85, blocks: [
         blk("per floor", "The same count, floor by floor",
-          `<p class="note">A floor that differs from the others is flagged in place.</p>${table(6, 3)}`),
+          `<p class="note">A floor that differs from the others is flagged in place.</p>
+           ${table(["Level", "Units", "Windows"], [
+             ["2", "8", "34"], ["3", "8", "34"], ["4", "8", "34"],
+             ["5", "8", "30 · differs", "—"], ["6", "8", "34"], ["Roof", "—", "4"],
+           ])}`),
         blk("source", "Where these numbers came from",
-          `${rows(3, -1)}<p class="note">File, revision, read time. No number without one.</p>`, null, 0),
+          `${list([["A-201 Plan niveau 5", "R04 · 24 Oct"], ["A-202 Élévations", "R03 · 02 Oct"], ["Model SU", "24 Oct"]], -1)}
+           <p class="note">File, revision, read time. No number without one.</p>`, null, 0),
       ] },
     ],
   },
 
   Rules: {
-    icon: "scale",
-    title: "Rules, measured and missing",
-    head: ["title", "zoning by-law and code edition", 2],
+    icon: "scale", title: "Rules, measured and missing", sub: "Zoning by-law 2019-45 · code edition to confirm",
+    actions: [["download", "Export the study"], ["mail", "Note to the planner"]],
     cols: [
-      { flex: .8, blocks: [
+      { flex: .85, blocks: [
         blk("articles", "Articles that matter here",
-          `<div class="rowline">${'<div class="chip"></div>'.repeat(3)}</div>
-           <p class="note">Filtered to this project, each with a plain state.</p>${rows(9, 2)}`),
+          `<div class="rowline">${chips(["All", "To check", "Missing"], 0)}</div>
+           <p class="note">Filtered to this project, each with a plain state.</p>
+           ${list([
+             ["4.2.1 Hauteur", "fine"], ["4.2.4 Marge arrière", "to check"], ["4.3.1 Taux d'implantation", "fine"],
+             ["5.1.2 Stationnement", "missing input"], ["5.4 Ratio logements", "fine"],
+             ["6.1 Aires d'agrément", "missing input"], ["6.3 Rangement vélo", "to check"],
+             ["7.2 Façade sur rue", "fine"], ["8.1 Matériaux", "to check"],
+           ], 1)}`),
       ] },
-      { flex: 1.4, blocks: [
-        blk("article", "The article, and what the project measures",
-          `<div class="bar" style="width:100%;height:40px;border-radius:6px"></div>
-           <div class="rowline"><div class="num" style="height:54px"></div><div class="num" style="height:54px"></div></div>
-           <p class="note">Measured against required, side by side, then one sentence of plain reading. It never says the project complies.</p>
-           ${bars(3)}`,
+      { flex: 1.45, blocks: [
+        blk("article", "4.2.4 Marge arrière",
+          `<div class="field q"><span class="lo bar" style="width:92%"></span><span class="lo bar" style="width:64%;margin-top:6px"></span>
+             <span class="hi q">« La marge arrière minimale est de 7,50 m, mesurée depuis la ligne arrière du lot. »</span></div>
+           ${nums([["7.42 m", "measured from the surveyor's plan R2"], ["7.50 m", "required by 4.2.4"]])}
+           <p class="note">Measured against required, side by side, then one sentence of plain reading.
+             It names the gap; it never says the project complies.</p>
+           <div>${line("The rear wall sits 80 mm inside the required setback.", 88)}</div>
+           <div>${line("A minor exemption request covers up to 10 % of the setback.", 76)}</div>`,
           "high · the article in words anyone can act on"),
         blk("export", "The code study as a document",
-          `<div class="rowline">${'<div class="chip"></div>'.repeat(2)}<span class="sp"></span><div class="chip on"></div></div>`, null, 0),
+          `<div class="rowline">${chips(["Print", "PDF"], -1)}<span class="sp"></span>${chips(["Export the study"], 0)}</div>`, null, 0),
       ] },
-      { flex: .8, blocks: [
+      { flex: .85, blocks: [
         blk("missing inputs", "What the project still needs",
-          `<p class="note">The answers no drawing can give: lot area, code edition, a surveyor's figure. One shared list.</p>
-           ${rows(6, -1)}<div class="bar d" style="height:26px;border-radius:6px;width:60%"></div>`,
+          `<p class="note">The answers no drawing can give. One shared list.</p>
+           ${list([
+             ["Lot area", "surveyor"], ["Code edition", "city"], ["Parking ratio", "by-law annex"],
+             ["Amenity area rule", "city"], ["Bike storage count", "client"], ["Street façade width", "surveyor"],
+           ], -1)}
+           <div class="solid"><span class="hi">Write the note to the planner</span></div>`,
           "high · say out loud what is missing"),
       ] },
     ],
   },
 
   Coordination: {
-    icon: "git-compare",
-    title: "Where the trades cross",
-    head: ["title", "drawings compared, date of each", 2],
+    icon: "git-compare", title: "Where the trades cross", sub: "Structure R02 · mechanical R01 · compared 24 Oct",
+    actions: [["external-link", "Open in AutoCAD"], ["download", "Export"]],
     cols: [
-      { flex: .9, blocks: [
+      { flex: .95, blocks: [
         blk("crossings", "Ducts, beams and columns in the same place",
-          `<p class="note">One row per crossing, level and axis named.</p>${rows(8, 1)}`,
+          `<p class="note">One row per crossing, level and axis named.</p>
+           ${list([
+             ["Level 5 · corridor, axis 4", "duct × beam"], ["Level 5 · unit 507", "column × closet"],
+             ["Level 4 · corridor, axis 4", "duct × beam"], ["Level 3 · shaft B", "duct × slab"],
+             ["Level 3 · unit 311", "column × window"], ["Level 2 · lobby", "beam × ceiling"],
+             ["Roof · unit 603", "duct × parapet"], ["Garage · axis 7", "column × stall"],
+           ], 1)}`,
           "high · ducts, beams and columns"),
       ] },
       { flex: 1.5, blocks: [
         blk("overlay", "The two drawings on top of each other",
-          `<div class="rowline">${'<div class="chip"></div>'.repeat(3)}<span class="sp"></span><div class="chip"></div></div>
-           <div class="plan">structure over mechanical, the overlap marked</div>`),
+          `<div class="rowline">${chips(["Structure", "Mechanical", "Architecture"], 0)}<span class="sp"></span>${chips(["Level 5"], -1)}</div>
+           <div class="plan"><span class="cap">structure over mechanical, the overlap marked</span></div>`),
       ] },
-      { flex: 1, blocks: [
-        blk("crossing", "What is in the way",
-          `${table(4, 2)}
-           <div class="bar" style="height:34px;border-radius:6px;width:100%"></div>
-           <div class="bar d" style="height:28px;border-radius:6px;width:100%"></div>
+      { flex: 1.05, blocks: [
+        blk("crossing", "Corridor, axis 4",
+          `${table(["Crossing", "Value", "Source"], [
+             ["Duct underside", "2 310 mm", "MEC R01"],
+             ["Beam underside", "2 280 mm", "STR R02"],
+             ["Overlap", "30 mm", "measured"],
+             ["Clear height left", "2 250 mm", "needs 2 300"],
+           ])}
+           <div class="field"><span class="lo bar" style="width:72%"></span><span class="hi">one sentence for the next person</span></div>
+           <div class="solid"><span class="hi">Record the decision</span></div>
            <p class="note">Recording it asks for the same reason as any other decision.</p>`),
       ] },
     ],
@@ -322,75 +419,87 @@ const SCREENS = {
 const KEY = [
   ["Project", "Change log first", "The page opens on what moved since the last read, not on a dashboard."],
   ["Site", "Surveyor's plan as a layer", "Property lines over the floor; every setback names the plan and its date."],
-  ["Units", "Plan and model in one row", "Two panes of equal weight, differences in the right column, reason prompt under them."],
+  ["Units", "Plan and model in one row", "Two panes of equal weight, difference in the right column, reason prompt under it."],
   ["Counts", "One table per question", "Units and areas, window schedule by floor, each table carrying its source."],
   ["Rules", "Three columns", "Articles, the measured-against-required pair, and the missing inputs that block a verdict."],
   ["Coordination", "List, overlay, detail", "Crossings on the left, the superposition in the middle, the decision on the right."],
 ];
 
-let screen = "Project";
+const V = { screen: "Project", fidelity: "low", labels: true, notes: true, flags: true, wide: false, density: "comfortable" };
 
 function render() {
-  const def = SCREENS[screen];
+  const def = SCREENS[V.screen];
+  const frame = document.getElementById("frame");
+  frame.dataset.fi = V.fidelity;
+  frame.dataset.labels = V.labels ? "1" : "0";
+  frame.dataset.notes = V.notes ? "1" : "0";
+  frame.dataset.flags = V.flags ? "1" : "0";
+  frame.dataset.wide = V.wide ? "1" : "0";
+  document.getElementById("body").dataset.dense = V.density === "compact" ? "1" : "0";
 
   document.getElementById("rail").innerHTML = Object.entries(SCREENS).map(([k, s]) =>
-    `<div class="r ${k === screen ? "on" : ""}" data-s="${k}">${ico(s.icon)}<span>${k}</span></div>`).join("");
+    `<div class="r ${k === V.screen ? "on" : ""}" data-s="${k}">${ico(s.icon)}<span>${k}</span></div>`).join("");
 
   document.getElementById("tabs").innerHTML = Object.entries(SCREENS).map(([k, s]) =>
-    `<button class="${k === screen ? "on" : ""}" data-s="${k}">${ico(s.icon)}${k}</button>`).join("") +
-    `<span class="sp"></span><span class="stamp">read 6 min ago</span>`;
+    `<button class="${k === V.screen ? "on" : ""}" data-s="${k}">${ico(s.icon)}<span class="lo bar" style="width:52px"></span><span class="hi">${k}</span></button>`).join("") +
+    `<span class="sp"></span><span class="stamp"><span class="lo bar" style="width:62px"></span><span class="hi">read 6 min ago</span></span>`;
 
   document.getElementById("hd").innerHTML =
-    `<div class="t"><div class="bar d" style="width:230px;height:13px"></div>
-      <div class="bar" style="width:330px"></div></div>` +
-    '<div class="btn"></div>'.repeat(def.head[2]);
+    `<div class="t"><span class="lo bar d" style="width:230px;height:13px"></span><span class="hi">${def.title}</span>
+       <span class="lo bar" style="width:330px"></span><span class="hi">${def.sub}</span></div>` +
+    def.actions.map(([i, t]) => `<span class="btn">${ico(i)}<span class="lo bar" style="width:52px"></span><span class="hi">${t}</span></span>`).join("");
 
   document.getElementById("body").innerHTML = def.cols.map((c) =>
     `<div class="col" style="flex:${c.flex}">${c.blocks.map((b) => `
       <section class="blk" style="flex:${b.grow} 1 auto">
         <span class="tag">${b.label}</span>
         ${b.flag ? `<span class="flag">${b.flag}</span>` : ""}
-        <div class="bh"><div class="bar d" style="width:${90 + b.head.length * 2}px;height:10px"></div></div>
+        <div class="bh"><span class="lo bar d" style="width:${90 + b.head.length * 2}px;height:10px"></span><span class="hi">${b.head}</span></div>
         <div class="bb">${b.body}</div>
       </section>`).join("")}</div>`).join("");
 
   document.querySelectorAll("[data-s]").forEach((el) => el.addEventListener("click", () => {
-    screen = el.dataset.s;
+    V.screen = el.dataset.s;
+    dial.setValue("screen", V.screen);
     render();
   }));
 
-  /* Selecting a row is the only live behaviour: it shows which block answers it. */
-  document.querySelectorAll(".rowline.sel").forEach((r) => r.addEventListener("click", () => {
-    r.parentNode.querySelectorAll(".rowline.sel").forEach((o) => o.classList.remove("on"));
+  /* Selecting a row is the only live behaviour: it says which block answers it. */
+  document.querySelectorAll(".row-sel").forEach((r) => r.addEventListener("click", () => {
+    r.parentNode.querySelectorAll(".row-sel").forEach((o) => o.classList.remove("on"));
     r.classList.add("on");
   }));
 
   lucide.createIcons();
 }
 
-document.getElementById("screens").innerHTML = Object.keys(SCREENS).map((k) =>
-  `<button data-s="${k}" class="${k === screen ? "on" : ""}">${k}</button>`).join("");
-document.getElementById("screens").addEventListener("click", (e) => {
-  const b = e.target.closest("button");
-  if (!b) return;
-  screen = b.dataset.s;
-  document.querySelectorAll("#screens button").forEach((x) => x.classList.toggle("on", x === b));
-  render();
-});
-
-const toggle = (id, attr, node) => document.getElementById(id).addEventListener("click", (e) => {
-  const on = e.target.classList.toggle("on");
-  node().setAttribute(attr, on ? "1" : "0");
-});
-const frame = () => document.getElementById("frame");
-toggle("labels", "data-labels", frame);
-toggle("notes", "data-notes", frame);
-toggle("wide", "data-wide", frame);
-toggle("dense", "data-dense", () => document.getElementById("body"));
-
 document.getElementById("keylist").innerHTML = KEY.map(([s, t, d]) =>
   `<li><i>${s}</i><span><b>${t}.</b> ${d}</span></li>`).join("");
 
+const sel = (options) => ({ type: "select", options, default: options[0] });
+
+const dial = DialKit.createDialKit("Wireframe C, adapted", {
+  screen: sel(Object.keys(SCREENS)),
+  fidelity: sel(["low", "high"]),
+  regionLabels: true,
+  featureFlags: true,
+  notes: true,
+  wideRail: false,
+  density: sel(["comfortable", "compact"]),
+});
+
+dial.subscribe((v) => {
+  V.screen = v.screen;
+  V.fidelity = v.fidelity;
+  V.labels = v.regionLabels;
+  V.flags = v.featureFlags;
+  V.notes = v.notes;
+  V.wide = v.wideRail;
+  V.density = v.density;
+  render();
+});
+
+DialKit.createDialRoot({ position: "top-right", theme: "light" });
 render();
 </script>
 </body>
