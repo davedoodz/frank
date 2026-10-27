@@ -663,11 +663,12 @@ const SCREENS = {
     regions: ["header", "list", "content", "inspector", "footer"],
     steps: { list: 1, content: 2, inspector: 3, footer: 4 },
   },
-  "Quantités": { icon: "table", regions: ["header", "content"], steps: { header: 1, content: 2 } },
   /* Neither Rules nor Coordination is a destination. An article is read
      against a number the drawings produced, so it lives in the overview; a
-     crossing lands on one unit, so it lives in that unit's inspector. */
-  "Suivi": { icon: "calendar-check", regions: ["header", "content", "inspector"], steps: { inspector: 1, content: 2 } },
+     crossing lands on one unit, so it lives in that unit's inspector.
+     Quantités and Suivi went the same way: the totals and the dates are
+     what the project is, not two more places to go. Both are sections of
+     Aperçu now, and the rail is three entries shorter. */
   /* The rail offered Fichiers before the screen existed, so the entry threw
      on click. It is a screen now: what was read, and when. */
   "Fichiers": { icon: "file", regions: ["header", "content"], steps: {} },
@@ -1096,10 +1097,8 @@ const NAV_ICONS = {
     ["Zoning scale", "scale"], ["Checklist", "clipboard-list"]],
   "Unités": [["Layers", "layers"], ["Floor grid", "grid-2x2"], ["Rooms", "bed-double"],
     ["Doors", "door-open"], ["Ruler", "ruler"]],
-  "Quantités": [["Table", "table"], ["Sum", "sigma"], ["Calculator", "calculator"],
-    ["Bar chart", "chart-column"], ["Percent", "percent"]],
-  "Suivi": [["Calendar check", "calendar-check"], ["Calendar clock", "calendar-clock"],
-    ["Timer", "timer"], ["Checklist", "list-checks"], ["Flag", "flag"]],
+  /* Quantités and Suivi are sections inside Aperçu, so they have no rail
+     glyph to choose. CONTEXT still names their tables and phases. */
   "Fichiers": [["File", "file"], ["Folder", "folder"], ["Folder tree", "folder-tree"],
     ["File stack", "file-stack"], ["Office server", "hard-drive"]],
 };
@@ -1114,7 +1113,7 @@ const JOURNEY = [
   { n: 3, t: "Voir les deux dessins à la fois", d: "Le plan 2D à côté de la maquette 3D, l'écart mesuré.", s: "Unités" },
   { n: 4, t: "Décider, et dire pourquoi", d: "La décision ne s'enregistre pas sans raison.", s: "Unités" },
   { n: 5, t: "Vérifier ce que ça brise", d: "Quel article, quel conflit, quelle échéance.", s: "Aperçu" },
-  { n: 6, t: "Sortir les chiffres", d: "Les tableaux et la note pour le comité de la ville.", s: "Quantités" },
+  { n: 6, t: "Sortir les chiffres", d: "Les tableaux et la note pour le comité de la ville.", s: "Aperçu" },
 ];
 
 /* ------------------------------------------------------------- fidelity */
@@ -1407,6 +1406,9 @@ const CONTEXT = {
   /* Aperçu has no views: the whole project reads on one page, so the strip
      above it carries nothing but the way back to the index. */
   "Unités": [...LEVELS.map((lv) => `Niveau ${lv}`), "Tous les niveaux"],
+  /* These two are no longer screens, so these are not strip views: they are
+     the chips inside the Quantités and Suivi sections of Aperçu, and the
+     same V.view entries drive them. */
   "Quantités": ["Unités", "Superficies", "Fenêtres", "Matériaux"],
   "Suivi": ["Programme", "Esquisse", "Comité", "Permis", "Site"],
   "Fichiers": ["Dessins", "Maquette", "Arpenteur", "Correspondance"],
@@ -1477,9 +1479,7 @@ function headerHTML() {
     "Aperçu": [V.project, `8 étages · ${UNITS_BY_LEVEL["Tous les niveaux"].length} unités · ${unresolved} articles non résolus`],
     "Unités": [`Étage type — ${viewOf("Unités").toLowerCase()}`,
       `${rowsOf("Unités").length} unités · ${rowsOf("Unités").filter((r) => /croisement/.test(r[1])).length} avec un croisement ouvert`],
-    "Quantités": ["Quantités", `${viewOf("Quantités")} · compté à partir des dessins, rien de saisi`],
-    "Fichiers": ["Fichiers", "ce qui a été lu, et quand"],
-    "Suivi": ["Suivi", `${viewOf("Suivi")} · les signaux viennent des dessins`] }[V.screen] || [V.screen, ""];
+    "Fichiers": ["Fichiers", "ce qui a été lu, et quand"] }[V.screen] || [V.screen, ""];
   const metrics = V.header.layout === "Title + metrics";
   const bare = V.header.layout === "Title only";
   return `<header class="pane rg ${solo("header")}" data-rg="entête" data-fi="${fiOf("header")}" style="flex:0 0 auto">
@@ -1606,9 +1606,10 @@ function contentHTML() {
         <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div></div>`;
       return `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap)">${plan()}${model()}</div>`;
     },
-    /* Aperçu is one page, not four tabs. The project opens on everything it
-       knows at once: what changed, the totals, and the zoning and code block
-       that used to be its own screen. Nothing here is worth a click to see. */
+    /* Aperçu is the project on one page. What changed, the totals, the
+       dates, and the zoning and code block: three of these were screens of
+       their own and none of them was worth a trip. A section keeps its own
+       chips, so the four tables and the five phases still switch in place. */
     "Aperçu": () => {
       const tiles = [["Ce qui a changé depuis la dernière lecture", "lignes lues dans les dessins"],
         ["Les deux sources connectées", "plan et maquette, même niveau"],
@@ -1619,6 +1620,34 @@ function contentHTML() {
           <div class="lo bar" style="width:60%"></div><div class="hi" style="font-weight:600">${t}</div>
           <div class="lo col">${bars(4)}</div>
           <div class="hi" style="color:var(--ink-2);font-size:11.5px">${note}</div></div>`).join("")}</div>`;
+      /* The chips belong to the section, not to the screen, so they carry
+         the section's name with them and never move the strip above. */
+      const chips = (name) => `<div class="row" style="gap:6px">${viewsOf(name).map((t, i) =>
+        `<span class="chip ${i === viewIndex(name) ? "on" : ""}" ${act("subview", `${name}|${i}`)} title="${t}">
+          <span class="lo bar" style="width:44px"></span><span class="hi">${t}</span></span>`).join("")}</div>`;
+      const t = QTABS[viewOf("Quantités")];
+      const quant = `<div class="pane" style="flex:0 0 auto">
+          <div class="ph">${icon("table")}<span class="lo bar" style="width:70px"></span>
+            <span class="hi">Quantités</span><span style="flex:1"></span>
+            <span class="chip"><span class="lo bar" style="width:60px"></span>
+              <span class="hi">compté à partir des dessins, rien de saisi</span></span></div>
+          <div class="pb">${chips("Quantités")}
+            <table class="tbl"><thead><tr>${t.head.map((h) => `<th><span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
+            <tbody>${t.rows.map((r) => `<tr>${r.map((c, i) => `<td class="${i ? "n" : ""}"><span class="lo bar" style="width:${i ? 34 : 50}px"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>
+          </div></div>`;
+      const phases = PHASES[viewOf("Suivi")] || [];
+      const done = phases.filter((p) => V.settled[`Suivi · ${p}`]).length;
+      const suivi = `<div class="pane" style="flex:0 0 auto">
+          <div class="ph">${icon("calendar-check")}<span class="lo bar" style="width:60px"></span>
+            <span class="hi">Suivi</span><span style="flex:1"></span>
+            <span class="chip"><span class="lo bar" style="width:40px"></span>
+              <span class="hi">${done} sur ${phases.length} fait${done > 1 ? "s" : ""}</span></span></div>
+          <div class="pb">${chips("Suivi")}
+            ${phases.map((p) => `<div class="listrow" ${act("tick", p)} title="Cocher">
+              <span class="dot" style="border-radius:3px;${V.settled[`Suivi · ${p}`] ? "background:var(--ink);border-color:var(--ink)" : ""}"></span>
+              <span class="lo bar" style="flex:1"></span>
+              <span class="hi" style="font-size:12px">${p}${V.settled[`Suivi · ${p}`] ? " · fait" : ""}</span></div>`).join("")}
+          </div></div>`;
       /* One card per provision: the number read in the drawings beside the
          number the provision asks for, the sentence in French, and a link to
          the official page. The card the footer strip points at is marked. */
@@ -1631,26 +1660,7 @@ function contentHTML() {
             <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
               <span class="hi" style="font-size:11.5px;color:var(--ink-2)">Extraits de travail, abrégés. La version qui fait foi est celle de l'arrondissement ou de la RBQ, liée sur chaque carte. Une lecture automatique ne déclare pas une non-conformité.</span></div></div>
           </div></div>`;
-      return `<div class="col" style="flex:1;gap:var(--gap)">${grid}${zoning}</div>`;
-    },
-    /* No chip row here: the four tables are already the views in the strip
-       at the top of the card, and naming them twice makes the second row
-       look like a filter it is not. */
-    "Quantités": () => {
-      const t = QTABS[viewOf("Quantités")];
-      return `<div class="col" style="flex:1">
-        <table class="tbl"><thead><tr>${t.head.map((h) => `<th><span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
-        <tbody>${t.rows.map((r) => `<tr>${r.map((c, i) => `<td class="${i ? "n" : ""}"><span class="lo bar" style="width:${i ? 34 : 50}px"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
-    },
-    "Suivi": () => {
-      const views = viewsOf("Suivi");
-      return `<div class="col" style="flex:1">
-        <div class="row">${views.map((t, i) => `<span class="chip" ${act("view", i)} style="${i === viewIndex("Suivi") ? "border-color:var(--ink)" : ""}">
-          <span class="lo bar" style="width:44px"></span><span class="hi">${t}</span></span>`).join("")}</div>
-        ${(PHASES[viewOf("Suivi")] || []).map((t) => `<div class="listrow" ${act("tick", t)} title="Cocher">
-          <span class="dot" style="border-radius:3px;${V.settled[`Suivi · ${t}`] ? "background:var(--ink);border-color:var(--ink)" : ""}"></span>
-          <span class="lo bar" style="flex:1"></span>
-          <span class="hi" style="font-size:12px">${t}${V.settled[`Suivi · ${t}`] ? " · fait" : ""}</span></div>`).join("")}</div>`;
+      return `<div class="col" style="flex:1;gap:var(--gap)">${grid}${quant}${suivi}${zoning}</div>`;
     },
     /* Files: what was read, and when. The view picks the kind. */
     "Fichiers": () => `<div class="col" style="flex:1">
@@ -2274,6 +2284,14 @@ function onClick(e) {
       /* A new view is a new set of rows, so the old row number means nothing. */
       V.sel[screen] = 0;
       break;
+    /* A section inside a screen names itself, because the screen it sits on
+       has no views of its own: "Quantités|2" switches that table alone. */
+    case "subview": {
+      const [name, i] = value.split("|");
+      V.view[name] = Number(i);
+      V.sel[name] = 0;
+      break;
+    }
     case "viewnext":
       V.view[screen] = (viewIndex(screen) + 1) % viewsOf(screen).length;
       V.sel[screen] = 0;
@@ -2433,7 +2451,7 @@ function onClick(e) {
 const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
 /* The panel names a screen in English; the prototype knows it in French. */
 const SCREEN_FR = { Projects: "Projets", Overview: "Aperçu", Units: "Unités",
-  Quantities: "Quantités", Tracking: "Suivi", Files: "Fichiers" };
+  Files: "Fichiers" };
 const FR_SCREEN = Object.fromEntries(Object.entries(SCREEN_FR).map(([en, fr]) => [fr, en]));
 
 const sel = (options) => ({ type: "select", options, default: options[0] });
@@ -2460,8 +2478,8 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   railIcons: { _collapsed: false,
     overview: sel(NAV_ICONS["Aperçu"].map(([l]) => l)),
     units: sel(NAV_ICONS["Unités"].map(([l]) => l)),
-    quantities: sel(NAV_ICONS["Quantités"].map(([l]) => l)),
-    tracking: sel(NAV_ICONS["Suivi"].map(([l]) => l)),
+    /* No rows for Quantités or Suivi: they are sections of Aperçu and the
+       rail does not list them any more. */
     files: sel(NAV_ICONS["Fichiers"].map(([l]) => l)) },
   /* The plan is black and white until a typology is asked for. */
   typologies: { _collapsed: false, "3½": false, "4½": false, "5½": false },
@@ -2514,8 +2532,6 @@ function applyDial(v) {
   };
   pick("Aperçu", v.railIcons.overview);
   pick("Unités", v.railIcons.units);
-  pick("Quantités", v.railIcons.quantities);
-  pick("Suivi", v.railIcons.tracking);
   pick("Fichiers", v.railIcons.files);
   const la = v.layers, al = la.align;
   TYPOS.forEach((t) => { V.typo[t] = v.typologies[t]; });
