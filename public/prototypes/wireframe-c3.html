@@ -13,7 +13,7 @@
   --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
   --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
   --line:#c9c9c9; --line-2:#e2e2e2; --fill:#ededed; --fill-2:#f6f6f6;
-  --paper:#fff; --page:#fafafa; --bar:#dcdcdc; --tag:#4b4bd6; --tag-soft:#eeeeff;
+  --paper:#fff; --page:#fafafa; --bar:#dcdcdc; --tag:#1b1b1b; --tag-soft:#ededed;
 }
 *{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
 html{-webkit-font-smoothing:antialiased}
@@ -118,7 +118,7 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .frame[data-shell="inset"] .rail{background:none;border-right:0}
 .frame[data-shell="inset"] .tabs{border-bottom:0}
 .frame[data-shell="inset"] .main{padding:0 10px 10px;min-height:0}
-.frame[data-shell="inset"] .hd{background:#fff;border:1px solid var(--line);border-bottom:0;border-radius:8px 12px 0 0}
+.frame[data-shell="inset"] .hd{background:#fff;border:1px solid var(--line);border-bottom:0;border-radius:8px 8px 0 0}
 .frame[data-shell="inset"] .body{background:#fff;border:1px solid var(--line);border-top:0;
   border-radius:0 0 8px 8px;gap:0;padding:0}
 .frame[data-shell="inset"] .cols{gap:0}
@@ -189,7 +189,7 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 
 /* labels and notes */
 .frame[data-labels="1"] .blk,.frame[data-labels="1"] .rail,.frame[data-labels="1"] .tabs{
-  outline:1px dashed #b9b9ff;outline-offset:-1px}
+  outline:1px dashed var(--line-2);outline-offset:-1px}
 .tag{position:absolute;top:0;left:0;background:var(--tag);color:#fff;font-size:9.5px;letter-spacing:.05em;
   text-transform:uppercase;padding:2px 6px;border-radius:0 0 5px 0;z-index:3}
 .flag{position:absolute;top:5px;right:8px;max-width:52%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
@@ -232,26 +232,30 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .frame[data-compose="1"] .blk[data-uid]{cursor:grab}
 .frame[data-compose="1"] .blk[data-uid]:hover{box-shadow:0 0 0 1px var(--line-2)}
 .blk.dragging{opacity:.35}
-.bt{position:absolute;top:4px;right:4px;z-index:5;display:none;gap:2px;background:var(--paper);
-  border:1px solid var(--line);border-radius:6px;padding:2px}
+.bt{position:absolute;top:3px;right:3px;z-index:5;display:none;gap:1px;background:var(--paper);
+  border:1px solid var(--line-2);border-radius:5px;padding:1px}
 .frame[data-compose="1"] .blk[data-uid]:hover > .bt,
 .frame[data-compose="1"] .blk.off > .bt{display:flex}
 .bt button{font:inherit;border:0;background:none;width:20px;height:20px;border-radius:5px;cursor:pointer;
   color:var(--ink-3);display:flex;align-items:center;justify-content:center;padding:0}
 .bt button:hover{background:var(--fill);color:var(--ink)}
-.bt button svg{width:12px;height:12px;stroke-width:2}
+.bt button svg{width:11px;height:11px;stroke-width:1.75}
 .bt .hdl{cursor:grab;color:var(--line-2)}
 .blk.off{flex:0 0 auto;background:var(--fill-2);border-style:dashed;border-color:var(--line-2)}
 .blk.off > .bh,.blk.off > .bb,.blk.off > .flag{display:none}
 .blk.off > .stub{display:flex;align-items:center;gap:7px;padding:7px 10px;font-size:11.5px;color:var(--ink-3)}
 .blk > .stub{display:none}
-.col.over{outline:2px dashed var(--tag);outline-offset:-2px;border-radius:6px}
+.col.over{outline:1px dashed var(--line);outline-offset:-2px;border-radius:6px}
 .dropline{height:2px;background:var(--tag);border-radius:2px;flex:0 0 2px}
-.coltools{display:flex;align-items:center;gap:4px;justify-content:center;padding:2px 0}
-.coltools button{font:inherit;font-size:11px;border:1px solid var(--line);background:var(--paper);
-  border-radius:6px;height:21px;padding:0 7px;cursor:pointer;color:var(--ink-3)}
-.coltools button:hover{color:var(--ink);border-color:var(--line-2)}
-.col.focus > .coltools button{border-color:var(--tag);color:var(--tag)}
+/* Editing controls are furniture, not content: they sit at a third of the
+   ink until the column is approached. */
+.coltools{display:flex;align-items:center;gap:1px;justify-content:center;padding:1px 0;
+  opacity:.28;transition:opacity .12s}
+.col:hover > .coltools,.col.focus > .coltools{opacity:1}
+.coltools button{font:inherit;font-size:10.5px;border:0;background:none;
+  border-radius:4px;height:18px;min-width:18px;padding:0 4px;cursor:pointer;color:var(--ink-3)}
+.coltools button:hover{color:var(--ink);background:var(--fill)}
+.col.focus > .coltools button{color:var(--ink-2)}
 
 .tray{margin-top:14px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
 .tray header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
