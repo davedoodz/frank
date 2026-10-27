@@ -42,7 +42,6 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
    the house reads on its own and sits apart at the top. */
 .frame[data-nav="rail"] .rail .r span{display:block;font-size:10px;line-height:1.2;
   text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.frame[data-nav="rail"] .rail .r[data-s="Home"] span{display:none}
 .frame[data-nav="rail"] .rail .r{height:auto;min-height:30px;flex-direction:column;gap:2px;padding:5px 3px}
 .frame[data-nav="stack"] .rail .r{height:auto;flex-direction:column;gap:4px;padding:6px 2px;
   font-size:10px;text-align:center}
@@ -77,7 +76,12 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .tabs[data-style="Top accent"] button.on{background:none;box-shadow:inset 0 2px 0 var(--ink)}
 .tabs[data-style="Boxed"] button{border-color:var(--line);background:var(--paper)}
 .tabs[data-style="Boxed"] button.on{background:var(--fill);border-color:var(--line-2)}
-.tabs .crumb{font-size:12.5px;color:var(--ink-3)}
+.tabs .crumb{font-size:12.5px;color:var(--ink-3);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.tabs .crumb svg{width:13px;height:13px;stroke-width:1.9}
+.tabs .crumb:hover{color:var(--ink)}
+.tabs .crumb.on{cursor:default}
+.open-proj{cursor:pointer}
+.open-proj:hover{border-color:var(--line);background:var(--fill-2)}
 .tabs .crumb.on{color:var(--ink);font-weight:500}
 .tabs .grp{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 6px 0 2px}
 .tabs .div{width:1px;height:18px;background:var(--line);margin:0 6px}
@@ -197,6 +201,18 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 /* Over a real drawing the footprint block would hide it; the overlay keeps
    its property line and its measured distances only. */
 .fi-high .plan[data-img] svg rect{fill:none}
+
+/* The stack: the floor plan at its own aspect, with the surveyor's sheet and
+   the landscaping sheet laid over it. Every layer is placed in the same
+   coordinate space, so a measured offset means the same thing on all three. */
+.plan.align{aspect-ratio:1280 / 1160;height:auto;flex:0 0 auto;overflow:hidden;align-items:stretch}
+.fi-high .plan.align[data-img]{background-size:100% 100%;background-position:0 0}
+.plan .lay{position:absolute;background-repeat:no-repeat;background-size:100% 100%;
+  pointer-events:none;z-index:1}
+.plan .lay[data-lay="arp"]{background-image:url(assets/arp-site.png)}
+.plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png)}
+.plan .lay{display:none}
+.fi-high .plan[data-img] .lay{display:block}
 
 /* labels and notes */
 .frame[data-labels="1"] .blk,.frame[data-labels="1"] .rail,.frame[data-labels="1"] .tabs{
@@ -348,15 +364,36 @@ const nums = (pairs) => `<div class="rowline">${pairs.map(([v, c]) =>
   `<span class="num"><span class="lo bar" style="width:62%;height:11px"></span>
    <span class="hi">${v}</span><span class="cap hi">${c}</span></span>`).join("")}</div>`;
 
-/* A property line drawn over the floor: the surveyor's plan as its own layer. */
-const siteSVG = `<svg viewBox="0 0 100 60" preserveAspectRatio="none">
-  <polygon points="8,6 92,10 90,54 10,50" fill="none" stroke="#cfcfd4" stroke-width=".7" stroke-dasharray="3 2"/>
-  <rect x="26" y="18" width="48" height="26" fill="#ececef" stroke="#8c8d94" stroke-width=".5"/>
-  <line x1="26" y1="31" x2="9" y2="31" stroke="#4b4bd6" stroke-width=".5"/>
-  <line x1="74" y1="31" x2="91" y2="31" stroke="#4b4bd6" stroke-width=".5"/>
-  <line x1="50" y1="18" x2="50" y2="8" stroke="#4b4bd6" stroke-width=".5"/>
-  <line x1="50" y1="44" x2="50" y2="52" stroke="#4b4bd6" stroke-width=".5"/>
-</svg>`;
+/* Where each sheet's building sits inside its own image, measured once and
+   normalised 0–1: arp-site.png is the surveyor's implantation plan, paysage
+   .png is the landscaping sheet, and the floor plan's own building fills
+   nearly the whole sheet. Scaling by the ratio of those boxes puts the three
+   buildings on top of each other. */
+const SHEETS = {
+  arp: { box: [.159, .246, .818, .814] },
+  pay: { box: [.138, .224, .808, .796] },
+};
+const BASE_BOX = [.014, .019, .978, .961];
+
+/* Places one sheet so its building lands on the floor plan's building, then
+   applies the nudge the panel holds. Numbers are percentages of the plan
+   box, which is why that box carries the drawing's own aspect ratio. */
+function sheetStyle(key) {
+  const L = V.lay[key];
+  const [bx0, by0, bx1, by1] = BASE_BOX;
+  const [sx0, sy0, sx1, sy1] = SHEETS[key].box;
+  const w = (bx1 - bx0) / (sx1 - sx0) * L.scale / 100;
+  const h = (by1 - by0) / (sy1 - sy0) * L.scale / 100;
+  const left = bx0 - sx0 * w + L.x / 100;
+  const top = by0 - sy0 * h + L.y / 100;
+  return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;opacity:${L.opacity / 100}`;
+}
+
+function layersHTML() {
+  return ["arp", "pay"].filter((k) => V.lay[k].on)
+    .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"></div>`).join("");
+}
 
 /* Unit boxes measured on assets/plan-etage.jpg, normalised 0–1, the same
    numbers the platform uses. A thumbnail shows its own unit, never the sheet. */
@@ -387,7 +424,7 @@ const PROJECTS = [
   ["Maison Clark", "8 units · 3 levels", "A-100 R01 · 02 Oct", "up to date"],
 ];
 
-const card = (p, big) => `<section class="blk">
+const card = (p, big) => `<section class="blk open-proj" data-s="Overview" title="Open ${p[0]}">
   <div class="bb">
     <div class="plan ghost" style="min-height:${big ? 92 : 64}px">${ico("image")}</div>
     <div><span class="lo bar d" style="width:52%;height:11px"></span><span class="hi" style="font-weight:600">${p[0]}</span></div>
@@ -525,10 +562,11 @@ const PARTS = [
      </div>`, { from: "C" }),
 
   /* ------------------------------------------------------------- the site */
-  P("site-plan", "content", "plan + surveyor layer", "Floor with the surveyor's plan under it", () =>
-    `<div class="rowline">${chips(["Level 5", "Ground", "Site"], 0)}<span class="sp"></span>${chips(["Surveyor's plan R2 · on"], 0)}</div>
-     <div class="plan" data-img="plan">${siteSVG}<span class="cap">property lines over the building, every distance drawn</span></div>
-     <p class="note">The overlay is a layer that switches off, never a tint or a filter on the drawing.</p>`,
+  P("site-plan", "content", "plan + surveyor layer", "Floor with the sheets laid over it", () =>
+    `<div class="rowline">${chips(["Level 5", "Ground", "Site"], 0)}<span class="sp"></span>
+       ${chips([`Surveyor ${V.lay.arp.on ? "on" : "off"}`, `Landscaping ${V.lay.pay.on ? "on" : "off"}`], V.lay.arp.on ? 0 : 1)}</div>
+     <div class="plan align" data-img="plan">${layersHTML()}<span class="cap">the surveyor's sheet and the landscaping sheet over the floor</span></div>
+     <p class="note">Each sheet is a layer that switches off on its own, never a tint or a filter on the drawing.</p>`,
     { flag: "high · the surveyor's plan under everything" }),
 
   P("setbacks", "content", "measured from the line", "Setbacks and coverage", () =>
@@ -763,9 +801,9 @@ function HOME_BODY() {
 /* --------------------------------------------------------------- screens */
 
 const SCREENS = {
-  Home: { icon: "home", title: "Projects", sub: "4 ongoing · 1 archived",
+  Projects: { icon: "folder", title: "Projects", sub: "4 ongoing · 1 archived", index: true,
     actions: [["plus", "New project"]] },
-  Project: { icon: "layout-dashboard", title: "Alder Court", sub: "48 units · 6 levels",
+  Overview: { icon: "layout-dashboard", title: "Alder Court", sub: "48 units · 6 levels",
     actions: [["external-link", "Open in AutoCAD"], ["download", "Export"]] },
   Site: { icon: "map", title: "Site and property lines", sub: "Surveyor's plan R2 · 12 Sep · lot 1 459 m²",
     actions: [["layers", "Layers"], ["download", "Export"]] },
@@ -781,8 +819,8 @@ const SCREENS = {
 
 /* The layout a screen opens with. Everything after this is the user's. */
 const DEFAULTS = {
-  Home: [{ flex: 1, items: ["projects"] }],
-  Project: [
+  Projects: [{ flex: 1, items: ["projects"] }],
+  Overview: [
     { flex: 1.6, items: ["change-log"] },
     { flex: 1, items: ["counts", "metrics"] },
     { flex: 1, items: ["blocking"] },
@@ -815,7 +853,7 @@ const DEFAULTS = {
 /* The six moves the prototype is built around, and the piece that serves
    each one. A step badge only appears where a move actually lands. */
 const JOURNEY = [
-  { n: 1, t: "A drawing was saved", d: "The project page says what moved since the last read.", s: "Project" },
+  { n: 1, t: "A drawing was saved", d: "The project page says what moved since the last read.", s: "Overview" },
   { n: 2, t: "Open the unit that moved", d: "Pick it from the list, or from the plan itself.", s: "Units" },
   { n: 3, t: "See both drawings at once", d: "2D plan beside the 3D model, difference measured.", s: "Units" },
   { n: 4, t: "Decide, and say why", d: "The decision will not save without a reason.", s: "Units" },
@@ -826,7 +864,7 @@ const STEP_OF = { "change-log": 1, "units-list": 2, "plan-vs-model": 3, reason: 
   article: 5, articles: 5, "question-tabs": 6 };
 
 const KEY = [
-  ["Project", "Change log first", "The page opens on what moved since the last read, not on a dashboard."],
+  ["Overview", "Change log first", "The page opens on what moved since the last read, not on a dashboard."],
   ["Site", "Surveyor's plan as a layer", "Property lines over the floor; every setback names the plan and its date."],
   ["Units", "Plan and model in one row", "Two panes of equal weight, difference in the right column, reason prompt under it."],
   ["Counts", "One table per question", "Units and areas, window schedule by floor, each table carrying its source."],
@@ -840,8 +878,8 @@ const SHORT = (name) => name.slice(0, 3).toUpperCase();
 /* The rail and the tab strip never carry the same destinations. With a rail
    on screen, the strip shows the current screen's own views. */
 const CONTEXT = {
-  Home: ["Ongoing", "Archived"],
-  Project: ["What changed", "Totals", "Blocking"],
+  Projects: ["Ongoing", "Archived"],
+  Overview: ["What changed", "Totals", "Blocking"],
   Site: ["Level 5", "Ground", "Site"],
   Units: ["Level 5", "Level 4", "Level 3", "All levels"],
   Counts: ["Units", "Areas", "Window schedule", "Materials"],
@@ -851,15 +889,17 @@ const CONTEXT = {
 
 /* ------------------------------------------------------------ the state */
 
-const V = { shell: "Inset card", homeLayout: "Card grid", screen: "Project", fidelity: "high", labels: false,
+const V = { shell: "Inset card", homeLayout: "Card grid", screen: "Projects", fidelity: "high", labels: false,
   notes: true, flags: false, journey: false, isolate: "none", density: "comfortable", compose: true,
   nav: "Icon rail + tabs", icons: "Rail only", titles: "Full label", tabStyle: "Plain", tabAlign: "Left",
   region: { nav: { fidelity: "inherit", layout: "" }, header: { fidelity: "inherit", layout: "Title + actions" },
     list: { fidelity: "inherit", layout: "Vertical list" }, content: { fidelity: "inherit", layout: "Two panes" },
     inspector: { fidelity: "inherit", layout: "Right panel" }, footer: { fidelity: "inherit", layout: "Impact strip" } },
+  lay: { arp: { on: true, opacity: 55, scale: 100, x: 0, y: 0 },
+    pay: { on: false, opacity: 55, scale: 100, x: 0, y: 0 } },
   focus: 0 };
 
-const STORE = "wireframe-c2.layout.v1";
+const STORE = "wireframe-c3.layout.v1";
 let uidSeq = 1;
 let LAYOUT = load();
 
@@ -1000,11 +1040,15 @@ function render() {
   frame.dataset.flags = V.flags ? "1" : "0";
   frame.dataset.journey = V.journey ? "1" : "0";
   frame.dataset.compose = V.compose ? "1" : "0";
-  frame.dataset.nav = { "Wide rail with labels": "wide", "Wide rail with sections": "wide",
-    "Rail with labels under icons": "stack", "Tabs only, no rail": "none", "Top bar only": "none" }[V.nav] || "rail";
+  frame.dataset.nav = SCREENS[V.screen].index ? "none"
+    : { "Wide rail with labels": "wide", "Wide rail with sections": "wide",
+        "Rail with labels under icons": "stack", "Tabs only, no rail": "none", "Top bar only": "none" }[V.nav] || "rail";
   document.getElementById("body").dataset.dense = V.density === "compact" ? "1" : "0";
 
-  const names = Object.keys(SCREENS);
+  /* Option 5: the projects index has no rail at all. The rail is the proof
+     that a project is open, and it never lists the index itself. */
+  const onIndex = !!SCREENS[V.screen].index;
+  const names = Object.keys(SCREENS).filter((k) => !SCREENS[k].index);
   const sections = V.nav === "Wide rail with sections";
   const railIc = V.icons === "Rail only" || V.icons === "Rail and tabs";
   const tabIc = V.icons === "Tabs only" || V.icons === "Rail and tabs";
@@ -1012,7 +1056,7 @@ function render() {
   const text = (k, i) => V.titles === "Short code" ? SHORT(k) : V.titles === "Numbered" ? `${i + 1}. ${k}` : k;
 
   const rail = document.getElementById("rail");
-  rail.style.display = (V.nav === "Tabs only, no rail" || V.nav === "Top bar only") ? "none" : "";
+  rail.style.display = (onIndex || V.nav === "Tabs only, no rail" || V.nav === "Top bar only") ? "none" : "";
   rail.className = "rail " + fiClass("nav") + fade("nav");
   rail.dataset.labelsMode = V.titles;
   rail.innerHTML = names.map((k, i) => {
@@ -1035,9 +1079,14 @@ function render() {
   const stamp = `<span class="sp"></span>`;
 
   const views = CONTEXT[V.screen] || ["Overview"];
-  if (V.nav === "Rail + breadcrumb") {
-    tabs.innerHTML = `<span class="crumb hi">Le Hauterive III</span>${ico("chevron-right")}
-      <span class="crumb on hi">${views[0]}</span>${stamp}`;
+  /* The index is reached from the words "All projects", which sit in the strip
+     on every screen. On the index itself they are the only thing there. */
+  const back = `<span class="crumb hi" data-s="Projects" title="All projects">${ico("folder")}All projects</span>`;
+  if (onIndex) {
+    tabs.innerHTML = `<span class="crumb on hi">${ico("folder")}All projects</span>${stamp}`;
+  } else if (V.nav === "Rail + breadcrumb") {
+    tabs.innerHTML = `${back}${ico("chevron-right")}
+      <span class="crumb on hi">Alder Court</span>${stamp}`;
   } else if (V.nav === "Rail + view menu") {
     tabs.innerHTML = `<button class="on" data-menu><span class="hi">${views[0]}</span>${ico("chevron-down")}</button>${stamp}`;
   } else if (V.nav === "Tabs only, no rail" || V.nav === "Top bar only") {
@@ -1045,7 +1094,7 @@ function render() {
   } else {
     /* A rail is on screen, so the strip shows this screen's own views rather
        than repeating the screen list. */
-    tabs.innerHTML = views.map((t, i) =>
+    tabs.innerHTML = back + `<span class="div"></span>` + views.map((t, i) =>
       `<button class="${i === 0 ? "on" : ""}" title="${t}">
         <span class="lo bar" style="width:52px"></span><span class="hi">${t}</span></button>`).join("") + stamp;
   }
@@ -1267,7 +1316,7 @@ function pieceSwitches() {
 const COLNAMES = [1, 2, 3, 4, 5, 6].map((n) => `Column ${n}`);
 
 const dialConfig = () => ({
-  screen: { type: "select", options: Object.keys(SCREENS), default: "Project" },
+  screen: { type: "select", options: Object.keys(SCREENS), default: "Projects" },
   fidelity: sel(["high", "low"]),
   regionLabels: false,
   featureFlags: false,
@@ -1277,6 +1326,18 @@ const dialConfig = () => ({
   shell: sel(["Inset card", "Flat"]),
   homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
+  layers: { _collapsed: false,
+    surveyor: true,
+    surveyorOpacity: [55, 0, 100, 5],
+    landscaping: false,
+    landscapingOpacity: [55, 0, 100, 5],
+    align: { _collapsed: true,
+      surveyorScale: [100, 60, 160, 1],
+      surveyorX: [0, -40, 40, .5],
+      surveyorY: [0, -40, 40, .5],
+      landscapingScale: [100, 60, 160, 1],
+      landscapingX: [0, -40, 40, .5],
+      landscapingY: [0, -40, 40, .5] } },
   compose: { _collapsed: false,
     editing: true,
     column: { type: "select", options: COLNAMES, default: "Column 1" },
@@ -1304,7 +1365,7 @@ const dialConfig = () => ({
 });
 
 const dial = DialKit.createDialKit("Wireframe C, adapted — C skin", dialConfig(), {
-  id: "wireframe-c2", persist: true,
+  id: "wireframe-c3", persist: true,
   onAction(path) {
     const cs = cols();
     if (path === "compose.wider" || path === "compose.narrower") {
@@ -1369,6 +1430,11 @@ function applyDial(v) {
   V.shell = v.shell;
   V.homeLayout = v.homeLayout;
   V.isolate = v.isolate;
+  const la = v.layers, al = la.align;
+  V.lay.arp = { on: la.surveyor, opacity: la.surveyorOpacity,
+    scale: al.surveyorScale, x: al.surveyorX, y: al.surveyorY };
+  V.lay.pay = { on: la.landscaping, opacity: la.landscapingOpacity,
+    scale: al.landscapingScale, x: al.landscapingX, y: al.landscapingY };
   V.compose = v.compose.editing;
   V.focus = Math.max(0, Math.min(cols().length - 1, COLNAMES.indexOf(v.compose.column)));
   V.nav = v.nav.layout;
