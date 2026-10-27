@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zonage et code — dix façons de dessiner la fiche (option A)</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Dix sous-variantes de l'option A. Les sept articles, leurs sept dessins et
+   leurs citations sont identiques d'une variante à l'autre: le dessin de la
+   règle ne bouge pas. Ce qui change, c'est l'anatomie de la fiche — l'ordre
+   des choses, la place du dessin, ce qui est montré d'emblée et ce qui est
+   remis à plus tard. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#a4a4a4;
+  --line:#d2d2d2; --line-2:#e9e9e9; --fill:#f2f2f2; --fill-2:#f8f8f8;
+  --page:#f2f2f2; --paper:#fff;
+  --over:#b9743f; --over-2:#f0ddcb; --ok:#4b7d5e; --ok-2:#d9e7de; --ref:#b6b6b6;
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased;
+  padding:20px 20px 70px}
+.mono{font-family:var(--mono)}
+svg{display:block;overflow:visible}
+text{font-family:var(--mono);fill:var(--ink-2);font-size:9px}
+text.v{font-family:var(--sans);fill:var(--ink);font-size:11px;font-weight:600}
+
+.wrap{max-width:1500px;margin:0 auto}
+h1{font-size:15px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:88ch;margin-top:6px;line-height:1.55}
+.rule{height:1px;background:var(--line-2);margin:14px 0 18px}
+
+/* une variante = un panneau, dans le même cadre blanc que l'écran réel */
+.sec{margin-bottom:26px}
+.cap{display:flex;align-items:baseline;gap:9px;margin-bottom:8px}
+.cap .n{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.cap .t{font-size:13px;font-weight:600}
+.cap .meas{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.panel{background:var(--paper);border:1px solid var(--line-2);border-radius:12px;padding:14px 16px 18px}
+.phd{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);margin-bottom:12px}
+.phd .cnt{margin-left:auto;font-size:11.5px;background:var(--fill);border-radius:20px;padding:3px 10px}
+.why{font-size:11.5px;color:var(--ink-2);line-height:1.5;margin-top:9px;max-width:92ch}
+.cost{font-size:11.5px;color:var(--ink-3);line-height:1.5;max-width:92ch}
+
+/* pièces communes à toutes les fiches ---------------------------------- */
+.id{font-family:var(--mono);font-size:11px;color:var(--ink-2);background:var(--fill);
+  border-radius:4px;padding:1px 6px;white-space:nowrap}
+q{display:block;font-size:12px;line-height:1.5;color:var(--ink-2);quotes:'« ' ' »';
+  border-left:2px solid var(--line-2);padding-left:9px}
+.src{font-family:var(--mono);font-size:10px;color:var(--ink-3);line-height:1.45}
+.state{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-2)}
+.state.push{margin-left:auto}
+.dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px}
+.dot.open{background:var(--over)} .dot.ok{background:var(--ok)} .dot.ref{background:var(--ref)}
+a.lien{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink);
+  border:1px solid var(--line);border-radius:6px;padding:5px 9px;font-size:11.5px;align-self:flex-start}
+a.lien:hover{background:var(--fill-2)}
+a.lien svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.6}
+a.plain{font-size:11.5px;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+a.plain:hover{border-color:var(--ink)}
+.nums{display:flex;align-items:baseline;gap:8px}
+.nums .big{font-size:19px;font-weight:600;letter-spacing:-.02em}
+.nums .need{font-size:11.5px;color:var(--ink-3)}
+.gap{font-size:11px;font-weight:600}
+.gap.open{color:var(--over)} .gap.ok{color:var(--ok)} .gap.ref{color:var(--ink-3)}
+
+.grid{display:grid;gap:12px}
+.g-sm{grid-template-columns:repeat(auto-fill,minmax(282px,1fr))}
+.g-md{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
+.g-lg{grid-template-columns:repeat(auto-fill,minmax(430px,1fr))}
+
+/* 01 — dessin en tête, à fond perdu ------------------------------------ */
+.c1{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.c1 .draw{background:var(--fill-2);padding:10px 10px 6px;border-bottom:1px solid var(--line-2)}
+.c1 .tx{padding:11px;display:flex;flex-direction:column;gap:8px}
+.c1 .hd{display:flex;align-items:center;gap:8px}
+
+/* 02 — les deux chiffres d'abord --------------------------------------- */
+.c2{border:1px solid var(--line-2);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:9px}
+.c2 .hd{display:flex;align-items:center;gap:8px}
+.c2 .draw{background:var(--fill-2);border-radius:6px;padding:6px}
+
+/* 03 — dessin à gauche, texte à droite --------------------------------- */
+.c3{border:1px solid var(--line-2);border-radius:var(--r);padding:11px;display:grid;
+  grid-template-columns:176px 1fr;gap:12px;align-items:start}
+.c3 .draw{background:var(--fill-2);border-radius:6px;padding:6px}
+.c3 .tx{display:flex;flex-direction:column;gap:7px;min-width:0}
+.c3 .hd{display:flex;align-items:center;gap:8px}
+
+/* 04 — la citation d'abord, le dessin comme preuve --------------------- */
+.c4{border:1px solid var(--line-2);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:9px}
+.c4 q{border-left:0;padding-left:0;font-size:12.5px;color:var(--ink)}
+.c4 .draw{background:var(--fill-2);border-radius:6px;padding:6px;margin-top:2px}
+.c4 .ft{display:flex;align-items:center;gap:8px}
+
+/* 05 — sans cadre, un filet entre les fiches --------------------------- */
+.g5{gap:0;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.c5{padding:14px 14px 16px;border-top:1px solid var(--line-2);display:flex;flex-direction:column;gap:8px}
+.c5 .hd{display:flex;align-items:center;gap:8px}
+.c5 .draw{padding:2px 0}
+
+/* 06 — l'écart en bandeau ---------------------------------------------- */
+.c6{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.c6 .band{display:flex;align-items:center;gap:8px;padding:7px 11px;font-size:11.5px}
+.c6 .band b{font-weight:600}
+.c6[data-s="open"] .band{background:var(--over-2);color:#7a4a22}
+.c6[data-s="ok"] .band{background:var(--ok-2);color:#2f5a42}
+.c6[data-s="ref"] .band{background:var(--fill);color:var(--ink-2)}
+.c6 .tx{padding:11px;display:flex;flex-direction:column;gap:8px}
+
+/* 07 — le dessin occupe la fiche, le texte vient au survol ------------- */
+.c7{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;position:relative;
+  background:var(--fill-2);min-height:208px}
+.c7 .top{display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--paper);
+  border-bottom:1px solid var(--line-2)}
+.c7 .draw{padding:10px}
+.c7 .tx{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);
+  border-top:1px solid var(--line-2);padding:11px;display:flex;flex-direction:column;gap:8px;
+  transform:translateY(101%);transition:transform .16s ease}
+.c7:hover .tx,.c7:focus-within .tx{transform:none}
+.c7 .peek{position:absolute;right:10px;bottom:8px;font-size:10.5px;color:var(--ink-3)}
+.c7:hover .peek{opacity:0}
+
+/* 08 — citation repliée, fiches de hauteur égale ----------------------- */
+.c8{border:1px solid var(--line-2);border-radius:var(--r);padding:12px;display:flex;
+  flex-direction:column;gap:8px}
+.c8 .draw{background:var(--fill-2);border-radius:6px;padding:6px}
+.c8 q{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.c8 details q{-webkit-line-clamp:unset;display:block;margin-top:7px}
+.c8 summary{font-size:11.5px;color:var(--ink-2);cursor:pointer;list-style:none}
+.c8 summary::-webkit-details-marker{display:none}
+.c8 summary::before{content:"▸ ";color:var(--ink-3)}
+.c8 details[open] summary::before{content:"▾ "}
+
+/* 09 — gouttière d'état à gauche --------------------------------------- */
+.c9{border:1px solid var(--line-2);border-radius:var(--r);display:grid;grid-template-columns:30px 1fr;
+  overflow:hidden}
+.c9 .gut{background:var(--fill-2);border-right:1px solid var(--line-2);display:flex;
+  flex-direction:column;align-items:center;gap:8px;padding:10px 0}
+.c9 .gut .vid{writing-mode:vertical-rl;font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+.c9 .tx{padding:11px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.c9 .draw{background:var(--fill-2);border-radius:6px;padding:6px}
+
+/* 10 — grande fiche pour ce qui bloque --------------------------------- */
+.g10{grid-template-columns:repeat(4,minmax(0,1fr))}
+.c10{border:1px solid var(--line-2);border-radius:var(--r);padding:12px;display:flex;
+  flex-direction:column;gap:8px}
+.c10[data-s="open"]{grid-column:span 2;border-color:var(--line)}
+/* Une vignette ne s'étire pas à la hauteur de la grande fiche d'à côté:
+   elle s'arrête là où son contenu s'arrête. */
+.c10[data-s="ok"],.c10[data-s="ref"]{align-self:start}
+.c10 .draw{background:var(--fill-2);border-radius:6px;padding:6px}
+.c10 .hd{display:flex;align-items:center;gap:8px}
+
+footer{max-width:1500px;margin:26px auto 0;font-size:11.5px;color:var(--ink-3);line-height:1.6;max-width:92ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Option A — dix façons de dessiner la fiche</h1>
+  <p class="lede">Les sept articles, leurs dessins et leurs citations sont les mêmes partout: c'est
+  l'anatomie de la fiche qui change. Ce qui se décide ici: ce que la fiche montre avant qu'on la lise,
+  où va le dessin, et ce qui est remis à un clic. La mesure à droite de chaque titre est lue sur la
+  page après rendu — hauteur de la plus haute fiche, et nombre de rangées pour les sept articles à
+  cette largeur. Une fiche courte n'est pas gratuite: ce qu'elle gagne en hauteur, elle le retire
+  du dessin ou le cache derrière un geste.</p>
+  <div class="rule"></div>
+  <div id="sheet"></div>
+</div>
+<footer id="foot"></footer>
+
+<script>
+const ARROW = `<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>`;
+
+/* Les sept dispositions, reprises telles quelles de zonage-en-contexte.html:
+   chaque dessin est écrit pour sa règle — des étages pour une hauteur, des
+   cases pour un stationnement. L'image est la règle, pas son chiffre. */
+const A = [
+  { id: "art. 9", topic: "Hauteur en étages", state: "non résolu", m: "6 étages", r: "5 étages",
+    ecart: "1 étage de trop",
+    q: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    draw: (w, h) => {
+      const n = 6, lim = 5, fh = h / (n + 1.2), x = 10, bw = w * .38;
+      let s = `<rect x="${x}" y="${h - fh * n}" width="${bw}" height="${fh * n}" fill="var(--over-2)" stroke="var(--ink)" stroke-width="1"/>`;
+      for (let i = 1; i < n; i++) s += `<line x1="${x}" x2="${x + bw}" y1="${h - fh * i}" y2="${h - fh * i}" stroke="var(--ink)" stroke-width=".6" stroke-opacity=".5"/>`;
+      for (let i = 0; i < n; i++) s += `<rect x="${x + bw * .18}" y="${h - fh * (i + 1) + fh * .25}" width="${bw * .22}" height="${fh * .4}" fill="var(--paper)" stroke="var(--ink)" stroke-width=".5"/>
+        <rect x="${x + bw * .58}" y="${h - fh * (i + 1) + fh * .25}" width="${bw * .22}" height="${fh * .4}" fill="var(--paper)" stroke="var(--ink)" stroke-width=".5"/>`;
+      s += `<line x1="${x}" x2="${x + bw + 14}" y1="${h - fh * lim}" y2="${h - fh * lim}" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="5 3"/>
+        <text x="${x + bw + 18}" y="${h - fh * lim + 3}">5 étages exigés</text>
+        <line x1="${x}" x2="${x + bw + 14}" y1="${h - fh * n}" y2="${h - fh * n}" stroke="var(--over)" stroke-width="1.4"/>
+        <text class="v" x="${x + bw + 18}" y="${h - fh * n + 3}" fill="var(--over)">6e étage dessiné</text>
+        <line x1="0" x2="${w}" y1="${h}" y2="${h}" stroke="var(--ink)" stroke-width="1.2"/>`;
+      return s;
+    } },
+
+  { id: "art. 43", topic: "Taux d'implantation", state: "conforme", m: "48,2 %", r: "55 %",
+    ecart: "6,8 % de marge",
+    q: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    draw: (w, h) => {
+      const pad = 14, W = w - pad * 2, H = h - pad * 2;
+      const aW = W * .82, aH = H * (.55 / .82);
+      const bW = W * .82, bH = H * (.482 / .82);
+      return `<rect x="${pad}" y="${pad}" width="${W}" height="${H}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1"/>
+        <rect x="${pad + 6}" y="${pad + 6}" width="${aW}" height="${aH}" fill="none" stroke="var(--ink)"
+          stroke-width="1.1" stroke-dasharray="5 3"/>
+        <rect x="${pad + 6}" y="${pad + 6}" width="${bW}" height="${bH}" fill="var(--ok-2)" stroke="var(--ok)" stroke-width="1.2"/>
+        <text class="v" x="${pad + 14}" y="${pad + 6 + bH / 2}" fill="var(--ok)">48,2 %</text>
+        <text x="${pad + 14}" y="${pad + 6 + aH - 5}">55 % permis</text>
+        <text x="${pad + W - 4}" y="${pad + H + 11}" text-anchor="end">terrain 1 459 m²</text>`;
+    } },
+
+  { id: "art. 22", topic: "Marge arrière", state: "non résolu", m: "2,70 m", r: "3,00 m",
+    ecart: "30 cm manquants",
+    q: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    draw: (w, h) => {
+      const lot = h - 18, b = h - 18 - (h * .42);
+      const need = lot - (h * .42) * (3.00 / 2.70);
+      return `<line x1="10" x2="${w - 10}" y1="${lot}" y2="${lot}" stroke="var(--ink)" stroke-width="1.4"/>
+        <text x="10" y="${lot + 12}">limite arrière du terrain</text>
+        <rect x="10" y="10" width="${w - 20}" height="${b - 10}" fill="var(--fill)" stroke="var(--ink)" stroke-width="1"/>
+        <text x="${w / 2}" y="${(b + 10) / 2}" text-anchor="middle">bâtiment</text>
+        <rect x="10" y="${b}" width="${w - 20}" height="${lot - b}" fill="var(--over-2)" fill-opacity=".6"/>
+        <line x1="${w * .3}" x2="${w * .3}" y1="${b}" y2="${lot}" stroke="var(--over)" stroke-width="1.2"/>
+        <text class="v" x="${w * .34}" y="${(b + lot) / 2 + 4}" fill="var(--over)">2,70 m</text>
+        <line x1="${w - 56}" x2="${w - 56}" y1="${need}" y2="${lot}" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="${w - 64}" x2="${w - 48}" y1="${need}" y2="${need}" stroke="var(--ink)" stroke-width="1.2"/>
+        <text x="${w - 12}" y="${need - 5}" text-anchor="end">3,00 m exigés</text>`;
+    } },
+
+  { id: "art. 71", topic: "Stationnement", state: "non résolu", m: "22 cases", r: "30 cases",
+    ecart: "8 cases manquantes",
+    q: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    draw: (w, h) => {
+      const per = 10, cw = (w - 20) / per, ch = Math.min((h - 26) / 3, 20);
+      let s = "";
+      for (let i = 0; i < 30; i++) {
+        const x = 10 + (i % per) * cw, y = 8 + Math.floor(i / per) * (ch + 5), built = i < 22;
+        s += `<rect x="${x + 1}" y="${y}" width="${cw - 4}" height="${ch}" rx="1.5"
+          fill="${built ? "var(--over-2)" : "none"}" stroke="${built ? "var(--ink)" : "var(--over)"}"
+          stroke-width="${built ? .9 : 1}" ${built ? "" : 'stroke-dasharray="3 2"'}/>`;
+      }
+      return s + `<text class="v" x="10" y="${h - 2}">22 dessinées</text>
+        <text x="${w - 10}" y="${h - 2}" text-anchor="end" fill="var(--over)">8 manquantes sur 30</text>`;
+    } },
+
+  { id: "art. 134", topic: "Verdissement et pleine terre", state: "non résolu", m: "17 %", r: "20 %",
+    ecart: "3 % manquants",
+    q: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
+    src: "Règlement d'urbanisme 01-277 · Plateau-Mont-Royal · texte consolidé",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    draw: (w, h) => {
+      const pad = 12, W = w - pad * 2, H = h - pad * 2;
+      const green = W * .17, need = W * .20;
+      return `<rect x="${pad}" y="${pad}" width="${W}" height="${H}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1"/>
+        <rect x="${pad}" y="${pad}" width="${green}" height="${H}" fill="var(--ok-2)"/>
+        <rect x="${pad + green}" y="${pad}" width="${need - green}" height="${H}" fill="none" stroke="var(--over)"
+          stroke-width="1" stroke-dasharray="3 2"/>
+        <line x1="${pad + need}" x2="${pad + need}" y1="${pad - 5}" y2="${pad + H}" stroke="var(--ink)" stroke-width="1.2"/>
+        ${[...Array(5)].map((_, i) => `<circle cx="${pad + green * .5}" cy="${pad + H * (i + .5) / 5}" r="${Math.min(green * .3, 7)}"
+          fill="none" stroke="var(--ok)" stroke-width="1"/>`).join("")}
+        <text class="v" x="${pad + need + 8}" y="${pad + 12}" fill="var(--ok)">17 % en pleine terre</text>
+        <text x="${pad + need + 8}" y="${pad + 26}" fill="var(--over)">20 % exigés · 3 % manquants</text>`;
+    } },
+
+  { id: "3.2.3.1", topic: "Baies non protégées", state: "non résolu", m: "74,2 m²", r: "68,5 m²",
+    ecart: "5,7 m² de trop",
+    q: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
+    src: "Code de construction du Québec, chapitre I — Bâtiment · CNB 2020 modifié, en vigueur le 17 avril 2025",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    draw: (w, h) => {
+      const fx = 12, fw = w * .52, fy = 10, fh = h - 30;
+      let s = `<rect x="${fx}" y="${fy}" width="${fw}" height="${fh}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.1"/>`;
+      const cols = 4, rows = 3, gw = fw / (cols + 1.6), gh = fh / (rows + 1.4);
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const i = r * cols + c, past = i >= 11;
+        s += `<rect x="${fx + gw * .4 + c * gw * 1.3}" y="${fy + gh * .35 + r * gh * 1.3}"
+          width="${gw * .95}" height="${gh * .8}" fill="${past ? "var(--over)" : "var(--over-2)"}"
+          fill-opacity="${past ? .85 : 1}" stroke="var(--ink)" stroke-width=".7"/>`;
+      }
+      s += `<line x1="${fx + fw + 10}" x2="${w - 14}" y1="${fy + fh / 2}" y2="${fy + fh / 2}"
+          stroke="var(--ink)" stroke-width="1" stroke-dasharray="4 3"/>
+        <line x1="${w - 14}" x2="${w - 14}" y1="${fy + 6}" y2="${fy + fh - 6}" stroke="var(--ink)" stroke-width="1.2"/>
+        <text x="${fx + fw + 12}" y="${fy + fh / 2 - 6}">distance</text>
+        <text x="${fx + fw + 12}" y="${fy + fh / 2 + 16}">limitative</text>
+        <text class="v" x="${fx}" y="${h - 4}">74,2 m² de baies</text>
+        <text x="${w - 10}" y="${h - 4}" text-anchor="end" fill="var(--over)">68,5 m² permis</text>`;
+      return s;
+    } },
+
+  { id: "A-19.1", topic: "Cadre légal du zonage", state: "pour référence", m: "—", r: "cadre habilitant",
+    ecart: "rien à mesurer",
+    q: "La loi habilite la municipalité à régir, par règlement, l'usage du sol et l'implantation des bâtiments sur son territoire.",
+    src: "Loi sur l'aménagement et l'urbanisme · Québec · texte consolidé",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1",
+    draw: (w, h) => {
+      const steps = [["Loi", "A-19.1"], ["Règlement", "01-277"], ["Article", "art. 9, 22"]];
+      const bw = (w - 24 - 28) / 3;
+      return steps.map(([t, n], i) => {
+        const x = 12 + i * (bw + 14);
+        return `<rect x="${x}" y="${h * .22}" width="${bw}" height="${h * .45}" rx="5"
+            fill="${i === 0 ? "var(--fill)" : "var(--paper)"}" stroke="var(--ink)" stroke-width="${i === 0 ? 1.3 : .9}"/>
+          <text class="v" x="${x + bw / 2}" y="${h * .42}" text-anchor="middle">${t}</text>
+          <text x="${x + bw / 2}" y="${h * .58}" text-anchor="middle">${n}</text>
+          ${i < 2 ? `<path d="M${x + bw + 3} ${h * .445} h8 m-3 -3 l3 3 -3 3" stroke="var(--ink)" fill="none" stroke-width="1"/>` : ""}`;
+      }).join("") + `<text x="12" y="${h - 4}">habilite</text>`;
+    } },
+];
+
+const cl = (a) => a.state === "conforme" ? "ok" : a.state === "pour référence" ? "ref" : "open";
+const box = (a, w, h) => `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet"
+  style="width:100%;height:auto">${a.draw(w, h)}</svg>`;
+const lien = (a) => `<a class="lien" href="${a.url}" target="_blank" rel="noopener noreferrer">Lire le texte officiel ${ARROW}</a>`;
+const plain = (a) => `<a class="plain" href="${a.url}" target="_blank" rel="noopener noreferrer">Texte officiel</a>`;
+const st = (a) => `<span class="state"><span class="dot ${cl(a)}"></span>${a.state}</span>`;
+const nums = (a) => `<div class="nums"><span class="big">${a.m}</span>
+  <span class="need">sur ${a.r} exigés</span>
+  <span class="gap ${cl(a)}" style="margin-left:auto">${a.ecart}</span></div>`;
+
+/* ------------------------------------------------------- les dix variantes
+   Chaque variante est une fonction qui rend les sept fiches. Les classes
+   .c1 à .c10 portent toute la mise en page; aucun style en ligne. */
+const WAYS = [
+  { id: "A1", t: "Dessin en tête, à fond perdu", grid: "g-sm",
+    card: (a) => `<div class="c1"><div class="draw">${box(a, 258, 140)}</div>
+      <div class="tx"><div class="hd"><span class="id">${a.id}</span><b>${a.topic}</b>
+        <span class="state push"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+        <q>${a.q}</q><div class="src">${a.src}</div>${lien(a)}</div></div>`,
+    why: "Le dessin ouvre la fiche et touche ses bords: on voit la règle avant de lire son numéro. L'œil parcourt sept images avant de lire un seul mot.",
+    cost: "Le dessin prend le haut de chaque fiche, donc la page entière: sept images de même poids se concurrencent, rien ne dit par où commencer." },
+
+  { id: "A2", t: "Les deux chiffres d'abord", grid: "g-sm",
+    card: (a) => `<div class="c2"><div class="hd"><span class="id">${a.id}</span><b>${a.topic}</b>
+        <span class="state push"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+      ${nums(a)}<div class="draw">${box(a, 258, 128)}</div>
+      <q>${a.q}</q><div class="src">${a.src}</div>${lien(a)}</div>`,
+    why: "Mesuré, exigé, écart: la réponse tient sur une ligne, et le dessin est là pour la justifier. C'est la version qui se lit debout, avant une réunion.",
+    cost: "Le chiffre prend le rôle principal et le dessin devient décoratif; or un chiffre lu sans sa géométrie est exactement ce que fitte veut éviter." },
+
+  { id: "A3", t: "Dessin à gauche, texte à droite", grid: "g-lg",
+    card: (a) => `<div class="c3"><div class="draw">${box(a, 170, 120)}</div>
+      <div class="tx"><div class="hd"><span class="id">${a.id}</span><b>${a.topic}</b>
+        <span class="state push"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+        ${nums(a)}<q>${a.q}</q><div class="src">${a.src}</div>${plain(a)}</div></div>`,
+    why: "Fiche couchée: le dessin et sa phrase sont côte à côte, au même niveau de l'œil. Deux par rangée, les sept tiennent sur quatre rangées sans rien replier.",
+    cost: "Le dessin tombe à 170 px de large; les dessins denses — les trente cases, la façade — y perdent leurs annotations." },
+
+  { id: "A4", t: "La citation d'abord, le dessin en preuve", grid: "g-md",
+    card: (a) => `<div class="c4"><div class="hd" style="display:flex;align-items:center;gap:8px">
+        <span class="id">${a.id}</span><b style="font-size:12.5px;font-weight:500">${a.topic}</b>
+        <span class="state push"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+      <q>${a.q}</q><div class="draw">${box(a, 340, 150)}</div>
+      <div class="ft"><span class="src" style="flex:1">${a.src}</span>${plain(a)}</div></div>`,
+    why: "L'ordre est celui de la responsabilité: la règle écrite, puis ce que le dessin en dit. C'est la fiche qu'on montre à un urbaniste sans la commenter.",
+    cost: "Les citations n'ont pas la même longueur: les fiches se décalent, et la page perd sa grille." },
+
+  { id: "A5", t: "Sans cadre, un filet entre les fiches", grid: "g5",
+    card: (a) => `<div class="c5"><div class="hd"><span class="id">${a.id}</span><b>${a.topic}</b>
+        <span class="state push"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+      ${nums(a)}<div class="draw">${box(a, 280, 130)}</div>
+      <q>${a.q}</q><div class="src">${a.src}</div>${plain(a)}</div>`,
+    why: "Pas de carte, pas d'ombre: un filet sépare, le papier reste blanc. C'est la variante la plus proche de DESIGN.md, et le dessin n'est plus posé dans une boîte grise.",
+    cost: "Sans cadre, rien ne dit où une fiche finit quand deux citations ont des longueurs différentes; la lecture en colonnes devient incertaine." },
+
+  { id: "A6", t: "L'écart en bandeau", grid: "g-sm",
+    card: (a) => `<div class="c6" data-s="${cl(a)}">
+      <div class="band"><span class="dot ${cl(a)}"></span><b>${a.ecart}</b>
+        <span style="margin-left:auto">${a.m} · ${a.r} exigés</span></div>
+      <div class="tx"><div class="hd" style="display:flex;align-items:center;gap:8px">
+          <span class="id">${a.id}</span><b style="font-size:12.5px;font-weight:500">${a.topic}</b></div>
+        <div class="draw">${box(a, 258, 132)}</div>
+        <q>${a.q}</q><div class="src">${a.src}</div>${plain(a)}</div></div>`,
+    why: "Le bandeau dit l'écart en toutes lettres, teinté par l'état: on trie sept fiches d'un coup d'œil sans lire une ligne.",
+    cost: "Trois teintes de bandeau répétées sept fois, c'est beaucoup de couleur pour un écran dont le sujet est un dessin noir sur blanc." },
+
+  { id: "A7", t: "Dessin plein cadre, texte au survol", grid: "g-sm",
+    card: (a) => `<div class="c7" tabindex="0">
+      <div class="top"><span class="id">${a.id}</span><b style="font-size:12.5px;font-weight:500">${a.topic}</b>
+        <span class="state push"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+      <div class="draw">${box(a, 258, 148)}</div>
+      <span class="peek">survoler pour le texte</span>
+      <div class="tx"><q>${a.q}</q><div class="src">${a.src}</div>${plain(a)}</div></div>`,
+    why: "La page devient une planche de sept dessins; le texte de loi monte à la demande, par-dessus le dessin qu'il décrit.",
+    cost: "Un texte qui n'apparaît qu'au survol n'existe pas à l'impression, ni au clavier sans tabulation, ni pour quelqu'un qui scanne la page de loin." },
+
+  { id: "A8", t: "Citation repliée, fiches de hauteur égale", grid: "g-sm",
+    card: (a) => `<div class="c8"><div style="display:flex;align-items:center;gap:8px">
+        <span class="id">${a.id}</span><b style="font-size:12.5px;font-weight:500">${a.topic}</b>
+        <span class="state push"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+      ${nums(a)}<div class="draw">${box(a, 258, 132)}</div>
+      <details><summary>la disposition, en toutes lettres</summary><q>${a.q}</q>
+        <div class="src" style="margin-top:6px">${a.src}</div></details>
+      ${plain(a)}</div>`,
+    why: "Toutes les fiches font la même hauteur parce que la citation est repliée: la grille tient, et la phrase reste à un clic, pas à une page.",
+    cost: "Replier le texte de loi, c'est admettre qu'on ne le lira pas; la fiche redevient une paire de chiffres avec une image." },
+
+  { id: "A9", t: "Gouttière d'état à gauche", grid: "g-sm",
+    card: (a) => `<div class="c9"><div class="gut"><span class="dot ${cl(a)}"></span>
+        <span class="vid">${a.id}</span></div>
+      <div class="tx"><b style="font-size:12.5px;font-weight:500">${a.topic}</b>
+        ${nums(a)}<div class="draw">${box(a, 230, 124)}</div>
+        <q>${a.q}</q><div class="src">${a.src}</div>${plain(a)}</div></div>`,
+    why: "L'état et le numéro sortent du contenu et passent dans une bande de 30 px: la colonne de pastilles se lit verticalement, d'une fiche à l'autre.",
+    cost: "Trente pixels pris sur chaque fiche pour une pastille et six caractères; le dessin rétrécit d'autant." },
+
+  { id: "A10", t: "Grande fiche pour ce qui bloque", grid: "g10",
+    card: (a) => `<div class="c10" data-s="${cl(a)}">
+      <div class="hd"><span class="id">${a.id}</span><b style="font-size:12.5px;font-weight:500">${a.topic}</b>
+        <span class="state push"><span class="dot ${cl(a)}"></span>${a.state}</span></div>
+      ${nums(a)}
+      <div class="draw">${box(a, cl(a) === "open" ? 520 : 250, cl(a) === "open" ? 190 : 110)}</div>
+      ${cl(a) === "open" ? `<q>${a.q}</q><div class="src">${a.src}</div>${lien(a)}`
+        : `<div class="src">${a.src}</div>${plain(a)}`}</div>`,
+    why: "La page n'est pas une grille d'égaux: les cinq non résolus occupent deux colonnes avec leur dessin en grand, les deux autres restent des vignettes.",
+    cost: "La hiérarchie est écrite dans la mise en page: le jour où un article est réglé, la page se recompose toute seule sous les yeux." },
+];
+
+/* --------------------------------------------------------------- la mesure
+   Hauteur réelle de la plus haute fiche et nombre de rangées pour les sept
+   articles, lues après rendu: la densité annoncée est celle qu'on obtient. */
+function measure() {
+  document.querySelectorAll(".sec").forEach((s) => {
+    const cards = [...s.querySelectorAll(".grid > div")];
+    if (!cards.length) return;
+    const h = Math.round(Math.max(...cards.map((c) => c.getBoundingClientRect().height)));
+    const tops = new Set(cards.map((c) => Math.round(c.getBoundingClientRect().top)));
+    s.querySelector(".meas").textContent = `fiche ${h} px · ${tops.size} rangée${tops.size > 1 ? "s" : ""}`;
+  });
+}
+
+document.getElementById("sheet").innerHTML = WAYS.map((w) => `<section class="sec">
+  <div class="cap"><span class="n">${w.id}</span><span class="t">${w.t}</span><span class="meas"></span></div>
+  <div class="panel">
+    <div class="phd">Zonage et code
+      <span class="cnt">${A.filter((a) => a.state === "non résolu").length} non résolus sur ${A.length}</span></div>
+    <div class="grid ${w.grid}">${A.map(w.card).join("")}</div>
+  </div>
+  <div class="why">${w.why}</div>
+  <div class="cost">Coût: ${w.cost}</div>
+</section>`).join("");
+
+document.getElementById("foot").textContent =
+  "Les sept dessins sont identiques dans les dix: ce qui se décide ici n'est pas le dessin mais ce "
+  + "qui l'entoure. A1, A5 et A7 donnent la priorité à l'image; A2, A6 et A8 à la réponse chiffrée; "
+  + "A4 au texte de loi. A3 et A9 arbitrent par la géométrie de la fiche, A10 par l'état: c'est la "
+  + "seule qui admet que cinq articles comptent plus que deux. La ligne de DESIGN.md qui tranche: "
+  + "une fiche ne doit rien cacher derrière un geste — ce qui met A7 en dernier, et A8 juste avant.";
+
+measure();
+window.addEventListener("resize", measure);
+</script>
+</body>
+</html>
