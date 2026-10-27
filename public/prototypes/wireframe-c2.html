@@ -888,7 +888,10 @@ function findItem(uid) {
   return null;
 }
 
-function commit() { save(); render(); }
+/* The panel carries one switch per piece on the screen, so a part can be
+   argued away from the dial as well as from the block itself. The layout is
+   the truth; the dial is pushed back into line after every change. */
+function commit() { save(); syncDial(); render(); }
 
 function addPart(partId, ci, index) {
   const cs = cols();
@@ -1260,7 +1263,17 @@ const sel = (options) => ({ type: "select", options, default: options[0] });
 const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
 const act = (label) => ({ type: "action", label });
 
-const dial = DialKit.createDialKit("Wireframe C, adapted", {
+/* One switch per piece standing on the current screen. Keys are part ids, so
+   the panel re-reads itself whenever the screen or the layout changes. */
+function pieceSwitches() {
+  const group = { _collapsed: false };
+  for (const col of cols()) {
+    for (const it of col.items) if (!(it.part in group)) group[it.part] = !it.hidden;
+  }
+  return group;
+}
+
+const dialConfig = () => ({
   screen: { type: "select", options: Object.keys(SCREENS), default: "Project" },
   fidelity: sel(["low", "high"]),
   regionLabels: true,
@@ -1290,7 +1303,10 @@ const dial = DialKit.createDialKit("Wireframe C, adapted", {
   content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
   inspector: { _collapsed: true, fidelity: FI, layout: sel(["Right panel", "Bottom sheet", "Overlay drawer", "Hidden"]) },
   footer: { _collapsed: true, fidelity: FI, layout: sel(["Impact strip", "Hidden"]) },
-}, {
+  pieces: pieceSwitches(),
+});
+
+const dial = DialKit.createDialKit("Wireframe C, adapted", dialConfig(), {
   id: "wireframe-c2", persist: true,
   onAction(path) {
     if (path === "compose.addColumn") {
@@ -1312,7 +1328,23 @@ const dial = DialKit.createDialKit("Wireframe C, adapted", {
   },
 });
 
+/* Pushing the layout back into the panel. The guard keeps the subscriber
+   that this fires from reading its own write as a user's intent. */
+let SYNCING = false;
+function syncDial() {
+  if (typeof dial === "undefined") return;
+  const on = {};
+  for (const col of cols()) for (const it of col.items) if (!(it.part in on)) on[it.part] = !it.hidden;
+  SYNCING = true;
+  dial.updateConfig(dialConfig());
+  dial.setValues({ pieces: on });
+  SYNCING = false;
+}
+
+let LAST_SCREEN = null;
 function applyDial(v) {
+  const switched = LAST_SCREEN !== null && LAST_SCREEN !== v.screen;
+  LAST_SCREEN = v.screen;
   V.screen = v.screen;
   V.fidelity = v.fidelity;
   V.labels = v.regionLabels;
@@ -1333,6 +1365,21 @@ function applyDial(v) {
     V.region[r] = { fidelity: v[r].fidelity, layout: v[r].layout || "" };
   });
   if (V.focus >= cols().length) V.focus = 0;
+  /* A new screen brings its own pieces; the panel is re-read rather than
+     carrying the last screen's switches onto it. */
+  if (switched) { syncDial(); render(); return; }
+  /* A switch flipped in the panel hides every instance of that piece on the
+     screen, the same state the eye button writes. */
+  if (!SYNCING && v.pieces) {
+    let changed = false;
+    for (const col of cols()) {
+      for (const it of col.items) {
+        const show = v.pieces[it.part];
+        if (show !== undefined && it.hidden === show) { it.hidden = !show; changed = true; }
+      }
+    }
+    if (changed) save();
+  }
   render();
 }
 
