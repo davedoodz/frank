@@ -97,7 +97,10 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .rail.wide .row .hi{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* breadcrumb, screen menu and grouped tabs live in the tab strip */
-.tabs .crumb{font-size:12.5px;color:var(--ink-3)}
+.tabs .crumb{font-size:12.5px;color:var(--ink-3);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.tabs .crumb .lu{width:13px;height:13px}
+.tabs .crumb:hover{color:var(--ink)}
+.tabs .crumb.on{cursor:default}
 .tabs .crumb.on{color:var(--ink);font-weight:500}
 .tabs .grp{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
   padding:0 6px 0 2px}
@@ -129,6 +132,8 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .btnw{height:26px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
   display:inline-flex;align-items:center;gap:6px;padding:0 9px;font-size:12px;color:var(--ink-2)}
 .btnw.solid{background:var(--bar);border-color:var(--line);color:var(--ink)}
+.pcard{cursor:pointer}
+.pcard:hover{border-color:var(--line);background:var(--fill-2)}
 .tile{border:1px solid var(--line-2);border-radius:var(--r);padding:10px;display:flex;
   flex-direction:column;gap:6px;min-width:0}
 .listrow{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:5px}
@@ -192,6 +197,21 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 [data-fi="high"] .plan[data-img="plan"]{background-image:url(assets/plan-etage.jpg)}
 [data-fi="high"] .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
 [data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
+
+/* The consultants' sheets sit over the floor plan in one shared coordinate
+   space: the plan box takes the drawing's own aspect and is drawn edge to
+   edge, so a percentage means the same thing on every layer. */
+.plan.align{aspect-ratio:1280 / 1160;height:auto;flex:0 0 auto;overflow:hidden}
+[data-fi="high"] .plan.align[data-img]{background-size:100% 100%;background-position:0 0}
+.plan .lay{position:absolute;display:none;background-repeat:no-repeat;
+  background-size:100% 100%;pointer-events:none;z-index:1}
+[data-fi="high"] .plan[data-img] .lay{display:block}
+.plan .lay[data-lay="arp"]{background-image:url(assets/arp-site.png)}
+/* The landscaping sheet is drawn the other way round from the surveyor's:
+   the 8,26 m drive island reads (.375,.313) on one and (.354,.276) on the
+   other once both are measured against their property lines. The file stays
+   as extracted; the half turn happens here. */
+.plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png);transform:rotate(180deg)}
 [data-fi="high"] .btnw.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
 [data-fi="high"] .listrow.on{background:#eef1e0}
 [data-fi="high"] .listrow .dot{background:#8ba00f}
@@ -258,6 +278,8 @@ const V = {
   content: { fidelity: "inherit", layout: "Two panes" },
   inspector: { fidelity: "inherit", layout: "Right panel" },
   footer: { fidelity: "inherit", layout: "Impact strip" },
+  lay: { arp: { on: true, opacity: 55, scale: 100, x: 0, y: 0 },
+    pay: { on: false, opacity: 55, scale: 100, x: 0, y: 0 } },
 };
 
 const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
@@ -286,7 +308,7 @@ const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1))
 /* --------------------------------------------------------------- screens */
 
 const SCREENS = {
-  Home: { icon: "home", regions: ["header", "content"], steps: {}, home: true },
+  Projects: { icon: "folder", regions: ["header", "content"], steps: {}, home: true, index: true },
   Overview: {
     icon: "layout-grid",
     regions: ["header", "content", "inspector"],
@@ -331,7 +353,7 @@ function crop(box, pad = 0.45, axis = "width") {
     + `background-position:${(px / (1 - fw) * 100).toFixed(1)}% ${(py / (1 - fh) * 100).toFixed(1)}%`;
 }
 
-const NAV = [["home", "Home"], ["layout-grid", "Overview"], ["layers", "Units"], ["table", "Quantities"],
+const NAV = [["layout-grid", "Overview"], ["layers", "Units"], ["table", "Quantities"],
   ["scale", "Rules"], ["git-compare", "Coordination"], ["calendar-check", "Tracking"], ["file", "Files"]];
 
 /* The cross-screen journey the prototype is built around. Everything else
@@ -403,7 +425,7 @@ const pstate = (p) => `<span class="state" data-open="${p[4]}"><span class="d"><
 
 /* One 16:9 thumbnail per project, whatever the building. The ratio is set on
    the frame; the drawing is cropped by it and never stretched to fit. */
-const pcard = (p) => `<div class="tile pcard">
+const pcard = (p) => `<div class="tile pcard" data-screen="Overview" title="Open ${p[0]}">
   <div class="plan ghost thumb" data-img="plan">${icon("image")}<span class="lv hi">level 5</span></div>
   <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
   <div><span class="lo bar lt" style="width:72%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
@@ -462,6 +484,7 @@ const HOMES = {
 };
 
 function navHTML() {
+  if (SCREENS[V.screen].index) return "";
   const mode = V.nav.layout;
   if (mode === "Top bar only" || mode === "Tabs only, no rail") return "";
   const sections = mode === "Wide rail with sections";
@@ -475,7 +498,7 @@ function navHTML() {
     const head = sections && SECTIONS[i] ? `<div class="sct hi">${SECTIONS[i]}</div>` : "";
     if (wide) return `${head}<div class="row ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%"></span>${text}</div>`;
     if (stack) return `<div class="stk ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%;height:6px"></span>${text}</div>`;
-    return `<div class="ic ${on}" data-screen="${name}" title="${name}">${g || `<span class="code hi">${SHORT(name)}</span>`}${g && name !== "Home" ? `<span class="cap hi">${navLabel(name, i)}</span>` : ""}</div>`;
+    return `<div class="ic ${on}" data-screen="${name}" title="${name}">${g || `<span class="code hi">${SHORT(name)}</span>`}${g ? `<span class="cap hi">${navLabel(name, i)}</span>` : ""}</div>`;
   }).join("");
   const cls = wide ? "wide" : stack ? "stack" : "";
   return `<nav class="rail rg ${solo("nav")} ${cls}" data-rg="nav" data-fi="${fiOf("nav")}"
@@ -485,7 +508,7 @@ function navHTML() {
 /* The rail and the tab strip never carry the same destinations. When the
    rail lists the screens, the strip drops to the current screen's own views. */
 const CONTEXT = {
-  Home: ["Ongoing", "Archived"],
+  Projects: ["Ongoing", "Archived"],
   Overview: ["What changed", "Totals", "Blocking"],
   Units: ["Level 5", "Level 4", "Level 3", "All levels"],
   Quantities: ["Units", "Areas", "Windows", "Materials"],
@@ -500,7 +523,7 @@ function tabsHTML() {
   if (mode === "Rail only, no tabs") return "";
   const top = mode === "Top bar only";
   const ic = tabIcons();
-  const names = Object.keys(SCREENS);
+  const names = Object.keys(SCREENS).filter((n) => !SCREENS[n].index);
   /* Icons off and labels away would leave an empty strip, so the short code
      stands in: a tab target never renders without something to read. */
   const bare = !ic && (V.nav.labels === "Hidden" || V.nav.labels === "Hover only");
@@ -510,20 +533,25 @@ function tabsHTML() {
 
   let items;
   const views = CONTEXT[V.screen] || ["Overview"];
-  if (mode === "Rail + view menu") {
+  /* The index is reached from the words "All projects". They sit in the strip
+     on every screen; on the index itself they are the only thing in it. */
+  const back = `<span class="crumb hi" data-screen="Projects" title="All projects">${icon("folder")}All projects</span>`;
+  if (SCREENS[V.screen].index) {
+    items = `<span class="crumb on hi">${icon("folder")}All projects</span><span class="sp"></span>`;
+  } else if (mode === "Rail + view menu") {
     items = `<span class="btnw solid" data-menu><span class="hi">${views[0]}</span>${icon("chevron-down")}</span>
       <span class="sp"></span>
       <span class="chip hi">1 of ${views.length}</span>`;
   } else if (mode === "Rail + breadcrumb") {
-    items = `<span class="crumb hi">Le Hauterive III</span>${icon("chevron-right")}
-      <span class="crumb on hi">${views[0]}</span>
+    items = `${back}${icon("chevron-right")}
+      <span class="crumb on hi">Alder Court</span>
       <span class="sp"></span>`;
   } else if (top || mode === "Tabs only, no rail") {
-    items = `${names.map(tab).join("")}<span class="sp"></span>`;
+    items = `${back}<span class="div"></span>${names.map(tab).join("")}<span class="sp"></span>`;
   } else {
     /* A rail is on screen, so the strip shows this screen's views instead
        of repeating the screen list. */
-    items = `${views.map((t, i) => `<button aria-current="${i === 0}" title="${t}">
+    items = `${back}<span class="div"></span>${views.map((t, i) => `<button aria-current="${i === 0}" title="${t}">
         <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`).join("")}
       <span class="sp"></span>`;
   }
@@ -537,7 +565,7 @@ function tabsHTML() {
 
 function headerHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.header : null;
-  const title = { Home: ["Projects", "5 ongoing · 1 archived"],
+  const title = { Projects: ["Projects", "5 ongoing · 1 archived"],
     Overview: ["Le Hauterive III", "8 floors · 98 units · 2 sources connected"],
     Units: ["Typical floor — level 5", "14 units · 6 differences open"],
     Quantities: ["Quantities", "counted from the drawings, nothing typed"],
@@ -733,9 +761,11 @@ function render() {
   const hasList = def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
   const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Right panel";
   const cols = [hasList ? "260px" : null, "1fr", hasInsp ? "340px" : null].filter(Boolean).join(" ");
-  const navMode = { "Top bar only": "top", "Tabs only, no rail": "top",
-    "Wide rail with labels": "wide", "Wide rail with sections": "wide",
-    "Rail with labels under icons": "stack" }[V.nav.layout] || "rail";
+  /* No rail until a project is open: the rail is the proof that one is. */
+  const navMode = def.index ? "top"
+    : { "Top bar only": "top", "Tabs only, no rail": "top",
+        "Wide rail with labels": "wide", "Wide rail with sections": "wide",
+        "Rail with labels under icons": "stack" }[V.nav.layout] || "rail";
 
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
