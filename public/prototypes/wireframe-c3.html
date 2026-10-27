@@ -404,7 +404,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 /* The 2D pane is a window onto a sheet that is larger than it: the drawing
    and everything laid over it move and scale together inside .vp, so a
    percentage keeps meaning the same thing at every zoom. */
-.vp{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab}
+/* Same box as the model pane beside it: the field is the pane, the drawing
+   is centred in it, and neither drawing states an edge of its own. */
+.vp{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab;background:#f1f3f4}
 .vp.drag{cursor:grabbing}
 
 /* Zoom belongs on the frame of the drawing it zooms, not in a toolbar two
@@ -427,7 +429,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .frame[data-shell="inset"] .pane.drawing{border:1px solid #b4b4b7;border-radius:9px;background:#fff}
 .frame[data-chrome="black"] .pane.drawing{border-color:rgba(255,255,255,.22);
   box-shadow:0 2px 14px rgba(0,0,0,.45)}
-.vp > .plan{position:absolute;left:0;top:0;width:100%;transform-origin:0 0;will-change:transform}
+/* The sheet's own box is sized in script to fit this one, so 0–1 on the
+   drawing stays 0–1 on the element the overlays are drawn in. */
+.vp > .plan{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;
+  border:0;background-color:#fff}
 /* The selected unit, drawn over the sheet and never into it: a thin outline
    and a light wash, both in the one accent the screen already uses. */
 .umark{position:absolute;inset:0;z-index:3;overflow:visible}
@@ -1571,31 +1576,48 @@ function footerHTML() {
 const ZMIN = 100, ZMAX = 600;
 const vpEl = () => document.querySelector("[data-vp]");
 
-/* The sheet never leaves the pane: at 100 % it fills it, above that it may
-   be dragged until an edge reaches the opposite edge of the pane. */
-function clampPan(rect, zoom) {
+/* The sheet's box, laid out to fit the viewport the way the model fits its
+   own: the drawing is contained, never cropped, so the two panes show the
+   same amount of their subject and line up top and bottom. Returns the
+   untransformed size the pan and the zoom are measured against. */
+const SHEET_AR = 1280 / 1160;
+function layoutSheet(el) {
+  const plan = el.querySelector(".plan");
+  if (!plan) return { w: 0, h: 0 };
+  const r = el.getBoundingClientRect();
+  let w = r.width, h = w / SHEET_AR;
+  if (h > r.height) { h = r.height; w = h * SHEET_AR; }
+  plan.style.width = `${w}px`;
+  plan.style.height = `${h}px`;
+  return { w, h };
+}
+
+/* The sheet never leaves the pane: while it is smaller than the viewport it
+   stays centred in it, and once it is larger it may be dragged until an
+   edge reaches the opposite edge of the pane. */
+function clampPan(rect, zoom, base) {
   const z = zoom / 100;
-  const w = rect.width * (z - 1), h = rect.height * (z - 1);
-  V.pan.x = Math.min(0, Math.max(-w, V.pan.x));
-  V.pan.y = Math.min(0, Math.max(-h, V.pan.y));
+  const bw = base.w * z, bh = base.h * z;
+  V.pan.x = bw <= rect.width ? (rect.width - bw) / 2 : Math.min(0, Math.max(rect.width - bw, V.pan.x));
+  V.pan.y = bh <= rect.height ? (rect.height - bh) / 2 : Math.min(0, Math.max(rect.height - bh, V.pan.y));
 }
 
 /* Zooms around a point of the pane, the pointer under the wheel or the
    middle of the pane for the buttons, so what is being read stays put. */
-function zoomTo(next, cx, cy, rect) {
+function zoomTo(next, cx, cy, rect, base) {
   const z0 = V.zoom / 100;
   const z1 = Math.min(ZMAX, Math.max(ZMIN, next)) / 100;
   V.pan.x = cx - (cx - V.pan.x) * (z1 / z0);
   V.pan.y = cy - (cy - V.pan.y) * (z1 / z0);
   V.zoom = Math.round(z1 * 100);
-  clampPan(rect, V.zoom);
+  clampPan(rect, V.zoom, base);
 }
 
 function zoomBy(next) {
   const el = vpEl();
   if (!el) { V.zoom = Math.min(ZMAX, Math.max(ZMIN, next)); return; }
   const r = el.getBoundingClientRect();
-  zoomTo(next, r.width / 2, r.height / 2, r);
+  zoomTo(next, r.width / 2, r.height / 2, r, layoutSheet(el));
 }
 
 /* The selected unit, filling the pane with a little air: the box is 0–1 on
@@ -1605,12 +1627,14 @@ function fitUnit() {
   const row = selRow("Unités");
   if (!el || !row) return;
   const r = el.getBoundingClientRect();
+  const base = layoutSheet(el);
   const [x, y, w, h] = PLAN_BOXES[row[2]];
-  const z = Math.min(ZMAX, Math.max(ZMIN, Math.min(1 / (w * 1.5), 1 / (h * 1.5)) * 100));
+  const z = Math.min(ZMAX, Math.max(ZMIN,
+    Math.min(r.width / (base.w * w * 1.5), r.height / (base.h * h * 1.5)) * 100));
   V.zoom = Math.round(z);
-  V.pan.x = r.width / 2 - (x + w / 2) * r.width * (z / 100);
-  V.pan.y = r.height / 2 - (y + h / 2) * r.height * (z / 100);
-  clampPan(r, V.zoom);
+  V.pan.x = r.width / 2 - (x + w / 2) * base.w * (z / 100);
+  V.pan.y = r.height / 2 - (y + h / 2) * base.h * (z / 100);
+  clampPan(r, V.zoom, base);
 }
 
 /* The wheel and the drag write straight to the element and to V, without a
@@ -1622,6 +1646,10 @@ function paintSheet() {
   const el = vpEl();
   if (!el) return;
   const plan = el.querySelector(".plan");
+  /* Laid out first: the pane can have been resized since the last paint,
+     and the pan is centred against the box this returns. */
+  const base = layoutSheet(el);
+  clampPan(el.getBoundingClientRect(), V.zoom, base);
   if (plan) plan.style.transform = `translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})`;
   const slider = document.querySelector("[data-zoom]");
   if (slider && document.activeElement !== slider) slider.value = String(V.zoom);
@@ -1643,7 +1671,7 @@ function wireViewport() {
   el.onwheel = (e) => {
     e.preventDefault();
     const r = el.getBoundingClientRect();
-    zoomTo(V.zoom * Math.exp(-e.deltaY * 0.0016), e.clientX - r.left, e.clientY - r.top, r);
+    zoomTo(V.zoom * Math.exp(-e.deltaY * 0.0016), e.clientX - r.left, e.clientY - r.top, r, layoutSheet(el));
     paint();
   };
   el.ondblclick = () => { V.zoom = 100; V.pan = { x: 0, y: 0 }; paint(); };
@@ -1664,7 +1692,7 @@ function wireViewport() {
       }
       V.pan.x = start.px + (m.clientX - start.x);
       V.pan.y = start.py + (m.clientY - start.y);
-      clampPan(r, V.zoom);
+      clampPan(r, V.zoom, layoutSheet(el));
       paint();
     };
     el.onpointerup = (u) => {
@@ -1674,7 +1702,14 @@ function wireViewport() {
       if (moved) { u.stopPropagation(); u.preventDefault(); }
     };
   };
+  /* Drawn once here: the markup carries the last transform, but the box it
+     is measured against only exists after the pane has been laid out. */
+  paintSheet();
 }
+
+/* The pane changes width with the window, and the sheet is centred in it,
+   so the one listener re-centres whatever is on screen. */
+window.addEventListener("resize", () => paintSheet());
 
 /* The two sliders are the only zoom controls left, so each one is wired to
    the thing it moves: the plan slider to the sheet transform, the model
