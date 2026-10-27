@@ -242,23 +242,23 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .fld input{border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;font:inherit;font-size:12px;color:var(--ink);background:#fff}
 .fld input:focus{outline:1px solid var(--ink);outline-offset:1px}
 
-/* A provision reads as a card: where it comes from, what it says, the two
-   numbers side by side, and the way out to the official text. */
-.codegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
-.code{border:1px solid var(--line-2);border-radius:var(--r);padding:11px;display:flex;
-  flex-direction:column;gap:7px;min-width:0;background:#fff}
+/* A provision reads as a card, drawing first: the rule is seen before its
+   number is read. The drawing touches the card's edges, the words sit under
+   it, and the two numbers are not repeated — they are inside the drawing. */
+.codegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;align-items:start}
+.code{border:1px solid var(--line-2);border-radius:var(--r);display:flex;flex-direction:column;
+  min-width:0;background:#fff;overflow:hidden}
 .code:hover{border-color:var(--line)}
 .code.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
+.code .draw{padding:10px;background:var(--fill-2);border-bottom:1px solid var(--line-2)}
+/* multiply drops the file's white onto the tray without tinting the line. */
+.code .draw img{width:100%;height:auto;display:block;mix-blend-mode:multiply}
+.code .tx{padding:11px;display:flex;flex-direction:column;gap:7px;min-width:0}
 .code .tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
   border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;color:var(--ink-2)}
 .code .src{font-size:11px;color:var(--ink-3);line-height:1.45}
 .code .quote{margin:0;border-left:2px solid var(--line);padding-left:9px;
   font-size:12px;line-height:1.5;color:var(--ink-2)}
-.code .nums{gap:8px}
-.code .num{flex:1;border:1px solid var(--line-2);border-radius:6px;padding:7px 8px;display:flex;flex-direction:column;gap:2px}
-.code.gap .num:first-child .v{color:var(--hi,#b3261e)}
-.code .num .v{font-size:15px;font-weight:600;color:var(--ink)}
-.code .num .k{font-size:10.5px;color:var(--ink-3)}
 .code .state{font-size:10.5px;color:var(--ink-3);display:inline-flex;align-items:center;gap:5px}
 .code .state::before{content:"";display:inline-block;vertical-align:middle;margin-right:5px;
   width:7px;height:7px;border-radius:50%;background:var(--bar)}
@@ -764,43 +764,51 @@ const ARTICLES = [
     quote: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
     measured: "6 étages", required: "5 étages", state: "non résolu",
     needs: "grille des usages et normes de la zone",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    img: "assets/code/art-9-hauteur.png", ratio: "1649 / 954" },
   { id: "art. 43", topic: "Taux d'implantation",
     doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
     quote: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
     measured: "48,2 %", required: "55 %", state: "conforme",
     needs: "superficie du terrain confirmée par l'arpenteur",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    img: "assets/code/art-43-implantation.png", ratio: "1545 / 1018" },
   { id: "art. 22", topic: "Marge arrière",
     doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
     quote: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
     measured: "2,70 m", required: "3,00 m", state: "non résolu",
     needs: "limite arrière relevée, exceptions et saillies admises",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    img: "assets/code/art-22-marge.png", ratio: "1602 / 982" },
   { id: "art. 71", topic: "Stationnement",
     doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
     quote: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
     measured: "22 cases", required: "30 cases", state: "non résolu",
     needs: "réductions applicables près du transport collectif",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    img: "assets/code/art-71-stationnement.png", ratio: "1859 / 846" },
   { id: "art. 134", topic: "Verdissement et pleine terre",
     doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
     quote: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
     measured: "17 %", required: "20 %", state: "non résolu",
     needs: "plan d'aménagement paysager coté",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    img: "assets/code/art-134-verdissement.png", ratio: "1597 / 985" },
   { id: "3.2.3.1", topic: "Baies non protégées",
     doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
     quote: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
     measured: "74,2 m²", required: "68,5 m²", state: "non résolu",
     needs: "distance limitative mesurée, surface de la façade de rayonnement",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202" },
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    img: "assets/code/art-3231-baies.png", ratio: "1642 / 958" },
   { id: "A-19.1", topic: "Cadre légal du zonage",
     doc: "Loi sur l'aménagement et l'urbanisme", place: "Québec", edition: "texte consolidé",
     quote: "La loi habilite la municipalité à régir, par règlement, l'usage du sol et l'implantation des bâtiments sur son territoire.",
     measured: "—", required: "cadre habilitant", state: "pour référence",
     needs: "aucun chiffre: la règle applicable vient du règlement de l'arrondissement",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1" },
+    /* Nothing to measure, so no drawing to show: the chain of authority is
+       the article, and it is traced in the card itself. */
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1", chain: true },
 ];
 
 const QTABS = {
@@ -896,6 +904,11 @@ const CONTOURS = {
   ],
 };
 const contoursFor = (level) => CONTOURS[level] || CONTOURS.typical;
+/* Handed to the 3D viewer for window-to-unit registration: keys "typical"
+   and 1–8, each a polygonArray index-matched to row[2] (null entries
+   left unmatched rather than guessed). See the comment on CONTOURS above
+   for how confident each slot is and why some are empty. */
+window.fitteContours = CONTOURS;
 
 /* The marketing sheet (assets/plan-etage.jpg, read for "Tous les
    niveaux") is the same floor drawn at a different crop/offset than the
@@ -1177,24 +1190,44 @@ function fileStrip(kind) {
 
 const unresolvedCount = () => ARTICLES.filter((a) => a.state === "non résolu").length;
 
+/* The chain of authority for the one article that has no number: the law
+   enables the bylaw, the bylaw carries the article that is measured. */
+const chainSVG = () => `<svg viewBox="0 0 300 96" style="width:100%;height:auto">
+  ${[["Loi", "A-19.1"], ["Règlement", "01-277"], ["Article", "art. 9, 22"]].map(([t, n], i) => {
+    const x = 6 + i * 98;
+    return `<rect x="${x}" y="24" width="84" height="44" rx="5" fill="#fff"
+        stroke="var(--ink)" stroke-width="${i === 0 ? 1.4 : .9}"/>
+      <text x="${x + 42}" y="44" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${t}</text>
+      <text x="${x + 42}" y="59" text-anchor="middle" font-size="10"
+        font-family="ui-monospace,Menlo,monospace" fill="var(--ink-2)">${n}</text>
+      ${i < 2 ? `<path d="M${x + 88} 46 h6 m-2.5 -3 l3 3 -3 3" stroke="var(--ink)" fill="none" stroke-width="1"/>` : ""}`;
+  }).join("")}
+  <text x="6" y="88" font-size="10" font-family="ui-monospace,Menlo,monospace" fill="var(--ink-3)">habilite</text>
+</svg>`;
+
+/* A1: the drawing opens the card and touches its edges. The two numbers are
+   not repeated under it — they are written inside the drawing, where the
+   geometry that produced them is visible. */
 function codeCard(a, i) {
   const gap = a.state === "non résolu";
   return `<div class="code ${i === V.article ? "on" : ""} ${gap ? "gap" : ""}" ${act("article", i)}>
-    <div class="row" style="align-items:baseline">
-      <span class="hi tag">${a.id}</span>
-      <span class="hi" style="font-weight:600;font-size:12.5px;flex:1">${a.topic}</span>
-      <span class="hi state" data-state="${a.state}">${a.state}</span>
+    <div class="draw">${a.img
+      ? `<img src="${a.img}" alt="${a.topic} — ${a.measured} mesuré, ${a.required} exigé"
+           loading="lazy" style="aspect-ratio:${a.ratio}">`
+      : chainSVG()}</div>
+    <div class="tx">
+      <div class="row" style="align-items:baseline">
+        <span class="hi tag">${a.id}</span>
+        <span class="hi" style="font-weight:600;font-size:12.5px;flex:1">${a.topic}</span>
+        <span class="hi state" data-state="${a.state}">${a.state}</span>
+      </div>
+      <div class="lo col">${bars(2)}</div>
+      <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
+      <div class="hi src">${a.doc} · ${a.place}<br>${a.edition}</div>
+      ${gap ? `<div class="hi src">manque pour conclure: ${a.needs}</div>` : ""}
+      <a class="btnw src-link hi" href="${a.url}" target="_blank" rel="noreferrer"
+         ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
     </div>
-    <div class="lo col">${bars(2)}</div>
-    <div class="hi src">${a.doc} · ${a.place}<br>${a.edition}</div>
-    <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
-    <div class="row nums">
-      <div class="num"><span class="hi v">${a.measured}</span><span class="hi k">mesuré dans les dessins</span></div>
-      <div class="num"><span class="hi v">${a.required}</span><span class="hi k">exigé par l'article</span></div>
-    </div>
-    <div class="hi src">manque pour conclure: ${a.needs}</div>
-    <a class="btnw src-link hi" href="${a.url}" target="_blank" rel="noreferrer"
-       ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
   </div>`;
 }
 
@@ -1667,8 +1700,8 @@ function inspectorHTML() {
         <div class="lo bar" style="width:100%;height:34px;border-radius:5px"></div>
         <input class="hi note" value="${V.note.replace(/"/g, "&quot;")}" placeholder="une phrase pour la personne suivante">
         ${V.settled[settleKey()] ? `<div class="hi" style="font-size:11.5px;color:var(--ink-2)">enregistré — ${V.settled[settleKey()]}</div>` : ""}
-        <span class="btnw solid ${V.reason ? "" : "off"}" ${act("save")} style="justify-content:center"
-          title="${V.reason ? "Enregistrer" : "Choisissez d'abord une raison"}"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Enregistrer la décision</span></span>
+        <span class="btnw solid ${saveReady() ? "go" : "off"}" data-save ${act("save")} style="justify-content:center"
+          title="${saveReady() ? "Enregistrer" : "Choisissez une raison ou écrivez une phrase"}"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Enregistrer la décision</span></span>
       </div>
       <span class="btnw solid" ${act("autocad")} style="justify-content:center">${icon("external-link")}<span class="lo bar" style="width:70px;background:#fff;opacity:.6"></span><span class="hi">Ouvrir dans AutoCAD</span></span>
       </div>`
@@ -1851,6 +1884,28 @@ function fitUnit() {
   V.pan.y = r.height / 2 - (y + h / 2) * base.h * (z / 100);
   clampPan(r, V.zoom, base);
 }
+
+/* Bidirectional selection: the 3D viewer raycasts a window, finds which
+   CONTOURS polygon it falls closest to, and calls this with the unit
+   number that slot implies (e.g. "801" for CONTOURS[8][0]) — the mirror
+   of window.fitteSelection above. This is the same level switch and row
+   selection a list-row click already makes, including the "only refit
+   the view if it was already zoomed in" rule fitUnit's caller follows. */
+window.fitteSelectUnit = (unitStr) => {
+  const no = String(unitStr);
+  const level = Number(no.slice(0, -2));
+  const idx = Number(no.slice(-2)) - 1;
+  const rows = UNITS_BY_LEVEL[`Niveau ${level}`];
+  if (!rows) return;
+  const rowIndex = rows.findIndex((r) => r[2] === idx);
+  if (rowIndex < 0) return;
+  V.screen = "Unités";
+  dial.setValue("screen", FR_SCREEN[V.screen]);
+  V.view["Unités"] = LEVELS.indexOf(level);
+  V.sel["Unités"] = rowIndex;
+  if (V.zoom > 130) fitUnit();
+  render();
+};
 
 /* The wheel and the drag write straight to the element and to V, without a
    re-render: a re-render per wheel tick would rebuild the whole screen and
