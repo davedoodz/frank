@@ -102,7 +102,7 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
   text-transform:uppercase;letter-spacing:.07em;font-size:11px}
 .rail[data-labels-mode="Short code"] .hi,.tabs[data-labels-mode="Short code"] .hi{letter-spacing:.04em}
 /* a caption that does not fit on one line wraps rather than truncating:
-   "Coordination" is a destination, not an ellipsis */
+   "Quantités" is a destination, not an ellipsis */
 .rail .ic .cap{font-size:9px;line-height:1.2;text-align:center;max-width:100%;
   white-space:normal;overflow-wrap:normal;hyphens:none;color:var(--ink-3)}
 .rail .ic.on .cap{color:var(--ink)}
@@ -151,6 +151,26 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .btnw{height:26px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
   display:inline-flex;align-items:center;gap:6px;padding:0 9px;font-size:12px;color:var(--ink-2)}
 .btnw.solid{background:var(--bar);border-color:var(--line);color:var(--ink)}
+/* The file strip sits between the pane title and the drawing: where the
+   file is, what it is called, and the two applications it can be handed
+   back to. One line, no card. */
+.fstrip{display:flex;align-items:center;gap:8px;padding:6px 10px;flex-wrap:nowrap;
+  border-bottom:1px solid var(--line-2);min-width:0}
+.fstrip .btnw{flex:0 0 auto;white-space:nowrap}
+.fpath{display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto;overflow:hidden;
+  height:24px;padding:0 8px;border:1px solid var(--line-2);border-radius:5px;
+  background:var(--fill-2);font-size:11.5px;color:var(--ink-2);cursor:pointer}
+.fpath:hover{border-color:var(--line);background:var(--fill)}
+.fpath .lu{flex:0 0 13px}
+/* The folder gives way first, then the revision: the file name is what is
+   being read, the folder only says where it lives. */
+.fdir{font-family:var(--mono,ui-monospace,monospace);color:var(--ink-3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto;min-width:0}
+.fname{font-family:var(--mono,ui-monospace,monospace);color:var(--ink);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:40px}
+.frev{color:var(--ink-3);white-space:nowrap;flex:0 2 auto;overflow:hidden}
+[data-fi="low"] .fdir,[data-fi="low"] .fname,[data-fi="low"] .frev{color:transparent;
+  background:var(--bar);border-radius:3px;height:9px;display:inline-block;min-width:60px}
 .pcard{cursor:pointer}
 .pcard:hover{border-color:var(--line);background:var(--fill-2)}
 .tile{border:1px solid var(--line-2);border-radius:var(--r);padding:10px;display:flex;
@@ -456,13 +476,9 @@ const SCREENS = {
     steps: { list: 1, content: 2, inspector: 3, footer: 4 },
   },
   "Quantités": { icon: "table", regions: ["header", "content"], steps: { header: 1, content: 2 } },
-  /* Rules is not a destination: an article is only read against a number the
-     drawings produced, so it lives inside the overview. */
-  "Coordination": {
-    icon: "git-compare",
-    regions: ["header", "list", "content", "inspector"],
-    steps: { list: 1, content: 2, inspector: 3 },
-  },
+  /* Neither Rules nor Coordination is a destination. An article is read
+     against a number the drawings produced, so it lives in the overview; a
+     crossing lands on one unit, so it lives in that unit's inspector. */
   "Suivi": { icon: "calendar-check", regions: ["header", "content", "inspector"], steps: { inspector: 1, content: 2 } },
   /* The rail offered Fichiers before the screen existed, so the entry threw
      on click. It is a screen now: what was read, and when. */
@@ -493,23 +509,9 @@ const TYPICAL = [
    fourth colour on the plan. */
 const TYPOS = ["3½", "4½", "5½"];
 const TYPO_INK = { "3½": "#d98b8b", "4½": "#6fa9d8", "5½": "#78c47f" };
+const LEVELS = [8, 7, 6, 5, 4, 3, 2, 1];
 const baseTypo = (ty) => ty.split("+")[0];
 
-/* The open differences sit on named units, so the same ones keep reading as
-   differences wherever that unit is listed. */
-const UNIT_GAPS = { "502": 1, "506": 1, "508": 1, "406": 1, "703": 1 };
-
-const LEVELS = [8, 7, 6, 5, 4, 3, 2, 1];
-
-const UNITS_BY_LEVEL = {};
-LEVELS.forEach((lv) => {
-  const n = lv === 8 ? 6 : TYPICAL.length;
-  UNITS_BY_LEVEL[`Niveau ${lv}`] = TYPICAL.slice(0, n).map(([ty, pi2], i) => {
-    const no = `${lv}${String(i + 1).padStart(2, "0")}`;
-    return [`${no} · ${ty}`, UNIT_GAPS[no] ? `${UNIT_GAPS[no]} écart` : `${pi2} pi²`, i, baseTypo(ty)];
-  });
-});
-UNITS_BY_LEVEL["Tous les niveaux"] = LEVELS.flatMap((lv) => UNITS_BY_LEVEL[`Niveau ${lv}`]);
 
 /* One drawing per level, the sheets the permit set actually carries: a level
    tab does not recolour the same picture, it opens another file. Code,
@@ -528,12 +530,35 @@ LEVELS.forEach((lv) => {
 SHEETS["Tous les niveaux"] = { code: "A-401", img: "assets/plan-etage.jpg",
   file: "A-401_ETAGE_TYPE.dwg", rev: "R04", date: "24 Oct" };
 
-const CROSSINGS = {
-  "Structure": [["C-05-07 poutre sous le plafond", "niveau 5"], ["C-05-11 colonne absente", "niveau 5"],
-    ["C-02-05 poutre contre la dalle", "réglé"]],
-  "Mécanique": [["C-05-02 conduit dans une colonne", "niveau 5"], ["C-TT-03 drain hors colonne", "toiture"]],
-  "Architecture": [["C-05-09 retombée sous la fenêtre", "niveau 5"], ["C-04-01 gaine dans le rangement", "niveau 4"]],
-};
+/* A crossing is where two drawings disagree in one place. It belongs to the
+   unit it touches, which is why it is read in the unit inspector and not on
+   a screen of its own: code, what was seen, the two disciplines, the unit,
+   the level, and whether it is settled. */
+const CROSSINGS = [
+  ["C-05-07", "poutre sous le plafond", "structure", "507", 5, 0],
+  ["C-05-11", "colonne absente", "structure", "506", 5, 0],
+  ["C-05-02", "conduit dans une colonne", "mécanique", "502", 5, 0],
+  ["C-05-09", "retombée sous la fenêtre", "architecture", "509", 5, 0],
+  ["C-04-01", "gaine dans le rangement", "architecture", "401", 4, 0],
+  ["C-02-05", "poutre contre la dalle", "structure", "202", 2, 1],
+  ["C-TT-03", "drain hors colonne", "mécanique", "", 8, 0],
+];
+
+const crossingsFor = (no) => CROSSINGS.filter((c) => c[3] === no);
+const openCrossings = () => CROSSINGS.filter((c) => !c[5]);
+
+/* A unit reads as open when a crossing lands on it, so the list and the
+   inspector never disagree about which units still need a decision. */
+const UNITS_BY_LEVEL = {};
+LEVELS.forEach((lv) => {
+  const n = lv === 8 ? 6 : TYPICAL.length;
+  UNITS_BY_LEVEL[`Niveau ${lv}`] = TYPICAL.slice(0, n).map(([ty, pi2], i) => {
+    const no = `${lv}${String(i + 1).padStart(2, "0")}`;
+    const open = crossingsFor(no).filter((c) => !c[5]).length;
+    return [`${no} · ${ty}`, open ? `${open} croisement${open > 1 ? "s" : ""}` : `${pi2} pi²`, i, baseTypo(ty)];
+  });
+});
+UNITS_BY_LEVEL["Tous les niveaux"] = LEVELS.flatMap((lv) => UNITS_BY_LEVEL[`Niveau ${lv}`]);
 
 /* The inspector's own tabs, and the five reasons a change is allowed to have.
    A decision without one of them does not save. */
@@ -697,7 +722,7 @@ const typoHTML = () => {
 };
 
 const NAV = [["layout-grid", "Aperçu"], ["layers", "Unités"], ["table", "Quantités"],
-  ["git-compare", "Coordination"], ["calendar-check", "Suivi"], ["file", "Fichiers"]];
+  ["calendar-check", "Suivi"], ["file", "Fichiers"]];
 
 /* The cross-screen journey the prototype is built around. Everything else
    on the screen exists to serve one of these six moves. */
@@ -746,9 +771,7 @@ const viewOf = (screen) => viewsOf(screen)[viewIndex(screen)];
 
 /* The rows the current screen is showing, after its view and its search. */
 function rowsOf(screen) {
-  let all = screen === "Unités" ? (UNITS_BY_LEVEL[viewOf(screen)] || UNITS_BY_LEVEL["Niveau 5"])
-    : screen === "Coordination" ? (CROSSINGS[viewOf(screen)] || [])
-      : [];
+  let all = screen === "Unités" ? (UNITS_BY_LEVEL[viewOf(screen)] || UNITS_BY_LEVEL["Niveau 5"]) : [];
   /* No typology asked for means the whole level; asking for one narrows the
      list to it, the same units the plan then colours. */
   if (screen === "Unités" && typosOn().length) all = all.filter((r) => typosOn().includes(r[3]));
@@ -784,7 +807,6 @@ function fileStrip(kind) {
     <span class="fpath hi" ${act("renamefile", kind)} title="Changer le dossier ou le nom du fichier">
       ${icon("file")}<span class="fdir">${dir}</span><span class="fname">${name}</span>
       <span class="frev">${stamp}</span>${icon("pen-line")}</span>
-    <span class="lo bar" style="flex:1;max-width:120px"></span>
     <span class="btnw" ${act(host[0])} title="${host[1]}">${icon("external-link")}
       <span class="lo bar" style="width:52px"></span><span class="hi">${host[1]}</span></span>
   </div>`;
@@ -964,7 +986,6 @@ const CONTEXT = {
      above it carries nothing but the way back to the index. */
   "Unités": [...LEVELS.map((lv) => `Niveau ${lv}`), "Tous les niveaux"],
   "Quantités": ["Unités", "Superficies", "Fenêtres", "Matériaux"],
-  "Coordination": ["Structure", "Mécanique", "Architecture"],
   "Suivi": ["Programme", "Esquisse", "Comité", "Permis", "Site"],
   "Fichiers": ["Dessins", "Maquette", "Arpenteur", "Correspondance"],
 };
@@ -1028,9 +1049,9 @@ function headerHTML() {
   const open = Object.keys(V.settled).length;
   const title = { "Projets": ["Projets", `${PROJECTS.length} en cours`],
     "Aperçu": [V.project, `8 étages · 104 unités · ${unresolved} articles non résolus`],
-    "Unités": [`Étage type — ${viewOf("Unités").toLowerCase()}`, `${rowsOf("Unités").length} unités · ${rowsOf("Unités").filter((r) => r[1] === "1 écart").length} écarts ouverts`],
+    "Unités": [`Étage type — ${viewOf("Unités").toLowerCase()}`,
+      `${rowsOf("Unités").length} unités · ${rowsOf("Unités").filter((r) => /croisement/.test(r[1])).length} avec un croisement ouvert`],
     "Quantités": ["Quantités", `${viewOf("Quantités")} · compté à partir des dessins, rien de saisi`],
-    "Coordination": ["Coordination", `${rowsOf("Coordination").length} croisements en ${viewOf("Coordination").toLowerCase()} · ${open} réglés`],
     "Fichiers": ["Fichiers", "ce qui a été lu, et quand"],
     "Suivi": ["Suivi", `${viewOf("Suivi")} · les signaux viennent des dessins`] }[V.screen] || [V.screen, ""];
   const metrics = V.header.layout === "Title + metrics";
@@ -1047,8 +1068,9 @@ function headerHTML() {
         </div>
         ${bare ? "" : SCREENS[V.screen].home
           ? `<span class="btnw solid" ${act("newproject")} title="Démarrer un projet">${icon("plus")}<span class="lo bar" style="width:52px"></span><span class="hi">Nouveau projet</span></span>`
-          : `<span class="btnw" ${act("autocad")} title="Ouvrir le dessin dans AutoCAD">${icon("external-link")}<span class="lo bar" style="width:52px"></span><span class="hi">Ouvrir dans AutoCAD</span></span>
-        <span class="btnw" ${act("export")} title="Exporter ce que cet écran montre">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Exporter</span></span>`}
+          /* AutoCAD and SketchUp used to sit up here, a screen away from the
+             drawing they open. They live on the drawing pane now. */
+          : `<span class="btnw" ${act("export")} title="Exporter ce que cet écran montre">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Exporter</span></span>`}
       </div>
       ${metrics ? `<div class="row" style="gap:var(--gap)">${[1, 2, 3, 4].map((i) => `<div class="tile" style="flex:1">
         <div class="lo bar" style="width:38px;height:14px"></div><div class="lo bar lt" style="width:70%"></div>
@@ -1063,7 +1085,7 @@ function listHTML() {
   const mode = V.list.layout;
   if (mode === "Hidden") return "";
   const step = V.journey ? SCREENS[V.screen].steps.list : null;
-  const label = { "Unités": "Unités", "Coordination": "Croisements" }[V.screen] || "Liste";
+  const label = V.screen === "Unités" ? "Unités" : "Liste";
   /* The list reads the same rows the header counts, so the view above it and
      the search inside it both change what is on screen. */
   const pairs = rowsOf(V.screen);
@@ -1099,6 +1121,7 @@ function contentHTML() {
       const unit = (selRow("Unités") || ["—"])[0];
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span></div>
+        ${fileStrip(kind === "plan" ? "plan" : "model")}
         <div class="pb" style="overflow:hidden"><div class="plan ${cls}" data-img="${kind}" style="zoom:${V.zoom / 100}"><span class="lo"></span><span class="hi">${note}</span>${layers}</div></div></div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
@@ -1149,15 +1172,6 @@ function contentHTML() {
         <div class="tile"><div class="row">${icon("info")}<span class="lo bar" style="width:60%"></span>
           <span class="hi" style="font-size:11.5px">fichier source, révision et heure de lecture sous chaque tableau</span></div></div></div>`;
     },
-
-    "Coordination": () => {
-      const r = selRow("Coordination") || ["—", ""];
-      return `<div class="col" style="flex:1">
-        <div class="pane" style="max-width:420px"><div class="pb" style="overflow:hidden"><div class="plan" data-img="plan" style="height:170px;flex:0 0 170px;zoom:${V.zoom / 100}">
-          <span class="lo"></span><span class="hi">${r[0]} — deux dessins superposés</span></div></div></div>
-        <div class="tile"><div class="lo col">${bars(3)}</div>
-          <div class="hi" style="font-size:12px;color:var(--ink-2)">${viewOf("Coordination")} · ${r[1]} · ${V.settled[settleKey()] ? `réglé — ${V.settled[settleKey()]}` : "quels deux fichiers, quel niveau, quelle unité est touchée"}</div></div></div>`;
-    },
     "Suivi": () => {
       const views = viewsOf("Suivi");
       return `<div class="col" style="flex:1">
@@ -1178,7 +1192,7 @@ function contentHTML() {
           <span class="hi" style="font-size:11.5px">rien n'est écrit dans un fichier de dessin; les mises à jour sont proposées</span></div></div></div>`,
   }[V.screen]();
 
-  const zoomable = V.screen === "Unités" || V.screen === "Coordination";
+  const zoomable = V.screen === "Unités";
   return region("content", "contenu", `<div class="ph">${icon("box")}
     <span class="lo bar" style="width:80px"></span><span class="hi">${V.screen}</span>
     <span style="flex:1"></span>
@@ -1195,24 +1209,34 @@ function inspectorHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.inspector : null;
   const row = selRow(V.screen);
   const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`, "Aperçu": "Ce qui bloque",
-    "Coordination": "Décision", "Suivi": "Échéances et signaux" }[V.screen] || "Détail";
-  /* A decision panel on the screens where something is decided; a short
+    "Suivi": "Échéances et signaux" }[V.screen] || "Détail";
+  /* A decision panel on the screen where something is decided; a short
      read-only column everywhere else. */
-  const decides = V.screen === "Unités" || V.screen === "Coordination";
+  const decides = V.screen === "Unités";
   /* The unit inspector answers a different question per tab, so the tabs
      carry four sets of rows and not one set with four labels. */
+  const no = (row || ["—"])[0].split(" ")[0];
+  const level = Number(viewOf("Unités").replace(/\D/g, "")) || null;
+  /* Coordination is read here, on the unit the crossing lands on. A unit with
+     no crossing says so, and says what the level and the project carry. */
+  const mine = crossingsFor(no);
+  const crossRows = mine.length
+    ? mine.map(([id, what, disc, , , done]) => [`${id} · ${disc}`, done ? "réglé" : what])
+    : [["Sur cette unité", "aucun croisement"],
+      ["Sur ce niveau", `${CROSSINGS.filter((c) => c[4] === level && !c[5]).length} ouverts`],
+      ["Dans le projet", `${openCrossings().length} ouverts`],
+      ["Dernier dessin lu", "S-301 R02"]];
   const unitRows = {
     "Vue d'ensemble": [["Typologie", (row || ["", ""])[0].split(" · ")[1] || "—"],
       ["Superficie", (row || ["", ""])[1]], ["Niveau", viewOf("Unités")], ["Statut", V.settled[settleKey()] ? "réglé" : "non vérifié"]],
     "Ouvertures": [["Le plan dit", "1800 × 1500"], ["La maquette dit", "1560 × 1500"], ["Écart", "240 mm"], ["Apparu dans", "R04 · 24 Oct"]],
-    "Coordination": [["Croisements", "2 ouverts"], ["Discipline", "structure, mécanique"], ["Axe", "4"], ["Dernier dessin lu", "S-301 R02"]],
+    "Coordination": crossRows,
     "Historique": [["R04 · 24 Oct", "fenêtre élargie"], ["R03 · 02 Oct", "cloison déplacée"], ["R02 · 19 Oct", "unité découpée"], ["R01 · 12 Sep", "première lecture"]],
   };
   const rows = {
     "Unités": unitRows[UNIT_TABS[V.utab]],
-    "Coordination": [["Niveau", "5"], ["Où", "corridor, axe 4"], ["Dessins", "mécanique + structure"], ["Unité", "507"]],
     "Aperçu": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Émission du permis", "21 Nov"], ["Données manquantes", "10"]],
-    "Suivi": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Croisements ouverts", "4"], ["Articles à lire", "5"]],
+    "Suivi": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Croisements ouverts", `${openCrossings().length}`], ["Articles à lire", "5"]],
   }[V.screen] || [["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"]];
 
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
@@ -1361,6 +1385,7 @@ function dialogHTML() {
     <span class="hi" style="font-size:11.5px;color:var(--ink-2)">${label}</span>
     <input data-field="${key}" value="${(d[key] || "").replace(/"/g, "&quot;")}" placeholder="${hint}">
   </label>`;
+  if (d.kind) return fileDialogHTML(d, field);
   return `<div class="scrim" ${act("dlgclose")}>
     <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
       <div class="dh"><span class="hi" style="font-weight:600;font-size:13.5px">Nouveau projet</span>
@@ -1394,6 +1419,39 @@ function say(message) {
   TOAST_TIMER = setTimeout(() => { V.toast = null; render(); }, 2600);
 }
 
+
+/* Where fitte looks for a drawing, and what it is called there. Two fields,
+   because an office moves files and renames revisions constantly and the
+   tool has to follow without anyone re-importing a project. Changing it
+   here changes what is read; the file on the server is never touched. */
+function fileDialogHTML(d, field) {
+  const ext = d.kind === "plan" ? ".dwg" : ".skp";
+  const host = d.kind === "plan" ? "AutoCAD" : "SketchUp";
+  const subs = d.kind === "plan"
+    ? ["\\\\serveur-bureau\\Projets\\2026\\BAL3\\Dessins\\", "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Dessins\\Émis\\",
+       "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Reçu\\Arpenteur\\"]
+    : ["\\\\serveur-bureau\\Projets\\2026\\BAL3\\Maquette\\", "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Maquette\\Archives\\"];
+  return `<div class="scrim" ${act("dlgclose")}>
+    <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
+      <div class="dh"><span class="hi" style="font-weight:600;font-size:13.5px">
+        Fichier lu pour ${d.kind === "plan" ? viewOf("Unités").toLowerCase() : "la maquette"}</span>
+        <span style="flex:1"></span>
+        <span class="btnw" ${act("dlgclose")} title="Fermer">${icon("x")}</span></div>
+      <div class="db">
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Le fichier reste sur le serveur du bureau. Changer le dossier ou le nom change ce que fitte lit et ce que « Ouvrir dans ${host} » ouvre; rien n'est écrit dans le fichier.</div>
+        ${field("folder", "Dossier", "\\\\serveur-bureau\\Projets\\…")}
+        <div class="row" style="flex-wrap:wrap;gap:5px">${subs.map((f) => `<span class="chip" ${act("dlgfolder", f)} title="Choisir ce dossier">
+          <span class="hi" style="font-family:var(--mono,monospace);font-size:11px">${f}</span></span>`).join("")}</div>
+        ${field("name", "Nom du fichier", `NOM_DU_PLAN${ext}`)}
+        ${d.error ? `<div class="hi" style="font-size:11.5px;color:var(--accent,#b3261e)">${d.error}</div>` : ""}
+      </div>
+      <div class="df">
+        <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Lecture seule. Aucune écriture dans un fichier de dessin.</span>
+        <span class="btnw" ${act("dlgclose")}><span class="hi">Annuler</span></span>
+        <span class="btnw solid" ${act("dlgfile")}>${icon("check")}<span class="hi">Enregistrer le chemin</span></span>
+      </div>
+    </div></div>`;
+}
 function onClick(e) {
   const screenEl = e.target.closest("[data-screen]");
   const el = e.target.closest("[data-act]");
@@ -1480,7 +1538,39 @@ function onClick(e) {
       break;
     }
     case "openfile": say(`${value} — ouvert en lecture. Rien n'est écrit dans le fichier.`); break;
-    case "autocad": say("Remise à AutoCAD: le dessin s'ouvre sur l'unité, la décision suit."); break;
+    case "autocad":
+      say(`Remise à AutoCAD: ${dwgName()} s'ouvre sur l'unité, la décision suit.`);
+      break;
+    case "sketchup":
+      say(`Remise à SketchUp: ${V.docs.skp} s'ouvre sur ${viewOf("Unités").toLowerCase()}. Lecture seule.`);
+      break;
+    /* The path is a control, not a label: the file moves and gets renamed
+       in an office, and the tool has to be pointed at the new one. */
+    case "renamefile":
+      V.dialog = { kind: value, error: "",
+        folder: value === "plan" ? V.docs.dir : V.docs.skpDir,
+        name: value === "plan" ? dwgName() : V.docs.skp };
+      break;
+    case "dlgfile": {
+      const d = V.dialog;
+      const ext = d.kind === "plan" ? ".dwg" : ".skp";
+      if (!d.folder.trim() || !d.name.trim()) {
+        d.error = "Il faut un dossier et un nom: sans les deux, il n'y a rien à lire."; break;
+      }
+      if (!d.name.trim().toLowerCase().endsWith(ext)) {
+        d.error = `fitte lit un ${ext} ici: le nom doit se terminer par ${ext}.`; break;
+      }
+      if (d.kind === "plan") {
+        V.docs.dir = d.folder.trim();
+        V.docs.names[viewOf("Unités")] = d.name.trim();
+      } else {
+        V.docs.skpDir = d.folder.trim();
+        V.docs.skp = d.name.trim();
+      }
+      say(`${d.name.trim()} — chemin enregistré. La prochaine lecture part de là; rien n'est écrit dans le fichier.`);
+      V.dialog = null;
+      break;
+    }
     case "export": say(`Export préparé: ${screen}${CONTEXT[screen] ? ` · ${viewOf(screen)}` : ""}.`); break;
     case "readarticle":
       /* Aperçu holds the articles on the same page, so the link only has to
@@ -1499,7 +1589,7 @@ function onClick(e) {
 const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
 /* The panel names a screen in English; the prototype knows it in French. */
 const SCREEN_FR = { Projects: "Projets", Overview: "Aperçu", Units: "Unités",
-  Quantities: "Quantités", Coordination: "Coordination", Tracking: "Suivi", Files: "Fichiers" };
+  Quantities: "Quantités", Tracking: "Suivi", Files: "Fichiers" };
 const FR_SCREEN = Object.fromEntries(Object.entries(SCREEN_FR).map(([en, fr]) => [fr, en]));
 
 const sel = (options) => ({ type: "select", options, default: options[0] });
