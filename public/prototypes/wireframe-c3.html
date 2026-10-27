@@ -188,6 +188,31 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .fld{display:flex;flex-direction:column;gap:4px}
 .fld input{border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;font:inherit;font-size:12px;color:var(--ink);background:#fff}
 .fld input:focus{outline:1px solid var(--ink);outline-offset:1px}
+
+/* A provision reads as a card: where it comes from, what it says, the two
+   numbers side by side, and the way out to the official text. */
+.codegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.code{border:1px solid var(--line-2);border-radius:var(--r);padding:11px;display:flex;
+  flex-direction:column;gap:7px;min-width:0;background:#fff}
+.code:hover{border-color:var(--line)}
+.code.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
+.code .tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
+  border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;color:var(--ink-2)}
+.code .src{font-size:11px;color:var(--ink-3);line-height:1.45}
+.code .quote{margin:0;border-left:2px solid var(--line);padding-left:9px;
+  font-size:12px;line-height:1.5;color:var(--ink-2)}
+.code .nums{gap:8px}
+.code .num{flex:1;border:1px solid var(--line-2);border-radius:6px;padding:7px 8px;display:flex;flex-direction:column;gap:2px}
+.code.gap .num:first-child .v{color:var(--hi,#b3261e)}
+.code .num .v{font-size:15px;font-weight:600;color:var(--ink)}
+.code .num .k{font-size:10.5px;color:var(--ink-3)}
+.code .state{font-size:10.5px;color:var(--ink-3);display:inline-flex;align-items:center;gap:5px}
+.code .state::before{content:"";display:inline-block;vertical-align:middle;margin-right:5px;
+  width:7px;height:7px;border-radius:50%;background:var(--bar)}
+.code .state[data-state="non résolu"]::before{background:var(--hi,#b3261e)}
+.code .state[data-state="conforme"]::before{background:var(--ink-3)}
+.code .src-link{align-self:flex-start;text-decoration:none;color:var(--ink-2);gap:6px}
+.code .src-link:hover{background:var(--fill);color:var(--ink)}
 .plan{position:relative;flex:1;background:repeating-linear-gradient(0deg,var(--fill-2) 0 15px,transparent 15px 16px),
   repeating-linear-gradient(90deg,var(--fill-2) 0 15px,transparent 15px 16px);
   border:1px dashed var(--line);border-radius:var(--r);display:grid;place-items:center;color:var(--ink-3);font-size:11.5px}
@@ -260,7 +285,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 [data-fi="high"] .plan[data-img]{background-repeat:no-repeat;background-position:center;
   background-size:cover;border-color:var(--line)}
 [data-fi="high"] .plan[data-img] > .hi{display:none}
-[data-fi="high"] .plan[data-img="plan"]{background-image:url(assets/plan-etage.jpg)}
+/* --plan is set on the frame from the level the tabs are on: one sheet per
+   level, not one picture relabelled. */
+[data-fi="high"] .plan[data-img="plan"]{background-image:var(--plan,url(assets/plan-etage.jpg))}
 [data-fi="high"] .plan[data-img="model"]{background-image:url(assets/skp-facade.jpg)}
 [data-fi="high"] .plan[data-img="massing"]{background-image:url(assets/skp-ensemble.jpg)}
 
@@ -272,7 +299,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .plan.align{aspect-ratio:1280 / 1160;height:auto;flex:0 0 auto;overflow:hidden}
 [data-fi="high"] .plan.align[data-img]{background:none}
 [data-fi="high"] .plan.align[data-img="plan"]::before{content:"";position:absolute;inset:0;
-  background:url(assets/plan-etage.jpg) center/contain no-repeat;filter:grayscale(1)}
+  background:var(--plan,url(assets/plan-etage.jpg)) center/contain no-repeat;filter:grayscale(1)}
 /* The thumbnails are crops of the same plan, so they read the same way. */
 [data-fi="high"] .plan[data-img="plan"]:not(.align){filter:grayscale(1)}
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
@@ -365,6 +392,15 @@ const V = {
   /* The new-project dialog, while it is open: what has been typed, which
      kinds of file the office folder will be read for, and what is missing. */
   dialog: null,
+  /* Where the two drawings this screen reads actually sit. The folder is on
+     the office server, not an upload: renaming here changes what fitte
+     looks for, never the file itself. */
+  docs: {
+    dir: "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Dessins\\",
+    names: {},   // level → the drawing file read for it, once it was changed
+    skpDir: "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Maquette\\",
+    skp: "BAL3_Maquette_R07.skp",
+  },
   /* Which typologies are asked for. Nothing is on: the plan is read in black
      and white until someone asks a question of it. Keyed by TYPOS, written
      out here because TYPOS is declared further down the file. */
@@ -475,6 +511,23 @@ LEVELS.forEach((lv) => {
 });
 UNITS_BY_LEVEL["Tous les niveaux"] = LEVELS.flatMap((lv) => UNITS_BY_LEVEL[`Niveau ${lv}`]);
 
+/* One drawing per level, the sheets the permit set actually carries: a level
+   tab does not recolour the same picture, it opens another file. Code,
+   revision and date are what the title block says; the images in assets/
+   are those sheets rendered and cropped to one shared frame, so a unit box
+   means the same thing on every level. */
+const SHEETS = {};
+LEVELS.forEach((lv) => {
+  const code = `A-${204 + lv}`;
+  SHEETS[`Niveau ${lv}`] = { code, img: `assets/plan-niveau-${lv}.jpg`,
+    file: `${code}_PLAN_NIVEAU_${lv}.dwg`, rev: lv === 8 ? "R03" : "R04",
+    date: lv === 8 ? "18 Oct" : "24 Oct" };
+});
+/* All levels together has no sheet of its own: the typical floor stands for
+   it, and it is the one plan that arrives already coloured by typology. */
+SHEETS["Tous les niveaux"] = { code: "A-401", img: "assets/plan-etage.jpg",
+  file: "A-401_ETAGE_TYPE.dwg", rev: "R04", date: "24 Oct" };
+
 const CROSSINGS = {
   "Structure": [["C-05-07 poutre sous le plafond", "niveau 5"], ["C-05-11 colonne absente", "niveau 5"],
     ["C-02-05 poutre contre la dalle", "réglé"]],
@@ -487,15 +540,56 @@ const CROSSINGS = {
 const UNIT_TABS = ["Vue d'ensemble", "Ouvertures", "Coordination", "Historique"];
 const REASONS = ["coût client", "structure", "code", "ville", "erreur de dessin"];
 
-/* The articles that touch this project, each with the number the drawings
-   produced and the number the article asks for. */
+/* The provisions that touch this project. Each one carries where it comes
+   from, the sentence as it is written in French, the number the drawings
+   produced, the number the provision asks for, and the official page it can
+   be read on. Sources are quebec_canada_building_zoning_codes_fitte.md:
+   the borough bylaw for land use, the Québec construction code for the
+   building itself. The quoted text is a short working excerpt, not the
+   consolidated legal version: every card says so, and links out. */
 const ARTICLES = [
-  ["art. 9 hauteur", "« La hauteur maximale est de 5 étages. »", "6 étages", "5 étages", "non résolu"],
-  ["art. 43 implantation", "« Le taux d'implantation maximal est de 55 %. »", "48,2 %", "55 %", "conforme"],
-  ["art. 22 marge arrière", "« La marge arrière minimale est de 3,00 m. »", "2.70 m", "3.00 m", "non résolu"],
-  ["art. 71 stationnement", "« Une case par logement de 2 chambres et plus. »", "22 cases", "30 cases", "non résolu"],
-  ["art. 134 verdissement", "« 20 % de la superficie du terrain en pleine terre. »", "17 %", "20 %", "non résolu"],
-  ["3.2.3.1 ouvertures", "« Surface maximale des baies non protégées selon la distance limitative. »", "74.2 m²", "68.5 m²", "non résolu"],
+  { id: "art. 9", topic: "Hauteur en étages",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
+    quote: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
+    measured: "6 étages", required: "5 étages", state: "non résolu",
+    needs: "grille des usages et normes de la zone",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "art. 43", topic: "Taux d'implantation",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
+    quote: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
+    measured: "48,2 %", required: "55 %", state: "conforme",
+    needs: "superficie du terrain confirmée par l'arpenteur",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "art. 22", topic: "Marge arrière",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
+    quote: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
+    measured: "2,70 m", required: "3,00 m", state: "non résolu",
+    needs: "limite arrière relevée, exceptions et saillies admises",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "art. 71", topic: "Stationnement",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
+    quote: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
+    measured: "22 cases", required: "30 cases", state: "non résolu",
+    needs: "réductions applicables près du transport collectif",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "art. 134", topic: "Verdissement et pleine terre",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
+    quote: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
+    measured: "17 %", required: "20 %", state: "non résolu",
+    needs: "plan d'aménagement paysager coté",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131" },
+  { id: "3.2.3.1", topic: "Baies non protégées",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
+    measured: "74,2 m²", required: "68,5 m²", state: "non résolu",
+    needs: "distance limitative mesurée, surface de la façade de rayonnement",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202" },
+  { id: "A-19.1", topic: "Cadre légal du zonage",
+    doc: "Loi sur l'aménagement et l'urbanisme", place: "Québec", edition: "texte consolidé",
+    quote: "La loi habilite la municipalité à régir, par règlement, l'usage du sol et l'implantation des bâtiments sur son territoire.",
+    measured: "—", required: "cadre habilitant", state: "pour référence",
+    needs: "aucun chiffre: la règle applicable vient du règlement de l'arrondissement",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1" },
 ];
 
 const QTABS = {
@@ -554,7 +648,9 @@ function crop(box, pad = 0.45, axis = "width") {
    surveyor's box is the teal implantation outline; the landscaping box is
    the same outline carried across by the two property lines, which agree to
    within half a percent on the drive island. */
-const SHEETS = {
+/* Named apart from SHEETS above: that one is the project's own sheet per
+   level, this one is where a consultant's drawing sits inside its sheet. */
+const OVERLAY_SHEETS = {
   arp: { box: [.159, .246, .818, .814], ratio: 1650 / 1560 },
   pay: { box: [.138, .224, .808, .796], ratio: 835 / 800 },
 };
@@ -567,7 +663,7 @@ const BASE_RATIO = 1280 / 1160;
    stretched to fit, it is placed and then nudged. The ground sheets cover
    the podium, so they bound the typical floor rather than trace it. */
 function sheetStyle(key) {
-  const L = V.lay[key], S = SHEETS[key];
+  const L = V.lay[key], S = OVERLAY_SHEETS[key];
   const [bx0, by0, bx1, by1] = BASE_BOX;
   const [sx0, sy0, sx1, sy1] = S.box;
   /* The width the sheet needs so its building spans the plan's, and the
@@ -670,6 +766,57 @@ const settleKey = () => `${V.screen} · ${(selRow(V.screen) || [""])[0]}`;
 
 /* A control is a control: it says what it does and it is clickable. */
 const act = (name, value) => `data-act="${name}"${value === undefined ? "" : ` data-value="${value}"`}`;
+
+/* The drawing the screen is reading right now. The level tabs own it, so
+   every other screen shows the same level's sheet rather than a stand-in. */
+const sheet = () => SHEETS[viewOf("Unités")] || SHEETS["Tous les niveaux"];
+const dwgName = () => V.docs.names[viewOf("Unités")] || sheet().file;
+
+/* What a drawing pane says about its file: where it is, what it is called,
+   which revision was read — and the two ways out of fitte, next to the
+   drawing they act on rather than up in the header. */
+function fileStrip(kind) {
+  const dir = kind === "plan" ? V.docs.dir : V.docs.skpDir;
+  const name = kind === "plan" ? dwgName() : V.docs.skp;
+  const stamp = kind === "plan" ? `${sheet().rev} · ${sheet().date}` : "R07 · 22 Oct";
+  const host = kind === "plan" ? ["autocad", "Ouvrir dans AutoCAD"] : ["sketchup", "Ouvrir dans SketchUp"];
+  return `<div class="fstrip rg" data-rg="fichier">
+    <span class="fpath hi" ${act("renamefile", kind)} title="Changer le dossier ou le nom du fichier">
+      ${icon("file")}<span class="fdir">${dir}</span><span class="fname">${name}</span>
+      <span class="frev">${stamp}</span>${icon("pen-line")}</span>
+    <span class="lo bar" style="flex:1;max-width:120px"></span>
+    <span class="btnw" ${act(host[0])} title="${host[1]}">${icon("external-link")}
+      <span class="lo bar" style="width:52px"></span><span class="hi">${host[1]}</span></span>
+  </div>`;
+}
+
+/* ------------------------------------------------------------ code cards
+   A provision is only readable next to the number the drawings produced, so
+   the card carries both, plus the sentence and the page it comes from. The
+   link is a real link: the regulation is read where it is published. */
+
+const unresolvedCount = () => ARTICLES.filter((a) => a.state === "non résolu").length;
+
+function codeCard(a, i) {
+  const gap = a.state === "non résolu";
+  return `<div class="code ${i === V.article ? "on" : ""} ${gap ? "gap" : ""}" ${act("article", i)}>
+    <div class="row" style="align-items:baseline">
+      <span class="hi tag">${a.id}</span>
+      <span class="hi" style="font-weight:600;font-size:12.5px;flex:1">${a.topic}</span>
+      <span class="hi state" data-state="${a.state}">${a.state}</span>
+    </div>
+    <div class="lo col">${bars(2)}</div>
+    <div class="hi src">${a.doc} · ${a.place}<br>${a.edition}</div>
+    <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
+    <div class="row nums">
+      <div class="num"><span class="hi v">${a.measured}</span><span class="hi k">mesuré dans les dessins</span></div>
+      <div class="num"><span class="hi v">${a.required}</span><span class="hi k">exigé par l'article</span></div>
+    </div>
+    <div class="hi src">manque pour conclure: ${a.needs}</div>
+    <a class="btnw src-link hi" href="${a.url}" target="_blank" rel="noreferrer"
+       ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
+  </div>`;
+}
 
 /* ------------------------------------------------------------ the parts */
 
@@ -877,7 +1024,7 @@ function headerHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.header : null;
   /* The subtitle answers to the state: which project is open, which level is
      being read, how many rows the current view is actually showing. */
-  const unresolved = ARTICLES.filter((a) => a[4] !== "conforme").length;
+  const unresolved = unresolvedCount();
   const open = Object.keys(V.settled).length;
   const title = { "Projets": ["Projets", `${PROJECTS.length} en cours`],
     "Aperçu": [V.project, `8 étages · 104 unités · ${unresolved} articles non résolus`],
@@ -968,7 +1115,6 @@ function contentHTML() {
        knows at once: what changed, the totals, and the zoning and code block
        that used to be its own screen. Nothing here is worth a click to see. */
     "Aperçu": () => {
-      const a = ARTICLES[V.article];
       const tiles = [["Ce qui a changé depuis la dernière lecture", "lignes lues dans les dessins"],
         ["Les deux sources connectées", "plan et maquette, même niveau"],
         ["Étage type — 14 unités", "typologies et superficies"],
@@ -978,25 +1124,17 @@ function contentHTML() {
           <div class="lo bar" style="width:60%"></div><div class="hi" style="font-weight:600">${t}</div>
           <div class="lo col">${bars(4)}</div>
           <div class="hi" style="color:var(--ink-2);font-size:11.5px">${note}</div></div>`).join("")}</div>`;
+      /* One card per provision: the number read in the drawings beside the
+         number the provision asks for, the sentence in French, and a link to
+         the official page. The card the footer strip points at is marked. */
       const zoning = `<div class="pane" style="flex:0 0 auto">
           <div class="ph">${icon("scale")}<span class="lo bar" style="width:90px"></span>
             <span class="hi">Zonage et code</span><span style="flex:1"></span>
-            <span class="chip"><span class="lo bar" style="width:52px"></span><span class="hi">${ARTICLES.filter((x) => x[4] !== "conforme").length} non résolus</span></span></div>
+            <span class="chip"><span class="lo bar" style="width:52px"></span><span class="hi">${unresolvedCount()} non résolus sur ${ARTICLES.length}</span></span></div>
           <div class="pb">
-            <div class="row" style="flex-wrap:wrap">${ARTICLES.map((x, i) => `<span class="chip" ${act("article", i)} style="${i === V.article ? "border-color:var(--ink)" : ""}">
-              <span class="lo bar" style="width:54px"></span><span class="hi">${x[0]}</span></span>`).join("")}</div>
-            <div class="tile"><div class="lo bar" style="width:55%"></div><div class="hi" style="font-weight:600">${a[0]} — ${a[4]}</div>
-              <div class="lo bar lt" style="width:90%"></div>
-              <div class="hi" style="font-size:11.5px;color:var(--ink-2)">${a[1]}</div></div>
-            <div class="row" style="gap:var(--gap)">
-              ${[[a[2], "mesuré dans les dessins"], [a[3], "exigé par l'article"]].map(([x, b]) => `<div class="tile" style="flex:1">
-                <div class="lo bar" style="width:60px;height:16px"></div><div class="hi" style="font-size:17px;font-weight:600">${x}</div>
-                <div class="lo bar lt" style="width:80%"></div>
-                <div class="hi" style="font-size:11.5px;color:var(--ink-2)">${b}</div></div>`).join("")}</div>
-            <div class="tile"><div class="lo col">${bars(2)}</div>
-              <div class="hi" style="font-size:12px;color:var(--ink-2)">lecture simple de l'écart, puis ce qui manque pour conclure</div></div>
+            <div class="codegrid">${ARTICLES.map((x, i) => codeCard(x, i)).join("")}</div>
             <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
-              <span class="hi" style="font-size:11.5px">données manquantes, communes à tous les articles</span></div></div>
+              <span class="hi" style="font-size:11.5px;color:var(--ink-2)">Extraits de travail, abrégés. La version qui fait foi est celle de l'arrondissement ou de la RBQ, liée sur chaque carte. Une lecture automatique ne déclare pas une non-conformité.</span></div></div>
           </div></div>`;
       return `<div class="col" style="flex:1;gap:var(--gap)">${grid}${zoning}</div>`;
     },
@@ -1146,7 +1284,8 @@ function render() {
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
          data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
-         data-shell="${V.shell === "Inset card" ? "inset" : "flat"}">
+         data-shell="${V.shell === "Inset card" ? "inset" : "flat"}"
+         style="--plan:url(${sheet().img})">
       ${navHTML()}
       <div class="body">
         ${tabsHTML()}
@@ -1281,6 +1420,9 @@ function onClick(e) {
       break;
     case "row": V.sel[screen] = Number(value); break;
     case "article": V.article = Number(value); break;
+    /* The source link is a real link: the browser follows it, and the screen
+       only notes what was opened. */
+    case "source": say(`${value} — texte officiel ouvert dans un onglet. Lecture seule.`); return render();
     case "utab": V.utab = Number(value); break;
     case "zoom":
       V.zoom = Number(value) === 0 ? 100 : Math.min(200, Math.max(50, V.zoom + Number(value)));
@@ -1345,7 +1487,7 @@ function onClick(e) {
          select the one the strip is talking about. */
       V.screen = "Aperçu";
       dial.setValue("screen", FR_SCREEN[V.screen]);
-      V.article = ARTICLES.findIndex((a) => a[0].startsWith("3.2.3.1"));
+      V.article = ARTICLES.findIndex((a) => a.id === "3.2.3.1");
       break;
     default: return;
   }
