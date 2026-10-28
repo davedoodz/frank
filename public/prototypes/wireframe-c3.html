@@ -549,6 +549,11 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    2000×1675 canvas, so they fill the box edge to edge rather than being
    scaled and centred the way the surveyor's differently-cropped sheet is. */
 .plan .lay.eng{inset:0;background-size:100% 100%}
+.engineering-bar{padding:6px 10px;border-bottom:1px solid var(--line-2);flex:0 0 auto}
+.engineering-bar .laychips{flex-wrap:wrap;margin:0}
+.engineering-bar .laychips .lb{display:inline}
+.engineering-source{font-size:11px;color:var(--ink-2);margin-top:4px}
+.model-context-note{padding:6px 10px;font-size:11px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
 /* The three layer chips sit in the pane header, tight, so the header still
    reads as one line with the host button at its end. */
 .laychips{display:flex;gap:4px;margin-right:6px;flex:0 0 auto}
@@ -655,21 +660,25 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .ncard .nnew{width:100%;margin-top:5px;border:1px solid var(--line-2);border-radius:6px;padding:5px 7px;
   font:inherit;font-size:12.5px;color:var(--ink);background:#fff;resize:none}
 
-/* The pin itself. On the sheet it sits inside the transformed drawing and is
-   scaled back down; over the model the viewer places it in pixels. */
-.npin{position:absolute;transform-origin:0 0;display:flex;flex-direction:column;align-items:flex-start;
-  cursor:pointer;z-index:6}
+/* The pin itself. On the sheet it lives inside the transformed drawing and
+   is scaled back down so it stays a pin instead of growing into a sign;
+   over the model the viewer places it in pixels. The box has no size: the
+   dot and the label hang off it, so the anchor stays exactly on the point
+   whatever the label says. */
+.npin{position:absolute;width:0;height:0;transform-origin:0 100%;cursor:pointer;z-index:6}
 .npins{position:absolute;inset:0;z-index:6;pointer-events:none}
-.npins .npin{transform:translate(-50%,-100%);pointer-events:auto}
-.npin .nd{width:20px;height:20px;border-radius:50% 50% 50% 2px;transform:rotate(-45deg);background:#c3e05a;
-  color:#2f3a05;border:1px solid #2f3a05;display:grid;place-items:center;font-size:10px;font-weight:700}
+.npins .npin{pointer-events:auto}
+.npin .nd{position:absolute;left:-10px;bottom:1px;width:20px;height:20px;border-radius:50% 50% 50% 2px;
+  transform:rotate(-45deg);background:#c3e05a;color:#2f3a05;border:1px solid #2f3a05;display:grid;
+  place-items:center;font-size:10px;font-weight:700}
 .npin .nd > svg{transform:rotate(45deg);width:11px;height:11px}
 .npin.team .nd{border-radius:4px;transform:none;background:#e7eef2;color:#2f4858;border:1px dashed #2f4858}
 .npin.team .nd > svg{transform:none}
 .npin.on .nd{background:var(--ink);color:#fff;border-color:var(--ink);border-style:solid}
 .npin.pending .nd{background:#fff;border-style:dashed}
-.npin .nl{margin-top:3px;background:var(--paper);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px;
-  font-size:10px;white-space:nowrap;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.npin .nl{position:absolute;left:13px;top:-12px;background:var(--paper);border:1px solid var(--line-2);
+  border-radius:5px;padding:1px 6px;font-size:10px;white-space:nowrap;max-width:190px;overflow:hidden;
+  text-overflow:ellipsis}
 .npin.team .nl{border-style:dashed;color:#2f4858}
 .npin.back{opacity:.32}
 /* Pin mode: the next click on either drawing puts a point down, and both
@@ -918,7 +927,12 @@ const V = {
   typo: { "3½": false, "4½": false, "5½": false },
   inspector: { fidelity: "inherit", layout: "Right panel" },
   lay: { arp: { on: true, opacity: 55, scale: 100, x: 0, y: 0 },
-    pay: { on: false, opacity: 55, scale: 100, x: 0, y: 0 } },
+    pay: { on: false, opacity: 55, scale: 100, x: 0, y: 0 },
+    /* The four consultant disciplines: independent toggles, full-bleed on
+       the same 2000×1675 canvas the floor plan already uses, so none of
+       them needs sheetStyle()'s scale-and-nudge the surveyor's sheet does. */
+    electrical: { on: false }, drainage: { on: false },
+    distribution: { on: false }, ventilation: { on: false } },
 };
 
 const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
@@ -937,6 +951,8 @@ function sprite() {
     "share-2", "eye", "message-square",
     /* the three layer chips on the 2D pane */
     "trees",
+    /* the four engineering-discipline chips */
+    "zap", "droplets", "git-branch", "wind",
     /* the margin: posting a note, keeping one for the studio, reading as a guest */
     "lock", "map-pin", "send", "users", "trash-2",
     /* the scope switch and the real .csv it exports */
@@ -1038,6 +1054,64 @@ LEVELS.forEach((lv) => {
     date: lv === 8 ? "18 Oct" : "24 Oct" };
 });
 
+/* Non-residential levels: no apartment units, and — until an architectural
+   source is digitized — no architectural plan either. -1/0/9 are the
+   numeric level contract window.fitteSelection and the building model
+   share (window.fitteSelectUnit only ever hands back 1–8, since the model
+   has no basement or roof geometry to raycast against). This is the one
+   place a level number is turned into a view label or read back out of
+   one — sourceLevel() below replaces every other hand-rolled "Niveau N"
+   parse in the file. */
+const NONRES_VIEWS = { "-1": "Sous-sol 00", "0": "Sous-sol 0", "9": "Toiture" };
+const NONRES_LEVELS = [-1, 0, 9];
+const LEVEL_VIEWS = ["Sous-sol 00", "Sous-sol 0", ...LEVELS.map((lv) => `Niveau ${lv}`), "Toiture"];
+const isNonresLevel = (level) => level === -1 || level === 0 || level === 9;
+function sourceLevel(view) {
+  const found = Object.entries(NONRES_VIEWS).find(([, v]) => v === view);
+  if (found) return Number(found[0]);
+  const m = /^Niveau (\d+)$/.exec(view);
+  return m ? Number(m[1]) : null;
+}
+const levelView = (level) => NONRES_VIEWS[level] ?? `Niveau ${level}`;
+const viewIndexOfLevel = (level) => LEVEL_VIEWS.indexOf(levelView(level));
+
+/* The four consultant disciplines, read off window.fitteEngineering — a
+   classic script (assets/engineering/sheets.js) loaded before this module.
+   Reads straight through engSheet(), which answers null rather than throw
+   when the manifest hasn't loaded, or a level has no page for a kind (the
+   basement "00" electrical has none: sheet5 of the permis set is "0", not
+   "00"). */
+const ENG_DISCIPLINES = ["electrical", "drainage", "distribution", "ventilation"];
+const ENG_LABELS = { electrical: "Électricité", drainage: "Drainage",
+  distribution: "Distribution", ventilation: "Ventilation" };
+const ENG_LAYICON = { electrical: "zap", drainage: "droplets",
+  distribution: "git-branch", ventilation: "wind" };
+/* Drainage is the one discipline present on every non-residential sheet
+   (00, 0 and the roof), so it is the default base reference where no
+   architecture exists yet. */
+const ENG_BASE_DISCIPLINE = "drainage";
+const levelKey = (level) => level === -1 ? "00" : level === 9 ? "roof" : String(level);
+function engSheet(discipline, level) {
+  const kind = window.fitteEngineering && window.fitteEngineering[discipline];
+  return (kind && kind[levelKey(level)]) || null;
+}
+/* The discipline standing in for the missing architectural plan: the first
+   toggled-on kind that actually has a sheet for this level, or the default.
+   Switching which chip is on switches the base; turning every chip back
+   off does not blank the pane, it falls back to the default again. */
+function engBaseDiscipline(level) {
+  if (!isNonresLevel(level)) return null;
+  const on = ENG_DISCIPLINES.filter((d) => V.lay[d].on && engSheet(d, level));
+  return on[0] || ENG_BASE_DISCIPLINE;
+}
+/* The remaining toggled kinds, aligned on top of the base — never the base
+   kind itself twice. On a residential floor every toggled kind is an
+   overlay, since the architecture is always the base there. */
+function engOverlayDisciplines(level) {
+  const base = engBaseDiscipline(level);
+  return ENG_DISCIPLINES.filter((d) => V.lay[d].on && d !== base && engSheet(d, level));
+}
+
 /* A crossing is where two drawings disagree in one place. It belongs to the
    unit it touches, which is why it is read in the unit inspector and not on
    a screen of its own: code, what was seen, the two disciplines, the unit,
@@ -1076,6 +1150,7 @@ LEVELS.forEach((lv) => {
   });
 });
 UNITS_BY_LEVEL["Tous les niveaux"] = LEVELS.flatMap((lv) => UNITS_BY_LEVEL[`Niveau ${lv}`]);
+NONRES_LEVELS.forEach((lv) => { UNITS_BY_LEVEL[levelView(lv)] = []; });
 
 /* The inspector's own tabs, and the five reasons a change is allowed to have.
    A decision without one of them does not save.
@@ -1314,8 +1389,7 @@ window.fitteContours = CONTOURS;
    true floor instead of a stand-in. Falls back to the typical floor (5)
    when nothing is selected yet. */
 function currentLevel() {
-  const m = /^Niveau (\d+)$/.exec(viewOf("Unités"));
-  return m ? Number(m[1]) : null;
+  return sourceLevel(viewOf("Unités"));
 }
 function paneLevel() {
   const lv = currentLevel();
@@ -1384,8 +1458,37 @@ function sheetStyle(key) {
 /* The canvas sits on top of the picture inside the same box, so the two are
    registered by construction: a PDF page paints only its ink, and what shows
    through until it lands is the picture underneath. */
-const layersHTML = () => ["arp", "pay"].filter((k) => V.lay[k].on)
+const layersHTML = () => (isNonresLevel(paneLevel()) ? [] : ["arp", "pay"]).filter((k) => V.lay[k].on)
   .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"><canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${k === "arp" ? 180 : 0}"></canvas></div>`).join("");
+
+/* The consultant disciplines read the same way the surveyor and the
+   landscaper already do — a chip per kind, toggled independently — except
+   none of them needs sheetStyle()'s scale-and-nudge: the asset pipeline
+   crops every engineering sheet to the floor plan's own 2000×1675 canvas,
+   so registration is "the same box", not a transform. A kind a level has
+   no page for stays on the row, greyed and unclickable: "not asked for"
+   and "nothing here yet" are different sentences. */
+function engChip(d, level) {
+  const s = engSheet(d, level);
+  const isBase = isNonresLevel(level) && d === engBaseDiscipline(level);
+  const on = isBase || V.lay[d].on;
+  const title = !s ? `${ENG_LABELS[d]} — aucune feuille pour ce niveau`
+    : isBase ? `${ENG_LABELS[d]} — plan de base de ce niveau — ${s.code} · p.${s.page}`
+    : `Superposer ${ENG_LABELS[d].toLowerCase()} — ${s.code} · p.${s.page}`;
+  return `<span class="chip hi ${on ? "on" : ""}" ${s ? act("englayer", d) : ""} title="${title}"
+    ${s ? "" : `aria-disabled="true" style="opacity:.4;cursor:default"`}>${icon(ENG_LAYICON[d])}
+    <span class="lb">${ENG_LABELS[d]}${isBase ? " · base" : ""}</span></span>`;
+}
+/* Only the overlays paint a layer div: the base kind reuses the floor
+   plan's own canvas and --plan background (see paneSheet()), the same slot
+   the architecture fills on a residential level. */
+const engLayersHTML = () => engOverlayDisciplines(paneLevel())
+  .map((d) => {
+    const s = engSheet(d, paneLevel());
+    const vector = s.pdf && s.detail !== "image";
+    return `<div class="lay eng" data-lay="${d}" style="opacity:.55;background-image:url(${s.img})">
+      ${vector ? `<canvas data-laypdf="${d}" data-pdf-url="${s.pdf}"></canvas>` : ""}</div>`;
+  }).join("");
 
 /* The plan is read in black and white. Colour only arrives when a typology
    is asked for, and then only on the units that answer. */
@@ -1394,7 +1497,7 @@ const typoHTML = () => {
   const on = typosOn();
   if (!on.length) return "";
   const polys = polysForPane();
-  const levelRows = UNITS_BY_LEVEL[`Niveau ${paneLevel()}`] || [];
+  const levelRows = UNITS_BY_LEVEL[levelView(paneLevel())] || [];
   /* Laid on the sheet the level tabs opened, so the fill sits on the unit
      and not on the courtyard beside it. */
   const parts = levelRows.map((r) => {
@@ -1505,14 +1608,14 @@ const bars = (n, w = [100, 70, 85]) =>
 
 const viewsOf = (screen) => CONTEXT[screen] || [];
 /* Units opens on level 5: that is the floor every example here is about. */
-const defaultView = (screen) => (screen === "Unités" ? Math.max(0, LEVELS.indexOf(5)) : 0);
+const defaultView = (screen) => (screen === "Unités" ? Math.max(0, viewIndexOfLevel(5)) : 0);
 const viewIndex = (screen) => Math.min(V.view[screen] === undefined ? defaultView(screen) : V.view[screen],
   Math.max(0, viewsOf(screen).length - 1));
 const viewOf = (screen) => viewsOf(screen)[viewIndex(screen)];
 
 /* The rows the current screen is showing, after its view and its search. */
 function rowsOf(screen) {
-  let all = screen === "Unités" ? (UNITS_BY_LEVEL[viewOf(screen)] || UNITS_BY_LEVEL["Niveau 5"]) : [];
+  let all = screen === "Unités" ? (UNITS_BY_LEVEL[viewOf(screen)] || []) : [];
   /* No typology asked for means the whole level; asking for one narrows the
      list to it, the same units the plan then colours. */
   if (screen === "Unités" && typosOn().length) all = all.filter((r) => typosOn().includes(r[3]));
@@ -1546,8 +1649,14 @@ const act = (name, value) => `data-act="${name}"${value === undefined ? "" : ` d
    or — on "Tous les niveaux" — the selected unit's real level (paneLevel
    above), so every other screen shows that unit's true floor rather than
    a stand-in composite. */
-const sheet = () => SHEETS[`Niveau ${paneLevel()}`] || SHEETS["Niveau 5"];
-const dwgName = () => V.docs.names[viewOf("Unités")] || sheet().file;
+/* The architectural source for a residential floor; null on a basement or
+   the roof, where none has been digitized — paneSheet() below is what the
+   pane actually paints, architecture when there is one, the engineering
+   base discipline when there is not. Never "Niveau 5": an unmapped level
+   shows its own absence, not another floor's drawing. */
+const sheet = () => SHEETS[levelView(paneLevel())] || null;
+const paneSheet = () => sheet() || engSheet(engBaseDiscipline(paneLevel()), paneLevel());
+const dwgName = () => V.docs.names[viewOf("Unités")] || sheet()?.file || "—";
 
 /* What a drawing pane says about its file: where it is, what it is called,
    which revision was read. The button that hands the drawing back to the
@@ -1557,6 +1666,14 @@ const HOSTS = { plan: ["autocad", "Ouvrir dans AutoCAD"], model: ["sketchup", "O
 
 function hostButton(kind) {
   const [a, label] = HOSTS[kind];
+  /* No DWG to hand back on a level with no architectural source: the
+     button says so and does nothing, rather than opening on a file that
+     does not exist for this level. */
+  if (kind === "plan" && !sheet()) {
+    return `<span class="btnw hi" style="opacity:.5;cursor:default"
+      title="Aucun plan d'architecture importé pour ce niveau — remise à AutoCAD indisponible">
+      ${icon("external-link")}<span class="hi">AutoCAD — indisponible</span></span>`;
+  }
   /* Solid: handing the drawing back to its application is the one action
      on a drawing pane, so it carries the weight of the primary button. */
   return `<span class="btnw solid" ${act(a)} title="${label}">${icon("external-link")}
@@ -2001,7 +2118,7 @@ function navHTML() {
    rail lists the screens, the strip drops to the current screen's own views. */
 const CONTEXT = {
   "Projets": ["En cours", "Archivés"],
-  "Unités": [...LEVELS.map((lv) => `Niveau ${lv}`), "Tous les niveaux"],
+  "Unités": [...LEVEL_VIEWS, "Tous les niveaux"],
   /* The second row filters the list: which body of rules is being read.
      The Québec construction code comes first because it is the one the
      building itself is judged against. */
@@ -2085,14 +2202,22 @@ function tabsHTML() {
      the contractor. Sharing is the end of the first row, on every screen
      that has a project open, because it is about the project and not about
      what is on screen. */
+  /* Reading the screen as the shared link shows it belongs next to the share
+     button, because that is the question it answers: what did the person on
+     the other end actually get. */
+  const guestChip = SCREENS[V.screen].index ? ""
+    : `<span class="btnw ${V.guest ? "solid" : ""}" ${act("guest")}
+         title="${V.guest ? "Revenir à la vue de l'atelier" : "Voir l'écran comme l'invité du lien partagé"}"
+         style="margin-left:auto;flex:0 0 auto">${icon(V.guest ? "eye" : "lock")}<span class="hi">${
+           V.guest ? "Vue invité" : `${teamPins()} note${teamPins() > 1 ? "s" : ""} d'atelier`}</span></span>`;
   const share = SCREENS[V.screen].index ? ""
     : `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
-         style="margin-left:auto;flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
+         style="flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
        data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
-    ${items}${share}
+    ${items}${guestChip}${share}
   </div>${row2}`;
 }
 
@@ -2156,7 +2281,9 @@ function listHTML() {
   /* The list reads the same rows the header counts, so the view above it and
      the search inside it both change what is on screen. */
   const pairs = rowsOf(V.screen);
-  const rows = pairs.length ? pairs.map((r) => `${r[0]} · ${r[1]}`) : ["rien ne correspond"];
+  const emptyMsg = V.screen === "Unités" && isNonresLevel(paneLevel())
+    ? "aucune unité résidentielle à ce niveau" : "rien ne correspond";
+  const rows = pairs.length ? pairs.map((r) => `${r[0]} · ${r[1]}`) : [emptyMsg];
   /* Counting the building is not reading a unit: no row is lit. Clicking one
      still works, and switches the scope back. */
   const sel = buildingScope() ? -1 : selIndex(V.screen);
@@ -2185,10 +2312,11 @@ function listHTML() {
   /* One column: in two the drawings came out barely wider than a thumbnail,
      and the plan of a unit is the point of the card. */
   const inner = mode === "Card grid"
-    ? `<div style="display:grid;grid-template-columns:1fr;gap:8px">${pairs.map((r, i) => V.screen === "Unités" ? ucard(r, i)
+    ? (pairs.length ? `<div style="display:grid;grid-template-columns:1fr;gap:8px">${pairs.map((r, i) => V.screen === "Unités" ? ucard(r, i)
       : `<div class="tile ${i === sel ? "on" : ""}" ${act("row", i)}>
         <div class="plan" style="height:54px;flex:0 0 54px"></div>
         <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r[0]} · ${r[1]}</div></div>`).join("")}</div>`
+      : `<div class="tile"><span class="hi" style="font-size:12px;color:var(--ink-2)">${emptyMsg}</span></div>`)
     : rows.map((r, i) => `<div class="listrow ${i === sel ? "on" : ""}" ${pairs.length ? act("row", i) : ""}><span class="dot"></span>
         <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}${V.settled[`${V.screen} · ${(pairs[i] || [""])[0]}`] ? " · réglé" : ""}</span></div>`).join("");
 
@@ -2234,7 +2362,7 @@ function contentHTML() {
       const mini = (side) => (side === "plan"
         ? `<div class="mini hi" data-mini="plan">
         <span class="mi" data-mi>
-          <img src="${sheet().img}" alt="">
+          <img src="${paneSheet()?.img || ""}" alt="">
           <span class="mrect" data-mrect></span>
         </span>
       </div>`
@@ -2277,13 +2405,23 @@ function contentHTML() {
          reads as three words: the sheet itself, the surveyor's rule, the
          landscape architect's planting. */
       const LAYICON = { none: "file", arp: "ruler", pay: "trees" };
-      const laychip = (k, t) => `<span class="chip hi ${k === "none" ? (!V.lay.arp.on && !V.lay.pay.on ? "on" : "") : (V.lay[k].on ? "on" : "")}"
-        ${act("layer", k)} title="${k === "none" ? "Le plan d'étage seul" : `Superposer ${t.toLowerCase()}`}">${icon(LAYICON[k])}<span class="lb">${t}</span></span>`;
+      const laychip = (k, t) => {
+        const unavailable = k !== "none" && isNonresLevel(paneLevel());
+        const on = !unavailable && (k === "none"
+          ? !V.lay.arp.on && !V.lay.pay.on && !ENG_DISCIPLINES.some((d) => V.lay[d].on)
+          : V.lay[k].on);
+        return `<span class="chip hi ${on ? "on" : ""}" ${unavailable ? 'aria-disabled="true" style="opacity:.4"' : act("layer", k)}
+          title="${unavailable ? `${t} — non disponible pour ce niveau` : k === "none" ? "Le plan de base seul" : `Superposer ${t.toLowerCase()}`}">${icon(LAYICON[k])}<span class="lb">${t}</span></span>`;
+      };
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane drawing" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>
         ${kind === "plan" ? `<span class="laychips">${laychip("none", "Plan seul")}${laychip("arp", "Arpenteur")}${laychip("pay", "Paysage")}</span>` : ""}
         ${hostButton(kind === "plan" ? "plan" : "model")}</div>
+        ${kind === "plan" ? `<div class="engineering-bar hi">
+          <span class="laychips eng">${ENG_DISCIPLINES.map((d) => engChip(d, paneLevel())).join("")}</span>
+          ${!sheet() ? `<div class="engineering-source">Architecture non fournie · ${paneSheet()?.code || "—"} · p.${paneSheet()?.page || "—"}</div>` : ""}
+        </div>` : isNonresLevel(paneLevel()) ? `<div class="model-context-note hi">${note}</div>` : ""}
         ${kind === "plan"
           /* The sheet is larger than the pane, so the pane is a window onto
              it: the drawing, the consultants' layers, the typology fills and
@@ -2294,7 +2432,7 @@ function contentHTML() {
               <div class="plan ${cls}" data-img="${kind}" data-src="${planVector() ? "vector" : "image"}"
                    style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})">
                 <span class="lo"></span><span class="hi">${note}</span>
-                ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
+                ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${paneSheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}${pinMarkHTML()}</div></div>
               ${north("plan")}${mini("plan")}${zcol("plan")}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
@@ -2316,13 +2454,20 @@ function contentHTML() {
          thing. Quantités is no longer a strip under the drawings; it is the
          right column, where the scope switch sends it. */
       const a = buildingScope() ? qAim() : null;
+      const nonres = isNonresLevel(paneLevel());
       const planNote = buildingScope()
         ? (a ? `${a.what} — allumé sur le plan` : "rien à montrer sur le plan pour cette ligne")
+        : nonres
+        ? `${levelView(paneLevel())} — architecture non fournie — base ${ENG_LABELS[engBaseDiscipline(paneLevel())].toLowerCase()}`
         : `${unit} — contours par-dessus`;
       const modelNote = buildingScope()
         ? "rien à montrer sur la maquette pour cette ligne"
+        : paneLevel() === -1 || paneLevel() === 0
+        ? `${levelView(paneLevel())} — géométrie absente de la maquette`
+        : paneLevel() === 9
+        ? "Toiture — bandeau et repère affichés sur la maquette"
         : `${unit} — volumétrie, même niveau`;
-      const plan = () => pane("Plan 2D", planNote, "plan", "align", typoHTML() + layersHTML());
+      const plan = () => pane("Plan 2D", planNote, "plan", "align", typoHTML() + layersHTML() + engLayersHTML());
       const model = () => pane("Maquette 3D", modelNote, "model", "fit");
       if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
       if (mode === "Single pane + inset") return `<div class="col" style="flex:1;gap:var(--gap)">
@@ -2435,11 +2580,39 @@ function exportCSV() {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/* A basement or the roof carries no apartment units: the inspector reads
+   as the level itself — which disciplines are on, their real sheet code
+   and page — never a stand-in unit, and never a decision panel with
+   nothing chosen to decide about. */
+function nonresInspectorHTML(mode, step) {
+  const level = paneLevel();
+  const base = engBaseDiscipline(level);
+  const overlays = engOverlayDisciplines(level);
+  const rows = [base, ...overlays].map((d) => {
+    const s = engSheet(d, level);
+    return [`${ENG_LABELS[d]}${d === base ? " (base)" : ""}`, s ? `${s.code} · p.${s.page}` : "aucune feuille"];
+  });
+  const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${levelView(level)}</span></div>
+    <div class="pb">
+      <div class="tile"><div class="lo col">${bars(2)}</div>
+        <div class="hi" style="font-size:12px">Aucun plan d'architecture n'a encore été importé pour ce niveau.</div>
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Lecture par discipline technique seulement — rien à sélectionner comme unité, rien à décider ici.</div></div>
+      ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
+        <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
+        <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>
+        <span class="hi" style="font-size:12px">${val}</span></div>`).join("")}
+    </div>`;
+  if (mode === "Bottom sheet") return `<section class="pane rg sheet" data-rg="inspecteur → feuille du bas" data-fi="${fiOf("inspector")}" style="height:260px">${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
+  if (mode === "Overlay drawer") return `<section class="pane rg drawer" data-rg="inspecteur → superposition" data-fi="${fiOf("inspector")}">${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
+  return region("inspector", "inspecteur", inner, step);
+}
+
 function inspectorHTML() {
   const mode = V.inspector.layout;
   if (mode === "Hidden") return "";
   const step = V.journey ? SCREENS[V.screen].steps.inspector : null;
   if (buildingScope()) return qPaneHTML(step);
+  if (V.screen === "Unités" && isNonresLevel(paneLevel())) return nonresInspectorHTML(mode, step);
   const row = selRow(V.screen);
   const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`,
     "Codes": "Ce qui bloque" }[V.screen] || "Détail";
@@ -2723,7 +2896,7 @@ const vpEl = () => document.querySelector("[data-vp]");
 
 /* PDF detail is automatic; the image remains underneath during rendering.
    wireframe-c3-pdf.js paints viewport-sized tiles at the current pixel density. */
-const planVector = () => !!sheet().pdf;
+const planVector = () => !!(paneSheet() && paneSheet().pdf && paneSheet().detail !== "image");
 const SHEET_AR = 2000 / 1675;
 function layoutSheet(el) {
   const plan = el.querySelector(".plan");
@@ -2848,7 +3021,7 @@ window.fitteSelectUnit = (unitStr) => {
   const no = String(unitStr);
   const level = Number(no.slice(0, -2));
   const suffix = Number(no.slice(-2));
-  const rows = UNITS_BY_LEVEL[`Niveau ${level}`];
+  const rows = UNITS_BY_LEVEL[levelView(level)];
   if (!rows) return;
   const rowIndex = rows.findIndex((r) => r[2] === suffix);
   if (rowIndex < 0) return;
@@ -2862,8 +3035,8 @@ window.fitteSelectUnit = (unitStr) => {
   /* A window picked in the 3D model can be on another floor, and the pane
      is about to carry a different sheet: there is nothing to glide across,
      so a change of level lands instead of sliding. */
-  const sameSheet = V.view["Unités"] === LEVELS.indexOf(level);
-  V.view["Unités"] = LEVELS.indexOf(level);
+  const sameSheet = V.view["Unités"] === viewIndexOfLevel(level);
+  V.view["Unités"] = viewIndexOfLevel(level);
   V.sel["Unités"] = rowIndex;
   /* A level change rebuilds the sheet and the thumbnails, so this path
      cannot avoid a full render — but it can put it before the glide, the
@@ -3091,7 +3264,7 @@ function render() {
          data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
          data-shell="${V.shell === "Inset card" ? "inset" : "flat"}"
          data-chrome="${V.chrome === "Black" ? "black" : "light"}"
-         style="--plan:url(${sheet().img})">
+         style="--plan:url(${paneSheet()?.img || ""})">
       ${navHTML()}
       <div class="body">
         ${tabsHTML()}
@@ -3437,6 +3610,10 @@ function onClick(e) {
       /* Asking for a floor is asking to read a floor: the building-wide
          count steps aside. */
       if (screen === "Unités") V.scope = "Niveau";
+      /* A basement or the roof has no unit to glide to: landing with a
+         residential floor's zoom and pan left over would show an empty,
+         arbitrarily cropped corner of the sheet instead of the sheet. */
+      if (screen === "Unités" && isNonresLevel(currentLevel())) { V.zoom = 100; V.pan = { x: 0, y: 0 }; }
       break;
     /* A section inside a screen names itself, because the screen it sits on
        has no views of its own: "Quantités|2" switches that table alone. */
@@ -3455,6 +3632,7 @@ function onClick(e) {
     case "viewnext":
       V.view[screen] = (viewIndex(screen) + 1) % viewsOf(screen).length;
       V.sel[screen] = 0;
+      if (screen === "Unités" && isNonresLevel(currentLevel())) { V.zoom = 100; V.pan = { x: 0, y: 0 }; }
       break;
     /* Picking a unit moves the sheet to it, whatever the zoom was: the list
        is a way of looking at the plan, so the answer to a click is the unit
@@ -3488,7 +3666,7 @@ function onClick(e) {
       V.qrow = Number(value);
       const a = qAim();
       if (a && a.typo) TYPOS.forEach((ty) => dial.setValue(`typologies.${ty}`, ty === a.typo));
-      if (a && a.level) { V.view["Unités"] = LEVELS.indexOf(a.level); V.sel["Unités"] = 0; }
+      if (a && a.level) { V.view["Unités"] = viewIndexOfLevel(a.level); V.sel["Unités"] = 0; }
       break;
     }
     case "csv": exportCSV(); say(`Tableau « ${viewOf("Quantités")} » téléchargé en .csv.`); break;
@@ -3574,12 +3752,16 @@ function onClick(e) {
        both would let the two disagree on the next dial change. */
     case "layer":
       if (value === "none") {
+        ENG_DISCIPLINES.forEach((d) => { V.lay[d].on = false; });
         dial.setValue("layers.surveyor", false);
         dial.setValue("layers.landscaping", false);
       } else {
         dial.setValue(value === "arp" ? "layers.surveyor" : "layers.landscaping", !V.lay[value].on);
       }
       return;
+    /* The four consultant disciplines are not part of the fidelity panel:
+       they toggle straight on V, the way picking a row does. */
+    case "englayer": V.lay[value].on = !V.lay[value].on; break;
     /* The unit the list is on, filling the pane: the move the plan is
        opened for, without hunting for it with the wheel. */
     case "fitunit": fitUnit(); break;
@@ -3799,6 +3981,13 @@ function applyDial(v) {
 dial.subscribe(applyDial);
 
 sprite();
+/* The notes outlive the tab: they are read back before the first paint, and
+   the model's picker is wired once because its canvas survives re-renders. */
+V.pins = loadPins();
+wireModelPins();
+/* The first paint happens while the model is still downloading, so the pins
+   hung on it are handed over again the moment there is a camera. */
+window.addEventListener("fitte:model-state", (e) => { if (e.detail === "ready") pushModelPins(); });
 applyDial(dial.values);
 </script>
 </body>

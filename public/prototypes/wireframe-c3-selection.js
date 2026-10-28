@@ -155,11 +155,13 @@ export function createBuildingSelection({ model, camera, controls, canvas, sourc
     selected = byUnit.get(String(selection.unit)) || [];
     for (const item of selected) item.mesh.material = highlight;
     const level = Number(selection.level);
-    floorUniforms.fitteFloorOn.value = level >= 1 && level <= 8 ? 1 : 0;
+    // The roof pavilion exists in this export; neither basement does.
+    floorUniforms.fitteFloorOn.value = level >= 1 && level <= 9 ? 1 : 0;
     floorUniforms.fitteFloorMin.value = (ELEVATIONS[level - 1] || 0) - sourceOffset.y;
-    floorUniforms.fitteFloorMax.value = (ELEVATIONS[level] || 0) - sourceOffset.y;
+    floorUniforms.fitteFloorMax.value = (level === 9 ? 12.36 : ELEVATIONS[level] || 0) - sourceOffset.y;
     label(selection);
     if (changed && frame) frameWindows();
+    if (changed && frame && (level === -1 || level === 0 || level === 9)) window.fitteModel?.reset();
   }
 
   canvas.addEventListener("pointerdown", (event) => { pointerStart = { x: event.clientX, y: event.clientY, button: event.button }; flight = null; });

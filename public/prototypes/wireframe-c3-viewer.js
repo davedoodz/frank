@@ -17,6 +17,7 @@ let homeTarget;
 let lastZoom = null;
 let buildingSelection;
 let sourceCenter;
+let contextLost = false;
 // The corner view is a second render of the same scene from a camera that
 // never moves, plus a marker for where the live camera stands. One scene,
 // two cameras: a picture of the building would be wrong the moment it is
@@ -37,6 +38,9 @@ function setStatus(host, state, message) {
   host.setAttribute("aria-busy", state === "loading" ? "true" : "false");
   const status = host.querySelector("[data-model-status]");
   if (status) status.textContent = message;
+  // Anything hung on the model — the margin's pins, for one — only has a
+  // camera to project through once the building is in the scene.
+  window.dispatchEvent(new CustomEvent("fitte:model-state", { detail: state }));
 }
 
 function resize(host) {
@@ -139,7 +143,77 @@ function writeZoom(percent) {
   controls.update();
 }
 
-window.fitteModel = { readZoom, writeZoom, reset: resetCamera };
+// Notes stuck to the model are the page's data, not the viewer's: it is
+// handed the list, and gives back a place on screen for each one plus the
+// one thing only it can answer — what a click on the building hit.
+window.fitteModel = { readZoom, writeZoom, reset: resetCamera, setPins, pick };
+
+let modelPins = [];
+let pinSig = "";
+function setPins(list) {
+  modelPins = Array.isArray(list) ? list : [];
+  pinSig = "";               // force the next frame to redraw
+}
+// A click on the building turned into a point in the model, plus what that
+// point belongs to: the level, read from the same elevation table the unit
+// selection uses, and the façade, read from the face normal.
+function pick(clientX, clientY) {
+  const canvas = renderer?.domElement;
+  if (!canvas || !model) return null;
+  const r = canvas.getBoundingClientRect();
+  const ray = new THREE.Raycaster();
+  ray.setFromCamera(new THREE.Vector2(
+    ((clientX - r.left) / r.width) * 2 - 1,
+    -((clientY - r.top) / r.height) * 2 + 1), camera);
+  const hit = ray.intersectObject(model, true)[0];
+  if (!hit) return null;
+  const n = hit.face
+    ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld)
+    : new THREE.Vector3(0, 1, 0);
+  return { p: [hit.point.x, hit.point.y, hit.point.z], n: [n.x, n.y, n.z],
+    level: levelAt(hit.point.y), face: faceName(n) };
+}
+function levelAt(worldY) {
+  const srcY = worldY + (sourceCenter?.[1] || 0);
+  let level = 1;
+  ELEVATIONS.forEach((e, i) => { if (srcY >= e - 0.1) level = Math.min(i + 1, 8); });
+  return level;
+}
+function faceName(n) {
+  const ax = Math.abs(n.x), ay = Math.abs(n.y), az = Math.abs(n.z);
+  if (ay > ax && ay > az) return n.y > 0 ? "toiture" : "sous-face";
+  // North is -Z in this export, the same assumption the north mark uses.
+  if (az > ax) return n.z > 0 ? "façade sud" : "façade nord";
+  return n.x > 0 ? "façade est" : "façade ouest";
+}
+const pinVec = new THREE.Vector3();
+const pinNorm = new THREE.Vector3();
+const pinDir = new THREE.Vector3();
+function paintPins() {
+  const layer = document.querySelector("[data-npins]");
+  if (!layer || !camera) return;
+  const canvas = renderer.domElement;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  // Rewriting the markers sixty times a second for a building that is not
+  // moving is waste: the camera and the list are the whole input.
+  const sig = `${camera.matrixWorldInverse.elements.map((v) => v.toFixed(3)).join()}|${modelPins.length}|${w}x${h}`;
+  if (sig === pinSig) return;
+  pinSig = sig;
+  layer.innerHTML = modelPins.map((pin) => {
+    pinVec.set(pin.p[0], pin.p[1], pin.p[2]);
+    // Stuck to a wall the camera is behind: dimmed, never hidden, so the
+    // count in the margin and the count on screen keep agreeing.
+    const back = pin.n
+      ? pinDir.copy(pinVec).sub(camera.position).normalize()
+          .dot(pinNorm.set(pin.n[0], pin.n[1], pin.n[2])) > 0
+      : false;
+    pinVec.project(camera);
+    if (pinVec.z > 1) return "";
+    const x = (pinVec.x * 0.5 + 0.5) * w, y = (-pinVec.y * 0.5 + 0.5) * h;
+    return `<div class="npin ${pin.cls || ""} ${back ? "back" : ""}"
+      style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px" data-act="note" data-value="${pin.id}">${pin.html}</div>`;
+  }).join("");
+}
 
 function createRenderer() {
   scene = new THREE.Scene();
@@ -161,6 +235,16 @@ function createRenderer() {
     "Contrôle 3D : cliquer sur une fenêtre pour sélectionner son unité, glisser pour orbiter, molette pour zoomer, flèches pour déplacer la vue",
   );
   renderer.domElement.tabIndex = 0;
+  renderer.domElement.addEventListener("webglcontextlost", (event) => {
+    event.preventDefault();
+    contextLost = true;
+    const host = document.querySelector("[data-building-model]");
+    if (host) setStatus(host, "loading", "Restauration de la vue 3D…");
+  });
+  renderer.domElement.addEventListener("webglcontextrestored", () => {
+    contextLost = false;
+    mountBuildingViewer();
+  });
 
   scene.add(new THREE.HemisphereLight(0xffffff, 0x8c9094, 2.1));
   const key = new THREE.DirectionalLight(0xffffff, 3.2);
@@ -217,7 +301,7 @@ function createRenderer() {
 
   renderer.setAnimationLoop((now) => {
     const canvas = renderer.domElement;
-    if (!canvas.isConnected || canvas.offsetParent === null) return;
+    if (contextLost || !canvas.isConnected || canvas.offsetParent === null) return;
     buildingSelection?.update(now);
     controls.update();
     renderer.render(scene, camera);
@@ -231,6 +315,7 @@ function createRenderer() {
     paintAxes();
     paintNorth();
     paintLevels();
+    paintPins();
   });
 }
 
@@ -238,9 +323,15 @@ function createRenderer() {
 // shares the scene, the lights and the model: only the camera differs — and
 // it looks straight down, so the corner view is a roof plan.
 function renderOverview() {
-  const canvas = document.querySelector("[data-mini3d]");
+  let canvas = document.querySelector("[data-mini3d]");
   if (!canvas || !overviewCamera || !planHalf) return;
-  if (!overview || overview.domElement !== canvas) {
+  // UI renders replace the placeholder, not the GPU renderer. Keeping this
+  // canvas avoids leaking a context and another copy of the model per click.
+  if (overview && overview.domElement !== canvas) {
+    canvas.replaceWith(overview.domElement);
+    canvas = overview.domElement;
+  }
+  if (!overview) {
     try {
       overview = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
     } catch (error) {
@@ -347,7 +438,7 @@ function paintLevels() {
   }
   const selected = Number(document.querySelector("[data-building-model]")?.dataset.selectedLevel) || 0;
   const rows = [];
-  for (let level = 1; level <= 8; level += 1) {
+  for (let level = 1; level <= 9; level += 1) {
     const y = ELEVATIONS[level - 1] - sourceCenter[1];
     // Of the four footprint corners at this height, the one that lands
     // furthest left is where the rule starts.
@@ -371,7 +462,7 @@ function paintLevels() {
     const end = Math.max(72, Math.min(px, w - 12));
     return `<g class="${level === selected ? "on" : ""}">
       <line x1="10" y1="${py.toFixed(1)}" x2="${end.toFixed(1)}" y2="${py.toFixed(1)}"></line>
-      <text x="10" y="${(py - 5).toFixed(1)}">Niveau ${level}</text>
+      <text x="10" y="${(py - 5).toFixed(1)}">${level === 9 ? "Toiture" : `Niveau ${level}`}</text>
     </g>`;
   }).join("");
 }
@@ -429,6 +520,10 @@ async function mountBuildingViewer() {
   resizeObserver = new ResizeObserver(() => resize(host));
   resizeObserver.observe(host);
   resize(host);
+  if (contextLost) {
+    setStatus(host, "loading", "Restauration de la vue 3D…");
+    return;
+  }
 
   const reset = host.querySelector("[data-model-reset]");
   if (reset) reset.onclick = (event) => {

@@ -69,9 +69,12 @@ async function pageFor(url) {
   if (!doc) doc = await pdfjs.getDocument(url).promise;
   documents.delete(url);
   documents.set(url, doc);
-  // Keep recently used floors, not every floor's parsed drawing indefinitely.
-  while (documents.size > 3) {
-    const oldest = documents.keys().next().value;
+  // All visible disciplines must stay resident; evicting one of seven active
+  // layers would force it to be parsed again on every viewport change.
+  const visible = new Set([...wanted.values()].map((r) => r.url));
+  while (documents.size > Math.max(3, visible.size)) {
+    const oldest = [...documents.keys()].find((key) => !visible.has(key));
+    if (oldest === undefined) break;
     const previous = documents.get(oldest);
     documents.delete(oldest);
     await previous.destroy();
@@ -96,8 +99,10 @@ async function pump() {
     const bitmap = await createImageBitmap(off);
     off.width = off.height = 0;
     tiles.set(request.key, bitmap);
-    while (tiles.size > 6) {
-      const oldest = tiles.keys().next().value;
+    const visible = new Set([...wanted.values()].map((r) => r.key));
+    while (tiles.size > Math.max(6, visible.size)) {
+      const oldest = [...tiles.keys()].find((key) => !visible.has(key));
+      if (oldest === undefined) break;
       tiles.get(oldest).close();
       tiles.delete(oldest);
     }
