@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { createBuildingSelection } from "./wireframe-c3-selection.js";
 
 const MODEL_URL = "assets/building.glb";
 
@@ -14,6 +15,19 @@ let modelPromise;
 let homePosition;
 let homeTarget;
 let lastZoom = null;
+let buildingSelection;
+let sourceCenter;
+// The corner view is a second render of the same scene from a camera that
+// never moves, plus a marker for where the live camera stands. One scene,
+// two cameras: a picture of the building would be wrong the moment it is
+// orbited.
+let overview;
+let overviewCamera;
+let cameraMark;
+let markRadius;
+// Everything that belongs to the corner view only is on layer 1, which the
+// main camera never renders.
+const MARK_LAYER = 1;
 
 function setStatus(host, state, message) {
   host.dataset.state = state;
@@ -38,6 +52,7 @@ function fitModel(host) {
   const box = new THREE.Box3().setFromObject(model);
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3());
+  sourceCenter = center.toArray();
 
   // The exported model is close to the origin but not centred. Recentring at
   // runtime keeps the source GLB untouched and gives OrbitControls a stable
@@ -61,10 +76,25 @@ function fitModel(host) {
 
   homePosition = camera.position.clone();
   homeTarget = controls.target.clone();
+  // The corner camera stands a little further back than the home view: far
+  // enough that the marker stays inside the frame, close enough that the
+  // building fills it. The frame is wide and short, so the fit is read on
+  // the height.
+  overviewCamera.position.copy(homePosition).multiplyScalar(0.92);
+  overviewCamera.lookAt(0, 0, 0);
+  overviewCamera.near = Math.max(camera.near, 0.01);
+  overviewCamera.far = camera.far * 2;
+  overviewCamera.updateProjectionMatrix();
+  // The marker is read as "the eye is over there": it keeps a fixed radius
+  // outside the massing whatever the real distance, so it never ends up
+  // buried in a façade, and only its direction carries meaning.
+  markRadius = radius * 0.98;
+  cameraMark.scale.setScalar(radius * 0.055);
   resize(host);
 }
 
 function resetCamera() {
+  buildingSelection?.cancelFlight();
   if (!homePosition || !homeTarget || !camera || !controls) return;
   camera.position.copy(homePosition);
   controls.target.copy(homeTarget);
@@ -96,6 +126,7 @@ function readZoom() {
 function writeZoom(percent) {
   const l = limits();
   if (!l || !Number.isFinite(percent)) return;
+  buildingSelection?.cancelFlight();
   const t = 1 - Math.min(100, Math.max(0, percent)) / 100;
   const d = Math.exp(Math.log(l.lo) + t * (Math.log(l.hi) - Math.log(l.lo)));
   const direction = camera.position.clone().sub(controls.target).normalize();
@@ -122,7 +153,7 @@ function createRenderer() {
   renderer.domElement.className = "model3d-canvas";
   renderer.domElement.setAttribute(
     "aria-label",
-    "Contrôle 3D : glisser pour orbiter, molette pour zoomer, flèches pour déplacer la vue",
+    "Contrôle 3D : cliquer sur une fenêtre pour sélectionner son unité, glisser pour orbiter, molette pour zoomer, flèches pour déplacer la vue",
   );
   renderer.domElement.tabIndex = 0;
 
@@ -151,12 +182,102 @@ function createRenderer() {
     window.dispatchEvent(new CustomEvent("fitte:model-zoom", { detail: percent }));
   });
 
-  renderer.setAnimationLoop(() => {
+  // The corner view's camera and the marker that stands where the live one
+  // is. Both sit on layer 1, so the main render never sees them.
+  overviewCamera = new THREE.PerspectiveCamera(34, 1, 0.01, 1000);
+  overviewCamera.layers.enable(MARK_LAYER);
+  cameraMark = new THREE.Group();
+  cameraMark.layers.set(MARK_LAYER);
+  const ball = new THREE.Mesh(
+    new THREE.SphereGeometry(1, 16, 12),
+    new THREE.MeshBasicMaterial({ color: 0x1b1b1b }),
+  );
+  ball.layers.set(MARK_LAYER);
+  cameraMark.add(ball);
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(1.5, 2.1, 24),
+    new THREE.MeshBasicMaterial({ color: 0x8ba00f, side: THREE.DoubleSide, transparent: true, opacity: 0.9 }),
+  );
+  ring.layers.set(MARK_LAYER);
+  cameraMark.add(ring);
+  scene.add(cameraMark);
+  // The line from the target to the marker: the direction the building is
+  // being looked from, which is the thing the corner view is for.
+  const sight = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]),
+    new THREE.LineBasicMaterial({ color: 0x1b1b1b, transparent: true, opacity: 0.55 }),
+  );
+  sight.layers.set(MARK_LAYER);
+  scene.add(sight);
+
+  renderer.setAnimationLoop((now) => {
     const canvas = renderer.domElement;
     if (!canvas.isConnected || canvas.offsetParent === null) return;
+    buildingSelection?.update(now);
     controls.update();
     renderer.render(scene, camera);
+    // The marker rides the live camera's direction at a fixed radius, so the
+    // corner view says where the building is being looked at from.
+    const back = camera.position.clone().sub(controls.target).normalize();
+    cameraMark.position.copy(controls.target).add(back.multiplyScalar(markRadius || 1));
+    cameraMark.lookAt(controls.target);
+    sight.geometry.setFromPoints([controls.target.clone(), cameraMark.position.clone()]);
+    renderOverview();
+    paintAxes();
   });
+}
+
+// The second pass, into the canvas sitting in the corner of the pane. It
+// shares the scene, the lights and the model: only the camera differs.
+function renderOverview() {
+  const canvas = document.querySelector("[data-mini3d]");
+  if (!canvas || !overviewCamera) return;
+  if (!overview || overview.domElement !== canvas) {
+    try {
+      overview = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+    } catch (error) {
+      console.error("Corner view unavailable", error);
+      canvas.remove();
+      return;
+    }
+    overview.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    overview.outputColorSpace = THREE.SRGBColorSpace;
+    overview.toneMapping = THREE.ACESFilmicToneMapping;
+  }
+  const { width, height } = canvas.getBoundingClientRect();
+  if (width < 2 || height < 2) return;
+  if (canvas.width !== Math.round(width * overview.getPixelRatio())
+      || canvas.height !== Math.round(height * overview.getPixelRatio())) {
+    overview.setSize(width, height, false);
+    overviewCamera.aspect = width / height;
+    overviewCamera.updateProjectionMatrix();
+  }
+  overview.render(scene, overviewCamera);
+}
+
+// The axis gizmo is two dozen numbers, not a third WebGL context: each world
+// axis is turned into the camera's frame and drawn as a line in the SVG.
+// An axis pointing away from the eye is drawn faint, so the cube reads.
+const AXES = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) };
+const axisVec = new THREE.Vector3();
+function paintAxes() {
+  const svg = document.querySelector("[data-axes]");
+  if (!svg || !camera) return;
+  const q = camera.quaternion.clone().invert();
+  for (const [name, axis] of Object.entries(AXES)) {
+    axisVec.copy(axis).applyQuaternion(q);
+    const x = axisVec.x * 19, y = -axisVec.y * 19;
+    const line = svg.querySelector(`[data-ax="${name}"]`);
+    const text = svg.querySelector(`[data-axt="${name}"]`);
+    if (!line || !text) continue;
+    line.setAttribute("x2", x.toFixed(2));
+    line.setAttribute("y2", y.toFixed(2));
+    text.setAttribute("x", (x * 1.22).toFixed(2));
+    text.setAttribute("y", (y * 1.22).toFixed(2));
+    const away = axisVec.z < 0 ? 0.42 : 1;
+    line.setAttribute("opacity", away);
+    text.setAttribute("opacity", away);
+  }
 }
 
 function loadModel(host) {
@@ -175,6 +296,10 @@ function loadModel(host) {
         });
         scene.add(model);
         fitModel(host);
+        buildingSelection = createBuildingSelection({
+          model, camera, controls, canvas: renderer.domElement, sourceCenter,
+        });
+        buildingSelection.sync();
         resolve(model);
       },
       (event) => {
@@ -216,6 +341,7 @@ async function mountBuildingViewer() {
   };
 
   if (model) {
+    buildingSelection?.sync();
     setStatus(host, "ready", "");
     return;
   }
@@ -234,6 +360,7 @@ async function mountBuildingViewer() {
       resize(currentHost);
     }
     if (currentHost) setStatus(currentHost, "ready", "");
+    buildingSelection?.sync();
   } catch (error) {
     console.error("Building model failed to load", error);
     const currentHost = document.querySelector("[data-building-model]") || host;
