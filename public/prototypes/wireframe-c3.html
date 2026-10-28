@@ -594,6 +594,29 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .legend i{width:13px;height:13px;border-radius:3px;background:var(--bar);display:inline-block}
 .legend i.dash{background:none;border:1px dashed #b9b9ff}
 svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
+
+/* unit card ----------------------------------------------------------- */
+/* Three facts, three jobs: the number identifies, the typology classes, the
+   area compares. Written as one sentence they sat at one weight and wrapped
+   onto a second line on the narrow cards only, so the grid read ragged.
+   The number goes onto the drawing it belongs to, which leaves the text line
+   to the two facts that are actually compared between units. Nothing wraps:
+   a fact too long for the card is cut, never folded, so every card in the
+   grid is exactly as tall as its neighbour. */
+.ucard{position:relative}
+.ucard .ub{position:absolute;left:5px;top:5px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;padding:0 5px;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;
+  line-height:1.5;z-index:1}
+/* Scoped to high fidelity on purpose: .hi is display:none in the low-fidelity
+   pass, and a bare ".ucard .ul{display:flex}" outranks it, which would leave
+   the text showing on a wireframe that is supposed to be grey bars. */
+[data-fi="high"] .ucard .ul{display:flex;align-items:baseline;gap:6px;min-width:0;padding-top:1px}
+.ucard .ul > *{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ucard .ua{margin-left:auto;color:var(--ink-3);font-size:11.5px;font-variant-numeric:tabular-nums}
+/* A crossing is a state, not an identity: it rides on the number instead of
+   taking the area's place, so the card never loses a fact to it. */
+.ucard .uc{position:absolute;right:5px;top:5px;z-index:1;width:7px;height:7px;border-radius:50%;
+  background:var(--hi);box-shadow:0 0 0 2px var(--card)}
 </style>
 </head>
 <body>
@@ -811,7 +834,10 @@ LEVELS.forEach((lv) => {
       : (lv === 8 && PH_UNITS[suffix]) ? PH_UNITS[suffix] : TYPICAL[suffix];
     const no = `${lv}${String(suffix).padStart(2, "0")}`;
     const open = crossingsFor(no).filter((c) => !c[5]).length;
-    return [`${no} · ${ty}`, open ? `${open} croisement${open > 1 ? "s" : ""}` : `${pi2} pi²`, suffix, baseTypo(ty), lv];
+    /* The area stays on the row even when a crossing is open: a crossing is
+       a state, not an identity, and the card shows both. */
+    return [`${no} · ${ty}`, open ? `${open} croisement${open > 1 ? "s" : ""}` : `${pi2} pi²`,
+      suffix, baseTypo(ty), lv, ty, pi2, open];
   });
 });
 UNITS_BY_LEVEL["Tous les niveaux"] = LEVELS.flatMap((lv) => UNITS_BY_LEVEL[`Niveau ${lv}`]);
@@ -1568,9 +1594,22 @@ function listHTML() {
         ${pairs.slice(0, 4).map((r, i) => `<span class="chip ${i === sel ? "on" : ""}" ${act("row", i)}><span class="lo bar" style="width:46px"></span><span class="hi">${r[0].split(" ")[0]}</span></span>`).join("")}
       </div></section>`;
   }
+  /* A6: on Unités the number rides on the drawing and the line underneath
+     carries the typology and the area, the two facts a reader compares from
+     one card to the next. Other screens have no drawing and no typology, so
+     they keep the plain pair. */
+  const ucard = (r, i) => `<div class="tile ucard ${i === sel ? "on" : ""}" ${act("row", i)}
+      title="${r[0]} · ${r[6]} pi²${r[7] ? ` · ${r[1]}` : ""}">
+      <div class="plan" data-img="unit" style="height:54px;flex:0 0 54px;background-image:url(assets/plan-niveau-${r[4]}.jpg);${crop(boxForUnit(r[4], r[2]))}"></div>
+      <span class="hi ub">${r[0].split(" · ")[0]}</span>
+      ${r[7] ? `<span class="hi uc" title="${r[1]}"></span>` : ""}
+      <div class="lo bar" style="width:70%"></div>
+      <div class="hi ul"><span style="font-size:12px">${r[5]}</span>
+        <span class="ua">${r[6]} pi²</span></div></div>`;
   const inner = mode === "Card grid"
-    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${pairs.map((r, i) => `<div class="tile ${i === sel ? "on" : ""}" ${act("row", i)}>
-        <div class="plan"${V.screen === "Unités" ? ` data-img="unit" style="height:54px;flex:0 0 54px;background-image:url(assets/plan-niveau-${r[4]}.jpg);${crop(boxForUnit(r[4], r[2]))}"` : ` style="height:54px;flex:0 0 54px"`}></div>
+    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${pairs.map((r, i) => V.screen === "Unités" ? ucard(r, i)
+      : `<div class="tile ${i === sel ? "on" : ""}" ${act("row", i)}>
+        <div class="plan" style="height:54px;flex:0 0 54px"></div>
         <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r[0]} · ${r[1]}</div></div>`).join("")}</div>`
     : rows.map((r, i) => `<div class="listrow ${i === sel ? "on" : ""}" ${pairs.length ? act("row", i) : ""}><span class="dot"></span>
         <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}${V.settled[`${V.screen} · ${(pairs[i] || [""])[0]}`] ? " · réglé" : ""}</span></div>`).join("");
