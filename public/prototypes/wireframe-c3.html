@@ -830,7 +830,6 @@ const V = {
      white plan, which is how the drawing is read by default. */
   typo: { "3½": false, "4½": false, "5½": false },
   inspector: { fidelity: "inherit", layout: "Right panel" },
-  footer: { fidelity: "inherit", layout: "Impact strip" },
   lay: { arp: { on: true, opacity: 55, scale: 100, x: 0, y: 0 },
     pay: { on: false, opacity: 55, scale: 100, x: 0, y: 0 } },
 };
@@ -872,8 +871,8 @@ const SCREENS = {
   "Projets": { icon: "folder", regions: ["header", "content"], steps: {}, home: true, index: true },
   "Unités": {
     icon: "git-compare",
-    regions: ["header", "list", "content", "inspector", "footer"],
-    steps: { list: 1, content: 2, inspector: 3, footer: 4 },
+    regions: ["header", "list", "content", "inspector"],
+    steps: { list: 1, content: 2, inspector: 3 },
   },
   /* The two questions asked about a project that are not about a floor:
      what the rules demand, and what is due when. Everything else that used
@@ -1447,8 +1446,10 @@ const HOSTS = { plan: ["autocad", "Ouvrir dans AutoCAD"], model: ["sketchup", "O
 
 function hostButton(kind) {
   const [a, label] = HOSTS[kind];
-  return `<span class="btnw" ${act(a)} title="${label}">${icon("external-link")}
-    <span class="lo bar" style="width:46px"></span><span class="hi">${label}</span></span>`;
+  /* Solid: handing the drawing back to its application is the one action
+     on a drawing pane, so it carries the weight of the primary button. */
+  return `<span class="btnw solid" ${act(a)} title="${label}">${icon("external-link")}
+    <span class="lo bar" style="width:46px;background:#fff;opacity:.6"></span><span class="hi">${label}</span></span>`;
 }
 
 /* ------------------------------------------------------------ code cards
@@ -2319,7 +2320,6 @@ function inspectorHTML() {
         <span class="btnw solid ${saveReady() ? "go" : "off"}" data-save ${act("save")} style="justify-content:center"
           title="${saveReady() ? "Enregistrer" : "Choisissez une raison ou écrivez une phrase"}"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Enregistrer la décision</span></span>
       </div>
-      <span class="btnw solid" ${act("autocad")} style="justify-content:center">${icon("external-link")}<span class="lo bar" style="width:70px;background:#fff;opacity:.6"></span><span class="hi">Ouvrir dans AutoCAD</span></span>
       </div>`
       : `<div class="tile"><div class="lo col">${bars(3)}</div>
           <div class="hi" style="font-size:11.5px;color:var(--ink-2)">compté à partir des dessins, rien de saisi</div></div>`}
@@ -2334,21 +2334,6 @@ function inspectorHTML() {
       ${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
   }
   return region("inspector", "inspecteur", inner, step);
-}
-
-function footerHTML() {
-  if (V.footer.layout === "Hidden" || !SCREENS[V.screen].regions.includes("footer")) return "";
-  const step = V.journey ? SCREENS[V.screen].steps.footer : null;
-  return `<section class="pane rg ${solo("footer")}" data-rg="pied de page — effet du changement" data-fi="${fiOf("footer")}" style="flex:0 0 auto;grid-column:1/-1">
-    ${step ? `<span class="step">${step}</span>` : ""}
-    <div class="pb" style="flex-direction:row;align-items:center;gap:10px;padding:8px 12px">
-      <span class="lo bar" style="width:150px"></span><span class="lo bar" style="width:60px"></span><span class="lo bar" style="width:60px"></span>
-      <span class="hi" style="font-size:12px">Ouvertures de la façade sud</span>
-      <span class="hi" style="font-size:12px;font-weight:600">68.5 m² → 74.2 m²</span>
-      <span class="hi" style="font-size:12px;color:var(--ink-2)">+5.7 m²</span>
-      <span style="flex:1"></span>
-      <span class="btnw" ${act("readarticle")} title="Ouvrir l'article dans Zonage et code"><span class="lo bar" style="width:70px"></span><span class="hi">Lire l'article 3.2.3.1</span></span>
-    </div></section>`;
 }
 
 /* ------------------------------------------------- reading the sheet
@@ -2720,8 +2705,7 @@ function render() {
           ${SCREENS[V.screen].home ? "" : `${V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
           ${hasList ? listHTML() : ""}
           ${contentHTML()}
-          ${hasInsp ? inspectorHTML() : ""}
-          ${footerHTML()}`}
+          ${hasInsp ? inspectorHTML() : ""}`}
         </div>
         ${def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
       </div>
@@ -2799,8 +2783,8 @@ function paintSelection() {
   /* Hidden inspector, or a layout that does not draw one: nothing to swap,
      and nothing to fall back to either. */
   if (insp && inner) insp.outerHTML = inner;
-  /* The header and the footer strip are counted from the floor, not from
-     the selection: measured identical for every row, so they are left. */
+  /* The header is counted from the floor, not from the selection: measured
+     identical for every row, so it is left alone. */
   /* The outline and its label are children of the scaled sheet, so they are
      replaced inside it rather than around it. */
   const plan = vpEl()?.querySelector(".plan");
@@ -3238,14 +3222,6 @@ function onClick(e) {
       say(`Remise à SketchUp: ${V.docs.skp} s'ouvre sur ${viewOf("Unités").toLowerCase()}. Lecture seule.`);
       break;
     case "export": say(`Export préparé: ${screen}${CONTEXT[screen] ? ` · ${viewOf(screen)}` : ""}.`); break;
-    case "readarticle":
-      /* The footer strip names one provision; Codes is where it is read in
-         full, so the link goes there and opens that one. */
-      V.screen = "Codes";
-      dial.setValue("screen", FR_SCREEN[V.screen]);
-      V.view["Codes"] = 3;          // "Tous", so the article is in the list whatever it is
-      V.articleId = "3.2.3.1";
-      break;
     default: return;
   }
   render();
@@ -3279,7 +3255,7 @@ const dial = DialKit.createDialKit("Wireframe C3", {
      plan is a white sheet, and inverting it would be redrawing it. */
   theme: sel(["Light", "Dark"]),
   homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
-  isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
+  isolate: sel(["none", "nav", "header", "list", "content", "inspector"]),
   /* One shortlist per screen, so the rail can be judged against what the
      screen actually holds rather than against a default grid of squares. */
   railIcons: { _collapsed: false,
@@ -3312,14 +3288,14 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   list: { _collapsed: true, fidelity: FI, layout: sel(["Card grid", "Vertical list", "Filter bar only", "Hidden"]) },
   content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
   inspector: { _collapsed: true, fidelity: FI, layout: sel(["Right panel", "Bottom sheet", "Overlay drawer", "Hidden"]) },
-  footer: { _collapsed: true, fidelity: FI, layout: sel(["Impact strip", "Hidden"]) },
 /* The id carries the saved panel. It is bumped whenever a default changes,
    because a panel saved before it would keep reopening on the old one — the
    dark bar and the card grid would never be seen by anyone who had already
    opened the file. r3: dark chrome and unit cards by default. r4: the
    Coordination tab and its glyph, which a saved panel would otherwise pin
-   back to Layers. */
-}, { id: "wireframe-c3-r4", persist: true });
+   back to Layers. r5: the footer strip is gone, so its group must not
+   reappear from a saved panel. */
+}, { id: "wireframe-c3-r5", persist: true });
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
 
@@ -3352,7 +3328,7 @@ function applyDial(v) {
     scale: al.surveyorScale, x: al.surveyorX, y: al.surveyorY };
   V.lay.pay = { on: la.landscaping, opacity: la.landscapingOpacity,
     scale: al.landscapingScale, x: al.landscapingX, y: al.landscapingY };
-  ["nav", "header", "list", "content", "inspector", "footer"].forEach((r) => { V[r] = v[r]; });
+  ["nav", "header", "list", "content", "inspector"].forEach((r) => { V[r] = v[r]; });
   render();
 }
 
