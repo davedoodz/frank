@@ -6,15 +6,25 @@
 <title>Rail de calques — huit variantes</title>
 <link rel="stylesheet" href="vendor/geist/geist.css">
 <style>
-/* The rail won. What is left is how it behaves, and the reference everyone
-   in the office already has in their hands is the Photoshop layers panel:
-   an eye on the left, a thumbnail, a name, the selected row highlighted,
-   opacity at the top, a row of buttons at the bottom. Alt-click on an eye
-   isolates. That vocabulary is free — it does not have to be taught.
+/* The rail is the Photoshop layers panel, because that is the panel both
+   users already have in their hands: eye on the left, a thumbnail, the
+   selected row lit, a row of verbs at the foot, alt-click an eye to isolate.
 
-   Eight variants below. Each is the whole screen, at the size it is used,
-   with the four panes untouched: the rail is only honest when the drawing
-   beside it is the real width it will have. */
+   What a row says has been rewritten. A layer here is not an abstraction,
+   it is a file on the office server, so the row carries the file: its real
+   name — the office's name, with the date at the end, as drawings are named
+   between architects and consultants — the discipline it came from with its
+   own glyph, and the date it was issued. No revision codes: R02 means
+   nothing without the sheet in front of you, and the date is what is
+   actually argued about. No "à jour" either: nothing in fitte can know
+   whether a consultant has drawn something newer this morning, and a green
+   dot that cannot be trusted is worse than no dot.
+
+   Two things follow from a row being a file. Clicking it opens that file
+   where it is edited, or swaps it for another one. And the row can be
+   dragged: stacking order is the other half of reading two drawings at
+   once, and plenty of people never touch opacity — they drag the sheet they
+   want on top and leave both at 100 %. */
 :root{
   --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
   --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
@@ -22,14 +32,13 @@
   --line:#c9c9c9; --line-2:#e5e5e5;
   --fill:#ededed; --fill-2:#f6f6f6; --page:#f2f2f2; --card:#fff;
   --vert:#C3E05A; --vert-ink:#2f3a05;
-  --ok:#2f6b2f; --warn:#8a5c00;
   --r:6px;
 }
 *{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
 body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
 .sheet{padding:22px 20px 80px;display:flex;flex-direction:column;gap:34px}
 h1{font-size:17px;font-weight:600}
-.lede{font-size:12.5px;color:var(--ink-2);max-width:78ch}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:80ch}
 .lu{width:14px;height:14px;flex:0 0 14px;stroke-width:1.6}
 
 .var{display:flex;flex-direction:column;gap:9px}
@@ -39,10 +48,7 @@ h1{font-size:17px;font-weight:600}
 .why{font-size:12px;color:var(--ink-2);max-width:96ch}
 .why .cost{color:var(--ink-3)}
 
-/* ------------------------------------------------------------ the screen
-   The prototype at full size: dark bar, level row, four panes, impact
-   strip. Nothing here is compressed — a 1 440 px screen is what the office
-   works on, so that is what the rail is judged inside. */
+/* ------------------------------------------------------------ the screen */
 .app{border-radius:12px;overflow:hidden;background:#141416;min-width:1180px}
 .bar1{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
 .bar1 .crumb{color:rgba(255,255,255,.58)}
@@ -84,8 +90,8 @@ h1{font-size:17px;font-weight:600}
 .uc .ul{display:flex;align-items:baseline;gap:6px;padding:6px 9px;font-size:12.5px}
 .uc .ul .a{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums}
 
-/* The rail eats into the 2D pane, so that pane is given back what the rail
-   takes: the drawing beside it stays as wide as the model next to it. */
+/* The rail takes its width from the pane, so the drawing beside it stays as
+   wide as the model next to it. */
 .d2{flex:1.6;min-width:0}
 .m3{flex:1;min-width:0}
 .m3 .still{flex:1;min-height:0;background-image:url(assets/maquette-still.jpg);background-size:cover;
@@ -95,7 +101,6 @@ h1{font-size:17px;font-weight:600}
 .kv b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
 .kv span{color:var(--ink-2)}
 
-/* the drawing itself, and the two consultant sheets over it */
 .stage{flex:1;min-width:0;min-height:0;position:relative;overflow:hidden;background:var(--card)}
 .plan{position:absolute;inset:0;background-image:url(assets/plan-niveau-5.jpg);
   background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
@@ -107,10 +112,8 @@ h1{font-size:17px;font-weight:600}
 .mult{mix-blend-mode:multiply}
 .diff{mix-blend-mode:difference}
 
-/* ----------------------------------------------------------- the rail
-   Same anatomy in all eight: a header, a list of layers, a foot of
-   buttons. Only the row changes, and what the header and the foot do. */
-.rail{flex:0 0 var(--rw,224px);border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+/* ----------------------------------------------------------- the rail */
+.rail{flex:0 0 var(--rw,252px);border-left:1px solid var(--line-2);display:flex;flex-direction:column;
   min-height:0;background:var(--card)}
 .rh{flex:0 0 auto;border-bottom:1px solid var(--line-2);padding:6px 8px;display:flex;flex-direction:column;gap:6px}
 .rh .t{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-3)}
@@ -118,30 +121,39 @@ h1{font-size:17px;font-weight:600}
 .rb{flex:1;min-height:0;overflow:auto;padding:5px;display:flex;flex-direction:column;gap:2px}
 .rf{flex:0 0 auto;border-top:1px solid var(--line-2);padding:5px 6px;display:flex;align-items:center;gap:4px}
 
-.lrow{border:1px solid transparent;border-radius:5px;padding:4px 5px;display:flex;flex-direction:column;gap:4px;
-  cursor:default}
+/* A row is dragged by its handle, so nothing in it should turn into a text
+   selection on the way. */
+.lrow{border:1px solid transparent;border-radius:5px;padding:5px;display:flex;flex-direction:column;gap:4px;
+  user-select:none;background:var(--card)}
 .lrow:hover{background:var(--fill-2)}
 .lrow.sel{background:var(--fill);border-color:var(--line-2)}
 .lrow.hid{opacity:.5}
-.thumb{width:38px;height:30px;flex:0 0 38px;border:1px solid var(--line-2);border-radius:3px;
+.lrow.drag{opacity:.9;border-color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.14)}
+.lrow.over{border-top:2px solid var(--ink)}
+/* the handle: the one part of the row that says "this moves" */
+.grip{color:var(--ink-3);cursor:grab;flex:0 0 14px}
+.grip:active{cursor:grabbing}
+.lrow:hover .grip{color:var(--ink-2)}
+
+.thumb{width:40px;height:32px;flex:0 0 40px;border:1px solid var(--line-2);border-radius:3px;
   background-color:#fff;background-size:contain;background-repeat:no-repeat;background-position:center}
-.thumb.big{width:54px;height:42px;flex:0 0 54px}
+.thumb.big{width:56px;height:44px;flex:0 0 56px}
 .eye{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;
   color:var(--ink-3);cursor:pointer;flex:0 0 22px}
 .eye:hover{background:var(--fill)}
 .eye.on{color:var(--ink)}
 .lock{color:var(--ink-3);cursor:pointer}
 .lock.on{color:var(--ink)}
+/* the file name, as the office writes it: elided at the front, never wrapped */
+.fname{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left;min-width:0}
+/* When the row is too narrow something has to give, and it is the
+   discipline label, not the date: the date is why the row is read. */
+.disc{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);min-width:0;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.disc .lu{width:12px;height:12px;flex:0 0 12px}
+.date{font-size:11px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
 .nm{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.sub{font-size:10.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rev{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
-.bar-c{width:3px;border-radius:2px;align-self:stretch;flex:0 0 3px}
-.dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px}
-.dot.ok{background:var(--ok)}
-.dot.old{background:#d08b00}
-.state{font-size:10.5px;white-space:nowrap}
-.state.old{color:var(--warn)}
-.state.ok{color:var(--ink-3)}
 
 .row{display:flex;align-items:center;gap:6px;min-width:0}
 .col{display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -152,26 +164,25 @@ h1{font-size:17px;font-weight:600}
 .btn.ico{padding:0 6px}
 .btn.sm{height:21px;padding:0 6px;font-size:11px;border-radius:4px}
 .btn.on{border-color:var(--ink);color:var(--ink);background:var(--card)}
-.btn.solid{background:#1b1b1b;border-color:#1b1b1b;color:#fff}
-.btn[disabled]{opacity:.4;pointer-events:none}
 input[type=range]{-webkit-appearance:none;appearance:none;height:14px;background:transparent;cursor:pointer;width:100%;min-width:0}
 input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:2px}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;
   background:var(--ink);margin-top:-4px}
 .pc{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;
   width:32px;text-align:right;flex:0 0 32px}
-/* the scrubby number: Photoshop's draggable label */
 .scrub{font-family:var(--mono);font-size:11px;color:var(--ink-2);cursor:ew-resize;
   border-bottom:1px dotted var(--line);font-variant-numeric:tabular-nums;user-select:none}
 .scrub:hover{color:var(--ink);border-color:var(--ink-3)}
 select{height:22px;border:1px solid var(--line-2);border-radius:4px;background:var(--card);
   font-size:11px;color:var(--ink-2);padding:0 4px}
-
 .tabs{display:flex;gap:2px}
 .tabs span{font-size:11.5px;color:var(--ink-3);padding:3px 8px;border-radius:5px;cursor:pointer}
 .tabs span.on{background:var(--fill);color:var(--ink)}
+.bar-c{width:3px;border-radius:2px;align-self:stretch;flex:0 0 3px}
+.grp{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);
+  padding:4px 5px 2px;display:flex;align-items:center;gap:6px;cursor:pointer}
+.hint{font-size:10.5px;color:var(--ink-3)}
 
-.hist{display:flex;flex-direction:column;gap:4px;padding:4px 2px}
 .vrow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
 .vrow.cur{color:var(--ink)}
 .vrow .d{color:var(--ink-3);font-family:var(--mono);font-size:10.5px}
@@ -182,14 +193,13 @@ select{height:22px;border:1px solid var(--line-2);border-radius:4px;background:v
 .drop{border:1px dashed var(--line);border-radius:5px;padding:7px;text-align:center;font-size:11px;
   color:var(--ink-3);cursor:pointer}
 .drop:hover{border-color:var(--ink-3);color:var(--ink-2)}
-.panel{border-top:1px solid var(--line-2);padding:6px;display:flex;flex-direction:column;gap:6px;
-  background:var(--fill-2);flex:0 0 auto;max-height:230px;overflow:auto}
+.panel{border-top:1px solid var(--line-2);padding:7px;display:flex;flex-direction:column;gap:6px;
+  background:var(--fill-2);flex:0 0 auto;max-height:244px;overflow:auto}
+.path{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);background:var(--card);
+  border:1px solid var(--line-2);border-radius:4px;padding:4px 6px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left}
 .toast{position:absolute;left:10px;bottom:10px;background:#1b1b1b;color:#fff;font-size:11.5px;
   padding:6px 10px;border-radius:5px;z-index:9;max-width:70%}
-.grp{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);
-  padding:4px 5px 2px;display:flex;align-items:center;gap:6px;cursor:pointer}
-.hint{font-size:10.5px;color:var(--ink-3);padding:3px 6px}
-/* the zoom column, kept so the rail is measured against the real pane */
 .zcol{flex:0 0 30px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;
   align-items:center;gap:6px;padding:7px 0;color:var(--ink-3);font-size:10.5px}
 .zcol .tr{flex:1;width:3px;background:var(--line);border-radius:2px;position:relative}
@@ -199,7 +209,8 @@ select{height:22px;border:1px solid var(--line-2);border-radius:4px;background:v
 <body>
 <div class="sheet">
   <h1>Rail de calques — huit variantes</h1>
-  <p class="lede">Le rail retenu, décliné. Le vocabulaire est celui du panneau Calques de Photoshop, que les deux utilisateurs ont déjà dans la main: l'œil à gauche, une vignette, le calque sélectionné en surbrillance, l'opacité en haut, une rangée de boutons en bas. <b>Alt-clic sur un œil isole</b> le calque, comme dans Photoshop. Chaque variante est l'écran entier, à sa taille réelle, les quatre volets intacts.</p>
+  <p class="lede">Un calque est un fichier sur le serveur du bureau, et la ligne le dit: le nom tel que le bureau l'écrit, avec la date à la fin, la discipline d'où il vient avec son propre pictogramme, et la date d'émission. Pas de code de révision, pas de pastille « à jour »: fitte ne peut pas savoir ce qu'un consultant a dessiné ce matin.</p>
+  <p class="lede"><b>Cliquer une ligne</b> ouvre le fichier là où il se modifie, ou le remplace par un autre. <b>Tirer la poignée</b> change l'ordre d'empilement — deux planches à 100 % l'une sur l'autre, sans toucher à l'opacité. <b>Alt-clic sur un œil</b> isole, comme dans Photoshop. Chaque variante est l'écran entier, à sa taille réelle.</p>
   <div id="vars"></div>
 </div>
 
@@ -209,8 +220,8 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
 function sprite() {
   const names = ["file", "ruler", "trees", "eye", "eye-off", "layers", "upload", "history", "clock",
     "chevron-down", "chevron-right", "external-link", "check", "circle", "list", "box", "lock",
-    "lock-open", "git-compare", "x", "folder", "share-2", "plus", "minus", "table", "maximize",
-    "trash-2", "copy", "sliders-horizontal"];
+    "lock-open", "git-compare", "x", "folder", "share-2", "plus", "minus", "table", "pen-line",
+    "grip-vertical", "replace", "compass", "hard-hat", "folder-open", "arrow-up-down"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
     if (!node) return "";
@@ -226,15 +237,14 @@ function sprite() {
 }
 const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
 
-/* The placement of the consultant sheets, taken from the prototype: each is
-   scaled so its building covers the floor plan's, then centred. */
+/* The placement of the consultant sheets, taken from the prototype. */
 const BASE_BOX = [314 / 2000, 325 / 1675, 1488 / 2000, 1270 / 1675];
 const BASE_RATIO = 2000 / 1675;
 const SHEETS = {
   arp: { box: [298 / 1650, 307 / 1560, 1380 / 1650, 1172 / 1560], ratio: 1650 / 1560 },
   pay: { box: [156 / 835, 178 / 800, 711 / 835, 624 / 800], ratio: 835 / 800 },
 };
-function layStyle(k, opacity) {
+function layStyle(k, opacity, z) {
   const S = SHEETS[k];
   const [bx0, by0, bx1, by1] = BASE_BOX;
   const [sx0, sy0, sx1, sy1] = S.box;
@@ -243,339 +253,323 @@ function layStyle(k, opacity) {
   const left = bx0 - sx0 * w;
   const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h;
   return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
-    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;opacity:${opacity / 100}`;
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;opacity:${opacity / 100};z-index:${z}`;
 }
 
-/* Three documents, their current sheet and the ones it replaced. The
-   landscape sheet is out of date on purpose: a newer one is sitting in the
-   office's received folder, unopened. */
-const DRAWINGS = {
-  plan: { name: "Plan d'étage", icon: "file", who: "Atelier", colour: "#1b1b1b",
-    thumb: "assets/plan-niveau-5.jpg",
-    versions: [
-      { rev: "R04", date: "24 oct", note: "corridor élargi à 1 100 mm" },
-      { rev: "R03", date: "12 sept", note: "escalier est repositionné" },
-      { rev: "R02", date: "2 août", note: "première émission pour permis" }] },
-  arp: { name: "Arpenteur", icon: "ruler", who: "Arpenteur-géomètre", colour: "#2f6b8a",
-    thumb: "assets/arp-site.png",
-    versions: [
-      { rev: "R02", date: "7 oct", note: "implantation conforme" },
-      { rev: "R01", date: "14 mai", note: "relevé initial" }] },
-  pay: { name: "Paysage", icon: "trees", who: "Architecte paysagiste", colour: "#5d7a33",
-    thumb: "assets/paysage.png",
-    waiting: { rev: "R02", date: "26 oct" },
-    versions: [{ rev: "R01", date: "7 juil", note: "aménagement au pré-permis" }] },
+/* --------------------------------------------------------- the disciplines
+   Who drew it, with a glyph of its own: the row is read before it is read.
+   A compass for the office's own drawings, the surveyor's rule, the trees
+   of the landscape architect, a hard hat for engineering when it arrives. */
+const DISC = {
+  arch: { label: "Architecte", icon: "compass" },
+  arp: { label: "Arpenteur-géomètre", icon: "ruler" },
+  pays: { label: "Architecte paysagiste", icon: "trees" },
+  civ: { label: "Ingénieur civil", icon: "hard-hat" },
 };
-/* Top of the rail is the top of the pile, as in any layers panel: the
-   consultant sheets print over the floor plan. */
-const KEYS = ["pay", "arp", "plan"];
-const FOUND = [
-  { file: "PAYSAGE_PRE-PERMIS_R02.pdf", date: "26 oct", rev: "R02" },
-  { file: "PAYSAGE_COUPES_R02.pdf", date: "26 oct", rev: "R02" },
-];
+
+/* The documents. Names are written as an office writes them: project code,
+   what the sheet is, the date at the end. The date is the only version
+   marker — it is what is said out loud on the phone. */
+const SERVER = "\\\\serveur-bureau\\Projets\\2026\\BAL3\\";
+const DRAWINGS = {
+  plan: { disc: "arch", app: "AutoCAD", thumb: "assets/plan-niveau-5.jpg",
+    folder: SERVER + "Dessins\\",
+    versions: [
+      { file: "BAL3_PLAN-NIVEAU-5_2026-10-24.dwg", date: "24 oct 2026", note: "corridor élargi à 1 100 mm" },
+      { file: "BAL3_PLAN-NIVEAU-5_2026-09-12.dwg", date: "12 sept 2026", note: "escalier est repositionné" },
+      { file: "BAL3_PLAN-NIVEAU-5_2026-08-02.dwg", date: "2 août 2026", note: "émission pour permis" }] },
+  arp: { disc: "arp", app: "AutoCAD", thumb: "assets/arp-site.png",
+    folder: SERVER + "Reçu\\Arpenteur\\",
+    versions: [
+      { file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-07.pdf", date: "7 oct 2026", note: "implantation du projet" },
+      { file: "BAL3_RELEVE-TERRAIN_2026-05-14.pdf", date: "14 mai 2026", note: "relevé du terrain" }] },
+  pay: { disc: "pays", app: "Acrobat", thumb: "assets/paysage.png",
+    folder: SERVER + "Reçu\\Paysage\\",
+    versions: [
+      { file: "BAL3_AMENAGEMENT-PAYSAGER_2026-07-07.pdf", date: "7 juil 2026", note: "aménagement au pré-permis" }] },
+};
+/* Files sitting in the received folders, offered when a row is swapped. */
+const FOUND = {
+  plan: [{ file: "BAL3_PLAN-NIVEAU-5_2026-10-27.dwg", date: "27 oct 2026" },
+    { file: "BAL3_PLAN-NIVEAU-6_2026-10-24.dwg", date: "24 oct 2026" }],
+  arp: [{ file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-21.pdf", date: "21 oct 2026" },
+    { file: "BAL3_CERTIFICAT-LOCALISATION_2026-09-30.pdf", date: "30 sept 2026" }],
+  pay: [{ file: "BAL3_AMENAGEMENT-PAYSAGER_2026-10-26.pdf", date: "26 oct 2026" },
+    { file: "BAL3_PLANTATIONS-DETAILS_2026-10-26.pdf", date: "26 oct 2026" }],
+};
 const BLENDS = [["normal", "Normal"], ["mult", "Multiplier"], ["diff", "Différence"]];
 
 const newState = () => ({
+  /* The order of the pile, top first, exactly as the rail prints it. */
+  order: ["pay", "arp", "plan"],
   on: { plan: true, arp: true, pay: true },
   op: { plan: 100, arp: 55, pay: 55 },
   blend: { plan: "normal", arp: "mult", pay: "mult" },
   lock: { plan: true, arp: false, pay: false },
-  iso: null, sel: "pay", tab: "layers", open: null, imp: null,
+  iso: null, sel: "pay", tab: "layers", open: null, swap: null,
   groups: { bureau: true, cons: true },
-  toast: null,
+  drag: null, overIdx: null, toast: null,
   docs: JSON.parse(JSON.stringify(DRAWINGS)),
 });
 const S = [];
 const visible = (s, k) => (s.iso ? s.iso === k : s.on[k]);
 const cur = (s, k) => s.docs[k].versions[0];
-const stale = (s, k) => !!s.docs[k].waiting;
+const disc = (s, k) => DISC[s.docs[k].disc];
+/* Top of the rail prints last: the first row of the list is the sheet on
+   top of the pile, as in any layers panel. */
+const zOf = (s, k) => s.order.length - s.order.indexOf(k);
 
 /* -------------------------------------------------------------- the stage */
-function stageHTML(s, v) {
-  const blend = (k) => (v.blend ? ` ${s.blend[k] === "mult" ? "mult" : s.blend[k] === "diff" ? "diff" : ""}` : "");
+function stageHTML(s, o = {}) {
+  const blend = (k) => (o.blend ? ` ${s.blend[k] === "mult" ? "mult" : s.blend[k] === "diff" ? "diff" : ""}` : "");
   return `<div class="stage">
-    <div class="plan ${visible(s, "plan") ? "" : "off"}" style="opacity:${s.op.plan / 100}"></div>
+    <div class="plan ${visible(s, "plan") ? "" : "off"}"
+      style="opacity:${s.op.plan / 100};z-index:${zOf(s, "plan")}"></div>
     ${["arp", "pay"].map((k) => `<div class="lay ${k}${blend(k)} ${visible(s, k) ? "" : "off"}"
-      style="${layStyle(k, s.op[k])}"></div>`).join("")}
+      style="${layStyle(k, s.op[k], zOf(s, k))}"></div>`).join("")}
     ${s.toast ? `<div class="toast">${s.toast}</div>` : ""}
   </div>`;
 }
 
-function stateHTML(s, k, short) {
-  const d = s.docs[k];
-  if (!d.waiting) return `<span class="dot ok"></span><span class="state ok">à jour</span>`;
-  return `<span class="dot old"></span><span class="state old">${short
-    ? `${d.waiting.rev} · ${d.waiting.date}` : `${d.waiting.rev} reçu le ${d.waiting.date}`}</span>`;
-}
+/* --------------------------------------------------------- the row pieces */
+const gripHTML = (i, k) => `<span class="grip" data-a="grip" data-i="${i}" data-k="${k}"
+  title="Tirer pour changer l'ordre d'empilement">${icon("grip-vertical")}</span>`;
 
-/* The two panels every variant can open under its list: what this drawing
-   has been, and what would replace it. Identical everywhere, so the variants
-   differ only in the rail itself. */
-function histHTML(s, i, k) {
-  const d = s.docs[k];
-  return `<div class="hist">
-    <div class="row"><b style="font-size:11.5px">Versions · ${d.name}</b><span style="flex:1"></span>
-      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
-    ${d.versions.map((v, j) => `<div class="vrow ${j === 0 ? "cur" : ""}">
-      ${j === 0 ? icon("check") : `<span style="width:14px"></span>`}
-      <span class="d">${v.rev}</span><span class="d">${v.date}</span>
-      <span class="nm" style="flex:1">${v.note}</span>
-      ${j === 0 ? `<span class="rev">lu</span>` : `<span class="btn sm" data-a="cmp" data-i="${i}" data-k="${k}" data-v="${j}">comparer</span>`}
-    </div>`).join("")}
-    <div class="note">Rien n'est supprimé et rien n'est écrit dans un fichier de dessin.</div>
-  </div>`;
-}
-function importHTML(s, i, k) {
-  const d = s.docs[k];
-  return `<div class="col">
-    <div class="row"><b style="font-size:11.5px">Importer · ${d.name}</b><span style="flex:1"></span>
-      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
-    <div class="note">La version lue aujourd'hui passe dans l'historique; elle reste comparable.</div>
-    ${(d.waiting ? FOUND : FOUND.slice(1)).map((f, j) => `<div class="found" data-a="pick" data-i="${i}" data-k="${k}" data-f="${j}">
-      ${icon("file")}<span class="nm" style="flex:1">${f.file}</span><span class="d">${f.date}</span></div>`).join("")}
-    <div class="drop" data-a="pick" data-i="${i}" data-k="${k}" data-f="0">Déposer un PDF ou un DWG</div>
-  </div>`;
-}
-const panelHTML = (s, i) => (s.imp ? `<div class="panel">${importHTML(s, i, s.imp)}</div>`
-  : s.open ? `<div class="panel">${histHTML(s, i, s.open)}</div>` : "");
-
-/* The eye, with Photoshop's modifier: alt-click isolates, click hides. */
 const eyeHTML = (s, i, k) => `<span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}"
   title="${visible(s, k) ? "Masquer" : "Afficher"} · Alt-clic: ne voir que celui-ci">${icon(visible(s, k) ? "eye" : "eye-off")}</span>`;
 
 const sliderHTML = (s, i, k) => `<input type="range" min="0" max="100" value="${s.op[k]}"
   data-a="op" data-i="${i}" data-k="${k}">`;
 
-/* The foot of the rail: the same four verbs everywhere, Photoshop's bottom
-   row — act on the selected layer. */
-const footHTML = (s, i, extra = "") => `<div class="rf">
-  <span class="btn ico" data-a="imp" data-i="${i}" data-k="${s.sel}" title="Importer une nouvelle version">${icon("upload")}</span>
-  <span class="btn ico" data-a="hist" data-i="${i}" data-k="${s.sel}" title="Historique des versions">${icon("history")}</span>
-  <span class="btn ico" data-a="cmp" data-i="${i}" data-k="${s.sel}" data-v="1" title="Comparer avec la version précédente">${icon("git-compare")}</span>
-  ${extra}
-  <span style="flex:1"></span>
-  <span class="btn sm ${s.iso ? "on" : ""}" data-a="iso" data-i="${i}" data-k="${s.iso ? "" : s.sel}"
-    title="Ne voir que le calque sélectionné">${s.iso ? "tout voir" : "isoler"}</span>
+/* The two lines that carry the file: its name as written, then who drew it
+   and when. Both elide from the left, because the end of a drawing name is
+   the part that changes. */
+const fileLines = (s, k) => `<span class="fname" title="${cur(s, k).file}">${cur(s, k).file}</span>
+  <span class="row"><span class="disc">${icon(disc(s, k).icon)}${disc(s, k).label}</span>
+    <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></span>`;
+
+/* What a row can do, because a row is a file: open it where it is edited,
+   or put another file in its place. */
+const actionsHTML = (s, i, k) => `<div class="row" style="gap:4px">
+  <span class="btn sm" data-a="open" data-i="${i}" data-k="${k}">${icon("external-link")}Ouvrir dans ${s.docs[k].app}</span>
+  <span class="btn sm" data-a="swap" data-i="${i}" data-k="${k}">${icon("replace")}Changer</span>
+  <span class="btn sm" data-a="hist" data-i="${i}" data-k="${k}" title="Documents précédents">${icon("history")}${s.docs[k].versions.length}</span>
 </div>`;
 
-/* ===================================================================== A
-   The panel, as Photoshop draws it: opacity at the top acting on the
-   selected layer, rows with a thumbnail, buttons at the bottom. One slider
-   on screen instead of three. */
+/* Swapping: the folder the file lives in, what is sitting in it, and a drop
+   target. The file that leaves stays in the list below, by date. */
+function swapHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col">
+    <div class="row"><b style="font-size:11.5px">Changer le document</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    <div class="row">${icon("folder-open")}<span class="path" title="${d.folder}">${d.folder}</span></div>
+    ${FOUND[k].map((f, j) => `<div class="found" data-a="pick" data-i="${i}" data-k="${k}" data-f="${j}">
+      ${icon("file")}<span class="fname" style="flex:1">${f.file}</span><span class="date">${f.date}</span></div>`).join("")}
+    <div class="drop" data-a="pick" data-i="${i}" data-k="${k}" data-f="0">Déposer un fichier, ou coller un chemin</div>
+    <div class="note">Le fichier reste sur le serveur. fitte lit; il n'écrit jamais dans un dessin.</div>
+  </div>`;
+}
+
+function histHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col" style="gap:4px">
+    <div class="row"><b style="font-size:11.5px">Documents lus pour ce calque</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    ${d.versions.map((v, j) => `<div class="vrow ${j === 0 ? "cur" : ""}">
+      ${j === 0 ? icon("check") : `<span style="width:14px"></span>`}
+      <span class="fname" style="flex:1">${v.file}</span><span class="date">${v.date}</span>
+      ${j === 0 ? "" : `<span class="btn sm" data-a="revert" data-i="${i}" data-k="${k}" data-v="${j}">relire</span>`}
+    </div>`).join("")}
+    <div class="note">Les documents remplacés restent listés: on peut toujours revenir à celui qui était lu.</div>
+  </div>`;
+}
+const panelHTML = (s, i) => (s.swap ? `<div class="panel">${swapHTML(s, i, s.swap)}</div>`
+  : s.open ? `<div class="panel">${histHTML(s, i, s.open)}</div>` : "");
+
+/* The foot: the verbs of the selected layer, Photoshop's bottom row. */
+const footHTML = (s, i) => `<div class="rf">
+  <span class="btn ico" data-a="open" data-i="${i}" data-k="${s.sel}" title="Ouvrir le document">${icon("external-link")}</span>
+  <span class="btn ico" data-a="swap" data-i="${i}" data-k="${s.sel}" title="Changer le document">${icon("replace")}</span>
+  <span class="btn ico" data-a="hist" data-i="${i}" data-k="${s.sel}" title="Documents précédents">${icon("history")}</span>
+  <span style="flex:1"></span>
+  <span class="btn sm ${s.iso ? "on" : ""}" data-a="iso" data-i="${i}" data-k="${s.iso ? "" : s.sel}">${s.iso ? "tout voir" : "isoler"}</span>
+</div>`;
+
+const rowAttrs = (s, i, k) => `class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}
+  ${s.drag === k ? "drag" : ""} ${s.overIdx === s.order.indexOf(k) ? "over" : ""}"
+  data-a="sel" data-i="${i}" data-k="${k}" data-row="${k}"`;
+
+/* ===================================================================== A */
 function varA(i, s) {
   return rail(i, s, `
     <div class="rh">
-      <div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>${stateHTML(s, s.sel, true)}</div>
-      <div class="row"><span class="rev" style="width:52px">Opacité</span>${sliderHTML(s, i, s.sel)}<span class="pc">${s.op[s.sel]}%</span></div>
+      <div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>
+        <span class="hint">${icon("arrow-up-down")} ordre</span></div>
+      <div class="row"><span class="date" style="width:52px">Opacité</span>${sliderHTML(s, i, s.sel)}<span class="pc">${s.op[s.sel]}%</span></div>
     </div>
-    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
-      data-a="sel" data-i="${i}" data-k="${k}">
-      <div class="row">${eyeHTML(s, i, k)}
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
         <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
-        <div class="col" style="flex:1;gap:1px">
-          <span class="nm">${s.docs[k].name}</span>
-          <span class="row"><span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span>
-            ${stale(s, k) ? `<span class="dot old"></span>` : ""}</span>
-        </div>
-      </div>
+        <div class="col" style="flex:1;gap:1px">${fileLines(s, k)}</div></div>
+      ${s.sel === k ? actionsHTML(s, i, k) : ""}
     </div>`).join("")}</div>
     ${footHTML(s, i)}`);
 }
 
-/* ===================================================================== B
-   Bigger thumbnails: at 54 px the surveyor's sheet and the landscape sheet
-   are told apart without reading. The rail gets wider for it. */
+/* ===================================================================== B */
 function varB(i, s) {
   return rail(i, s, `
-    <div class="rh"><div class="t">${icon("layers")}<b>Calques</b></div></div>
-    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
-      data-a="sel" data-i="${i}" data-k="${k}">
-      <div class="row">${eyeHTML(s, i, k)}
+    <div class="rh"><div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>
+      <span class="hint">3 documents</span></div></div>
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
         <span class="thumb big" style="background-image:url(${s.docs[k].thumb})"></span>
-        <div class="col" style="flex:1;gap:2px">
-          <span class="nm">${s.docs[k].name}</span>
-          <span class="sub">${s.docs[k].who}</span>
-          <span class="row"><span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span>
-            <span style="flex:1"></span>${stateHTML(s, k, true)}</span>
-        </div>
-      </div>
+        <div class="col" style="flex:1;gap:2px">${fileLines(s, k)}</div></div>
       <div class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></div>
+      ${s.sel === k ? actionsHTML(s, i, k) : ""}
     </div>`).join("")}</div>
-    ${footHTML(s, i)}`, 252);
+    ${footHTML(s, i)}`, 286);
 }
 
-/* ===================================================================== C
-   No thumbnails, one line per layer. The densest of the eight: the rail
-   stops being a panel and becomes a legend. */
+/* ===================================================================== C */
 function varC(i, s) {
   return rail(i, s, `
     <div class="rh"><div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>
       <span class="btn sm" data-a="iso" data-i="${i}" data-k="${s.iso ? "" : s.sel}">${s.iso ? "tout" : "isoler"}</span></div></div>
-    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
-      data-a="sel" data-i="${i}" data-k="${k}" style="padding:3px 5px">
-      <div class="row">${eyeHTML(s, i, k)}${icon(s.docs[k].icon)}
-        <span class="nm" style="flex:1">${s.docs[k].name}</span>
-        ${stale(s, k) ? `<span class="dot old"></span>` : ""}
-        <span class="rev">${cur(s, k).rev}</span></div>
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)} style="padding:4px 5px">
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}${icon(disc(s, k).icon)}
+        <span class="nm" style="flex:1">${disc(s, k).label}</span>
+        <span class="date">${cur(s, k).date}</span></div>
       <div class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></div>
+      ${s.sel === k ? `<span class="fname">${cur(s, k).file}</span>${actionsHTML(s, i, k)}` : ""}
     </div>`).join("")}</div>
-    ${footHTML(s, i)}`, 196);
+    ${footHTML(s, i)}`, 238);
 }
 
-/* ===================================================================== D
-   Two tabs, the way Photoshop keeps Layers and History in one dock: the
-   version trail stops being a popup and becomes the other half of the rail. */
+/* ===================================================================== D */
 function varD(i, s) {
-  const layers = `${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
-    data-a="sel" data-i="${i}" data-k="${k}">
-    <div class="row">${eyeHTML(s, i, k)}
+  const layers = s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+    <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
       <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
-      <div class="col" style="flex:1;gap:1px"><span class="nm">${s.docs[k].name}</span>
-        <span class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></span></div>
-    </div></div>`).join("")}`;
+      <div class="col" style="flex:1;gap:1px">${fileLines(s, k)}
+        <span class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></span></div></div>
+  </div>`).join("");
   const d = s.docs[s.sel];
-  const versions = `<div class="col" style="padding:4px">
-    <div class="row">${icon(d.icon)}<b style="font-size:12px">${d.name}</b></div>
-    ${d.waiting ? `<div class="row">${stateHTML(s, s.sel)}</div>` : ""}
+  const docs = `<div class="col" style="padding:4px">
+    <div class="row">${icon(disc(s, s.sel).icon)}<b style="font-size:12px">${disc(s, s.sel).label}</b></div>
+    <div class="row">${icon("folder-open")}<span class="path">${d.folder}</span></div>
     ${d.versions.map((v, j) => `<div class="vrow ${j === 0 ? "cur" : ""}">
       ${j === 0 ? icon("check") : `<span style="width:14px"></span>`}
-      <span class="d">${v.rev}</span><span class="d">${v.date}</span>
-      <span class="nm" style="flex:1">${v.note}</span></div>`).join("")}
-    <span class="btn sm" data-a="imp" data-i="${i}" data-k="${s.sel}">${icon("upload")}Importer une version</span>
+      <span class="fname" style="flex:1">${v.file}</span><span class="date">${v.date}</span></div>`).join("")}
+    ${actionsHTML(s, i, s.sel)}
   </div>`;
   return rail(i, s, `
     <div class="rh"><div class="tabs">
       <span class="${s.tab === "layers" ? "on" : ""}" data-a="tab" data-i="${i}" data-k="layers">Calques</span>
-      <span class="${s.tab === "vers" ? "on" : ""}" data-a="tab" data-i="${i}" data-k="vers">Versions</span>
+      <span class="${s.tab === "docs" ? "on" : ""}" data-a="tab" data-i="${i}" data-k="docs">Document</span>
     </div></div>
-    <div class="rb">${s.tab === "layers" ? layers : versions}</div>
-    ${footHTML(s, i)}`, 238);
+    <div class="rb">${s.tab === "layers" ? layers : docs}</div>
+    ${footHTML(s, i)}`, 272);
 }
 
-/* ===================================================================== E
-   The scrubby number: no track on screen, the percentage is dragged
-   sideways like a Photoshop field. Three rows fit in half the height, and
-   nothing on the rail competes with the drawing for attention. */
+/* ===================================================================== E */
 function varE(i, s) {
   return rail(i, s, `
     <div class="rh"><div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>
       <span class="hint">glisser le %</span></div></div>
-    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
-      data-a="sel" data-i="${i}" data-k="${k}">
-      <div class="row">${eyeHTML(s, i, k)}
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
         <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
         <div class="col" style="flex:1;gap:1px">
-          <span class="nm">${s.docs[k].name}</span>
-          <span class="row"><span class="rev">${cur(s, k).rev}</span>
-            ${stale(s, k) ? `<span class="dot old"></span>` : ""}
+          <span class="fname">${cur(s, k).file}</span>
+          <span class="row"><span class="disc">${icon(disc(s, k).icon)}${disc(s, k).label}</span>
             <span style="flex:1"></span>
             <span class="scrub" data-a="scrub" data-i="${i}" data-k="${k}">${s.op[k]}%</span></span>
-        </div>
-      </div>
+        </div></div>
+      ${s.sel === k ? actionsHTML(s, i, k) : ""}
     </div>`).join("")}</div>
-    ${footHTML(s, i)}`, 212);
+    ${footHTML(s, i)}`, 268);
 }
 
-/* ===================================================================== F
-   Blend modes. Two line drawings stacked at 55 % both go grey; multiplied,
-   both stay black and only the ink adds up — which is how a light table
-   works, and what an architect actually wants when two surveys are
-   compared. Difference is there for finding what moved. */
+/* ===================================================================== F */
 function varF(i, s) {
   return rail(i, s, `
     <div class="rh">
       <div class="t">${icon("layers")}<b>Calques</b></div>
-      <div class="row"><span class="rev" style="width:46px">Fusion</span>
+      <div class="row"><span class="date" style="width:46px">Fusion</span>
         <select data-a="blend" data-i="${i}" data-k="${s.sel}">
           ${BLENDS.map(([v, t]) => `<option value="${v}" ${s.blend[s.sel] === v ? "selected" : ""}>${t}</option>`).join("")}
         </select></div>
-      <div class="row"><span class="rev" style="width:46px">Opacité</span>${sliderHTML(s, i, s.sel)}<span class="pc">${s.op[s.sel]}%</span></div>
+      <div class="row"><span class="date" style="width:46px">Opacité</span>${sliderHTML(s, i, s.sel)}<span class="pc">${s.op[s.sel]}%</span></div>
     </div>
-    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
-      data-a="sel" data-i="${i}" data-k="${k}">
-      <div class="row">${eyeHTML(s, i, k)}
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
         <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
-        <div class="col" style="flex:1;gap:1px"><span class="nm">${s.docs[k].name}</span>
-          <span class="row"><span class="rev">${cur(s, k).rev}</span><span style="flex:1"></span>
-            <span class="rev">${BLENDS.find(([v]) => v === s.blend[k])[1].toLowerCase()} · ${s.op[k]}%</span></span></div>
-      </div>
+        <div class="col" style="flex:1;gap:1px">${fileLines(s, k)}
+          <span class="date">${BLENDS.find(([v]) => v === s.blend[k])[1].toLowerCase()} · ${s.op[k]}%</span></div></div>
+      ${s.sel === k ? actionsHTML(s, i, k) : ""}
     </div>`).join("")}</div>
-    ${footHTML(s, i)}`, 238);
+    ${footHTML(s, i)}`, 272);
 }
 
-/* ===================================================================== G
-   Groups. The office's own drawing on one side, what consultants sent on
-   the other, each group with one eye: "show me only what came from outside"
-   is one click, which is the question asked before a coordination meeting. */
+/* ===================================================================== G */
 function varG(i, s) {
-  const group = (id, title, keys) => `
-    <div class="grp" data-a="grp" data-i="${i}" data-k="${id}">
+  const inGroup = (id) => s.order.filter((k) => (id === "bureau") === (s.docs[k].disc === "arch"));
+  const group = (id, title) => {
+    const keys = inGroup(id);
+    const anyOn = keys.some((k) => visible(s, k));
+    return `<div class="grp" data-a="grp" data-i="${i}" data-k="${id}">
       ${icon(s.groups[id] ? "chevron-down" : "chevron-right")}
-      <span class="eye ${keys.some((k) => visible(s, k)) ? "on" : ""}" data-a="geye" data-i="${i}" data-k="${id}">
-        ${icon(keys.some((k) => visible(s, k)) ? "eye" : "eye-off")}</span>
-      <span style="flex:1">${title}</span>
-      <span class="rev">${keys.length}</span>
-    </div>
-    ${s.groups[id] ? keys.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
-      data-a="sel" data-i="${i}" data-k="${k}" style="margin-left:10px">
-      <div class="row">${eyeHTML(s, i, k)}
-        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
-        <div class="col" style="flex:1;gap:1px"><span class="nm">${s.docs[k].name}</span>
-          <span class="row"><span class="rev">${cur(s, k).rev}</span>
-            <span style="flex:1"></span>${stateHTML(s, k, true)}</span></div></div>
-      <div class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></div>
-    </div>`).join("") : ""}`;
+      <span class="eye ${anyOn ? "on" : ""}" data-a="geye" data-i="${i}" data-k="${id}">${icon(anyOn ? "eye" : "eye-off")}</span>
+      <span style="flex:1">${title}</span><span class="date">${keys.length}</span></div>
+      ${s.groups[id] ? keys.map((k) => `<div ${rowAttrs(s, i, k)} style="margin-left:10px">
+        <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
+          <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+          <div class="col" style="flex:1;gap:1px">${fileLines(s, k)}</div></div>
+        <div class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></div>
+        ${s.sel === k ? actionsHTML(s, i, k) : ""}
+      </div>`).join("") : ""}`;
+  };
   return rail(i, s, `
     <div class="rh"><div class="t">${icon("layers")}<b>Calques</b></div></div>
-    <div class="rb">${group("cons", "Reçu des consultants", ["pay", "arp"])}${group("bureau", "Dessiné au bureau", ["plan"])}</div>
-    ${footHTML(s, i)}`, 244);
+    <div class="rb">${group("cons", "Reçu des consultants")}${group("bureau", "Dessiné au bureau")}</div>
+    ${footHTML(s, i)}`, 280);
 }
 
-/* ===================================================================== H
-   Colour-coded, and locked. A bar of colour identifies each drawing on the
-   rail and could tint nothing at all on the sheet — the plan stays black.
-   The office's own plan is locked: it cannot be hidden by accident, which
-   is the one mistake that makes the screen unreadable without explaining
-   why. The stale sheet carries its import button on its own row. */
+/* ===================================================================== H */
 function varH(i, s) {
   return rail(i, s, `
     <div class="rh"><div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>
-      <span class="rev">${KEYS.filter((k) => visible(s, k)).length}/3 visibles</span></div></div>
-    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
-      data-a="sel" data-i="${i}" data-k="${k}">
-      <div class="row">
-        <span class="bar-c" style="background:${s.docs[k].colour}"></span>
+      <span class="date">${s.order.filter((k) => visible(s, k)).length}/3 visibles</span></div></div>
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}
         ${s.lock[k] ? `<span class="eye on" title="Calque verrouillé: toujours visible">${icon("eye")}</span>` : eyeHTML(s, i, k)}
-        <div class="col" style="flex:1;gap:1px">
-          <span class="nm">${s.docs[k].name}</span>
-          <span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span>
-        </div>
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px">${fileLines(s, k)}</div>
         <span class="lock ${s.lock[k] ? "on" : ""}" data-a="lock" data-i="${i}" data-k="${k}"
           title="${s.lock[k] ? "Déverrouiller" : "Verrouiller la visibilité"}">${icon(s.lock[k] ? "lock" : "lock-open")}</span>
       </div>
       <div class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></div>
-      ${stale(s, k) ? `<div class="row">${stateHTML(s, k)}<span style="flex:1"></span>
-        <span class="btn sm" data-a="imp" data-i="${i}" data-k="${k}">${icon("upload")}Importer</span></div>` : ""}
+      ${s.sel === k ? actionsHTML(s, i, k) : ""}
     </div>`).join("")}</div>
-    ${footHTML(s, i)}`, 236);
+    ${footHTML(s, i)}`, 280);
 }
 
-/* ----------------------------------------------------------- the full screen
-   Four panes at the size they are used: the units, the sheet with its rail,
-   the model, the unit being read. Nothing is folded away for the demo. */
+/* ----------------------------------------------------------- the full screen */
 const UNITS = [["501", "5½", "1 275 pi²", "30% 40%"], ["502", "5½", "1 496 pi²", "46% 36%"],
   ["503", "3½", "760 pi²", "38% 52%"], ["504", "4½", "1 152 pi²", "54% 46%"],
   ["505", "4½", "1 221 pi²", "34% 30%"]];
 
 function rail(i, s, inner, width) {
-  return { rail: `<div class="rail" style="--rw:${width || 224}px">${inner}${panelHTML(s, i)}</div>` };
+  return { rail: `<div class="rail" style="--rw:${width || 272}px">${inner}${panelHTML(s, i)}</div>` };
 }
 
 function screenHTML(i, s, built) {
   return `<div class="app" data-i="${i}">
     <div class="bar1">${icon("folder")}<span class="crumb">Tous les projets</span>
       <span class="crumb on">Le Baldwin III</span>
-      <span class="tab on">${icon("layers")}Unités</span>
+      <span class="tab on">${icon("git-compare")}Coordination</span>
       <span class="tab">${icon("table")}Codes</span><span class="tab">${icon("clock")}Échéancier</span>
       <span class="sp"></span><span class="share">${icon("share-2")}Partager</span></div>
     <div class="bar2">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<span class="${n === 5 ? "on" : ""}">Niveau ${n}</span>`).join("")}
@@ -590,7 +584,7 @@ function screenHTML(i, s, built) {
             <div class="ul"><span>${u[1]}</span><span class="a">${u[2]}</span></div></div>`).join("")}</div></div>
 
         <div class="pane d2"><div class="ph">${icon("file")}Plan 2D<span class="sp"></span>
-          <span class="btn">${icon("external-link")}Ouvrir dans AutoCAD</span></div>
+          <span class="btn" data-a="open" data-i="${i}" data-k="plan">${icon("external-link")}Ouvrir dans AutoCAD</span></div>
           <div style="flex:1;min-height:0;display:flex">
             ${stageHTML(s, { blend: true })}
             <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>100%</span></div>
@@ -610,33 +604,32 @@ function screenHTML(i, s, built) {
             <div class="kv"><span>Superficie</span><b>1 275 pi²</b></div>
             <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
             <div class="kv"><span>Écart</span><b>240 mm</b></div>
-            <div class="kv"><span>Apparu dans</span><b>R04 · 24 Oct</b></div>
+            <div class="kv"><span>Lu dans</span><b>24 oct 2026</b></div>
           </div></div>
       </div>
-      <div class="foot">Ouvertures de la façade sud <b>68.5 m² → 74.2 m²</b><span class="rev">+5.7 m²</span>
+      <div class="foot">Ouvertures de la façade sud <b>68.5 m² → 74.2 m²</b><span class="date">+5.7 m²</span>
         <span class="sp"></span><span class="btn">Lire l'article 3.2.3.1</span></div>
     </div>
   </div>`;
 }
 
-/* --------------------------------------------------------------- variants */
 const VARIANTS = [
   { name: "Panneau Photoshop", build: varA,
-    why: `L'opacité est en haut et agit sur le calque sélectionné, exactement comme dans Photoshop: un seul curseur à l'écran au lieu de trois, et la rangée de boutons en bas porte les verbes. <span class="cost">Le prix: régler deux calques demande de sélectionner l'un puis l'autre.</span>` },
+    why: `L'opacité est en haut et agit sur le calque sélectionné; la ligne sélectionnée déplie ses actions: ouvrir le document, le changer, voir les précédents. <span class="cost">Le prix: régler deux calques demande de sélectionner l'un puis l'autre.</span>` },
   { name: "Grandes vignettes", build: varB,
-    why: `À 54 px, le plan de l'arpenteur et celui du paysagiste se distinguent sans être lus, et chaque calque garde son curseur. <span class="cost">Le prix: 252 px de rail et trois curseurs toujours visibles.</span>` },
+    why: `À 56 px la planche se reconnaît sans être lue, et chaque calque garde son curseur. Le nom du fichier est écrit en entier — tronqué par la gauche, puisque c'est la fin d'un nom de dessin qui change. <span class="cost">Le prix: 286 px de rail.</span>` },
   { name: "Liste dense", build: varC,
-    why: `Pas de vignette, une ligne par calque: le rail cesse d'être un panneau et devient une légende. C'est le plus petit des huit — 196 px. <span class="cost">Le prix: rien ne rappelle à quoi ressemble chaque dessin.</span>` },
-  { name: "Onglets Calques · Versions", build: varD,
-    why: `Comme le dock Calques / Historique de Photoshop: la trace des versions n'est plus une fenêtre qui s'ouvre, c'est l'autre moitié du rail, toujours à la même place. <span class="cost">Le prix: on ne voit jamais les deux en même temps.</span>` },
+    why: `La discipline tient lieu de nom et le fichier n'apparaît qu'une fois la ligne ouverte. C'est le plus petit des huit. <span class="cost">Le prix: il faut cliquer pour savoir quel document est lu.</span>` },
+  { name: "Onglets Calques · Document", build: varD,
+    why: `Comme le dock Calques / Historique de Photoshop: le dossier, le document lu et ceux qu'il remplace occupent l'autre moitié du rail, toujours à la même place. <span class="cost">Le prix: on ne voit jamais les deux en même temps.</span>` },
   { name: "Pourcentage à glisser", build: varE,
-    why: `Le pourcentage se tire latéralement, sans piste visible — le champ scrubby de Photoshop. Les trois lignes tiennent dans la moitié de la hauteur et rien dans le rail ne tire l'œil plus que le dessin. <span class="cost">Le prix: c'est un geste qui s'apprend; sans la mention « glisser le % », il reste invisible.</span>` },
+    why: `Le pourcentage se tire latéralement, sans piste visible — le champ scrubby de Photoshop. Les lignes tiennent dans la moitié de la hauteur. <span class="cost">Le prix: un geste qui s'apprend.</span>` },
   { name: "Modes de fusion", build: varF,
-    why: `Deux traits superposés à 55 % deviennent gris; multipliés, les deux restent noirs et seules les encres s'additionnent — c'est la table lumineuse. « Différence » sert à trouver ce qui a bougé. <span class="cost">Le prix: un vocabulaire de plus, et un réglage qui peut rendre une planche illisible.</span>` },
+    why: `Deux traits superposés à 55 % deviennent gris; multipliés, les deux restent noirs et seules les encres s'additionnent — c'est la table lumineuse. <span class="cost">Le prix: un vocabulaire de plus.</span>` },
   { name: "Groupes bureau · consultants", build: varG,
     why: `Un œil par groupe: « ne me montrer que ce qui vient de l'extérieur » est un clic, et c'est la question posée avant une réunion de coordination. <span class="cost">Le prix: deux niveaux de hiérarchie pour trois calques.</span>` },
-  { name: "Couleur et verrou", build: varH,
-    why: `Une barre de couleur identifie chaque dessin dans le rail sans jamais teinter la planche. Le plan du bureau est verrouillé: il ne peut pas être masqué par accident, la seule erreur qui rend l'écran incompréhensible sans dire pourquoi. Le dessin périmé porte son bouton d'import sur sa propre ligne. <span class="cost">Le prix: une icône de plus par ligne.</span>` },
+  { name: "Verrou de visibilité", build: varH,
+    why: `Le plan du bureau est verrouillé: il ne peut pas être masqué par accident, la seule erreur qui rend l'écran incompréhensible sans dire pourquoi. <span class="cost">Le prix: une icône de plus par ligne.</span>` },
 ];
 
 function render(i) {
@@ -654,7 +647,7 @@ function renderAll() {
 function say(s, msg) {
   s.toast = msg;
   clearTimeout(s.timer);
-  s.timer = setTimeout(() => { s.toast = null; render(S.indexOf(s)); }, 3400);
+  s.timer = setTimeout(() => { s.toast = null; render(S.indexOf(s)); }, 3600);
 }
 
 document.addEventListener("click", (e) => {
@@ -663,8 +656,6 @@ document.addEventListener("click", (e) => {
   const i = +el.dataset.i, k = el.dataset.k, s = S[i];
   if (!s) return;
   switch (el.dataset.a) {
-    /* Photoshop's modifier, kept: alt-click on an eye shows that layer
-       alone and remembers the stack it interrupted. */
     case "eye":
       if (e.altKey) { s.iso = s.iso === k ? null : k; s.sel = k; break; }
       if (s.iso) s.iso = null;
@@ -672,33 +663,41 @@ document.addEventListener("click", (e) => {
       s.sel = k;
       break;
     case "iso": s.iso = k || null; if (k) s.sel = k; break;
-    case "sel": s.sel = k; break;
+    case "sel": s.sel = k; s.swap = null; s.open = null; break;
     case "tab": s.tab = k; break;
     case "grp": s.groups[k] = !s.groups[k]; break;
     case "geye": {
-      const keys = k === "cons" ? ["pay", "arp"] : ["plan"];
+      const keys = s.order.filter((x) => (k === "bureau") === (s.docs[x].disc === "arch"));
       const anyOn = keys.some((x) => visible(s, x));
       if (s.iso) s.iso = null;
       keys.forEach((x) => { s.on[x] = !anyOn; });
       break;
     }
     case "lock": s.lock[k] = !s.lock[k]; break;
-    case "imp": s.imp = s.imp === k ? null : k; s.open = null; s.sel = k; break;
-    case "hist": s.open = s.open === k ? null : k; s.imp = null; s.sel = k; break;
-    case "close": s.imp = null; s.open = null; break;
+    /* Opening is the whole point of keeping the file on the server: fitte
+       hands the document to the application that edits it and stays out. */
+    case "open":
+      s.sel = k;
+      say(s, `${cur(s, k).file} — ouvert dans ${s.docs[k].app}.`);
+      break;
+    case "swap": s.swap = s.swap === k ? null : k; s.open = null; s.sel = k; break;
+    case "hist": s.open = s.open === k ? null : k; s.swap = null; s.sel = k; break;
+    case "close": s.swap = null; s.open = null; break;
+    /* Swapping puts another file in the same slot. The one that leaves is
+       not deleted: it drops into the list, by date, and can be read again. */
     case "pick": {
-      const f = FOUND[+el.dataset.f], d = s.docs[k];
-      d.versions.unshift({ rev: f.rev, date: f.date, note: `importé · ${f.file}` });
-      delete d.waiting;
-      s.imp = null; s.open = k; s.sel = k;
+      const f = FOUND[k][+el.dataset.f], d = s.docs[k];
+      d.versions = [{ file: f.file, date: f.date, note: "lu depuis le dossier du bureau" },
+        ...d.versions.filter((v) => v.file !== f.file)];
+      s.swap = null; s.open = k; s.sel = k;
       const n = d.versions.length - 1;
-      say(s, `${d.name} ${f.rev} importé. ${n > 1 ? `${n} versions précédentes conservées` : "1 version précédente conservée"}.`);
+      say(s, `Calque « ${disc(s, k).label} » : ${f.file}. ${n > 1 ? `${n} documents gardés` : "1 document gardé"}.`);
       break;
     }
-    case "cmp": {
-      const d = s.docs[k], prev = d.versions[+(el.dataset.v || 1)];
-      if (!prev) { say(s, `Une seule version reçue pour « ${d.name} »: rien à comparer.`); break; }
-      say(s, `Comparaison ${d.versions[0].rev} ↔ ${prev.rev} — le balayage s'ouvrirait ici.`);
+    case "revert": {
+      const d = s.docs[k], v = d.versions[+el.dataset.v];
+      d.versions = [v, ...d.versions.filter((x) => x !== v)];
+      say(s, `${v.file} — relu.`);
       break;
     }
     default: return;
@@ -706,8 +705,6 @@ document.addEventListener("click", (e) => {
   render(i);
 });
 
-/* The slider writes on every move and touches only the box that changed: a
-   full re-render would drop the thumb being dragged. */
 document.addEventListener("input", (e) => {
   const el = e.target.closest("[data-a='op']");
   if (el) {
@@ -731,9 +728,40 @@ function paintOpacity(i, k, v) {
   if (box) box.style.opacity = v / 100;
 }
 
-/* The scrubby percentage of variant E: drag sideways, one point per pixel,
-   the same ratio Photoshop uses on its fields. */
+/* ------------------------------------------------------------- dragging
+   The handle moves a row through the list, and the pile on the drawing
+   follows: the row at the top of the rail is the sheet on top. Nobody has
+   to touch opacity to put one drawing over another. */
 document.addEventListener("pointerdown", (e) => {
+  const g = e.target.closest("[data-a='grip']");
+  if (g) {
+    const i = +g.dataset.i, k = g.dataset.k, s = S[i];
+    s.drag = k; s.sel = k;
+    const list = g.closest(".rb");
+    const move = (ev) => {
+      const rows = [...list.querySelectorAll("[data-row]")];
+      const under = rows.find((r) => {
+        const b = r.getBoundingClientRect();
+        return ev.clientY >= b.top && ev.clientY <= b.bottom;
+      });
+      if (!under || under.dataset.row === k) return;
+      const from = s.order.indexOf(k), to = s.order.indexOf(under.dataset.row);
+      s.order.splice(from, 1);
+      s.order.splice(to, 0, k);
+      render(i);
+    };
+    const up = () => {
+      s.drag = null; s.overIdx = null;
+      render(i);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    e.preventDefault();
+    return;
+  }
+  /* The scrubby percentage: one point per pixel, Photoshop's ratio. */
   const el = e.target.closest("[data-a='scrub']");
   if (!el) return;
   const i = +el.dataset.i, k = el.dataset.k, s = S[i];
