@@ -123,10 +123,12 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs.lvl .views{flex:1}
 .tabs.lvl button{font-size:12px;padding:4px 9px}
 .tabs.lvl button[aria-current="true"]{background:var(--vert);color:var(--vert-ink);font-weight:600}
-.frame[data-chrome="black"] .tabs.lvl{background:#1c1c1f;border-color:#2b2b30}
-.frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.5)}
-.frame[data-chrome="black"] .tabs.lvl button:hover{color:rgba(255,255,255,.8)}
-.frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{color:var(--vert-ink)}
+.frame[data-chrome="black"] .tabs.lvl{background:#1e1e21;border-color:#2c2c31}
+.frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.72);font-size:12.5px}
+.frame[data-chrome="black"] .tabs.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
+/* The green stays on the level and nowhere else: it is the one value the
+   whole screen is filtered by, and it has to beat a white pill one row up. */
+.frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{background:var(--vert);color:var(--vert-ink)}
 
 /* rail with the label under the icon */
 .rail.stack{align-items:stretch;padding:10px 6px}
@@ -468,14 +470,14 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .frame[data-chrome="black"] .rail .row.on,
 .frame[data-chrome="black"] .rail .stk.on{background:rgba(255,255,255,.12);color:#fff}
 .frame[data-chrome="black"] .rail .ic.on .cap{color:rgba(255,255,255,.72)}
-.frame[data-chrome="black"] .tabs button{color:rgba(255,255,255,.5)}
-.frame[data-chrome="black"] .tabs button:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.8)}
-/* The view being read is the one green thing in the chrome. Dark ink on it,
-   because the green is light enough to read against black but not to carry
-   white text. */
-.frame[data-chrome="black"] .tabs button[aria-current="true"]{background:var(--vert);color:#111112;font-weight:600}
-.frame[data-chrome="black"] .tabs .crumb{color:rgba(255,255,255,.5)}
-.frame[data-chrome="black"] .tabs .crumb.on{color:#fff}
+.frame[data-chrome="black"] .tabs button{color:rgba(255,255,255,.72);font-size:13.5px}
+.frame[data-chrome="black"] .tabs button:hover{background:rgba(255,255,255,.1);color:#fff}
+/* The open view is white on black — the strongest mark the bar can make,
+   and it costs no colour. Green is spent one row down on the level, so the
+   two rows never argue over which one is the filter. */
+.frame[data-chrome="black"] .tabs button[aria-current="true"]{background:#fff;color:#141416;font-weight:600}
+.frame[data-chrome="black"] .tabs .crumb{color:rgba(255,255,255,.58)}
+.frame[data-chrome="black"] .tabs .crumb.on{color:#fff;font-size:13px}
 .frame[data-chrome="black"] .tabs .div,
 .frame[data-chrome="black"] .tabs .sep{background:rgba(255,255,255,.16)}
 /* The card is the same white card; only what holds it changes. */
@@ -767,7 +769,7 @@ const V = {
   journey: true,
   density: "comfortable",
   shell: "Inset card",
-  chrome: "Light",
+  chrome: "Black",
   homeLayout: "Card grid",
   isolate: "none",
   /* One glyph per screen, written by the panel. Keyed by the French screen
@@ -2418,9 +2420,43 @@ function zoomBy(next) {
   zoomTo(next, r.width / 2, r.height / 2, r, layoutSheet(el));
 }
 
+/* Moving from one unit to the next is a move across one sheet, so the sheet
+   moves: the eye keeps the drawing it was reading and arrives knowing where
+   it went. Jumping does the opposite — the plan looks like a different
+   plan every click, and the reader has to find the building again.
+   The pan is interpolated in the pane's pixels and the zoom geometrically,
+   because zoom is multiplicative: 50 → 200 % must pass through 100, not
+   through 125. Nothing re-renders during the glide; only the transform and
+   the two readouts move, which is the same path the wheel takes. */
+let GLIDE = 0;
+const stopGlide = () => { if (GLIDE) { cancelAnimationFrame(GLIDE); GLIDE = 0; } };
+function glideTo(to, ms = 420) {
+  stopGlide();
+  const z0 = V.zoom, p0 = { x: V.pan.x, y: V.pan.y };
+  const dz = Math.abs(to.zoom - z0), dp = Math.hypot(to.pan.x - p0.x, to.pan.y - p0.y);
+  /* A move of a few pixels is not a journey: snap, and keep the frames. */
+  if (dz < 1 && dp < 2) { V.zoom = to.zoom; V.pan = to.pan; paintSheet(); return; }
+  const t0 = performance.now();
+  /* Slow at both ends, quickest in the middle: the start says "we are
+     leaving this unit", the end says "we have arrived at that one". */
+  const ease = (t) => (t < .5 ? 4 * t * t * t : 1 - ((-2 * t + 2) ** 3) / 2);
+  const step = (now) => {
+    const t = Math.min(1, (now - t0) / ms), k = ease(t);
+    V.zoom = z0 * ((to.zoom / z0) ** k);
+    V.pan.x = p0.x + (to.pan.x - p0.x) * k;
+    V.pan.y = p0.y + (to.pan.y - p0.y) * k;
+    paintSheet();
+    if (t < 1) { GLIDE = requestAnimationFrame(step); return; }
+    GLIDE = 0;
+    V.zoom = to.zoom; V.pan = to.pan;
+    paintSheet();
+  };
+  GLIDE = requestAnimationFrame(step);
+}
+
 /* The selected unit, filling the pane with a little air: the box is 0–1 on
    the sheet, so the zoom that frames it is the pane over the box. */
-function fitUnit() {
+function fitUnit(glide = true) {
   const el = vpEl();
   const row = selRow("Unités");
   if (!el || !row) return;
@@ -2431,10 +2467,20 @@ function fitUnit() {
   const [x, y, w, h] = polyBounds(poly);
   const z = Math.min(ZMAX, Math.max(ZMIN,
     Math.min(r.width / (base.w * w * 1.5), r.height / (base.h * h * 1.5)) * 100));
+  /* clampPan writes V.pan, so the target is computed in V and the start is
+     put back before the glide: the frames own V from here on. */
+  const from = { zoom: V.zoom, pan: { x: V.pan.x, y: V.pan.y } };
   V.zoom = Math.round(z);
   V.pan.x = r.width / 2 - (x + w / 2) * base.w * (z / 100);
   V.pan.y = r.height / 2 - (y + h / 2) * base.h * (z / 100);
   clampPan(r, V.zoom, base);
+  const to = { zoom: V.zoom, pan: { x: V.pan.x, y: V.pan.y } };
+  V.zoom = from.zoom; V.pan = from.pan;
+  /* The sheet is only ever glided across itself: a level change replaces
+     the drawing, and sliding one plan onto another says they are the same
+     building seen from the side, which they are not. */
+  if (!glide) { V.zoom = to.zoom; V.pan = to.pan; paintSheet(); return; }
+  glideTo(to);
 }
 
 /* Bidirectional selection: the 3D viewer raycasts a window, finds which
@@ -2461,9 +2507,13 @@ window.fitteSelectUnit = (unitStr) => {
   });
   V.screen = "Unités";
   dial.setValue("screen", FR_SCREEN[V.screen]);
+  /* A window picked in the 3D model can be on another floor, and the pane
+     is about to carry a different sheet: there is nothing to glide across,
+     so a change of level lands instead of sliding. */
+  const sameSheet = V.view["Unités"] === LEVELS.indexOf(level);
   V.view["Unités"] = LEVELS.indexOf(level);
   V.sel["Unités"] = rowIndex;
-  fitUnit();
+  fitUnit(sameSheet);
   render();
   /* A window click can select a row well below the fold: keep it in view,
      but only scroll the list pane itself, never the page around it. */
@@ -2485,10 +2535,14 @@ function paintSheet() {
   const base = layoutSheet(el);
   clampPan(el.getBoundingClientRect(), V.zoom, base);
   if (plan) plan.style.transform = `translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})`;
+  /* V.zoom runs through fractions while the sheet glides; the slider and
+     the percentage are read by a person, so they are rounded here rather
+     than quantising the motion itself. */
+  const shown = Math.round(V.zoom);
   const slider = document.querySelector("[data-zoom]");
-  if (slider && document.activeElement !== slider) slider.value = String(V.zoom);
+  if (slider && document.activeElement !== slider) slider.value = String(shown);
   const read = document.querySelector("[data-zread]");
-  if (read) read.textContent = `${V.zoom}%`;
+  if (read) read.textContent = `${shown}%`;
   const z = V.zoom / 100;
   const label = el.querySelector(".ulabel");
   if (label) {
@@ -2506,15 +2560,19 @@ function wireViewport() {
   const el = vpEl();
   if (!el) return;
   const paint = paintSheet;
+  /* The hand always wins: a wheel, a drag or a double-click during a glide
+     stops it where it is rather than fighting it for the transform. */
   el.onwheel = (e) => {
     e.preventDefault();
+    stopGlide();
     const r = el.getBoundingClientRect();
     zoomTo(V.zoom * Math.exp(-e.deltaY * 0.0016), e.clientX - r.left, e.clientY - r.top, r, layoutSheet(el));
     paint();
   };
-  el.ondblclick = () => { V.zoom = 100; V.pan = { x: 0, y: 0 }; paint(); };
+  el.ondblclick = () => { stopGlide(); V.zoom = 100; V.pan = { x: 0, y: 0 }; paint(); };
   el.onpointerdown = (e) => {
     if (e.button !== 0) return;
+    stopGlide();
     const r = el.getBoundingClientRect();
     const start = { x: e.clientX, y: e.clientY, px: V.pan.x, py: V.pan.y };
     let moved = false;
@@ -3075,6 +3133,7 @@ function onClick(e) {
     case "fitsheet":
       /* The sheet filling the pane, not the floor of the slider: below 100 %
          there is only paper, and nothing more of the drawing to see. */
+      stopGlide();
       V.zoom = 100; V.pan = { x: 0, y: 0 };
       paintSheet();
       return;
@@ -3231,9 +3290,10 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   journeySteps: true,
   density: sel(["comfortable", "compact"]),
   shell: sel(["Inset card", "Flat"]),
-  /* Light grey chrome, or black chrome with the office green on the view
-     being read. The card stays white in both: the drawing never changes. */
-  chrome: sel(["Light", "Black"]),
+  /* The dark bar: the chrome stops imitating paper, so the drawing is the
+     only white thing on the screen. Green marks the level, white marks the
+     open view. The grey chrome is kept beside it for comparison. */
+  chrome: sel(["Black", "Light"]),
   /* The whole screen on a dark ramp. The drawing keeps its own paper: a
      plan is a white sheet, and inverting it would be redrawing it. */
   theme: sel(["Light", "Dark"]),
