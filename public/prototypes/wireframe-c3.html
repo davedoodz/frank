@@ -286,6 +286,82 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    number is read. The drawing touches the card's edges, the words sit under
    it, and the two numbers are not repeated — they are inside the drawing. */
 .codegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;align-items:start}
+
+/* The vertical reading of the same provisions: the drawing on the left at a
+   fixed width so every row starts at the same place, the words on the right
+   at full measure. A grid of cards made the quote a column three words
+   wide; a list lets the sentence be read. */
+.codelist{display:flex;flex-direction:column;gap:8px}
+.coderow{display:grid;grid-template-columns:258px 1fr;gap:0;align-items:stretch;
+  border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
+.coderow:hover{border-color:var(--line)}
+.coderow.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
+.coderow > .draw{padding:10px;background:var(--fill-2);border-right:1px solid var(--line-2);
+  display:grid;place-items:center}
+.coderow > .draw img{width:100%;height:auto;display:block;mix-blend-mode:multiply}
+.coderow > .tx{padding:11px 12px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.coderow .note{border-left:2px solid var(--vert);padding-left:9px;display:flex;flex-direction:column}
+.noteinput{flex:1;resize:vertical;border:1px solid var(--line-2);border-radius:6px;padding:6px 8px;
+  font:inherit;font-size:12px;color:var(--ink);background:var(--card)}
+.noteinput:focus{outline:1px solid var(--ink);outline-offset:1px}
+@media (max-width:900px){.coderow{grid-template-columns:1fr}
+  .coderow > .draw{border-right:0;border-bottom:1px solid var(--line-2)}}
+
+/* The calendar is a table of days with hairlines, not a card grid: a month
+   has to be read as one block, so the cells share their borders. */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--line-2);
+  border-radius:var(--r);overflow:hidden;background:var(--line-2);gap:1px}
+.cal .dow{background:var(--fill-2);padding:4px 6px;font-size:10.5px;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.06em}
+.cal .day{background:var(--card);padding:4px 6px;min-height:28px;display:flex;flex-direction:column;
+  gap:2px;cursor:pointer;position:relative}
+.cal.big .day{min-height:76px}
+.cal .day:hover{background:var(--fill-2)}
+.cal .day.dim{color:var(--ink-3);background:var(--fill-2);opacity:.65}
+.cal .day.on{background:var(--fill);box-shadow:0 0 0 1px var(--ink) inset}
+.cal .day.today .n{background:var(--ink);color:var(--card);border-radius:3px;padding:0 4px}
+.cal .day .n{font-size:11.5px;font-weight:600;align-self:flex-start}
+.cal .day .lbl{font-size:10.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal .dots{display:flex;gap:3px;align-items:center}
+.cal .dots em{font-size:10px;font-style:normal;color:var(--ink-3)}
+.pdot{width:6px;height:6px;border-radius:50%;background:var(--ink);display:inline-block}
+.pdot[data-prio="moyenne"]{background:var(--ink-2)}
+.pdot[data-prio="basse"]{background:var(--card);border:1px solid var(--ink-3)}
+.pdot[data-done="true"]{background:var(--card);border:1px solid var(--line);opacity:.8}
+.cal .day.late .n{text-decoration:underline;text-underline-offset:2px}
+/* Twelve small months at once: the year is for seeing where the work
+   piles up, not for reading titles. */
+.year{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.year .ym .row{cursor:pointer;padding:2px 0}
+.year .cal.mini .day{min-height:20px;padding:2px 3px}
+.year .cal.mini .day .n{font-size:10px;font-weight:500}
+.year .cal.mini .dow{padding:2px 3px;font-size:9.5px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line-2);
+  border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;min-height:260px}
+.week .wcol{background:var(--card);display:flex;flex-direction:column;cursor:pointer}
+.week .wcol.on{background:var(--fill)}
+.week .wh{padding:5px 6px;border-bottom:1px solid var(--line-2);font-size:11px;font-weight:600}
+.week .wcol.today .wh{background:var(--ink);color:var(--card)}
+.week .wb{padding:5px;display:flex;flex-direction:column;gap:4px}
+.wtask{border:1px solid var(--line-2);border-left:2px solid var(--ink-3);border-radius:5px;
+  padding:4px 5px;font-size:11px;display:flex;flex-direction:column;gap:1px;background:var(--card)}
+.wtask[data-prio="haute"]{border-left-color:var(--ink);border-left-width:3px}
+.wtask[data-prio="moyenne"]{border-left-color:var(--ink-2)}
+.wtask .who{font-size:10px;color:var(--ink-3)}
+/* A task row reads left to right as: done, what, how urgent, when. */
+.task{display:flex;align-items:center;gap:8px;padding:6px 7px;border:1px solid var(--line-2);
+  border-radius:var(--r);background:var(--card);cursor:pointer}
+.task:hover{border-color:var(--line)}
+.task.on{box-shadow:0 0 0 1px var(--ink) inset;border-color:var(--ink)}
+.task.done{opacity:.55}
+.task.done .hi{text-decoration:line-through}
+.task.late{border-left:3px solid var(--ink)}
+.task .pr{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);
+  border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;white-space:nowrap}
+.task .pr[data-prio="haute"]{background:var(--vert);color:var(--vert-ink);border-color:var(--vert)}
+.task .pr[data-prio="moyenne"]{color:var(--ink)}
+.task .dte{font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;
+  min-width:52px;text-align:right}
 .code{border:1px solid var(--line-2);border-radius:var(--r);display:flex;flex-direction:column;
   min-width:0;background:var(--card);overflow:hidden}
 .code:hover{border-color:var(--line)}
@@ -463,8 +539,19 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .plan .lay canvas{display:block;width:100%;height:100%}
 /* The three layer chips sit in the pane header, tight, so the header still
    reads as one line with the host button at its end. */
-.laychips{display:flex;gap:4px;margin-right:6px}
-.laychips .chip{padding:1px 7px;font-size:11px;cursor:pointer}
+.laychips{display:flex;gap:4px;margin-right:6px;flex:0 0 auto}
+.laychips .chip{padding:1px 8px 1px 6px;font-size:11px;cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:4px}
+.laychips .chip .lu{width:12px;height:12px;flex:0 0 12px}
+/* A pane too narrow for three words would push the title onto two lines, so
+   below that width the words go and the glyphs stay; the tooltip still names
+   each one. The pane is the container, so this follows the pane and not the
+   window: the same pane is wide in "Plan seul" and narrow beside the model. */
+.pane.drawing{container-type:inline-size}
+@container (max-width:470px){
+  .laychips .chip .lb{display:none}
+  .laychips .chip{padding:2px 5px}
+}
 /* One typology, one colour, laid on the unit it belongs to. */
 .plan .utagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible}
 .plan .utagsvg polygon{opacity:.45;mix-blend-mode:multiply}
@@ -694,6 +781,21 @@ const V = {
   view: {},          // screen → index of the view in its tab strip
   sel: {},           // screen → index of the selected row
   article: 2,        // which article is open under Zonage et code
+  /* Codes: which provision is open, which one is being annotated, and the
+     notes written against each — nothing is ever written to a drawing. */
+  articleId: "3.3.1.9",
+  noteOn: null,
+  notes: {
+    "3.3.1.18": [{ who: "Chargée de projet", when: "24 oct", txt: "Le garde-corps est dessiné à 1 020 mm sur l'élévation sud. À reprendre avant le dépôt." }],
+    "art. 71": [{ who: "Entrepreneur général", when: "22 oct", txt: "Vérifier la réduction pour proximité du métro avant de recompter les cases." }],
+  },
+  /* Échéancier: the day the calendar is centred on, and which task is open.
+     The calendar's scale is the view in the second row. */
+  day: "2026-11-14",
+  task: null,
+  /* Quantités reads under the floor it is counted from, as a strip: closed
+     it is one line of totals, open it is the table. */
+  quant: false,
   utab: 1,           // which tab of the unit inspector
   zoom: 100,         // plan zoom, in percent
   /* Where the sheet has been dragged to inside the 2D pane, in pixels of
@@ -754,7 +856,9 @@ function sprite() {
     "sigma", "calculator", "chart-column", "percent", "calendar-clock", "timer", "list-checks",
     "flag", "folder-tree", "file-stack", "hard-drive",
     /* sharing: the button, and the two rights it can grant */
-    "share-2", "eye", "message-square"];
+    "share-2", "eye", "message-square",
+    /* the three layer chips on the 2D pane */
+    "trees"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
     if (!node) return "";
@@ -774,24 +878,26 @@ const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1))
 
 const SCREENS = {
   "Projets": { icon: "folder", regions: ["header", "content"], steps: {}, home: true, index: true },
-  "Aperçu": {
-    icon: "layout-grid",
-    regions: ["header", "content", "inspector"],
-    steps: { content: 1, inspector: 2 },
-  },
   "Unités": {
     icon: "layers",
     regions: ["header", "list", "content", "inspector", "footer"],
     steps: { list: 1, content: 2, inspector: 3, footer: 4 },
   },
-  /* Neither Rules nor Coordination is a destination. An article is read
-     against a number the drawings produced, so it lives in the overview; a
-     crossing lands on one unit, so it lives in that unit's inspector.
-     Quantités and Suivi went the same way: the totals and the dates are
-     what the project is, not two more places to go. Both are sections of
-     Aperçu now. Fichiers went the same way, a step further: what was read
-     and when is a property of a drawing, not a destination, so the two
-     screens left are the project and the floor. */
+  /* The two questions asked about a project that are not about a floor:
+     what the rules demand, and what is due when. Everything else that used
+     to be a screen is a section of one of the three — a crossing lands on
+     one unit, so it lives in that unit's inspector; the totals are counted
+     from the floor, so they live beside it. */
+  "Codes": {
+    icon: "scale",
+    regions: ["header", "content", "inspector"],
+    steps: { content: 1, inspector: 2 },
+  },
+  "Échéancier": {
+    icon: "calendar-check",
+    regions: ["header", "content"],
+    steps: { content: 1 },
+  },
 };
 
 /* ------------------------------------------------------- what the screens
@@ -956,6 +1062,51 @@ const ARTICLES = [
     needs: "limite arrière relevée, exceptions et saillies admises",
     url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
     img: "assets/code/art-22-marge.png", ratio: "1602 / 982" },
+  /* The Québec construction code, chapter I — Bâtiment. These are the ones
+     the building itself is judged against, so the Codes screen lists them
+     before the borough's dimensions. None of them has an exported sheet
+     behind it yet, so each carries a schematic drawn here from the two
+     numbers — never a redrawn plan. */
+  { id: "3.3.1.9", topic: "Largeur des corridors communs",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
+    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "La largeur libre d'un corridor commun desservant des logements ne doit pas être inférieure à 1 100 mm.",
+    measured: "1 120 mm", required: "1 100 mm", state: "conforme",
+    needs: "largeur relevée au point le plus étroit, saillies comprises",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    fig: "corridor" },
+  { id: "3.4.2.1", topic: "Nombre d'issues par étage",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
+    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Au moins deux issues doivent desservir chaque étage, placées de manière que les distances de parcours soient respectées.",
+    measured: "2 issues", required: "2 issues", state: "conforme",
+    needs: "distances de parcours mesurées depuis la porte la plus éloignée",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    fig: "issues" },
+  { id: "3.3.1.18", topic: "Hauteur des garde-corps",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
+    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "La hauteur d'un garde-corps doit être d'au moins 1 070 mm au-dessus de la surface praticable lorsque la dénivellation dépasse 1 800 mm.",
+    measured: "1 020 mm", required: "1 070 mm", state: "non résolu",
+    needs: "hauteur des garde-corps de balcon cotée sur l'élévation",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    fig: "garde" },
+  { id: "3.8.1.3", topic: "Parcours sans obstacles",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
+    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Un parcours sans obstacles doit relier l'entrée principale aux aires desservies; la largeur libre d'une porte ne doit pas être inférieure à 850 mm.",
+    measured: "800 mm", required: "850 mm", state: "non résolu",
+    needs: "largeur libre des portes de l'entrée et du corridor",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    fig: "porte" },
+  { id: "3.2.1.1", topic: "Classement et construction du bâtiment",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
+    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Le bâtiment doit être classé selon son usage principal et construit selon le type exigé pour sa hauteur et son aire de bâtiment.",
+    measured: "groupe C · 8 étages", required: "incombustible", state: "non résolu",
+    needs: "aire de bâtiment par étage et type de construction retenu",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    fig: "classement" },
 ];
 
 const QTABS = {
@@ -975,14 +1126,43 @@ const QTABS = {
       ["panneau fibrociment", "ouest", 186, "21 %", "R03", "A-202"], ["verre", "toutes", 98, "11 %", "R04", "A-201"]] },
 };
 
-const PHASES = {
-  "Programme": ["Programme reçu du client", "Nombre d'unités visé fixé", "Mix de typologies arrêté"],
-  "Esquisse": ["Implantation testée sur le lot", "Étage type dessiné", "Hauteur vérifiée contre art. 9"],
-  "Comité": ["Tableau des superficies par étage", "Répartition des typologies",
-    "Élévations avec matériaux", "Demande de dérogation mineure rédigée", "Note à l'urbaniste"],
-  "Permis": ["Plans d'émission pour permis", "Calculs de conformité joints", "Réponse de l'urbaniste"],
-  "Site": ["Relevé d'implantation", "Carnet de chantier", "Tel que construit"],
-};
+/* The work, as dates. The old Suivi section was five phases of ticks with
+   no day attached to them, so nothing could be late. A task here carries a
+   day, a priority and an owner, which is what makes it a mark on the
+   calendar and a line in the list at the same time. Mock data: the dates
+   are plausible for a permit deposit in the autumn, nothing is imported. */
+const TODAY = "2026-11-14";
+const TASKS = [
+  { id: "t1", day: "2026-11-03", title: "Tableau des superficies par étage", who: "Chargée de projet",
+    prio: "moyenne", done: true, phase: "Comité" },
+  { id: "t2", day: "2026-11-09", title: "Élévations avec matériaux au comité", who: "Atelier",
+    prio: "moyenne", done: true, phase: "Comité" },
+  { id: "t3", day: "2026-11-14", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: "Atelier",
+    prio: "haute", done: false, phase: "Permis", code: "3.3.1.18" },
+  { id: "t4", day: "2026-11-14", title: "Largeur libre des portes du parcours sans obstacles", who: "Atelier",
+    prio: "haute", done: false, phase: "Permis", code: "3.8.1.3" },
+  { id: "t5", day: "2026-11-17", title: "Confirmer le type de construction pour 8 étages", who: "Ingénieur",
+    prio: "haute", done: false, phase: "Permis", code: "3.2.1.1" },
+  { id: "t6", day: "2026-11-20", title: "Recompter les cases après réduction pour le métro", who: "Chargée de projet",
+    prio: "moyenne", done: false, phase: "Permis", code: "art. 71" },
+  { id: "t7", day: "2026-11-24", title: "Note à l'urbaniste sur la marge avant", who: "Chargée de projet",
+    prio: "moyenne", done: false, phase: "Comité", code: "art. 22" },
+  { id: "t8", day: "2026-11-27", title: "Demande de dérogation mineure rédigée", who: "Chargée de projet",
+    prio: "basse", done: false, phase: "Comité" },
+  { id: "t9", day: "2026-12-04", title: "Plans d'émission pour permis", who: "Atelier",
+    prio: "haute", done: false, phase: "Permis" },
+  { id: "t10", day: "2026-12-08", title: "Calculs de conformité joints au dépôt", who: "Atelier",
+    prio: "haute", done: false, phase: "Permis" },
+  { id: "t11", day: "2026-12-15", title: "Dépôt de la demande de permis", who: "Chargée de projet",
+    prio: "haute", done: false, phase: "Permis" },
+  { id: "t12", day: "2027-01-19", title: "Réponse de l'urbaniste attendue", who: "Arrondissement",
+    prio: "moyenne", done: false, phase: "Permis" },
+  { id: "t13", day: "2027-02-09", title: "Relevé d'implantation", who: "Arpenteur",
+    prio: "basse", done: false, phase: "Site" },
+  { id: "t14", day: "2026-10-27", title: "Mix de typologies arrêté", who: "Promoteur",
+    prio: "basse", done: true, phase: "Programme" },
+];
+const PRIO = { haute: 3, moyenne: 2, basse: 1 };
 
 
 /* Hand-traced wall contours on the 2000 × 1675 permit-sheet crops.
@@ -1187,18 +1367,17 @@ function unitMarkHTML() {
 
 
 
-/* The rail glyph is a decision, not a default: what an architect reads in
-   two seconds for "the project at a glance", "the floor and its units",
-   "the numbers", "what is due", "where the files are". Each screen carries
-   its own shortlist, and the panel picks one per screen; the first of each
-   list is what the prototype opens with. */
+/* The tab glyph is a decision, not a default: what an architect reads in
+   two seconds for "the floor and its units", "what the rules demand",
+   "what is due when". Each screen carries its own shortlist, and the panel
+   picks one per screen; the first of each list is what it opens with. */
 const NAV_ICONS = {
-  "Aperçu": [["Dashboard", "layout-grid"], ["Gauge", "gauge"], ["Building", "building-2"],
-    ["Zoning scale", "scale"], ["Checklist", "clipboard-list"]],
   "Unités": [["Layers", "layers"], ["Floor grid", "grid-2x2"], ["Rooms", "bed-double"],
     ["Doors", "door-open"], ["Ruler", "ruler"]],
-  /* Quantités and Suivi are sections inside Aperçu, so they have no rail
-     glyph to choose. CONTEXT still names their tables and phases. */
+  "Codes": [["Scale", "scale"], ["Checklist", "clipboard-list"], ["Flag", "flag"],
+    ["Book", "book-open"], ["Shield", "shield-check"]],
+  "Échéancier": [["Calendar", "calendar-check"], ["Timer", "timer"], ["Clock", "calendar-clock"],
+    ["Checklist", "list-checks"], ["Flag", "flag"]],
 };
 const NAV = Object.keys(NAV_ICONS);
 const navIcon = (name) => V.icons[name] || NAV_ICONS[name][0][1];
@@ -1206,12 +1385,12 @@ const navIcon = (name) => V.icons[name] || NAV_ICONS[name][0][1];
 /* The cross-screen journey the prototype is built around. Everything else
    on the screen exists to serve one of these six moves. */
 const JOURNEY = [
-  { n: 1, t: "Un dessin a été enregistré", d: "La page du projet dit ce qui a bougé depuis la dernière lecture.", s: "Aperçu" },
+  { n: 1, t: "Un dessin a été enregistré", d: "Le niveau dit ce qui a bougé depuis la dernière lecture.", s: "Unités" },
   { n: 2, t: "Ouvrir l'unité qui a bougé", d: "Choisissez-la dans la liste, ou sur le plan lui-même.", s: "Unités" },
   { n: 3, t: "Voir les deux dessins à la fois", d: "Le plan 2D à côté de la maquette 3D, l'écart mesuré.", s: "Unités" },
   { n: 4, t: "Décider, et dire pourquoi", d: "La décision ne s'enregistre pas sans raison.", s: "Unités" },
-  { n: 5, t: "Vérifier ce que ça brise", d: "Quel article, quel conflit, quelle échéance.", s: "Aperçu" },
-  { n: 6, t: "Sortir les chiffres", d: "Les tableaux et la note pour le comité de la ville.", s: "Aperçu" },
+  { n: 5, t: "Vérifier ce que ça brise", d: "Quel article du code, quel conflit, ce qui manque pour conclure.", s: "Codes" },
+  { n: 6, t: "Savoir quand c'est dû", d: "Le calendrier et la liste de ce qui reste à faire.", s: "Échéancier" },
 ];
 
 /* ------------------------------------------------------------- fidelity */
@@ -1361,6 +1540,244 @@ function codeCard(a, i) {
   </div>`;
 }
 
+/* Schematics for the provisions that have no exported sheet behind them.
+   They are drawn from the two numbers the provision compares, in the same
+   line weight as the rest of the screen. None of them is a plan, and none
+   of them is derived from a drawing file: a schematic says what the rule
+   measures, the sheet says what the project does. */
+const FIGS = {
+  corridor: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
+    <rect x="18" y="26" width="264" height="14" fill="var(--fill)" stroke="var(--ink)" stroke-width="1.1"/>
+    <rect x="18" y="80" width="264" height="14" fill="var(--fill)" stroke="var(--ink)" stroke-width="1.1"/>
+    <path d="M150 42 v36 m-4 -32 l4 -4 4 4 m-8 28 l4 4 4 -4" stroke="var(--ink)" fill="none" stroke-width="1"/>
+    <text x="158" y="58" font-size="12" font-weight="600" fill="var(--ink)">${a.measured}</text>
+    <text x="158" y="74" font-size="10.5" fill="var(--ink-2)">${a.required} exigés</text>
+    <text x="22" y="20" font-size="10" fill="var(--ink-3)">corridor commun · niveau type</text>
+    <text x="22" y="110" font-size="10" fill="var(--ink-3)">largeur libre au point le plus étroit</text></svg>`,
+  issues: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
+    <rect x="20" y="24" width="260" height="72" fill="none" stroke="var(--ink)" stroke-width="1.1"/>
+    ${[34, 236].map((x) => `<rect x="${x}" y="34" width="30" height="52" fill="var(--fill)"
+      stroke="var(--ink)" stroke-width="1"/>
+      ${[0, 1, 2, 3].map((k) => `<path d="M${x} ${44 + k * 11} h30" stroke="var(--ink)" stroke-width=".7"/>`).join("")}`).join("")}
+    <path d="M70 60 h160" stroke="var(--ink-2)" stroke-dasharray="4 3" stroke-width="1"/>
+    <text x="150" y="56" text-anchor="middle" font-size="11" fill="var(--ink-2)">distance de parcours</text>
+    <text x="20" y="16" font-size="10" fill="var(--ink-3)">étage type</text>
+    <text x="20" y="112" font-size="11" font-weight="600" fill="var(--ink)">${a.measured} dessinées · ${a.required} exigées</text></svg>`,
+  garde: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
+    <path d="M20 96 h150" stroke="var(--ink)" stroke-width="1.4"/>
+    <path d="M170 96 v-14 h110" stroke="var(--ink)" stroke-width="1.1" fill="none"/>
+    ${[34, 58, 82, 106, 130].map((x) => `<path d="M${x} 96 v-34" stroke="var(--ink)" stroke-width=".9"/>`).join("")}
+    <path d="M20 62 h150" stroke="var(--ink)" stroke-width="1.2"/>
+    <path d="M184 96 v-34 m-4 30 l4 4 4 -4 m-8 -26 l4 -4 4 4" stroke="var(--ink)" fill="none" stroke-width="1"/>
+    <text x="192" y="74" font-size="12" font-weight="600" fill="var(--ink)">${a.measured}</text>
+    <text x="192" y="90" font-size="10.5" fill="var(--ink-2)">${a.required} exigés</text>
+    <text x="20" y="20" font-size="10" fill="var(--ink-3)">garde-corps de balcon · élévation</text>
+    <text x="20" y="114" font-size="10" fill="var(--ink-3)">dénivellation supérieure à 1 800 mm</text></svg>`,
+  porte: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
+    <path d="M40 92 h60 M200 92 h60" stroke="var(--ink)" stroke-width="3"/>
+    <path d="M100 92 a72 72 0 0 1 72 -72" stroke="var(--ink-2)" stroke-dasharray="4 3" fill="none" stroke-width="1"/>
+    <path d="M100 92 v-72" stroke="var(--ink)" stroke-width="1.6"/>
+    <path d="M100 104 h100 m-96 -4 l-4 4 4 4 m92 -8 l4 4 -4 4" stroke="var(--ink)" fill="none" stroke-width="1"/>
+    <text x="150" y="26" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${a.measured}</text>
+    <text x="150" y="42" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">${a.required} exigés</text>
+    <text x="20" y="16" font-size="10" fill="var(--ink-3)">porte du parcours sans obstacles · plan</text></svg>`,
+  classement: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
+    ${[0, 1, 2, 3, 4, 5, 6, 7].map((k) => `<rect x="${60 + 0}" y="${14 + k * 11}" width="130" height="9"
+      fill="${k === 7 ? "var(--fill)" : "none"}" stroke="var(--ink)" stroke-width=".9"/>`).join("")}
+    <path d="M46 14 v88 m-4 4 l4 4 4 -4 m-8 -84 l4 -4 4 4" stroke="var(--ink)" fill="none" stroke-width="1"/>
+    <text x="200" y="52" font-size="12" font-weight="600" fill="var(--ink)">${a.measured}</text>
+    <text x="200" y="68" font-size="10.5" fill="var(--ink-2)">construction ${a.required}</text>
+    <text x="20" y="116" font-size="10" fill="var(--ink-3)">usage principal et hauteur de bâtiment</text></svg>`,
+};
+const codeFig = (a) => a.img
+  ? `<img src="${a.img}" alt="${a.topic} — ${a.measured} mesuré, ${a.required} exigé"
+       loading="lazy" style="aspect-ratio:${a.ratio}">`
+  : (FIGS[a.fig] ? FIGS[a.fig](a) : chainSVG());
+
+/* The Québec construction code first: it is what the building is judged
+   against, and the borough's dimensions only decide what is allowed on the
+   lot. Inside a body of rules the order is the one the articles were
+   written in. */
+const CODE_ORDER = ["Code de construction", "Loi sur", "Règlement"];
+const codeRank = (a) => {
+  const i = CODE_ORDER.findIndex((k) => a.doc.startsWith(k));
+  return i < 0 ? CODE_ORDER.length : i;
+};
+const CODE_FILTERS = {
+  "Code du Québec": (a) => a.doc.startsWith("Code de construction"),
+  "Règlement d'urbanisme": (a) => a.doc.startsWith("Règlement"),
+  "Loi-cadre": (a) => a.doc.startsWith("Loi sur"),
+  "Tous": () => true,
+  "Non résolus": (a) => a.state === "non résolu",
+};
+function codeList() {
+  const f = CODE_FILTERS[viewOf("Codes")] || (() => true);
+  return ARTICLES.filter(f).sort((x, y) => codeRank(x) - codeRank(y));
+}
+
+/* A note is written by a person against one article, and it never leaves
+   this screen: nothing is ever written back into a drawing or into the
+   bylaw. */
+function codeRow(a) {
+  const gap = a.state === "non résolu";
+  const notes = V.notes[a.id] || [];
+  const open = V.noteOn === a.id;
+  return `<div class="coderow ${gap ? "gap" : ""} ${V.articleId === a.id ? "on" : ""}" ${act("article", a.id)}>
+    <div class="draw">${codeFig(a)}</div>
+    <div class="tx">
+      <div class="row" style="align-items:baseline">
+        <span class="hi tag">${a.id}</span>
+        <span class="hi" style="font-weight:600;font-size:13px;flex:1">${a.topic}</span>
+        <span class="hi state" data-state="${a.state}">${a.state}</span>
+      </div>
+      <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
+      <div class="hi src">${a.doc} · ${a.place} · ${a.edition}</div>
+      ${gap ? `<div class="hi src">manque pour conclure: ${a.needs}</div>` : ""}
+      ${notes.length ? `<div class="col" style="gap:5px">${notes.map((n) => `<div class="note">
+        <span class="hi" style="font-size:11px;color:var(--ink-3)">${n.who} · ${n.when}</span>
+        <span class="hi" style="font-size:12px">${n.txt}</span></div>`).join("")}</div>` : ""}
+      ${open ? `<div class="row" style="gap:6px;align-items:flex-start">
+        <textarea class="noteinput" data-note="${a.id}" rows="2"
+          placeholder="Ce qui manque, qui va le chercher, pour quand"></textarea>
+        <span class="btnw solid" ${act("notesave", a.id)}>${icon("check")}<span class="hi">Écrire</span></span>
+      </div>` : ""}
+      <div class="row" style="gap:6px">
+        <a class="btnw src-link hi" href="${a.url}" target="_blank" rel="noreferrer"
+           ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
+        <span class="btnw" ${act("noteopen", a.id)}>${icon("message-square")}<span class="hi">${open ? "Annuler" : "Ajouter une note"}</span></span>
+        ${notes.length ? `<span class="hi" style="font-size:11px;color:var(--ink-3)">${notes.length} note${notes.length > 1 ? "s" : ""}</span>` : ""}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ------------------------------------------------------- the calendar */
+
+/* Dates are handled as ISO strings and plain UTC arithmetic: the screen
+   never needs a locale calendar, only the day a task falls on. */
+const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
+  "août", "septembre", "octobre", "novembre", "décembre"];
+const MONTHS_AB = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+const DOW = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
+const iso = (d) => d.toISOString().slice(0, 10);
+const dOf = (s) => new Date(s + "T00:00:00Z");
+const shift = (s, n) => { const d = dOf(s); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
+/* Monday as the first column, which is how a site week is read here. */
+const monday = (s) => shift(s, -((dOf(s).getUTCDay() + 6) % 7));
+const fmtDay = (s) => { const d = dOf(s); return `${d.getUTCDate()} ${MONTHS_AB[d.getUTCMonth()]}`; };
+const tasksOn = (s) => TASKS.filter((t) => t.day === s);
+const lateCount = () => TASKS.filter((t) => !t.done && t.day < TODAY).length;
+
+function calTitle() {
+  const d = dOf(V.day), v = viewOf("Échéancier");
+  if (v === "Année") return `${d.getUTCFullYear()}`;
+  if (v === "Semaine") {
+    const a = monday(V.day);
+    return `semaine du ${fmtDay(a)} au ${fmtDay(shift(a, 6))}`;
+  }
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+}
+
+/* One day cell, at every scale: the number, a dot per task coloured by
+   priority, and the open count once there is no room for dots. */
+function dayCell(s, dim, big) {
+  const ts = tasksOn(s), open = ts.filter((t) => !t.done);
+  const cls = [s === V.day ? "on" : "", dim ? "dim" : "", s === TODAY ? "today" : "",
+    open.some((t) => t.day < TODAY) ? "late" : ""].join(" ");
+  return `<div class="day ${cls}" ${act("calday", s)} title="${fmtDay(s)} · ${ts.length} élément${ts.length > 1 ? "s" : ""}">
+    <span class="lo bar" style="width:14px"></span>
+    <span class="hi n">${dOf(s).getUTCDate()}</span>
+    ${ts.length ? `<span class="hi dots">${ts.slice(0, big ? 4 : 3).map((t) =>
+      `<i class="pdot" data-prio="${t.prio}" data-done="${t.done}"></i>`).join("")}${
+      ts.length > (big ? 4 : 3) ? `<em>+${ts.length - (big ? 4 : 3)}</em>` : ""}</span>` : ""}
+    ${big && ts.length ? `<span class="hi lbl">${ts[0].title}</span>` : ""}</div>`;
+}
+
+function monthGrid(y, m, big) {
+  const first = iso(new Date(Date.UTC(y, m, 1)));
+  const start = monday(first);
+  const cells = [];
+  for (let i = 0; i < 42; i++) {
+    const s = shift(start, i);
+    if (i >= 35 && dOf(s).getUTCMonth() !== m) break;
+    cells.push(dayCell(s, dOf(s).getUTCMonth() !== m, big));
+  }
+  return `<div class="cal ${big ? "big" : "mini"}">
+    ${DOW.map((d) => `<div class="dow"><span class="lo bar" style="width:16px"></span><span class="hi">${big ? d : d[0]}</span></div>`).join("")}
+    ${cells.join("")}</div>`;
+}
+
+function calendarHTML() {
+  const v = viewOf("Échéancier"), d = dOf(V.day);
+  if (v === "Année") {
+    const y = d.getUTCFullYear();
+    return `<div class="year">${MONTHS.map((name, m) => `<div class="ym">
+      <div class="row" ${act("calmonth", `${y}-${String(m + 1).padStart(2, "0")}-01`)}>
+        <span class="lo bar" style="width:40px"></span>
+        <span class="hi" style="font-size:11.5px;font-weight:600">${name}</span>
+        <span style="flex:1"></span>
+        <span class="hi" style="font-size:11px;color:var(--ink-3)">${
+          TASKS.filter((t) => t.day.slice(0, 7) === `${y}-${String(m + 1).padStart(2, "0")}`).length || ""}</span>
+      </div>${monthGrid(y, m, false)}</div>`).join("")}</div>`;
+  }
+  if (v === "Semaine") {
+    const a = monday(V.day);
+    return `<div class="week">${DOW.map((name, i) => {
+      const s = shift(a, i), ts = tasksOn(s);
+      return `<div class="wcol ${s === V.day ? "on" : ""} ${s === TODAY ? "today" : ""}" ${act("calday", s)}>
+        <div class="wh"><span class="lo bar" style="width:30px"></span>
+          <span class="hi">${name} ${dOf(s).getUTCDate()}</span></div>
+        <div class="wb">${ts.map((t) => `<div class="wtask" data-prio="${t.prio}" ${act("task", t.id)}>
+          <span class="lo bar" style="width:80%"></span>
+          <span class="hi">${t.title}</span>
+          <span class="hi who">${t.who}</span></div>`).join("")}</div></div>`;
+    }).join("")}</div>`;
+  }
+  return monthGrid(d.getUTCFullYear(), d.getUTCMonth(), true);
+}
+
+/* The list on the right is the same tasks, ordered by day and by priority
+   inside a day. The calendar filters it: a day is selected, so the list
+   opens on that day and keeps the rest below it under a divider. */
+function taskListHTML() {
+  const sorted = [...TASKS].sort((a, b) => a.day.localeCompare(b.day) || PRIO[b.prio] - PRIO[a.prio]);
+  const here = sorted.filter((t) => t.day === V.day);
+  const rest = sorted.filter((t) => t.day !== V.day && !t.done);
+  const line = (t) => `<div class="task ${t.done ? "done" : ""} ${V.task === t.id ? "on" : ""}
+      ${!t.done && t.day < TODAY ? "late" : ""}" ${act("task", t.id)}>
+    <span class="dot" style="border-radius:3px;${t.done ? "background:var(--ink);border-color:var(--ink)" : ""}"
+      ${act("tasktick", t.id)} title="Cocher"></span>
+    <span class="col" style="flex:1;gap:2px;min-width:0">
+      <span class="lo bar" style="width:70%"></span>
+      <span class="hi" style="font-size:12.5px">${t.title}</span>
+      <span class="lo bar" style="width:40%"></span>
+      <span class="hi" style="font-size:11px;color:var(--ink-3)">${t.who} · ${t.phase}${
+        t.code ? ` · ${t.code}` : ""}${!t.done && t.day < TODAY ? " · en retard" : ""}</span>
+    </span>
+    <span class="hi pr" data-prio="${t.prio}">${t.prio}</span>
+    <span class="hi dte" ${act("calday", t.day)}>${fmtDay(t.day)}</span>
+  </div>`;
+  return `<div class="col" style="gap:7px">
+    <div class="row" style="gap:6px">
+      <span class="chip on"><span class="lo bar" style="width:40px"></span>
+        <span class="hi">${fmtDay(V.day)}</span></span>
+      <span class="chip"><span class="lo bar" style="width:40px"></span>
+        <span class="hi">${lateCount()} en retard</span></span>
+      <span style="flex:1"></span>
+      <span class="btnw" ${act("calday", TODAY)}>${icon("plus")}<span class="hi">Ajouter une tâche</span></span>
+    </div>
+    ${here.length ? here.map(line).join("")
+      : `<div class="tile"><span class="lo bar" style="width:60%"></span>
+          <span class="hi" style="font-size:12px;color:var(--ink-2)">Rien ce jour-là.</span></div>`}
+    <div class="row" style="gap:8px;margin-top:2px">
+      <span class="lo bar" style="width:70px"></span>
+      <span class="hi" style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em">La suite</span>
+      <span style="flex:1;border-top:1px solid var(--line-2)"></span></div>
+    ${rest.map(line).join("")}
+  </div>`;
+}
+
+
 /* ------------------------------------------------------------ the parts */
 
 /* Sections only appear in the grouped rail: the first three screens read a
@@ -1507,14 +1924,16 @@ function navHTML() {
    rail lists the screens, the strip drops to the current screen's own views. */
 const CONTEXT = {
   "Projets": ["En cours", "Archivés"],
-  /* Aperçu has no views: the whole project reads on one page, so the strip
-     above it carries nothing but the way back to the index. */
   "Unités": [...LEVELS.map((lv) => `Niveau ${lv}`), "Tous les niveaux"],
-  /* These two are no longer screens, so these are not strip views: they are
-     the chips inside the Quantités and Suivi sections of Aperçu, and the
-     same V.view entries drive them. */
+  /* The second row filters the list: which body of rules is being read.
+     The Québec construction code comes first because it is the one the
+     building itself is judged against. */
+  "Codes": ["Code du Québec", "Règlement d'urbanisme", "Loi-cadre", "Tous", "Non résolus"],
+  /* The scale the calendar is drawn at. */
+  "Échéancier": ["Mois", "Semaine", "Année"],
+  /* Not a strip: the chips inside the Quantités section, driven by the
+     same V.view entries. */
   "Quantités": ["Unités", "Superficies", "Fenêtres", "Matériaux"],
-  "Suivi": ["Programme", "Esquisse", "Comité", "Permis", "Site"],
 };
 
 function tabsHTML() {
@@ -1597,7 +2016,8 @@ function headerHTML() {
   const unresolved = unresolvedCount();
   const open = Object.keys(V.settled).length;
   const title = { "Projets": ["Projets", `${PROJECTS.length} en cours`],
-    "Aperçu": [V.project, `8 étages · ${UNITS_BY_LEVEL["Tous les niveaux"].length} unités · ${unresolved} articles non résolus`],
+    "Codes": ["Codes et règlements", `${ARTICLES.length} articles suivis · ${unresolved} non résolus`],
+    "Échéancier": ["Échéancier", `${TASKS.filter((t) => !t.done).length} tâches ouvertes · ${lateCount()} en retard`],
     "Unités": [`Plans — ${viewOf("Unités").toLowerCase()}`,
       `${rowsOf("Unités").length} unités · ${rowsOf("Unités").filter((r) => /croisement/.test(r[1])).length} avec un croisement ouvert`],
   }[V.screen] || [V.screen, ""];
@@ -1654,14 +2074,16 @@ function listHTML() {
      they keep the plain pair. */
   const ucard = (r, i) => `<div class="tile ucard ${i === sel ? "on" : ""}" ${act("row", i)}
       title="${r[0]} · ${r[6]} pi²${r[7] ? ` · ${r[1]}` : ""}">
-      <div class="plan" data-img="unit" style="height:54px;flex:0 0 54px;background-image:url(assets/plan-niveau-${r[4]}.jpg);${crop(boxForUnit(r[4], r[2]))}"></div>
+      <div class="plan" data-img="unit" style="height:88px;flex:0 0 88px;background-image:url(assets/plan-niveau-${r[4]}.jpg);${crop(boxForUnit(r[4], r[2]))}"></div>
       <span class="hi ub">${r[0].split(" · ")[0]}</span>
       ${r[7] ? `<span class="hi uc" title="${r[1]}"></span>` : ""}
       <div class="lo bar" style="width:70%"></div>
       <div class="hi ul"><span style="font-size:12px">${r[5]}</span>
         <span class="ua">${r[6]} pi²</span></div></div>`;
+  /* One column: in two the drawings came out barely wider than a thumbnail,
+     and the plan of a unit is the point of the card. */
   const inner = mode === "Card grid"
-    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${pairs.map((r, i) => V.screen === "Unités" ? ucard(r, i)
+    ? `<div style="display:grid;grid-template-columns:1fr;gap:8px">${pairs.map((r, i) => V.screen === "Unités" ? ucard(r, i)
       : `<div class="tile ${i === sel ? "on" : ""}" ${act("row", i)}>
         <div class="plan" style="height:54px;flex:0 0 54px"></div>
         <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r[0]} · ${r[1]}</div></div>`).join("")}</div>`
@@ -1750,8 +2172,12 @@ function contentHTML() {
          drawing could not ask for the surveyor. The three chips are that
          question, on the pane that answers it. "Plan seul" is not a fourth
          layer, it is both overlays off — the floor plan is always there. */
+      /* One glyph each, so the row reads as three kinds of drawing before it
+         reads as three words: the sheet itself, the surveyor's rule, the
+         landscape architect's planting. */
+      const LAYICON = { none: "file", arp: "ruler", pay: "trees" };
       const laychip = (k, t) => `<span class="chip hi ${k === "none" ? (!V.lay.arp.on && !V.lay.pay.on ? "on" : "") : (V.lay[k].on ? "on" : "")}"
-        ${act("layer", k)} title="${k === "none" ? "Le plan d'étage seul" : `Superposer ${t.toLowerCase()}`}">${t}</span>`;
+        ${act("layer", k)} title="${k === "none" ? "Le plan d'étage seul" : `Superposer ${t.toLowerCase()}`}">${icon(LAYICON[k])}<span class="lb">${t}</span></span>`;
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane drawing" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>
@@ -1783,61 +2209,77 @@ function contentHTML() {
          is why it is the one pane drawn at the plan's own aspect. */
       const plan = () => pane("Plan 2D", `${unit} — contours par-dessus`, "plan", "align", typoHTML() + layersHTML());
       const model = () => pane("Maquette 3D", `${unit} — volumétrie, même niveau`, "model", "fit");
-      if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
-      if (mode === "Single pane + inset") return `<div style="position:relative;flex:1;display:flex">${plan()}
-        <div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
-        <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div></div>`;
-      return `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap)">${plan()}${model()}</div>`;
-    },
-    /* Aperçu is the project on one page. What changed, the totals, the
-       dates, and the zoning and code block: three of these were screens of
-       their own and none of them was worth a trip. A section keeps its own
-       chips, so the four tables and the five phases still switch in place. */
-    "Aperçu": () => {
-      /* No summary tiles: four boxes that only named what the tables below
-         already say were a second heading for every section. */
-      /* The chips belong to the section, not to the screen, so they carry
-         the section's name with them and never move the strip above. */
-      const chips = (name) => `<div class="row" style="gap:6px">${viewsOf(name).map((t, i) =>
-        `<span class="chip ${i === viewIndex(name) ? "on" : ""}" ${act("subview", `${name}|${i}`)} title="${t}">
-          <span class="lo bar" style="width:44px"></span><span class="hi">${t}</span></span>`).join("")}</div>`;
+      /* Quantités reads under the floor it is counted from. Closed it is a
+         single line — the four totals, which is what is glanced at; open it
+         is the table that was a screen of its own and never worth a trip.
+         It never takes room from the drawing until it is asked for. */
       const t = QTABS[viewOf("Quantités")];
+      const qchip = (name, i) => `<span class="chip ${i === viewIndex("Quantités") ? "on" : ""}"
+        ${act("subview", `Quantités|${i}`)} title="${name}">
+        <span class="lo bar" style="width:40px"></span><span class="hi">${name}</span></span>`;
+      const totals = QTABS["Unités"].rows.map((r) => `${r[2]} × ${r[0]}`).join(" · ");
       const quant = `<div class="pane" style="flex:0 0 auto">
-          <div class="ph">${icon("table")}<span class="lo bar" style="width:70px"></span>
-            <span class="hi">Quantités</span><span style="flex:1"></span>
-            <span class="chip"><span class="lo bar" style="width:60px"></span>
-              <span class="hi">compté à partir des dessins, rien de saisi</span></span></div>
-          <div class="pb">${chips("Quantités")}
-            <table class="tbl"><thead><tr>${t.head.map((h) => `<th><span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
-            <tbody>${t.rows.map((r) => `<tr>${r.map((c, i) => `<td class="${i ? "n" : ""}"><span class="lo bar" style="width:${i ? 34 : 50}px"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>
-          </div></div>`;
-      const phases = PHASES[viewOf("Suivi")] || [];
-      const done = phases.filter((p) => V.settled[`Suivi · ${p}`]).length;
-      const suivi = `<div class="pane" style="flex:0 0 auto">
-          <div class="ph">${icon("calendar-check")}<span class="lo bar" style="width:60px"></span>
-            <span class="hi">Suivi</span><span style="flex:1"></span>
-            <span class="chip"><span class="lo bar" style="width:40px"></span>
-              <span class="hi">${done} sur ${phases.length} fait${done > 1 ? "s" : ""}</span></span></div>
-          <div class="pb">${chips("Suivi")}
-            ${phases.map((p) => `<div class="listrow" ${act("tick", p)} title="Cocher">
-              <span class="dot" style="border-radius:3px;${V.settled[`Suivi · ${p}`] ? "background:var(--ink);border-color:var(--ink)" : ""}"></span>
-              <span class="lo bar" style="flex:1"></span>
-              <span class="hi" style="font-size:12px">${p}${V.settled[`Suivi · ${p}`] ? " · fait" : ""}</span></div>`).join("")}
-          </div></div>`;
-      /* One card per provision: the number read in the drawings beside the
-         number the provision asks for, the sentence in French, and a link to
-         the official page. The card the footer strip points at is marked. */
-      const zoning = `<div class="pane" style="flex:0 0 auto">
-          <div class="ph">${icon("scale")}<span class="lo bar" style="width:90px"></span>
-            <span class="hi">Zonage et code</span><span style="flex:1"></span>
-            <span class="chip"><span class="lo bar" style="width:52px"></span><span class="hi">${unresolvedCount()} non résolus sur ${ARTICLES.length}</span></span></div>
-          <div class="pb">
-            <div class="codegrid">${ARTICLES.map((x, i) => codeCard(x, i)).join("")}</div>
-            <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
-              <span class="hi" style="font-size:11.5px;color:var(--ink-2)">Extraits de travail, abrégés. La version qui fait foi est celle de l'arrondissement ou de la RBQ, liée sur chaque carte. Une lecture automatique ne déclare pas une non-conformité.</span></div></div>
-          </div></div>`;
-      return `<div class="col" style="flex:1;gap:var(--gap)">${quant}${suivi}${zoning}</div>`;
+        <div class="ph" ${act("quant")} style="cursor:pointer">${icon("table")}
+          <span class="lo bar" style="width:70px"></span>
+          <span class="hi">Quantités</span>
+          ${V.quant ? "" : `<span class="hi" style="font-size:11.5px;color:var(--ink-2)">${totals}</span>`}
+          <span style="flex:1"></span>
+          <span class="hi" style="font-size:11px;color:var(--ink-3)">compté à partir des dessins, rien de saisi</span>
+          ${icon(V.quant ? "chevron-down" : "chevron-up")}</div>
+        ${V.quant ? `<div class="pb">
+          <div class="row" style="gap:6px">${viewsOf("Quantités").map(qchip).join("")}</div>
+          <table class="tbl"><thead><tr>${t.head.map((h) => `<th><span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
+          <tbody>${t.rows.map((r) => `<tr>${r.map((c, i) => `<td class="${i ? "n" : ""}"><span class="lo bar" style="width:${i ? 34 : 50}px"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>
+        </div>` : ""}</div>`;
+      if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}${quant}</div>`;
+      if (mode === "Single pane + inset") return `<div class="col" style="flex:1;gap:var(--gap)">
+        <div style="position:relative;flex:1;display:flex">${plan()}
+        <div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
+        <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div></div>${quant}</div>`;
+      return `<div class="col" style="flex:1;gap:var(--gap)">
+        <div class="row" style="flex:1;align-items:stretch;gap:var(--gap);min-height:0">${plan()}${model()}</div>
+        ${quant}</div>`;
     },
+    /* Codes is the vertical reading of the provisions: the Québec
+       construction code first, then the bylaw, each one with the schematic
+       of what it measures, the sentence in French, what is still missing,
+       and the notes written against it. Nothing here writes to a drawing.
+       The strip above filters which body of rules is being read. */
+    "Codes": () => {
+      const rows = codeList();
+      return `<div class="col" style="flex:1;gap:var(--gap)">
+        <div class="pane" style="flex:0 0 auto">
+          <div class="ph">${icon("scale")}<span class="lo bar" style="width:90px"></span>
+            <span class="hi">${viewOf("Codes")}</span><span style="flex:1"></span>
+            <span class="chip"><span class="lo bar" style="width:52px"></span>
+              <span class="hi">${rows.length} article${rows.length > 1 ? "s" : ""} · ${unresolvedCount()} non résolus</span></span>
+            <span class="btnw solid" ${act("addcode")}>${icon("plus")}<span class="hi">Ajouter</span></span></div>
+          <div class="pb">
+            <div class="codelist">${rows.map(codeRow).join("")}</div>
+            <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
+              <span class="hi" style="font-size:11.5px;color:var(--ink-2)">Extraits de travail, abrégés. La version qui fait foi est celle de la RBQ ou de l'arrondissement, liée sur chaque article. Une lecture automatique ne déclare pas une non-conformité.</span></div></div>
+          </div></div>
+      </div>`;
+    },
+    /* Échéancier is a calendar on the left and the work on the right. They
+       are one object seen twice: a task has a date, so it is a mark on the
+       calendar; a day holds tasks, so clicking it filters the list. The
+       scale — année, mois, semaine — is the view in the strip above. */
+    "Échéancier": () => `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap)">
+      <div class="pane" style="flex:1.25">
+        <div class="ph">${icon("calendar-check")}<span class="lo bar" style="width:70px"></span>
+          <span class="hi">${calTitle()}</span><span style="flex:1"></span>
+          <span class="btnw" ${act("calmove", "-1")} title="Avant">${icon("chevron-left")}</span>
+          <span class="btnw" ${act("calmove", "1")} title="Après">${icon("chevron-right")}</span>
+          <span class="btnw" ${act("calday", TODAY)}><span class="hi">Aujourd'hui</span></span></div>
+        <div class="pb">${calendarHTML()}</div></div>
+      <div class="pane" style="flex:1">
+        <div class="ph">${icon("list-checks")}<span class="lo bar" style="width:60px"></span>
+          <span class="hi">À faire</span><span style="flex:1"></span>
+          <span class="chip"><span class="lo bar" style="width:40px"></span>
+            <span class="hi">${TASKS.filter((t) => !t.done).length} ouvertes</span></span></div>
+        <div class="pb">${taskListHTML()}</div></div>
+    </div>`,
   }[V.screen]();
 
   /* No header strip on this pane: it only repeated the screen name already
@@ -1851,8 +2293,8 @@ function inspectorHTML() {
   if (mode === "Hidden") return "";
   const step = V.journey ? SCREENS[V.screen].steps.inspector : null;
   const row = selRow(V.screen);
-  const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`, "Aperçu": "Ce qui bloque",
-    "Suivi": "Échéances et signaux" }[V.screen] || "Détail";
+  const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`,
+    "Codes": "Ce qui bloque" }[V.screen] || "Détail";
   /* A decision panel on the screen where something is decided; a short
      read-only column everywhere else. */
   const decides = V.screen === "Unités";
@@ -1878,8 +2320,11 @@ function inspectorHTML() {
   };
   const rows = {
     "Unités": unitRows[UNIT_TABS[V.utab]],
-    "Aperçu": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Émission du permis", "21 Nov"], ["Données manquantes", "10"]],
-    "Suivi": [["Dépôt au comité", "14 Nov"], ["Réponse de l'urbaniste", "12 jours de retard"], ["Croisements ouverts", `${openCrossings().length}`], ["Articles à lire", "5"]],
+    /* The short column beside the provisions is the state of the one that
+       is open: what was read, what is asked, what is still missing. */
+    "Codes": (() => { const a = ARTICLES.find((x) => x.id === V.articleId) || ARTICLES[0];
+      return [["Article", a.id], ["Lu dans les dessins", a.measured], ["Exigé", a.required],
+        ["Manque", a.state === "non résolu" ? a.needs : "rien"]]; })(),
   }[V.screen] || [["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"]];
 
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
@@ -2454,6 +2899,7 @@ function dialogHTML() {
     <input data-field="${key}" value="${(d[key] || "").replace(/"/g, "&quot;")}" placeholder="${hint}">
   </label>`;
   if (d.kind === "share") return shareDialogHTML(d);
+  if (d.kind === "addcode") return addCodeDialogHTML(d);
   if (d.kind) return fileDialogHTML(d, field);
   return `<div class="scrim" ${act("dlgclose")}>
     <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
@@ -2523,6 +2969,105 @@ function shareDialogHTML(d) {
         <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Un commentaire est une note à côté du plan. Aucun fichier de dessin n'est modifié.</span>
         <span class="btnw" ${act("dlgclose")}><span class="hi">Fermer</span></span>
         <span class="btnw solid" ${act("sharecopy", link)}>${icon("link")}<span class="hi">Copier le lien</span></span>
+      </div>
+    </div></div>`;
+}
+
+/* What can be added to the Codes screen, in the order a person asks for
+   it: which body of rules, which part of it, which article. The catalogue
+   is short on purpose — it is what a residential project in this borough
+   is actually read against, not the whole code. */
+const CODE_SOURCES = [
+  { name: "Code de construction du Québec, chapitre I — Bâtiment", short: "Code du Québec",
+    place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    arts: {
+      "Partie 3 — Sécurité dans les bâtiments": [
+        { id: "3.3.1.4", topic: "Distance de parcours jusqu'à une issue", required: "45 m",
+          quote: "La distance de parcours jusqu'à une issue ne doit pas dépasser 45 m dans une aire de plancher protégée par gicleurs.",
+          needs: "parcours mesuré depuis la porte de logement la plus éloignée", fig: "issues" },
+        { id: "3.3.4.4", topic: "Portes des logements", required: "810 mm",
+          quote: "La largeur libre d'une porte donnant sur un corridor commun ne doit pas être inférieure à 810 mm.",
+          needs: "largeur libre relevée sur les plans d'étage", fig: "porte" },
+        { id: "3.4.3.2", topic: "Largeur des escaliers d'issue", required: "1 100 mm",
+          quote: "La largeur d'un escalier d'issue doit être d'au moins 1 100 mm entre les mains courantes.",
+          needs: "largeur entre mains courantes cotée sur le plan de la cage", fig: "corridor" },
+      ],
+      "Partie 9 — Maisons et petits bâtiments": [
+        { id: "9.5.3.1", topic: "Hauteur sous plafond des pièces", required: "2 300 mm",
+          quote: "La hauteur libre d'une pièce habitable ne doit pas être inférieure à 2 300 mm sur au moins la moitié de sa superficie.",
+          needs: "hauteur sous dalle et épaisseur des plafonds suspendus", fig: "garde" },
+        { id: "9.7.2.3", topic: "Surface vitrée des pièces habitables", required: "5 % de l'aire",
+          quote: "La surface vitrée d'une pièce habitable ne doit pas être inférieure à 5 % de l'aire de plancher desservie.",
+          needs: "aires de plancher par pièce et dimensions des fenêtres", fig: "classement" },
+      ],
+    } },
+  { name: "Règlement d'urbanisme de l'arrondissement", short: "Règlement d'urbanisme",
+    place: "Arrondissement", edition: "version à jour consultée le 2 novembre 2026",
+    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    arts: {
+      "Hauteurs et implantation": [
+        { id: "art. 43", topic: "Taux d'implantation au sol", required: "70 %",
+          quote: "Le taux d'implantation au sol du bâtiment ne peut excéder 70 % de la superficie du terrain.",
+          needs: "superficie du terrain et emprise au sol du bâtiment", fig: "classement" },
+      ],
+      "Stationnement et accès": [
+        { id: "art. 86", topic: "Unités de stationnement pour vélos", required: "1 par logement",
+          quote: "Au moins une unité de stationnement pour vélo doit être aménagée par logement.",
+          needs: "nombre de supports dessinés au sous-sol et à l'extérieur", fig: "issues" },
+      ],
+    } },
+  { name: "Loi sur l'aménagement et l'urbanisme", short: "Loi-cadre",
+    place: "Québec", edition: "RLRQ c. A-19.1, à jour",
+    url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1",
+    arts: {
+      "Dérogations": [
+        { id: "art. 145.1", topic: "Dérogation mineure", required: "résolution du conseil",
+          quote: "Le conseil d'une municipalité peut accorder une dérogation mineure aux dispositions du règlement de zonage.",
+          needs: "l'écart demandé, en chiffres, et la raison écrite", fig: "classement" },
+      ],
+    } },
+];
+
+/* Three questions and nothing else: the body of rules, the part, the
+   article. Each answer narrows the next list, so there is never a form to
+   fill — only a choice to make. The added article arrives unmeasured: the
+   drawing has not been read against it yet, and the screen says so. */
+function addCodeDialogHTML(d) {
+  const src = CODE_SOURCES.find((s) => s.name === d.source) || CODE_SOURCES[0];
+  const sections = Object.keys(src.arts);
+  const arts = d.section ? src.arts[d.section] : [];
+  const chosen = arts.find((a) => a.id === d.art);
+  const step = (n, label) => `<div class="row" style="gap:6px;align-items:baseline;padding-top:2px">
+    <span class="hi tag">${n}</span>
+    <span class="hi" style="font-size:11.5px;color:var(--ink-2)">${label}</span></div>`;
+  const pickrow = (on, action, value, main, note) => `<div class="listrow ${on ? "on" : ""}"
+      ${act(action, value)} title="${main}">
+    <span class="hi" style="font-size:12px;flex:1">${main}</span>
+    ${note ? `<span class="hi" style="font-size:11.5px;color:var(--ink-3)">${note}</span>` : ""}
+    ${on ? icon("check") : ""}</div>`;
+  return `<div class="scrim" ${act("dlgclose")}>
+    <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
+      <div class="dh">${icon("plus")}<span class="hi" style="font-weight:600;font-size:13.5px">Ajouter un article à suivre</span>
+        <span style="flex:1"></span>
+        <span class="btnw" ${act("dlgclose")} title="Fermer">${icon("x")}</span></div>
+      <div class="db">
+        ${step("1", "Quel code")}
+        <div class="col" style="gap:4px">${CODE_SOURCES.map((s) =>
+          pickrow(s.name === d.source, "picksource", s.name, s.short, s.place)).join("")}</div>
+        ${step("2", "Quelle partie")}
+        <div class="col" style="gap:4px">${sections.map((s) =>
+          pickrow(s === d.section, "picksection", s, s, `${src.arts[s].length} articles`)).join("")}</div>
+        ${step("3", "Quel article")}
+        ${d.section ? `<div class="col" style="gap:4px">${arts.map((a) =>
+          pickrow(a.id === d.art, "pickart", a.id, `${a.id} — ${a.topic}`, a.required)).join("")}</div>`
+          : `<div class="tile"><span class="hi" style="font-size:12px;color:var(--ink-3)">Choisissez d'abord une partie.</span></div>`}
+        ${chosen ? `<blockquote class="hi quote">«&nbsp;${chosen.quote}&nbsp;»</blockquote>` : ""}
+      </div>
+      <div class="df">
+        <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">L'article arrive non mesuré: rien n'est comparé tant que le dessin n'a pas été lu.</span>
+        <span class="btnw" ${act("dlgclose")}><span class="hi">Annuler</span></span>
+        <span class="btnw solid" ${act("addcodeok")}>${icon("plus")}<span class="hi">Ajouter</span></span>
       </div>
     </div></div>`;
 }
@@ -2608,7 +3153,54 @@ function onClick(e) {
       V.sel[screen] = Number(value);
       if (screen === "Unités") fitUnit();
       break;
-    case "article": V.article = Number(value); break;
+    case "article": V.articleId = value; V.noteOn = null; break;
+    /* The totals strip under the floor: one line, or the table. */
+    case "quant": V.quant = !V.quant; break;
+    /* Writing a note never touches a drawing or a bylaw: it is a sentence
+       stored against the provision's number, with a name and a day. */
+    case "noteopen": V.noteOn = V.noteOn === value ? null : value; break;
+    case "notesave": {
+      const el = document.querySelector(`[data-note="${CSS.escape(value)}"]`);
+      const txt = (el?.value || "").trim();
+      if (!txt) { say("Rien à écrire: la note est vide."); break; }
+      (V.notes[value] ||= []).push({ who: "Chargée de projet", when: "aujourd'hui", txt });
+      V.noteOn = null;
+      say(`Note écrite sur ${value}. Elle reste dans fitte, rien n'est envoyé au texte officiel.`);
+      break;
+    }
+    /* Three questions, in the order a person asks them: which body of
+       rules, which part of it, which article. */
+    case "addcode": V.dialog = { kind: "addcode", source: CODE_SOURCES[0].name, section: null, art: null }; break;
+    case "picksource": V.dialog = { ...V.dialog, source: value, section: null, art: null }; break;
+    case "picksection": V.dialog = { ...V.dialog, section: value, art: null }; break;
+    case "pickart": V.dialog = { ...V.dialog, art: value }; break;
+    case "addcodeok": {
+      const d = V.dialog, src = CODE_SOURCES.find((s) => s.name === d.source);
+      const a = (src?.arts[d.section] || []).find((x) => x.id === d.art);
+      if (!a) { say("Choisissez un article avant d'ajouter."); break; }
+      if (ARTICLES.some((x) => x.id === a.id)) { say(`${a.id} est déjà suivi.`); V.dialog = null; break; }
+      ARTICLES.push({ id: a.id, topic: a.topic, doc: src.name, place: src.place, edition: src.edition,
+        quote: a.quote, measured: "—", required: a.required, state: "non résolu",
+        needs: a.needs, url: src.url, fig: a.fig });
+      V.articleId = a.id; V.dialog = null;
+      say(`${a.id} ajouté. Rien n'est mesuré tant que le dessin n'a pas été lu.`);
+      break;
+    }
+    /* The calendar and the list are one object: a day click filters the
+       list, a date in the list moves the calendar. */
+    case "calday": V.day = value; break;
+    case "calmonth": V.day = value; V.view["Échéancier"] = 0; break;
+    case "calmove": {
+      const n = Number(value), v = viewOf("Échéancier");
+      if (v === "Semaine") V.day = shift(V.day, 7 * n);
+      else if (v === "Année") {
+        const d = dOf(V.day); d.setUTCFullYear(d.getUTCFullYear() + n); V.day = iso(d);
+      } else { const d = dOf(V.day); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + n); V.day = iso(d); }
+      break;
+    }
+    case "task": { V.task = V.task === value ? null : value; const t = TASKS.find((x) => x.id === value);
+      if (t) V.day = t.day; break; }
+    case "tasktick": { const t = TASKS.find((x) => x.id === value); if (t) t.done = !t.done; break; }
     /* The source link is a real link: the browser follows it, and the screen
        only notes what was opened. */
     case "source": say(`${value} — texte officiel ouvert dans un onglet. Lecture seule.`); return render();
@@ -2670,14 +3262,9 @@ function onClick(e) {
       say(`Décision enregistrée sur ${settleKey()}.`);
       V.reason = null; V.note = "";
       break;
-    case "tick": {
-      const key = `Suivi · ${value}`;
-      if (V.settled[key]) delete V.settled[key]; else V.settled[key] = "fait";
-      break;
-    }
     case "open":
       V.project = value;
-      V.screen = "Aperçu";
+      V.screen = "Unités";
       dial.setValue("screen", FR_SCREEN[V.screen]);
       break;
     /* A project is not created by a click: it is a folder on the server that
@@ -2761,11 +3348,12 @@ function onClick(e) {
     }
     case "export": say(`Export préparé: ${screen}${CONTEXT[screen] ? ` · ${viewOf(screen)}` : ""}.`); break;
     case "readarticle":
-      /* Aperçu holds the articles on the same page, so the link only has to
-         select the one the strip is talking about. */
-      V.screen = "Aperçu";
+      /* The footer strip names one provision; Codes is where it is read in
+         full, so the link goes there and opens that one. */
+      V.screen = "Codes";
       dial.setValue("screen", FR_SCREEN[V.screen]);
-      V.article = ARTICLES.findIndex((a) => a.id === "3.2.3.1");
+      V.view["Codes"] = 3;          // "Tous", so the article is in the list whatever it is
+      V.articleId = "3.2.3.1";
       break;
     default: return;
   }
@@ -2776,7 +3364,7 @@ function onClick(e) {
 
 const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
 /* The panel names a screen in English; the prototype knows it in French. */
-const SCREEN_FR = { Projects: "Projets", Overview: "Aperçu", Units: "Unités" };
+const SCREEN_FR = { Projects: "Projets", Units: "Unités", Codes: "Codes", Schedule: "Échéancier" };
 const FR_SCREEN = Object.fromEntries(Object.entries(SCREEN_FR).map(([en, fr]) => [fr, en]));
 
 const sel = (options) => ({ type: "select", options, default: options[0] });
@@ -2806,8 +3394,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   /* One shortlist per screen, so the rail can be judged against what the
      screen actually holds rather than against a default grid of squares. */
   railIcons: { _collapsed: false,
-    overview: sel(NAV_ICONS["Aperçu"].map(([l]) => l)),
-    units: sel(NAV_ICONS["Unités"].map(([l]) => l)) },
+    units: sel(NAV_ICONS["Unités"].map(([l]) => l)),
+    codes: sel(NAV_ICONS["Codes"].map(([l]) => l)),
+    schedule: sel(NAV_ICONS["Échéancier"].map(([l]) => l)) },
   /* The plan is black and white until a typology is asked for. */
   typologies: { _collapsed: false, "3½": false, "4½": false, "5½": false },
   layers: { _collapsed: false,
@@ -2862,8 +3451,9 @@ function applyDial(v) {
     const hit = NAV_ICONS[screen].find(([l]) => l.toLowerCase() === want);
     V.icons[screen] = (hit || NAV_ICONS[screen][0])[1];
   };
-  pick("Aperçu", v.railIcons.overview);
   pick("Unités", v.railIcons.units);
+  pick("Codes", v.railIcons.codes);
+  pick("Échéancier", v.railIcons.schedule);
   const la = v.layers, al = la.align;
   TYPOS.forEach((t) => { V.typo[t] = v.typologies[t]; });
   V.lay.arp = { on: la.surveyor, opacity: la.surveyorOpacity,
