@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Échéancier — six façons de dessiner le calendrier</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Six calendars over one list of tasks. A month grid answers "what day is
+   it due"; it answers "what is late", "what is mine" and "how much is left
+   before the deposit" badly or not at all. Each design below is judged on
+   those four questions, not on how it looks empty. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e4e4e4;
+  --fill:#ededed; --fill-2:#f7f7f7; --page:#f4f4f4; --paper:#fff;
+  --hi:#111;
+  --vert:#c3e05a; --vert-ink:#2f3a05; --vert-soft:#eef3dc;
+  --rouge:#b4442f; --rouge-soft:#f7e8e4;
+  --bleu:#2f4858; --bleu-soft:#e7eef2;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:26px 22px 70px}
+.lu{width:15px;height:15px;flex:0 0 auto;stroke-width:1.6}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:5px;max-width:92ch}
+.sub b{color:var(--ink);font-weight:500}
+
+.bar{position:sticky;top:0;z-index:40;margin-top:16px;padding:8px 11px;background:var(--paper);
+  border:1px solid var(--line-2);border-radius:8px;display:flex;align-items:center;gap:9px}
+.bar .lab{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:7px;overflow:hidden}
+.seg button{height:27px;padding:0 10px;border:0;background:var(--paper);font:inherit;font-size:12px;
+  color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button.on{background:var(--hi);color:#fff}
+.bar .r{margin-left:auto;color:var(--ink-2);font-size:12px;display:flex;align-items:center;gap:8px}
+.btn{height:27px;padding:0 10px;border:1px solid var(--line-2);border-radius:7px;background:var(--paper);
+  font:inherit;font-size:12px;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--fill-2)}
+
+.ways{display:flex;flex-direction:column;gap:32px;margin-top:20px}
+.way .cap{display:flex;align-items:baseline;gap:9px;margin-bottom:3px}
+.way .cap b{font-size:14px;font-weight:600}
+.way .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.way .note{color:var(--ink-2);font-size:12.5px;max-width:98ch;margin-bottom:10px}
+.way .note b{color:var(--ink);font-weight:500}
+.frame{border:1px solid var(--line-2);border-radius:9px;background:var(--paper);overflow:hidden}
+.hdr{height:38px;display:flex;align-items:center;gap:9px;padding:0 12px;border-bottom:1px solid var(--line-2)}
+.hdr .t{font-size:13.5px;font-weight:500}
+.hdr .r{margin-left:auto;display:flex;align-items:center;gap:6px}
+.nav{width:27px;height:27px;border:1px solid var(--line-2);border-radius:7px;display:grid;place-items:center;
+  color:var(--ink-2);cursor:pointer;background:var(--paper)}
+.nav:hover{background:var(--fill-2)}
+
+/* the shared vocabulary of a task: phase gives the colour, late gives the
+   weight, done gives the strike */
+.dotp{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.p-Permis{background:var(--rouge)}
+.p-Comité{background:var(--bleu)}
+.p-Programme{background:var(--ink-3)}
+.p-Site{background:#7a8a2e}
+.chipt{display:flex;align-items:center;gap:5px;border-radius:5px;padding:2px 6px;font-size:11px;
+  background:var(--fill-2);border:1px solid var(--line-2);cursor:pointer;width:100%;text-align:left;
+  overflow:hidden;white-space:nowrap}
+.chipt .tx{overflow:hidden;text-overflow:ellipsis}
+.chipt:hover{background:var(--fill)}
+.chipt.done{color:var(--ink-3)}
+.chipt.done .tx{text-decoration:line-through}
+.chipt.late{border-color:#e3bcb2;background:var(--rouge-soft);color:#7d2b1b}
+.chipt.sel{border-color:var(--hi);background:var(--hi);color:#fff}
+.chipt.sel .dotp{outline:1px solid #fff}
+
+/* 1 — the month grid */
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.month .dow{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+  padding:7px 9px;border-bottom:1px solid var(--line-2);background:var(--fill-2)}
+.cell{min-width:0;border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2);min-height:104px;
+  padding:6px 7px;display:flex;flex-direction:column;gap:4px;cursor:pointer}
+.cell:nth-child(7n+7){border-right:0}
+.cell.out{background:var(--fill-2);color:var(--ink-3)}
+.cell.we{background:#fcfcfc}
+.cell.sel{box-shadow:inset 0 0 0 2px var(--hi)}
+.cell .n{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:5px}
+.cell.out .n{font-weight:400}
+.cell .n .today{background:var(--hi);color:#fff;border-radius:5px;padding:0 5px}
+.cell .more{font-size:10.5px;color:var(--ink-3)}
+
+/* 2 — month plus the day's column */
+.split{display:grid;grid-template-columns:minmax(0,1fr) 268px}
+.split .side{border-left:1px solid var(--line-2);display:flex;flex-direction:column;max-height:560px}
+.split .side .sh{padding:9px 11px;border-bottom:1px solid var(--line-2)}
+.split .side .sh b{font-size:13px}
+.split .side .sh .m{color:var(--ink-3);font-size:11.5px}
+.split .side .sc{overflow:auto}
+.trow{padding:8px 11px;border-bottom:1px solid var(--line-2);cursor:pointer}
+.trow:hover{background:var(--fill-2)}
+.trow.sel{background:var(--vert-soft)}
+.trow .t{font-size:12.5px;display:flex;gap:6px;align-items:flex-start}
+.trow .m{margin-top:3px;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.trow.done .t{color:var(--ink-3);text-decoration:line-through}
+
+/* 3 — the week band, hours of nothing removed */
+.band{display:grid;grid-template-columns:132px minmax(0,1fr)}
+.band .rail{border-right:1px solid var(--line-2)}
+.band .rl{height:46px;display:flex;align-items:center;gap:7px;padding:0 10px;font-size:12px;color:var(--ink-2);
+  border-bottom:1px solid var(--line-2)}
+.band .grid{position:relative;overflow:hidden}
+.band .wk{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-bottom:1px solid var(--line-2);height:28px}
+.band .wk span{border-right:1px solid var(--line-2);font-size:10.5px;color:var(--ink-3);padding:6px 7px;
+  letter-spacing:.05em;text-transform:uppercase}
+.band .lane{border-bottom:1px solid var(--line-2);position:relative}
+.band .lane .zeb{position:absolute;inset:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+.band .lane .zeb i{border-right:1px solid var(--line-2)}
+.band .ev{position:absolute;height:26px;border-radius:6px;display:flex;align-items:center;gap:6px;
+  padding:0 8px;font-size:11.5px;background:var(--fill-2);border:1px solid var(--line-2);cursor:pointer;
+  white-space:nowrap;overflow:hidden}
+.band .ev.done{color:var(--ink-3);text-decoration:line-through}
+.band .ev.late{background:var(--rouge-soft);border-color:#e3bcb2;color:#7d2b1b}
+.band .ev.sel{background:var(--hi);border-color:var(--hi);color:#fff}
+.band .today{position:absolute;top:0;bottom:0;width:0;border-left:2px solid var(--hi)}
+.band .today b{position:absolute;top:-1px;left:-20px;background:var(--hi);color:#fff;font-size:10px;
+  border-radius:4px;padding:1px 5px}
+
+/* 4 — the agenda, grouped by week */
+.agenda{display:flex;flex-direction:column}
+.agenda .wkh{display:flex;align-items:center;gap:9px;padding:7px 12px;background:var(--fill-2);
+  border-bottom:1px solid var(--line-2);font-size:11.5px;color:var(--ink-2)}
+.agenda .wkh .c{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.agenda .day{display:grid;grid-template-columns:96px 1fr;border-bottom:1px solid var(--line-2)}
+.agenda .day:last-child{border-bottom:0}
+.agenda .dg{padding:9px 12px;border-right:1px solid var(--line-2);color:var(--ink-2)}
+.agenda .dg b{display:block;font-size:17px;line-height:1.1;color:var(--ink)}
+.agenda .dg span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+.agenda .dg b i{font-style:normal}
+.agenda .day.today .dg b i{background:var(--hi);color:#fff;border-radius:6px;padding:0 6px}
+.agenda .list{padding:5px 0}
+
+/* 5 — the year as twelve small months */
+.year{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.ym{border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2);padding:9px 10px}
+.ym:nth-child(4n){border-right:0}
+.ym .t{font-size:12px;color:var(--ink-2);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.ym .t .c{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.ym .g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+.ym .d{aspect-ratio:1;border-radius:3px;background:var(--fill-2);font-size:9px;color:var(--ink-3);
+  display:grid;place-items:center;cursor:pointer}
+.ym .d.n1{background:#dfe8c2;color:var(--vert-ink)}
+.ym .d.n2{background:#c6d897;color:var(--vert-ink)}
+.ym .d.n3{background:#a9c261;color:var(--vert-ink)}
+.ym .d.late{background:var(--rouge-soft);color:#7d2b1b}
+.ym .d.today{outline:2px solid var(--hi)}
+.ym .d.out{background:transparent;color:transparent;cursor:default}
+
+/* 6 — one column of days, the week that matters */
+.stream{display:grid;grid-template-columns:minmax(0,1fr) 300px}
+.stream .col{max-height:580px;overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:0}
+.sday{display:grid;grid-template-columns:62px 1fr;gap:12px;position:relative}
+.sday .g{padding:10px 0 14px;text-align:right;color:var(--ink-3)}
+.sday .g b{display:block;color:var(--ink);font-size:14px}
+.sday .g span{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em}
+.sday .ln{position:absolute;left:70px;top:0;bottom:0;width:1px;background:var(--line-2)}
+.sday .pt{position:absolute;left:66px;top:16px;width:9px;height:9px;border-radius:50%;background:var(--paper);
+  border:1.5px solid var(--line)}
+.sday.has .pt{background:var(--ink);border-color:var(--ink)}
+.sday.today .pt{background:var(--vert);border-color:var(--vert-ink)}
+.sday .items{padding:8px 0 12px;display:flex;flex-direction:column;gap:5px}
+.sday.empty .items{padding:4px 0;color:var(--ink-3);font-size:11.5px}
+.sday.empty .g{padding:5px 0 7px}
+.sday.empty .pt{top:11px}
+.late-head{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid #e3bcb2;
+  background:var(--rouge-soft);color:#7d2b1b;border-radius:8px;font-size:11.5px;margin-bottom:8px}
+.card{border:1px solid var(--line-2);border-radius:8px;padding:7px 9px;cursor:pointer;background:var(--paper)}
+.card:hover{background:var(--fill-2)}
+.card.sel{border-color:var(--hi)}
+.card.late{border-color:#e3bcb2;background:var(--rouge-soft)}
+.card .t{font-size:12.5px;display:flex;gap:6px;align-items:flex-start}
+.card .m{margin-top:3px;font-size:11px;color:var(--ink-3)}
+.card.done .t{color:var(--ink-3);text-decoration:line-through}
+.stream .side{border-left:1px solid var(--line-2);padding:11px 12px;display:flex;flex-direction:column;gap:9px}
+.kpi{border:1px solid var(--line-2);border-radius:8px;padding:9px 10px}
+.kpi b{display:block;font-size:19px;line-height:1.15}
+.kpi span{font-size:11.5px;color:var(--ink-2)}
+.kpi.red b{color:var(--rouge)}
+
+.tbl{margin-top:30px;border:1px solid var(--line-2);border-radius:8px;background:var(--paper);width:100%;
+  border-collapse:separate;border-spacing:0;overflow:hidden}
+.tbl td,.tbl th{border-bottom:1px solid var(--line-2);text-align:left;padding:8px 11px;font-size:12px}
+.tbl th{color:var(--ink-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.y{color:var(--vert-ink);font-weight:600}
+.tbl td.n{color:var(--ink-3)}
+.verdict{margin-top:18px;border:1px solid var(--line-2);border-radius:8px;background:var(--paper);
+  padding:12px 14px;font-size:12.5px;color:var(--ink-2)}
+.verdict b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Échéancier — six façons de dessiner le calendrier</h1>
+  <p class="sub">Une seule liste de tâches, dessinée six fois. La grille du mois répond bien à une question —
+     <b>quel jour est-ce dû</b> — et mal à trois autres: <b>qu'est-ce qui est en retard</b>,
+     <b>qu'est-ce qui est à moi</b>, <b>combien reste-t-il avant le dépôt</b>. Chaque dessin ci-dessous est jugé
+     là-dessus, pas sur son allure à vide. Cliquez une tâche: la sélection suit dans les six.</p>
+
+  <div class="bar">
+    <span class="lab">Filtre</span>
+    <span class="seg" id="who"></span>
+    <span class="lab" style="margin-left:6px">Terminées</span>
+    <span class="seg" id="donef">
+      <button data-done="1" class="on">Visibles</button>
+      <button data-done="0">Masquées</button>
+    </span>
+    <span class="r" id="tally"></span>
+  </div>
+
+  <div class="ways" id="ways"></div>
+
+  <table class="tbl" id="cost"></table>
+  <div class="verdict" id="verdict"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["calendar-check", "calendar-clock", "chevron-left", "chevron-right", "circle", "check",
+    "alert-triangle", "user", "list-checks", "clock", "flag", "arrow-right"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* The same tasks the C3 prototype carries, so the six drawings are compared
+   on a real month and not on a demo month with one event a day. */
+const TODAY = "2026-11-14";
+const TASKS = [
+  ["t1", "2026-11-03", "Tableau des superficies par étage", "Chargée de projet", "moyenne", true, "Comité"],
+  ["t2", "2026-11-09", "Élévations avec matériaux au comité", "Atelier", "moyenne", true, "Comité"],
+  ["t3", "2026-11-14", "Reprendre la hauteur des garde-corps à 1 070 mm", "Atelier", "haute", false, "Permis"],
+  ["t4", "2026-11-14", "Largeur libre des portes du parcours sans obstacles", "Atelier", "haute", false, "Permis"],
+  ["t5", "2026-11-17", "Confirmer le type de construction pour 8 étages", "Ingénieur", "haute", false, "Permis"],
+  ["t6", "2026-11-20", "Recompter les cases après réduction pour le métro", "Chargée de projet", "moyenne", false, "Permis"],
+  ["t7", "2026-11-24", "Note à l'urbaniste sur la marge avant", "Chargée de projet", "moyenne", false, "Comité"],
+  ["t8", "2026-11-27", "Demande de dérogation mineure rédigée", "Chargée de projet", "basse", false, "Comité"],
+  ["t9", "2026-12-04", "Plans d'émission pour permis", "Atelier", "haute", false, "Permis"],
+  ["t10", "2026-12-08", "Calculs de conformité joints au dépôt", "Atelier", "haute", false, "Permis"],
+  ["t11", "2026-12-15", "Dépôt de la demande de permis", "Chargée de projet", "haute", false, "Permis"],
+  ["t12", "2027-01-19", "Réponse de l'urbaniste attendue", "Arrondissement", "moyenne", false, "Permis"],
+  ["t13", "2027-02-09", "Relevé d'implantation", "Arpenteur", "basse", false, "Site"],
+  ["t14", "2026-10-27", "Mix de typologies arrêté", "Promoteur", "basse", true, "Programme"],
+  ["t15", "2026-11-05", "Coupe de rue pour le comité", "Atelier", "moyenne", false, "Comité"],
+  ["t16", "2026-11-11", "Calcul d'ensoleillement de la cour", "Atelier", "basse", false, "Comité"],
+  ["t17", "2026-11-17", "Révision des quantités de stationnement", "Ingénieur", "moyenne", false, "Permis"],
+  ["t18", "2026-11-26", "Devis d'ascenseur à confirmer", "Ingénieur", "basse", false, "Permis"],
+  ["t19", "2026-11-14", "Coupe de mur type pour le détail de parapet", "Atelier", "moyenne", false, "Permis"],
+  ["t20", "2026-11-14", "Relire les notes de l'arrondissement", "Chargée de projet", "basse", false, "Comité"],
+].map(([id, day, title, who, prio, done, phase]) => ({ id, day, title, who, prio, done, phase }));
+
+const WHO = ["Tous", "Atelier", "Chargée de projet", "Ingénieur", "Autres"];
+const OURS = ["Atelier", "Chargée de projet", "Ingénieur"];
+let S = { month: "2026-11", day: TODAY, sel: null, who: "Tous", showDone: true };
+
+/* Dates are strings: no locale calendar is needed, only which day a task
+   falls on and how two days compare. */
+const dOf = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const key = (dt) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+const addDays = (s, n) => { const d = dOf(s); d.setDate(d.getDate() + n); return key(d); };
+const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre",
+  "octobre", "novembre", "décembre"];
+const DOW = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
+const monthLabel = (m) => { const [y, mm] = m.split("-").map(Number); return `${MONTHS[mm - 1]} ${y}`; };
+const shiftMonth = (m, n) => {
+  const [y, mm] = m.split("-").map(Number);
+  const d = new Date(y, mm - 1 + n, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+};
+const isLate = (t) => !t.done && t.day < TODAY;
+
+const visible = () => TASKS.filter((t) => (S.showDone || !t.done)
+  && (S.who === "Tous"
+    || (S.who === "Autres" ? !OURS.includes(t.who) : t.who === S.who)));
+const onDay = (d) => visible().filter((t) => t.day === d);
+
+/* The six grids all need the same 42 days: the month, padded to whole weeks
+   from Monday, because a week that starts on Sunday reads wrong here. */
+function gridDays(month) {
+  const [y, m] = month.split("-").map(Number);
+  const first = new Date(y, m - 1, 1);
+  const lead = (first.getDay() + 6) % 7;
+  const start = new Date(y, m - 1, 1 - lead);
+  return Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return { k: key(d), n: d.getDate(), out: d.getMonth() !== m - 1, we: d.getDay() === 0 || d.getDay() === 6 };
+  });
+}
+
+const chip = (t, extra = "") => `<button class="chipt ${t.done ? "done" : ""} ${isLate(t) ? "late" : ""}
+    ${t.id === S.sel ? "sel" : ""} ${extra}" data-task="${t.id}" title="${t.title} — ${t.who}">
+  <span class="dotp p-${t.phase}"></span><span class="tx">${t.title}</span></button>`;
+
+const navHdr = (title, sub = "") => `<div class="hdr">${icon("calendar-check")}
+  <span class="t">${title}</span>${sub ? `<span style="color:var(--ink-3);font-size:12px">${sub}</span>` : ""}
+  <span class="r">
+    <span class="nav" data-mv="-1">${icon("chevron-left")}</span>
+    <span class="nav" data-mv="1">${icon("chevron-right")}</span>
+    <button class="btn" data-today>Aujourd'hui</button>
+  </span></div>`;
+
+/* ------------------------------------------------------------- 1 · grille */
+function wayMonth() {
+  const days = gridDays(S.month);
+  return `<div class="frame">${navHdr(monthLabel(S.month))}
+    <div class="month">
+      ${DOW.map((d) => `<div class="dow">${d}</div>`).join("")}
+      ${days.map((d) => {
+        const list = onDay(d.k);
+        const show = list.slice(0, 2);
+        return `<div class="cell ${d.out ? "out" : ""} ${d.we ? "we" : ""} ${d.k === S.day ? "sel" : ""}"
+            data-day="${d.k}">
+          <div class="n">${d.k === TODAY ? `<span class="today">${d.n}</span>` : d.n}</div>
+          ${show.map((t) => chip(t)).join("")}
+          ${list.length > show.length ? `<span class="more">+${list.length - show.length} autre${list.length - show.length > 1 ? "s" : ""}</span>` : ""}
+        </div>`;
+      }).join("")}
+    </div></div>`;
+}
+
+/* --------------------------------------------------- 2 · grille + colonne */
+function waySplit() {
+  const days = gridDays(S.month);
+  const list = onDay(S.day);
+  return `<div class="frame split">
+    <div>${navHdr(monthLabel(S.month))}
+      <div class="month">
+        ${DOW.map((d) => `<div class="dow">${d}</div>`).join("")}
+        ${days.map((d) => {
+          const l = onDay(d.k);
+          return `<div class="cell ${d.out ? "out" : ""} ${d.we ? "we" : ""} ${d.k === S.day ? "sel" : ""}"
+              data-day="${d.k}" style="min-height:76px">
+            <div class="n">${d.k === TODAY ? `<span class="today">${d.n}</span>` : d.n}</div>
+            ${l.length ? `<div style="display:flex;gap:3px;flex-wrap:wrap">
+              ${l.map((t) => `<span class="dotp p-${t.phase}" style="${isLate(t) ? "outline:1px solid var(--rouge)" : ""}"></span>`).join("")}
+            </div>` : ""}
+          </div>`;
+        }).join("")}
+      </div>
+    </div>
+    <div class="side">
+      <div class="sh"><b>${dOf(S.day).getDate()} ${MONTHS[dOf(S.day).getMonth()]}</b>
+        <div class="m">${list.length ? `${list.length} tâche${list.length > 1 ? "s" : ""}` : "rien ce jour-là"}</div></div>
+      <div class="sc">${list.map((t) => `<div class="trow ${t.done ? "done" : ""} ${t.id === S.sel ? "sel" : ""}" data-task="${t.id}">
+        <div class="t"><span class="dotp p-${t.phase}" style="margin-top:5px"></span>${t.title}</div>
+        <div class="m">${t.who} · ${t.phase}${isLate(t) ? " · en retard" : ""}</div></div>`).join("")
+        || `<div style="padding:11px;color:var(--ink-3);font-size:12px">Choisissez un jour dans la grille.</div>`}</div>
+    </div></div>`;
+}
+
+/* ------------------------------------------------------- 3 · bande de six
+   Six weeks across, one lane per person: the only drawing here that answers
+   "what is mine" and "how far is the deposit" in the same glance. */
+function wayBand() {
+  const days = gridDays(S.month);
+  const weeks = Array.from({ length: 6 }, (_, w) => days[w * 7]);
+  const lanes = ["Atelier", "Chargée de projet", "Ingénieur", "Autres"];
+  const pos = (day) => {
+    const i = days.findIndex((d) => d.k === day);
+    return i < 0 ? null : { w: Math.floor(i / 7), dow: i % 7 };
+  };
+  const todayPos = pos(TODAY);
+  return `<div class="frame">${navHdr(monthLabel(S.month), "six semaines, une voie par personne")}
+    <div class="band">
+      <div class="rail"><div class="rl" style="height:28px;color:var(--ink-3);font-size:10.5px;
+        letter-spacing:.06em;text-transform:uppercase">Qui</div>
+        ${lanes.map((lane) => {
+          const mine = visible().filter((t) => (lane === "Autres" ? !OURS.includes(t.who) : t.who === lane))
+            .map((t) => pos(t.day)).filter(Boolean);
+          const used = {};
+          mine.forEach((p) => { used[p.w] = (used[p.w] ?? -1) + 1; });
+          const rows = Math.max(1, ...Object.values(used).map((v) => v + 1));
+          return `<div class="rl" style="height:${rows * 30 + 10}px">${icon("user")}${lane}</div>`;
+        }).join("")}</div>
+      <div class="grid">
+        <div class="wk">${weeks.map((w) => `<span>sem. du ${w.n}</span>`).join("")}</div>
+        ${lanes.map((lane) => {
+          const mine = visible().filter((t) => (lane === "Autres" ? !OURS.includes(t.who) : t.who === lane))
+            .map((t) => ({ t, p: pos(t.day) })).filter((x) => x.p)
+            .sort((a, b) => a.t.day.localeCompare(b.t.day));
+          // an event occupies its whole week column, so two in the same week
+          // stack into sub-rows instead of printing over each other
+          const used = {};
+          mine.forEach((x) => { x.row = used[x.p.w] = (used[x.p.w] ?? -1) + 1; });
+          const rows = Math.max(1, ...mine.map((x) => x.row + 1));
+          return `<div class="lane" style="height:${rows * 30 + 10}px">
+            <div class="zeb">${Array.from({ length: 6 }, () => "<i></i>").join("")}</div>
+            ${mine.map(({ t, p, row }) => `<span class="ev ${t.done ? "done" : ""} ${isLate(t) ? "late" : ""} ${t.id === S.sel ? "sel" : ""}"
+                data-task="${t.id}" title="${t.title} — ${dOf(t.day).getDate()} ${MONTHS[dOf(t.day).getMonth()]}"
+                style="left:calc(${((p.w * 100) / 6).toFixed(3)}% + 4px);width:calc(${(100 / 6).toFixed(3)}% - 8px);
+                  top:${row * 30 + 6}px">
+                <span class="dotp p-${t.phase}"></span>${t.title}</span>`).join("")}
+          </div>`;
+        }).join("")}
+        ${todayPos ? `<div class="today" style="left:${((todayPos.w * 100) / 6 + (todayPos.dow * 100) / 42).toFixed(2)}%">
+          <b>auj.</b></div>` : ""}
+      </div>
+    </div></div>`;
+}
+
+/* ------------------------------------------------------------ 4 · agenda */
+function wayAgenda() {
+  const days = gridDays(S.month).filter((d) => !d.out);
+  const withWork = days.filter((d) => onDay(d.k).length);
+  const weeks = [];
+  withWork.forEach((d) => {
+    const dt = dOf(d.k);
+    const monday = addDays(d.k, -((dt.getDay() + 6) % 7));
+    const w = weeks.find((x) => x.monday === monday) || (weeks.push({ monday, days: [] }), weeks[weeks.length - 1]);
+    w.days.push(d);
+  });
+  return `<div class="frame">${navHdr(monthLabel(S.month), "les jours vides ne sont pas dessinés")}
+    <div class="agenda">
+      ${weeks.map((w) => {
+        const count = w.days.reduce((n, d) => n + onDay(d.k).length, 0);
+        const late = w.days.reduce((n, d) => n + onDay(d.k).filter(isLate).length, 0);
+        return `<div>
+          <div class="wkh">${icon("clock")}Semaine du ${dOf(w.monday).getDate()} ${MONTHS[dOf(w.monday).getMonth()]}
+            <span class="c">${count} tâche${count > 1 ? "s" : ""}${late ? ` · ${late} en retard` : ""}</span></div>
+          ${w.days.map((d) => `<div class="day ${d.k === TODAY ? "today" : ""}">
+            <div class="dg"><b><i>${d.n}</i></b><span>${DOW[(dOf(d.k).getDay() + 6) % 7]}</span></div>
+            <div class="list">${onDay(d.k).map((t) => `<div class="trow ${t.done ? "done" : ""} ${t.id === S.sel ? "sel" : ""}"
+              data-task="${t.id}" style="border-bottom:0">
+              <div class="t"><span class="dotp p-${t.phase}" style="margin-top:5px"></span>${t.title}</div>
+              <div class="m">${t.who} · ${t.phase}${isLate(t) ? " · en retard" : ""}</div></div>`).join("")}</div>
+          </div>`).join("")}
+        </div>`;
+      }).join("") || `<div style="padding:14px;color:var(--ink-3)">Rien ce mois-ci.</div>`}
+    </div></div>`;
+}
+
+/* -------------------------------------------------------------- 5 · année
+   Twelve small months: the permit, the committee and the response from the
+   borough are months apart, and no month view ever shows them together. */
+function wayYear() {
+  const year = Number(S.month.split("-")[0]);
+  return `<div class="frame">${navHdr(`${year}`, "la densité, pas le détail")}
+    <div class="year">
+      ${Array.from({ length: 12 }, (_, m) => {
+        const mk = `${year}-${String(m + 1).padStart(2, "0")}`;
+        const days = gridDays(mk);
+        const count = visible().filter((t) => t.day.startsWith(mk)).length;
+        return `<div class="ym">
+          <div class="t">${MONTHS[m]}<span class="c">${count || ""}</span></div>
+          <div class="g">${days.map((d) => {
+            if (d.out) return `<span class="d out"></span>`;
+            const l = onDay(d.k);
+            const late = l.some(isLate);
+            const n = l.length ? `n${Math.min(l.length, 3)}` : "";
+            return `<span class="d ${n} ${late ? "late" : ""} ${d.k === TODAY ? "today" : ""}"
+              data-day="${d.k}" title="${d.k}${l.length ? ` · ${l.length}` : ""}">${l.length ? l.length : ""}</span>`;
+          }).join("")}</div>
+        </div>`;
+      }).join("")}
+    </div></div>`;
+}
+
+/* ------------------------------------------------------------ 6 · le fil
+   One column of days around today, with what is left to the deposit stated
+   in words beside it. The calendar stops being a grid and becomes a queue. */
+function wayStream() {
+  // the column starts at today; what is overdue is pulled out of its date
+  // and stacked above, because a late task has no useful day left
+  const days = Array.from({ length: 21 }, (_, i) => addDays(TODAY, i));
+  const overdue = visible().filter(isLate);
+  const deposit = TASKS.find((t) => t.id === "t11");
+  const daysTo = Math.round((dOf(deposit.day) - dOf(TODAY)) / 86400000);
+  const open = visible().filter((t) => !t.done).length;
+  const late = visible().filter(isLate).length;
+  const mine = visible().filter((t) => !t.done && t.who === "Atelier").length;
+  return `<div class="frame stream">
+    <div>
+      ${navHdr("Les trois prochaines semaines", "aujourd'hui en haut")}
+      <div class="col">
+        ${overdue.length ? `<div class="late-head">${icon("alert-triangle")}
+          ${overdue.length} tâche${overdue.length > 1 ? "s" : ""} en retard, sorties de leur date</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px">
+          ${overdue.map((t) => `<div class="card late ${t.id === S.sel ? "sel" : ""}" data-task="${t.id}">
+            <div class="t"><span class="dotp p-${t.phase}" style="margin-top:5px"></span>${t.title}</div>
+            <div class="m">${t.who} · due le ${dOf(t.day).getDate()} ${MONTHS[dOf(t.day).getMonth()]}</div>
+          </div>`).join("")}</div>` : ""}
+        ${days.map((k) => {
+          const list = onDay(k);
+          const dt = dOf(k);
+          return `<div class="sday ${list.length ? "has" : "empty"} ${k === TODAY ? "today" : ""}">
+            <span class="ln"></span><span class="pt"></span>
+            <div class="g"><b>${dt.getDate()}</b><span>${DOW[(dt.getDay() + 6) % 7]}</span></div>
+            <div class="items">${list.map((t) => `<div class="card ${t.done ? "done" : ""} ${isLate(t) ? "late" : ""}
+                ${t.id === S.sel ? "sel" : ""}" data-task="${t.id}">
+              <div class="t"><span class="dotp p-${t.phase}" style="margin-top:5px"></span>${t.title}</div>
+              <div class="m">${t.who} · ${t.phase}</div></div>`).join("")
+              || (k === TODAY ? "rien d'échu aujourd'hui" : "")}</div>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>
+    <div class="side">
+      <div class="kpi"><b>${daysTo} jours</b><span>avant le dépôt du permis · ${dOf(deposit.day).getDate()} ${MONTHS[dOf(deposit.day).getMonth()]}</span></div>
+      <div class="kpi ${late ? "red" : ""}"><b>${late}</b><span>en retard</span></div>
+      <div class="kpi"><b>${open}</b><span>ouvertes au total</span></div>
+      <div class="kpi"><b>${mine}</b><span>à l'atelier</span></div>
+      <div style="font-size:11.5px;color:var(--ink-3)">Les chiffres suivent le filtre de la barre du haut.</div>
+    </div></div>`;
+}
+
+const WAYS = [
+  { name: "La grille du mois, remplie", html: wayMonth,
+    note: "Ce que l'écran fait déjà, mais la case porte le titre au complet et une pastille de phase, et dit combien de tâches elle cache. <b>Ce qu'on gagne:</b> la forme du mois. <b>Ce qu'on perd:</b> une case de 104 px tient deux lignes — le 14 novembre en a quatre, et « +2 autres » n'est pas une réponse." },
+  { name: "La grille, plus la colonne du jour", html: waySplit,
+    note: "La grille se réduit à des pastilles — un point par tâche, cerclé de rouge s'il est en retard — et le détail passe à droite. <b>Ce qu'on gagne:</b> la grille reste lisible même à huit tâches par jour, et la colonne tient des titres entiers. <b>Ce qu'on perd:</b> deux clics pour lire deux jours." },
+  { name: "La bande de six semaines, une voie par personne", html: wayBand,
+    note: "Le mois devient six colonnes et chaque voie est quelqu'un. <b>Ce qu'on gagne:</b> « qu'est-ce qui est à moi » et « qu'est-ce qui arrive sur l'ingénieur la semaine prochaine » se lisent sans filtrer. <b>Ce qu'on perd:</b> la position dans la semaine est approximative — c'est une bande, pas un jour précis." },
+  { name: "L'agenda: les jours vides ne sont pas dessinés", html: wayAgenda,
+    note: "Pas de grille. Les semaines qui portent quelque chose, les jours qui portent quelque chose, rien d'autre. <b>Ce qu'on gagne:</b> aucune place perdue, les titres sont entiers, le retard est compté par semaine. <b>Ce qu'on perd:</b> la forme du mois disparaît — on ne voit plus que la fin du mois est vide." },
+  { name: "L'année en douze petits mois", html: wayYear,
+    note: "Une case par jour, teintée par le nombre de tâches. <b>Ce qu'on gagne:</b> le comité de novembre, le dépôt de décembre et la réponse de l'arrondissement en janvier tiennent enfin dans le même écran. <b>Ce qu'on perd:</b> aucun titre — c'est une carte de densité, elle sert à choisir où regarder." },
+  { name: "Le fil des trois prochaines semaines", html: wayStream,
+    note: "Le calendrier devient une file: aujourd'hui en haut, un jour par ligne, et à droite ce que personne ne lit jamais sur une grille — <b>combien de jours avant le dépôt</b>, combien de retards, combien à l'atelier. Ce qui est en retard sort de sa date et remonte en haut: un 5 novembre échu n'a plus de jour utile. <b>Ce qu'on perd:</b> impossible de regarder un mois passé sans changer de vue." },
+];
+
+const COST = [
+  ["1 · Grille du mois", "oui", "mal (rouge dans la case)", "non", "non", "déjà bâtie"],
+  ["2 · Grille + colonne", "oui", "oui", "non", "non", "faible"],
+  ["3 · Bande par personne", "à la semaine", "oui", "oui", "à peu près", "moyen"],
+  ["4 · Agenda", "oui", "oui, compté par semaine", "non", "non", "faible"],
+  ["5 · Année", "non", "oui, en rouge", "non", "oui", "faible"],
+  ["6 · Fil de trois semaines", "oui", "oui", "oui", "oui, en jours", "moyen"],
+];
+
+function render() {
+  document.getElementById("who").innerHTML = WHO.map((w) =>
+    `<button data-who="${w}" class="${S.who === w ? "on" : ""}">${w}</button>`).join("");
+  document.querySelectorAll("#donef button").forEach((b) =>
+    b.classList.toggle("on", (b.dataset.done === "1") === S.showDone));
+  const late = visible().filter(isLate).length;
+  document.getElementById("tally").textContent =
+    `${visible().length} tâches · ${visible().filter((t) => !t.done).length} ouvertes${late ? ` · ${late} en retard` : ""}`;
+  document.getElementById("ways").innerHTML = WAYS.map((w, i) => `<section class="way">
+    <div class="cap"><span class="n">Façon ${i + 1}</span><b>${w.name}</b></div>
+    <div class="note">${w.note}</div>${w.html()}</section>`).join("");
+  document.getElementById("cost").innerHTML = `<thead><tr>
+      <th>Façon</th><th>Quel jour</th><th>Qu'est-ce qui est en retard</th><th>Qu'est-ce qui est à moi</th>
+      <th>Combien avant le dépôt</th><th>Coût</th></tr></thead>
+    <tbody>${COST.map((r) => `<tr><td>${r[0]}</td>
+      ${r.slice(1, 5).map((c) => `<td class="${c.startsWith("oui") ? "y" : c === "non" ? "n" : ""}">${c}</td>`).join("")}
+      <td>${r[5]}</td></tr>`).join("")}</tbody>`;
+  document.getElementById("verdict").innerHTML = `<b>Ce que je retiendrais:</b> la façon 6 comme vue par défaut
+    et la façon 5 comme vue d'ensemble. Le travail d'un permis est une file, pas un mois: la question posée dix
+    fois par jour est « qu'est-ce qui me tombe dessus cette semaine et combien de jours avant le dépôt », et
+    seules ces deux-là y répondent. La grille du mois reste utile une fois par semaine, en façon 2 — pastilles
+    dans la grille, titres dans la colonne — parce qu'une case qui cache « +2 autres » ment sur la charge.
+    La façon 3 est la meilleure des six pour une réunion d'équipe et la pire pour une personne seule.`;
+}
+
+document.addEventListener("click", (e) => {
+  const task = e.target.closest("[data-task]");
+  if (task) { S.sel = S.sel === task.dataset.task ? null : task.dataset.task;
+    const t = TASKS.find((x) => x.id === S.sel);
+    if (t) { S.day = t.day; S.month = t.day.slice(0, 7); }
+    return render(); }
+  const day = e.target.closest("[data-day]");
+  if (day) { S.day = day.dataset.day; return render(); }
+  const mv = e.target.closest("[data-mv]");
+  if (mv) { S.month = shiftMonth(S.month, Number(mv.dataset.mv)); return render(); }
+  if (e.target.closest("[data-today]")) { S.month = TODAY.slice(0, 7); S.day = TODAY; return render(); }
+  const who = e.target.closest("[data-who]");
+  if (who) { S.who = who.dataset.who; return render(); }
+  const df = e.target.closest("[data-done]");
+  if (df) { S.showDone = df.dataset.done === "1"; return render(); }
+});
+
+sprite();
+render();
+</script>
+</body>
+</html>
