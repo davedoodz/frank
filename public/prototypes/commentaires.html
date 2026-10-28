@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commentaires des invités — six façons</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Same ramp and same hairlines as wireframe-c3. What is being compared is
+   not the look of a comment but what it is attached to, and what happens to
+   it when the drawing is read again next week. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --card:#fff; --hi:#111; --vert:#c3e05a; --vert-ink:#2f3a05;
+  --wash:rgba(17,17,18,.055);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:28px 24px 64px}
+.lu{width:16px;height:16px;flex:0 0 auto;stroke-width:1.6}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:5px;max-width:78ch}
+.opts{display:flex;flex-direction:column;gap:30px;margin-top:26px}
+.opt .cap{display:flex;align-items:baseline;gap:9px;margin-bottom:3px}
+.opt .cap b{font-size:13.5px;font-weight:600}
+.opt .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.opt .note{color:var(--ink-2);font-size:12px;max-width:92ch;margin-bottom:9px}
+.shot{border:1px solid var(--line-2);border-radius:8px;background:var(--card);overflow:hidden;
+  display:grid;grid-template-columns:1fr 310px}
+.shot.one{grid-template-columns:1fr}
+.left{border-right:1px solid var(--line-2);min-width:0}
+.side{min-width:0;display:flex;flex-direction:column}
+.hdr{height:32px;display:flex;align-items:center;gap:7px;padding:0 10px;font-size:12px;
+  color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+.hdr .r{margin-left:auto;font-size:11px;color:var(--ink-3)}
+
+/* the drawing, never tinted: the comment lives above it, never in it */
+.plan{position:relative;height:330px;background:#fff;overflow:hidden;cursor:crosshair}
+.plan img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:28% 36%}
+.pins{position:absolute;inset:0}
+.pin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;
+  align-items:center;cursor:pointer}
+.pin .num{width:21px;height:21px;border-radius:50% 50% 50% 2px;transform:rotate(-45deg);
+  background:var(--vert);color:var(--vert-ink);border:1px solid var(--vert-ink);
+  display:grid;place-items:center;font-size:10.5px;font-weight:700}
+.pin .num span{transform:rotate(45deg)}
+.pin.sel .num{background:var(--hi);color:#fff;border-color:var(--hi)}
+.pin .lbl{margin-top:3px;background:var(--card);border:1px solid var(--line-2);border-radius:5px;
+  padding:1px 6px;font-size:10.5px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+
+/* a thread, the same object in every option */
+.thread{padding:9px 10px;border-bottom:1px solid var(--line-2);cursor:pointer}
+.thread:hover{background:var(--fill-2)}
+.thread.sel{background:#f3f6e6}
+.thread .who{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.thread .who b{color:var(--ink);font-weight:600;font-size:12px}
+.thread .who .when{margin-left:auto;color:var(--ink-3);font-size:11px}
+.thread .txt{margin-top:3px;font-size:12.5px}
+.thread .anch{margin-top:5px;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;
+  color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:1px 6px;
+  font-family:var(--mono)}
+.thread .rep{margin-top:6px;padding-left:9px;border-left:2px solid var(--line-2);font-size:12px;color:var(--ink-2)}
+.thread .st{margin-left:6px;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+.thread.done .txt{color:var(--ink-3);text-decoration:line-through}
+.newc{margin-top:auto;border-top:1px solid var(--line-2);padding:8px 10px;display:flex;gap:7px;align-items:flex-start}
+.newc textarea{flex:1;min-height:46px;resize:none;border:1px solid var(--line-2);border-radius:6px;
+  padding:6px 8px;font:inherit;font-size:12px;color:var(--ink);background:var(--card)}
+.newc textarea::placeholder{color:var(--ink-3)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--line-2);
+  border-radius:6px;background:var(--card);font:inherit;font-size:12px;color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--fill-2)}
+.btn.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
+.btn.sm{height:24px;font-size:11.5px;padding:0 8px}
+
+/* unit list, for the option that hangs the note on the unit and not on a point */
+.rows{padding:6px;display:flex;flex-direction:column;gap:3px;max-height:330px;overflow:auto}
+.row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;font-size:12.5px;
+  color:var(--ink-2);cursor:pointer}
+.row:hover{background:var(--fill-2)}
+.row.sel{background:#eef1e0;color:var(--ink);font-weight:500}
+.row .cnt{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-3)}
+.row .cnt.has{color:var(--vert-ink);background:var(--vert);border-radius:9px;padding:1px 7px;font-weight:600}
+
+/* the quantity table, for the option that comments a number */
+table{width:100%;border-collapse:separate;border-spacing:0}
+th,td{text-align:right;padding:6px 10px;font-size:12px;border-bottom:1px solid var(--line-2)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--ink-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+td.n{font-variant-numeric:tabular-nums}
+tr.sel td{background:#f3f6e6}
+td .mark{cursor:pointer;border-bottom:2px solid var(--vert);padding-bottom:1px}
+td .chip{margin-left:6px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--ink-3)}
+
+/* the email, for the people who will never open an account */
+.mail{padding:12px 14px;font-size:12.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:9px}
+.mail .box{border:1px solid var(--line-2);border-radius:6px;background:var(--fill-2);padding:10px 12px}
+.mail .from{font-size:11.5px;color:var(--ink-3);font-family:var(--mono)}
+.mail .q{border-left:2px solid var(--line);padding-left:9px;color:var(--ink-3)}
+.mail b{color:var(--ink)}
+
+/* the revision strip, for the option that ties a comment to a sheet state */
+.revs{display:flex;align-items:center;gap:0;padding:10px 12px}
+.rev{flex:1;border:1px solid var(--line-2);border-right:0;padding:7px 9px;font-size:11.5px;color:var(--ink-2)}
+.rev:first-child{border-radius:6px 0 0 6px}
+.rev:last-child{border-right:1px solid var(--line-2);border-radius:0 6px 6px 0}
+.rev.now{background:var(--fill-2);color:var(--ink)}
+.rev b{display:block;font-size:12.5px;color:var(--ink);font-weight:600}
+.rev .cm{margin-top:4px;display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--ink-3)}
+.stale{margin:0 12px 12px;border:1px solid var(--line-2);border-radius:6px;padding:9px 11px;font-size:12px}
+.stale .tag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--ink-3);margin-bottom:4px}
+
+/* what each way costs */
+.tbl{margin-top:34px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);width:100%}
+.tbl td,.tbl th{border-bottom:1px solid var(--line-2);text-align:left;padding:8px 11px;font-size:12px}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.y{color:var(--vert-ink);font-weight:600}
+.verdict{margin-top:18px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);
+  padding:12px 14px;font-size:12.5px;color:var(--ink-2)}
+.verdict b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Commentaires des invités — six façons</h1>
+  <p class="sub">Le bouton <b>Partager</b> donne deux droits: lire, ou lire et commenter. Reste la question
+     posée ici: un commentaire est accroché à quoi? Un point sur la feuille, une unité, un nombre, une
+     révision, ou rien du tout. C'est ce choix qui décide si la note est encore juste après la prochaine
+     lecture du dessin. Les deux premières options sont vivantes: cliquez sur le plan, cliquez sur une unité.</p>
+
+  <div class="opts" id="opts"></div>
+  <table class="tbl" id="cost"></table>
+
+  <div class="verdict" id="verdict"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+function sprite() {
+  const names = ["message-square", "map-pin", "check", "circle", "mail", "reply", "clock", "layers",
+    "corner-down-right", "at-sign", "file", "history", "alert-triangle", "sigma", "list", "send", "eye"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* ------------------------------------------------------------------ state
+   Pins are stored the way the prototype stores a unit outline: normalised
+   0 to 1 on the sheet. That is the whole point of option 1 — the note keeps
+   its place when the sheet is re-exported at another size. */
+const S = {
+  pins: [
+    { x: .31, y: .42, who: "Entrepreneur général", when: "hier 16:20",
+      txt: "Le dégagement devant la porte de l'unité 507 fait 860 mm, il en faut 900.", open: true },
+    { x: .62, y: .66, who: "Chargée de projet", when: "lun. 09:05",
+      txt: "Le balcon de l'unité 510 dépasse la ligne d'alignement de 0,4 m.", open: true },
+  ],
+  sel: 0,
+  unit: "507 · 4½",
+  byUnit: {
+    "507 · 4½": [{ who: "Urbaniste de l'arrondissement", when: "mar. 11:40",
+      txt: "Confirmer la hauteur libre sous la poutre: la coupe A-301 et le plan ne disent pas la même chose." }],
+    "510 · 5½": [{ who: "Chargée de projet", when: "lun. 09:05", txt: "Balcon à revalider après le prochain relevé." }],
+  },
+  draft: "",
+};
+const UNITS = ["501 · 3½", "502 · 3½", "503 · 3½", "504 · 3½+bureau", "505 · 4½", "506 · 4½",
+  "507 · 4½", "508 · 4½", "509 · 4½", "510 · 5½", "511 · 4½", "512 · 5½"];
+
+const planImg = `<img src="assets/plan-niveau-5.jpg" alt="">`;
+
+/* ------------------------------------------------------------- option 1 */
+function pinOption() {
+  const pins = S.pins.map((p, i) => `<div class="pin ${i === S.sel ? "sel" : ""}" data-pin="${i}"
+      style="left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%">
+    <div class="num"><span>${i + 1}</span></div>
+    <div class="lbl">${p.txt.slice(0, 28)}…</div></div>`).join("");
+  return `<div class="shot">
+    <div class="left">
+      <div class="hdr">${icon("file")}Plan 2D · niveau 5<span class="r">cliquez sur le plan pour poser une épingle</span></div>
+      <div class="plan" data-plan>${planImg}<div class="pins">${pins}</div></div>
+    </div>
+    <div class="side">
+      <div class="hdr">${icon("message-square")}Épingles<span class="r">${S.pins.length} ouvertes</span></div>
+      ${S.pins.map((p, i) => `<div class="thread ${i === S.sel ? "sel" : ""}" data-pin="${i}">
+        <div class="who">${icon("circle")}<b>${p.who}</b><span class="when">${p.when}</span></div>
+        <div class="txt">${p.txt}</div>
+        <div class="anch">${icon("map-pin")}niveau 5 · x ${p.x.toFixed(2)} y ${p.y.toFixed(2)}</div></div>`).join("")}
+      <div class="newc"><textarea data-draft placeholder="Cliquez le plan, puis écrivez la note ici">${S.draft}</textarea>
+        <button class="btn solid" data-add>${icon("send")}Poser</button></div>
+    </div></div>`;
+}
+
+/* ------------------------------------------------------------- option 2 */
+function unitOption() {
+  const list = UNITS.map((u) => {
+    const n = (S.byUnit[u] || []).length;
+    return `<div class="row ${u === S.unit ? "sel" : ""}" data-unit="${u}">${u}
+      <span class="cnt ${n ? "has" : ""}">${n ? icon("message-square") + n : ""}</span></div>`;
+  }).join("");
+  const th = S.byUnit[S.unit] || [];
+  return `<div class="shot">
+    <div class="left">
+      <div class="hdr">${icon("list")}Unités · niveau 5<span class="r">le compte est sur la ligne</span></div>
+      <div class="rows">${list}</div>
+    </div>
+    <div class="side">
+      <div class="hdr">${icon("message-square")}${S.unit}<span class="r">${th.length} note${th.length > 1 ? "s" : ""}</span></div>
+      ${th.length ? th.map((c) => `<div class="thread">
+        <div class="who">${icon("circle")}<b>${c.who}</b><span class="when">${c.when}</span></div>
+        <div class="txt">${c.txt}</div>
+        <div class="anch">${icon("layers")}unité ${S.unit.split(" ")[0]}</div></div>`).join("")
+        : `<div class="thread" style="color:var(--ink-3)">Aucune note sur cette unité.</div>`}
+      <div class="newc"><textarea data-draft2 placeholder="Écrire sur ${S.unit}"></textarea>
+        <button class="btn solid" data-add2>${icon("send")}Écrire</button></div>
+    </div></div>`;
+}
+
+/* --------------------------------------------------- options 3 to 6, fixed
+   These are not interactive on purpose: what they propose is a different
+   anchor, and an anchor is read, not clicked. */
+const STATIC = [
+  { name: "Fil par sujet, sans point",
+    note: "Pas d'épingle: une liste de sujets, chacun portant la référence qu'il veut — un niveau, une unité, une feuille. C'est ce que fait une liste de déficiences de chantier. Rapide à écrire, difficile à retrouver sur le plan.",
+    html: () => `<div class="shot one">
+      <div class="hdr">${icon("message-square")}Sujets ouverts<span class="r">3 ouverts · 1 réglé</span></div>
+      ${[["Entrepreneur général", "hier 16:20", "Dégagement de porte sous la norme à plusieurs endroits du niveau 5.", "niveau 5", "ouvert"],
+         ["Urbaniste de l'arrondissement", "mar. 11:40", "Le stationnement visiteur n'apparaît nulle part dans le calcul.", "projet", "ouvert"],
+         ["Chargée de projet", "lun. 09:05", "Balcon de l'unité 510 à revalider après le relevé.", "unité 510", "ouvert"],
+         ["Entrepreneur général", "ven. 14:02", "Hauteur libre confirmée à 2 440 mm.", "feuille A-301", "réglé"]]
+        .map(([who, when, txt, anch, st]) => `<div class="thread ${st === "réglé" ? "done" : ""}">
+          <div class="who">${icon("circle")}<b>${who}</b><span class="st">${st}</span><span class="when">${when}</span></div>
+          <div class="txt">${txt}</div>
+          <div class="anch">${icon("layers")}${anch}</div>
+          ${st === "réglé" ? `<div class="rep">${icon("corner-down-right")} réglé par l'atelier · la coupe a été corrigée en R04</div>` : ""}
+        </div>`).join("")}</div>` },
+
+  { name: "Commentaire sur un nombre",
+    note: "L'invité souligne une valeur dans un tableau — une superficie, un compte de stationnements — et écrit à côté. La note transporte le nombre contre lequel elle a été écrite, donc elle se marque toute seule comme périmée quand la prochaine lecture change ce nombre.",
+    html: () => `<div class="shot">
+      <div class="left">
+        <div class="hdr">${icon("sigma")}Quantités · unités<span class="r">compté à partir des dessins</span></div>
+        <table><thead><tr><th>Type</th><th>Projet</th><th>pi² moy</th><th>pi² total</th></tr></thead><tbody>
+          <tr><td>3½</td><td class="n">21</td><td class="n">729</td><td class="n">18 824</td></tr>
+          <tr class="sel"><td>4½</td><td class="n">35</td><td class="n"><span class="mark">1 147</span>
+            <span class="chip">${icon("message-square")}1</span></td><td class="n">53 891</td></tr>
+          <tr><td>5½</td><td class="n">28</td><td class="n">1 424</td><td class="n">30 063</td></tr>
+        </tbody></table>
+      </div>
+      <div class="side">
+        <div class="hdr">${icon("message-square")}Sur « pi² moy · 4½ »</div>
+        <div class="thread">
+          <div class="who">${icon("circle")}<b>Chargée de projet</b><span class="when">mar. 08:12</span></div>
+          <div class="txt">1 147 pi² de moyenne, c'est 40 de plus que le programme. On coupe où?</div>
+          <div class="anch">${icon("sigma")}écrit contre 1 147 pi²</div>
+        </div>
+        <div class="thread done">
+          <div class="who">${icon("circle")}<b>Entrepreneur général</b><span class="when">lun. 17:30</span></div>
+          <div class="txt">Le compte de 4½ me semblait bas.</div>
+          <div class="anch">${icon("alert-triangle")}écrit contre 33 · la valeur est 35 depuis R04</div>
+        </div>
+        <div class="newc" style="justify-content:flex-end">
+          <span style="flex:1;font-size:11.5px;color:var(--ink-3)">Une note périmée n'est pas effacée: elle est datée par la valeur qu'elle visait.</span>
+        </div>
+      </div></div>` },
+
+  { name: "Réponse par courriel",
+    note: "L'urbaniste de l'arrondissement n'ouvrira jamais un compte. Il reçoit le résumé hebdomadaire, il répond au courriel, et la réponse devient un commentaire sur le projet. Zéro apprentissage, mais aucune ancre: la note arrive sans point et sans unité.",
+    html: () => `<div class="shot one"><div class="mail">
+      <div class="box"><div class="from">de: baldwin-iii@fitte.app · à: urbanisme@arrondissement · objet: Le Baldwin III — ce qui a changé cette semaine</div>
+        <div style="margin-top:7px"><b>3 écarts ouverts</b> · hauteur en étages, baies non protégées, stationnement.
+        Les plans sont à jour au R04 du 24 oct. <b>Répondez à ce courriel</b> pour écrire au dossier.</div></div>
+      <div class="box" style="background:var(--card)">
+        <div class="from">de: urbanisme@arrondissement · 12 jours de retard sur la réponse attendue</div>
+        <div style="margin-top:7px;color:var(--ink)">« Le calcul de stationnement doit tenir compte de la réduction pour proximité du transport collectif. Reprenez l'article 71. »</div>
+        <div class="q" style="margin-top:9px">&gt; 3 écarts ouverts · hauteur en étages, baies non protégées, stationnement</div></div>
+      <div class="box" style="display:flex;align-items:center;gap:9px">
+        ${icon("at-sign")}<span>La réponse est entrée comme commentaire sur <b>Zonage et code · art. 71</b>,
+        avec l'adresse comme auteur. Personne n'a ouvert fitte.</span></div>
+    </div></div>` },
+
+  { name: "Commentaire daté d'une révision",
+    note: "La note est attachée à l'état de la feuille au moment où elle a été écrite. Quand une révision arrive, les commentaires de la révision précédente ne disparaissent pas: ils sont marqués « écrit sur R03 », et on voit tout de suite lesquels doivent être relus.",
+    html: () => `<div class="shot one">
+      <div class="hdr">${icon("history")}A-209_PLAN_NIVEAU_5<span class="r">4 révisions lues</span></div>
+      <div class="revs">
+        ${[["R01", "12 août", "2 notes"], ["R02", "03 sep", "1 note"], ["R03", "28 sep", "3 notes"], ["R04", "24 oct", "1 note"]]
+          .map(([r, d, c], i) => `<div class="rev ${i === 3 ? "now" : ""}"><b>${r}</b>${d}
+            <span class="cm">${icon("message-square")}${c}</span></div>`).join("")}
+      </div>
+      <div class="stale">
+        <div class="tag">${icon("alert-triangle")}à relire — écrit sur R03, la feuille est en R04</div>
+        <div><b>Entrepreneur général</b> · 28 sep — « La gaine mécanique de l'unité 507 traverse la chambre. »
+        <span style="color:var(--ink-3)">La gaine a bougé entre R03 et R04; la note n'a pas été rouverte.</span></div>
+      </div></div>` },
+];
+
+/* ------------------------------------------------------------------ cost */
+const COST = [
+  ["1", "Épingle sur le plan", "un point x,y sur la feuille", "oui, le point est normalisé", "compte", "le plan"],
+  ["2", "Note sur l'unité", "l'unité", "oui, tant que l'unité garde son numéro", "compte", "la liste et l'inspecteur"],
+  ["3", "Fil par sujet", "rien, ou une référence écrite à la main", "sans objet", "compte", "une liste à part"],
+  ["4", "Commentaire sur un nombre", "la valeur et sa date", "oui, et se marque périmée", "compte", "le tableau"],
+  ["5", "Réponse par courriel", "rien", "sans objet", "aucun compte", "le projet"],
+  ["6", "Daté d'une révision", "la feuille dans son état", "oui, marqué à relire", "compte", "l'historique"],
+];
+
+function render() {
+  const live = [
+    { name: "Épingle sur le plan",
+      note: "L'invité clique un point de la feuille, la note s'y accroche. Le point est enregistré en coordonnées 0 à 1 sur le plan, comme les contours d'unité: la feuille peut être ré-exportée plus grande, l'épingle reste au même endroit du dessin. C'est la seule façon de dire « ici » sans écrire un paragraphe.",
+      html: pinOption },
+    { name: "Note sur l'unité",
+      note: "Pas de point: la note appartient à l'unité. La liste porte le compte, l'inspecteur porte le fil. C'est ce que l'atelier lit déjà, et une note d'unité survit à un redessin complet de l'étage tant que le numéro tient.",
+      html: unitOption },
+  ];
+  const all = [...live, ...STATIC];
+  document.getElementById("opts").innerHTML = all.map((o, i) => `<section class="opt">
+    <div class="cap"><span class="n">Façon ${i + 1}</span><b>${o.name}</b></div>
+    <div class="note">${o.note}</div>
+    ${o.html()}</section>`).join("");
+
+  document.getElementById("cost").innerHTML = `<thead><tr>
+      <th>Façon</th><th>Ancrée à</th><th>Survit à une relecture du dessin</th><th>Compte requis</th><th>Lue depuis</th></tr></thead>
+    <tbody>${COST.map(([n, name, anch, surv, acct, where]) => `<tr>
+      <td>${n} · ${name}</td><td>${anch}</td>
+      <td class="${surv.startsWith("oui") ? "y" : ""}">${surv}</td><td>${acct}</td><td>${where}</td></tr>`).join("")}</tbody>`;
+
+  document.getElementById("verdict").innerHTML = `<b>Ce que je retiendrais:</b> 1 + 2 ensemble, et 6 par-dessus.
+    L'épingle répond à « où », la note d'unité répond à « sur quoi », et la révision répond à « est-ce encore vrai ».
+    La 5 est à garder pour une seule personne, l'arrondissement, parce qu'elle n'ouvrira pas de compte.
+    La 3 arrive gratuitement dès que 1 et 2 existent: c'est la même liste, sans ancre.
+    La 4 est la plus coûteuse à construire et la plus facile à mal lire — un nombre commenté change sans
+    prévenir à chaque lecture des dessins.`;
+}
+
+/* ----------------------------------------------------------- interaction */
+document.addEventListener("click", (e) => {
+  const plan = e.target.closest("[data-plan]");
+  if (plan && !e.target.closest("[data-pin]")) {
+    const r = plan.getBoundingClientRect();
+    const txt = (document.querySelector("[data-draft]") || {}).value || "";
+    S.pins.push({ x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height,
+      who: "Vous", when: "à l'instant",
+      txt: txt.trim() || "Note à écrire — l'épingle est posée, le texte suit." });
+    S.sel = S.pins.length - 1;
+    S.draft = "";
+    render();
+    return;
+  }
+  const pin = e.target.closest("[data-pin]");
+  if (pin) { S.sel = +pin.dataset.pin; render(); return; }
+  const unit = e.target.closest("[data-unit]");
+  if (unit) { S.unit = unit.dataset.unit; render(); return; }
+  if (e.target.closest("[data-add]")) {
+    const t = document.querySelector("[data-draft]");
+    if (t && t.value.trim()) { S.pins[S.sel].txt = t.value.trim(); S.draft = ""; render(); }
+    return;
+  }
+  if (e.target.closest("[data-add2]")) {
+    const t = document.querySelector("[data-draft2]");
+    if (t && t.value.trim()) {
+      (S.byUnit[S.unit] = S.byUnit[S.unit] || []).push({ who: "Vous", when: "à l'instant", txt: t.value.trim() });
+      render();
+    }
+  }
+});
+document.addEventListener("input", (e) => {
+  if (e.target.matches("[data-draft]")) S.draft = e.target.value;
+});
+
+sprite();
+render();
+</script>
+</body>
+</html>
