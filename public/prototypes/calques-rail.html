@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rail de calques — huit variantes</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* The rail won. What is left is how it behaves, and the reference everyone
+   in the office already has in their hands is the Photoshop layers panel:
+   an eye on the left, a thumbnail, a name, the selected row highlighted,
+   opacity at the top, a row of buttons at the bottom. Alt-click on an eye
+   isolates. That vocabulary is free — it does not have to be taught.
+
+   Eight variants below. Each is the whole screen, at the size it is used,
+   with the four panes untouched: the rail is only honest when the drawing
+   beside it is the real width it will have. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e5e5e5;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#f2f2f2; --card:#fff;
+  --vert:#C3E05A; --vert-ink:#2f3a05;
+  --ok:#2f6b2f; --warn:#8a5c00;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.sheet{padding:22px 20px 80px;display:flex;flex-direction:column;gap:34px}
+h1{font-size:17px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:78ch}
+.lu{width:14px;height:14px;flex:0 0 14px;stroke-width:1.6}
+
+.var{display:flex;flex-direction:column;gap:9px}
+.vh{display:flex;align-items:baseline;gap:8px}
+.vh .n{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.vh b{font-size:14px;font-weight:600}
+.why{font-size:12px;color:var(--ink-2);max-width:96ch}
+.why .cost{color:var(--ink-3)}
+
+/* ------------------------------------------------------------ the screen
+   The prototype at full size: dark bar, level row, four panes, impact
+   strip. Nothing here is compressed — a 1 440 px screen is what the office
+   works on, so that is what the rail is judged inside. */
+.app{border-radius:12px;overflow:hidden;background:#141416;min-width:1180px}
+.bar1{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar1 .crumb{color:rgba(255,255,255,.58)}
+.bar1 .crumb.on{color:#fff;font-weight:600;font-size:13px;margin-right:4px}
+.bar1 .tab{padding:5px 10px;border-radius:7px;display:flex;align-items:center;gap:6px;font-size:13.5px}
+.bar1 .tab.on{background:#fff;color:#141416;font-weight:600}
+.bar1 .sp{flex:1}
+.bar1 .share{border:1px solid rgba(255,255,255,.28);border-radius:5px;padding:4px 10px;font-size:12px;
+  display:flex;align-items:center;gap:6px}
+.bar2{height:32px;background:#1e1e21;border-top:1px solid #2c2c31;display:flex;align-items:center;
+  gap:3px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar2 span{padding:3px 9px;border-radius:6px}
+.bar2 span.on{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.card{background:var(--card);margin:7px;border-radius:9px;overflow:hidden;display:flex;flex-direction:column}
+.ttl{padding:10px 13px;display:flex;align-items:center;gap:10px}
+.ttl b{font-size:16px;font-weight:600}
+.ttl .sub{font-size:12px;color:var(--ink-2)}
+.ttl .sp{flex:1}
+.work{display:flex;gap:9px;padding:0 9px 9px;height:560px}
+.foot{border-top:1px solid var(--line-2);padding:8px 13px;display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--ink-2)}
+.foot b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.foot .sp{flex:1}
+
+.pane{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);
+  display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.ph{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:8px;padding:0 10px;font-size:12.5px;color:var(--ink-2)}
+.ph .sp{flex:1}
+.pb{flex:1;min-height:0;overflow:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
+
+.lst{flex:0 0 232px}
+.uc{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;flex:0 0 auto}
+.uc.on{border-color:var(--ink)}
+.uc .cr{height:88px;background-image:url(assets/plan-niveau-5.jpg);background-size:360%;
+  filter:grayscale(1);position:relative}
+.uc .no{position:absolute;left:6px;top:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;padding:0 6px;font-size:12px;font-weight:600}
+.uc .ul{display:flex;align-items:baseline;gap:6px;padding:6px 9px;font-size:12.5px}
+.uc .ul .a{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* The rail eats into the 2D pane, so that pane is given back what the rail
+   takes: the drawing beside it stays as wide as the model next to it. */
+.d2{flex:1.6;min-width:0}
+.m3{flex:1;min-width:0}
+.m3 .still{flex:1;min-height:0;background-image:url(assets/maquette-still.jpg);background-size:cover;
+  background-position:center}
+.insp{flex:0 0 280px}
+.kv{display:flex;align-items:baseline;gap:8px;font-size:12.5px}
+.kv b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.kv span{color:var(--ink-2)}
+
+/* the drawing itself, and the two consultant sheets over it */
+.stage{flex:1;min-width:0;min-height:0;position:relative;overflow:hidden;background:var(--card)}
+.plan{position:absolute;inset:0;background-image:url(assets/plan-niveau-5.jpg);
+  background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
+.lay{position:absolute;background-repeat:no-repeat;background-size:contain;background-position:center;
+  pointer-events:none}
+.lay.arp{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
+.lay.pay{background-image:url(assets/paysage.png)}
+.off{display:none}
+.mult{mix-blend-mode:multiply}
+.diff{mix-blend-mode:difference}
+
+/* ----------------------------------------------------------- the rail
+   Same anatomy in all eight: a header, a list of layers, a foot of
+   buttons. Only the row changes, and what the header and the foot do. */
+.rail{flex:0 0 var(--rw,224px);border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  min-height:0;background:var(--card)}
+.rh{flex:0 0 auto;border-bottom:1px solid var(--line-2);padding:6px 8px;display:flex;flex-direction:column;gap:6px}
+.rh .t{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-3)}
+.rh .t b{color:var(--ink-2);font-weight:500;font-size:12px}
+.rb{flex:1;min-height:0;overflow:auto;padding:5px;display:flex;flex-direction:column;gap:2px}
+.rf{flex:0 0 auto;border-top:1px solid var(--line-2);padding:5px 6px;display:flex;align-items:center;gap:4px}
+
+.lrow{border:1px solid transparent;border-radius:5px;padding:4px 5px;display:flex;flex-direction:column;gap:4px;
+  cursor:default}
+.lrow:hover{background:var(--fill-2)}
+.lrow.sel{background:var(--fill);border-color:var(--line-2)}
+.lrow.hid{opacity:.5}
+.thumb{width:38px;height:30px;flex:0 0 38px;border:1px solid var(--line-2);border-radius:3px;
+  background-color:#fff;background-size:contain;background-repeat:no-repeat;background-position:center}
+.thumb.big{width:54px;height:42px;flex:0 0 54px}
+.eye{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-3);cursor:pointer;flex:0 0 22px}
+.eye:hover{background:var(--fill)}
+.eye.on{color:var(--ink)}
+.lock{color:var(--ink-3);cursor:pointer}
+.lock.on{color:var(--ink)}
+.nm{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sub{font-size:10.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rev{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.bar-c{width:3px;border-radius:2px;align-self:stretch;flex:0 0 3px}
+.dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px}
+.dot.ok{background:var(--ok)}
+.dot.old{background:#d08b00}
+.state{font-size:10.5px;white-space:nowrap}
+.state.old{color:var(--warn)}
+.state.ok{color:var(--ink-3)}
+
+.row{display:flex;align-items:center;gap:6px;min-width:0}
+.col{display:flex;flex-direction:column;gap:5px;min-width:0}
+.btn{height:24px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:inline-flex;align-items:center;gap:5px;padding:0 8px;font-size:11.5px;color:var(--ink-2);
+  cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--fill);border-color:var(--ink-3)}
+.btn.ico{padding:0 6px}
+.btn.sm{height:21px;padding:0 6px;font-size:11px;border-radius:4px}
+.btn.on{border-color:var(--ink);color:var(--ink);background:var(--card)}
+.btn.solid{background:#1b1b1b;border-color:#1b1b1b;color:#fff}
+.btn[disabled]{opacity:.4;pointer-events:none}
+input[type=range]{-webkit-appearance:none;appearance:none;height:14px;background:transparent;cursor:pointer;width:100%;min-width:0}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;
+  background:var(--ink);margin-top:-4px}
+.pc{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;
+  width:32px;text-align:right;flex:0 0 32px}
+/* the scrubby number: Photoshop's draggable label */
+.scrub{font-family:var(--mono);font-size:11px;color:var(--ink-2);cursor:ew-resize;
+  border-bottom:1px dotted var(--line);font-variant-numeric:tabular-nums;user-select:none}
+.scrub:hover{color:var(--ink);border-color:var(--ink-3)}
+select{height:22px;border:1px solid var(--line-2);border-radius:4px;background:var(--card);
+  font-size:11px;color:var(--ink-2);padding:0 4px}
+
+.tabs{display:flex;gap:2px}
+.tabs span{font-size:11.5px;color:var(--ink-3);padding:3px 8px;border-radius:5px;cursor:pointer}
+.tabs span.on{background:var(--fill);color:var(--ink)}
+
+.hist{display:flex;flex-direction:column;gap:4px;padding:4px 2px}
+.vrow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.vrow.cur{color:var(--ink)}
+.vrow .d{color:var(--ink-3);font-family:var(--mono);font-size:10.5px}
+.note{font-size:10.5px;color:var(--ink-3)}
+.found{display:flex;align-items:center;gap:6px;font-size:11px;padding:4px 6px;border:1px solid var(--line-2);
+  border-radius:4px;cursor:pointer;font-family:var(--mono);color:var(--ink-2)}
+.found:hover{border-color:var(--ink);color:var(--ink)}
+.drop{border:1px dashed var(--line);border-radius:5px;padding:7px;text-align:center;font-size:11px;
+  color:var(--ink-3);cursor:pointer}
+.drop:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.panel{border-top:1px solid var(--line-2);padding:6px;display:flex;flex-direction:column;gap:6px;
+  background:var(--fill-2);flex:0 0 auto;max-height:230px;overflow:auto}
+.toast{position:absolute;left:10px;bottom:10px;background:#1b1b1b;color:#fff;font-size:11.5px;
+  padding:6px 10px;border-radius:5px;z-index:9;max-width:70%}
+.grp{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);
+  padding:4px 5px 2px;display:flex;align-items:center;gap:6px;cursor:pointer}
+.hint{font-size:10.5px;color:var(--ink-3);padding:3px 6px}
+/* the zoom column, kept so the rail is measured against the real pane */
+.zcol{flex:0 0 30px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  align-items:center;gap:6px;padding:7px 0;color:var(--ink-3);font-size:10.5px}
+.zcol .tr{flex:1;width:3px;background:var(--line);border-radius:2px;position:relative}
+.zcol .tr::after{content:"";position:absolute;left:-4px;top:38%;width:11px;height:11px;border-radius:50%;background:var(--ink)}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>Rail de calques — huit variantes</h1>
+  <p class="lede">Le rail retenu, décliné. Le vocabulaire est celui du panneau Calques de Photoshop, que les deux utilisateurs ont déjà dans la main: l'œil à gauche, une vignette, le calque sélectionné en surbrillance, l'opacité en haut, une rangée de boutons en bas. <b>Alt-clic sur un œil isole</b> le calque, comme dans Photoshop. Chaque variante est l'écran entier, à sa taille réelle, les quatre volets intacts.</p>
+  <div id="vars"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["file", "ruler", "trees", "eye", "eye-off", "layers", "upload", "history", "clock",
+    "chevron-down", "chevron-right", "external-link", "check", "circle", "list", "box", "lock",
+    "lock-open", "git-compare", "x", "folder", "share-2", "plus", "minus", "table", "maximize",
+    "trash-2", "copy", "sliders-horizontal"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+
+/* The placement of the consultant sheets, taken from the prototype: each is
+   scaled so its building covers the floor plan's, then centred. */
+const BASE_BOX = [314 / 2000, 325 / 1675, 1488 / 2000, 1270 / 1675];
+const BASE_RATIO = 2000 / 1675;
+const SHEETS = {
+  arp: { box: [298 / 1650, 307 / 1560, 1380 / 1650, 1172 / 1560], ratio: 1650 / 1560 },
+  pay: { box: [156 / 835, 178 / 800, 711 / 835, 624 / 800], ratio: 835 / 800 },
+};
+function layStyle(k, opacity) {
+  const S = SHEETS[k];
+  const [bx0, by0, bx1, by1] = BASE_BOX;
+  const [sx0, sy0, sx1, sy1] = S.box;
+  const w = (bx1 - bx0) / (sx1 - sx0);
+  const h = w * BASE_RATIO / S.ratio;
+  const left = bx0 - sx0 * w;
+  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h;
+  return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;opacity:${opacity / 100}`;
+}
+
+/* Three documents, their current sheet and the ones it replaced. The
+   landscape sheet is out of date on purpose: a newer one is sitting in the
+   office's received folder, unopened. */
+const DRAWINGS = {
+  plan: { name: "Plan d'étage", icon: "file", who: "Atelier", colour: "#1b1b1b",
+    thumb: "assets/plan-niveau-5.jpg",
+    versions: [
+      { rev: "R04", date: "24 oct", note: "corridor élargi à 1 100 mm" },
+      { rev: "R03", date: "12 sept", note: "escalier est repositionné" },
+      { rev: "R02", date: "2 août", note: "première émission pour permis" }] },
+  arp: { name: "Arpenteur", icon: "ruler", who: "Arpenteur-géomètre", colour: "#2f6b8a",
+    thumb: "assets/arp-site.png",
+    versions: [
+      { rev: "R02", date: "7 oct", note: "implantation conforme" },
+      { rev: "R01", date: "14 mai", note: "relevé initial" }] },
+  pay: { name: "Paysage", icon: "trees", who: "Architecte paysagiste", colour: "#5d7a33",
+    thumb: "assets/paysage.png",
+    waiting: { rev: "R02", date: "26 oct" },
+    versions: [{ rev: "R01", date: "7 juil", note: "aménagement au pré-permis" }] },
+};
+/* Top of the rail is the top of the pile, as in any layers panel: the
+   consultant sheets print over the floor plan. */
+const KEYS = ["pay", "arp", "plan"];
+const FOUND = [
+  { file: "PAYSAGE_PRE-PERMIS_R02.pdf", date: "26 oct", rev: "R02" },
+  { file: "PAYSAGE_COUPES_R02.pdf", date: "26 oct", rev: "R02" },
+];
+const BLENDS = [["normal", "Normal"], ["mult", "Multiplier"], ["diff", "Différence"]];
+
+const newState = () => ({
+  on: { plan: true, arp: true, pay: true },
+  op: { plan: 100, arp: 55, pay: 55 },
+  blend: { plan: "normal", arp: "mult", pay: "mult" },
+  lock: { plan: true, arp: false, pay: false },
+  iso: null, sel: "pay", tab: "layers", open: null, imp: null,
+  groups: { bureau: true, cons: true },
+  toast: null,
+  docs: JSON.parse(JSON.stringify(DRAWINGS)),
+});
+const S = [];
+const visible = (s, k) => (s.iso ? s.iso === k : s.on[k]);
+const cur = (s, k) => s.docs[k].versions[0];
+const stale = (s, k) => !!s.docs[k].waiting;
+
+/* -------------------------------------------------------------- the stage */
+function stageHTML(s, v) {
+  const blend = (k) => (v.blend ? ` ${s.blend[k] === "mult" ? "mult" : s.blend[k] === "diff" ? "diff" : ""}` : "");
+  return `<div class="stage">
+    <div class="plan ${visible(s, "plan") ? "" : "off"}" style="opacity:${s.op.plan / 100}"></div>
+    ${["arp", "pay"].map((k) => `<div class="lay ${k}${blend(k)} ${visible(s, k) ? "" : "off"}"
+      style="${layStyle(k, s.op[k])}"></div>`).join("")}
+    ${s.toast ? `<div class="toast">${s.toast}</div>` : ""}
+  </div>`;
+}
+
+function stateHTML(s, k, short) {
+  const d = s.docs[k];
+  if (!d.waiting) return `<span class="dot ok"></span><span class="state ok">à jour</span>`;
+  return `<span class="dot old"></span><span class="state old">${short
+    ? `${d.waiting.rev} · ${d.waiting.date}` : `${d.waiting.rev} reçu le ${d.waiting.date}`}</span>`;
+}
+
+/* The two panels every variant can open under its list: what this drawing
+   has been, and what would replace it. Identical everywhere, so the variants
+   differ only in the rail itself. */
+function histHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="hist">
+    <div class="row"><b style="font-size:11.5px">Versions · ${d.name}</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    ${d.versions.map((v, j) => `<div class="vrow ${j === 0 ? "cur" : ""}">
+      ${j === 0 ? icon("check") : `<span style="width:14px"></span>`}
+      <span class="d">${v.rev}</span><span class="d">${v.date}</span>
+      <span class="nm" style="flex:1">${v.note}</span>
+      ${j === 0 ? `<span class="rev">lu</span>` : `<span class="btn sm" data-a="cmp" data-i="${i}" data-k="${k}" data-v="${j}">comparer</span>`}
+    </div>`).join("")}
+    <div class="note">Rien n'est supprimé et rien n'est écrit dans un fichier de dessin.</div>
+  </div>`;
+}
+function importHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col">
+    <div class="row"><b style="font-size:11.5px">Importer · ${d.name}</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    <div class="note">La version lue aujourd'hui passe dans l'historique; elle reste comparable.</div>
+    ${(d.waiting ? FOUND : FOUND.slice(1)).map((f, j) => `<div class="found" data-a="pick" data-i="${i}" data-k="${k}" data-f="${j}">
+      ${icon("file")}<span class="nm" style="flex:1">${f.file}</span><span class="d">${f.date}</span></div>`).join("")}
+    <div class="drop" data-a="pick" data-i="${i}" data-k="${k}" data-f="0">Déposer un PDF ou un DWG</div>
+  </div>`;
+}
+const panelHTML = (s, i) => (s.imp ? `<div class="panel">${importHTML(s, i, s.imp)}</div>`
+  : s.open ? `<div class="panel">${histHTML(s, i, s.open)}</div>` : "");
+
+/* The eye, with Photoshop's modifier: alt-click isolates, click hides. */
+const eyeHTML = (s, i, k) => `<span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}"
+  title="${visible(s, k) ? "Masquer" : "Afficher"} · Alt-clic: ne voir que celui-ci">${icon(visible(s, k) ? "eye" : "eye-off")}</span>`;
+
+const sliderHTML = (s, i, k) => `<input type="range" min="0" max="100" value="${s.op[k]}"
+  data-a="op" data-i="${i}" data-k="${k}">`;
+
+/* The foot of the rail: the same four verbs everywhere, Photoshop's bottom
+   row — act on the selected layer. */
+const footHTML = (s, i, extra = "") => `<div class="rf">
+  <span class="btn ico" data-a="imp" data-i="${i}" data-k="${s.sel}" title="Importer une nouvelle version">${icon("upload")}</span>
+  <span class="btn ico" data-a="hist" data-i="${i}" data-k="${s.sel}" title="Historique des versions">${icon("history")}</span>
+  <span class="btn ico" data-a="cmp" data-i="${i}" data-k="${s.sel}" data-v="1" title="Comparer avec la version précédente">${icon("git-compare")}</span>
+  ${extra}
+  <span style="flex:1"></span>
+  <span class="btn sm ${s.iso ? "on" : ""}" data-a="iso" data-i="${i}" data-k="${s.iso ? "" : s.sel}"
+    title="Ne voir que le calque sélectionné">${s.iso ? "tout voir" : "isoler"}</span>
+</div>`;
+
+/* ===================================================================== A
+   The panel, as Photoshop draws it: opacity at the top acting on the
+   selected layer, rows with a thumbnail, buttons at the bottom. One slider
+   on screen instead of three. */
+function varA(i, s) {
+  return rail(i, s, `
+    <div class="rh">
+      <div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>${stateHTML(s, s.sel, true)}</div>
+      <div class="row"><span class="rev" style="width:52px">Opacité</span>${sliderHTML(s, i, s.sel)}<span class="pc">${s.op[s.sel]}%</span></div>
+    </div>
+    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+      data-a="sel" data-i="${i}" data-k="${k}">
+      <div class="row">${eyeHTML(s, i, k)}
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px">
+          <span class="nm">${s.docs[k].name}</span>
+          <span class="row"><span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span>
+            ${stale(s, k) ? `<span class="dot old"></span>` : ""}</span>
+        </div>
+      </div>
+    </div>`).join("")}</div>
+    ${footHTML(s, i)}`);
+}
+
+/* ===================================================================== B
+   Bigger thumbnails: at 54 px the surveyor's sheet and the landscape sheet
+   are told apart without reading. The rail gets wider for it. */
+function varB(i, s) {
+  return rail(i, s, `
+    <div class="rh"><div class="t">${icon("layers")}<b>Calques</b></div></div>
+    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+      data-a="sel" data-i="${i}" data-k="${k}">
+      <div class="row">${eyeHTML(s, i, k)}
+        <span class="thumb big" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:2px">
+          <span class="nm">${s.docs[k].name}</span>
+          <span class="sub">${s.docs[k].who}</span>
+          <span class="row"><span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span>
+            <span style="flex:1"></span>${stateHTML(s, k, true)}</span>
+        </div>
+      </div>
+      <div class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></div>
+    </div>`).join("")}</div>
+    ${footHTML(s, i)}`, 252);
+}
+
+/* ===================================================================== C
+   No thumbnails, one line per layer. The densest of the eight: the rail
+   stops being a panel and becomes a legend. */
+function varC(i, s) {
+  return rail(i, s, `
+    <div class="rh"><div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="iso" data-i="${i}" data-k="${s.iso ? "" : s.sel}">${s.iso ? "tout" : "isoler"}</span></div></div>
+    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+      data-a="sel" data-i="${i}" data-k="${k}" style="padding:3px 5px">
+      <div class="row">${eyeHTML(s, i, k)}${icon(s.docs[k].icon)}
+        <span class="nm" style="flex:1">${s.docs[k].name}</span>
+        ${stale(s, k) ? `<span class="dot old"></span>` : ""}
+        <span class="rev">${cur(s, k).rev}</span></div>
+      <div class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></div>
+    </div>`).join("")}</div>
+    ${footHTML(s, i)}`, 196);
+}
+
+/* ===================================================================== D
+   Two tabs, the way Photoshop keeps Layers and History in one dock: the
+   version trail stops being a popup and becomes the other half of the rail. */
+function varD(i, s) {
+  const layers = `${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+    data-a="sel" data-i="${i}" data-k="${k}">
+    <div class="row">${eyeHTML(s, i, k)}
+      <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+      <div class="col" style="flex:1;gap:1px"><span class="nm">${s.docs[k].name}</span>
+        <span class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></span></div>
+    </div></div>`).join("")}`;
+  const d = s.docs[s.sel];
+  const versions = `<div class="col" style="padding:4px">
+    <div class="row">${icon(d.icon)}<b style="font-size:12px">${d.name}</b></div>
+    ${d.waiting ? `<div class="row">${stateHTML(s, s.sel)}</div>` : ""}
+    ${d.versions.map((v, j) => `<div class="vrow ${j === 0 ? "cur" : ""}">
+      ${j === 0 ? icon("check") : `<span style="width:14px"></span>`}
+      <span class="d">${v.rev}</span><span class="d">${v.date}</span>
+      <span class="nm" style="flex:1">${v.note}</span></div>`).join("")}
+    <span class="btn sm" data-a="imp" data-i="${i}" data-k="${s.sel}">${icon("upload")}Importer une version</span>
+  </div>`;
+  return rail(i, s, `
+    <div class="rh"><div class="tabs">
+      <span class="${s.tab === "layers" ? "on" : ""}" data-a="tab" data-i="${i}" data-k="layers">Calques</span>
+      <span class="${s.tab === "vers" ? "on" : ""}" data-a="tab" data-i="${i}" data-k="vers">Versions</span>
+    </div></div>
+    <div class="rb">${s.tab === "layers" ? layers : versions}</div>
+    ${footHTML(s, i)}`, 238);
+}
+
+/* ===================================================================== E
+   The scrubby number: no track on screen, the percentage is dragged
+   sideways like a Photoshop field. Three rows fit in half the height, and
+   nothing on the rail competes with the drawing for attention. */
+function varE(i, s) {
+  return rail(i, s, `
+    <div class="rh"><div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>
+      <span class="hint">glisser le %</span></div></div>
+    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+      data-a="sel" data-i="${i}" data-k="${k}">
+      <div class="row">${eyeHTML(s, i, k)}
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px">
+          <span class="nm">${s.docs[k].name}</span>
+          <span class="row"><span class="rev">${cur(s, k).rev}</span>
+            ${stale(s, k) ? `<span class="dot old"></span>` : ""}
+            <span style="flex:1"></span>
+            <span class="scrub" data-a="scrub" data-i="${i}" data-k="${k}">${s.op[k]}%</span></span>
+        </div>
+      </div>
+    </div>`).join("")}</div>
+    ${footHTML(s, i)}`, 212);
+}
+
+/* ===================================================================== F
+   Blend modes. Two line drawings stacked at 55 % both go grey; multiplied,
+   both stay black and only the ink adds up — which is how a light table
+   works, and what an architect actually wants when two surveys are
+   compared. Difference is there for finding what moved. */
+function varF(i, s) {
+  return rail(i, s, `
+    <div class="rh">
+      <div class="t">${icon("layers")}<b>Calques</b></div>
+      <div class="row"><span class="rev" style="width:46px">Fusion</span>
+        <select data-a="blend" data-i="${i}" data-k="${s.sel}">
+          ${BLENDS.map(([v, t]) => `<option value="${v}" ${s.blend[s.sel] === v ? "selected" : ""}>${t}</option>`).join("")}
+        </select></div>
+      <div class="row"><span class="rev" style="width:46px">Opacité</span>${sliderHTML(s, i, s.sel)}<span class="pc">${s.op[s.sel]}%</span></div>
+    </div>
+    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+      data-a="sel" data-i="${i}" data-k="${k}">
+      <div class="row">${eyeHTML(s, i, k)}
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px"><span class="nm">${s.docs[k].name}</span>
+          <span class="row"><span class="rev">${cur(s, k).rev}</span><span style="flex:1"></span>
+            <span class="rev">${BLENDS.find(([v]) => v === s.blend[k])[1].toLowerCase()} · ${s.op[k]}%</span></span></div>
+      </div>
+    </div>`).join("")}</div>
+    ${footHTML(s, i)}`, 238);
+}
+
+/* ===================================================================== G
+   Groups. The office's own drawing on one side, what consultants sent on
+   the other, each group with one eye: "show me only what came from outside"
+   is one click, which is the question asked before a coordination meeting. */
+function varG(i, s) {
+  const group = (id, title, keys) => `
+    <div class="grp" data-a="grp" data-i="${i}" data-k="${id}">
+      ${icon(s.groups[id] ? "chevron-down" : "chevron-right")}
+      <span class="eye ${keys.some((k) => visible(s, k)) ? "on" : ""}" data-a="geye" data-i="${i}" data-k="${id}">
+        ${icon(keys.some((k) => visible(s, k)) ? "eye" : "eye-off")}</span>
+      <span style="flex:1">${title}</span>
+      <span class="rev">${keys.length}</span>
+    </div>
+    ${s.groups[id] ? keys.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+      data-a="sel" data-i="${i}" data-k="${k}" style="margin-left:10px">
+      <div class="row">${eyeHTML(s, i, k)}
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px"><span class="nm">${s.docs[k].name}</span>
+          <span class="row"><span class="rev">${cur(s, k).rev}</span>
+            <span style="flex:1"></span>${stateHTML(s, k, true)}</span></div></div>
+      <div class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></div>
+    </div>`).join("") : ""}`;
+  return rail(i, s, `
+    <div class="rh"><div class="t">${icon("layers")}<b>Calques</b></div></div>
+    <div class="rb">${group("cons", "Reçu des consultants", ["pay", "arp"])}${group("bureau", "Dessiné au bureau", ["plan"])}</div>
+    ${footHTML(s, i)}`, 244);
+}
+
+/* ===================================================================== H
+   Colour-coded, and locked. A bar of colour identifies each drawing on the
+   rail and could tint nothing at all on the sheet — the plan stays black.
+   The office's own plan is locked: it cannot be hidden by accident, which
+   is the one mistake that makes the screen unreadable without explaining
+   why. The stale sheet carries its import button on its own row. */
+function varH(i, s) {
+  return rail(i, s, `
+    <div class="rh"><div class="t">${icon("layers")}<b>Calques</b><span style="flex:1"></span>
+      <span class="rev">${KEYS.filter((k) => visible(s, k)).length}/3 visibles</span></div></div>
+    <div class="rb">${KEYS.map((k) => `<div class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+      data-a="sel" data-i="${i}" data-k="${k}">
+      <div class="row">
+        <span class="bar-c" style="background:${s.docs[k].colour}"></span>
+        ${s.lock[k] ? `<span class="eye on" title="Calque verrouillé: toujours visible">${icon("eye")}</span>` : eyeHTML(s, i, k)}
+        <div class="col" style="flex:1;gap:1px">
+          <span class="nm">${s.docs[k].name}</span>
+          <span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span>
+        </div>
+        <span class="lock ${s.lock[k] ? "on" : ""}" data-a="lock" data-i="${i}" data-k="${k}"
+          title="${s.lock[k] ? "Déverrouiller" : "Verrouiller la visibilité"}">${icon(s.lock[k] ? "lock" : "lock-open")}</span>
+      </div>
+      <div class="row">${sliderHTML(s, i, k)}<span class="pc">${s.op[k]}%</span></div>
+      ${stale(s, k) ? `<div class="row">${stateHTML(s, k)}<span style="flex:1"></span>
+        <span class="btn sm" data-a="imp" data-i="${i}" data-k="${k}">${icon("upload")}Importer</span></div>` : ""}
+    </div>`).join("")}</div>
+    ${footHTML(s, i)}`, 236);
+}
+
+/* ----------------------------------------------------------- the full screen
+   Four panes at the size they are used: the units, the sheet with its rail,
+   the model, the unit being read. Nothing is folded away for the demo. */
+const UNITS = [["501", "5½", "1 275 pi²", "30% 40%"], ["502", "5½", "1 496 pi²", "46% 36%"],
+  ["503", "3½", "760 pi²", "38% 52%"], ["504", "4½", "1 152 pi²", "54% 46%"],
+  ["505", "4½", "1 221 pi²", "34% 30%"]];
+
+function rail(i, s, inner, width) {
+  return { rail: `<div class="rail" style="--rw:${width || 224}px">${inner}${panelHTML(s, i)}</div>` };
+}
+
+function screenHTML(i, s, built) {
+  return `<div class="app" data-i="${i}">
+    <div class="bar1">${icon("folder")}<span class="crumb">Tous les projets</span>
+      <span class="crumb on">Le Baldwin III</span>
+      <span class="tab on">${icon("layers")}Unités</span>
+      <span class="tab">${icon("table")}Codes</span><span class="tab">${icon("clock")}Échéancier</span>
+      <span class="sp"></span><span class="share">${icon("share-2")}Partager</span></div>
+    <div class="bar2">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<span class="${n === 5 ? "on" : ""}">Niveau ${n}</span>`).join("")}
+      <span>Tous les niveaux</span></div>
+    <div class="card">
+      <div class="ttl"><b>Plans — niveau 5</b><span class="sub">15 unités · 4 avec un croisement ouvert</span>
+        <span class="sp"></span><span class="btn">${icon("table")}Exporter</span></div>
+      <div class="work">
+        <div class="pane lst"><div class="ph">${icon("list")}Unités</div>
+          <div class="pb">${UNITS.map((u, j) => `<div class="uc ${j === 0 ? "on" : ""}">
+            <div class="cr" style="background-position:${u[3]}"><span class="no">${u[0]}</span></div>
+            <div class="ul"><span>${u[1]}</span><span class="a">${u[2]}</span></div></div>`).join("")}</div></div>
+
+        <div class="pane d2"><div class="ph">${icon("file")}Plan 2D<span class="sp"></span>
+          <span class="btn">${icon("external-link")}Ouvrir dans AutoCAD</span></div>
+          <div style="flex:1;min-height:0;display:flex">
+            ${stageHTML(s, { blend: true })}
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>100%</span></div>
+            ${built.rail}
+          </div></div>
+
+        <div class="pane m3"><div class="ph">${icon("box")}Maquette 3D<span class="sp"></span>
+          <span class="btn">${icon("external-link")}Ouvrir dans SketchUp</span></div>
+          <div style="flex:1;min-height:0;display:flex">
+            <div class="still"></div>
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>60%</span></div>
+          </div></div>
+
+        <div class="pane insp"><div class="ph">${icon("circle")}Unité 501</div>
+          <div class="pb">
+            <div class="kv"><span>Type</span><b>5½</b></div>
+            <div class="kv"><span>Superficie</span><b>1 275 pi²</b></div>
+            <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
+            <div class="kv"><span>Écart</span><b>240 mm</b></div>
+            <div class="kv"><span>Apparu dans</span><b>R04 · 24 Oct</b></div>
+          </div></div>
+      </div>
+      <div class="foot">Ouvertures de la façade sud <b>68.5 m² → 74.2 m²</b><span class="rev">+5.7 m²</span>
+        <span class="sp"></span><span class="btn">Lire l'article 3.2.3.1</span></div>
+    </div>
+  </div>`;
+}
+
+/* --------------------------------------------------------------- variants */
+const VARIANTS = [
+  { name: "Panneau Photoshop", build: varA,
+    why: `L'opacité est en haut et agit sur le calque sélectionné, exactement comme dans Photoshop: un seul curseur à l'écran au lieu de trois, et la rangée de boutons en bas porte les verbes. <span class="cost">Le prix: régler deux calques demande de sélectionner l'un puis l'autre.</span>` },
+  { name: "Grandes vignettes", build: varB,
+    why: `À 54 px, le plan de l'arpenteur et celui du paysagiste se distinguent sans être lus, et chaque calque garde son curseur. <span class="cost">Le prix: 252 px de rail et trois curseurs toujours visibles.</span>` },
+  { name: "Liste dense", build: varC,
+    why: `Pas de vignette, une ligne par calque: le rail cesse d'être un panneau et devient une légende. C'est le plus petit des huit — 196 px. <span class="cost">Le prix: rien ne rappelle à quoi ressemble chaque dessin.</span>` },
+  { name: "Onglets Calques · Versions", build: varD,
+    why: `Comme le dock Calques / Historique de Photoshop: la trace des versions n'est plus une fenêtre qui s'ouvre, c'est l'autre moitié du rail, toujours à la même place. <span class="cost">Le prix: on ne voit jamais les deux en même temps.</span>` },
+  { name: "Pourcentage à glisser", build: varE,
+    why: `Le pourcentage se tire latéralement, sans piste visible — le champ scrubby de Photoshop. Les trois lignes tiennent dans la moitié de la hauteur et rien dans le rail ne tire l'œil plus que le dessin. <span class="cost">Le prix: c'est un geste qui s'apprend; sans la mention « glisser le % », il reste invisible.</span>` },
+  { name: "Modes de fusion", build: varF,
+    why: `Deux traits superposés à 55 % deviennent gris; multipliés, les deux restent noirs et seules les encres s'additionnent — c'est la table lumineuse. « Différence » sert à trouver ce qui a bougé. <span class="cost">Le prix: un vocabulaire de plus, et un réglage qui peut rendre une planche illisible.</span>` },
+  { name: "Groupes bureau · consultants", build: varG,
+    why: `Un œil par groupe: « ne me montrer que ce qui vient de l'extérieur » est un clic, et c'est la question posée avant une réunion de coordination. <span class="cost">Le prix: deux niveaux de hiérarchie pour trois calques.</span>` },
+  { name: "Couleur et verrou", build: varH,
+    why: `Une barre de couleur identifie chaque dessin dans le rail sans jamais teinter la planche. Le plan du bureau est verrouillé: il ne peut pas être masqué par accident, la seule erreur qui rend l'écran incompréhensible sans dire pourquoi. Le dessin périmé porte son bouton d'import sur sa propre ligne. <span class="cost">Le prix: une icône de plus par ligne.</span>` },
+];
+
+function render(i) {
+  document.querySelector(`[data-var="${i}"] .mount`).innerHTML =
+    screenHTML(i, S[i], VARIANTS[i].build(i, S[i]));
+}
+function renderAll() {
+  document.getElementById("vars").innerHTML = VARIANTS.map((v, i) => `<div class="var" data-var="${i}">
+    <div class="vh"><span class="n">Variante ${String.fromCharCode(65 + i)}</span><b>${v.name}</b></div>
+    <p class="why">${v.why}</p>
+    <div class="mount"></div></div>`).join("");
+  VARIANTS.forEach((_, i) => { S[i] = S[i] || newState(); render(i); });
+}
+
+function say(s, msg) {
+  s.toast = msg;
+  clearTimeout(s.timer);
+  s.timer = setTimeout(() => { s.toast = null; render(S.indexOf(s)); }, 3400);
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-a]");
+  if (!el) return;
+  const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+  if (!s) return;
+  switch (el.dataset.a) {
+    /* Photoshop's modifier, kept: alt-click on an eye shows that layer
+       alone and remembers the stack it interrupted. */
+    case "eye":
+      if (e.altKey) { s.iso = s.iso === k ? null : k; s.sel = k; break; }
+      if (s.iso) s.iso = null;
+      s.on[k] = !s.on[k];
+      s.sel = k;
+      break;
+    case "iso": s.iso = k || null; if (k) s.sel = k; break;
+    case "sel": s.sel = k; break;
+    case "tab": s.tab = k; break;
+    case "grp": s.groups[k] = !s.groups[k]; break;
+    case "geye": {
+      const keys = k === "cons" ? ["pay", "arp"] : ["plan"];
+      const anyOn = keys.some((x) => visible(s, x));
+      if (s.iso) s.iso = null;
+      keys.forEach((x) => { s.on[x] = !anyOn; });
+      break;
+    }
+    case "lock": s.lock[k] = !s.lock[k]; break;
+    case "imp": s.imp = s.imp === k ? null : k; s.open = null; s.sel = k; break;
+    case "hist": s.open = s.open === k ? null : k; s.imp = null; s.sel = k; break;
+    case "close": s.imp = null; s.open = null; break;
+    case "pick": {
+      const f = FOUND[+el.dataset.f], d = s.docs[k];
+      d.versions.unshift({ rev: f.rev, date: f.date, note: `importé · ${f.file}` });
+      delete d.waiting;
+      s.imp = null; s.open = k; s.sel = k;
+      const n = d.versions.length - 1;
+      say(s, `${d.name} ${f.rev} importé. ${n > 1 ? `${n} versions précédentes conservées` : "1 version précédente conservée"}.`);
+      break;
+    }
+    case "cmp": {
+      const d = s.docs[k], prev = d.versions[+(el.dataset.v || 1)];
+      if (!prev) { say(s, `Une seule version reçue pour « ${d.name} »: rien à comparer.`); break; }
+      say(s, `Comparaison ${d.versions[0].rev} ↔ ${prev.rev} — le balayage s'ouvrirait ici.`);
+      break;
+    }
+    default: return;
+  }
+  render(i);
+});
+
+/* The slider writes on every move and touches only the box that changed: a
+   full re-render would drop the thumb being dragged. */
+document.addEventListener("input", (e) => {
+  const el = e.target.closest("[data-a='op']");
+  if (el) {
+    const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+    s.op[k] = +el.value;
+    paintOpacity(i, k, s.op[k]);
+    const pc = el.parentElement.querySelector(".pc");
+    if (pc) pc.textContent = `${s.op[k]}%`;
+    return;
+  }
+  const sel = e.target.closest("[data-a='blend']");
+  if (sel) {
+    const i = +sel.dataset.i, k = sel.dataset.k, s = S[i];
+    s.blend[k] = sel.value;
+    render(i);
+  }
+});
+function paintOpacity(i, k, v) {
+  const app = document.querySelector(`.app[data-i="${i}"]`);
+  const box = k === "plan" ? app.querySelector(".plan") : app.querySelector(`.lay.${k}`);
+  if (box) box.style.opacity = v / 100;
+}
+
+/* The scrubby percentage of variant E: drag sideways, one point per pixel,
+   the same ratio Photoshop uses on its fields. */
+document.addEventListener("pointerdown", (e) => {
+  const el = e.target.closest("[data-a='scrub']");
+  if (!el) return;
+  const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+  const x0 = e.clientX, v0 = s.op[k];
+  const move = (ev) => {
+    s.op[k] = Math.max(0, Math.min(100, Math.round(v0 + (ev.clientX - x0))));
+    el.textContent = `${s.op[k]}%`;
+    paintOpacity(i, k, s.op[k]);
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+});
+
+sprite();
+renderAll();
+</script>
+</body>
+</html>
