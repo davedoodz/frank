@@ -852,7 +852,7 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
 /* Lucide ships as a sprite-less library, so the icons are stamped once into
    a hidden sprite and referenced by id afterwards. */
 function sprite() {
-  const names = ["home", "folder", "image", "layout-grid", "layers", "table", "scale", "git-compare", "calendar-check",
+  const names = ["home", "folder", "image", "layout-grid", "layers", "table", "hash", "git-compare", "calendar-check",
     "file", "box", "pen-line", "chevron-right", "chevron-left", "chevron-down", "chevron-up", "search", "plus", "minus", "maximize", "minimize",
     "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "x", "link",
     /* the rail's alternatives, one shortlist per screen; see NAV_ICONS */
@@ -895,7 +895,9 @@ const SCREENS = {
      one unit, so it lives in that unit's inspector; the totals are counted
      from the floor, so they live beside it. */
   "Codes": {
-    icon: "scale",
+    /* An article is a number before it is a principle, and a pair of scales
+       reads as justice, which is not what this screen is: it is 3.3.1.9. */
+    icon: "hash",
     regions: ["header", "content", "inspector"],
     steps: { content: 1, inspector: 2 },
   },
@@ -1379,7 +1381,7 @@ const NAV_ICONS = {
      git uses for the same idea. Layers stays on the shortlist. */
   "Unités": [["Compare", "git-compare"], ["Layers", "layers"], ["Floor grid", "grid-2x2"],
     ["Rooms", "bed-double"], ["Ruler", "ruler"]],
-  "Codes": [["Scale", "scale"], ["Checklist", "clipboard-list"], ["Flag", "flag"],
+  "Codes": [["Number", "hash"], ["Checklist", "clipboard-list"], ["Flag", "flag"],
     ["Book", "book-open"], ["Shield", "shield-check"]],
   "Échéancier": [["Calendar", "calendar-check"], ["Timer", "timer"], ["Clock", "calendar-clock"],
     ["Checklist", "list-checks"], ["Flag", "flag"]],
@@ -2266,7 +2268,7 @@ function contentHTML() {
       const rows = codeList();
       return `<div class="col" style="flex:1;gap:var(--gap)">
         <div class="pane" style="flex:0 0 auto">
-          <div class="ph">${icon("scale")}<span class="lo bar" style="width:90px"></span>
+          <div class="ph">${icon("hash")}<span class="lo bar" style="width:90px"></span>
             <span class="hi">${viewOf("Codes")}</span><span style="flex:1"></span>
             <span class="chip"><span class="lo bar" style="width:52px"></span>
               <span class="hi">${rows.length} article${rows.length > 1 ? "s" : ""} · ${unresolvedCount()} non résolus</span></span>
@@ -3428,8 +3430,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
    opened the file. r3: dark chrome and unit cards by default. r4: the
    Coordination tab and its glyph, which a saved panel would otherwise pin
    back to Layers. r5: the footer strip is gone, so its group must not
-   reappear from a saved panel. */
-}, { id: "wireframe-c3-r5", persist: true });
+   reappear from a saved panel. r6: the Codes glyph is a number sign, and
+   a panel saved on "Scale" would name an option that no longer exists. */
+}, { id: "wireframe-c3-r6", persist: true });
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
 
