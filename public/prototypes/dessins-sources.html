@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dessins et versions — six façons</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Three drawings are laid on the same spot: the floor plan the office draws,
+   the surveyor's site plan, the landscape architect's site plan. Two
+   questions follow from that and the prototype answers neither well today.
+
+   One: which of the three am I looking at? The chips in the pane header turn
+   overlays on and off, but there is no way to see one alone, no way to say
+   how strongly each one prints, and nothing says which drawing a line
+   belongs to once three are stacked.
+
+   Two: is this the latest one? A consultant sends a new sheet every few
+   weeks. The path strip answered "which file" and never answered "which
+   version, and what did the last one say". It is gone; this file is where
+   its replacement is chosen.
+
+   Every option below is drawn in the screen it would live in, with the real
+   sheets, because the whole judgement is how much room it takes from the
+   drawing. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e5e5e5;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa; --card:#fff;
+  --vert:#C3E05A; --vert-ink:#2f3a05;
+  --bad:#b3261e; --ok:#2f6b2f;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.sheet{padding:22px 24px 80px;display:flex;flex-direction:column;gap:26px;max-width:1500px}
+h1{font-size:17px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:74ch}
+.lede + .lede{margin-top:-18px}
+.lu{width:14px;height:14px;flex:0 0 14px;stroke-width:1.6}
+
+/* An option: its number, its name, why it is on the list, then the screen. */
+.opt{display:flex;flex-direction:column;gap:10px}
+.oh{display:flex;align-items:baseline;gap:8px}
+.oh .n{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.oh b{font-size:14px;font-weight:600}
+.why{font-size:12px;color:var(--ink-2);max-width:88ch}
+.why .cost{color:var(--ink-3)}
+
+/* ------------------------------------------------------------ the screen
+   A compressed copy of the prototype: dark bar, level row, white card, the
+   three panes. Compressed in height only — the widths are the real ones,
+   since what is being judged is what the control steals from the plan. */
+.app{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#141416}
+.bar1{height:38px;display:flex;align-items:center;gap:6px;padding:0 10px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar1 .crumb{color:rgba(255,255,255,.58)}
+.bar1 .crumb.on{color:#fff;font-weight:600}
+.bar1 .tab{padding:4px 9px;border-radius:7px;display:flex;align-items:center;gap:5px}
+.bar1 .tab.on{background:#fff;color:#141416;font-weight:600}
+.bar1 .sp{flex:1}
+.bar1 .share{border:1px solid rgba(255,255,255,.28);border-radius:5px;padding:3px 9px;font-size:12px}
+.bar2{height:30px;background:#1e1e21;border-top:1px solid #2c2c31;display:flex;align-items:center;
+  gap:3px;padding:0 10px;color:rgba(255,255,255,.72);font-size:12px}
+.bar2 span{padding:2px 8px;border-radius:6px}
+.bar2 span.on{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.card{background:var(--card);margin:6px;border-radius:8px;overflow:hidden}
+.ttl{padding:9px 12px;display:flex;align-items:baseline;gap:10px}
+.ttl b{font-size:15px;font-weight:600}
+.ttl span{font-size:11.5px;color:var(--ink-2)}
+.work{display:flex;gap:8px;padding:0 8px 8px;height:352px}
+.pane{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);
+  display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.ph{height:30px;flex:0 0 auto;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:7px;padding:0 9px;font-size:12px;color:var(--ink-2)}
+.ph .sp{flex:1}
+.pb{flex:1;min-height:0;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:7px}
+
+/* left: the units, as cards, one per row, the way the prototype has them */
+.lst{flex:0 0 150px}
+.uc{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;flex:0 0 auto}
+.uc.on{border-color:var(--ink)}
+.uc .cr{height:52px;background-image:url(assets/plan-niveau-5.jpg);background-size:300%;
+  filter:grayscale(1);position:relative}
+.uc .no{position:absolute;left:5px;top:5px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;padding:0 5px;font-size:11px;font-weight:600}
+.uc .ul{display:flex;align-items:baseline;gap:6px;padding:4px 7px;font-size:11.5px}
+.uc .ul .a{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* middle: the drawing. The stage is the window onto a sheet larger than it. */
+.d2{flex:1;min-width:0;position:relative}
+/* The drawing never collapses to a sliver: a panel that opens under it
+   scrolls inside itself rather than eating the plan it refers to. */
+.stage{flex:1;min-height:150px;position:relative;overflow:hidden;background:var(--card)}
+.plan{position:absolute;inset:0;background-image:url(assets/plan-niveau-5.jpg);
+  background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
+.lay{position:absolute;background-repeat:no-repeat;background-size:contain;background-position:center;
+  pointer-events:none}
+.lay.arp{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
+.lay.pay{background-image:url(assets/paysage.png)}
+.off{display:none}
+
+/* right: the inspector, or whatever the option puts there instead */
+.insp{flex:0 0 212px}
+.kv{display:flex;align-items:baseline;gap:8px;font-size:11.5px}
+.kv b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.kv span{color:var(--ink-2)}
+
+/* --------------------------------------------------------- shared pieces
+   The same five controls appear in every option; only where they sit and
+   what has to be done to reach them changes. */
+.btn{height:24px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:inline-flex;align-items:center;gap:5px;padding:0 8px;font-size:11.5px;color:var(--ink-2);
+  cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--fill);border-color:var(--ink-3)}
+.btn.solid{background:#1b1b1b;border-color:#1b1b1b;color:#fff}
+.btn.sm{height:20px;padding:0 6px;font-size:11px;border-radius:4px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:11.5px;color:var(--ink-2);
+  background:var(--card);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.chip.on{border-color:var(--ink);color:var(--ink)}
+.chip.dim{opacity:.45}
+input[type=range]{-webkit-appearance:none;appearance:none;height:14px;background:transparent;cursor:pointer;
+  width:100%;min-width:0}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;
+  background:var(--ink);margin-top:-4px}
+.pc{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;
+  width:30px;text-align:right;flex:0 0 30px}
+.rev{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;flex:0 0 6px}
+.dot.ok{background:var(--ok)}
+.dot.old{background:#d08b00}
+.state{font-size:10.5px;white-space:nowrap}
+.state.old{color:#8a5c00}
+.state.ok{color:var(--ink-3)}
+.eye{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-3);cursor:pointer;flex:0 0 22px}
+.eye:hover{background:var(--fill)}
+.eye.on{color:var(--ink)}
+.row{display:flex;align-items:center;gap:6px;min-width:0}
+.col{display:flex;flex-direction:column;gap:5px;min-width:0}
+.nm{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:10.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* the version history and the import panel, used by every option */
+.hist{border-top:1px dashed var(--line-2);padding-top:6px;display:flex;flex-direction:column;gap:4px}
+.vrow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.vrow .d{color:var(--ink-3);font-family:var(--mono);font-size:10.5px}
+.vrow.cur{color:var(--ink)}
+.vrow .push{margin-left:auto}
+.drop{border:1px dashed var(--line);border-radius:5px;padding:8px;text-align:center;font-size:11px;
+  color:var(--ink-3);cursor:pointer}
+.drop:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.found{display:flex;align-items:center;gap:6px;font-size:11px;padding:4px 6px;border:1px solid var(--line-2);
+  border-radius:4px;cursor:pointer;font-family:var(--mono);color:var(--ink-2)}
+.found:hover{border-color:var(--ink);color:var(--ink)}
+.note{font-size:10.5px;color:var(--ink-3)}
+.toast{position:absolute;left:8px;bottom:8px;background:#1b1b1b;color:#fff;font-size:11px;
+  padding:5px 9px;border-radius:5px;z-index:9;max-width:70%}
+
+/* 1 — the rail, a column of the drawing pane */
+.rail{flex:0 0 198px;background:var(--card);
+  border-left:1px solid var(--line-2);display:flex;flex-direction:column;min-height:0}
+.rail .rh{height:26px;display:flex;align-items:center;gap:6px;padding:0 8px;font-size:11px;
+  color:var(--ink-3);border-bottom:1px solid var(--line-2)}
+.rail .rb{flex:1;overflow:auto;padding:6px;display:flex;flex-direction:column;gap:4px}
+.lrow{border:1px solid transparent;border-radius:5px;padding:5px 6px;display:flex;flex-direction:column;gap:4px}
+.lrow:hover{background:var(--fill-2)}
+.lrow.sel{border-color:var(--line);background:var(--fill-2)}
+.lrow .iso{opacity:0}
+.lrow:hover .iso{opacity:1}
+
+/* 2 — the band under the pane header */
+.band{display:flex;align-items:stretch;gap:0;border-bottom:1px solid var(--line-2);flex:0 0 auto}
+.seg{flex:1;min-width:0;padding:5px 8px;display:flex;flex-direction:column;gap:3px;cursor:pointer;
+  border-right:1px solid var(--line-2)}
+.seg:last-child{border-right:0}
+.seg.sel{background:var(--fill-2)}
+.seg.mut{opacity:.45}
+
+/* 4 — the popover under a chip */
+.pop{position:absolute;z-index:8;top:34px;background:var(--card);border:1px solid var(--line);
+  border-radius:7px;box-shadow:0 8px 24px rgba(0,0,0,.14);width:244px;padding:8px;
+  display:flex;flex-direction:column;gap:7px}
+
+/* 5 — the drawer under the drawing */
+.drawer{flex:0 1 auto;min-height:0;overflow:auto;border-top:1px solid var(--line-2);background:var(--card)}
+.dh2{height:26px;display:flex;align-items:center;gap:8px;padding:0 9px;font-size:11px;color:var(--ink-2);cursor:pointer}
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.tbl th{text-align:left;font-weight:400;color:var(--ink-3);font-size:10.5px;padding:3px 9px;
+  border-bottom:1px solid var(--line-2)}
+.tbl td{padding:4px 9px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tr.sel td{background:var(--fill-2)}
+
+/* 6 — the wipe between two versions */
+.wipe{position:absolute;inset:0;overflow:hidden}
+.wipe .old{position:absolute;inset:0;background-image:url(assets/plan-niveau-4.jpg);
+  background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
+.wipe .new{position:absolute;inset:0;background-image:url(assets/plan-niveau-5.jpg);
+  background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
+.wipe .hand{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);z-index:3}
+.wipe .hand::after{content:"";position:absolute;left:-7px;top:50%;width:16px;height:16px;margin-top:-8px;
+  border-radius:50%;background:var(--ink)}
+.wipe .tag{position:absolute;top:6px;font-size:10.5px;font-family:var(--mono);color:var(--ink-2);
+  background:rgba(255,255,255,.85);padding:1px 5px;border-radius:3px}
+.mini{position:absolute;left:8px;bottom:8px;z-index:4;background:rgba(255,255,255,.94);
+  border:1px solid var(--line-2);border-radius:6px;padding:5px 6px;display:flex;flex-direction:column;gap:3px;width:158px}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>Dessins et versions — six façons</h1>
+  <p class="lede">Trois dessins occupent le même emplacement: le plan d'étage du bureau, le plan de l'arpenteur, le plan du paysagiste. Il faut pouvoir n'en lire qu'un, les empiler avec une opacité par dessin, et savoir d'un coup d'œil si celui qu'on lit est le dernier reçu.</p>
+  <p class="lede">Chaque option est dessinée dans l'écran où elle vivrait, avec les vraies planches. Les commandes sont actives: œil, opacité, isolement, import d'une version, historique. Dans l'option 6, la version précédente est figurée par une autre planche, faute d'archive réelle.</p>
+  <div id="opts"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* ------------------------------------------------------------------ icons */
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["file", "ruler", "trees", "eye", "eye-off", "layers", "upload", "history", "clock",
+    "chevron-down", "chevron-up", "chevron-right", "external-link", "check", "circle", "list", "box",
+    "git-compare", "maximize", "x", "folder", "share-2", "plus", "alert-circle"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+
+/* --------------------------------------------------------- the three sheets
+   The placement comes from the prototype: each consultant sheet is scaled so
+   its building covers the floor plan's building, then centred on it. No
+   stretching — a sheet is placed, never deformed. */
+const BASE_BOX = [314 / 2000, 325 / 1675, 1488 / 2000, 1270 / 1675];
+const BASE_RATIO = 2000 / 1675;
+const SHEETS = {
+  arp: { box: [298 / 1650, 307 / 1560, 1380 / 1650, 1172 / 1560], ratio: 1650 / 1560 },
+  pay: { box: [156 / 835, 178 / 800, 711 / 835, 624 / 800], ratio: 835 / 800 },
+};
+function layStyle(k, opacity) {
+  const S = SHEETS[k];
+  const [bx0, by0, bx1, by1] = BASE_BOX;
+  const [sx0, sy0, sx1, sy1] = S.box;
+  const w = (bx1 - bx0) / (sx1 - sx0);
+  const h = w * BASE_RATIO / S.ratio;
+  const left = bx0 - sx0 * w;
+  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h;
+  return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;opacity:${opacity / 100}`;
+}
+
+/* ------------------------------------------------------------ the drawings
+   Three documents, each with the version being read and the ones it
+   replaced. A version is never dropped: the question an architect asks six
+   weeks later is "what did the last one say", and only a kept copy answers
+   it. The landscape sheet is deliberately out of date — that is the case
+   every option has to make legible. */
+const DRAWINGS = {
+  plan: { name: "Plan d'étage", icon: "file", who: "Atelier", kind: "dwg",
+    file: "A-205_PLAN_NIVEAU_5.dwg",
+    versions: [
+      { rev: "R04", date: "24 oct", who: "Atelier", note: "corridor élargi à 1 100 mm" },
+      { rev: "R03", date: "12 sept", who: "Atelier", note: "escalier est repositionné" },
+      { rev: "R02", date: "2 août", who: "Atelier", note: "première émission pour permis" },
+    ] },
+  arp: { name: "Arpenteur", icon: "ruler", who: "Arpenteur-géomètre", kind: "pdf",
+    file: "ARPENTEUR_PLAN-PROJET_R02.pdf",
+    versions: [
+      { rev: "R02", date: "7 oct", who: "Arpenteur-géomètre", note: "implantation conforme" },
+      { rev: "R01", date: "14 mai", who: "Arpenteur-géomètre", note: "relevé initial" },
+    ] },
+  pay: { name: "Paysage", icon: "trees", who: "Architecte paysagiste", kind: "pdf",
+    file: "PAYSAGE_PRE-PERMIS_R01.pdf",
+    /* Something newer is sitting in the received folder, unopened. */
+    waiting: { rev: "R02", date: "26 oct", file: "PAYSAGE_PRE-PERMIS_R02.pdf",
+      folder: "…\\Reçu\\Paysage\\" },
+    versions: [
+      { rev: "R01", date: "7 juil", who: "Architecte paysagiste", note: "aménagement au pré-permis" },
+    ] },
+};
+const KEYS = ["plan", "arp", "pay"];
+const FOUND = [
+  { file: "PAYSAGE_PRE-PERMIS_R02.pdf", date: "26 oct", rev: "R02" },
+  { file: "PAYSAGE_COUPES_R02.pdf", date: "26 oct", rev: "R02" },
+];
+
+/* --------------------------------------------------------------- the state
+   One record per option, so six screens can be handled independently and
+   compared side by side in the same session. */
+const S = [];
+const newState = () => ({
+  on: { plan: true, arp: true, pay: true },
+  op: { plan: 100, arp: 55, pay: 55 },
+  iso: null,          /* a key, or null for the stack */
+  sel: "pay",         /* the drawing the panel is talking about */
+  open: null,         /* which drawing has its history open */
+  imp: null,          /* which drawing is being replaced */
+  drawer: true,
+  pop: null,
+  wipe: 52,
+  toast: null,
+  docs: JSON.parse(JSON.stringify(DRAWINGS)),
+});
+
+const visible = (s, k) => (s.iso ? s.iso === k : s.on[k]);
+const cur = (s, k) => s.docs[k].versions[0];
+const stale = (s, k) => !!s.docs[k].waiting;
+
+/* --------------------------------------------------------------- the stage
+   The plan and the two consultant sheets, in one box, so the three stay
+   registered whatever is shown. */
+function stageHTML(s, extra = "") {
+  return `<div class="stage" data-stage>
+    <div class="plan ${visible(s, "plan") ? "" : "off"}" style="opacity:${s.op.plan / 100}"></div>
+    ${["arp", "pay"].map((k) => `<div class="lay ${k} ${visible(s, k) ? "" : "off"}"
+      style="${layStyle(k, s.op[k])}"></div>`).join("")}
+    ${extra}
+    ${s.toast ? `<div class="toast">${s.toast}</div>` : ""}
+  </div>`;
+}
+
+/* The state line every option repeats in its own shape: up to date, or a
+   newer sheet is sitting in the office folder unread. */
+function stateHTML(s, k, short) {
+  const d = s.docs[k];
+  if (!d.waiting) return `<span class="dot ok"></span><span class="state ok">à jour</span>`;
+  /* In a 198 px rail the full sentence is cut mid-word, which reads as a
+     bug; the short form keeps the two facts that matter. */
+  return `<span class="dot old"></span><span class="state old">${short
+    ? `${d.waiting.rev} · ${d.waiting.date}` : `${d.waiting.rev} reçu le ${d.waiting.date}`}</span>`;
+}
+
+/* The history, identical everywhere: what is being read, what it replaced,
+   who sent it and what changed. Comparing opens the wipe of option 6. */
+function histHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="hist">
+    ${d.versions.map((v, j) => `<div class="vrow ${j === 0 ? "cur" : ""}">
+      ${j === 0 ? icon("check") : `<span style="width:14px"></span>`}
+      <span class="d">${v.rev}</span><span class="d">${v.date}</span>
+      <span class="nm" style="flex:1">${v.note}</span>
+      ${j === 0 ? `<span class="rev">lu</span>`
+        : `<span class="btn sm" data-a="cmp" data-i="${i}" data-k="${k}" data-v="${j}">comparer</span>`}
+    </div>`).join("")}
+    <div class="note">Les versions remplacées restent lisibles: fitte ne supprime rien et n'écrit jamais dans un fichier de dessin.</div>
+  </div>`;
+}
+
+/* Choosing the file that replaces the current one. Two sheets are sitting in
+   the received folder; either can be dropped in by hand instead. */
+function importHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col" style="gap:6px">
+    <div class="note">Nouvelle version de « ${d.name} ». L'ancienne reste dans l'historique.</div>
+    ${(d.waiting ? FOUND : FOUND.slice(1)).map((f, j) => `<div class="found" data-a="pick" data-i="${i}" data-k="${k}" data-f="${j}">
+      ${icon("file")}<span class="nm" style="flex:1">${f.file}</span><span class="d">${f.date}</span></div>`).join("")}
+    <div class="drop" data-a="pick" data-i="${i}" data-k="${k}" data-f="0">Déposer un PDF ou un DWG ici</div>
+  </div>`;
+}
+
+/* ------------------------------------------------------------ the frame
+   Everything above the panes is the same in all six, so it is written once.
+   The option only decides what happens inside the drawing pane and in the
+   third column. */
+const UNITS = [["501", "5½", "1275 pi²"], ["502", "5½", "1496 pi²"], ["503", "3½", "760 pi²"], ["504", "4½", "1152 pi²"]];
+const unitsHTML = () => `<div class="pane lst"><div class="ph">${icon("list")}Unités</div>
+  <div class="pb">${UNITS.map((u, j) => `<div class="uc ${j === 0 ? "on" : ""}">
+    <div class="cr" style="background-position:${28 + j * 14}% ${34 + j * 10}%"><span class="no">${u[0]}</span></div>
+    <div class="ul"><span>${u[1]}</span><span class="a">${u[2]}</span></div></div>`).join("")}</div></div>`;
+
+const inspHTML = () => `<div class="pane insp"><div class="ph">${icon("circle")}Unité 501</div>
+  <div class="pb">
+    <div class="kv"><span>Type</span><b>5½</b></div>
+    <div class="kv"><span>Superficie</span><b>1 275 pi²</b></div>
+    <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
+    <div class="kv"><span>Écart</span><b>240 mm</b></div>
+  </div></div>`;
+
+function appHTML(i, middle, third) {
+  return `<div class="app" data-i="${i}">
+    <div class="bar1">${icon("folder")}<span class="crumb">Tous les projets</span>
+      <span class="crumb on">Le Baldwin III</span>
+      <span class="tab on">${icon("layers")}Unités</span><span class="tab">Codes</span><span class="tab">Échéancier</span>
+      <span class="sp"></span><span class="share">${icon("share-2")} Partager</span></div>
+    <div class="bar2">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<span class="${n === 5 ? "on" : ""}">Niveau ${n}</span>`).join("")}</div>
+    <div class="card">
+      <div class="ttl"><b>Plans — niveau 5</b><span>15 unités · 4 avec un croisement ouvert</span></div>
+      <div class="work">${unitsHTML()}${middle}${third || inspHTML()}</div>
+    </div>
+  </div>`;
+}
+
+/* ===================================================================== 1
+   A rail docked on the right of the drawing. Everything about the three
+   sheets is in one column: visible, how strong, which version, and the two
+   buttons that change it. It costs 198 px of drawing, permanently. */
+function opt1(i, s) {
+  const rail = `<div class="rail">
+    <div class="rh">${icon("layers")}Dessins
+      <span style="flex:1"></span>
+      ${s.iso ? `<span class="btn sm" data-a="iso" data-i="${i}" data-k="">tout voir</span>` : ""}</div>
+    <div class="rb">${KEYS.map((k) => {
+      const d = s.docs[k];
+      const sel = s.sel === k;
+      return `<div class="lrow ${sel ? "sel" : ""}" data-a="sel" data-i="${i}" data-k="${k}">
+        <div class="row">
+          <span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}"
+            title="${visible(s, k) ? "Masquer" : "Afficher"}">${icon(visible(s, k) ? "eye" : "eye-off")}</span>
+          ${icon(d.icon)}<span class="nm" style="flex:1">${d.name}</span>
+          <span class="btn sm iso" data-a="iso" data-i="${i}" data-k="${k}" title="Ne voir que celui-ci">seul</span>
+        </div>
+        <div class="row"><span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span>
+          <span style="flex:1"></span>${stateHTML(s, k, true)}</div>
+        <div class="row"><input type="range" min="0" max="100" value="${s.op[k]}"
+          data-a="op" data-i="${i}" data-k="${k}"><span class="pc">${s.op[k]}%</span></div>
+        ${sel ? `<div class="row" style="gap:5px">
+            <span class="btn sm" data-a="imp" data-i="${i}" data-k="${k}">${icon("upload")}Importer</span>
+            <span class="btn sm" data-a="hist" data-i="${i}" data-k="${k}">${icon("history")}${d.versions.length}</span>
+          </div>
+          ${s.imp === k ? importHTML(s, i, k) : ""}
+          ${s.open === k ? histHTML(s, i, k) : ""}` : ""}
+      </div>`;
+    }).join("")}</div>
+  </div>`;
+  /* The rail is a sibling of the stage, not something laid over it: a panel
+     that covers the drawing it controls is worse than one that shortens it,
+     because the part hidden is always the part being pointed at. */
+  return appHTML(i, `<div class="pane d2"><div class="ph">${icon("file")}Plan 2D<span class="sp"></span>
+    <span class="btn">${icon("external-link")}Ouvrir dans AutoCAD</span></div>
+    <div style="flex:1;min-height:0;display:flex">${stageHTML(s)}${rail}</div></div>`);
+}
+
+/* ===================================================================== 2
+   A band under the pane header: the three sheets side by side, each with its
+   own slider. Nothing is hidden behind a click, and the drawing keeps its
+   full width — but the band is 46 px of height on every screen. */
+function opt2(i, s) {
+  const band = `<div class="band">${KEYS.map((k) => {
+    const d = s.docs[k];
+    const mut = s.iso && s.iso !== k;
+    return `<div class="seg ${s.sel === k ? "sel" : ""} ${mut ? "mut" : ""}" data-a="sel" data-i="${i}" data-k="${k}">
+      <div class="row">
+        <span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}">${icon(visible(s, k) ? "eye" : "eye-off")}</span>
+        ${icon(d.icon)}<span class="nm" style="flex:1">${d.name}</span>
+        <span class="rev">${cur(s, k).rev}</span>${stateHTML(s, k)}
+        <span class="btn sm" data-a="iso" data-i="${i}" data-k="${s.iso === k ? "" : k}">${s.iso === k ? "tout" : "seul"}</span>
+        <span class="btn sm" data-a="imp" data-i="${i}" data-k="${k}">${icon("upload")}</span>
+        <span class="btn sm" data-a="hist" data-i="${i}" data-k="${k}">${icon("history")}</span>
+      </div>
+      <div class="row"><input type="range" min="0" max="100" value="${s.op[k]}"
+        data-a="op" data-i="${i}" data-k="${k}"><span class="pc">${s.op[k]}%</span></div>
+    </div>`;
+  }).join("")}</div>`;
+  const panel = (s.imp || s.open) ? `<div class="pb" style="flex:0 0 auto;border-top:1px solid var(--line-2)">
+    ${s.imp ? importHTML(s, i, s.imp) : histHTML(s, i, s.open)}</div>` : "";
+  return appHTML(i, `<div class="pane d2"><div class="ph">${icon("file")}Plan 2D<span class="sp"></span>
+    <span class="btn">${icon("external-link")}Ouvrir dans AutoCAD</span></div>
+    ${band}${stageHTML(s)}${panel}</div>`);
+}
+
+/* ===================================================================== 3
+   The third column stops being the unit and becomes the documents. Each
+   sheet is a card with its own thumbnail, so "which drawing is that line
+   from" is answered by looking, not by toggling. The unit facts move out of
+   sight, which is the price. */
+function opt3(i, s) {
+  const third = `<div class="pane insp" style="flex:0 0 250px">
+    <div class="ph">${icon("layers")}Dessins<span class="sp"></span>
+      ${s.iso ? `<span class="btn sm" data-a="iso" data-i="${i}" data-k="">tout voir</span>` : ""}</div>
+    <div class="pb">${KEYS.map((k) => {
+      const d = s.docs[k];
+      return `<div class="uc" style="border-color:${s.sel === k ? "var(--ink)" : "var(--line-2)"}"
+        data-a="sel" data-i="${i}" data-k="${k}">
+        <div class="cr" style="background-image:url(${k === "plan" ? "assets/plan-niveau-5.jpg" : k === "arp" ? "assets/arp-site.png" : "assets/paysage.png"});
+          background-size:contain;background-repeat:no-repeat;background-position:center;background-color:#fff;height:58px"></div>
+        <div class="col" style="padding:6px 7px;gap:5px">
+          <div class="row">${icon(d.icon)}<span class="nm" style="flex:1">${d.name}</span>
+            <span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}">${icon(visible(s, k) ? "eye" : "eye-off")}</span></div>
+          <div class="row"><span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span><span style="flex:1"></span>${stateHTML(s, k)}</div>
+          <div class="row"><input type="range" min="0" max="100" value="${s.op[k]}" data-a="op" data-i="${i}" data-k="${k}">
+            <span class="pc">${s.op[k]}%</span></div>
+          <div class="row" style="gap:5px">
+            <span class="btn sm" data-a="iso" data-i="${i}" data-k="${s.iso === k ? "" : k}">${s.iso === k ? "tout voir" : "voir seul"}</span>
+            <span class="btn sm" data-a="imp" data-i="${i}" data-k="${k}">${icon("upload")}</span>
+            <span class="btn sm" data-a="hist" data-i="${i}" data-k="${k}">${icon("history")}${d.versions.length}</span>
+          </div>
+          ${s.imp === k ? importHTML(s, i, k) : ""}
+          ${s.open === k ? histHTML(s, i, k) : ""}
+        </div>
+      </div>`;
+    }).join("")}
+    <div class="drop" data-a="imp" data-i="${i}" data-k="pay">Déposer une nouvelle version</div>
+    </div></div>`;
+  return appHTML(i, `<div class="pane d2"><div class="ph">${icon("file")}Plan 2D<span class="sp"></span>
+    <span class="btn">${icon("external-link")}Ouvrir dans AutoCAD</span></div>${stageHTML(s)}</div>`, third);
+}
+
+/* ===================================================================== 4
+   What the prototype has today — three chips — plus the thing it lacks: the
+   chip opens. One click isolates, the caret opens opacity, version and
+   import. Costs nothing in space; costs one click to find anything. */
+function opt4(i, s) {
+  const chips = `<span class="row" style="gap:5px">${KEYS.map((k) => {
+    const d = s.docs[k];
+    const act = s.iso === k;
+    return `<span class="chip ${act ? "on" : ""} ${s.iso && !act ? "dim" : ""}"
+      data-a="iso" data-i="${i}" data-k="${act ? "" : k}" title="${act ? "Tout voir" : `Ne voir que ${d.name}`}">
+      ${icon(d.icon)}${d.name}
+      ${stale(s, k) ? `<span class="dot old"></span>` : ""}
+      <span data-a="pop" data-i="${i}" data-k="${k}" title="Réglages du dessin">${icon("chevron-down")}</span></span>`;
+  }).join("")}</span>`;
+  const k = s.pop;
+  const pop = k ? `<div class="pop" style="left:${{ plan: 80, arp: 190, pay: 300 }[k]}px">
+    <div class="row">${icon(s.docs[k].icon)}<b style="font-size:12px">${s.docs[k].name}</b>
+      <span style="flex:1"></span>
+      <span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}">${icon(visible(s, k) ? "eye" : "eye-off")}</span></div>
+    <div class="row"><input type="range" min="0" max="100" value="${s.op[k]}" data-a="op" data-i="${i}" data-k="${k}">
+      <span class="pc">${s.op[k]}%</span></div>
+    <div class="row"><span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span><span style="flex:1"></span>${stateHTML(s, k)}</div>
+    <div class="row" style="gap:5px">
+      <span class="btn sm" data-a="imp" data-i="${i}" data-k="${k}">${icon("upload")}Importer</span>
+      <span class="btn sm" data-a="hist" data-i="${i}" data-k="${k}">${icon("history")}${s.docs[k].versions.length} version${s.docs[k].versions.length > 1 ? "s" : ""}</span>
+      <span style="flex:1"></span><span class="btn sm" data-a="pop" data-i="${i}" data-k="">${icon("x")}</span></div>
+    ${s.imp === k ? importHTML(s, i, k) : ""}
+    ${s.open === k ? histHTML(s, i, k) : ""}
+  </div>` : "";
+  return appHTML(i, `<div class="pane d2" style="position:relative">
+    <div class="ph">${icon("file")}Plan 2D ${chips}<span class="sp"></span>
+      <span class="btn">${icon("external-link")}Ouvrir dans AutoCAD</span></div>
+    ${pop}${stageHTML(s)}</div>`);
+}
+
+/* ===================================================================== 5
+   A drawer under the drawing: one line per sheet, read across — state,
+   version, opacity, what can be done. It reads like a drawing register,
+   which is what an office already keeps on paper, and it folds away. */
+function opt5(i, s) {
+  const body = s.drawer ? `<table class="tbl">
+    <tr><th style="width:34%">Dessin</th><th>Version</th><th>État</th><th style="width:26%">Opacité</th><th></th></tr>
+    ${KEYS.map((k) => {
+      const d = s.docs[k];
+      return `<tr class="${s.sel === k ? "sel" : ""}" data-a="sel" data-i="${i}" data-k="${k}">
+        <td><div class="row">
+          <span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}">${icon(visible(s, k) ? "eye" : "eye-off")}</span>
+          ${icon(d.icon)}<span class="nm">${d.name}</span></div></td>
+        <td><span class="rev">${cur(s, k).rev} · ${cur(s, k).date}</span></td>
+        <td><div class="row">${stateHTML(s, k)}</div></td>
+        <td><div class="row"><input type="range" min="0" max="100" value="${s.op[k]}" data-a="op" data-i="${i}" data-k="${k}">
+          <span class="pc">${s.op[k]}%</span></div></td>
+        <td><div class="row" style="gap:4px;justify-content:flex-end">
+          <span class="btn sm" data-a="iso" data-i="${i}" data-k="${s.iso === k ? "" : k}">${s.iso === k ? "tout" : "seul"}</span>
+          <span class="btn sm" data-a="imp" data-i="${i}" data-k="${k}">${icon("upload")}Importer</span>
+          <span class="btn sm" data-a="hist" data-i="${i}" data-k="${k}">${icon("history")}${d.versions.length}</span>
+        </div></td>
+      </tr>
+      ${(s.open === k || s.imp === k) ? `<tr><td colspan="5">
+        ${s.imp === k ? importHTML(s, i, k) : ""}${s.open === k ? histHTML(s, i, k) : ""}</td></tr>` : ""}`;
+    }).join("")}
+  </table>` : "";
+  const drawer = `<div class="drawer">
+    <div class="dh2" data-a="drawer" data-i="${i}">${icon("layers")}Dessins du niveau 5
+      <span class="rev">3 documents</span>
+      ${KEYS.some((k) => stale(s, k)) ? `<span class="dot old"></span><span class="state old">1 version plus récente reçue</span>` : ""}
+      <span style="flex:1"></span>${icon(s.drawer ? "chevron-down" : "chevron-up")}</div>
+    ${body}</div>`;
+  return appHTML(i, `<div class="pane d2"><div class="ph">${icon("file")}Plan 2D<span class="sp"></span>
+    <span class="btn">${icon("external-link")}Ouvrir dans AutoCAD</span></div>
+    ${stageHTML(s)}${drawer}</div>`);
+}
+
+/* ===================================================================== 6
+   The question is not only which sheet, it is what changed since the last
+   one. The pane becomes a wipe between the version being read and the one
+   it replaced; the layer toggles shrink to a corner card. Import happens
+   where the comparison ends, which is where the decision is taken. */
+function opt6(i, s) {
+  const k = s.sel;
+  const d = s.docs[k];
+  const prev = d.versions[1];
+  /* In comparison the opacity sliders would lie: what is on screen is one
+     drawing in two states, not three drawings stacked. So the corner card
+     answers the only question this mode has — which drawing is being
+     compared — and says what each one is worth comparing against. */
+  const mini = `<div class="mini">
+    <div class="note">Comparer</div>
+    ${KEYS.map((x) => `<div class="row" style="cursor:pointer" data-a="sel" data-i="${i}" data-k="${x}">
+      ${icon(s.sel === x ? "check" : "circle")}
+      <span class="nm" style="flex:1">${s.docs[x].name}</span>
+      ${stale(s, x) ? `<span class="dot old"></span>` : ""}
+      <span class="rev">${s.docs[x].versions.length}</span>
+    </div>`).join("")}</div>`;
+  /* The two halves are the same drawing at two dates. Only the floor plan
+     has two sheets on disk here, so the consultant drawings show their own
+     sheet on both sides: the mechanism is real, the second sheet is not. */
+  const IMG = { plan: ["assets/plan-niveau-5.jpg", "assets/plan-niveau-4.jpg"],
+    arp: ["assets/arp-site.png", "assets/arp-site.png"],
+    pay: ["assets/paysage.png", "assets/paysage.png"] };
+  const wipe = prev ? `<div class="wipe">
+    <div class="old" style="background-image:url(${IMG[k][1]})"></div>
+    <div class="new" style="background-image:url(${IMG[k][0]});clip-path:inset(0 ${100 - s.wipe}% 0 0)"></div>
+    <div class="hand" style="left:${s.wipe}%" data-a="wipe" data-i="${i}"></div>
+    <span class="tag" style="left:8px">${cur(s, k).rev} · ${cur(s, k).date}</span>
+    <span class="tag" style="right:8px">${prev.rev} · ${prev.date}</span>
+  </div>` : `<div class="note" style="padding:10px">Une seule version reçue pour « ${d.name} »: rien à comparer tant que la suivante n'est pas importée.</div>`;
+  const foot = `<div class="drawer"><div class="dh2">
+    ${icon("git-compare")}<span class="nm">${d.name}</span>
+    <span class="rev">${cur(s, k).rev} ↔ ${prev ? prev.rev : "—"}</span>
+    <span style="flex:1"></span>
+    ${d.waiting ? `<span class="dot old"></span><span class="state old">${d.waiting.rev} reçu le ${d.waiting.date}</span>` : ""}
+    <span class="btn sm" data-a="imp" data-i="${i}" data-k="${k}">${icon("upload")}Importer une version</span>
+    <span class="btn sm" data-a="hist" data-i="${i}" data-k="${k}">${icon("history")}${d.versions.length}</span>
+  </div>${s.imp === k ? `<div class="pb" style="flex:0 0 auto">${importHTML(s, i, k)}</div>` : ""}
+  ${s.open === k ? `<div class="pb" style="flex:0 0 auto">${histHTML(s, i, k)}</div>` : ""}</div>`;
+  return appHTML(i, `<div class="pane d2"><div class="ph">${icon("file")}Plan 2D — comparaison<span class="sp"></span>
+    <span class="btn">${icon("external-link")}Ouvrir dans AutoCAD</span></div>
+    <div class="stage" data-stage>${wipe}${mini}${s.toast ? `<div class="toast">${s.toast}</div>` : ""}</div>
+    ${foot}</div>`);
+}
+
+/* ------------------------------------------------------------ the options */
+const OPTIONS = [
+  { name: "Rail de calques", render: opt1,
+    why: `Tout ce qui concerne les trois dessins tient dans une colonne à droite du plan: visible ou non, à quelle force, quelle version, et les deux boutons qui la changent. Rien n'est caché. <span class="cost">Le prix: 198 px de dessin en moins, tout le temps, même quand on ne touche aux calques qu'une fois par jour.</span>` },
+  { name: "Bande sous l'en-tête", render: opt2,
+    why: `Les trois dessins côte à côte, chacun avec son curseur, en permanence sous le titre du volet. Le plan garde toute sa largeur et les trois états se lisent d'un seul regard. <span class="cost">Le prix: 46 px de hauteur sur tous les écrans, et trois curseurs visibles en permanence pour un réglage rare.</span>` },
+  { name: "Dessins dans la troisième colonne", render: opt3,
+    why: `La colonne de droite cesse de parler de l'unité et parle des documents: une vignette par dessin, donc « cette ligne vient d'où » se répond en regardant, pas en allumant et éteignant. L'import et l'historique ont enfin de la place. <span class="cost">Le prix: les chiffres de l'unité sortent de l'écran, ou il faut une quatrième colonne.</span>` },
+  { name: "Pastilles ouvrantes", render: opt4,
+    why: `Ce que le prototype a déjà — trois pastilles — plus ce qui lui manque: la pastille s'ouvre. Un clic isole, le chevron donne l'opacité, la version et l'import. Un point ambre sur la pastille suffit à dire « il y a plus récent ». <span class="cost">Le prix: tout est à un clic de profondeur, et rien ne se compare côte à côte.</span>` },
+  { name: "Tiroir des dessins", render: opt5,
+    why: `Un tiroir sous le dessin, une ligne par planche, lue en travers: état, version, opacité, actions. C'est le tableau des dessins qu'un bureau tient déjà, et il se replie quand on dessine. <span class="cost">Le prix: replié, il ne reste qu'une ligne d'avertissement; déplié, il prend 120 px.</span>` },
+  { name: "Balayage entre deux versions", render: opt6,
+    why: `La vraie question n'est pas seulement « quel dessin » mais « qu'est-ce qui a changé depuis le dernier ». Le volet devient un balayage entre la version lue et celle qu'elle remplace, et l'import est au bout de la comparaison, là où la décision se prend. <span class="cost">Le prix: c'est un mode, pas un réglage permanent — il faut en sortir pour travailler.</span>` },
+];
+
+function render(i) {
+  const o = OPTIONS[i];
+  document.querySelector(`[data-opt="${i}"] .mount`).innerHTML = o.render(i, S[i]);
+}
+function renderAll() {
+  document.getElementById("opts").innerHTML = OPTIONS.map((o, i) => `<div class="opt" data-opt="${i}">
+    <div class="oh"><span class="n">Option ${i + 1}</span><b>${o.name}</b></div>
+    <p class="why">${o.why}</p>
+    <div class="mount"></div>
+  </div>`).join("");
+  /* Option 6 opens on the floor plan: it is the only drawing with three
+     versions, and a comparison screen that opens on "nothing to compare"
+     teaches the reader nothing. */
+  OPTIONS.forEach((_, i) => {
+    if (!S[i]) { S[i] = newState(); if (i === 5) S[i].sel = "plan"; }
+    render(i);
+  });
+}
+
+/* ------------------------------------------------------------- the actions
+   One handler for the six screens: every control carries its option index,
+   so the same code moves whichever copy was clicked. */
+function say(s, msg) {
+  s.toast = msg;
+  clearTimeout(s.timer);
+  s.timer = setTimeout(() => { s.toast = null; render(S.indexOf(s)); }, 3200);
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-a]");
+  if (!el) return;
+  const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+  if (!s) return;
+  switch (el.dataset.a) {
+    /* Isolation is a mode, not a set of toggles: asking for one drawing
+       alone must not destroy the stack one was looking at. */
+    case "iso": s.iso = k || null; s.sel = k || s.sel; break;
+    case "eye":
+      if (s.iso) { s.iso = null; }
+      s.on[k] = !s.on[k];
+      break;
+    case "sel": s.sel = k; break;
+    case "pop": s.pop = s.pop === k || !k ? null : k; s.sel = k || s.sel; s.imp = null; s.open = null; break;
+    case "imp": s.imp = s.imp === k ? null : k; s.open = null; s.sel = k; if (s.pop !== null) s.pop = k; break;
+    case "hist": s.open = s.open === k ? null : k; s.imp = null; s.sel = k; if (s.pop !== null) s.pop = k; break;
+    case "drawer": s.drawer = !s.drawer; break;
+    /* Importing never overwrites: the new sheet goes on top of the pile and
+       the one it replaces keeps its line, its date and its author. */
+    case "pick": {
+      const f = FOUND[+el.dataset.f];
+      const d = s.docs[k];
+      d.versions.unshift({ rev: f.rev, date: f.date, who: d.who, note: `importé · ${f.file}` });
+      d.file = f.file;
+      delete d.waiting;
+      s.imp = null; s.open = k; s.sel = k;
+      const n = d.versions.length - 1;
+      say(s, `${d.name} ${f.rev} importé. ${n > 1 ? `${n} versions précédentes conservées` : "1 version précédente conservée"}.`);
+      break;
+    }
+    case "cmp": {
+      const v = +el.dataset.v;
+      s.sel = k; s.wipe = 52; s.open = null;
+      say(s, `Comparaison ${cur(s, k).rev} ↔ ${s.docs[k].versions[v].rev} — voir l'option 6.`);
+      break;
+    }
+    default: return;
+  }
+  render(i);
+});
+
+/* The sliders write on every move, so the sheet follows the thumb instead of
+   jumping when it is let go. Only the one box that changed is touched: a
+   full re-render would drop the thumb being dragged. */
+document.addEventListener("input", (e) => {
+  const el = e.target.closest("[data-a='op']");
+  if (!el) return;
+  const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+  s.op[k] = +el.value;
+  const app = document.querySelector(`.app[data-i="${i}"]`);
+  const box = k === "plan" ? app.querySelector(".plan") : app.querySelector(`.lay.${k}`);
+  if (box) box.style.opacity = s.op[k] / 100;
+  const pc = el.parentElement.querySelector(".pc");
+  if (pc) pc.textContent = `${s.op[k]}%`;
+});
+
+/* Dragging the wipe handle: pointer events on the stage, so the comparison
+   follows the hand across the whole drawing. */
+document.addEventListener("pointerdown", (e) => {
+  const h = e.target.closest("[data-a='wipe']");
+  if (!h) return;
+  const i = +h.dataset.i, s = S[i];
+  const stage = h.closest(".stage");
+  const move = (ev) => {
+    const r = stage.getBoundingClientRect();
+    s.wipe = Math.max(2, Math.min(98, Math.round((ev.clientX - r.left) / r.width * 100)));
+    const w = stage.querySelector(".wipe");
+    w.querySelector(".new").style.clipPath = `inset(0 ${100 - s.wipe}% 0 0)`;
+    w.querySelector(".hand").style.left = `${s.wipe}%`;
+  };
+  const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+});
+
+sprite();
+renderAll();
+</script>
+</body>
+</html>
