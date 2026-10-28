@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les quantités dans l'écran Unités — six façons</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Same ramp, same type and the same hairlines as nav-haut.html and
+   wireframe-c3: these are six homes for one piece of content, not a new
+   visual language. What changes from option to option is where the numbers
+   live inside the Unités screen and what they take from the panes around
+   them. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --card:#fff; --hi:#111; --vert:#c3e05a; --vert-ink:#2f3a05;
+  --wash:rgba(17,17,18,.055); --wash-2:rgba(17,17,18,.085);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:28px 24px 64px}
+.lu{width:16px;height:16px;flex:0 0 auto;stroke-width:1.6}
+
+/* page scaffolding ------------------------------------------------------ */
+.head{max-width:1180px;margin:0 auto 26px}
+.head h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.head p{color:var(--ink-2);margin-top:5px;max-width:76ch}
+.opts{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:30px}
+.opt{display:flex;flex-direction:column;gap:9px}
+.opt .cap{display:flex;align-items:baseline;gap:9px}
+.opt .cap b{font-size:13.5px;font-weight:600}
+.opt .cap .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.opt .cap .note{color:var(--ink-2);font-size:12px}
+/* The option is shown inside a window, because a placement is judged
+   against the width and height it has to survive, not against the page. */
+.shot{border:1px solid var(--line-2);border-radius:8px;background:var(--card);overflow:hidden}
+
+/* shared two-row top navigation (copied from nav-haut.html) ------------ */
+.qat{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;
+  border-bottom:1px solid var(--line-2);background:var(--fill-2);font-size:11.5px;color:var(--ink-2)}
+.qat .sep{width:1px;height:14px;background:var(--line-2)}
+.qat .ic{width:22px;height:22px;display:grid;place-items:center;border-radius:5px;cursor:pointer;color:var(--ink-2)}
+.qat .ic:hover{background:var(--wash);color:var(--ink)}
+.qat .proj{font-weight:500;color:var(--ink)}
+.qat .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+.rtabs{display:flex;align-items:flex-end;gap:2px;padding:0 8px;height:30px;
+  border-bottom:1px solid var(--line-2)}
+.rtabs button{border:0;background:transparent;font:inherit;font-size:12px;color:var(--ink-2);
+  padding:0 11px;height:26px;border-radius:6px 6px 0 0;cursor:pointer}
+.rtabs button:hover{background:var(--wash)}
+.rtabs button[aria-current="true"]{background:var(--card);color:var(--ink);font-weight:500;
+  box-shadow:inset 0 -2px 0 var(--ink)}
+/* The contextual tab is AutoCAD's answer to "this only exists right now":
+   coloured, at the end, and only there for the one option that invokes it. */
+.rtabs button.ctx{color:var(--vert-ink);background:#eef4d8}
+.rtabs button.ctx[aria-current="true"]{box-shadow:inset 0 -2px 0 var(--vert-ink)}
+
+/* the Unités screen stub ------------------------------------------------ */
+.body{position:relative;background:var(--page)}
+.work4{display:grid;grid-template-columns:170px 1fr 1fr 190px;gap:9px;padding:9px}
+.pane{border:1px solid var(--line-2);border-radius:6px;background:var(--card);overflow:hidden;
+  display:flex;flex-direction:column;min-width:0}
+.ph{height:30px;flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:0 9px;font-size:12px;
+  color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+.ph .pull{margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;
+  border:1px solid var(--line-2);border-radius:5px;font-size:11px;background:var(--fill-2)}
+.field{flex:1;background:#fff}
+/* The plan is a real crop of the level, never tinted or filtered — a
+   placemark here would misrepresent what the screen actually draws. */
+.field.plan{background-image:url(assets/plan-niveau-5.jpg);background-size:cover;background-position:center}
+.rows{padding:6px;display:flex;flex-direction:column;gap:2px}
+.row{padding:5px 7px;border-radius:5px;font-size:11.5px;color:var(--ink-2)}
+.row.on{background:#eef1e0;color:var(--ink);font-weight:500}
+.kv{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 9px;
+  font-size:11.5px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+.kv:last-child{border-bottom:0}
+.kv b{color:var(--ink);font-weight:600}
+
+/* the footer strip, present on every option as the baseline chrome ----- */
+.foot{height:30px;flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:0 10px;
+  border-top:1px solid var(--line-2);background:var(--fill-2);font-size:11.5px;color:var(--ink-2)}
+.foot b{color:var(--ink);font-weight:600}
+.foot .sep{width:1px;height:14px;background:var(--line-2)}
+.foot .sp{flex:1}
+.foot .link{border:0;background:transparent;font:inherit;font-size:11.5px;color:var(--ink);
+  font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:3px}
+.foot .link:hover{text-decoration:underline}
+
+/* the chip row, reused everywhere the four Quantités tables are picked - */
+.chips{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.chip{border:1px solid var(--line-2);background:var(--card);font:inherit;font-size:10.5px;
+  color:var(--ink-2);padding:4px 9px;border-radius:999px;cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:4px}
+.chip .lu{width:12px;height:12px}
+.chip:hover{background:var(--wash)}
+.chip[aria-current="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* the mini-table itself, two sizes: a full read and a condensed one for
+   the narrowest columns in options 2 and 3 */
+.qtblwrap{overflow-x:auto}
+.qtbl{width:100%;border-collapse:collapse;font-size:11px}
+.qtbl th,.qtbl td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+.qtbl th{font-weight:500;color:var(--ink-3);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase}
+.qtbl tr:last-child td{border-bottom:0}
+.qtbl td.n{font-variant-numeric:tabular-nums;color:var(--ink-2);text-align:right}
+.qtbl.mini{font-size:10px}
+.qtbl.mini th,.qtbl.mini td{padding:4px 6px}
+
+/* option 1: the committed strip under every pane ------------------------ */
+.strip{grid-column:1/5}
+
+/* options 2 and 3: a two-way tab swapped in place of existing content --- */
+.coltabs{display:flex;flex:0 0 auto;border-bottom:1px solid var(--line-2)}
+.coltabs button{flex:1;border:0;background:transparent;font:inherit;font-size:10.5px;color:var(--ink-2);
+  padding:7px 4px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
+.coltabs button .lu{width:13px;height:13px}
+.coltabs button[aria-current="true"]{background:var(--fill-2);color:var(--ink);font-weight:600;
+  box-shadow:inset 0 -2px 0 var(--ink)}
+
+/* option 4: the sheet that covers only the two drawing panes ----------- */
+.planwrap{position:relative;grid-column:2/4;min-width:0}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;height:100%}
+.sheet{position:absolute;inset:0;z-index:3;background:var(--card);border:1px solid var(--line-2);
+  border-radius:6px;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 10px 26px rgba(17,17,18,.14)}
+.iconbtn{width:22px;height:22px;display:grid;place-items:center;border-radius:5px;cursor:pointer;
+  color:var(--ink-2);border:0;background:transparent}
+.iconbtn:hover{background:var(--wash);color:var(--ink)}
+
+/* option 5: a popover anchored to the footer, not to the drawing ------- */
+.ftrpop{position:absolute;left:9px;right:9px;bottom:30px;z-index:4;background:var(--card);
+  border:1px solid var(--line-2);border-radius:8px;overflow:hidden;
+  box-shadow:0 10px 26px rgba(17,17,18,.14)}
+
+/* option 6: counts folded into the group headers of the unit list ------ */
+.grp2{display:flex;align-items:baseline;justify-content:space-between;gap:6px;
+  padding:5px 7px;margin-top:3px;border-radius:5px;background:var(--fill-2)}
+.grp2:first-child{margin-top:0}
+.grp2 .b{font-size:11px;font-weight:600;color:var(--ink)}
+.grp2 .c{font-size:10px;color:var(--ink-3)}
+.empty{padding:16px 10px;color:var(--ink-3);font-size:11px;display:flex;gap:7px;align-items:flex-start;line-height:1.4}
+
+/* what each option costs, side by side, under the six ------------------- */
+.tbl{max-width:1180px;margin:34px auto 0;border:1px solid var(--line-2);border-radius:8px;
+  background:var(--card);border-collapse:separate;border-spacing:0;width:100%}
+.tbl th,.tbl td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line-2);font-size:12px}
+.tbl th{font-weight:500;color:var(--ink-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+
+.verdict{max-width:1180px;margin:22px auto 0;color:var(--ink-2);max-width:88ch}
+.verdict b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>Les quantités dans l'écran Unités — six façons</h1>
+  <p>Jusqu'ici, Quantités vivait dans l'écran Aperçu, séparé des plans. Cet écran-là disparaît : les six
+     options ci-dessous logent le même contenu — la puce Unités · Superficies · Fenêtres · Matériaux et
+     son tableau — à l'intérieur de l'écran Unités, chacune à un endroit différent de la navigation à
+     deux rangs, de la colonne de gauche, de l'inspecteur ou du pied de page. Les six partagent le même
+     état : changer de puce ou déplier le tableau dans l'une les change toutes, pour qu'elles soient
+     jugées sur les mêmes chiffres. Le corps est un gabarit : ce qui est jugé ici, c'est où vivent les
+     chiffres et ce qu'ils retirent au dessin.</p>
+</div>
+
+<div class="opts" id="opts"></div>
+
+<table class="tbl" id="cost"></table>
+
+<p class="verdict" id="verdict"></p>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* ------------------------------------------------------------------ data
+   The real Unités table from the retired Aperçu screen. Superficies is
+   mocked per level, consistent with an 8-level, 104-unit building; Fenêtres
+   and Matériaux stay mocked exactly as they were on the old screen. */
+const UNITS_TABLE = {
+  cols: ["Type", "Par étage", "Projet", "pi² moy", "pi² total", "Part"],
+  rows: [
+    ["3½", "3.2", "26", "724", "18 824", "17 %"],
+    ["3½+bureau", "0.9", "7", "880", "6 160", "6 %"],
+    ["4½", "6.1", "49", "1 100", "53 891", "49 %"],
+    ["5½", "2.8", "22", "1 366", "30 063", "28 %"],
+  ],
+};
+const AREA_TABLE = {
+  cols: ["Niveau", "Unités", "pi² total", "pi² moy"],
+  rows: [
+    ["1", "12", "12 800", "1 067"],
+    ["2", "13", "13 900", "1 069"],
+    ["3", "13", "13 850", "1 065"],
+    ["4", "13", "13 800", "1 062"],
+    ["5", "13", "13 750", "1 058"],
+    ["6", "13", "13 700", "1 054"],
+    ["7", "13", "13 650", "1 050"],
+    ["8", "14", "13 488", "963"],
+  ],
+};
+const WINDOW_TABLE = {
+  cols: ["Repère", "Largeur", "Hauteur", "Quantité", "Façade", "Source"],
+  rows: [
+    ["F-01", "1200", "1500", "18", "Nord", "DXF"],
+    ["F-02", "900", "1500", "24", "Sud", "DXF"],
+    ["F-03", "1800", "2100", "6", "Est", "Photo"],
+    ["F-04", "600", "900", "12", "Ouest", "DXF"],
+  ],
+};
+const MATERIAL_TABLE = {
+  cols: ["Matériau", "Surface", "Unité", "Source"],
+  rows: [
+    ["Béton apparent", "2 450", "m²", "DXF"],
+    ["Brique", "1 820", "m²", "DXF"],
+    ["Verre", "980", "m²", "Photo"],
+    ["Acier", "340", "ml", "DXF"],
+  ],
+};
+const CHIPS = [
+  ["Unités", "layers", UNITS_TABLE, "104 unités · 108 938 pi² au total"],
+  ["Superficies", "ruler", AREA_TABLE, "8 niveaux · de 963 à 1 069 pi² moy"],
+  ["Fenêtres", "door-open", WINDOW_TABLE, "4 types · 60 fenêtres relevées"],
+  ["Matériaux", "palette", MATERIAL_TABLE, "4 matériaux relevés sur plan"],
+];
+const chipData = (name) => CHIPS.find((c) => c[0] === name);
+
+/* The eight units shown on the left column, all on the floor the URL
+   already carries (?floor=5&u=502, per CLAUDE.md) so the list and the
+   Quantités tables can be read against the same level. */
+const UNITS_SAMPLE = [
+  { id: "501", type: "3½", area: "707 pi²" },
+  { id: "502", type: "3½", area: "724 pi²", on: true },
+  { id: "503", type: "3½+bureau", area: "880 pi²" },
+  { id: "504", type: "4½", area: "1 080 pi²" },
+  { id: "505", type: "4½", area: "1 100 pi²" },
+  { id: "506", type: "4½", area: "1 123 pi²" },
+  { id: "507", type: "5½", area: "1 366 pi²" },
+  { id: "508", type: "5½", area: "1 340 pi²" },
+];
+
+/* --------------------------------------------------------------- state
+   One object for all six options: which chip is selected, and whether the
+   option-specific "open" surface (a tab, a sheet, a popover) is expanded. */
+const S = { chip: "Unités", open: false };
+
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+function sprite() {
+  const names = ["layers", "sigma", "ruler", "door-open", "palette", "list", "file", "box", "info",
+    "external-link", "save", "undo-2", "redo-2", "search", "printer", "chevron-down", "chevron-up",
+    "x", "alert-triangle"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* --------------------------------------------------------- shared pieces
+   The two-row top navigation, the four baseline panes and the footer are
+   identical across options: what differs is where Quantités gets added. */
+const qat = () => `<div class="qat">
+  <span class="proj">Le Baldwin III</span><span class="sep"></span>
+  <span class="ic" title="Enregistrer">${icon("save")}</span>
+  <span class="ic" title="Annuler">${icon("undo-2")}</span>
+  <span class="ic" title="Rétablir">${icon("redo-2")}</span>
+  <span class="sep"></span><span>permis · R04 · 24 oct</span>
+  <div class="right"><span class="ic">${icon("search")}</span><span class="ic">${icon("printer")}</span></div></div>`;
+/* The nav as it now stands in wireframe-c3: Aperçu is gone, and Codes and
+   Échéancier are the two screens that are not about a floor. */
+const SCREENS = ["Unités", "Codes", "Échéancier"];
+const tabsRow = (ctx = "") => `<div class="rtabs">${SCREENS.map((n) =>
+  `<button${n === "Unités" ? ' aria-current="true"' : ""}>${n}</button>`).join("")}${ctx}</div>`;
+const topNav = (ctx = "") => qat() + tabsRow(ctx);
+
+const chipsRow = () => `<div class="chips">${CHIPS.map(([n, g]) =>
+  `<button class="chip" data-chip="${n}"${S.chip === n ? ' aria-current="true"' : ""}>${icon(g)}${n}</button>`).join("")}</div>`;
+const summaryLine = () => chipData(S.chip)[3];
+const tableHTML = (mode = "full") => {
+  const data = chipData(S.chip)[2];
+  const cls = mode === "mini" ? "qtbl mini" : "qtbl";
+  return `<div class="qtblwrap"><table class="${cls}"><thead><tr>${data.cols.map((c) => `<th>${c}</th>`).join("")}</tr></thead>
+    <tbody>${data.rows.map((r) => `<tr>${r.map((v, i) =>
+      `<td class="${i > 0 && /^[\d\s.,%]+$/.test(v) ? "n" : ""}">${v}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+};
+
+const listRows = () => `<div class="rows">${UNITS_SAMPLE.map((u) =>
+  `<div class="row${u.on ? " on" : ""}">${u.id} · ${u.type} · ${u.area}</div>`).join("")}</div>`;
+const inspectorDefaultBody = () => `<div class="kv"><span>Type</span><b>3½</b></div>
+  <div class="kv"><span>Superficie</span><b>724 pi²</b></div>
+  <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
+  <div class="kv"><span>Croisement</span><b>Aucun</b></div>`;
+
+const leftPane = () => `<div class="pane"><div class="ph">${icon("list")}Unités</div>${listRows()}</div>`;
+const planPane = () => `<div class="pane"><div class="ph">${icon("file")}Plan 2D<span class="pull">${icon("external-link")}AutoCAD</span></div><div class="field plan"></div></div>`;
+const maquettePane = () => `<div class="pane"><div class="ph">${icon("box")}Maquette 3D<span class="pull">${icon("external-link")}SketchUp</span></div><div class="field"></div></div>`;
+const inspectorPane = () => `<div class="pane"><div class="ph">${icon("info")}Unité 502</div>${inspectorDefaultBody()}</div>`;
+const footerDefault = () => `<div class="foot"><span>104 unités</span><span class="sep"></span>
+  <span>4 avec un croisement ouvert</span><span class="sp"></span><span>Niveau 5</span></div>`;
+
+/* ----------------------------------------------------------- six options
+   Each render() is a function of the shared state S, so all six redraw
+   together, and each tags one element data-cost: the surface a user has
+   to look at to read Quantités numbers right now, in that option. */
+const OPTIONS = [
+  { name: "Bande sous les plans",
+    note: "Le tableau complet est toujours sous les yeux, mais il prend la même hauteur qu'un plan supplémentaire — et cette hauteur ne bouge jamais, qu'on la consulte ou non.",
+    clicks: 0, coverage: "4/4",
+    render: () => topNav() + `<div class="body"><div class="work4">
+      ${leftPane()}${planPane()}${maquettePane()}${inspectorPane()}
+      <div class="pane strip" data-cost>
+        <div class="ph">${icon("sigma")}Quantités<span style="margin-left:auto;color:var(--ink-3);font-size:11px">${summaryLine()}</span></div>
+        <div style="padding:8px 10px 0">${chipsRow()}</div>
+        <div style="padding:8px 10px 10px">${tableHTML("full")}</div>
+      </div></div>${footerDefault()}</div>` },
+
+  { name: "Onglet dans la colonne gauche",
+    note: "Le même onglet qui affiche la liste affiche le tableau : zéro nouvelle surface, mais on ne voit plus une seule unité tant que Quantités est ouvert.",
+    clicks: 1, coverage: "4/4",
+    render: () => topNav() + `<div class="body"><div class="work4">
+      <div class="pane">
+        <div class="coltabs"${!S.open ? " data-cost" : ""}>
+          <button data-open="0"${!S.open ? ' aria-current="true"' : ""}>${icon("list")}Liste</button>
+          <button data-open="1"${S.open ? ' aria-current="true"' : ""}>${icon("sigma")}Quantités</button>
+        </div>
+        ${S.open ? `<div data-cost><div style="padding:6px 6px 0">${chipsRow()}</div>${tableHTML("mini")}</div>` : listRows()}
+      </div>
+      ${planPane()}${maquettePane()}${inspectorPane()}</div>${footerDefault()}</div>` },
+
+  { name: "Quatrième onglet dans l'inspecteur",
+    note: "Logé à côté de Détails et Croisements, comme une propriété de plus — au prix de la colonne la plus étroite de l'écran, et d'un conflit avec la fiche de l'unité sélectionnée.",
+    clicks: 1, coverage: "4/4",
+    render: () => topNav() + `<div class="body"><div class="work4">
+      ${leftPane()}${planPane()}${maquettePane()}
+      <div class="pane">
+        <div class="ph">${S.open ? icon("sigma") + "Quantités" : icon("info") + "Unité 502"}</div>
+        <div class="coltabs"${!S.open ? " data-cost" : ""}>
+          <button data-open="0"${!S.open ? ' aria-current="true"' : ""}>Détails</button>
+          <button>Croisements</button>
+          <button data-open="1"${S.open ? ' aria-current="true"' : ""}>${icon("sigma")}Quantités</button>
+        </div>
+        ${S.open ? `<div data-cost><div style="padding:6px 6px 0">${chipsRow()}</div>${tableHTML("mini")}</div>` : inspectorDefaultBody()}
+      </div></div>${footerDefault()}</div>` },
+
+  { name: "Feuille plein écran à la demande",
+    note: "Rien n'est pris tant que personne ne clique ; un clic couvre entièrement Plan 2D et Maquette 3D — invisible au repos, lisible en entier une fois ouverte.",
+    clicks: 1, coverage: "4/4",
+    render: () => topNav(`<button class="ctx"${S.open ? ' aria-current="true"' : ""} data-open="${S.open ? 0 : 1}">${icon("sigma")}Quantités</button>`) +
+      `<div class="body"><div class="work4">
+      ${leftPane()}
+      <div class="planwrap"><div class="pgrid">${planPane()}${maquettePane()}</div>
+        ${S.open ? `<div class="sheet" data-cost>
+          <div class="ph">${icon("sigma")}Quantités<button class="iconbtn" data-toggle="open" title="Fermer" style="margin-left:auto">${icon("x")}</button></div>
+          <div style="padding:8px 10px 0">${chipsRow()}</div>
+          <div style="padding:8px 10px 10px;overflow:auto">${tableHTML("full")}</div></div>` : ""}
+      </div>
+      ${inspectorPane()}</div>${footerDefault()}</div>` },
+
+  { name: "Ligne de totaux dans le pied de page",
+    note: "Une ligne compacte toujours là, le tableau complet un clic derrière elle, ancré au pied plutôt que posé sur le dessin : le seul des six qui ne coûte rien au repos et ne masque jamais les plans.",
+    clicks: 1, coverage: "4/4",
+    render: () => topNav() + `<div class="body"><div class="work4">
+      ${leftPane()}${planPane()}${maquettePane()}${inspectorPane()}</div>
+      ${S.open ? `<div class="ftrpop" data-cost>
+        <div class="ph">${icon("sigma")}Quantités</div>
+        <div style="padding:6px 10px 0">${chipsRow()}</div>
+        <div style="padding:6px 10px 8px;max-height:112px;overflow:auto">${tableHTML("mini")}</div></div>` : ""}
+      <div class="foot"${!S.open ? " data-cost" : ""}>${icon("sigma")}<b>${S.chip}</b><span class="sep"></span>
+        <span>${summaryLine()}</span><span class="sp"></span>
+        <button class="link" data-toggle="open">${icon(S.open ? "chevron-down" : "chevron-up")}${S.open ? "Masquer" : "Tout voir"}</button>
+      </div></div>` },
+
+  { name: "Comptes repliés dans la liste",
+    note: "Pas de deuxième surface du tout : les totaux vivent dans les en-têtes de groupe de la liste elle-même — qui ne peut porter que les unités, pas les fenêtres ni les matériaux.",
+    clicks: 0, coverage: "2/4",
+    render: () => topNav() + `<div class="body"><div class="work4">
+      <div class="pane"><div class="ph">${icon("list")}Unités</div>
+        <div data-cost><div style="padding:6px 6px 0">${chipsRow()}</div>${groupedLeft()}</div>
+      </div>
+      ${planPane()}${maquettePane()}${inspectorPane()}</div>${footerDefault()}</div>` },
+];
+
+/* Option 6's own body: group the sample units by type when the Unités chip
+   is active, collapse to the single loaded level under Superficies, and
+   admit plainly that Fenêtres and Matériaux have no per-unit home here. */
+function groupedLeft() {
+  if (S.chip === "Superficies") {
+    const lvl = AREA_TABLE.rows[4];
+    return `<div class="grp2"><span class="b">Niveau 5</span><span class="c">${lvl[1]} unités · ${lvl[3]} pi² moy</span></div>${listRows()}`;
+  }
+  if (S.chip === "Fenêtres" || S.chip === "Matériaux") {
+    return `<div class="empty">${icon("alert-triangle")}<span>${S.chip} ne décrit pas les unités : rien à plier ici.</span></div>`;
+  }
+  return UNITS_TABLE.rows.map(([type, , , avg]) => {
+    const units = UNITS_SAMPLE.filter((u) => u.type === type);
+    if (!units.length) return "";
+    return `<div class="grp2"><span class="b">${type}</span><span class="c">${units.length} au niveau · ${avg} pi² moy</span></div>
+      <div class="rows" style="padding-top:0">${units.map((u) => `<div class="row${u.on ? " on" : ""}">${u.id} · ${u.area}</div>`).join("")}</div>`;
+  }).join("");
+}
+
+/* ------------------------------------------------------------- painting
+   paint() draws the six shots for the current S. render() paints twice
+   more with S.open forced closed and open to measure, with getBoundingClientRect,
+   what each option's data-cost element actually takes — then restores the
+   real state and fills the comparison table from those measurements. */
+function paint() {
+  document.getElementById("opts").innerHTML = OPTIONS.map((o, i) => `<section class="opt">
+    <div class="cap"><span class="n">Option ${i + 1}</span><b>${o.name}</b></div>
+    <div class="cap"><span class="note">${o.note}</span></div>
+    <div class="shot" data-opt="${i}">${o.render()}</div>
+  </section>`).join("");
+}
+function measureHeights(openVal) {
+  S.open = openVal;
+  paint();
+  return OPTIONS.map((o, i) => {
+    const el = document.querySelector(`[data-opt="${i}"] [data-cost]`);
+    return el ? Math.round(el.getBoundingClientRect().height) : 0;
+  });
+}
+function render() {
+  const current = S.open;
+  const closed = measureHeights(false);
+  const opened = measureHeights(true);
+  S.open = current;
+  paint();
+  document.getElementById("cost").innerHTML = `<thead><tr>
+    <th>Option</th><th>Placement</th><th>Hauteur repliée</th><th>Hauteur dépliée</th>
+    <th>Clics jusqu'au tableau</th><th>Puces couvertes</th></tr></thead>
+    <tbody>${OPTIONS.map((o, i) => `<tr><td class="n">${i + 1}</td><td>${o.name}</td>
+      <td class="n">${closed[i]} px</td><td class="n">${opened[i]} px</td>
+      <td class="n">${o.clicks}</td><td class="n">${o.coverage}</td></tr>`).join("")}</tbody>`;
+  document.getElementById("verdict").innerHTML = `<b>La ligne de totaux au pied de page (option 5)</b> gagne :
+    elle ne prend aucune hauteur permanente puisqu'elle recycle une bande qui existait déjà, elle couvre
+    les quatre puces sans exception, et son tableau déplié s'ancre au-dessus du pied plutôt que sur
+    Plan 2D ou Maquette 3D — contrairement à la feuille plein écran (option 4), qui efface le dessin le
+    temps d'un clic. Les deux onglets (options 2 et 3) sont honnêtes mais chacun sacrifie quelque chose
+    de déjà précieux, la liste ou la fiche de l'unité sélectionnée ; la bande sous les plans (option 1)
+    est la plus lisible en permanence mais la plus chère ; les comptes repliés dans la liste (option 6)
+    sont gratuits mais ne répondent que pour les unités. Construire sur l'option 5.`;
+}
+
+document.addEventListener("click", (e) => {
+  const chip = e.target.closest("[data-chip]");
+  if (chip) { S.chip = chip.dataset.chip; render(); return; }
+  const tgl = e.target.closest("[data-toggle]");
+  if (tgl) { S[tgl.dataset.toggle] = !S[tgl.dataset.toggle]; render(); return; }
+  const op = e.target.closest("[data-open]");
+  if (op) { S.open = op.dataset.open === "1"; render(); return; }
+});
+
+sprite();
+render();
+</script>
+</body>
+</html>
