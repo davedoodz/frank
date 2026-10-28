@@ -227,26 +227,13 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .btnw{height:26px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
   display:inline-flex;align-items:center;gap:6px;padding:0 9px;font-size:12px;color:var(--ink-2)}
 .btnw.solid{background:var(--bar);border-color:var(--line);color:var(--ink)}
-/* The file strip sits between the pane title and the drawing: where the
-   file is, what it is called, and the two applications it can be handed
-   back to. One line, no card. */
-.fstrip{display:flex;align-items:center;gap:8px;padding:6px 10px;flex-wrap:nowrap;
-  border-bottom:1px solid var(--line-2);min-width:0}
-.fstrip .btnw{flex:0 0 auto;white-space:nowrap}
+/* A path as a control: one line, elided from the left, used by the share
+   dialog for the link it hands over. */
 .fpath{display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto;overflow:hidden;
   height:24px;padding:0 8px;border:1px solid var(--line-2);border-radius:5px;
   background:var(--fill-2);font-size:11.5px;color:var(--ink-2);cursor:pointer}
 .fpath:hover{border-color:var(--line);background:var(--fill)}
 .fpath .lu{flex:0 0 13px}
-/* The folder gives way first, then the revision: the file name is what is
-   being read, the folder only says where it lives. */
-.fdir{font-family:var(--mono,ui-monospace,monospace);color:var(--ink-3);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto;min-width:0}
-.fname{font-family:var(--mono,ui-monospace,monospace);color:var(--ink);white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:40px}
-.frev{color:var(--ink-3);white-space:nowrap;flex:0 2 auto;overflow:hidden}
-[data-fi="low"] .fdir,[data-fi="low"] .fname,[data-fi="low"] .frev{color:transparent;
-  background:var(--bar);border-radius:3px;height:9px;display:inline-block;min-width:60px}
 .pcard{cursor:pointer}
 .pcard:hover{border-color:var(--line);background:var(--fill-2)}
 .tile{border:1px solid var(--line-2);border-radius:var(--r);padding:10px;display:flex;
@@ -522,10 +509,16 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .plan canvas.sheetpdf{position:absolute;inset:0;width:100%;height:100%;display:block;
   z-index:0;filter:grayscale(1)}
 .plan canvas.sheetpdf[data-ready="1"]{background:#fff}
-/* While the pass runs, the pane says so where the file name is. */
-.pane[data-pdf="busy"] .fpath::after{content:"rendu vectoriel…";margin-left:auto;
-  color:var(--ink-3);font-size:10.5px}
-.pane[data-pdf="error"] .fpath::after{content:"PDF indisponible — aperçu image";margin-left:auto;color:var(--ink-3);font-size:10.5px}
+/* While the pass runs the pane says so in its own title bar, at the end of
+   the row: the file strip that used to carry it is gone. It is a transient
+   note, so it gives way before anything else — under a pane wide enough to
+   hold it the row would wrap, and a wrapped title costs more than the note
+   is worth. */
+.pane[data-pdf="busy"] > .ph::after{content:"rendu vectoriel…"}
+.pane[data-pdf="error"] > .ph::after{content:"PDF indisponible — aperçu image"}
+.pane[data-pdf] > .ph::after{order:9;color:var(--ink-3);font-size:10.5px;
+  white-space:nowrap;flex:0 0 auto}
+@container (max-width:620px){ .pane[data-pdf] > .ph::after{display:none} }
 /* The thumbnails are crops of the same plan, so they read the same way. */
 [data-fi="high"] .plan[data-img="plan"]:not(.align){filter:grayscale(1)}
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
@@ -1456,20 +1449,6 @@ function hostButton(kind) {
     <span class="lo bar" style="width:46px"></span><span class="hi">${label}</span></span>`;
 }
 
-function fileStrip(kind) {
-  const dir = kind === "plan" ? V.docs.dir : V.docs.skpDir;
-  const name = kind === "plan" ? dwgName() : V.docs.skp;
-  const stamp = kind === "plan" ? `${sheet().rev} · ${sheet().date}` : "R07 · 22 Oct";
-  /* The chip itself is never a .hi: that class switches display, which
-     would stop it being a flex row and let the path spill out of it. */
-  return `<div class="fstrip rg" data-rg="fichier">
-    <span class="fpath" ${act("renamefile", kind)} title="${dir}${name}  ·  changer le dossier ou le nom">
-      ${icon("file")}<span class="lo bar" style="width:84px"></span>
-      <span class="hi fdir">${dir}</span><span class="hi fname">${name}</span>
-      <span class="hi frev">${stamp}</span>${icon("pen-line")}</span>
-  </div>`;
-}
-
 /* ------------------------------------------------------------ code cards
    A provision is only readable next to the number the drawings produced, so
    the card carries both, plus the sentence and the page it comes from. The
@@ -1837,19 +1816,16 @@ const plist = (sel) => shownProjects().map((p, i) => `<div class="listrow ${p[0]
   <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[3]}</span></div>`).join("");
 
 const pane = (label, title, inner, style) => `<div class="pane rg" data-rg="${label}" data-fi="${fiOf("content")}" style="${style || ""}">
-  <div class="ph">${icon("folder")}<span class="lo bar" style="width:110px"></span><span class="hi">${title}</span></div>
+  ${title ? `<div class="ph">${icon("folder")}<span class="lo bar" style="width:110px"></span><span class="hi">${title}</span></div>` : ""}
   <div class="pb">${inner}</div></div>`;
 
-/* The index has no tab strip — the strip above it carries the breadcrumb —
-   so En cours and Archivés sit in the pane itself, where they filter. */
-const pviews = () => `<div class="row" style="padding-bottom:4px">${viewsOf("Projets").map((t, i) =>
-  `<span class="chip ${i === viewIndex("Projets") ? "on" : ""}" ${act("view", i)}>
-    <span class="lo bar" style="width:40px"></span><span class="hi">${t}</span></span>`).join("")}</div>`;
-
+/* The index carries no chrome of its own: the bar above it already names
+   where one is and which of En cours / Archivés is open, and printing both
+   again inside the card made three rows of navigation before the first
+   project. The grid starts at the top of the card. */
 const HOMES = {
-  "Card grid": () => pane("projets", viewOf("Projets") === "Archivés" ? "Projets archivés" : "Tous les projets",
-    `${pviews()}
-     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-content:start">${shownProjects().map((p, i) => pcard(p, i)).join("")}${viewOf("Projets") === "Archivés" ? "" : pnew()}</div>
+  "Card grid": () => pane("projets", null,
+    `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;align-content:start">${shownProjects().map((p, i) => pcard(p, i)).join("")}${viewOf("Projets") === "Archivés" ? "" : pnew()}</div>
      ${shownProjects().length ? "" : `<div class="hi" style="font-size:11.5px;color:var(--ink-3);padding-top:8px">aucun projet dans cette vue</div>`}`),
 
   "Table of projects": () => pane("projets", "Projets en cours",
@@ -1994,7 +1970,9 @@ function headerHTML() {
      being read, how many rows the current view is actually showing. */
   const unresolved = unresolvedCount();
   const open = Object.keys(V.settled).length;
-  const title = { "Projets": ["Projets", `${PROJECTS.length} en cours`],
+  /* The index needs no count: the projects are on screen, and one line of
+     arithmetic above them only repeats what the eye already did. */
+  const title = { "Projets": ["Projets", ""],
     "Codes": ["Codes et règlements", `${ARTICLES.length} articles suivis · ${unresolved} non résolus`],
     "Échéancier": ["Échéancier", `${TASKS.filter((t) => !t.done).length} tâches ouvertes · ${lateCount()} en retard`],
     "Unités": [`Plans — ${viewOf("Unités").toLowerCase()}`,
@@ -2161,7 +2139,6 @@ function contentHTML() {
         <span style="flex:1"></span>
         ${kind === "plan" ? `<span class="laychips">${laychip("none", "Plan seul")}${laychip("arp", "Arpenteur")}${laychip("pay", "Paysage")}</span>` : ""}
         ${hostButton(kind === "plan" ? "plan" : "model")}</div>
-        ${fileStrip(kind === "plan" ? "plan" : "model")}
         ${kind === "plan"
           /* The sheet is larger than the pane, so the pane is a window onto
              it: the drawing, the consultants' layers, the typology fills and
@@ -2861,7 +2838,6 @@ function dialogHTML() {
   </label>`;
   if (d.kind === "share") return shareDialogHTML(d);
   if (d.kind === "addcode") return addCodeDialogHTML(d);
-  if (d.kind) return fileDialogHTML(d, field);
   return `<div class="scrim" ${act("dlgclose")}>
     <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
       <div class="dh"><span class="hi" style="font-weight:600;font-size:13.5px">Nouveau projet</span>
@@ -3042,39 +3018,6 @@ function say(message) {
   TOAST_TIMER = setTimeout(() => { V.toast = null; render(); }, 2600);
 }
 
-
-/* Where fitte looks for a drawing, and what it is called there. Two fields,
-   because an office moves files and renames revisions constantly and the
-   tool has to follow without anyone re-importing a project. Changing it
-   here changes what is read; the file on the server is never touched. */
-function fileDialogHTML(d, field) {
-  const ext = d.kind === "plan" ? ".dwg" : ".skp";
-  const host = d.kind === "plan" ? "AutoCAD" : "SketchUp";
-  const subs = d.kind === "plan"
-    ? ["\\\\serveur-bureau\\Projets\\2026\\BAL3\\Dessins\\", "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Dessins\\Émis\\",
-       "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Reçu\\Arpenteur\\"]
-    : ["\\\\serveur-bureau\\Projets\\2026\\BAL3\\Maquette\\", "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Maquette\\Archives\\"];
-  return `<div class="scrim" ${act("dlgclose")}>
-    <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
-      <div class="dh"><span class="hi" style="font-weight:600;font-size:13.5px">
-        Fichier lu pour ${d.kind === "plan" ? viewOf("Unités").toLowerCase() : "la maquette"}</span>
-        <span style="flex:1"></span>
-        <span class="btnw" ${act("dlgclose")} title="Fermer">${icon("x")}</span></div>
-      <div class="db">
-        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Le fichier reste sur le serveur du bureau. Changer le dossier ou le nom change ce que fitte lit et ce que « Ouvrir dans ${host} » ouvre; rien n'est écrit dans le fichier.</div>
-        ${field("folder", "Dossier", "\\\\serveur-bureau\\Projets\\…")}
-        <div class="row" style="flex-wrap:wrap;gap:5px">${subs.map((f) => `<span class="chip" ${act("dlgfolder", f)} title="Choisir ce dossier">
-          <span class="hi" style="font-family:var(--mono,monospace);font-size:11px">${f}</span></span>`).join("")}</div>
-        ${field("name", "Nom du fichier", `NOM_DU_PLAN${ext}`)}
-        ${d.error ? `<div class="hi" style="font-size:11.5px;color:var(--accent,#b3261e)">${d.error}</div>` : ""}
-      </div>
-      <div class="df">
-        <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Lecture seule. Aucune écriture dans un fichier de dessin.</span>
-        <span class="btnw" ${act("dlgclose")}><span class="hi">Annuler</span></span>
-        <span class="btnw solid" ${act("dlgfile")}>${icon("check")}<span class="hi">Enregistrer le chemin</span></span>
-      </div>
-    </div></div>`;
-}
 function onClick(e) {
   const screenEl = e.target.closest("[data-screen]");
   const el = e.target.closest("[data-act]");
@@ -3284,33 +3227,6 @@ function onClick(e) {
     case "sketchup":
       say(`Remise à SketchUp: ${V.docs.skp} s'ouvre sur ${viewOf("Unités").toLowerCase()}. Lecture seule.`);
       break;
-    /* The path is a control, not a label: the file moves and gets renamed
-       in an office, and the tool has to be pointed at the new one. */
-    case "renamefile":
-      V.dialog = { kind: value, error: "",
-        folder: value === "plan" ? V.docs.dir : V.docs.skpDir,
-        name: value === "plan" ? dwgName() : V.docs.skp };
-      break;
-    case "dlgfile": {
-      const d = V.dialog;
-      const ext = d.kind === "plan" ? ".dwg" : ".skp";
-      if (!d.folder.trim() || !d.name.trim()) {
-        d.error = "Il faut un dossier et un nom: sans les deux, il n'y a rien à lire."; break;
-      }
-      if (!d.name.trim().toLowerCase().endsWith(ext)) {
-        d.error = `fitte lit un ${ext} ici: le nom doit se terminer par ${ext}.`; break;
-      }
-      if (d.kind === "plan") {
-        V.docs.dir = d.folder.trim();
-        V.docs.names[viewOf("Unités")] = d.name.trim();
-      } else {
-        V.docs.skpDir = d.folder.trim();
-        V.docs.skp = d.name.trim();
-      }
-      say(`${d.name.trim()} — chemin enregistré. La prochaine lecture part de là; rien n'est écrit dans le fichier.`);
-      V.dialog = null;
-      break;
-    }
     case "export": say(`Export préparé: ${screen}${CONTEXT[screen] ? ` · ${viewOf(screen)}` : ""}.`); break;
     case "readarticle":
       /* The footer strip names one provision; Codes is where it is read in
