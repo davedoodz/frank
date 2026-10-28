@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Épingles et notes — internes et partagées</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<script type="importmap">
+{"imports":{
+  "three":"./vendor/three/build/three.module.js",
+  "three/addons/":"./vendor/three/examples/jsm/"
+}}
+</script>
+<style>
+/* Same ramp and hairlines as wireframe-c3: what is compared here is not the
+   look of a note but who can read it, what it is stuck to, and where the
+   page keeps it once it is written. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --card:#fff; --hi:#111;
+  --vert:#c3e05a; --vert-ink:#2f3a05;      /* shared: the guest can read it */
+  --bleu:#2f4858; --bleu-fill:#e7eef2;     /* internal: the studio only */
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:28px 24px 72px}
+.lu{width:16px;height:16px;flex:0 0 auto;stroke-width:1.6}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:5px;max-width:86ch}
+.sub b{color:var(--ink);font-weight:500}
+
+/* ---------------------------------------------------------------- the bar
+   One switch decides everything below it: who is reading. The whole page is
+   re-read through it, so an internal note cannot survive the guest view by
+   accident in one design and not in another. */
+.bar{position:sticky;top:0;z-index:30;margin:18px 0 0;padding:9px 11px;background:var(--card);
+  border:1px solid var(--line-2);border-radius:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:7px;overflow:hidden}
+.seg button{height:28px;padding:0 11px;border:0;background:var(--card);font:inherit;font-size:12px;
+  color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button.on{background:var(--hi);color:#fff}
+.seg.team button.on{background:var(--bleu)}
+.bar .lab{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.bar .r{margin-left:auto;display:flex;align-items:center;gap:9px;color:var(--ink-2);font-size:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--line-2);
+  border-radius:6px;background:var(--card);font:inherit;font-size:12px;color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--fill-2)}
+.btn.solid{background:var(--hi);color:#fff;border-color:var(--hi)}
+.btn.sm{height:24px;font-size:11.5px;padding:0 8px}
+.btn.ghost{border-color:transparent;color:var(--ink-2)}
+body[data-as="invite"] .bar{border-color:var(--vert-ink)}
+body[data-as="invite"] .onlyteam{display:none !important}
+
+/* ------------------------------------------------------------- the atelier
+   The drawings are the real thing: four surfaces, one store. A pin posed on
+   the surveyor's plan is not the same object as a pin posed on the model,
+   and the page is built so that difference is visible before it is read. */
+.atelier{margin-top:14px;border:1px solid var(--line-2);border-radius:9px;background:var(--card);overflow:hidden}
+.tabs{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--line-2);padding:0 6px}
+.tab{height:36px;padding:0 11px;border:0;background:none;font:inherit;font-size:12.5px;color:var(--ink-2);
+  cursor:pointer;display:inline-flex;align-items:center;gap:6px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--ink);border-bottom-color:var(--hi);font-weight:500}
+.tab .cnt{min-width:17px;height:17px;padding:0 5px;border-radius:9px;background:var(--fill);color:var(--ink-2);
+  font-size:10.5px;font-weight:600;display:grid;place-items:center}
+.tab.on .cnt{background:var(--vert);color:var(--vert-ink)}
+.tabs .r{margin-left:auto;font-size:11.5px;color:var(--ink-3);padding-right:8px}
+
+.stage{position:relative;height:430px;background:#fff;overflow:hidden;cursor:crosshair}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pins{position:absolute;inset:0;pointer-events:none}
+.pin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;pointer-events:auto}
+.pin .num{width:21px;height:21px;border-radius:50% 50% 50% 2px;transform:rotate(-45deg);
+  background:var(--vert);color:var(--vert-ink);border:1px solid var(--vert-ink);
+  display:grid;place-items:center;font-size:10.5px;font-weight:700}
+.pin .num span{transform:rotate(45deg);display:grid;place-items:center}
+/* An internal pin is a different object, not a tinted one: squared off,
+   slate, and carrying a lock. Nobody should have to read a legend. */
+.pin.team .num{border-radius:4px;transform:none;background:var(--bleu-fill);color:var(--bleu);
+  border:1px solid var(--bleu);border-style:dashed}
+.pin.team .num span{transform:none}
+.pin.sel .num{background:var(--hi);color:#fff;border-color:var(--hi);border-style:solid}
+/* Selection darkens a pin, it never reshapes it: an internal note stays
+   square and slate even when it is the one being read. */
+.pin.team.sel .num{background:var(--bleu);color:#fff;border-color:var(--bleu);border-style:solid;
+  border-radius:4px;transform:none}
+.pin .lbl{margin-top:3px;background:var(--card);border:1px solid var(--line-2);border-radius:5px;
+  padding:1px 6px;font-size:10.5px;white-space:nowrap;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+/* Stuck to a wall the camera is behind: still counted, just quiet. */
+.pin.back{opacity:.32}
+.pin.team .lbl{border-style:dashed;color:var(--bleu)}
+.pin.done .num{opacity:.4}
+.stage .hint{position:absolute;left:10px;bottom:10px;font-size:11.5px;color:var(--ink-3);
+  background:rgba(255,255,255,.88);border:1px solid var(--line-2);border-radius:6px;padding:3px 8px}
+.stage .load{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-3);font-size:12px}
+
+/* the composer: it only appears once a point has been put down, because a
+   note without a place is the thing this page is trying to stop */
+.compose{border-top:1px solid var(--line-2);padding:9px 11px;display:flex;gap:9px;align-items:flex-start;
+  background:var(--fill-2)}
+.compose textarea{flex:1;min-height:44px;resize:none;border:1px solid var(--line-2);border-radius:6px;
+  padding:6px 8px;font:inherit;font-size:12.5px;color:var(--ink);background:var(--card)}
+.compose .anch{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);display:flex;align-items:center;gap:5px;
+  border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;background:var(--card);white-space:nowrap}
+.compose .col{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+
+/* --------------------------------------------------------------- the ways */
+.ways{display:flex;flex-direction:column;gap:30px;margin-top:34px}
+.way .cap{display:flex;align-items:baseline;gap:9px;margin-bottom:3px}
+.way .cap b{font-size:13.5px;font-weight:600}
+.way .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.way .note{color:var(--ink-2);font-size:12px;max-width:96ch;margin-bottom:9px}
+.frame{border:1px solid var(--line-2);border-radius:8px;background:var(--card);overflow:hidden}
+.hdr{height:32px;display:flex;align-items:center;gap:7px;padding:0 10px;font-size:12px;
+  color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+.hdr .r{margin-left:auto;font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:7px}
+
+/* a thread, the same object in every design */
+.thread{padding:8px 10px;border-bottom:1px solid var(--line-2);cursor:pointer;display:block;width:100%;
+  text-align:left;background:none;border-left:0;border-right:0;border-top:0;font:inherit}
+.thread:last-child{border-bottom:0}
+.thread:hover{background:var(--fill-2)}
+.thread.sel{background:#f3f6e6}
+.thread.team{background:var(--bleu-fill)}
+.thread.team.sel{background:#dbe7ee}
+.thread .who{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.thread .who b{color:var(--ink);font-weight:600;font-size:12px}
+.thread .who .when{margin-left:auto;color:var(--ink-3);font-size:11px}
+.thread .txt{margin-top:3px;font-size:12.5px}
+.thread.done .txt{color:var(--ink-3);text-decoration:line-through}
+.thread .anch{margin-top:5px;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;
+  color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:1px 6px;font-family:var(--mono)}
+.thread.team .anch{border-color:#c6d4dc;color:var(--bleu)}
+.empty{padding:10px;color:var(--ink-3);font-size:12px}
+
+/* 1 — the side panel with two tabs */
+.panel{display:grid;grid-template-columns:1fr 320px}
+.panel .shade{background:var(--fill-2);display:grid;place-items:center;color:var(--ink-3);font-size:12px;padding:18px}
+.panel .side{border-left:1px solid var(--line-2);display:flex;flex-direction:column;max-height:420px}
+.ptabs{display:flex;border-bottom:1px solid var(--line-2)}
+.ptabs button{flex:1;height:31px;border:0;background:none;font:inherit;font-size:12px;color:var(--ink-2);
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.ptabs button.on{color:var(--ink);border-bottom-color:var(--hi);font-weight:500}
+.ptabs button.on[data-pt="equipe"]{border-bottom-color:var(--bleu);color:var(--bleu)}
+.scroll{overflow:auto;flex:1}
+
+/* 2 — the drawer under the drawings, grouped by surface */
+.drawer .grp{border-bottom:1px solid var(--line-2)}
+.drawer .ghdr{display:flex;align-items:center;gap:7px;padding:6px 10px;font-size:11.5px;color:var(--ink-2);
+  background:var(--fill-2);cursor:pointer}
+.drawer .ghdr .c{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.drawer .cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.drawer .cols .thread{border-right:1px solid var(--line-2)}
+
+/* 3 — the pins as a layer in the left rail */
+.rail{display:grid;grid-template-columns:268px 1fr}
+.rail .tree{border-right:1px solid var(--line-2);padding:7px 6px;font-size:12.5px;max-height:420px;overflow:auto}
+.rail .node{display:flex;align-items:center;gap:7px;padding:4px 7px;border-radius:5px;color:var(--ink-2);cursor:pointer}
+.rail .node:hover{background:var(--fill-2)}
+.rail .node.kid{padding-left:24px}
+.rail .node.on{background:#eef1e0;color:var(--ink)}
+.rail .node.team.on{background:var(--bleu-fill);color:var(--bleu)}
+.rail .node .c{margin-left:auto;font-size:10.5px;color:var(--ink-3);font-family:var(--mono)}
+.rail .body{max-height:420px;overflow:auto}
+
+/* 4 — the note on the unit card */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;padding:10px}
+.card{border:1px solid var(--line-2);border-radius:7px;padding:8px 9px;cursor:pointer;position:relative}
+.card:hover{background:var(--fill-2)}
+.card.on{border-color:var(--hi)}
+.card b{font-size:13px}
+.card .m{color:var(--ink-3);font-size:11.5px}
+.card .dots{position:absolute;right:7px;top:7px;display:flex;gap:3px}
+.card .dot{width:7px;height:7px;border-radius:50%;background:var(--vert);border:1px solid var(--vert-ink)}
+.card .dot.team{background:var(--bleu-fill);border-color:var(--bleu);border-radius:2px}
+
+/* ------------------------------------------------------------ the record */
+.rec{margin-top:30px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);overflow:hidden}
+.rec pre{padding:11px 13px;font-family:var(--mono);font-size:11.5px;line-height:1.55;color:var(--ink-2);
+  white-space:pre-wrap;max-height:230px;overflow:auto}
+.rec pre b{color:var(--ink);font-weight:600}
+.tbl{margin-top:30px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);width:100%;
+  border-collapse:separate;border-spacing:0;overflow:hidden}
+.tbl td,.tbl th{border-bottom:1px solid var(--line-2);text-align:left;padding:8px 11px;font-size:12px}
+.tbl th{color:var(--ink-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.y{color:var(--vert-ink);font-weight:600}
+.verdict{margin-top:18px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);
+  padding:12px 14px;font-size:12.5px;color:var(--ink-2)}
+.verdict b{color:var(--ink)}
+</style>
+</head>
+<body data-as="equipe">
+<div class="wrap">
+  <h1>Épingles et notes — internes et partagées</h1>
+  <p class="sub">Deux publics sur le même dessin. L'invité — entrepreneur, arpenteur, arrondissement — pose des
+     questions qui doivent revenir à l'atelier. L'atelier s'écrit à lui-même: un rappel, un doute de conception,
+     une chose à revoir avant la prochaine émission. <b>Ces deux-là ne se mélangent pas.</b> Une note interne ne
+     doit jamais apparaître dans le lien partagé, et personne ne doit avoir à s'en souvenir au moment de l'écrire.
+     Posez des épingles ci-dessous: chaque épingle sait sur quelle surface elle a été posée, et les quatre façons
+     plus bas montrent le même dépôt rangé à quatre endroits différents de la page.</p>
+
+  <div class="bar">
+    <span class="lab onlyteam">J'écris en tant que</span>
+    <span class="seg team onlyteam" id="scope">
+      <button data-scope="equipe" class="on">Note d'atelier</button>
+      <button data-scope="partage">Épingle partagée</button>
+    </span>
+    <span class="lab" style="margin-left:8px">La page est lue comme</span>
+    <span class="seg" id="as">
+      <button data-readas="equipe" class="on">L'atelier</button>
+      <button data-readas="invite">L'invité</button>
+    </span>
+    <span class="r">
+      <span id="tally"></span>
+      <button class="btn sm" data-reset>Vider le dépôt</button>
+    </span>
+  </div>
+
+  <div class="atelier">
+    <div class="tabs" id="tabs"></div>
+    <div class="stage" id="stage"></div>
+    <div class="compose" id="compose"></div>
+  </div>
+
+  <div class="ways" id="ways"></div>
+
+  <div class="rec">
+    <div class="hdr"><span id="recIcon"></span>Ce qui est enregistré<span class="r">clé <code>fitte:epingles</code> · survit au rechargement</span></div>
+    <pre id="rec"></pre>
+  </div>
+
+  <table class="tbl" id="cost"></table>
+  <div class="verdict" id="verdict"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { ELEVATIONS } from "./wireframe-c3-selection.js";
+
+/* ------------------------------------------------------------------ icons */
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["message-square", "map-pin", "lock", "users", "eye", "eye-off", "check", "circle",
+    "file", "ruler", "trees", "box", "layers", "send", "trash-2", "database", "chevron-down", "pin"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* ----------------------------------------------------------- the surfaces
+   A pin is worthless if it only knows x and y: four different drawings are
+   open on this project and three of them show the same ground. The surface
+   is part of the anchor, and so is what the point landed on. */
+const SURFACES = {
+  plan:  { name: "Plan d'unités · niveau 5", short: "Plan d'unités", glyph: "file",
+           src: "assets/plan-niveau-5.jpg", sheet: "A-209_PLAN_NIVEAU_5 · R04" },
+  arp:   { name: "Plan d'arpenteur", short: "Arpenteur", glyph: "ruler",
+           src: "assets/arp-site.png", sheet: "ARP-2024-3318 · 18 sep" },
+  pay:   { name: "Plan d'aménagement paysager", short: "Paysage", glyph: "trees",
+           src: "assets/paysage.png", sheet: "P-101_AMENAGEMENT · R02" },
+  model: { name: "Maquette 3D", short: "Maquette", glyph: "box",
+           sheet: "BAL3_Maquette_R07 · 22 oct" },
+};
+
+/* What the point landed on, per surface. Boxes are in 0–1 sheet coordinates,
+   read off the drawings themselves; outside every box the pin still carries
+   the surface and the sheet, which is already more than a screenshot. */
+const ZONES = {
+  plan: [
+    { n: "unité 501", x: [.30, .42], y: [.56, .78] },
+    { n: "unité 503", x: [.19, .30], y: [.40, .60] },
+    { n: "unité 507", x: [.19, .34], y: [.20, .40] },
+    { n: "unité 510", x: [.45, .62], y: [.17, .34] },
+    { n: "unité 512", x: [.62, .78], y: [.17, .40] },
+    { n: "corridor commun", x: [.34, .62], y: [.34, .56] },
+  ],
+  arp: [
+    { n: "limite de lot nord", x: [.08, .92], y: [.05, .22] },
+    { n: "emprise de la rue", x: [.08, .92], y: [.78, .95] },
+    { n: "implantation du bâtiment", x: [.26, .74], y: [.30, .70] },
+  ],
+  pay: [
+    { n: "cour intérieure", x: [.30, .70], y: [.30, .70] },
+    { n: "stationnement", x: [.62, .95], y: [.05, .40] },
+    { n: "plantations de rue", x: [.05, .95], y: [.76, .98] },
+  ],
+};
+const hitZone = (surface, x, y) => (ZONES[surface] || [])
+  .find((z) => x >= z.x[0] && x <= z.x[1] && y >= z.y[0] && y <= z.y[1])?.n || "";
+
+/* -------------------------------------------------------------- the store
+   Pins live in localStorage under one key, and the page is rebuilt from that
+   key alone. Nothing below reads the DOM to know what exists. */
+const KEY = "fitte:epingles";
+const SEED = [
+  { id: 1, scope: "partage", surface: "plan", x: .31, y: .42, zone: "unité 507",
+    who: "Entrepreneur général", when: "hier 16:20", done: false,
+    txt: "Le dégagement devant la porte de l'unité 507 fait 860 mm, il en faut 900." },
+  { id: 2, scope: "partage", surface: "arp", x: .52, y: .17, zone: "limite de lot nord",
+    who: "Arpenteur", when: "lun. 09:05", done: false,
+    txt: "La marge avant au certificat est 5,94 m, le plan d'implantation dit 6,00 m." },
+  { id: 3, scope: "equipe", surface: "pay", x: .48, y: .52, zone: "cour intérieure",
+    who: "Vous", when: "mar. 08:40", done: false,
+    txt: "Rappel: la cour est encore dessinée avec l'ancienne entrée. À reprendre avant l'émission." },
+  { id: 4, scope: "equipe", surface: "model", p: [3.1, 6.4, 7.8], level: 6, face: "façade sud",
+    who: "Vous", when: "mar. 09:12", done: false,
+    txt: "Garde-corps du 6e: on avait parlé de verre plein ici, la maquette montre des barreaux." },
+];
+let S = {
+  pins: load(),
+  surface: "plan",
+  sel: null,
+  scope: "equipe",      // what the next pin will be
+  as: "equipe",         // who the page is read as
+  draft: "",
+  pending: null,        // a point put down, waiting for its sentence
+  tab: { panel: "partage" },
+  railNode: "all",
+  unit: "501",
+  open: { plan: true, arp: true, pay: true, model: true },
+};
+function load() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY));
+    if (Array.isArray(raw) && raw.length) return raw;
+  } catch { /* a corrupt key is not worth a dialog: fall back to the seed */ }
+  return SEED.map((p) => ({ ...p }));
+}
+const save = () => localStorage.setItem(KEY, JSON.stringify(S.pins));
+const nextId = () => S.pins.reduce((m, p) => Math.max(m, p.id), 0) + 1;
+
+/* The one rule the whole page turns on: an internal note is not rendered
+   faintly for the guest, it is not rendered at all. */
+const visible = () => S.pins.filter((p) => S.as === "equipe" || p.scope === "partage");
+const forSurface = (s) => visible().filter((p) => p.surface === s);
+const hidden = () => S.pins.filter((p) => p.scope === "equipe").length;
+
+const anchorText = (p) => (p.surface === "model"
+  ? `maquette · niv. ${p.level} · ${p.face} · ${p.p.map((v) => v.toFixed(1)).join(" ")}`
+  : `${SURFACES[p.surface].short.toLowerCase()} · ${p.zone || "hors zone"} · x ${p.x.toFixed(2)} y ${p.y.toFixed(2)}`);
+
+/* ------------------------------------------------------------- the stage */
+function paintTabs() {
+  document.getElementById("tabs").innerHTML = Object.entries(SURFACES).map(([k, s]) => {
+    const n = forSurface(k).length;
+    return `<button class="tab ${k === S.surface ? "on" : ""}" data-surface="${k}">
+      ${icon(s.glyph)}${s.short}${n ? `<span class="cnt">${n}</span>` : ""}</button>`;
+  }).join("") + `<span class="r">${SURFACES[S.surface].sheet}</span>`;
+}
+
+function pinHtml(p, i, left, top) {
+  const lbl = p.txt.length > 30 ? `${p.txt.slice(0, 30)}…` : p.txt;
+  return `<div class="pin ${p.scope === "equipe" ? "team" : ""} ${p.id === S.sel ? "sel" : ""} ${p.done ? "done" : ""}"
+      data-pin="${p.id}" style="left:${left};top:${top}">
+    <div class="num"><span>${p.scope === "equipe" ? icon("lock") : i}</span></div>
+    <div class="lbl">${lbl}</div></div>`;
+}
+
+function paintStage() {
+  const stage = document.getElementById("stage");
+  const s = SURFACES[S.surface];
+  if (S.surface === "model") {
+    if (!stage.querySelector("canvas")) {
+      stage.innerHTML = `<canvas id="mcanvas"></canvas><div class="pins" id="mpins"></div>
+        <div class="load" id="mload">la maquette se charge…</div>
+        <div class="hint">cliquez une surface du bâtiment — l'épingle garde le point dans le modèle, pas sur l'image</div>`;
+      mountModel();
+    }
+    paintModelPins(true);
+    return;
+  }
+  const list = forSurface(S.surface);
+  stage.innerHTML = `<img src="${s.src}" alt="">
+    <div class="pins">${list.map((p, i) => pinHtml(p, i + 1, `${(p.x * 100).toFixed(2)}%`, `${(p.y * 100).toFixed(2)}%`)).join("")}
+      ${S.pending && S.pending.surface === S.surface
+        ? `<div class="pin ${S.scope === "equipe" ? "team" : ""} sel" style="left:${(S.pending.x * 100).toFixed(2)}%;top:${(S.pending.y * 100).toFixed(2)}%">
+            <div class="num"><span>·</span></div></div>` : ""}</div>
+    <div class="hint">cliquez le dessin pour poser une épingle — elle est enregistrée en 0–1 sur la feuille</div>`;
+  // The sheet is letterboxed inside the pane, and 0–1 means 0–1 of the
+  // sheet: the pin layer is laid over the drawn image, not over the pane,
+  // or every pin would drift when the pane changes shape.
+  const img = stage.querySelector("img");
+  const fit = () => placeSheet(stage, img);
+  img.complete ? fit() : img.addEventListener("load", fit, { once: true });
+}
+
+// The rectangle the image actually occupies under object-fit: contain.
+function sheetBox(stage, img) {
+  const r = stage.getBoundingClientRect();
+  const nw = img.naturalWidth || 1, nh = img.naturalHeight || 1;
+  const k = Math.min(r.width / nw, r.height / nh);
+  const w = nw * k, h = nh * k;
+  return { left: (r.width - w) / 2, top: (r.height - h) / 2, width: w, height: h };
+}
+function placeSheet(stage, img) {
+  const b = sheetBox(stage, img);
+  const layer = stage.querySelector(".pins");
+  if (!layer) return;
+  Object.assign(layer.style, { left: `${b.left}px`, top: `${b.top}px`,
+    width: `${b.width}px`, height: `${b.height}px`, right: "auto", bottom: "auto" });
+}
+
+function paintCompose() {
+  const el = document.getElementById("compose");
+  const where = S.pending
+    ? anchorText({ ...S.pending, surface: S.pending.surface })
+    : "aucun point — cliquez d'abord le dessin";
+  const team = S.scope === "equipe";
+  el.innerHTML = `<div class="anch">${icon(S.pending ? "map-pin" : "circle")}${where}</div>
+    <textarea data-draft placeholder="${team
+      ? "Note d'atelier — visible par l'équipe seulement"
+      : "Épingle partagée — visible par tous ceux qui ont le lien"}">${S.draft}</textarea>
+    <div class="col">
+      <button class="btn solid" data-post ${S.pending ? "" : "disabled"}
+        style="${team ? "background:var(--bleu);border-color:var(--bleu)" : ""}">
+        ${icon(team ? "lock" : "send")}${team ? "Garder pour l'atelier" : "Poser l'épingle"}</button>
+      <span style="font-size:11px;color:var(--ink-3)">${team
+        ? "l'invité ne la verra jamais, même par le lien"
+        : "visible dans le lien partagé"}</span>
+    </div>`;
+}
+
+/* --------------------------------------------------------- the four ways */
+const thread = (p) => `<button class="thread ${p.scope === "equipe" ? "team" : ""} ${p.id === S.sel ? "sel" : ""} ${p.done ? "done" : ""}"
+    data-go="${p.id}">
+  <div class="who">${icon(p.scope === "equipe" ? "lock" : "circle")}<b>${p.who}</b><span class="when">${p.when}</span></div>
+  <div class="txt">${p.txt}</div>
+  <div class="anch">${icon(SURFACES[p.surface].glyph)}${anchorText(p)}</div></button>`;
+
+function wayPanel() {
+  const t = S.tab.panel;
+  const list = visible().filter((p) => (t === "equipe" ? p.scope === "equipe" : p.scope === "partage"));
+  const nTeam = visible().filter((p) => p.scope === "equipe").length;
+  const nShare = visible().filter((p) => p.scope === "partage").length;
+  return `<div class="frame panel">
+    <div class="shade">Le dessin reste entier: le volet prend sa propre largeur et ne couvre jamais une ligne.
+      Les épingles de l'atelier ci-dessus alimentent cette liste.</div>
+    <div class="side">
+      <div class="ptabs">
+        <button data-pt="partage" class="${t === "partage" ? "on" : ""}">${icon("users")}Partagées <b>${nShare}</b></button>
+        ${S.as === "equipe" ? `<button data-pt="equipe" class="${t === "equipe" ? "on" : ""}">${icon("lock")}Atelier <b>${nTeam}</b></button>` : ""}
+      </div>
+      <div class="scroll">${list.length ? list.map(thread).join("") : `<div class="empty">Rien ici.</div>`}</div>
+    </div></div>`;
+}
+
+function wayDrawer() {
+  const groups = Object.entries(SURFACES).map(([k, s]) => {
+    const list = forSurface(k);
+    if (!list.length) return "";
+    return `<div class="grp">
+      <div class="ghdr" data-grp="${k}">${icon(S.open[k] ? "chevron-down" : "circle")}${icon(s.glyph)}${s.name}
+        <span class="c">${list.length} épingle${list.length > 1 ? "s" : ""}${S.as === "equipe" && list.some((p) => p.scope === "equipe") ? ` · ${list.filter((p) => p.scope === "equipe").length} d'atelier` : ""}</span></div>
+      ${S.open[k] ? `<div class="cols">${list.map(thread).join("")}</div>` : ""}</div>`;
+  }).join("");
+  return `<div class="frame drawer">
+    <div class="hdr">${icon("layers")}Épingles du projet
+      <span class="r">rangées par surface, pas par date</span></div>
+    ${groups || `<div class="empty">Aucune épingle.</div>`}</div>`;
+}
+
+function wayRail() {
+  const nodes = [`<div class="node ${S.railNode === "all" ? "on" : ""}" data-node="all">${icon("pin")}Toutes les épingles
+      <span class="c">${visible().length}</span></div>`];
+  for (const [k, s] of Object.entries(SURFACES)) {
+    const list = forSurface(k);
+    nodes.push(`<div class="node kid ${S.railNode === k ? "on" : ""}" data-node="${k}">${icon(s.glyph)}${s.short}
+      <span class="c">${list.length}</span></div>`);
+  }
+  if (S.as === "equipe") {
+    nodes.push(`<div class="node team ${S.railNode === "equipe" ? "on" : ""}" data-node="equipe">${icon("lock")}Notes d'atelier
+      <span class="c">${hidden()}</span></div>`);
+  }
+  const list = S.railNode === "all" ? visible()
+    : S.railNode === "equipe" ? visible().filter((p) => p.scope === "equipe")
+    : forSurface(S.railNode);
+  return `<div class="frame rail">
+    <div class="tree">${nodes.join("")}</div>
+    <div class="body">
+      <div class="hdr">${icon("message-square")}${S.railNode === "all" ? "Toutes" : S.railNode === "equipe" ? "Notes d'atelier" : SURFACES[S.railNode].name}
+        <span class="r">${list.length}</span></div>
+      ${list.length ? list.map(thread).join("") : `<div class="empty">Rien sous ce calque.</div>`}</div></div>`;
+}
+
+const UNITS = ["501", "503", "507", "510", "512"];
+function wayCards() {
+  const onUnit = (u) => visible().filter((p) => (p.zone || "").includes(u));
+  const list = onUnit(S.unit);
+  return `<div class="frame">
+    <div class="hdr">${icon("layers")}Unités · niveau 5<span class="r">la pastille est sur la carte, le fil est dessous</span></div>
+    <div class="cards">${UNITS.map((u) => {
+      const ps = onUnit(u);
+      return `<div class="card ${u === S.unit ? "on" : ""}" data-unit="${u}"><b>${u}</b>
+        <div class="m">${u === "510" ? "5½ · 1 496 pi²" : u === "512" ? "5½ · 1 424 pi²" : "4½ · 1 152 pi²"}</div>
+        <div class="dots">${ps.map((p) => `<span class="dot ${p.scope === "equipe" ? "team" : ""}"></span>`).join("")}</div></div>`;
+    }).join("")}</div>
+    <div class="hdr" style="border-top:1px solid var(--line-2)">${icon("message-square")}Unité ${S.unit}<span class="r">${list.length}</span></div>
+    ${list.length ? list.map(thread).join("") : `<div class="empty">Aucune note sur cette unité. Les épingles posées hors d'une unité restent sur la feuille.</div>`}</div>`;
+}
+
+const WAYS = [
+  { name: "Volet latéral, deux onglets",
+    note: "Le dépôt est une colonne à droite du dessin, avec deux onglets: ce qui est partagé, et ce qui reste à l'atelier. L'onglet « Atelier » n'existe pas dans la vue invité — il n'est pas vidé, il n'est pas rendu. C'est la façon la plus courte à comprendre, et la seule où l'on voit les deux publics côte à côte sans les confondre.",
+    html: wayPanel },
+  { name: "Tiroir sous les dessins, rangé par surface",
+    note: "Le dépôt est sous les deux panneaux, en pleine largeur, groupé par dessin: plan d'unités, arpenteur, paysage, maquette. On lit « trois choses ouvertes sur le plan d'arpenteur » sans cliquer. Le coût: le tiroir mange de la hauteur, et sur un portable il ferme la vue du plan.",
+    html: wayDrawer },
+  { name: "Un calque dans le rail de gauche",
+    note: "Les épingles deviennent un calque comme les autres: on l'allume, on l'éteint, on l'ouvre par surface. Les notes d'atelier sont un calque séparé, visible seulement par l'équipe. Avantage: rien de neuf à apprendre. Risque: un calque éteint fait disparaître des questions ouvertes sans le dire.",
+    html: wayRail },
+  { name: "Sur la carte de l'unité",
+    note: "Pas de dépôt séparé: la pastille est sur l'unité, le fil est dans l'inspecteur. La note survit à un redessin complet de l'étage tant que le numéro tient. Mais une épingle posée sur l'arpenteur ou dans la cour n'appartient à aucune unité: il faut un deuxième endroit pour elle, donc ce choix ne peut pas être le seul.",
+    html: wayCards },
+];
+
+const COST = [
+  ["Volet latéral", "une colonne à droite", "onglet absent en vue invité", "oui, tout de suite", "la plus simple à bâtir"],
+  ["Tiroir par surface", "sous les dessins", "groupe absent en vue invité", "oui, c'est son but", "moyenne"],
+  ["Calque du rail", "le rail de gauche", "calque absent en vue invité", "oui, par calque", "moyenne"],
+  ["Carte de l'unité", "la liste et l'inspecteur", "pastille absente en vue invité", "non, l'unité seulement", "déjà à moitié bâtie"],
+];
+
+/* ------------------------------------------------------------- the record */
+function paintRecord() {
+  const last = S.pins[S.pins.length - 1];
+  document.getElementById("recIcon").innerHTML = icon("database");
+  document.getElementById("rec").innerHTML =
+    `<b>${S.pins.length} épingle(s) · ${hidden()} interne(s) · lues comme ${S.as === "equipe" ? "l'atelier" : "l'invité"}</b>\n\n`
+    + `// la dernière écrite, telle qu'elle est enregistrée\n`
+    + JSON.stringify(last, null, 2).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]))
+    + `\n\n// ce que le lien partagé renvoie: les notes d'atelier ne sont pas filtrées à l'affichage,\n`
+    + `// elles ne quittent pas le dépôt.\n`
+    + `GET /partage/BAL3 → ${S.pins.filter((p) => p.scope === "partage").length} épingle(s)`;
+}
+
+/* ------------------------------------------------------------------ paint */
+function render() {
+  document.body.dataset.as = S.as;
+  paintTabs();
+  paintStage();
+  paintCompose();
+  // The guest is not told how many notes are being kept from them: a count
+  // of hidden things is itself a leak, and an invitation to ask.
+  document.getElementById("tally").textContent = S.as === "invite"
+    ? `${visible().length} épingle(s) · lien partagé`
+    : `${visible().length} lisibles · ${hidden()} notes d'atelier`;
+  document.getElementById("ways").innerHTML = WAYS.map((w, i) => `<section class="way">
+    <div class="cap"><span class="n">Façon ${i + 1}</span><b>${w.name}</b></div>
+    <div class="note">${w.note}</div>${w.html()}</section>`).join("");
+  document.getElementById("cost").innerHTML = `<thead><tr>
+      <th>Façon</th><th>Le dépôt est</th><th>En vue invité</th><th>Porte une épingle hors unité</th><th>Coût</th></tr></thead>
+    <tbody>${COST.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>
+      <td class="${r[3].startsWith("oui") ? "y" : ""}">${r[3]}</td><td>${r[4]}</td></tr>`).join("")}</tbody>`;
+  document.getElementById("verdict").innerHTML = `<b>Ce que je retiendrais:</b> la façon 1 pour le dépôt,
+    la façon 4 par-dessus. Le volet répond à « qu'est-ce qui est ouvert », la pastille d'unité répond à
+    « qu'est-ce qui touche le 507 », et les deux lisent le même dépôt. Le tiroir et le calque sont le même
+    contenu rangé autrement; ils coûtent une deuxième liste à tenir à jour pour un gain de lecture.
+    <b>Sur la séparation:</b> l'épingle naît avec son public et ne change pas de camp — un bouton
+    « rendre partagée » existe, mais il est explicite et laisse une trace, parce qu'une note d'atelier
+    qui devient publique par accident est pire qu'une note jamais écrite.`;
+  paintRecord();
+}
+
+/* ------------------------------------------------------------ interaction */
+document.addEventListener("click", (e) => {
+  const scope = e.target.closest("[data-scope]");
+  if (scope) { S.scope = scope.dataset.scope;
+    document.querySelectorAll("#scope button").forEach((b) => b.classList.toggle("on", b === scope));
+    paintCompose(); return; }
+  const as = e.target.closest("[data-readas]");
+  if (as) { S.as = as.dataset.readas;
+    // A guest cannot write a studio note, so the pen changes hands with the view.
+    if (S.as === "invite") S.scope = "partage";
+    document.querySelectorAll("#as button").forEach((b) => b.classList.toggle("on", b === as));
+    document.querySelectorAll("#scope button").forEach((b) => b.classList.toggle("on", b.dataset.scope === S.scope));
+    S.sel = null; render(); return; }
+  if (e.target.closest("[data-reset]")) {
+    localStorage.removeItem(KEY); S.pins = load(); S.pending = null; S.draft = ""; render(); return;
+  }
+  const tab = e.target.closest("[data-surface]");
+  if (tab) { S.surface = tab.dataset.surface; S.pending = null; render(); return; }
+  const pin = e.target.closest("[data-pin]");
+  if (pin) { S.sel = +pin.dataset.pin; render(); return; }
+  const go = e.target.closest("[data-go]");
+  if (go) {
+    const p = S.pins.find((q) => q.id === +go.dataset.go);
+    if (p) { S.sel = p.id; S.surface = p.surface; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    return;
+  }
+  const pt = e.target.closest("[data-pt]");
+  if (pt) { S.tab.panel = pt.dataset.pt; render(); return; }
+  const grp = e.target.closest("[data-grp]");
+  if (grp) { S.open[grp.dataset.grp] = !S.open[grp.dataset.grp]; render(); return; }
+  const node = e.target.closest("[data-node]");
+  if (node) { S.railNode = node.dataset.node; render(); return; }
+  const unit = e.target.closest("[data-unit]");
+  if (unit) { S.unit = unit.dataset.unit; render(); return; }
+  if (e.target.closest("[data-post]")) { post(); return; }
+  // a click on a flat drawing puts the point down; the sentence comes after
+  const stage = e.target.closest("#stage");
+  if (stage && S.surface !== "model") {
+    const r = stage.getBoundingClientRect();
+    const b = sheetBox(stage, stage.querySelector("img"));
+    const x = (e.clientX - r.left - b.left) / b.width, y = (e.clientY - r.top - b.top) / b.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;   // the margin is not the drawing
+    S.pending = { surface: S.surface, x, y, zone: hitZone(S.surface, x, y) };
+    S.sel = null;
+    paintStage(); paintCompose();
+  }
+});
+document.addEventListener("input", (e) => { if (e.target.matches("[data-draft]")) S.draft = e.target.value; });
+
+function post() {
+  if (!S.pending) return;
+  const txt = S.draft.trim() || (S.scope === "equipe"
+    ? "Note d'atelier — à écrire." : "Question posée — à écrire.");
+  S.pins.push({ id: nextId(), scope: S.scope, who: S.scope === "equipe" ? "Vous" : "Vous (partagé)",
+    when: "à l'instant", done: false, txt, ...S.pending });
+  S.sel = S.pins[S.pins.length - 1].id;
+  S.pending = null; S.draft = "";
+  save(); render();
+}
+
+/* -------------------------------------------------------------- the model
+   A pin on the model cannot be a point on a picture: the picture turns. What
+   is kept is the world point the ray hit, plus what that point belongs to —
+   the level, read from the same elevation table the unit selection uses, and
+   the façade, read from the face normal. The markers are projected every
+   frame, so they stay stuck to the building as it is orbited. */
+let mdl = null;
+function mountModel() {
+  const canvas = document.getElementById("mcanvas");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color("#f4f4f4");
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa0a6, 2.3));
+  const key = new THREE.DirectionalLight(0xffffff, 1.5);
+  key.position.set(4, 8, 6);
+  scene.add(key);
+  const camera = new THREE.PerspectiveCamera(38, 1, .05, 400);
+  const controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.enablePan = false;
+  mdl = { renderer, scene, camera, controls, root: null, center: null };
+
+  new GLTFLoader().load("assets/building.glb", (gltf) => {
+    const root = gltf.scene;
+    const box = new THREE.Box3().setFromObject(root);
+    const center = box.getCenter(new THREE.Vector3());
+    root.position.sub(center);
+    scene.add(root);
+    const radius = box.getSize(new THREE.Vector3()).length() / 2;
+    camera.position.set(radius * .82, radius * .46, radius * .92);
+    camera.far = radius * 12;
+    camera.updateProjectionMatrix();
+    controls.target.set(0, 0, 0);
+    controls.update();
+    mdl.root = root; mdl.center = center; mdl.radius = radius;
+    document.getElementById("mload")?.remove();
+  }, undefined, () => {
+    const l = document.getElementById("mload");
+    if (l) l.textContent = "la maquette n'a pas pu être lue";
+  });
+
+  const resize = () => {
+    const r = canvas.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return;
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / r.height;
+    camera.updateProjectionMatrix();
+  };
+  resize();
+  new ResizeObserver(resize).observe(canvas);
+
+  renderer.setAnimationLoop(() => {
+    if (!canvas.isConnected) return;
+    controls.update();
+    renderer.render(scene, camera);
+    paintModelPins();
+  });
+
+  // The ray is cast on a click that did not drag: an orbit is not a pin.
+  let down = null;
+  canvas.addEventListener("pointerdown", (e) => { down = [e.clientX, e.clientY]; });
+  canvas.addEventListener("pointerup", (e) => {
+    if (!down || !mdl.root) return;
+    const moved = Math.hypot(e.clientX - down[0], e.clientY - down[1]);
+    down = null;
+    if (moved > 4) return;
+    const r = canvas.getBoundingClientRect();
+    const ndc = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1,
+      -((e.clientY - r.top) / r.height) * 2 + 1);
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(ndc, camera);
+    const hit = ray.intersectObject(mdl.root, true)[0];
+    if (!hit) return;
+    const n = normalOf(hit);
+    S.pending = { surface: "model", p: [hit.point.x, hit.point.y, hit.point.z],
+      n: [n.x, n.y, n.z], level: levelAt(hit.point.y), face: faceName(n) };
+    S.sel = null;
+    paintCompose();
+    paintModelPins(true);
+  });
+}
+// The source elevations are measured from the model's own window bands, so a
+// world Y turned back into source space names the floor without guessing.
+function levelAt(worldY) {
+  const srcY = worldY + (mdl?.center?.y || 0);
+  let level = 1;
+  ELEVATIONS.forEach((e, i) => { if (srcY >= e - .1) level = Math.min(i + 1, 8); });
+  return level;
+}
+function normalOf(hit) {
+  return hit.face
+    ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld)
+    : new THREE.Vector3(0, 1, 0);
+}
+function faceName(n) {
+  const ax = Math.abs(n.x), ay = Math.abs(n.y), az = Math.abs(n.z);
+  if (ay > ax && ay > az) return n.y > 0 ? "toiture" : "sous-face";
+  // North is -Z in this export, the same assumption the north mark uses.
+  if (az > ax) return n.z > 0 ? "façade sud" : "façade nord";
+  return n.x > 0 ? "façade est" : "façade ouest";
+}
+const vTmp = new THREE.Vector3();
+const nTmp = new THREE.Vector3();
+const dTmp = new THREE.Vector3();
+let pinSig = "";
+function paintModelPins(force) {
+  const layer = document.getElementById("mpins");
+  if (!layer || !mdl?.root) return;
+  const canvas = mdl.renderer.domElement;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  const list = forSurface("model");
+  // Rebuilding the markers on every frame would rewrite the DOM sixty times
+  // a second for a building that is not moving. The camera matrix plus the
+  // list is the whole input, so it is also the whole cache key.
+  const sig = `${mdl.camera.matrixWorldInverse.elements.map((v) => v.toFixed(3)).join()}|${list.map((p) => p.id).join()}|${S.sel}|${S.pending ? "p" : ""}|${w}x${h}`;
+  if (!force && sig === pinSig) return;
+  pinSig = sig;
+  const items = [...list.map((p, i) => ({ p, i: i + 1 })),
+    ...(S.pending?.surface === "model" ? [{ p: { ...S.pending, id: 0, scope: S.scope, txt: "" }, i: "·" }] : [])];
+  layer.innerHTML = items.map(({ p, i }) => {
+    vTmp.set(p.p[0], p.p[1], p.p[2]);
+    // A pin stuck to the far side of the building is not hidden — it is
+    // dimmed, so the count on the tab and the count on screen still agree.
+    const back = p.n
+      ? dTmp.copy(vTmp).sub(mdl.camera.position).normalize()
+          .dot(nTmp.set(p.n[0], p.n[1], p.n[2])) > 0
+      : false;
+    vTmp.project(mdl.camera);
+    if (vTmp.z > 1) return "";
+    const left = `${((vTmp.x * .5 + .5) * w).toFixed(1)}px`;
+    const top = `${((-vTmp.y * .5 + .5) * h).toFixed(1)}px`;
+    const html = p.id ? pinHtml(p, i, left, top)
+      : `<div class="pin ${S.scope === "equipe" ? "team" : ""} sel" style="left:${left};top:${top}">
+           <div class="num"><span>·</span></div></div>`;
+    return back ? html.replace('class="pin ', 'class="pin back ') : html;
+  }).join("");
+}
+
+// A narrower window redraws the sheet smaller; the pins are laid over the
+// drawn image, so the layer has to be measured again.
+window.addEventListener("resize", () => { if (S.surface !== "model") paintStage(); });
+
+sprite();
+render();
+</script>
+</body>
+</html>
