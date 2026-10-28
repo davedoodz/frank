@@ -29,6 +29,10 @@
      use. They are tokens because dark mode is only these turned over. */
   --card:#fff; --on-hi:#fff;
   --wash:rgba(17,17,18,.055); --wash-2:rgba(17,17,18,.085); --wash-3:rgba(17,17,18,.11);
+  /* The office green, used for one thing only: the level being read. It is
+     the same green the black chrome already wore, lifted to the root so the
+     level row carries it under either chrome. */
+  --vert:#c3e05a; --vert-ink:#2f3a05;
   --gap:10px; --pad:12px; --r:6px;
 }
 /* Dark mode is the same screen with the ramp turned over: same spacing,
@@ -107,6 +111,21 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
   scrollbar-width:none}
 .tabs .views::-webkit-scrollbar{display:none}
 .tabs .views button{flex:0 0 auto}
+
+/* ------------------------------------------------- two rows, and no rail
+   Row one is where one is and which screen is open. Row two is what that
+   screen asks for — here, which level is being read. The dependency is
+   stated by the order alone: no group boxes, no captions, nothing on the
+   left edge. The level row is the only place the office green appears. */
+.tabs.lvl{height:32px;background:var(--fill-2);border-top:1px solid var(--line-2);
+  border-bottom:1px solid var(--line-2)}
+.tabs.lvl .views{flex:1}
+.tabs.lvl button{font-size:12px;padding:4px 9px}
+.tabs.lvl button[aria-current="true"]{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.frame[data-chrome="black"] .tabs.lvl{background:#1c1c1f;border-color:#2b2b30}
+.frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.5)}
+.frame[data-chrome="black"] .tabs.lvl button:hover{color:rgba(255,255,255,.8)}
+.frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{color:var(--vert-ink)}
 
 /* rail with the label under the icon */
 .rail.stack{align-items:stretch;padding:10px 6px}
@@ -642,7 +661,7 @@ const V = {
      and white until someone asks a question of it. Keyed by TYPOS, written
      out here because TYPOS is declared further down the file. */
   typo: { "3½": false, "4½": false, "5½": false },
-  nav: { fidelity: "inherit", layout: "Icon rail + tabs" },
+  nav: { fidelity: "inherit", layout: "Two rows, no rail" },
   header: { fidelity: "inherit", layout: "Title + actions" },
   list: { fidelity: "inherit", layout: "Vertical list" },
   content: { fidelity: "inherit", layout: "Two panes" },
@@ -1287,7 +1306,10 @@ function navLabel(name, i) {
 }
 
 const railIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Rail only";
-const tabIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Tabs only";
+/* With no rail to carry them, the glyphs belong to the tabs: "Rail only"
+   would otherwise leave a row of bare words where the icon was promised. */
+const tabIcons = () => V.nav.layout === "Two rows, no rail"
+  || V.nav.icons === "Rail and tabs" || V.nav.icons === "Tabs only";
 
 /* ------------------------------------------------------------ the home
    Open a project that is running, or start one. The layouts differ only in
@@ -1389,7 +1411,8 @@ const HOMES = {
 function navHTML() {
   if (SCREENS[V.screen].index) return "";
   const mode = V.nav.layout;
-  if (mode === "Top bar only" || mode === "Tabs only, no rail") return "";
+  if (mode === "Top bar only" || mode === "Tabs only, no rail"
+    || mode === "Two rows, no rail") return "";
   const sections = mode === "Wide rail with sections";
   const wide = mode === "Wide rail with labels" || sections;
   const stack = mode === "Rail with labels under icons";
@@ -1438,6 +1461,8 @@ function tabsHTML() {
 
   let items;
   const views = CONTEXT[V.screen] || [];
+  const viewBtn = (t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen)}" title="${t}">
+    <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`;
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
   const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
@@ -1457,7 +1482,7 @@ function tabsHTML() {
     items = `${back}${icon("chevron-right")}
       <span class="crumb on hi">${V.project}</span>
       <span class="sp"></span>`;
-  } else if (top || mode === "Tabs only, no rail") {
+  } else if (top || mode === "Tabs only, no rail" || mode === "Two rows, no rail") {
     items = `${back}${icon("chevron-right")}<span class="crumb on hi">${V.project}</span>
       <span class="div"></span><div class="views">${names.map(tab).join("")}</div><span class="sp"></span>`;
   } else {
@@ -1466,16 +1491,23 @@ function tabsHTML() {
        views scroll under it rather than pushing it off the strip. */
     items = `${back}${icon("chevron-right")}<span class="crumb on hi">${V.project}</span>
       <span class="div"></span>
-      <div class="views">${views.map((t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen)}" title="${t}">
-        <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`).join("")}</div>
+      <div class="views">${views.map(viewBtn).join("")}</div>
       <span class="sp"></span>`;
   }
+  /* The second row only exists when the screen has something to ask for.
+     Aperçu and Fichiers keep the single row, and the drawing gets the
+     thirty-two pixels back. */
+  const row2 = mode === "Two rows, no rail" && views.length
+    ? `<div class="tabs lvl rg ${solo("nav")}" data-rg="vues" data-fi="${fiOf("nav")}"
+         data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}">
+        <div class="views">${views.map(viewBtn).join("")}</div></div>`
+    : "";
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
        data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
     ${items}
-  </div>`;
+  </div>${row2}`;
 }
 
 function headerHTML() {
@@ -2108,7 +2140,7 @@ function render() {
   const cols = [hasList ? "260px" : null, "1fr", hasInsp ? "340px" : null].filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
-    : { "Top bar only": "top", "Tabs only, no rail": "top",
+    : { "Top bar only": "top", "Tabs only, no rail": "top", "Two rows, no rail": "top",
         "Wide rail with labels": "wide", "Wide rail with sections": "wide",
         "Rail with labels under icons": "stack" }[V.nav.layout] || "rail";
 
@@ -2478,7 +2510,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
      screen it drives is in French. SCREEN_FR maps the two. */
   screen: sel(Object.keys(SCREEN_FR)),
   fidelity: sel(["high", "low"]),
-  regionLabels: true,
+  /* The region tags are a debugging overlay, not a default state: the panel
+     opens on the screen as it is meant to be read. */
+  regionLabels: false,
   journeySteps: true,
   density: sel(["comfortable", "compact"]),
   shell: sel(["Inset card", "Flat"]),
@@ -2516,7 +2550,7 @@ const dial = DialKit.createDialKit("Wireframe C3", {
       landscapingX: [0, -40, 40, .5],
       landscapingY: [0, -40, 40, .5] } },
   nav: { _collapsed: true, fidelity: FI,
-    layout: sel(["Icon rail + tabs", "Top bar only", "Wide rail with labels",
+    layout: sel(["Two rows, no rail", "Icon rail + tabs", "Top bar only", "Wide rail with labels",
       "Wide rail with sections", "Rail with labels under icons", "Rail only, no tabs",
       "Tabs only, no rail", "Rail + view menu", "Rail + breadcrumb"]),
     icons: sel(["Rail only", "Tabs only", "Rail and tabs", "None"]),
@@ -2528,7 +2562,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
   inspector: { _collapsed: true, fidelity: FI, layout: sel(["Right panel", "Bottom sheet", "Overlay drawer", "Hidden"]) },
   footer: { _collapsed: true, fidelity: FI, layout: sel(["Impact strip", "Hidden"]) },
-}, { id: "wireframe-c3", persist: true });;;
+/* The id carries the saved panel. It is bumped with the navigation change,
+   because a panel saved before it would reopen on the old rail. */
+}, { id: "wireframe-c3-r2", persist: true });;;
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
 
