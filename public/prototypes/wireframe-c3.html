@@ -831,7 +831,7 @@ const V = {
   typo: { "3½": false, "4½": false, "5½": false },
   nav: { fidelity: "inherit", layout: "Two rows, no rail" },
   header: { fidelity: "inherit", layout: "Title + actions" },
-  list: { fidelity: "inherit", layout: "Vertical list" },
+  list: { fidelity: "inherit", layout: "Card grid" },
   content: { fidelity: "inherit", layout: "Two panes" },
   /* Which typologies are asked for. None asked for is the plain black and
      white plan, which is how the drawing is read by default. */
@@ -3335,13 +3335,15 @@ const dial = DialKit.createDialKit("Wireframe C3", {
     tabStyle: sel(["Plain", "Underline", "Pills", "Segmented", "Top accent", "Boxed"]),
     tabAlign: sel(["Left", "Centred", "Spread"]) },
   header: { _collapsed: true, fidelity: FI, layout: sel(["Title + actions", "Title only", "Title + metrics"]) },
-  list: { _collapsed: true, fidelity: FI, layout: sel(["Vertical list", "Card grid", "Filter bar only", "Hidden"]) },
+  list: { _collapsed: true, fidelity: FI, layout: sel(["Card grid", "Vertical list", "Filter bar only", "Hidden"]) },
   content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
   inspector: { _collapsed: true, fidelity: FI, layout: sel(["Right panel", "Bottom sheet", "Overlay drawer", "Hidden"]) },
   footer: { _collapsed: true, fidelity: FI, layout: sel(["Impact strip", "Hidden"]) },
-/* The id carries the saved panel. It is bumped with the navigation change,
-   because a panel saved before it would reopen on the old rail. */
-}, { id: "wireframe-c3-r2", persist: true });;;
+/* The id carries the saved panel. It is bumped whenever a default changes,
+   because a panel saved before it would keep reopening on the old one — the
+   dark bar and the card grid would never be seen by anyone who had already
+   opened the file. r3: dark chrome by default, unit cards by default. */
+}, { id: "wireframe-c3-r3", persist: true });
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
 
