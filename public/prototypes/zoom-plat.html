@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zoom à plat, et le plan dans le coin — six commandes, trois aperçus</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#a4a4a4;
+  --line:#d2d2d2; --line-2:#e4e4e4; --fill:#f2f2f2; --fill-2:#f8f8f8;
+  --page:#f2f2f2; --paper:#fff; --go:#8ba00f;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.top{max-width:1560px;margin:0 auto;padding:20px 20px 0;display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.top h1{font-size:14px;font-weight:600}
+.top p{font-size:12px;color:var(--ink-2);max-width:60ch}
+.switch{margin-left:auto;display:flex;align-items:center;gap:7px}
+.switch span{font-size:11.5px;color:var(--ink-2)}
+.switch button{font-size:12px;border:1px solid var(--line-2);background:var(--paper);
+  border-radius:0;padding:5px 11px;cursor:pointer;color:var(--ink-2)}
+.switch button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:500}
+
+.wrap{max-width:1560px;margin:16px auto 70px;padding:0 20px;display:flex;flex-direction:column;gap:18px}
+.card{background:var(--paper);border:1px solid var(--line-2)}
+.card > h2{font-size:12.5px;font-weight:600;padding:12px 14px 0;display:flex;gap:8px;align-items:baseline}
+.card > h2 span{font-family:var(--mono);color:var(--ink-3);font-size:11px}
+.card > .say{font-size:11.5px;color:var(--ink-2);padding:3px 14px 11px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-2);
+  border-top:1px solid var(--line-2)}
+@media (max-width:1040px){.pair{grid-template-columns:1fr}}
+.pane{background:var(--paper);display:flex;flex-direction:column;min-width:0}
+.ph{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid var(--line-2);
+  font-size:12px;color:var(--ink-2);background:var(--fill-2)}
+.ph .nm{color:var(--ink);font-weight:500}
+.ph .sp{flex:1}
+
+.stage{position:relative;height:330px;overflow:hidden;background:#fff;cursor:grab;
+  touch-action:none;user-select:none}
+.stage.drag{cursor:grabbing}
+.sheet{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+.sheet img{display:block;max-width:none}
+
+/* flat parts, shared ---------------------------------------------------- */
+.b{height:28px;min-width:28px;display:flex;align-items:center;justify-content:center;
+  border:0;background:none;color:var(--ink-2);cursor:pointer;padding:0 6px;font:inherit;font-size:12px}
+.b:hover{background:var(--fill);color:var(--ink)}
+.b svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.val{font-family:var(--mono);font-size:11.5px;color:var(--ink);min-width:44px;text-align:center}
+.vr{width:1px;align-self:stretch;background:var(--line-2)}
+
+/* a flat range: a rail, a square grip, no shadow ------------------------ */
+input[type=range]{appearance:none;-webkit-appearance:none;background:none;margin:0;
+  flex:1;min-width:60px;height:22px;cursor:ew-resize}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:0}
+input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:10px;height:18px;
+  background:var(--ink);border:0;border-radius:0;margin-top:-7.5px}
+input[type=range].v{writing-mode:vertical-lr;direction:rtl;width:22px;height:auto;flex:1;cursor:ns-resize}
+input[type=range].v::-webkit-slider-runnable-track{width:3px;height:auto}
+input[type=range].v::-webkit-slider-thumb{width:18px;height:10px;margin-top:0;margin-left:-7.5px}
+
+/* 1 — the full-width foot strip ---------------------------------------- */
+.strip{display:flex;align-items:center;gap:0;height:34px;border-top:1px solid var(--line-2);
+  background:var(--paper)}
+.strip > *{flex:0 0 auto}
+.strip input[type=range]{flex:1;margin:0 10px}
+
+/* 2 — stepped rail with named stops ------------------------------------ */
+.steps{border-top:1px solid var(--line-2);background:var(--paper);padding:7px 10px 9px;
+  display:flex;align-items:center;gap:10px}
+.track{position:relative;flex:1;height:26px;cursor:pointer}
+.track .line{position:absolute;left:0;right:0;top:9px;height:3px;background:var(--line)}
+.track .fill{position:absolute;left:0;top:9px;height:3px;background:var(--ink)}
+.track .tick{position:absolute;top:5px;width:1px;height:11px;background:var(--line)}
+.track .lab{position:absolute;top:16px;transform:translateX(-50%);font-family:var(--mono);
+  font-size:9px;color:var(--ink-3)}
+.track .grip{position:absolute;top:3px;width:10px;height:15px;background:var(--ink);
+  transform:translateX(-50%)}
+
+/* 3 — flat column on the right edge ------------------------------------ */
+.colbar{position:absolute;right:0;top:0;bottom:0;width:38px;background:var(--paper);
+  border-left:1px solid var(--line-2);display:flex;flex-direction:column;align-items:center;
+  padding:6px 0;gap:6px;z-index:3}
+.colbar .val{min-width:0;font-size:10.5px;writing-mode:horizontal-tb}
+
+/* 4 — named stops, no slider at all ------------------------------------ */
+.segs{display:flex;height:32px;border-top:1px solid var(--line-2);background:var(--paper)}
+.segs button{flex:1;border:0;border-right:1px solid var(--line-2);background:none;
+  font:inherit;font-size:11.5px;color:var(--ink-2);cursor:pointer}
+.segs button:last-child{border-right:0}
+.segs button[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+/* 5 — a ruler under the drawing ---------------------------------------- */
+.ruler{position:relative;height:40px;border-top:1px solid var(--line-2);background:var(--paper);
+  cursor:ew-resize;padding:0 10px}
+.ruler .t{position:absolute;bottom:13px;width:1px;background:var(--line-2)}
+.ruler .t.maj{background:var(--line);}
+.ruler .n{position:absolute;bottom:2px;transform:translateX(-50%);font-family:var(--mono);
+  font-size:9px;color:var(--ink-3)}
+.ruler .cur{position:absolute;top:4px;bottom:11px;width:2px;background:var(--ink)}
+.ruler .bub{position:absolute;top:3px;transform:translateX(-50%);font-family:var(--mono);
+  font-size:10.5px;background:var(--ink);color:#fff;padding:1px 5px}
+
+/* 6 — in the header, flat ---------------------------------------------- */
+.ph .inline{display:flex;align-items:center;gap:4px}
+.ph .inline input[type=range]{width:96px;flex:0 0 96px}
+
+/* the corner view ------------------------------------------------------- */
+.mini{position:absolute;right:10px;bottom:10px;z-index:4;background:var(--paper);
+  border:1px solid var(--line);width:132px;user-select:none}
+.mini .mi{position:relative;display:block;cursor:crosshair}
+.mini img{display:block;width:100%;filter:grayscale(1) contrast(.72);opacity:.85}
+.mini .vp{position:absolute;border:1.5px solid var(--ink);background:rgba(27,27,27,.08);
+  cursor:grab}
+.mini .cap{display:flex;align-items:center;gap:5px;border-top:1px solid var(--line-2);
+  padding:3px 5px;font-size:10px;color:var(--ink-3);font-family:var(--mono)}
+.mini .cap .b{height:18px;min-width:18px;padding:0 3px}
+.mini .cap .b svg{width:11px;height:11px}
+/* No frame, no caption — but still a white ground under it, or the drawing
+   behind reads straight through the thumbnail and neither can be read. */
+[data-mini="nu"] .mini{border:0;background:rgba(255,255,255,.92);width:118px}
+[data-mini="nu"] .mini img{opacity:.7}
+[data-mini="nu"] .mini .cap{display:none}
+/* variant: the corner view folds away to a tab, by choice, not by timer */
+[data-mini="repli"] .mini.folded .mi,[data-mini="repli"] .mini.folded .cap .pct{display:none}
+[data-mini="repli"] .mini.folded{width:auto}
+
+/* compare ---------------------------------------------------------------- */
+.score{max-width:1560px;margin:0 auto 70px;padding:0 20px}
+table{border-collapse:collapse;width:100%;font-size:12px;background:var(--paper);border:1px solid var(--line-2)}
+th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line-2)}
+th{font-weight:500;color:var(--ink-2);background:var(--fill-2);font-size:11.5px}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--mono);color:var(--ink-2)}
+</style>
+</head>
+<body data-mini="cadre">
+
+<div class="top">
+  <div>
+    <h1>Zoom à plat, et le dessin entier dans le coin</h1>
+    <p>Six commandes, toujours visibles, sans verre ni ombre. Chaque volet porte en bas à droite le dessin complet avec le rectangle de ce qui est à l'écran: on peut le glisser pour se déplacer. Molette pour zoomer, glissé pour déplacer, double-clic pour tout revoir.</p>
+  </div>
+  <div class="switch">
+    <span>Aperçu du coin</span>
+    <button data-mini="cadre" aria-pressed="true">Encadré</button>
+    <button data-mini="nu" aria-pressed="false">Nu</button>
+    <button data-mini="repli" aria-pressed="false">Repliable</button>
+  </div>
+</div>
+
+<div class="wrap" id="wrap"></div>
+
+<div class="score">
+  <table>
+    <tr><th>Commande</th><th>Hauteur prise sous le dessin</th><th>Ce qu'elle dit sans qu'on la touche</th><th>Ce qu'elle coûte</th></tr>
+    <tr><td>1 · Bande au pied</td><td class="n">34 px</td><td>le niveau, les deux cadrages, les deux pas</td><td>une bande pleine largeur sur chaque volet</td></tr>
+    <tr><td>2 · Rail à paliers</td><td class="n">42 px</td><td>les paliers nommés et où l'on est entre eux</td><td>la plus haute des six</td></tr>
+    <tr><td>3 · Colonne au bord</td><td class="n">0 — 38 px à droite</td><td>le niveau, vertical comme le geste</td><td>mange la droite, là où l'aperçu se pose</td></tr>
+    <tr><td>4 · Paliers seuls</td><td class="n">32 px</td><td>les quatre états utiles, rien entre</td><td>pas de réglage fin</td></tr>
+    <tr><td>5 · Règle graduée</td><td class="n">40 px</td><td>l'échelle entière, chiffrée</td><td>demande de viser une graduation</td></tr>
+    <tr><td>6 · Dans l'en-tête</td><td class="n">0</td><td>le niveau, à côté du nom du fichier</td><td>loin de la main quand elle est au centre</td></tr>
+  </table>
+</div>
+
+<script>
+const PLAN = { src: "assets/plan-niveau-2.jpg", w: 2000, h: 1675, label: "Plan 2D", file: "A-209_PLAN_NIVEAU_02 · R04" };
+const MODEL = { src: "assets/baldwin-cover.png", w: 1742, h: 720, label: "Maquette 3D", file: "BAL3_Maquette_R07" };
+const sv = (d) => `<svg viewBox="0 0 24 24">${d}</svg>`;
+const I = {
+  plus: sv('<path d="M12 5v14M5 12h14"/>'),
+  minus: sv('<path d="M5 12h14"/>'),
+  wide: sv('<path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4"/>'),
+  close: sv('<path d="M3 9h4a2 2 0 0 0 2-2V3M21 9h-4a2 2 0 0 1-2-2V3M3 15h4a2 2 0 0 1 2 2v4M21 15h-4a2 2 0 0 0-2 2v4"/>'),
+  fold: sv('<path d="M6 9l6 6 6-6"/>'),
+  unfold: sv('<path d="M18 15l-6-6-6 6"/>'),
+};
+
+/* One engine per pane. Zoom is read in percent of the fitted sheet, so 100 %
+   always means "the whole drawing in the pane" whatever the file measures. */
+function viewer(stage, src, opts = {}) {
+  const sheet = stage.querySelector(".sheet");
+  const img = sheet.querySelector("img");
+  /* `base` is the scale at which the whole drawing fits the pane — the
+     scale 100 % refers to. It is a number, kept clear of the fit() method
+     that writes it. */
+  const S = { s: 1, x: 0, y: 0, base: 1, min: 1, max: 1, listeners: [] };
+
+  const emit = () => S.listeners.forEach((f) => f(S));
+  const apply = () => {
+    sheet.style.transform = `translate(${S.x}px, ${S.y}px) scale(${S.s})`;
+    emit();
+  };
+  const fit = () => {
+    const r = stage.getBoundingClientRect();
+    S.base = Math.min(r.width / src.w, r.height / src.h);
+    S.min = S.base * 0.45; S.max = S.base * 8;
+    S.s = S.base; S.x = (r.width - src.w * S.s) / 2; S.y = (r.height - src.h * S.s) / 2;
+    apply();
+  };
+  /* Pan is clamped so the drawing cannot be thrown out of the pane: once it
+     is larger than the window, an edge may reach the opposite edge and no
+     further; while it is smaller it stays centred. */
+  const clamp = () => {
+    const r = stage.getBoundingClientRect();
+    const bw = src.w * S.s, bh = src.h * S.s;
+    S.x = bw <= r.width ? (r.width - bw) / 2 : Math.min(0, Math.max(r.width - bw, S.x));
+    S.y = bh <= r.height ? (r.height - bh) / 2 : Math.min(0, Math.max(r.height - bh, S.y));
+  };
+  const zoomAt = (ns, cx, cy) => {
+    ns = Math.max(S.min, Math.min(S.max, ns));
+    const r = stage.getBoundingClientRect();
+    const px = (cx - r.left - S.x) / S.s, py = (cy - r.top - S.y) / S.s;
+    S.x = cx - r.left - px * ns; S.y = cy - r.top - py * ns; S.s = ns;
+    clamp(); apply();
+  };
+  const zoomCenter = (ns) => {
+    const r = stage.getBoundingClientRect();
+    zoomAt(ns, r.left + r.width / 2, r.top + r.height / 2);
+  };
+  const centerOn = (nx, ny) => {
+    const r = stage.getBoundingClientRect();
+    S.x = r.width / 2 - nx * src.w * S.s;
+    S.y = r.height / 2 - ny * src.h * S.s;
+    clamp(); apply();
+  };
+
+  stage.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    zoomAt(S.s * Math.exp(-e.deltaY * 0.0016), e.clientX, e.clientY);
+  }, { passive: false });
+
+  let drag = null;
+  stage.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".noDrag")) return;
+    drag = { x: e.clientX, y: e.clientY };
+    stage.classList.add("drag"); stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    S.x += e.clientX - drag.x; S.y += e.clientY - drag.y;
+    drag = { x: e.clientX, y: e.clientY }; clamp(); apply();
+  });
+  const end = () => { drag = null; stage.classList.remove("drag"); };
+  stage.addEventListener("pointerup", end);
+  stage.addEventListener("pointercancel", end);
+  stage.addEventListener("dblclick", fit);
+
+  img.complete ? fit() : img.addEventListener("load", fit);
+  /* A resized pane must not undo the reading: the fitted scale is measured
+     again and the same percentage is restored on top of it. */
+  window.addEventListener("resize", () => {
+    const p = S.s / S.base;
+    fit();
+    if (Math.abs(p - 1) > 0.001) { S.s = S.base * p; clamp(); apply(); }
+  });
+
+  return Object.assign(S, {
+    apply, fit, zoomAt, zoomCenter, centerOn,
+    on: (f) => { S.listeners.push(f); f(S); },
+    pct: () => Math.round(S.s / S.base * 100),
+    setPct: (p) => zoomCenter(S.base * p / 100),
+    /* 0–1 rectangle of what the pane currently shows, in sheet units. */
+    window: () => {
+      const r = stage.getBoundingClientRect();
+      return { x: -S.x / S.s / src.w, y: -S.y / S.s / src.h,
+        w: r.width / S.s / src.w, h: r.height / S.s / src.h };
+    },
+  });
+}
+
+const PMIN = 45, PMAX = 800;
+
+/* The corner view: the whole drawing, small, with the rectangle of what is
+   on screen. It is a control, not a picture — the rectangle is dragged. */
+function cornerView(stage, v, src) {
+  const el = document.createElement("div");
+  el.className = "mini noDrag";
+  el.innerHTML = `<span class="mi"><img src="${src.src}" alt=""><span class="vp"></span></span>
+    <span class="cap"><span class="pct">vue entière</span>
+      <span style="flex:1"></span>
+      <button class="b" title="Replier l'aperçu">${I.fold}</button></span>`;
+  stage.appendChild(el);
+  const mi = el.querySelector(".mi"), vp = el.querySelector(".vp");
+  const pct = el.querySelector(".pct"), fold = el.querySelector("button");
+  /* The thumbnail keeps the sheet's own proportions, so one factor serves
+     both axes and the rectangle cannot be told a lie about shape. */
+  mi.style.aspectRatio = `${src.w} / ${src.h}`;
+  mi.querySelector("img").style.width = "100%";
+
+  v.on(() => {
+    const b = mi.getBoundingClientRect();
+    if (!b.width) return;
+    const w = v.window();
+    const px = (n) => Math.max(0, Math.min(1, n));
+    vp.style.left = px(w.x) * b.width + "px";
+    vp.style.top = px(w.y) * b.height + "px";
+    vp.style.width = Math.min(1 - px(w.x), w.w) * b.width + "px";
+    vp.style.height = Math.min(1 - px(w.y), w.h) * b.height + "px";
+    pct.textContent = v.pct() + "%";
+  });
+
+  const goTo = (e) => {
+    const b = mi.getBoundingClientRect();
+    v.centerOn((e.clientX - b.left) / b.width, (e.clientY - b.top) / b.height);
+  };
+  let moving = false;
+  mi.addEventListener("pointerdown", (e) => {
+    moving = true; mi.setPointerCapture(e.pointerId); goTo(e); e.stopPropagation();
+  });
+  mi.addEventListener("pointermove", (e) => { if (moving) goTo(e); });
+  mi.addEventListener("pointerup", () => { moving = false; });
+
+  fold.onclick = () => {
+    const folded = el.classList.toggle("folded");
+    fold.innerHTML = folded ? I.unfold : I.fold;
+    fold.title = folded ? "Montrer l'aperçu" : "Replier l'aperçu";
+  };
+  return el;
+}
+
+/* Every control writes the same two things: a percentage and the two
+   framings. Each design below only decides how they are laid out. */
+const CONTROLS = {
+  strip(v) {
+    const el = document.createElement("div");
+    el.className = "strip noDrag";
+    el.innerHTML = `<button class="b" data-wide title="Tout voir">${I.wide}</button><span class="vr"></span>
+      <button class="b" data-out>${I.minus}</button>
+      <input type="range" min="${PMIN}" max="${PMAX}" value="100">
+      <button class="b" data-in>${I.plus}</button><span class="vr"></span>
+      <span class="val">100%</span><span class="vr"></span>
+      <button class="b" data-close title="Serrer">${I.close}</button>`;
+    wireCommon(el, v);
+    return el;
+  },
+  steps(v) {
+    const STOPS = [[45, "feuille"], [100, "page"], [200, "2×"], [400, "4×"], [800, "détail"]];
+    const el = document.createElement("div");
+    el.className = "steps noDrag";
+    el.innerHTML = `<button class="b" data-wide title="Tout voir">${I.wide}</button>
+      <div class="track"><span class="line"></span><span class="fill"></span>
+        ${STOPS.map(() => `<span class="tick"></span>`).join("")}
+        ${STOPS.map(([, n]) => `<span class="lab">${n}</span>`).join("")}
+        <span class="grip"></span></div>
+      <span class="val">100%</span>
+      <button class="b" data-close title="Serrer">${I.close}</button>`;
+    const track = el.querySelector(".track"), grip = el.querySelector(".grip");
+    const fill = el.querySelector(".fill");
+    const ticks = [...el.querySelectorAll(".tick")], labs = [...el.querySelectorAll(".lab")];
+    /* Position is read on a log scale: 45→800 is four doublings, and a
+       linear rail would bury everything under 200 in the first fifth. */
+    const t = (p) => (Math.log(p) - Math.log(PMIN)) / (Math.log(PMAX) - Math.log(PMIN));
+    const place = () => {
+      STOPS.forEach(([p], i) => {
+        ticks[i].style.left = t(p) * 100 + "%";
+        labs[i].style.left = t(p) * 100 + "%";
+      });
+    };
+    place();
+    v.on(() => {
+      const f = t(Math.max(PMIN, Math.min(PMAX, v.pct())));
+      grip.style.left = f * 100 + "%";
+      fill.style.width = f * 100 + "%";
+      el.querySelector(".val").textContent = v.pct() + "%";
+    });
+    const set = (e) => {
+      const b = track.getBoundingClientRect();
+      const f = Math.max(0, Math.min(1, (e.clientX - b.left) / b.width));
+      v.setPct(Math.exp(Math.log(PMIN) + f * (Math.log(PMAX) - Math.log(PMIN))));
+    };
+    let on = false;
+    track.addEventListener("pointerdown", (e) => { on = true; track.setPointerCapture(e.pointerId); set(e); });
+    track.addEventListener("pointermove", (e) => { if (on) set(e); });
+    track.addEventListener("pointerup", () => { on = false; });
+    wireCommon(el, v);
+    return el;
+  },
+  column(v, stage) {
+    const el = document.createElement("div");
+    el.className = "colbar noDrag";
+    el.innerHTML = `<button class="b" data-wide title="Tout voir">${I.wide}</button>
+      <button class="b" data-in>${I.plus}</button>
+      <input class="v" type="range" min="${PMIN}" max="${PMAX}" value="100">
+      <button class="b" data-out>${I.minus}</button>
+      <span class="val">100%</span>
+      <button class="b" data-close title="Serrer">${I.close}</button>`;
+    stage.appendChild(el);
+    wireCommon(el, v);
+    return null;
+  },
+  segs(v) {
+    const STOPS = [["Feuille", 100], ["200 %", 200], ["400 %", 400], ["Détail", 800]];
+    const el = document.createElement("div");
+    el.className = "segs noDrag";
+    el.innerHTML = STOPS.map(([n, p]) => `<button data-p="${p}" aria-pressed="false">${n}</button>`).join("");
+    el.querySelectorAll("button").forEach((b) => {
+      b.onclick = () => v.setPct(Number(b.dataset.p));
+    });
+    v.on(() => {
+      const p = v.pct();
+      el.querySelectorAll("button").forEach((b) => {
+        /* The nearest stop is the one that is lit: the wheel lands between
+           them constantly and a row of dark buttons that never light would
+           say the control is broken. */
+        const best = STOPS.reduce((a, c) => Math.abs(c[1] - p) < Math.abs(a[1] - p) ? c : a);
+        b.setAttribute("aria-pressed", String(Number(b.dataset.p) === best[1]));
+      });
+    });
+    return el;
+  },
+  ruler(v) {
+    const STOPS = [45, 100, 200, 400, 800];
+    const el = document.createElement("div");
+    el.className = "ruler noDrag";
+    const t = (p) => (Math.log(p) - Math.log(PMIN)) / (Math.log(PMAX) - Math.log(PMIN));
+    const minor = [];
+    for (let p = 50; p <= PMAX; p += 50) minor.push(p);
+    el.innerHTML = minor.map((p) => `<span class="t" style="left:${10 + t(p) * 0}px"></span>`).join("")
+      + `<span class="cur"></span><span class="bub">100%</span>`;
+    const cur = el.querySelector(".cur"), bub = el.querySelector(".bub");
+    const place = () => {
+      const b = el.getBoundingClientRect();
+      const inner = b.width - 20;
+      el.querySelectorAll(".t").forEach((n, i) => {
+        const p = minor[i];
+        n.style.left = (10 + t(p) * inner) + "px";
+        const maj = STOPS.includes(p);
+        n.classList.toggle("maj", maj);
+        n.style.height = maj ? "14px" : "7px";
+      });
+      el.querySelectorAll(".n").forEach((n) => n.remove());
+      STOPS.forEach((p) => {
+        const s = document.createElement("span");
+        s.className = "n"; s.textContent = p + "%";
+        s.style.left = (10 + t(p) * inner) + "px";
+        el.appendChild(s);
+      });
+    };
+    v.on(() => {
+      const b = el.getBoundingClientRect();
+      if (!b.width) return;
+      const inner = b.width - 20;
+      const f = t(Math.max(PMIN, Math.min(PMAX, v.pct())));
+      cur.style.left = (10 + f * inner) + "px";
+      bub.style.left = (10 + f * inner) + "px";
+      bub.textContent = v.pct() + "%";
+    });
+    requestAnimationFrame(place);
+    window.addEventListener("resize", place);
+    const set = (e) => {
+      const b = el.getBoundingClientRect();
+      const f = Math.max(0, Math.min(1, (e.clientX - b.left - 10) / (b.width - 20)));
+      v.setPct(Math.exp(Math.log(PMIN) + f * (Math.log(PMAX) - Math.log(PMIN))));
+    };
+    let on = false;
+    el.addEventListener("pointerdown", (e) => { on = true; el.setPointerCapture(e.pointerId); set(e); });
+    el.addEventListener("pointermove", (e) => { if (on) set(e); });
+    el.addEventListener("pointerup", () => { on = false; });
+    return el;
+  },
+  header(v, stage, head) {
+    const el = document.createElement("span");
+    el.className = "inline noDrag";
+    el.innerHTML = `<button class="b" data-wide title="Tout voir">${I.wide}</button>
+      <button class="b" data-out>${I.minus}</button>
+      <input type="range" min="${PMIN}" max="${PMAX}" value="100">
+      <button class="b" data-in>${I.plus}</button>
+      <span class="val">100%</span>
+      <button class="b" data-close title="Serrer">${I.close}</button>`;
+    head.appendChild(el);
+    wireCommon(el, v);
+    return null;
+  },
+};
+
+/* The parts every design shares: the range, the two steps, the two framings
+   and the readout. Written once so six layouts cannot drift apart. */
+function wireCommon(el, v) {
+  const sl = el.querySelector("input[type=range]");
+  const val = el.querySelector(".val");
+  if (sl) sl.addEventListener("input", () => v.setPct(Number(sl.value)));
+  v.on(() => {
+    const p = v.pct();
+    if (sl && document.activeElement !== sl) sl.value = String(Math.max(PMIN, Math.min(PMAX, p)));
+    if (val) val.textContent = p + "%";
+  });
+  const hit = (sel, fn) => { const b = el.querySelector(sel); if (b) b.onclick = fn; };
+  hit("[data-in]", () => v.setPct(v.pct() * 1.25));
+  hit("[data-out]", () => v.setPct(v.pct() / 1.25));
+  hit("[data-wide]", () => v.fit());
+  /* "Serrer" is the close framing: the middle of what is on screen, at 400 %
+     — the magnification a dimension is read at. */
+  hit("[data-close]", () => v.setPct(400));
+}
+
+const OPTIONS = [
+  { n: 1, key: "strip", name: "Bande au pied",
+    say: "Une bande pleine largeur sous le dessin: cadrage large, pas en arrière, curseur, pas en avant, pourcentage, cadrage serré. Rien ne flotte, rien ne s'efface." },
+  { n: 2, key: "steps", name: "Rail à paliers",
+    say: "Le même rail, mais gradué et nommé — feuille, page, 2×, 4×, détail — et logarithmique, pour que la moitié de la course ne soit pas écrasée sous 200 %." },
+  { n: 3, key: "column", name: "Colonne au bord",
+    say: "Le curseur debout contre le bord droit du volet, plein et opaque. Le geste est vertical comme la course; l'aperçu du coin se décale pour lui." },
+  { n: 4, key: "segs", name: "Paliers seuls",
+    say: "Pas de curseur: quatre états nommés. Celui qui est allumé est le plus proche du niveau en cours, car la molette tombe toujours entre deux." },
+  { n: 5, key: "ruler", name: "Règle graduée",
+    say: "L'échelle est dessinée en entier, chiffrée, avec le trait de position et sa pastille. On lit l'échelle même sans toucher à rien." },
+  { n: 6, key: "header", name: "Dans l'en-tête",
+    say: "La commande rejoint la barre de titre du volet, à côté du nom du fichier. Zéro pixel pris au dessin, et l'aperçu du coin reste le seul objet posé dessus." },
+];
+
+const wrap = document.getElementById("wrap");
+OPTIONS.forEach((o) => {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `<h2><span>${o.n}</span>${o.name}</h2><div class="say">${o.say}</div>
+    <div class="pair"></div>`;
+  const pair = card.querySelector(".pair");
+  [PLAN, MODEL].forEach((src) => {
+    const pane = document.createElement("div");
+    pane.className = "pane";
+    pane.innerHTML = `<div class="ph"><span class="nm">${src.label}</span>
+        <span class="mono" style="color:var(--ink-3);font-size:11px">${src.file}</span>
+        <span class="sp"></span></div>
+      <div class="stage"><div class="sheet"><img src="${src.src}" alt="${src.label}"></div></div>`;
+    pair.appendChild(pane);
+    const stage = pane.querySelector(".stage");
+    const v = viewer(stage, src);
+    cornerView(stage, v, src);
+    const node = CONTROLS[o.key](v, stage, pane.querySelector(".ph"));
+    if (node) pane.appendChild(node);
+    /* The column takes the right edge, so the corner view steps aside
+       rather than sitting under it. */
+    if (o.key === "column") stage.querySelector(".mini").style.right = "48px";
+  });
+  wrap.appendChild(card);
+});
+
+document.querySelectorAll(".switch button").forEach((b) => {
+  b.onclick = () => {
+    document.body.dataset.mini = b.dataset.mini;
+    document.querySelectorAll(".switch button").forEach((o) =>
+      o.setAttribute("aria-pressed", String(o === b)));
+    window.dispatchEvent(new Event("resize"));
+  };
+});
+</script>
+</body>
+</html>
