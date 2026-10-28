@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le volet de droite et les quantités — explorations</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Same ramp and hairlines as wireframe-c3. Nothing here invents a new
+   visual language: it moves the same four blocks of information to
+   different places and shows what each move costs the drawing. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --card:#fff; --vert:#c3e05a; --vert-ink:#2f3a05;
+  --wash:rgba(17,17,18,.055); --red:#9a2b1f; --red-wash:rgba(154,43,31,.1);
+  --r:6px; --r2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:28px 24px 72px}
+.lu{width:16px;height:16px;flex:0 0 auto;stroke-width:1.6}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* page scaffolding ------------------------------------------------------ */
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:6px;max-width:88ch}
+.sub b{color:var(--ink);font-weight:600}
+h2.part{font-size:14px;font-weight:600;margin:40px 0 4px;padding-top:18px;border-top:1px solid var(--line-2)}
+h2.part + p{color:var(--ink-2);font-size:12.5px;max-width:88ch;margin-bottom:16px}
+.opt{display:flex;flex-direction:column;gap:9px;margin-top:26px}
+.cap{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.cap .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.cap b{font-size:13.5px;font-weight:600}
+.note{color:var(--ink-2);font-size:12px;max-width:96ch}
+.note b{color:var(--ink);font-weight:600}
+.shot{border:1px solid var(--line-2);border-radius:var(--r2);background:var(--card);overflow:hidden}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.quad{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;align-items:start}
+
+/* the fragments of the screen the options are built from ---------------- */
+.insp{width:100%;background:var(--card);display:flex;flex-direction:column}
+.insp .ih{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--line-2);
+  font-size:12.5px;color:var(--ink-2)}
+.insp .ib{padding:10px 11px;display:flex;flex-direction:column;gap:9px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-2);
+  font-size:12.5px;color:var(--ink-2)}
+.kv:last-child{border-bottom:0}
+.kv b{font-weight:600;color:var(--ink)}
+.thumb{border:1px solid var(--line-2);border-radius:var(--r);background:#fff no-repeat center/cover;
+  aspect-ratio:16/9}
+.plan-th{background-image:url(assets/plan-niveau-5.jpg)}
+/* The same sheet, framed on the unit rather than shown whole: a thumbnail
+   that is identical in four tabs tells the reader the four tabs are the
+   same thing. */
+.plan-unit{background-image:url(assets/plan-niveau-5.jpg);background-size:520%;background-position:33% 74%}
+.model-th{background-image:url(assets/batiment.jpg);background-size:cover}
+.fac-th{background-image:url(assets/skp-facade.jpg);background-size:cover;background-position:50% 40%}
+/* One window elevation out of the four on the sheet. */
+.win{background:#fff url(assets/ouvertures-fenetres.jpg) no-repeat;background-size:400% auto;
+  border:1px solid var(--line-2);border-radius:var(--r);aspect-ratio:5/3}
+.door{background:#fff url(assets/ouvertures-portes.jpg) no-repeat;background-size:200% auto;
+  border:1px solid var(--line-2);border-radius:var(--r);aspect-ratio:2/1}
+
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--fill-2)}
+.seg button{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;font-size:12.5px;
+  border-right:1px solid var(--line);color:var(--ink)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line-2);border-radius:999px;padding:4px 11px;font-size:12px;color:var(--ink-2)}
+.chip[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:600;background:var(--fill-2)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:var(--r);
+  padding:5px 10px;font-size:12.5px;color:var(--ink-2);background:var(--card)}
+.btn:hover{border-color:var(--line);color:var(--ink)}
+.btn.solid{background:var(--ink);border-color:var(--ink);color:#fff}
+.tag{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);
+  border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;white-space:nowrap}
+
+/* the table, which is the point -----------------------------------------
+   A number column is right-aligned in the body AND in the head, a word
+   column is left-aligned in both. The screenshots show the opposite: heads
+   on the left, figures on the right, so no title sits over its column. */
+table.q{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+table.q th,table.q td{padding:7px 10px;border-bottom:1px solid var(--line-2);font-size:12.5px;
+  white-space:nowrap}
+table.q th{font-weight:500;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);
+  position:sticky;top:0;background:var(--card);z-index:1}
+table.q td.t,table.q th.t{text-align:left}
+table.q td.n,table.q th.n{text-align:right}
+table.q tbody tr{cursor:pointer}
+table.q tbody tr:hover td{background:var(--fill-2)}
+table.q tbody tr[aria-selected="true"] td{background:#eef1e0}
+table.q tbody tr[aria-selected="true"] td:first-child{box-shadow:inset 2px 0 0 var(--ink)}
+table.q tfoot td{padding:7px 10px;font-size:12.5px;font-weight:600;border-top:1px solid var(--line)}
+.sortable{cursor:pointer;user-select:none}
+.scroller{max-height:260px;overflow:auto}
+
+/* what a selected row lights up */
+.stage{position:relative;border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;background:#fff}
+.stage img{width:100%;display:block}
+.stage svg{position:absolute;inset:0;width:100%;height:100%}
+.stage .lbl{position:absolute;left:8px;bottom:8px;background:var(--card);border:1px solid var(--line-2);
+  border-radius:4px;font-size:11px;padding:2px 7px;color:var(--ink-2)}
+.hl{fill:rgba(195,224,90,.42);stroke:#2f3a05;stroke-width:1.2;vector-effect:non-scaling-stroke}
+.hl.off{display:none}
+.dim{position:absolute;inset:0;background:rgba(255,255,255,.55)}
+.nohl{font-size:11.5px;color:var(--ink-3);padding:6px 2px}
+
+/* full-screen frames for the placement options */
+.screen{display:flex;flex-direction:column;background:var(--page)}
+.nav1{display:flex;align-items:center;gap:8px;height:34px;padding:0 11px;background:var(--card);
+  border-bottom:1px solid var(--line-2);font-size:12px}
+.nav2{display:flex;align-items:center;gap:4px;height:30px;padding:0 11px;background:var(--card);
+  border-bottom:1px solid var(--line-2);font-size:12px;color:var(--ink-3)}
+.nav2 .on{background:var(--vert);color:var(--vert-ink);border-radius:5px;padding:3px 8px;font-weight:600}
+.hdr{padding:10px 12px 8px;display:flex;align-items:flex-end;gap:10px}
+.hdr h3{font-size:14.5px;font-weight:600}
+.hdr p{font-size:11.5px;color:var(--ink-2)}
+.cols{display:grid;gap:8px;padding:0 8px 8px;min-height:0}
+.pane{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden;
+  display:flex;flex-direction:column;min-width:0}
+.pane > .ph{height:28px;display:flex;align-items:center;gap:7px;padding:0 9px;font-size:12px;
+  color:var(--ink-2);border-bottom:1px solid var(--line-2);flex:0 0 auto}
+.pane > .pb{padding:8px;min-height:0;overflow:auto}
+.ulist{display:flex;flex-direction:column;gap:4px;padding:6px}
+.urow{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:5px;font-size:12px;color:var(--ink-2)}
+.urow[aria-selected="true"]{background:#eef1e0;color:var(--ink);font-weight:500}
+.foot{height:26px;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:11.5px;
+  color:var(--ink-2);border-top:1px solid var(--line-2);background:var(--card)}
+
+/* journal + coordination */
+.log{display:flex;gap:9px;padding:8px 9px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--card)}
+.log .pin{width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;
+  display:grid;place-items:center;flex:0 0 auto;font-weight:600}
+.log .pin.red{background:var(--red)}
+.log .tx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.log .tx .who{font-size:11px;color:var(--ink-3)}
+.log .tx .what{font-size:12.5px}
+.pinmark{fill:var(--card);stroke:var(--ink);stroke-width:1.5}
+.pinmark.red{stroke:var(--red);fill:var(--red-wash)}
+.layers{display:flex;gap:6px;flex-wrap:wrap}
+.lay{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:999px;
+  padding:3px 10px;font-size:11.5px;color:var(--ink-3)}
+.lay[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.lay i{width:8px;height:8px;border-radius:2px;background:currentColor;display:inline-block}
+.clash{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--line-2);
+  border-left:3px solid var(--red);border-radius:var(--r);font-size:12.5px;background:var(--card)}
+.clash .lu{color:var(--red)}
+
+.verdict{margin-top:34px;padding-top:18px;border-top:1px solid var(--line-2);color:var(--ink-2);
+  font-size:12.5px;max-width:96ch}
+.verdict b{color:var(--ink)}
+.verdict ul{margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Le volet de droite et les quantités — explorations</h1>
+  <p class="sub">Quatre onglets qui se ressemblent, la même vignette de plan répétée quatre fois, et un tableau
+     de quantités rangé sous les dessins : trois problèmes différents. Cette page les sépare.
+     <b>Première partie</b>, ce que devient le volet de droite. <b>Deuxième partie</b>, où vivent les quantités.
+     <b>Troisième partie</b>, le tableau lui-même — alignement, sélection qui allume le dessin, export.
+     <b>Quatrième partie</b>, le journal et la coordination, qui n'ont jamais été des fiches d'unité.
+     Les options partagent le même état : changer de portée, de tableau ou de ligne les change toutes.</p>
+  <div id="app"></div>
+  <div class="verdict" id="verdict"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* ------------------------------------------------------------------ data */
+const S = {
+  scope: "Niveau 5",      // Niveau 5 | Bâtiment
+  tab: "Unités",          // which quantity table
+  row: 0,                 // selected row in that table
+  insp: "Unité",          // which inspector section is open
+  layers: { arch: true, paysage: false, arpenteur: false, plomberie: true },
+  sort: { col: null, dir: 1 },
+};
+
+/* The four tables, with the type of each column declared once. "n" is a
+   number and is right-aligned on both sides of the rule; "t" is a word and
+   is left-aligned on both. The screenshots align them against each other,
+   which is why no title sits over its column.
+   `where` says what a row can light up: the plan, the model, both, or
+   neither. It is a property of the thing counted, not of the table — a
+   brick exists on the façade and not on a floor plan, circulation exists on
+   the plan and is not modelled. */
+const TABLES = {
+  "Unités": {
+    cols: [["Type", "t"], ["Par étage", "n"], ["Projet", "n"], ["pi² moy", "n"], ["pi² total", "n"], ["Part", "n"]],
+    rows: [
+      { c: ["3½", "3,2", "26", "724", "18 824", "17 %"], where: ["plan", "model"], what: "les 3½ du niveau" },
+      { c: ["3½+bureau", "0,9", "7", "880", "6 160", "6 %"], where: ["plan", "model"], what: "les 3½+bureau" },
+      { c: ["4½", "6,1", "49", "1 100", "53 891", "49 %"], where: ["plan", "model"], what: "les 4½ du niveau" },
+      { c: ["5½", "2,8", "22", "1 366", "30 063", "28 %"], where: ["plan", "model"], what: "les 5½ du niveau" },
+    ],
+    total: ["Total", "13,0", "104", "1 047", "108 938", "100 %"],
+  },
+  "Superficies": {
+    cols: [["Niveau", "t"], ["Unités", "n"], ["Net pi²", "n"], ["Brut pi²", "n"], ["Circulation", "n"], ["Part", "n"]],
+    rows: [
+      { c: ["8", "13", "14 896", "17 503", "15 %", "14 %"], where: ["plan"], what: "la circulation du niveau 8" },
+      { c: ["7", "15", "15 500", "18 212", "15 %", "14 %"], where: ["plan"], what: "la circulation du niveau 7" },
+      { c: ["6", "15", "15 500", "18 212", "15 %", "14 %"], where: ["plan"], what: "la circulation du niveau 6" },
+      { c: ["5", "15", "15 500", "18 212", "15 %", "14 %"], where: ["plan"], what: "la circulation du niveau 5" },
+      { c: ["4", "15", "15 500", "18 212", "15 %", "14 %"], where: ["plan"], what: "la circulation du niveau 4" },
+      { c: ["3", "15", "15 500", "18 212", "15 %", "14 %"], where: ["plan"], what: "la circulation du niveau 3" },
+      { c: ["2", "14", "14 150", "16 626", "15 %", "13 %"], where: ["plan"], what: "la circulation du niveau 2" },
+      { c: ["1", "2", "2 392", "2 811", "15 %", "2 %"], where: ["plan"], what: "la circulation du niveau 1" },
+    ],
+    total: ["Total", "104", "108 938", "127 998", "15 %", "100 %"],
+  },
+  "Fenêtres": {
+    cols: [["Repère", "t"], ["Largeur", "n"], ["Hauteur", "n"], ["Quantité", "n"], ["Façade", "t"], ["Source", "t"]],
+    rows: [
+      { c: ["F10", "1 800", "1 500", "24", "sud", "A-201 R04"], where: ["model"], tile: 0,
+        what: "les 24 F10 de la façade sud", lien: "Fenêtre coulissante 8'×7' — fiche fabricant" },
+      { c: ["F10.1", "1 560", "1 500", "6", "sud", "A-201 R04"], where: ["model"], tile: 1,
+        what: "les 6 F10.1", lien: "Fenêtre à battant 8'×8'2 — fiche fabricant" },
+      { c: ["F10.2", "900", "1 500", "18", "est", "A-202 R03"], where: ["model"], tile: 2,
+        what: "les 18 F10.2 de la façade est", lien: "Fenêtre fixe 3'×5' — fiche fabricant" },
+      { c: ["F10.3", "2 400", "2 100", "8", "ouest", "A-202 R03"], where: ["model"], tile: 3,
+        what: "les 8 F10.3", lien: "Porte-fenêtre 8'×7'6 — fiche fabricant" },
+    ],
+    total: ["Total", "—", "—", "56", "—", "—"],
+  },
+  "Matériaux": {
+    cols: [["Matériau", "t"], ["Façade", "t"], ["m²", "n"], ["Part", "n"], ["Révision", "t"], ["Source", "t"]],
+    rows: [
+      { c: ["brique grise", "sud", "412", "46 %", "R04", "A-202"], where: ["model"], what: "la brique grise, façade sud" },
+      { c: ["brique rouge", "est", "198", "22 %", "R03", "A-202"], where: ["model"], what: "la brique rouge, façade est" },
+      { c: ["panneau fibrociment", "ouest", "186", "21 %", "R03", "A-202"], where: ["model"], what: "le fibrociment, façade ouest" },
+      { c: ["verre", "toutes", "98", "11 %", "R04", "A-201"], where: ["model"], what: "le verre, toutes façades" },
+    ],
+    total: ["Total", "—", "894", "100 %", "—", "—"],
+  },
+};
+const TABS = Object.keys(TABLES);
+
+/* Where a highlight lands on each surface. Normalised 0–1 on the image, the
+   way the unit contours already are, so nothing is hard-coded in pixels. */
+const PLAN_SHAPES = {
+  "3½": [[.10, .18, .22, .34], [.63, .60, .20, .30]],
+  "3½+bureau": [[.33, .17, .17, .25]],
+  "4½": [[.10, .55, .26, .34], [.52, .16, .18, .30]],
+  "5½": [[.36, .45, .28, .42]],
+  circulation: [[.33, .36, .30, .14], [.44, .18, .11, .50]],
+};
+const MODEL_SHAPES = {
+  "sud": [[.30, .22, .44, .58]],
+  "est": [[.74, .26, .17, .50]],
+  "ouest": [[.12, .30, .18, .46]],
+  "toutes": [[.12, .22, .79, .62]],
+  "unites": [[.30, .44, .44, .12]],
+};
+
+const JOURNAL = [
+  { n: 1, who: "Chargée de projet", when: "24 oct", what: "Fenêtre élargie sur la façade sud, 1 800 → 2 400.",
+    why: "coût client", rev: "R04", at: [.62, .38], red: false },
+  { n: 2, who: "Atelier", when: "02 oct", what: "Cloison déplacée de 300 mm vers le corridor.",
+    why: "code", rev: "R03", at: [.41, .55], red: false },
+  { n: 3, who: "Ingénieur", when: "19 oct", what: "Colonne traverse un drain au plan de plomberie.",
+    why: "croisement", rev: "S-301 R02", at: [.52, .27], red: true },
+];
+
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+const pascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+function sprite() {
+  const names = ["box", "image", "git-compare", "clock", "table", "download", "external-link", "layers",
+    "list", "file", "circle", "chevron-down", "chevron-right", "building-2", "square-stack", "ruler",
+    "alert-triangle", "map-pin", "message-square", "check", "plus", "eye", "folder", "share-2", "scale"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[pascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* --------------------------------------------------------------- helpers */
+const T = () => TABLES[S.tab];
+const curRow = () => T().rows[Math.min(S.row, T().rows.length - 1)];
+const act = (a, v = "") => `data-a="${a}" data-v="${v}"`;
+
+/* The shapes a selected row lights up, on each surface. */
+function planShapes() {
+  const r = curRow();
+  if (!r.where.includes("plan")) return [];
+  if (S.tab === "Unités") return PLAN_SHAPES[r.c[0]] || [];
+  if (S.tab === "Superficies") return PLAN_SHAPES.circulation;
+  return [];
+}
+function modelShapes() {
+  const r = curRow();
+  if (!r.where.includes("model")) return [];
+  if (S.tab === "Unités") return MODEL_SHAPES.unites;
+  return MODEL_SHAPES[r.c[S.tab === "Fenêtres" ? 4 : 1]] || [];
+}
+const rects = (list, cls = "hl") => list.map(([x, y, w, h]) =>
+  `<rect class="${cls}" x="${x * 100}%" y="${y * 100}%" width="${w * 100}%" height="${h * 100}%" rx="2"/>`).join("");
+
+/* A surface with the current selection drawn over it, or a plain statement
+   that this row is not on this surface — which is information, not a gap. */
+function stage(kind) {
+  const shapes = kind === "plan" ? planShapes() : modelShapes();
+  const img = kind === "plan" ? "assets/plan-niveau-5.jpg" : "assets/skp-facade.jpg";
+  const name = kind === "plan" ? "Plan 2D — niveau 5" : "Maquette 3D";
+  return `<div class="stage">
+    <img src="${img}" alt="${name}" loading="lazy">
+    ${shapes.length ? `<svg preserveAspectRatio="none">${rects(shapes)}</svg>` : ""}
+    <span class="lbl">${name}${shapes.length ? ` · ${curRow().what}` : " · rien à montrer pour cette ligne"}</span>
+  </div>`;
+}
+
+/* ------------------------------------------------------------- the table */
+function tableHTML({ scroller = true, foot = true } = {}) {
+  const t = T();
+  const head = t.cols.map(([name, kind], i) =>
+    `<th class="${kind} sortable" ${act("sort", i)}>${name}${S.sort.col === i ? (S.sort.dir > 0 ? " ↑" : " ↓") : ""}</th>`).join("");
+  let rows = t.rows.map((r, i) => ({ r, i }));
+  if (S.sort.col !== null) {
+    const k = S.sort.col, kind = t.cols[k][1];
+    rows = rows.slice().sort((a, b) => {
+      const va = a.r.c[k], vb = b.r.c[k];
+      if (kind === "n") return (num(va) - num(vb)) * S.sort.dir;
+      return va.localeCompare(vb, "fr") * S.sort.dir;
+    });
+  }
+  const body = rows.map(({ r, i }) => `<tr ${act("row", i)} aria-selected="${i === S.row}">
+    ${r.c.map((v, j) => `<td class="${t.cols[j][1]}">${v}</td>`).join("")}</tr>`).join("");
+  const tf = foot ? `<tfoot><tr>${t.total.map((v, j) =>
+    `<td class="${t.cols[j][1]}">${v}</td>`).join("")}</tr></tfoot>` : "";
+  const table = `<table class="q"><thead><tr>${head}</tr></thead><tbody>${body}</tbody>${tf}</table>`;
+  return scroller ? `<div class="scroller">${table}</div>` : table;
+}
+const num = (s) => parseFloat(String(s).replace(/[^\d,.-]/g, "").replace(/\s/g, "").replace(",", ".")) || 0;
+
+const chipsHTML = () => `<div class="chips">${TABS.map((n) =>
+  `<button class="chip" aria-pressed="${S.tab === n}" ${act("tab", n)}>${n}</button>`).join("")}</div>`;
+
+/* The scope switch. The complaint it answers: the level strip says
+   "Niveau 5" while the table below counts the whole building, and nothing
+   on the screen says which. Here the scope is a control, it is written in
+   the table's own header, and the level strip greys out when the scope is
+   the building — because a floor cannot be chosen for a number that counts
+   all of them. */
+const scopeHTML = () => `<div class="seg">
+  <button aria-pressed="${S.scope === "Niveau 5"}" ${act("scope", "Niveau 5")}>${icon("layers")}Niveau 5</button>
+  <button aria-pressed="${S.scope === "Bâtiment"}" ${act("scope", "Bâtiment")}>${icon("building-2")}Bâtiment entier</button>
+</div>`;
+
+const csvNote = () => `<button class="btn" ${act("csv")}>${icon("download")}Exporter en .csv</button>`;
+
+/* ------------------------------------------------- part 1: the inspector */
+const INSP_SECTIONS = [
+  { k: "Unité", g: "square-stack", title: "L'unité",
+    rows: [["Typologie", "5½"], ["Superficie", "1 275 pi²"], ["Niveau", "Niveau 5"], ["Statut", "non vérifié"]] },
+  { k: "Ouvertures", g: "ruler", title: "Les ouvertures",
+    rows: [["Le plan dit", "1 800 × 1 500"], ["La maquette dit", "1 560 × 1 500"], ["Écart", "240 mm"], ["Apparu dans", "R04 · 24 oct"]] },
+  { k: "Coordination", g: "git-compare", title: "La coordination",
+    rows: [["Sur cette unité", "aucun croisement"], ["Sur ce niveau", "4 ouverts"], ["Dans le projet", "6 ouverts"], ["Dernier dessin lu", "S-301 R02"]] },
+  { k: "Historique", g: "clock", title: "L'historique",
+    rows: [["R04 · 24 oct", "fenêtre élargie"], ["R03 · 02 oct", "cloison déplacée"], ["R02 · 19 oct", "unité découpée"], ["R01 · 12 sep", "première lecture"]] },
+];
+const kvs = (rows) => rows.map(([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join("");
+
+/* Each section gets the picture that belongs to it, and the sections that
+   have no picture say so instead of borrowing the plan. */
+function sectionArt(k) {
+  if (k === "Unité") return `<div class="thumb plan-unit" title="le plan recadré sur l'unité"></div>`;
+  if (k === "Ouvertures") return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+    ${[0, 3].map((i) => `<div class="win" style="background-position:${i * 33.33}% 50%"></div>`).join("")}</div>`;
+  if (k === "Coordination") return `<div class="stage"><img src="assets/plan-niveau-5.jpg" alt="croisements" loading="lazy">
+    <svg preserveAspectRatio="none">${JOURNAL.filter((j) => j.red).map((j) =>
+      `<circle class="pinmark red" cx="${j.at[0] * 100}%" cy="${j.at[1] * 100}%" r="7"/>`).join("")}</svg>
+    <span class="lbl">1 croisement sur ce niveau</span></div>`;
+  return "";   // history has no picture of its own: it is a list of dates
+}
+
+const A1 = () => `<div class="insp">
+  <div class="ih">${icon("circle")}Unité 501<span style="flex:1"></span><span class="tag">niveau 5</span></div>
+  <div class="ib">${INSP_SECTIONS.map((s) => `<div>
+    <div style="display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.07em;
+      text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">${icon(s.g)}${s.title}</div>
+    ${s.k === "Unité" ? sectionArt(s.k) : ""}
+    <div style="margin-top:${s.k === "Unité" ? 8 : 0}px">${kvs(s.rows)}</div></div>`).join("")}
+  </div></div>`;
+
+const A2 = () => `<div class="insp">
+  <div class="ih">${icon("circle")}Unité 501<span style="flex:1"></span><span class="tag">niveau 5</span></div>
+  <div class="ib" style="gap:6px">${INSP_SECTIONS.map((s) => {
+    const open = S.insp === s.k;
+    return `<div style="border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden">
+      <button style="display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;font-size:12.5px;
+        background:${open ? "var(--fill-2)" : "var(--card)"}" ${act("insp", s.k)}>
+        ${icon(s.g)}<span style="flex:1;text-align:left;font-weight:${open ? 600 : 400}">${s.title}</span>
+        ${icon(open ? "chevron-down" : "chevron-right")}</button>
+      ${open ? `<div style="padding:8px 10px;border-top:1px solid var(--line-2)">
+        ${sectionArt(s.k)}<div style="margin-top:${sectionArt(s.k) ? 8 : 0}px">${kvs(s.rows)}</div></div>` : ""}
+    </div>`;
+  }).join("")}</div></div>`;
+
+const A3 = () => {
+  const s = INSP_SECTIONS.find((x) => x.k === S.insp) || INSP_SECTIONS[0];
+  return `<div class="insp">
+    <div class="ih">${icon("circle")}Unité 501<span style="flex:1"></span><span class="tag">niveau 5</span></div>
+    <div class="ib">
+      <div style="display:flex;gap:4px;border-bottom:1px solid var(--line-2);margin:-2px -11px 4px;padding:0 11px 6px">
+        ${INSP_SECTIONS.map((x) => `<button ${act("insp", x.k)}
+          style="display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:6px;font-size:12px;
+          background:${S.insp === x.k ? "var(--ink)" : "transparent"};color:${S.insp === x.k ? "#fff" : "var(--ink-2)"};
+          font-weight:${S.insp === x.k ? 600 : 400}">${icon(x.g)}${x.k}</button>`).join("")}
+      </div>
+      ${sectionArt(s.k)}
+      <div>${kvs(s.rows)}</div>
+    </div></div>`;
+};
+
+const A4 = () => `<div class="insp">
+  <div class="ih">${icon("circle")}Unité 501<span style="flex:1"></span><span class="tag">niveau 5</span></div>
+  <div class="ib">
+    <div class="thumb plan-unit"></div>
+    ${kvs(INSP_SECTIONS[0].rows)}
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px">
+      <button class="btn" style="justify-content:space-between">${icon("ruler")}
+        <span style="flex:1;text-align:left">Ouvertures</span><span class="tag">écart 240 mm</span></button>
+      <button class="btn" style="justify-content:space-between">${icon("git-compare")}
+        <span style="flex:1;text-align:left">Coordination</span><span class="tag">0 ici · 4 au niveau</span></button>
+      <button class="btn" style="justify-content:space-between">${icon("clock")}
+        <span style="flex:1;text-align:left">Historique</span><span class="tag">4 révisions</span></button>
+    </div>
+    <p class="nohl">Les trois ouvrent le tiroir du bas, à l'endroit où la donnée vit déjà : les ouvertures dans le
+      tableau, les croisements sur le plan, l'historique dans le journal.</p>
+  </div></div>`;
+
+/* ------------------------------------------- part 2: where the table goes */
+const navRows = () => `<div class="nav1">${icon("folder")}<span style="color:var(--ink-3)">Tous les projets</span>
+  ${icon("chevron-right")}<b style="font-weight:600">Le Baldwin III</b>
+  <span style="flex:1"></span>${scopeHTML()}</div>
+  <div class="nav2" style="${S.scope === "Bâtiment" ? "opacity:.45" : ""}">
+    ${[1, 2, 3, 4, 5, 6, 7, 8].map((l) => `<span class="${l === 5 && S.scope !== "Bâtiment" ? "on" : ""}"
+      style="padding:3px 8px">Niveau ${l}</span>`).join("")}
+    ${S.scope === "Bâtiment" ? `<span class="tag" style="margin-left:6px">sans objet : portée bâtiment</span>` : ""}
+  </div>`;
+
+const header = () => `<div class="hdr">
+  <div><h3>${S.scope === "Bâtiment" ? "Le Baldwin III — bâtiment entier" : "Plans — niveau 5"}</h3>
+    <p>${S.scope === "Bâtiment" ? "8 niveaux · 104 unités · 108 938 pi² nets" : "15 unités · 4 avec un croisement ouvert"}</p></div>
+  <span style="flex:1"></span>${csvNote()}</div>`;
+
+const unitList = () => `<div class="pane"><div class="ph">${icon("list")}Unités</div>
+  <div class="ulist">${["501 · 5½ · 1 275 pi²", "502 · 5½ · 1 496 pi²", "503 · 3½ · 760 pi²",
+    "504 · 4½ · 1 152 pi²", "505 · 4½ · 1 221 pi²"].map((u, i) =>
+    `<div class="urow" aria-selected="${i === 0}">${u}</div>`).join("")}</div></div>`;
+
+const planPane = () => `<div class="pane"><div class="ph">${icon("file")}Plan 2D</div>
+  <div class="pb" style="padding:6px">${stage("plan")}</div></div>`;
+const modelPane = () => `<div class="pane"><div class="ph">${icon("box")}Maquette 3D</div>
+  <div class="pb" style="padding:6px">${stage("model")}</div></div>`;
+
+const qPane = (title = "Quantités") => `<div class="pane"><div class="ph">${icon("table")}${title}
+  <span style="flex:1"></span><span class="tag">${S.scope}</span></div>
+  <div class="pb">${chipsHTML()}<div style="margin-top:8px">${tableHTML()}</div></div></div>`;
+
+const B1 = () => `<div class="screen">${navRows()}${header()}
+  <div class="cols" style="grid-template-columns:150px 1fr 1fr 220px">
+    ${unitList()}${planPane()}${modelPane()}
+    <div class="pane"><div class="ph">${icon("circle")}Unité 501</div>
+      <div class="pb">${kvs(INSP_SECTIONS[0].rows)}</div></div>
+  </div>
+  <div style="padding:0 8px 8px">${qPane()}</div>
+  <div class="foot">Ouvertures de la façade sud <b>68,5 m² → 74,2 m²</b> +5,7 m²</div></div>`;
+
+const B2 = () => `<div class="screen">${navRows()}${header()}
+  <div class="cols" style="grid-template-columns:150px 1fr 1fr 330px">
+    ${unitList()}${planPane()}${modelPane()}
+    ${S.scope === "Bâtiment" ? qPane("Quantités du bâtiment")
+      : `<div class="pane"><div class="ph">${icon("circle")}Unité 501</div>
+          <div class="pb">${sectionArt("Unité")}<div style="margin-top:8px">${kvs(INSP_SECTIONS[0].rows)}</div></div></div>`}
+  </div>
+  <div class="foot">${S.scope === "Bâtiment"
+    ? "La colonne de droite compte le bâtiment ; aucune unité n'est sélectionnée."
+    : "Passez la portée à « Bâtiment entier » : la colonne de droite devient le tableau."}</div></div>`;
+
+const B3 = () => `<div class="screen">${navRows()}${header()}
+  <div class="cols" style="grid-template-columns:1.35fr .9fr;align-items:start">
+    <div class="pane"><div class="ph">${icon("table")}Quantités<span style="flex:1"></span>
+      <span class="tag">${S.scope}</span></div>
+      <div class="pb">${chipsHTML()}<div style="margin-top:8px">${tableHTML({ scroller: false })}</div></div></div>
+    <div style="display:flex;flex-direction:column;gap:8px;min-height:0">
+      ${planPane()}${modelPane()}</div>
+  </div>
+  <div class="foot">Le tableau mène, les dessins confirment. La ligne choisie est allumée sur les deux.</div></div>`;
+
+const B4 = () => `<div class="screen">${navRows()}${header()}
+  <div class="cols" style="grid-template-columns:270px 1fr 1fr;align-items:start">
+    <div class="pane"><div class="ph">
+      <button ${act("left", "unites")} style="font-weight:${S.left === "quant" ? 400 : 600}">Unités</button>
+      <span style="color:var(--line)">|</span>
+      <button ${act("left", "quant")} style="font-weight:${S.left === "quant" ? 600 : 400}">Quantités</button></div>
+      ${S.left === "quant"
+        ? `<div class="pb">${chipsHTML()}<div style="margin-top:8px">${tableHTML()}</div></div>`
+        : `<div class="ulist">${["501 · 5½", "502 · 5½", "503 · 3½", "504 · 4½", "505 · 4½"].map((u, i) =>
+            `<div class="urow" aria-selected="${i === 0}">${u}</div>`).join("")}</div>`}
+    </div>
+    ${planPane()}${modelPane()}
+  </div>
+  <div class="foot">Une colonne de 270 px pour six colonnes de chiffres : le tableau est à l'étroit.</div></div>`;
+
+/* ------------------------------------- part 3: the table, working, in full */
+function workbench() {
+  const r = curRow();
+  const win = S.tab === "Fenêtres";
+  return `<div class="screen">
+    <div class="nav1">${icon("table")}<b style="font-weight:600">Quantités</b>
+      <span class="tag">${S.scope}</span><span style="flex:1"></span>${scopeHTML()}
+      <span style="width:8px"></span>${csvNote()}</div>
+    <div class="cols" style="grid-template-columns:1.4fr 1fr;padding:8px">
+      <div class="pane"><div class="ph">${chipsHTML()}</div>
+        <div class="pb" style="padding:0">${tableHTML({ scroller: false })}</div>
+        <div style="padding:8px 10px;border-top:1px solid var(--line-2);font-size:11.5px;color:var(--ink-3)">
+          Compté à partir des dessins, rien de saisi. Cliquez une ligne : elle s'allume là où la chose existe.
+        </div></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${win ? `<div class="pane"><div class="ph">${icon("ruler")}${r.c[0]} — élévation du fabricant</div>
+          <div class="pb" style="display:flex;flex-direction:column;gap:8px">
+            <div class="win" style="background-position:${(r.tile || 0) * 33.33}% 50%"></div>
+            <div>${kvs([["Dimensions", `${r.c[1]} × ${r.c[2]} mm`], ["Quantité", `${r.c[3]} unités`],
+              ["Façade", r.c[4]], ["Dessin", r.c[5]]])}</div>
+            <a class="btn" href="#" ${act("lien")}>${icon("external-link")}${r.lien}</a>
+          </div></div>` : ""}
+        <div class="pane"><div class="ph">${icon("file")}Plan 2D
+          <span style="flex:1"></span><span class="tag">${r.where.includes("plan") ? "allumé" : "sans objet"}</span></div>
+          <div class="pb" style="padding:6px">${stage("plan")}</div></div>
+        <div class="pane"><div class="ph">${icon("box")}Maquette 3D
+          <span style="flex:1"></span><span class="tag">${r.where.includes("model") ? "allumé" : "sans objet"}</span></div>
+          <div class="pb" style="padding:6px">${stage("model")}</div></div>
+      </div>
+    </div></div>`;
+}
+
+/* ------------------------------ part 4: the journal and the coordination */
+const C1 = () => `<div class="screen">
+  <div class="nav1">${icon("map-pin")}<b style="font-weight:600">Journal</b>
+    <span style="color:var(--ink-3)">chaque entrée est posée sur un dessin</span></div>
+  <div class="cols" style="grid-template-columns:1.2fr .8fr;padding:8px">
+    <div class="pane"><div class="ph">${icon("file")}Plan 2D — niveau 5</div>
+      <div class="pb" style="padding:6px"><div class="stage">
+        <img src="assets/plan-niveau-5.jpg" alt="plan avec épingles" loading="lazy">
+        <svg preserveAspectRatio="none">${JOURNAL.map((j) =>
+          `<circle class="pinmark ${j.red ? "red" : ""}" cx="${j.at[0] * 100}%" cy="${j.at[1] * 100}%" r="9"/>
+           <text x="${j.at[0] * 100}%" y="${j.at[1] * 100}%" dy="3.5" text-anchor="middle"
+             font-size="9" fill="${j.red ? "#9a2b1f" : "#1b1b1b"}">${j.n}</text>`).join("")}</svg>
+        <span class="lbl">3 entrées sur ce niveau</span></div></div></div>
+    <div class="pane"><div class="ph">${icon("clock")}Ce qui a changé<span style="flex:1"></span>
+      <button class="btn" ${act("noop")}>${icon("plus")}Noter un changement</button></div>
+      <div class="pb" style="display:flex;flex-direction:column;gap:7px">
+        ${JOURNAL.map((j) => `<div class="log">
+          <span class="pin ${j.red ? "red" : ""}">${j.n}</span>
+          <span class="tx"><span class="who">${j.who} · ${j.when} · ${j.rev}</span>
+            <span class="what">${j.what}</span>
+            <span class="who">pourquoi : ${j.why}</span></span></div>`).join("")}
+      </div></div>
+  </div>
+  <div class="foot">Écrire une note, c'est cliquer le dessin puis taper une phrase : la position est l'épingle.</div></div>`;
+
+const C2 = () => `<div class="screen">
+  <div class="nav1">${icon("layers")}<b style="font-weight:600">Calques et croisements</b>
+    <span style="flex:1"></span><span class="tag">1 à régler</span></div>
+  <div class="cols" style="grid-template-columns:1.2fr .8fr;padding:8px">
+    <div class="pane"><div class="ph" style="height:auto;padding:7px 9px"><div class="layers">
+      ${[["arch", "Architecture"], ["paysage", "Paysage"], ["arpenteur", "Arpenteur"], ["plomberie", "Plomberie"]]
+        .map(([k, n]) => `<button class="lay" aria-pressed="${S.layers[k]}" ${act("layer", k)}><i></i>${n}</button>`).join("")}
+    </div></div>
+      <div class="pb" style="padding:6px"><div class="stage">
+        <img src="assets/plan-niveau-5.jpg" alt="plan avec calques" loading="lazy">
+        <svg preserveAspectRatio="none">
+          ${S.layers.plomberie && S.layers.arch ? `<circle class="pinmark red" cx="52%" cy="27%" r="10"/>
+            <text x="52%" y="27%" dy="3.5" text-anchor="middle" font-size="10" fill="#9a2b1f">!</text>` : ""}
+        </svg>
+        <span class="lbl">${S.layers.plomberie && S.layers.arch
+          ? "1 croisement visible : architecture × plomberie"
+          : "activez deux calques pour voir les croisements"}</span></div></div></div>
+    <div class="pane"><div class="ph">${icon("alert-triangle")}À régler</div>
+      <div class="pb" style="display:flex;flex-direction:column;gap:7px">
+        <div class="clash">${icon("alert-triangle")}
+          <span style="flex:1">Colonne C-12 traverse un drain de 100 mm.<br>
+            <span style="color:var(--ink-3);font-size:11.5px">A-205 R04 × P-301 R02 · niveau 5 · ouvert depuis le 19 oct</span></span>
+          <span class="tag">échéance 27 oct</span></div>
+        <div style="display:flex;gap:6px"><button class="btn">${icon("message-square")}Commenter</button>
+          <button class="btn">${icon("check")}Marquer réglé</button>
+          <button class="btn">${icon("clock")}Reporter</button></div>
+        <p class="nohl">Réglé, le croisement ne disparaît pas : il descend dans l'historique du niveau avec sa date
+          et le nom de la personne.</p>
+      </div></div>
+  </div></div>`;
+
+/* ------------------------------------------------------------- the page */
+const OPTS = [
+  { part: "1 · Le volet de droite", intro: "Quatre onglets, quatre glyphes qui se ressemblent, et la même vignette de plan répétée quatre fois : l'œil conclut que les quatre volets disent la même chose. Les quatre options ci-dessous suppriment chacune une cause différente." },
+  { n: "Option 1", name: "Tout déplié, chaque bloc titré", f: A1, half: true,
+    note: "Pas d'onglets du tout : les quatre blocs se suivent, chacun avec son titre écrit. Une seule vignette, celle de l'unité, parce que c'est la seule qui ajoute quelque chose. <b>Coût :</b> la colonne devient longue, il faut faire défiler pour atteindre l'historique." },
+  { n: "Option 2", name: "Accordéon, un seul ouvert", f: A2, half: true,
+    note: "Les quatre titres restent visibles en permanence — donc on sait que les quatre existent — et un seul contenu est ouvert. <b>Coût :</b> un clic de plus pour chaque consultation, et deux blocs ne peuvent jamais être comparés." },
+  { n: "Option 3", name: "Onglets, mais chacun son image", f: A3, half: true,
+    note: "Les onglets restent et portent le mot en entier ; surtout, chaque onglet montre ce qui lui appartient : le plan recadré sur l'unité, les élévations de fenêtres, la carte des croisements, et rien pour l'historique, qui est une liste de dates. <b>Coût :</b> la hauteur du volet change d'un onglet à l'autre." },
+  { n: "Option 4", name: "Une fiche courte, le reste ailleurs", f: A4, half: true,
+    note: "Le volet ne garde que ce qui décrit l'unité. Les trois autres blocs deviennent des liens vers l'endroit où la donnée vit déjà : les ouvertures dans le tableau, les croisements sur le plan, l'historique dans le journal. <b>Coût :</b> plus rien n'est lisible sans un clic, et le volet devient un menu." },
+
+  { part: "2 · Où vivent les quantités", intro: "Aujourd'hui le tableau est un tiroir sous les dessins, replié, et son titre ne dit pas sur quoi il compte alors que la bande du haut affiche « Niveau 5 ». Les quatre options déplacent le tableau et règlent la portée en même temps : une bascule <b>Niveau 5 / Bâtiment entier</b>, qui grise la bande des niveaux quand elle n'a plus de sens." },
+  { n: "Option 5", name: "Le tiroir du bas, déplié par défaut", f: B1,
+    note: "La disposition actuelle, mais ouverte et avec la portée écrite dans l'en-tête du tableau. <b>Coût :</b> 180 px pris aux dessins en permanence, et le tableau reste loin de l'œil quand on travaille dans le plan." },
+  { n: "Option 6", name: "La colonne de droite devient le tableau", f: B2,
+    note: "La portée commande la colonne : sur « Niveau 5 » elle montre l'unité choisie, sur « Bâtiment entier » elle montre les quantités et plus aucune unité n'est sélectionnée. Un seul endroit à droite, deux contenus selon la question. <b>Coût :</b> 330 px de large pour six colonnes, les grands tableaux défilent." },
+  { n: "Option 7", name: "Écran-tableau : les chiffres mènent", f: B3,
+    note: "Le tableau prend la grande place et les deux dessins deviennent les témoins : on lit une ligne, on la voit. C'est la disposition d'une vérification. <b>Coût :</b> ce n'est plus l'écran des plans ; il lui faut son propre onglet." },
+  { n: "Option 8", name: "Deuxième onglet de la colonne de gauche", f: B4,
+    note: "La colonne de gauche bascule entre la liste des unités et le tableau, les dessins gardent toute leur largeur. <b>Coût :</b> 270 px pour six colonnes de chiffres, c'est trop peu — mesuré ci-dessus, le tableau y est à l'étroit." },
+
+  { part: "3 · Le tableau lui-même", intro: "La priorité. Trois choses s'y règlent : <b>l'alignement</b> — une colonne de chiffres est alignée à droite en tête comme en corps, une colonne de mots à gauche des deux côtés, ce que les captures ne font pas ; <b>la sélection</b> — cliquer une ligne l'allume là où la chose existe vraiment, et le dit quand elle n'existe nulle part ; <b>l'export</b> — le bouton produit un vrai fichier .csv de la table affichée. Les en-têtes sont cliquables pour trier." },
+  { n: "Option 9", name: "Le tableau au travail", f: workbench,
+    note: "Essayez : <b>Matériaux → brique grise</b> n'allume que la façade sud de la maquette, et le plan dit « rien à montrer pour cette ligne » — une brique n'est pas sur un plan d'étage. <b>Superficies → niveau 5</b> allume la circulation sur le plan et laisse la maquette éteinte. <b>Fenêtres</b> ajoute l'élévation du type choisi, découpée dans la feuille d'ouvertures, ses dimensions, sa quantité et un lien fabricant. L'export .csv fonctionne." },
+
+  { part: "4 · Le journal et la coordination", intro: "Ni l'un ni l'autre n'est une fiche d'unité. Un changement est un fait daté posé à un endroit du dessin ; un croisement est un problème qui appartient à deux calques à la fois. Les deux options les sortent du volet de droite." },
+  { n: "Option 10", name: "Journal : une phrase posée sur le dessin", f: C1,
+    note: "C'est l'exploration des épingles appliquée au suivi : noter un changement, c'est cliquer l'endroit puis écrire une phrase. L'entrée porte qui, quand, quelle révision et <b>pourquoi</b> — la raison étant la seule chose qu'un dessin ne peut pas dire tout seul. <b>Coût :</b> il faut cliquer juste ; une note mal posée est pire qu'une note sans position." },
+  { n: "Option 11", name: "Coordination : des calques et un ticket", f: C2,
+    note: "Les croisements ne sont pas un panneau, ce sont des marques rouges qui n'apparaissent que lorsque deux calques sont allumés ensemble — essayez d'éteindre la plomberie. La marque ouvre un ticket avec une échéance, et « réglé » l'envoie dans l'historique au lieu de l'effacer. <b>Coût :</b> rien n'est visible tant que les bons calques ne sont pas activés ; il faut donc un compteur ailleurs." },
+];
+
+function render() {
+  document.getElementById("app").innerHTML = OPTS.map((o) => {
+    if (o.part) return `<h2 class="part">${o.part}</h2><p>${o.intro}</p>`;
+    return `<section class="opt" ${o.half ? 'style="display:none"' : ""}>
+      <div class="cap"><span class="n">${o.n}</span><b>${o.name}</b></div>
+      <p class="note">${o.note}</p>
+      <div class="shot">${o.f()}</div></section>`;
+  }).join("");
+
+  /* The four inspector options are narrow, so they are laid two by two
+     rather than stretched across the page. */
+  const halves = OPTS.filter((o) => o.half);
+  const holder = document.createElement("div");
+  holder.className = "quad";
+  holder.innerHTML = halves.map((o) => `<section class="opt" style="margin-top:0">
+    <div class="cap"><span class="n">${o.n}</span><b>${o.name}</b></div>
+    <p class="note">${o.note}</p>
+    <div class="shot">${o.f()}</div></section>`).join("");
+  const firstPart = document.querySelectorAll("#app h2.part")[0];
+  firstPart.nextElementSibling.after(holder);
+  document.querySelectorAll("#app > section.opt[style*='none']").forEach((n) => n.remove());
+
+  document.getElementById("verdict").innerHTML = `<b>Ce que je retiendrais.</b>
+    <ul>
+      <li><b>Volet de droite : option 3.</b> Les onglets ne sont pas le problème ; la vignette répétée l'était.
+        Un onglet qui ne peut pas montrer une image propre n'en montre pas.</li>
+      <li><b>Quantités : option 6 pour l'écran des plans, option 7 comme écran à part.</b> La bascule de portée
+        règle la confusion « Niveau 5 » / bâtiment sans ajouter un mot, parce qu'elle grise la bande des niveaux
+        quand la question ne porte plus sur un étage.</li>
+      <li><b>Tableau : option 9, telle quelle.</b> Alignement par type de colonne, ligne qui allume la bonne
+        surface et qui dit quand il n'y en a pas, export .csv réel.</li>
+      <li><b>Journal et coordination : hors du volet.</b> Le journal est une épingle plus une phrase ; la
+        coordination est une marque rouge qui n'existe que quand deux calques se croisent, plus un ticket daté.</li>
+    </ul>`;
+}
+
+/* ---------------------------------------------------------------- events */
+function toCSV() {
+  const t = T();
+  const esc = (v) => `"${String(v).replace(/"/g, '""').replace(/\u00a0/g, " ")}"`;
+  const lines = [[`Le Baldwin III — ${S.tab} — portée ${S.scope}`],
+    t.cols.map(([n]) => n), ...t.rows.map((r) => r.c), t.total];
+  const csv = lines.map((l) => l.map(esc).join(",")).join("\r\n");
+  /* A BOM so Excel on Windows reads the accents. */
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `baldwin-iii-${S.tab.toLowerCase().normalize("NFD").replace(/[^a-z]/g, "")}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-a]");
+  if (!el) return;
+  const { a, v } = el.dataset;
+  if (a === "lien") { e.preventDefault(); return; }
+  if (a === "csv") { toCSV(); return; }
+  if (a === "tab") { S.tab = v; S.row = 0; S.sort = { col: null, dir: 1 }; }
+  if (a === "row") S.row = Number(v);
+  if (a === "scope") S.scope = v;
+  if (a === "insp") S.insp = v;
+  if (a === "left") S.left = v;
+  if (a === "layer") S.layers[v] = !S.layers[v];
+  if (a === "sort") {
+    const c = Number(v);
+    S.sort = S.sort.col === c ? { col: c, dir: -S.sort.dir } : { col: c, dir: 1 };
+  }
+  render();
+});
+
+S.left = "quant";
+sprite();
+render();
+</script>
+</body>
+</html>
