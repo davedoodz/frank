@@ -871,7 +871,7 @@ const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1))
 const SCREENS = {
   "Projets": { icon: "folder", regions: ["header", "content"], steps: {}, home: true, index: true },
   "Unités": {
-    icon: "layers",
+    icon: "git-compare",
     regions: ["header", "list", "content", "inspector", "footer"],
     steps: { list: 1, content: 2, inspector: 3, footer: 4 },
   },
@@ -1343,8 +1343,10 @@ function unitMarkHTML() {
    "what is due when". Each screen carries its own shortlist, and the panel
    picks one per screen; the first of each list is what it opens with. */
 const NAV_ICONS = {
-  "Unités": [["Layers", "layers"], ["Floor grid", "grid-2x2"], ["Rooms", "bed-double"],
-    ["Doors", "door-open"], ["Ruler", "ruler"]],
+  /* Coordination: two drawings brought side by side, which is the glyph
+     git uses for the same idea. Layers stays on the shortlist. */
+  "Unités": [["Compare", "git-compare"], ["Layers", "layers"], ["Floor grid", "grid-2x2"],
+    ["Rooms", "bed-double"], ["Ruler", "ruler"]],
   "Codes": [["Scale", "scale"], ["Checklist", "clipboard-list"], ["Flag", "flag"],
     ["Book", "book-open"], ["Shield", "shield-check"]],
   "Échéancier": [["Calendar", "calendar-check"], ["Timer", "timer"], ["Clock", "calendar-clock"],
@@ -1741,15 +1743,23 @@ function taskListHTML() {
 /* Sections only appear in the grouped rail: the first three screens read a
    project, the next three act on it, the last one stores it. */
 const SECTIONS = { 0: "Lecture", 3: "Décision", 6: "Archive" };
-const SHORT = (name) => name.slice(0, 3).toUpperCase();
+/* The key of a screen and the word on its tab are not the same thing. The
+   key is "Unités" everywhere in this file — it indexes views, rows, titles
+   and the fixture — while the tab says Coordination, because what the
+   screen does is reconcile the drawing with the model, and the units are
+   only the list it does it through. Renaming the key would touch thirty
+   lookups for a word. */
+const SCREEN_LABEL = { "Unités": "Coordination" };
+const labelOf = (name) => SCREEN_LABEL[name] || name;
+const SHORT = (name) => labelOf(name).slice(0, 3).toUpperCase();
 
 /* One label rule for the rail and the tabs, so a title never reads two ways
    on the same screen. Hover and Hidden are CSS, the rest rewrite the text. */
 function navLabel(name, i) {
   const m = V.nav.labels;
   if (m === "Short code") return SHORT(name);
-  if (m === "Numbered") return `${i + 1}. ${name}`;
-  return name;
+  if (m === "Numbered") return `${i + 1}. ${labelOf(name)}`;
+  return labelOf(name);
 }
 
 const railIcons = () => V.nav.icons === "Rail and tabs" || V.nav.icons === "Rail only";
@@ -1866,9 +1876,9 @@ function navHTML() {
     const g = ic ? icon(navIcon(name)) : "";
     const text = `<span class="hi">${navLabel(name, i)}</span>`;
     const head = sections && SECTIONS[i] ? `<div class="sct hi">${SECTIONS[i]}</div>` : "";
-    if (wide) return `${head}<div class="row ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%"></span>${text}</div>`;
-    if (stack) return `<div class="stk ${on}" data-screen="${name}" title="${name}">${g}<span class="lo bar" style="width:70%;height:6px"></span>${text}</div>`;
-    return `<div class="ic ${on}" data-screen="${name}" title="${name}">${g || `<span class="code hi">${SHORT(name)}</span>`}${g ? `<span class="cap hi">${navLabel(name, i)}</span>` : ""}</div>`;
+    if (wide) return `${head}<div class="row ${on}" data-screen="${name}" title="${labelOf(name)}">${g}<span class="lo bar" style="width:70%"></span>${text}</div>`;
+    if (stack) return `<div class="stk ${on}" data-screen="${name}" title="${labelOf(name)}">${g}<span class="lo bar" style="width:70%;height:6px"></span>${text}</div>`;
+    return `<div class="ic ${on}" data-screen="${name}" title="${labelOf(name)}">${g || `<span class="code hi">${SHORT(name)}</span>`}${g ? `<span class="cap hi">${navLabel(name, i)}</span>` : ""}</div>`;
   }).join("");
   const cls = wide ? "wide" : stack ? "stack" : "";
   return `<nav class="rail rg ${solo("nav")} ${cls}" data-rg="navigation" data-fi="${fiOf("nav")}"
@@ -1900,7 +1910,7 @@ function tabsHTML() {
   /* Icons off and labels away would leave an empty strip, so the short code
      stands in: a tab target never renders without something to read. */
   const bare = !ic && (V.nav.labels === "Hidden" || V.nav.labels === "Hover only");
-  const tab = (name, i) => `<button data-screen="${name}" aria-current="${name === V.screen}" title="${name}">
+  const tab = (name, i) => `<button data-screen="${name}" aria-current="${name === V.screen}" title="${labelOf(name)}">
       ${ic ? icon(SCREENS[name].icon) : ""}<span class="lo bar" style="width:46px"></span>
       ${bare ? `<span class="hi code">${SHORT(name)}</span>` : `<span class="hi">${navLabel(name, i)}</span>`}</button>`;
 
@@ -3306,8 +3316,10 @@ const dial = DialKit.createDialKit("Wireframe C3", {
 /* The id carries the saved panel. It is bumped whenever a default changes,
    because a panel saved before it would keep reopening on the old one — the
    dark bar and the card grid would never be seen by anyone who had already
-   opened the file. r3: dark chrome by default, unit cards by default. */
-}, { id: "wireframe-c3-r3", persist: true });
+   opened the file. r3: dark chrome and unit cards by default. r4: the
+   Coordination tab and its glyph, which a saved panel would otherwise pin
+   back to Layers. */
+}, { id: "wireframe-c3-r4", persist: true });
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
 
