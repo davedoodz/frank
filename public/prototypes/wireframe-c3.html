@@ -548,10 +548,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 /* The engineering layers are already cropped to the floor plan's own
    2000×1675 canvas, so they fill the box edge to edge rather than being
    scaled and centred the way the surveyor's differently-cropped sheet is. */
-.plan .lay.eng{inset:0;background-size:100% 100%}
+.plan .lay.eng{inset:0;background-size:100% 100%;mix-blend-mode:multiply}
 .engineering-bar{padding:6px 10px;border-bottom:1px solid var(--line-2);flex:0 0 auto}
 .engineering-bar .laychips{flex-wrap:wrap;margin:0}
-.engineering-bar .laychips .lb{display:inline}
+.engineering-bar .laychips .chip .lb{display:inline}
 .engineering-source{font-size:11px;color:var(--ink-2);margin-top:4px}
 .model-context-note{padding:6px 10px;font-size:11px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
 /* The three layer chips sit in the pane header, tight, so the header still
@@ -1149,7 +1149,10 @@ LEVELS.forEach((lv) => {
       suffix, baseTypo(ty), lv, ty, pi2, open];
   });
 });
-UNITS_BY_LEVEL["Tous les niveaux"] = LEVELS.flatMap((lv) => UNITS_BY_LEVEL[`Niveau ${lv}`]);
+/* Every unit of the building, for the counts a project card shows. It is
+   not a level tab: the strip asks for one floor, and the building-wide
+   question is the scope switch at the head of that strip. */
+const ALL_UNITS = LEVELS.flatMap((lv) => UNITS_BY_LEVEL[`Niveau ${lv}`]);
 NONRES_LEVELS.forEach((lv) => { UNITS_BY_LEVEL[levelView(lv)] = []; });
 
 /* The inspector's own tabs, and the five reasons a change is allowed to have.
@@ -1382,12 +1385,11 @@ const contoursFor = (level) => CONTOURS[level] || CONTOURS.typical;
    Floors without an override use the typical outlines. */
 window.fitteContours = CONTOURS;
 
-/* currentLevel() is null on "Tous les niveaux": the tabs aren't on one
-   level. paneLevel() is the level actually on screen either way — a
-   level tab's own level, or, on "Tous les niveaux", the selected unit's
-   real level, so picking a unit from the combined list shows its own
-   true floor instead of a stand-in. Falls back to the typical floor (5)
-   when nothing is selected yet. */
+/* currentLevel() is null when the tab is not a residential floor — a
+   basement or a commercial level has no unit sheet of its own. paneLevel()
+   is the level actually on screen either way: the tab's own level, or the
+   selected unit's real level. Falls back to the typical floor (5) when
+   nothing is selected yet. */
 function currentLevel() {
   return sourceLevel(viewOf("Unités"));
 }
@@ -1645,8 +1647,8 @@ function paintSaveButton() {
 /* A control is a control: it says what it does and it is clickable. */
 const act = (name, value) => `data-act="${name}"${value === undefined ? "" : ` data-value="${value}"`}`;
 
-/* The drawing the screen is reading right now: a level tab's own sheet,
-   or — on "Tous les niveaux" — the selected unit's real level (paneLevel
+/* The drawing the screen is reading right now: the level tab's own sheet,
+   or, where that tab has none, the selected unit's real level (paneLevel
    above), so every other screen shows that unit's true floor rather than
    a stand-in composite. */
 /* The architectural source for a residential floor; null on a basement or
@@ -2004,7 +2006,7 @@ const tabIcons = () => V.nav.layout === "Two rows, no rail"
 /* One real project, the one every drawing in assets/ belongs to:
    Le Baldwin III, boulevard Saint-Jean, Dollard-des-Ormeaux. */
 const PROJECTS = [
-  ["Le Baldwin III", `${UNITS_BY_LEVEL["Tous les niveaux"].length} unités · 8 niveaux`, "BAL3_Étage_Type R04 · 24 Oct", "6 écarts", 1],
+  ["Le Baldwin III", `${ALL_UNITS.length} unités · 8 niveaux`, "BAL3_Étage_Type R04 · 24 Oct", "6 écarts", 1],
 ];
 
 /* The state is the one word on a card allowed colour: a project with
@@ -2074,7 +2076,7 @@ const HOMES = {
   "List + preview": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
       ${pane("projets", "Tous les projets", `${plist(0)}<span class="btnw solid" ${act("newproject")} style="justify-content:center">${icon("plus")}<span class="hi">Nouveau projet</span></span>`, "flex:.85")}
       ${pane("aperçu", "Le Baldwin III", `<div class="plan ghost cover" style="min-height:140px">${icon("image")}</div>
-        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">${UNITS_BY_LEVEL["Tous les niveaux"].length} unités · 8 niveaux · lu il y a 6 min</span></div></div>`, "flex:1.5")}
+        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">${ALL_UNITS.length} unités · 8 niveaux · lu il y a 6 min</span></div></div>`, "flex:1.5")}
     </div>`,
 
   "Recent, then all": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
@@ -2118,7 +2120,7 @@ function navHTML() {
    rail lists the screens, the strip drops to the current screen's own views. */
 const CONTEXT = {
   "Projets": ["En cours", "Archivés"],
-  "Unités": [...LEVEL_VIEWS, "Tous les niveaux"],
+  "Unités": LEVEL_VIEWS,
   /* The second row filters the list: which body of rules is being read.
      The Québec construction code comes first because it is the one the
      building itself is judged against. */
