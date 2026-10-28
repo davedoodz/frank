@@ -868,9 +868,10 @@ const V = {
     "3.3.1.18": [{ who: "Chargée de projet", when: "24 oct", txt: "Le garde-corps est dessiné à 1 020 mm sur l'élévation sud. À reprendre avant le dépôt." }],
     "art. 71": [{ who: "Entrepreneur général", when: "22 oct", txt: "Vérifier la réduction pour proximité du métro avant de recompter les cases." }],
   },
-  /* Échéancier: the day the calendar is centred on, and which task is open.
-     The calendar's scale is the view in the second row. */
+  /* Échéancier: the day the calendar is centred on, the scale it is drawn
+     at — chosen on the calendar itself — and which task is open. */
   day: "2026-11-14",
+  scale: "Mois",
   task: null,
   /* What the screen is counting. "Niveau" is one floor: the unit list, the
      two drawings and the right column. "Bâtiment" is all eight: the work
@@ -1846,6 +1847,8 @@ const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet"
   "août", "septembre", "octobre", "novembre", "décembre"];
 const MONTHS_AB = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
 const DOW = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
+/* The three scales the calendar can be drawn at, in the order they widen. */
+const CAL_SCALES = ["Semaine", "Mois", "Année"];
 const iso = (d) => d.toISOString().slice(0, 10);
 const dOf = (s) => new Date(s + "T00:00:00Z");
 const shift = (s, n) => { const d = dOf(s); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
@@ -1856,7 +1859,7 @@ const tasksOn = (s) => TASKS.filter((t) => t.day === s);
 const lateCount = () => TASKS.filter((t) => !t.done && t.day < TODAY).length;
 
 function calTitle() {
-  const d = dOf(V.day), v = viewOf("Échéancier");
+  const d = dOf(V.day), v = V.scale;
   if (v === "Année") return `${d.getUTCFullYear()}`;
   if (v === "Semaine") {
     const a = monday(V.day);
@@ -1896,7 +1899,7 @@ function monthGrid(y, m, big) {
 }
 
 function calendarHTML() {
-  const v = viewOf("Échéancier"), d = dOf(V.day);
+  const v = V.scale, d = dOf(V.day);
   if (v === "Année") {
     const y = d.getUTCFullYear();
     return `<div class="year">${MONTHS.map((name, m) => `<div class="ym">
@@ -2118,8 +2121,6 @@ function navHTML() {
 const CONTEXT = {
   "Projets": ["En cours", "Archivés"],
   "Unités": LEVEL_VIEWS,
-  /* The scale the calendar is drawn at. */
-  "Échéancier": ["Mois", "Semaine", "Année"],
 };
 
 function tabsHTML() {
@@ -2487,11 +2488,14 @@ function contentHTML() {
     /* Échéancier is a calendar on the left and the work on the right. They
        are one object seen twice: a task has a date, so it is a mark on the
        calendar; a day holds tasks, so clicking it filters the list. The
-       scale — année, mois, semaine — is the view in the strip above. */
+       scale sits on the calendar it draws, beside the dates it changes,
+       rather than in a strip above that looked like a change of screen. */
     "Échéancier": () => `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap)">
       <div class="pane" style="flex:1.25">
         <div class="ph">${icon("calendar-check")}<span class="lo bar" style="width:70px"></span>
           <span class="hi">${calTitle()}</span><span style="flex:1"></span>
+          ${CAL_SCALES.map((s) => `<span class="chip ${V.scale === s ? "on" : ""}" ${act("calscale", s)}
+            title="Dessiner le calendrier par ${s.toLowerCase()}"><span class="hi">${s}</span></span>`).join("")}
           <span class="btnw" ${act("calmove", "-1")} title="Avant">${icon("chevron-left")}</span>
           <span class="btnw" ${act("calmove", "1")} title="Après">${icon("chevron-right")}</span>
           <span class="btnw" ${act("calday", TODAY)}><span class="hi">Aujourd'hui</span></span></div>
@@ -3671,9 +3675,11 @@ function onClick(e) {
     /* The calendar and the list are one object: a day click filters the
        list, a date in the list moves the calendar. */
     case "calday": V.day = value; break;
-    case "calmonth": V.day = value; V.view["Échéancier"] = 0; break;
+    /* Clicking a month in the year grid is asking to read that month. */
+    case "calmonth": V.day = value; V.scale = "Mois"; break;
+    case "calscale": V.scale = value; break;
     case "calmove": {
-      const n = Number(value), v = viewOf("Échéancier");
+      const n = Number(value), v = V.scale;
       if (v === "Semaine") V.day = shift(V.day, 7 * n);
       else if (v === "Année") {
         const d = dOf(V.day); d.setUTCFullYear(d.getUTCFullYear() + n); V.day = iso(d);
