@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La navigation du haut, plus lisible — six options</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Same ramp, same type, same hairlines as wireframe-c3. What changes from
+   option to option is the size of the word, the contrast it is written in,
+   and the size of the thing the hand has to hit. Nothing here is a new
+   visual language — it is the same navigation, made readable. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --card:#fff; --vert:#c3e05a; --vert-ink:#2f3a05;
+  --wash:rgba(17,17,18,.055); --wash-2:rgba(17,17,18,.085);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:28px 24px 64px}
+.lu{width:16px;height:16px;flex:0 0 auto;stroke-width:1.6}
+
+/* page scaffolding ------------------------------------------------------ */
+.head{max-width:1180px;margin:0 auto 20px}
+.head h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.head p{color:var(--ink-2);margin-top:5px;max-width:78ch}
+/* Two ways of looking at the same six: through 1,5 px of blur, which is
+   roughly a screen seen from a step back, and through a washed-out field,
+   which is a laptop under a window in the afternoon. Both are the condition
+   the people who could not find the buttons were actually in. */
+.ctl{max-width:1180px;margin:0 auto 24px;display:flex;align-items:center;gap:8px;
+  border:1px solid var(--line-2);border-radius:8px;background:var(--card);padding:8px 10px}
+.ctl .lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-right:2px}
+.ctl button{border:1px solid var(--line-2);background:var(--card);border-radius:6px;font:inherit;
+  font-size:12px;color:var(--ink-2);padding:5px 10px;cursor:pointer}
+.ctl button:hover{background:var(--wash);color:var(--ink)}
+.ctl button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.ctl .hint{margin-left:auto;font-size:11.5px;color:var(--ink-3)}
+.opts{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:30px}
+.opt{display:flex;flex-direction:column;gap:9px}
+.opt .cap{display:flex;align-items:baseline;gap:9px}
+.opt .cap b{font-size:13.5px;font-weight:600}
+.opt .cap .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.opt .cap .note{color:var(--ink-2);font-size:12px;max-width:92ch}
+.shot{border:1px solid var(--line-2);border-radius:8px;background:var(--card);overflow:hidden}
+/* The two viewing conditions are filters on the frame, never on the page:
+   the captions stay readable while the navigations are degraded. */
+body[data-blur="on"] .shot{filter:blur(1.5px)}
+body[data-sun="on"] .shot{filter:contrast(.62) brightness(1.1)}
+body[data-blur="on"][data-sun="on"] .shot{filter:blur(1.5px) contrast(.62) brightness(1.1)}
+
+/* the navigation, as it stands today ------------------------------------ */
+/* One markup for all six. Each option is a class on .nav and nothing else,
+   except where a different shape is the point — otherwise the comparison
+   would be between two markups rather than between two readings. */
+.nav{background:var(--card);border-bottom:1px solid var(--line-2)}
+.nav .r1{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px}
+.nav .r2{display:flex;align-items:center;gap:3px;height:32px;padding:0 10px;
+  border-top:1px solid var(--line-2);background:var(--card)}
+.crumb{display:inline-flex;align-items:center;gap:5px;color:var(--ink-3);font-size:11.5px;
+  white-space:nowrap;cursor:pointer}
+.crumb .lu{width:14px;height:14px}
+.proj{font-weight:600;font-size:12px;white-space:nowrap;color:var(--ink)}
+.sep{width:1px;height:14px;background:var(--line-2);margin:0 4px;flex:0 0 auto}
+.tabs{display:flex;align-items:center;gap:2px;min-width:0}
+/* The target in the prototype today, measured on the real screen: the word
+   in 12,5 px of --ink-3 on white, no edge, in a 74 × 29 px box. The box is
+   large enough; the word is not dark enough and nothing marks the edge. */
+.tab{display:inline-flex;align-items:center;gap:5px;height:29px;padding:0 9px;border:1px solid transparent;
+  border-radius:6px;background:transparent;font:inherit;font-size:12.5px;color:var(--ink-3);
+  cursor:pointer;white-space:nowrap}
+.tab .lu{width:14px;height:14px}
+.tab:hover{background:var(--wash);color:var(--ink)}
+.tab[aria-current="true"]{background:var(--fill);color:var(--ink);font-weight:500}
+.lvl{border:1px solid transparent;background:transparent;font:inherit;font-size:12px;
+  color:var(--ink-3);padding:4px 9px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.lvl:hover{background:var(--wash);color:var(--ink)}
+.lvl[aria-current="true"]{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.share{margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;
+  border:1px solid var(--line-2);border-radius:6px;font-size:11.5px;color:var(--ink-2);
+  background:var(--card);cursor:pointer;white-space:nowrap}
+.share .lu{width:14px;height:14px}
+
+/* option 1 — the same navigation, bigger and darker -------------------- */
+/* No new chrome at all: the word goes from 11,5 to 14 px, the grey goes to
+   the ink the body text is written in, the target from 24 to 34 px. */
+.nav.v1 .r1{height:44px}
+.nav.v1 .r2{height:38px}
+.nav.v1 .tab{height:34px;padding:0 12px;font-size:14px;color:var(--ink);gap:7px}
+.nav.v1 .tab .lu{width:18px;height:18px}
+.nav.v1 .tab[aria-current="true"]{background:var(--fill);font-weight:600}
+.nav.v1 .lvl{font-size:13px;padding:6px 11px;color:var(--ink)}
+.nav.v1 .proj{font-size:13.5px}
+.nav.v1 .crumb{font-size:12.5px}
+.nav.v1 .share{height:30px;font-size:13px;color:var(--ink)}
+
+/* option 2 — the screens as a segmented control ------------------------ */
+/* Every tab keeps a visible edge, so the row reads as three objects before
+   a single word is read. The chosen one is filled, not tinted. */
+.nav.v2 .r1{height:42px}
+.nav.v2 .tabs{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--fill-2);gap:0}
+.nav.v2 .tab{height:30px;padding:0 14px;font-size:13px;color:var(--ink);border-radius:0;
+  border-right:1px solid var(--line)}
+.nav.v2 .tabs .tab:last-child{border-right:0}
+.nav.v2 .tab[aria-current="true"]{background:var(--ink);color:#fff;font-weight:600}
+.nav.v2 .tab[aria-current="true"] .lu{color:#fff}
+.nav.v2 .lvl{font-size:12.5px;padding:5px 10px;color:var(--ink);border-color:var(--line-2)}
+.nav.v2 .r2{height:36px}
+
+/* option 3 — one strong underline, nothing else ------------------------ */
+/* The row keeps its height and its quiet; what is chosen is marked by a
+   3 px rule under the word, which is the one mark that survives a blur. */
+.nav.v3 .r1{height:40px}
+.nav.v3 .tabs{gap:4px;align-self:stretch;align-items:stretch}
+.nav.v3 .tab{height:auto;border-radius:0;padding:0 12px;font-size:13.5px;color:var(--ink-2);
+  border:0;border-bottom:3px solid transparent;align-items:center}
+.nav.v3 .tab:hover{background:transparent;border-bottom-color:var(--line)}
+.nav.v3 .tab[aria-current="true"]{background:transparent;color:var(--ink);font-weight:600;
+  border-bottom-color:var(--ink)}
+.nav.v3 .tab .lu{width:16px;height:16px}
+.nav.v3 .r2{height:34px}
+.nav.v3 .lvl{font-size:12.5px;color:var(--ink)}
+
+/* option 4 — the dark bar ---------------------------------------------- */
+/* The chrome stops pretending to be paper. Black bar, white words: the
+   highest contrast available, and the drawing below is unmistakably the
+   only white thing on the screen. */
+.nav.v4{background:#141416;border-bottom-color:#141416}
+.nav.v4 .r1{height:42px}
+.nav.v4 .r2{background:#1e1e21;border-top-color:#2c2c31;height:34px}
+.nav.v4 .crumb{color:rgba(255,255,255,.58)}
+.nav.v4 .proj{color:#fff;font-size:13px}
+.nav.v4 .sep{background:rgba(255,255,255,.18)}
+.nav.v4 .tab{color:rgba(255,255,255,.72);font-size:13.5px;height:30px;padding:0 12px}
+.nav.v4 .tab:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav.v4 .tab[aria-current="true"]{background:#fff;color:#141416;font-weight:600}
+.nav.v4 .lvl{color:rgba(255,255,255,.72);font-size:12.5px}
+.nav.v4 .lvl:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav.v4 .lvl[aria-current="true"]{background:var(--vert);color:var(--vert-ink)}
+.nav.v4 .share{background:transparent;border-color:rgba(255,255,255,.28);color:rgba(255,255,255,.82)}
+
+/* option 5 — glyph over word, the ribbon button ------------------------ */
+/* The target stops being a line of text and becomes a block: 58 × 46 px,
+   the glyph read first and the word under it confirming. The most room
+   taken, and the thing a hand finds without looking. */
+.nav.v5 .r1{height:54px;align-items:stretch;padding:4px 10px}
+.nav.v5 .tabs{gap:3px;align-items:stretch}
+.nav.v5 .tab{flex-direction:column;justify-content:center;gap:2px;height:auto;min-width:62px;
+  padding:4px 8px;font-size:11.5px;color:var(--ink);border-radius:7px}
+.nav.v5 .tab .lu{width:22px;height:22px;stroke-width:1.5}
+.nav.v5 .tab[aria-current="true"]{background:var(--fill);font-weight:600;
+  box-shadow:inset 0 -3px 0 var(--ink)}
+.nav.v5 .crumb,.nav.v5 .proj,.nav.v5 .sep,.nav.v5 .r1 > .lu{align-self:center}
+.nav.v5 .share{align-self:center;height:30px;font-size:12.5px;color:var(--ink)}
+.nav.v5 .r2{height:36px}
+.nav.v5 .lvl{font-size:12.5px;padding:5px 10px;color:var(--ink)}
+
+/* option 6 — the screen's name said once, in full ---------------------- */
+/* The tabs leave the thin strip and become the page's own heading, where
+   the title already was: 17 px, the chosen one in ink, the others beside
+   it as plain words. The strip above keeps only the project. One row less,
+   and the largest type on the screen is the navigation. */
+.nav.v6 .r1{height:34px}
+.nav.v6 .r2{height:34px}
+.nav.v6 .lvl{font-size:12.5px;color:var(--ink)}
+.bigtabs{display:flex;align-items:baseline;gap:16px;padding:12px 14px 8px;background:var(--page)}
+.bigtabs button{border:0;background:transparent;font:inherit;font-size:17px;letter-spacing:-.01em;
+  color:var(--ink-2);cursor:pointer;padding:0 0 3px;border-bottom:3px solid transparent}
+.bigtabs button:hover{color:var(--ink)}
+.bigtabs button[aria-current="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+/* the stub of the screen under each navigation ------------------------- */
+.body{background:var(--page)}
+.title{padding:12px 14px 10px}
+.title h2{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.title p{color:var(--ink-2);font-size:12px;margin-top:2px}
+.title.slim{padding:2px 14px 10px}
+.work{display:grid;grid-template-columns:168px 1fr 1fr 180px;gap:9px;padding:0 9px 9px}
+.pane{border:1px solid var(--line-2);border-radius:6px;background:var(--card);overflow:hidden;
+  display:flex;flex-direction:column;min-width:0}
+.ph{height:28px;display:flex;align-items:center;gap:7px;padding:0 9px;font-size:12px;
+  color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+.field{height:142px;background:#fff}
+.rows{padding:6px;display:flex;flex-direction:column;gap:4px}
+.rw{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:5px;font-size:12px;color:var(--ink-2)}
+.rw.on{background:#eef1e0;color:var(--ink);font-weight:500}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:5px 9px;font-size:11.5px;color:var(--ink-2)}
+.kv b{font-weight:600;color:var(--ink)}
+
+/* what each option costs and what it gains ----------------------------- */
+.tbl{max-width:1180px;margin:34px auto 0;border:1px solid var(--line-2);border-radius:8px;
+  background:var(--card);border-collapse:separate;border-spacing:0;width:100%}
+.tbl th,.tbl td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line-2);font-size:12px}
+.tbl th{font-weight:500;color:var(--ink-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.tbl tr.base td{background:var(--fill-2)}
+/* A number below the threshold is named, not coloured: the point is that it
+   can be read as a sentence in a report. */
+.bad{color:#9a2b1f;font-weight:600}
+.ok{color:var(--ink)}
+.verdict{max-width:1180px;margin:22px auto 0;color:var(--ink-2);font-size:12.5px;max-width:92ch}
+.verdict b{color:var(--ink)}
+.foot{max-width:1180px;margin:14px auto 0;color:var(--ink-3);font-size:11.5px}
+</style>
+</head>
+<body data-blur="off" data-sun="off">
+
+<div class="head">
+  <h1>La navigation du haut, plus lisible — six options</h1>
+  <p>Des gens n'ont pas trouvé les boutons du haut. Mesurés sur l'écran réel, ils sont écrits en
+     12,5 px de gris clair sur du blanc — 2,8:1, sous le seuil de 4,5 — sans bordure et sans rien qui
+     marque où commence et où finit la cible. La cible, elle, est assez grande : ce n'est pas la taille
+     du bouton qui a manqué, c'est qu'il ne ressemblait pas à un bouton. Les six options ci-dessous
+     changent la couleur, la taille ou le bord, ou les trois. Elles partagent le même état — changer
+     d'écran ou de niveau dans l'une les change toutes. Le tableau du bas est mesuré dans la page :
+     taille réelle, contraste réel calculé depuis les couleurs appliquées, cible réelle.</p>
+</div>
+
+<div class="ctl">
+  <span class="lbl">Voir comme</span>
+  <button data-tog="blur" aria-pressed="false">Flou 1,5 px</button>
+  <button data-tog="sun" aria-pressed="false">Écran en plein jour</button>
+  <span class="hint">Les deux conditions dans lesquelles la navigation a échoué.</span>
+</div>
+
+<div class="opts" id="opts"></div>
+<table class="tbl" id="cost"></table>
+<p class="verdict" id="verdict"></p>
+<p class="foot">Seuils : WCAG 2.2 demande 4,5:1 pour du texte sous 18,7 px, 3:1 au-dessus, et une cible
+   d'au moins 24 × 24 px. Le contraste est calculé ici sur les couleurs réellement appliquées, fond
+   composé compris.</p>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* ------------------------------------------------------------------ data
+   The navigation as it now stands in wireframe-c3: three screens, eight
+   levels, a share button at the end of the first row. */
+const SCREENS = [["Unités", "layers"], ["Codes", "scale"], ["Échéancier", "calendar-check"]];
+const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8];
+const S = { screen: "Unités", level: 5 };
+
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+function sprite() {
+  const names = ["folder", "chevron-right", "layers", "scale", "calendar-check", "share-2",
+    "list", "file", "box", "external-link", "circle"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* ----------------------------------------------------------- nav pieces */
+const on = (c) => (c ? ' aria-current="true"' : "");
+const crumb = () => `<span class="crumb">${icon("folder")}Tous les projets</span>
+  ${icon("chevron-right")}<span class="proj">Le Baldwin III</span>`;
+const tabs = () => `<div class="tabs">${SCREENS.map(([n, g]) =>
+  `<button class="tab" data-screen="${n}"${on(S.screen === n)}>${icon(g)}<span>${n}</span></button>`).join("")}</div>`;
+const share = () => `<span class="share">${icon("share-2")}Partager</span>`;
+const levels = () => LEVELS.map((l) =>
+  `<button class="lvl" data-level="${l}"${on(S.level === l)}>Niveau ${l}</button>`).join("");
+/* The one markup the options share. Only the class changes, which is what
+   makes the comparison a comparison and not two different screens. */
+const nav = (cls, opts = {}) => `<div class="nav ${cls}">
+  <div class="r1">${crumb()}<span class="sep"></span>${opts.noTabs ? "" : tabs()}${share()}</div>
+  <div class="r2">${levels()}</div>
+</div>${opts.bigTabs ? `<div class="bigtabs">${SCREENS.map(([n]) =>
+  `<button data-screen="${n}"${on(S.screen === n)}>${n}</button>`).join("")}</div>` : ""}`;
+
+/* ------------------------------------------------------- the six options */
+const OPTIONS = [
+  { cls: "v0", name: "Tel quel aujourd'hui", base: true,
+    note: "La référence, reproduite au pixel près depuis l'écran réel, pour que les six autres soient jugées contre quelque chose : 12,5 px de gris clair sur blanc, aucune bordure, l'actif à peine teinté. Mettez le flou : c'est ce que les gens ont vu." },
+  { cls: "v1", name: "Même barre, plus grande et plus foncée",
+    note: "Rien de nouveau à l'écran : le mot passe à 14 px, le gris passe à l'encre du texte courant, la cible grandit avec lui. Ne change aucune habitude, et le surcoût en hauteur est au tableau." },
+  { cls: "v2", name: "Onglets encadrés, actif plein",
+    note: "Chaque onglet garde un bord, donc la rangée se lit comme trois objets avant qu'un mot soit lu. L'écran courant est rempli en noir, pas teinté : il reste visible à travers le flou." },
+  { cls: "v3", name: "Soulignement épais",
+    note: "La barre garde sa discrétion ; ce qui est choisi est marqué par un trait de 3 px, la seule marque qui survit au flou. L'inactif passe le seuil sans être foncé, donc la rangée reste calme — mais rien n'annonce le bord de la cible." },
+  { cls: "v4", name: "Barre sombre",
+    note: "Le chrome cesse de se faire passer pour du papier. Contraste maximal, et le dessin en dessous devient la seule chose blanche de l'écran. Le prix : la barre tire l'œil avant le plan." },
+  { cls: "v5", name: "Pictogramme au-dessus du mot",
+    note: "La cible devient un bloc de 62 × 46 px, trouvé par la main sans lecture. C'est la logique du ruban AutoCAD, et c'est l'option qui prend le plus de hauteur." },
+  { cls: "v6", name: "Le nom de l'écran en titre", noTabs: true, bigTabs: true,
+    note: "Les onglets quittent la bande fine et deviennent le titre de la page, là où le titre était déjà : 17 px, le plus gros texte de l'écran. La bande du haut ne garde que le projet. Le titre disparaît mais la rangée de niveaux reste, donc la hauteur n'est pas gagnée — ce qui est gagné, c'est que la navigation n'est plus un détail du chrome." },
+];
+
+/* ------------------------------------------------------- the screen stub
+   Thin on purpose: it exists to show what the navigation leaves for the
+   drawing, and to put the tabs next to the things they compete with. */
+const stub = (o) => `<div class="body">
+  ${o.bigTabs ? "" : `<div class="title"><h2>Plans — niveau ${S.level}</h2>
+    <p>15 unités · 4 avec un croisement ouvert</p></div>`}
+  ${o.bigTabs ? `<div class="title slim"><p>15 unités · 4 avec un croisement ouvert</p></div>` : ""}
+  <div class="work">
+    <div class="pane"><div class="ph">${icon("list")}Unités</div>
+      <div class="rows">${["501 · 5½ · 1 275 pi²", "502 · 5½ · 1 496 pi²", "503 · 3½ · 760 pi²", "504 · 4½ · 1 152 pi²"]
+        .map((r, i) => `<div class="rw ${i === 0 ? "on" : ""}">${r}</div>`).join("")}</div></div>
+    <div class="pane"><div class="ph">${icon("file")}Plan 2D</div><div class="field"></div></div>
+    <div class="pane"><div class="ph">${icon("box")}Maquette 3D</div><div class="field"></div></div>
+    <div class="pane"><div class="ph">${icon("circle")}Unité 501</div>
+      ${[["Type", "5½"], ["Superficie", "1 275 pi²"], ["Statut", "Non vérifié"], ["Écart", "240 mm"]]
+        .map(([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join("")}</div>
+  </div></div>`;
+
+/* ------------------------------------------------------------- measuring
+   Contrast is computed from what the browser actually painted, not from the
+   token the stylesheet asked for: the background is composed up the tree
+   until something opaque is found, so a wash over white is read as what the
+   eye receives. */
+const parse = (c) => {
+  const m = c.match(/[\d.]+/g) || [0, 0, 0];
+  return [+m[0], +m[1], +m[2], m[3] === undefined ? 1 : +m[3]];
+};
+const over = (fg, bg) => fg.slice(0, 3).map((c, i) => c * fg[3] + bg[i] * (1 - fg[3]));
+function bgOf(el) {
+  let out = null;
+  for (let n = el; n; n = n.parentElement) {
+    const c = parse(getComputedStyle(n).backgroundColor);
+    if (c[3] === 0) continue;
+    out = out === null ? c : [...over(out, c), 1];
+    if (c[3] === 1) break;
+  }
+  return (out || [255, 255, 255, 1]).slice(0, 3);
+}
+const lum = ([r, g, b]) => {
+  const f = (v) => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; };
+  return .2126 * f(r) + .0722 * f(b) + .7152 * f(g);
+};
+function ratio(el) {
+  const bg = bgOf(el);
+  const fg = over(parse(getComputedStyle(el).color), bg);
+  const a = lum(fg), b = lum(bg);
+  return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+}
+/* WCAG 2.2: 4.5:1 under 18.66 px, 3:1 at or above it (or 14 px bold). */
+const needed = (px, bold) => (px >= 18.66 || (bold && px >= 14) ? 3 : 4.5);
+
+function measure() {
+  return OPTIONS.map((o, i) => {
+    const shot = document.querySelector(`[data-opt="${i}"]`);
+    const sel = o.bigTabs ? ".bigtabs button" : ".tab";
+    const idle = [...shot.querySelectorAll(sel)].find((b) => !b.hasAttribute("aria-current"));
+    const live = shot.querySelector(`${sel}[aria-current="true"]`);
+    const cs = getComputedStyle(idle);
+    const px = parseFloat(cs.fontSize);
+    const bold = parseInt(cs.fontWeight, 10) >= 600;
+    const r = idle.getBoundingClientRect();
+    const navEl = shot.querySelector(".nav");
+    /* Measured to the top of the work area, not to the top of the body: an
+       option that turns the page title into its tabs has to be charged for
+       the title it replaces, or it would look free. */
+    const navH = Math.round(shot.querySelector(".work").getBoundingClientRect().top
+      - navEl.getBoundingClientRect().top);
+    return { i, o, px, bold, idle: ratio(idle), live: ratio(live),
+      w: Math.round(r.width), h: Math.round(r.height), navH };
+  });
+}
+
+function render() {
+  document.getElementById("opts").innerHTML = OPTIONS.map((o, i) => `<section class="opt">
+    <div class="cap"><span class="n">${o.base ? "Référence" : `Option ${i}`}</span><b>${o.name}</b></div>
+    <div class="cap"><span class="note">${o.note}</span></div>
+    <div class="shot" data-opt="${i}">${nav(o.cls, o)}${stub(o)}</div>
+  </section>`).join("");
+
+  requestAnimationFrame(() => {
+    const rows = measure();
+    /* The page writes its numbers in French: comma, not point. */
+    const fr = (v) => v.toFixed(1).replace(".", ",");
+    const n = (v, ok) => `<span class="${ok ? "ok" : "bad"}">${v}</span>`;
+    document.getElementById("cost").innerHTML = `<thead><tr>
+      <th>Option</th><th>Navigation</th><th>Taille du mot</th><th>Contraste inactif</th>
+      <th>Contraste actif</th><th>Cible</th><th>Hauteur prise</th></tr></thead>
+      <tbody>${rows.map((m) => {
+        const need = needed(m.px, m.bold);
+        const tgt = m.w >= 24 && m.h >= 24;
+        return `<tr class="${m.o.base ? "base" : ""}">
+          <td class="n">${m.o.base ? "—" : m.i}</td>
+          <td>${m.o.name}</td>
+          <td class="n">${fr(m.px)} px</td>
+          <td class="n">${n(fr(m.idle) + ":1", m.idle >= need)} <span style="color:var(--ink-3)">(seuil ${String(need).replace(".", ",")})</span></td>
+          <td class="n">${n(fr(m.live) + ":1", m.live >= needed(m.px, true))}</td>
+          <td class="n">${n(`${m.w} × ${m.h}`, tgt)}</td>
+          <td class="n">${m.navH} px</td></tr>`;
+      }).join("")}</tbody>`;
+
+    /* The verdict names the numbers it is built on, so it stays true if the
+       options are edited afterwards. */
+    const base = rows[0], v1 = rows[1], v2 = rows[2], v5 = rows[5];
+    document.getElementById("verdict").innerHTML =
+      `<b>Ce que le tableau dit.</b> La référence écrit ses onglets à ${fr(base.px)} px pour
+       ${fr(base.idle)}:1, sous le seuil de ${String(needed(base.px, base.bold)).replace(".", ",")}, dans une cible de
+       ${base.w} × ${base.h} px — une cible qui, elle, est au-dessus des 24 px demandés. Le bouton était
+       donc assez grand et trop pâle : ce qui a manqué, c'est le contraste et le bord, pas la place.
+       <b>L'option 2</b> est celle à retenir : le cadre rend la cible visible avant que le mot soit lu,
+       l'inactif passe à ${fr(v2.idle)}:1 et l'actif rempli à ${fr(v2.live)}:1, pour
+       ${v2.navH - base.navH} px de hauteur de plus — l'option 5 en coûte ${v5.navH - base.navH}, et
+       l'option 4 fait de la barre la chose la plus foncée de l'écran, devant le dessin, ce qui est
+       exactement l'inverse de ce qu'on veut d'un outil de lecture de plans. <b>L'option 1</b>
+       (${fr(v1.idle)}:1 à ${fr(v1.px)} px) est le minimum à faire dans tous les cas :
+       elle est contenue dans chacune des autres. Mettez le flou sur les six : seules celles qui ont un
+       bord, un trait épais ou un fond plein restent repérables sans être lues.`;
+  });
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-tog]");
+  if (t) {
+    const k = t.dataset.tog, now = document.body.dataset[k] === "on";
+    document.body.dataset[k] = now ? "off" : "on";
+    t.setAttribute("aria-pressed", String(!now));
+    return;
+  }
+  const s = e.target.closest("[data-screen]");
+  if (s) { S.screen = s.dataset.screen; render(); return; }
+  const l = e.target.closest("[data-level]");
+  if (l) { S.level = Number(l.dataset.level); render(); }
+});
+
+sprite();
+render();
+</script>
+</body>
+</html>
