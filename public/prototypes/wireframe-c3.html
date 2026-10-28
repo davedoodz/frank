@@ -1494,9 +1494,11 @@ function tabsHTML() {
   const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
   if (SCREENS[V.screen].index) {
     items = `<span class="crumb on hi">${icon("folder")}Tous les projets</span><span class="sp"></span>`;
-  } else if (!views.length) {
+  } else if (!views.length && mode !== "Two rows, no rail") {
     /* A screen that reads on one page has nothing to filter, so the strip
-       carries the project's name and the way back, and no tabs at all. */
+       carries the project's name and the way back, and no tabs at all. The
+       two-row layout is the exception: it is the only way between screens,
+       so its first row is on every screen, views or not. */
     items = `${back}${icon("chevron-right")}<span class="crumb on hi">${V.project}</span><span class="sp"></span>`;
   } else if (mode === "Rail + view menu") {
     /* One button that steps through the views, because a menu that cannot
