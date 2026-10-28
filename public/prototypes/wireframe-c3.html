@@ -309,12 +309,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 
 /* The calendar is a table of days with hairlines, not a card grid: a month
    has to be read as one block, so the cells share their borders. */
-.cal{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--line-2);
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line-2);
   border-radius:var(--r);overflow:hidden;background:var(--line-2);gap:1px}
 .cal .dow{background:var(--fill-2);padding:4px 6px;font-size:10.5px;color:var(--ink-3);
   text-transform:uppercase;letter-spacing:.06em}
-.cal .day{background:var(--card);padding:4px 6px;min-height:28px;display:flex;flex-direction:column;
-  gap:2px;cursor:pointer;position:relative}
+.cal .day{background:var(--card);padding:4px 6px;min-height:28px;min-width:0;display:flex;
+  flex-direction:column;gap:2px;cursor:pointer;position:relative}
 .cal.big .day{min-height:76px}
 .cal .day:hover{background:var(--fill-2)}
 .cal .day.dim{color:var(--ink-3);background:var(--fill-2);opacity:.65}
@@ -333,10 +333,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    piles up, not for reading titles. */
 .year{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .year .ym .row{cursor:pointer;padding:2px 0}
-.year .cal.mini .day{min-height:20px;padding:2px 3px}
-.year .cal.mini .day .n{font-size:10px;font-weight:500}
-.year .cal.mini .dow{padding:2px 3px;font-size:9.5px}
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line-2);
+.year .cal.sm .day{min-height:20px;padding:2px 3px}
+.year .cal.sm .day .n{font-size:10px;font-weight:500}
+.year .cal.sm .dow{padding:2px 3px;font-size:9.5px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line-2);
   border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;min-height:260px}
 .week .wcol{background:var(--card);display:flex;flex-direction:column;cursor:pointer}
 .week .wcol.on{background:var(--fill)}
@@ -849,12 +849,12 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
    a hidden sprite and referenced by id afterwards. */
 function sprite() {
   const names = ["home", "folder", "image", "layout-grid", "layers", "table", "scale", "git-compare", "calendar-check",
-    "file", "box", "pen-line", "chevron-right", "chevron-left", "chevron-down", "search", "plus", "minus", "maximize", "minimize",
+    "file", "box", "pen-line", "chevron-right", "chevron-left", "chevron-down", "chevron-up", "search", "plus", "minus", "maximize", "minimize",
     "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "x", "link",
     /* the rail's alternatives, one shortlist per screen; see NAV_ICONS */
     "gauge", "building-2", "clipboard-list", "grid-2x2", "bed-double", "door-open", "ruler",
     "sigma", "calculator", "chart-column", "percent", "calendar-clock", "timer", "list-checks",
-    "flag", "folder-tree", "file-stack", "hard-drive",
+    "flag", "folder-tree", "file-stack", "hard-drive", "book-open", "shield-check",
     /* sharing: the button, and the two rights it can grant */
     "share-2", "eye", "message-square",
     /* the three layer chips on the 2D pane */
@@ -1702,7 +1702,8 @@ function monthGrid(y, m, big) {
     if (i >= 35 && dOf(s).getUTCMonth() !== m) break;
     cells.push(dayCell(s, dOf(s).getUTCMonth() !== m, big));
   }
-  return `<div class="cal ${big ? "big" : "mini"}">
+  /* "sm", not "mini": .mini is already the drawing's minimap. */
+  return `<div class="cal ${big ? "big" : "sm"}">
     ${DOW.map((d) => `<div class="dow"><span class="lo bar" style="width:16px"></span><span class="hi">${big ? d : d[0]}</span></div>`).join("")}
     ${cells.join("")}</div>`;
 }
