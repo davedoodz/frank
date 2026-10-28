@@ -736,7 +736,9 @@ function sprite() {
     /* the rail's alternatives, one shortlist per screen; see NAV_ICONS */
     "gauge", "building-2", "clipboard-list", "grid-2x2", "bed-double", "door-open", "ruler",
     "sigma", "calculator", "chart-column", "percent", "calendar-clock", "timer", "list-checks",
-    "flag", "folder-tree", "file-stack", "hard-drive"];
+    "flag", "folder-tree", "file-stack", "hard-drive",
+    /* sharing: the button, and the two rights it can grant */
+    "share-2", "eye", "message-square"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
     if (!node) return "";
@@ -1547,11 +1549,18 @@ function tabsHTML() {
          data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}">
         <div class="views">${views.map(viewBtn).join("")}</div></div>`
     : "";
+  /* A project is read by people who do not draw: the client, the urbaniste,
+     the contractor. Sharing is the end of the first row, on every screen
+     that has a project open, because it is about the project and not about
+     what is on screen. */
+  const share = SCREENS[V.screen].index ? ""
+    : `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
+         style="margin-left:auto;flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
        data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
-    ${items}
+    ${items}${share}
   </div>${row2}`;
 }
 
@@ -2357,6 +2366,7 @@ function dialogHTML() {
     <span class="hi" style="font-size:11.5px;color:var(--ink-2)">${label}</span>
     <input data-field="${key}" value="${(d[key] || "").replace(/"/g, "&quot;")}" placeholder="${hint}">
   </label>`;
+  if (d.kind === "share") return shareDialogHTML(d);
   if (d.kind) return fileDialogHTML(d, field);
   return `<div class="scrim" ${act("dlgclose")}>
     <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
@@ -2378,6 +2388,54 @@ function dialogHTML() {
         <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Lecture seule. Aucune écriture dans un fichier de dessin.</span>
         <span class="btnw" ${act("dlgclose")}><span class="hi">Annuler</span></span>
         <span class="btnw solid" ${act("dlgcreate")}>${icon("link")}<span class="hi">Connecter le dossier</span></span>
+      </div>
+    </div></div>`;
+}
+
+/* ------------------------------------------------------------ sharing
+   The people who read a project are not the people who draw it. What is
+   shared is a link to this project at this level, with one of two rights:
+   read, or read and comment. Nothing shared can ever write to a drawing —
+   a comment is a record beside the plan, not a mark on it. */
+const SHARE_RIGHTS = [
+  ["Lecture seule", "voir les plans, les quantités et les dates", "eye"],
+  ["Lecture et commentaires", "voir, et écrire une note ancrée sur une unité", "message-square"],
+];
+const SHARE_PEOPLE = [
+  ["Chargée de projet", "lecture et commentaires", "depuis le 12 sep"],
+  ["Entrepreneur général", "lecture et commentaires", "depuis le 02 oct"],
+  ["Urbaniste de l'arrondissement", "lecture seule", "lien ouvert 3 fois"],
+];
+function shareDialogHTML(d) {
+  const link = `fitte.app/p/baldwin-iii?niveau=${paneLevel()}`;
+  const right = (label, note, glyph) => `<div class="listrow ${d.right === label ? "on" : ""}"
+      ${act("shareright", label)} title="${label}">
+    ${icon(glyph)}
+    <span class="hi" style="font-size:12px;flex:1">${label}</span>
+    <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${note}</span>
+    ${d.right === label ? icon("check") : ""}</div>`;
+  return `<div class="scrim" ${act("dlgclose")}>
+    <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
+      <div class="dh">${icon("share-2")}<span class="hi" style="font-weight:600;font-size:13.5px">Partager ${V.project}</span>
+        <span style="flex:1"></span>
+        <span class="btnw" ${act("dlgclose")} title="Fermer">${icon("x")}</span></div>
+      <div class="db">
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Le lien ouvre le projet là où il est ouvert ici: le niveau et l'unité sont dans l'adresse. Un invité ne dessine rien et n'écrit dans aucun fichier.</div>
+        <div class="fpath" ${act("sharecopy", link)} title="Copier le lien">
+          ${icon("link")}<span class="hi" style="flex:1;overflow:hidden;text-overflow:ellipsis">${link}</span>
+          <span class="hi" style="font-size:11px;color:var(--ink-3)">copier</span></div>
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2);padding-top:2px">Droit accordé par le lien</div>
+        <div class="col" style="gap:4px">${SHARE_RIGHTS.map(([l, n, g]) => right(l, n, g)).join("")}</div>
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2);padding-top:2px">Déjà invités</div>
+        <div class="col" style="gap:4px">${SHARE_PEOPLE.map(([who, what, when]) => `<div class="listrow">
+          ${icon("circle")}
+          <span class="hi" style="font-size:12px;flex:1">${who}</span>
+          <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${what} · ${when}</span></div>`).join("")}</div>
+      </div>
+      <div class="df">
+        <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Un commentaire est une note à côté du plan. Aucun fichier de dessin n'est modifié.</span>
+        <span class="btnw" ${act("dlgclose")}><span class="hi">Fermer</span></span>
+        <span class="btnw solid" ${act("sharecopy", link)}>${icon("link")}<span class="hi">Copier le lien</span></span>
       </div>
     </div></div>`;
 }
@@ -2569,6 +2627,18 @@ function onClick(e) {
       V.view["Projets"] = 0;
       break;
     }
+    /* Sharing: a link, a right, and nothing else. The invitation itself is
+       out of scope for the prototype — what is being judged is that read
+       and comment are two different grants. */
+    case "share":
+      V.dialog = { kind: "share", right: "Lecture et commentaires" };
+      break;
+    case "shareright":
+      V.dialog = { ...V.dialog, right: value };
+      break;
+    case "sharecopy":
+      say(`Lien copié: ${value} — ${(V.dialog && V.dialog.right) || "Lecture et commentaires"}.`);
+      break;
     case "autocad":
       say(`Remise à AutoCAD: ${dwgName()} s'ouvre sur l'unité, la décision suit.`);
       break;
