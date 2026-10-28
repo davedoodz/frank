@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Montrer un dessin, en superposer deux</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* The rail is settled: the Photoshop layers panel, with a row per document.
+   Eye on the left, a grip to drag the pile, a thumbnail, the file as the
+   office names it with the date at the end, the discipline with its own
+   glyph. No opacity: in practice nobody scrubs a percentage — they put the
+   sheet they want on top and read through it. No revision codes and no "à
+   jour": fitte cannot know what a consultant drew this morning.
+
+   What is left to decide is one thing. A row can do three things — open the
+   document where it is edited, swap it for another file, show the documents
+   it replaced — and three buttons on a row is a toolbar, not a layer. Six
+   ways below to reach the three through a single door. Everything else on
+   the screen is identical, so only the door is being judged. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e5e5e5;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#f2f2f2; --card:#fff;
+  --vert:#C3E05A; --vert-ink:#2f3a05;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.sheet{padding:22px 20px 80px;display:flex;flex-direction:column;gap:34px}
+h1{font-size:17px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:80ch}
+.lu{width:14px;height:14px;flex:0 0 14px;stroke-width:1.6}
+
+.var{display:flex;flex-direction:column;gap:9px}
+.vh{display:flex;align-items:baseline;gap:8px}
+.vh .n{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.vh b{font-size:14px;font-weight:600}
+.why{font-size:12px;color:var(--ink-2);max-width:96ch}
+.why .cost{color:var(--ink-3)}
+
+/* ------------------------------------------------------------ the screen */
+.app{border-radius:12px;overflow:hidden;background:#141416;min-width:1180px}
+.bar1{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar1 .crumb{color:rgba(255,255,255,.58)}
+.bar1 .crumb.on{color:#fff;font-weight:600;font-size:13px;margin-right:4px}
+.bar1 .tab{padding:5px 10px;border-radius:7px;display:flex;align-items:center;gap:6px;font-size:13.5px}
+.bar1 .tab.on{background:#fff;color:#141416;font-weight:600}
+.bar1 .sp{flex:1}
+.bar1 .share{border:1px solid rgba(255,255,255,.28);border-radius:5px;padding:4px 10px;font-size:12px;
+  display:flex;align-items:center;gap:6px}
+.bar2{height:32px;background:#1e1e21;border-top:1px solid #2c2c31;display:flex;align-items:center;
+  gap:3px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar2 span{padding:3px 9px;border-radius:6px}
+.bar2 span.on{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.card{background:var(--card);margin:7px;border-radius:9px;overflow:hidden;display:flex;flex-direction:column}
+.ttl{padding:10px 13px;display:flex;align-items:center;gap:10px}
+.ttl b{font-size:16px;font-weight:600}
+.ttl .sub{font-size:12px;color:var(--ink-2)}
+.ttl .sp{flex:1}
+.work{display:flex;gap:9px;padding:0 9px 9px;height:560px}
+.foot{border-top:1px solid var(--line-2);padding:8px 13px;display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--ink-2)}
+.foot b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.foot .sp{flex:1}
+
+.pane{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);
+  display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.ph{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:8px;padding:0 10px;font-size:12.5px;color:var(--ink-2)}
+.ph .sp{flex:1}
+.pb{flex:1;min-height:0;overflow:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
+
+.lst{flex:0 0 232px}
+.uc{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;flex:0 0 auto}
+.uc.on{border-color:var(--ink)}
+.uc .cr{height:88px;background-image:url(assets/plan-niveau-5.jpg);background-size:360%;
+  filter:grayscale(1);position:relative}
+.uc .no{position:absolute;left:6px;top:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;padding:0 6px;font-size:12px;font-weight:600}
+.uc .ul{display:flex;align-items:baseline;gap:6px;padding:6px 9px;font-size:12.5px}
+.uc .ul .a{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+.d2{flex:1.6;min-width:0}
+.m3{flex:1;min-width:0}
+.m3 .still{flex:1;min-height:0;background-image:url(assets/maquette-still.jpg);background-size:cover;
+  background-position:center}
+.insp{flex:0 0 280px}
+.kv{display:flex;align-items:baseline;gap:8px;font-size:12.5px}
+.kv b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.kv span{color:var(--ink-2)}
+
+.stage{flex:1;min-width:0;min-height:0;position:relative;overflow:hidden;background:var(--card)}
+.plan{position:absolute;inset:0;background-image:url(assets/plan-niveau-5.jpg);
+  background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
+.lay{position:absolute;background-repeat:no-repeat;background-size:contain;background-position:center;
+  pointer-events:none;mix-blend-mode:multiply}
+.lay.arp{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
+.lay.pay{background-image:url(assets/paysage.png)}
+.off{display:none}
+
+/* ----------------------------------------------------------- the rail */
+.rail{flex:0 0 var(--rw,272px);border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  min-height:0;background:var(--card);position:relative}
+.rh{flex:0 0 auto;border-bottom:1px solid var(--line-2);padding:6px 8px;display:flex;align-items:center;
+  gap:6px;font-size:11.5px;color:var(--ink-3)}
+.rh b{color:var(--ink-2);font-weight:500;font-size:12px}
+.rb{flex:1;min-height:0;overflow:auto;padding:5px;display:flex;flex-direction:column;gap:2px}
+.rf{flex:0 0 auto;border-top:1px solid var(--line-2);padding:5px 6px;display:flex;align-items:center;gap:4px}
+
+.lrow{border:1px solid transparent;border-radius:5px;padding:5px;display:flex;flex-direction:column;gap:4px;
+  user-select:none;background:var(--card)}
+.lrow:hover{background:var(--fill-2)}
+.lrow.sel{background:var(--fill);border-color:var(--line-2)}
+.lrow.hid{opacity:.5}
+.lrow.drag{opacity:.9;border-color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.14)}
+.grip{color:var(--ink-3);cursor:grab;flex:0 0 14px}
+.grip:active{cursor:grabbing}
+.lrow:hover .grip{color:var(--ink-2)}
+
+.thumb{width:40px;height:32px;flex:0 0 40px;border:1px solid var(--line-2);border-radius:3px;
+  background-color:#fff;background-size:contain;background-repeat:no-repeat;background-position:center}
+.eye{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-3);cursor:pointer;flex:0 0 22px}
+.eye:hover{background:var(--fill)}
+.eye.on{color:var(--ink)}
+.fname{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left;min-width:0}
+.disc{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);min-width:0;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.disc .lu{width:12px;height:12px;flex:0 0 12px}
+.date{font-size:11px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
+
+.row{display:flex;align-items:center;gap:6px;min-width:0}
+.col{display:flex;flex-direction:column;gap:5px;min-width:0}
+.btn{height:24px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:inline-flex;align-items:center;gap:5px;padding:0 8px;font-size:11.5px;color:var(--ink-2);
+  cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--fill);border-color:var(--ink-3)}
+.btn.ico{padding:0 6px}
+.btn.sm{height:21px;padding:0 6px;font-size:11px;border-radius:4px}
+.btn.on{border-color:var(--ink);color:var(--ink);background:var(--card)}
+.btn.wide{width:100%;justify-content:center}
+
+/* the one door, in its several shapes */
+.kebab{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-3);cursor:pointer;flex:0 0 22px;opacity:0}
+.lrow:hover .kebab,.lrow.sel .kebab,.kebab.open{opacity:1}
+.kebab:hover,.kebab.open{background:var(--fill);color:var(--ink)}
+.menu{position:absolute;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:7px;
+  box-shadow:0 10px 28px rgba(0,0,0,.16);padding:4px;min-width:214px;display:flex;flex-direction:column;gap:1px}
+.mi{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:5px;font-size:12px;
+  color:var(--ink);cursor:pointer}
+.mi:hover{background:var(--fill-2)}
+.mi .lu{color:var(--ink-2)}
+.mi .k{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+.msep{height:1px;background:var(--line-2);margin:3px 2px}
+.mh{font-size:10.5px;color:var(--ink-3);padding:4px 7px 2px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left;font-family:var(--mono)}
+/* An unselected row keeps its door, but barely drawn: present enough to be
+   found, quiet enough not to turn the list into a toolbar. */
+.ghost{border-color:transparent;background:transparent;color:var(--ink-3)}
+.lrow:hover .ghost{border-color:var(--line);background:var(--fill-2)}
+.ghd{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink-3);padding:7px 6px 3px}
+
+
+.panel{border-top:1px solid var(--line-2);padding:7px;display:flex;flex-direction:column;gap:6px;
+  background:var(--fill-2);flex:0 0 auto;max-height:260px;overflow:auto}
+.vrow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.vrow.cur{color:var(--ink)}
+.note{font-size:10.5px;color:var(--ink-3)}
+.found{display:flex;align-items:center;gap:6px;font-size:11px;padding:4px 6px;border:1px solid var(--line-2);
+  border-radius:4px;cursor:pointer;font-family:var(--mono);color:var(--ink-2);background:var(--card)}
+.found:hover{border-color:var(--ink);color:var(--ink)}
+.drop{border:1px dashed var(--line);border-radius:5px;padding:7px;text-align:center;font-size:11px;
+  color:var(--ink-3);cursor:pointer}
+.drop:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.path{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);background:var(--card);
+  border:1px solid var(--line-2);border-radius:4px;padding:4px 6px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left}
+.toast{position:absolute;left:10px;bottom:10px;background:#1b1b1b;color:#fff;font-size:11.5px;
+  padding:6px 10px;border-radius:5px;z-index:9;max-width:70%}
+.hint{font-size:10.5px;color:var(--ink-3)}
+.zcol{flex:0 0 30px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  align-items:center;gap:6px;padding:7px 0;color:var(--ink-3);font-size:10.5px}
+.zcol .tr{flex:1;width:3px;background:var(--line);border-radius:2px;position:relative}
+.zcol .tr::after{content:"";position:absolute;left:-4px;top:38%;width:11px;height:11px;border-radius:50%;background:var(--ink)}
+
+/* ------------------------------------------- showing, not hiding */
+.gain{margin-left:auto;font-size:11px;color:var(--ink-2);
+  border:1px solid var(--line-2);border-radius:4px;padding:1px 6px}
+.vh{align-items:center}
+
+/* The film edge. A sheet on screen is drawn full strength; one that is not
+   is still there, just quiet — nothing is ever struck out. */
+.strip{flex:0 0 52px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;gap:3px;
+  padding:5px;background:var(--card);align-items:stretch}
+.sth{border:1px solid transparent;border-radius:4px;padding:3px;display:flex;flex-direction:column;
+  align-items:center;gap:1px;cursor:pointer;user-select:none;opacity:.5}
+.sth:hover{background:var(--fill-2);opacity:.8}
+.sth.on{opacity:1}
+.sth.sel{background:var(--fill);border-color:var(--line-2)}
+.sname{font-size:9.5px;color:var(--ink-2);letter-spacing:-.01em}
+.sall{margin-top:auto;display:flex;align-items:center;justify-content:center;color:var(--ink-3);
+  border:1px solid var(--line-2);border-radius:4px;padding:3px;cursor:pointer}
+.sall:hover{color:var(--ink);border-color:var(--ink-3)}
+
+/* The band. A chip is a drawing; its fill says whether that drawing is on
+   screen. There is no eye, and nothing to switch off. */
+.band{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:4px 8px;background:var(--card);
+  border-bottom:1px solid var(--line-2);color:var(--ink-3);overflow:hidden}
+.band:last-child{border-bottom:0;border-top:1px solid var(--line-2)}
+.chip{display:flex;align-items:center;gap:5px;border:1px solid var(--line-2);border-radius:5px;
+  padding:2px 6px;font-size:11.5px;color:var(--ink-3);cursor:pointer;white-space:nowrap;user-select:none}
+.chip:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.chip.on{border-color:var(--ink);color:var(--ink);background:var(--fill)}
+.chip.sel{box-shadow:inset 0 0 0 1px var(--ink)}
+.plus{display:inline-flex;color:var(--ink-3);border-left:1px solid var(--line-2);padding-left:4px;
+  margin-left:1px}
+.plus:hover{color:var(--ink)}
+
+/* The split line of the comparing variant. */
+.wipe{position:absolute;top:0;bottom:0;width:0;border-left:1px solid var(--ink);z-index:12;
+  cursor:ew-resize}
+.wipe .wh{position:absolute;top:50%;left:-9px;width:18px;height:28px;margin-top:-14px;background:var(--card);
+  border:1px solid var(--ink);border-radius:4px;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-2)}
+
+/* Words that do not fit beside the drawing sit on a card over it. Opaque,
+   never tinted: the plan under it stays untouched. */
+.fcard{position:absolute;z-index:14;background:var(--card);border:1px solid var(--line);
+  border-radius:7px;box-shadow:0 10px 28px rgba(0,0,0,.14);padding:7px;max-height:88%;overflow:auto}
+.fcard .menu{position:relative;box-shadow:none;border-color:var(--line-2);margin-top:2px;min-width:0}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>Montrer un dessin, en superposer deux</h1>
+  <p class="lede">Plus d'œil à cliquer, plus rien à masquer. Un clic sur un dessin le met seul à l'écran; les autres s'effacent parce qu'on n'a pas demandé à les voir, pas parce qu'on les a éteints. Un deuxième geste, différent dans chaque variante, sert à en afficher deux ensemble — le seul cas où plusieurs dessins servent vraiment: voir où ils se contredisent.</p>
+  <p class="lede">La bande dit en clair ce qui est à l'écran (« Architecte seul », « Architecte + arpenteur », « les 3 ensemble »). Les six variantes ne diffèrent que par le geste.</p>
+  <div id="vars"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["file", "ruler", "trees", "eye", "eye-off", "layers", "history", "clock",
+    "chevron-down", "chevron-right", "chevron-up", "external-link", "check", "circle", "list", "box",
+    "git-compare", "x", "folder", "folder-open", "share-2", "plus", "minus", "table", "compass",
+    "hard-hat", "grip-vertical", "replace", "ellipsis-vertical", "arrow-up-down", "mouse-pointer-click",
+    "file-text", "settings-2"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+
+/* Placement of the consultant sheets, from the prototype. */
+const BASE_BOX = [314 / 2000, 325 / 1675, 1488 / 2000, 1270 / 1675];
+const BASE_RATIO = 2000 / 1675;
+const SHEETS = {
+  arp: { box: [298 / 1650, 307 / 1560, 1380 / 1650, 1172 / 1560], ratio: 1650 / 1560 },
+  pay: { box: [156 / 835, 178 / 800, 711 / 835, 624 / 800], ratio: 835 / 800 },
+};
+function layStyle(k, z) {
+  const S = SHEETS[k];
+  const [bx0, by0, bx1, by1] = BASE_BOX;
+  const [sx0, sy0, sx1, sy1] = S.box;
+  const w = (bx1 - bx0) / (sx1 - sx0);
+  const h = w * BASE_RATIO / S.ratio;
+  const left = bx0 - sx0 * w;
+  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h;
+  return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;z-index:${z}`;
+}
+
+const DISC = {
+  arch: { label: "Architecte", icon: "compass" },
+  arp: { label: "Arpenteur-géomètre", icon: "ruler" },
+  pays: { label: "Architecte paysagiste", icon: "trees" },
+  civ: { label: "Ingénieur civil", icon: "hard-hat" },
+};
+const SERVER = "\\\\serveur-bureau\\Projets\\2026\\BAL3\\";
+const DRAWINGS = {
+  plan: { disc: "arch", app: "AutoCAD", thumb: "assets/plan-niveau-5.jpg", folder: SERVER + "Dessins\\",
+    versions: [
+      { file: "BAL3_PLAN-NIVEAU-5_2026-10-24.dwg", date: "24 oct 2026" },
+      { file: "BAL3_PLAN-NIVEAU-5_2026-09-12.dwg", date: "12 sept 2026" },
+      { file: "BAL3_PLAN-NIVEAU-5_2026-08-02.dwg", date: "2 août 2026" }] },
+  arp: { disc: "arp", app: "Acrobat", thumb: "assets/arp-site.png", folder: SERVER + "Reçu\\Arpenteur\\",
+    versions: [
+      { file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-07.pdf", date: "7 oct 2026" },
+      { file: "BAL3_RELEVE-TERRAIN_2026-05-14.pdf", date: "14 mai 2026" }] },
+  pay: { disc: "pays", app: "Acrobat", thumb: "assets/paysage.png", folder: SERVER + "Reçu\\Paysage\\",
+    versions: [
+      { file: "BAL3_AMENAGEMENT-PAYSAGER_2026-07-07.pdf", date: "7 juil 2026" }] },
+};
+const FOUND = {
+  plan: [{ file: "BAL3_PLAN-NIVEAU-5_2026-10-27.dwg", date: "27 oct 2026" },
+    { file: "BAL3_PLAN-NIVEAU-6_2026-10-24.dwg", date: "24 oct 2026" }],
+  arp: [{ file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-21.pdf", date: "21 oct 2026" },
+    { file: "BAL3_CERTIFICAT-LOCALISATION_2026-09-30.pdf", date: "30 sept 2026" }],
+  pay: [{ file: "BAL3_AMENAGEMENT-PAYSAGER_2026-10-26.pdf", date: "26 oct 2026" },
+    { file: "BAL3_PLANTATIONS-DETAILS_2026-10-26.pdf", date: "26 oct 2026" }],
+};
+
+/* No layer is ever "hidden" here. The state is the short list of drawings
+   currently on screen, and clicking a drawing replaces that list with
+   itself. Combinations are built by asking for them, not by switching three
+   things off. */
+const newState = () => ({
+  order: ["pay", "arp", "plan"],
+  shown: ["pay", "arp", "plan"],
+  sel: "pay",
+  preview: null,  /* what the pointer is hovering, shown instead of the list */
+  wipe: 0.52,     /* the split, for the variant that compares by sweeping */
+  menu: null,     /* which row has its door open */
+  panel: null,    /* "swap" | "hist" */
+  drag: null, toast: null,
+  drawer: false, /* the floating panel, for the variants that hide it */
+  tab: "lay",    /* the inspector's second reading */
+  docs: JSON.parse(JSON.stringify(DRAWINGS)),
+});
+const S = [];
+const visible = (s, k) => (s.preview ? s.preview === k : s.shown.includes(k));
+const solo = (s) => s.shown.length === 1;
+const cur = (s, k) => s.docs[k].versions[0];
+const disc = (s, k) => DISC[s.docs[k].disc];
+const zOf = (s, k) => s.order.length - s.order.indexOf(k);
+
+/* The sweep: the drawing on top is cut at the split, so the one under it
+   shows on the other side. Nothing is tinted — only clipped. */
+const topOf = (s) => s.order.find((k) => s.shown.includes(k));
+const clipOf = (s, k, wipe) => (wipe && s.shown.length > 1 && k === topOf(s)
+  ? `clip-path:inset(0 ${((1 - s.wipe) * 100).toFixed(1)}% 0 0);` : "");
+
+function stageHTML(s, wipe) {
+  return `<div class="stage">
+    <div class="plan ${visible(s, "plan") ? "" : "off"}"
+      style="z-index:${zOf(s, "plan")};${clipOf(s, "plan", wipe)}"></div>
+    ${["arp", "pay"].map((k) => `<div class="lay ${k} ${visible(s, k) ? "" : "off"}"
+      style="${layStyle(k, zOf(s, k))};${clipOf(s, k, wipe)}"></div>`).join("")}
+    ${wipe && s.shown.length > 1 ? `<div class="wipe" data-a="wipe" data-i="${S.indexOf(s)}"
+      style="left:${(s.wipe * 100).toFixed(1)}%"><span class="wh">${icon("grip-vertical")}</span></div>` : ""}
+    ${s.toast ? `<div class="toast">${s.toast}</div>` : ""}
+  </div>`;
+}
+
+/* --------------------------------------------------------- the row pieces */
+const gripHTML = (i, k) => `<span class="grip" data-a="grip" data-i="${i}" data-k="${k}"
+  title="Tirer pour changer l'ordre d'empilement">${icon("grip-vertical")}</span>`;
+/* There is no eye in this sheet: visibility is the consequence of what was
+   clicked, never a switch of its own. */
+const fileLines = (s, k) => `<span class="fname" title="${cur(s, k).file}">${cur(s, k).file}</span>
+  <span class="row"><span class="disc">${icon(disc(s, k).icon)}${disc(s, k).label}</span>
+    <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></span>`;
+
+/* The three things a document can do, written once. Every variant below is
+   a different way of putting a hand on this list. */
+const ITEMS = (s, i, k) => [
+  ["open", "external-link", `Ouvrir dans ${s.docs[k].app}`, "⏎"],
+  ["swap", "replace", "Changer le document…", "⌘R"],
+  ["hist", "history", `Documents précédents (${s.docs[k].versions.length})`, "⌘H"],
+];
+const menuHTML = (s, i, k, style = "") => `<div class="menu" style="${style}" data-menu>
+  <div class="mh">${cur(s, k).file}</div>
+  ${ITEMS(s, i, k).map(([a, g, t, key], j) => `${j === 2 ? `<div class="msep"></div>` : ""}
+    <div class="mi" data-a="${a}" data-i="${i}" data-k="${k}">${icon(g)}${t}<span class="k">${key}</span></div>`).join("")}
+</div>`;
+
+function swapHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col">
+    <div class="row"><b style="font-size:11.5px">Changer le document</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    <div class="row">${icon("folder-open")}<span class="path" title="${d.folder}">${d.folder}</span></div>
+    ${FOUND[k].map((f, j) => `<div class="found" data-a="pick" data-i="${i}" data-k="${k}" data-f="${j}">
+      ${icon("file")}<span class="fname" style="flex:1">${f.file}</span><span class="date">${f.date}</span></div>`).join("")}
+    <div class="drop" data-a="pick" data-i="${i}" data-k="${k}" data-f="0">Déposer un fichier, ou coller un chemin</div>
+    <div class="note">Le fichier reste sur le serveur. fitte lit; il n'écrit jamais dans un dessin.</div>
+  </div>`;
+}
+function histHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col" style="gap:4px">
+    <div class="row"><b style="font-size:11.5px">Documents lus pour ce calque</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    ${d.versions.map((v, j) => `<div class="vrow ${j === 0 ? "cur" : ""}">
+      ${j === 0 ? icon("check") : `<span style="width:14px"></span>`}
+      <span class="fname" style="flex:1">${v.file}</span><span class="date">${v.date}</span>
+      ${j === 0 ? "" : `<span class="btn sm" data-a="revert" data-i="${i}" data-k="${k}" data-v="${j}">relire</span>`}
+    </div>`).join("")}
+    <div class="note">Rien n'est supprimé: on peut toujours revenir au document qui était lu.</div>
+  </div>`;
+}
+const panelHTML = (s, i) => (s.panel === "swap" ? `<div class="panel">${swapHTML(s, i, s.sel)}</div>`
+  : s.panel === "hist" ? `<div class="panel">${histHTML(s, i, s.sel)}</div>` : "");
+
+const rowAttrs = (s, i, k) => `class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}
+  ${s.drag === k ? "drag" : ""}" data-a="sel" data-i="${i}" data-k="${k}" data-row="${k}"`;
+
+const railHead = (s, i, right = "") => `<div class="rh">${icon("layers")}<b>Calques</b>
+  <span style="flex:1"></span>${right || `<span class="hint">${s.order.filter((k) => visible(s, k)).length}/3 visibles</span>`}</div>`;
+
+/* Six ways to say "show me this one" without ever saying "hide the other
+   two". In all six a drawing is a chip or a thumbnail, clicking it puts it
+   on screen alone, and there is a second, deliberate gesture for putting
+   two on screen together — which is the only reason anyone opens several
+   drawings at once: to see where they disagree. */
+
+const SHORT = { arch: "Architecte", arp: "Arpenteur", pays: "Paysage", civ: "Civil" };
+const short = (s, k) => SHORT[s.docs[k].disc];
+const setLabel = (s) => (s.shown.length === s.order.length ? "les 3 ensemble"
+  : s.shown.length === 1 ? `${short(s, s.shown[0])} seul`
+  : s.order.filter((k) => s.shown.includes(k)).map((k) => short(s, k)).join(" + "));
+
+/* The block of document facts: who, when, which file, and the one button. */
+const detail = (i, s, k, inRow) => `<div class="col" style="gap:4px">
+  ${inRow ? "" : `<div class="row"><span class="disc" style="color:var(--ink);font-weight:600">${icon(disc(s, k).icon)}${disc(s, k).label}</span>
+    <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></div>`}
+  <span class="fname" title="${cur(s, k).file}">${cur(s, k).file}</span>
+  <span class="btn sm wide" data-a="menu" data-i="${i}" data-k="${k}">
+    ${icon("file-text")}Document ${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span>
+  ${s.menu === k ? menuHTML(s, i, k, "position:relative") : ""}
+  ${s.panel === "swap" ? swapHTML(s, i, k) : s.panel === "hist" ? histHTML(s, i, k) : ""}
+</div>`;
+
+/* A chip is a drawing. Whether it is on screen is said by the fill of the
+   chip itself, never by an icon beside it. */
+const chip = (i, s, k, extra = "") => `<span class="chip ${visible(s, k) ? "on" : ""} ${s.sel === k ? "sel" : ""}"
+  data-a="solo" data-i="${i}" data-k="${k}" data-row="${k}" data-hov="${k}"
+  title="${disc(s, k).label} · ${cur(s, k).date}">
+  ${icon(disc(s, k).icon)}${short(s, k)}${extra}</span>`;
+
+const allChip = (i, s) => `<span class="chip ${s.shown.length === s.order.length ? "on" : ""}"
+  data-a="all" data-i="${i}">${icon("layers")}Les 3</span>`;
+const readout = (s) => `<span class="hint">${setLabel(s)}</span>`;
+const docCard = (i, s, pos) => (s.menu || s.panel
+  ? `<div class="fcard" style="${pos};width:252px">${detail(i, s, s.sel)}</div>`
+  : `<div class="fcard" style="${pos};padding:4px"><span class="btn sm" data-a="menu" data-i="${i}"
+      data-k="${s.sel}">${icon("file-text")}${short(s, s.sel)} · document ${icon("chevron-up")}</span></div>`);
+
+/* ===================================================================== A
+   Click a drawing and it is the one on screen; click it again and all three
+   come back. To overlap, the + on another chip adds it over what is already
+   there, and the − takes it out. Nothing is ever switched off — the list is
+   replaced. */
+function varA(i, s) {
+  return { bottom: `<div class="band">
+      ${s.order.map((k) => chip(i, s, k, visible(s, k)
+        ? (s.shown.length > 1 ? `<span class="plus" data-a="drop" data-i="${i}" data-k="${k}"
+            title="Retirer de la vue">${icon("minus")}</span>` : "")
+        : `<span class="plus" data-a="add" data-i="${i}" data-k="${k}"
+            title="Ajouter par-dessus">${icon("plus")}</span>`)).join("")}
+      <span style="flex:1"></span>${readout(s)}</div>`,
+    over: docCard(i, s, "left:8px;bottom:8px") };
+}
+
+/* ===================================================================== B
+   The same chips, but the hand chooses: press one and it is alone on
+   screen; keep pressing and slide across its neighbours and each one joins.
+   One gesture goes from a single drawing to any combination. */
+function varB(i, s) {
+  return { bottom: `<div class="band" data-sweep="${i}">
+      ${s.order.map((k) => chip(i, s, k)).join("")}
+      <span style="flex:1"></span>${readout(s)}
+      <span class="hint">${icon("mouse-pointer-click")} glisser pour combiner</span></div>`,
+    over: docCard(i, s, "left:8px;bottom:8px") };
+}
+
+/* ===================================================================== C
+   No layers at all, only the readings someone actually asks for: the
+   architect's sheet, the architect against the survey, the landscape
+   against the survey. One click, one named view, no stacking to manage. */
+const COMBOS = [["Les 3", ["pay", "arp", "plan"]],
+  ["Architecte", ["plan"]],
+  ["Architecte + arpenteur", ["arp", "plan"]],
+  ["Architecte + paysage", ["pay", "plan"]],
+  ["Arpenteur + paysage", ["pay", "arp"]],
+  ["Arpenteur", ["arp"]], ["Paysage", ["pay"]]];
+const sameSet = (a, b) => a.length === b.length && a.every((k) => b.includes(k));
+function varC(i, s) {
+  return { bottom: `<div class="band">
+      ${COMBOS.map(([label, keys], j) => `<span class="chip ${sameSet(keys, s.shown) ? "on" : ""}"
+        data-a="combo" data-i="${i}" data-c="${keys.join(",")}">${j === 0 ? icon("layers") : ""}${label}</span>`).join("")}
+      <span style="flex:1"></span></div>`,
+    over: docCard(i, s, "left:8px;bottom:8px") };
+}
+
+/* ===================================================================== D
+   The pointer alone shows a drawing: hovering a chip puts it on screen by
+   itself, leaving puts the view back. A click fixes that reading, a click
+   on a second chip adds it to the fixed one. Looking costs nothing and
+   leaves nothing behind. */
+function varD(i, s) {
+  return { bottom: `<div class="band" data-hover="${i}">
+      ${s.order.map((k) => chip(i, s, k)).join("")}
+      ${allChip(i, s)}
+      <span style="flex:1"></span>${readout(s)}
+      <span class="hint">survol: aperçu · clic: fixe · 2e clic: ajoute</span></div>`,
+    over: docCard(i, s, "left:8px;bottom:8px") };
+}
+
+/* ===================================================================== E
+   Two drawings, one split. Click a chip to read it alone; click a second
+   and the two are cut by a line dragged across the sheet — the way two
+   sheets are compared on a light table, instead of ink over ink. */
+function varE(i, s) {
+  const both = s.order.filter((k) => s.shown.includes(k));
+  return { wipe: true,
+    bottom: `<div class="band" data-pair="${i}">
+      ${s.order.map((k) => chip(i, s, k)).join("")}
+      <span style="flex:1"></span>
+      ${both.length > 1 ? `<span class="hint">${short(s, both[0])} à gauche · ${short(s, both[1])} à droite</span>`
+        : readout(s)}</div>`,
+    over: docCard(i, s, "left:8px;top:8px") };
+}
+
+/* ===================================================================== F
+   The film edge: click a sheet and it is the one on screen. To overlap,
+   drag one thumbnail onto another — the gesture of laying one sheet over
+   another, which is exactly what the result is. */
+function varF(i, s) {
+  return { side: `<div class="strip">
+      ${s.order.map((k) => `<div class="sth ${visible(s, k) ? "on" : ""} ${s.sel === k ? "sel" : ""}"
+        data-a="solo" data-i="${i}" data-k="${k}" data-row="${k}" data-stack="${k}"
+        title="${disc(s, k).label} · ${cur(s, k).date} · tirer sur une autre pour superposer">
+        <span class="thumb" style="width:34px;height:28px;flex:0 0 34px;background-image:url(${s.docs[k].thumb})"></span>
+        <span class="sname">${short(s, k)}</span></div>`).join("")}
+      <span class="sall" data-a="all" data-i="${i}" title="Les trois ensemble">${icon("layers")}</span>
+    </div>`,
+    over: `<div class="fcard" style="right:52px;top:8px;width:238px">
+      <div class="row" style="margin-bottom:4px">${readout(s)}</div>${detail(i, s, s.sel)}</div>` };
+}
+
+/* ----------------------------------------------------------- the full screen */
+const UNITS = [["501", "5½", "1 275 pi²", "30% 40%"], ["502", "5½", "1 496 pi²", "46% 36%"],
+  ["503", "3½", "760 pi²", "38% 52%"], ["504", "4½", "1 152 pi²", "54% 46%"],
+  ["505", "4½", "1 221 pi²", "34% 30%"]];
+
+/* Each variant returns where its pieces go, not a finished rail: a band
+   above or below the drawing, a strip or a narrow rail beside it, a card
+   floating over it, a control in the head of the pane, or the inspector
+   column rewritten. */
+
+function screenHTML(i, s, P) {
+  return `<div class="app" data-i="${i}">
+    <div class="bar1">${icon("folder")}<span class="crumb">Tous les projets</span>
+      <span class="crumb on">Le Baldwin III</span>
+      <span class="tab on">${icon("git-compare")}Coordination</span>
+      <span class="tab">${icon("table")}Codes</span><span class="tab">${icon("clock")}Échéancier</span>
+      <span class="sp"></span><span class="share">${icon("share-2")}Partager</span></div>
+    <div class="bar2">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<span class="${n === 5 ? "on" : ""}">Niveau ${n}</span>`).join("")}
+      <span>Tous les niveaux</span></div>
+    <div class="card">
+      <div class="ttl"><b>Plans — niveau 5</b><span class="sub">15 unités · 4 avec un croisement ouvert</span>
+        <span class="sp"></span><span class="btn">${icon("table")}Exporter</span></div>
+      <div class="work">
+        <div class="pane lst"><div class="ph">${icon("list")}Unités</div>
+          <div class="pb">${UNITS.map((u, j) => `<div class="uc ${j === 0 ? "on" : ""}">
+            <div class="cr" style="background-position:${u[3]}"><span class="no">${u[0]}</span></div>
+            <div class="ul"><span>${u[1]}</span><span class="a">${u[2]}</span></div></div>`).join("")}</div></div>
+
+        <div class="pane d2" style="position:relative">
+          <div class="ph">${icon("file")}Plan 2D<span class="sp"></span>
+            ${P.head || `<span class="hint">${setLabel(s)}</span>`}</div>
+          ${P.headMenu || ""}
+          ${P.top || ""}
+          <div style="flex:1;min-height:0;display:flex;position:relative">
+            ${stageHTML(s, P.wipe)}
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>100%</span></div>
+            ${P.side || ""}
+            ${P.over || ""}
+          </div>
+          ${P.bottom || ""}</div>
+
+        <div class="pane m3"><div class="ph">${icon("box")}Maquette 3D<span class="sp"></span>
+          <span class="btn">${icon("external-link")}Ouvrir dans SketchUp</span></div>
+          <div style="flex:1;min-height:0;display:flex">
+            <div class="still"></div>
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>60%</span></div>
+          </div></div>
+
+        <div class="pane insp">${P.insp || `<div class="ph">${icon("circle")}Unité 501</div>
+          <div class="pb">
+            <div class="kv"><span>Type</span><b>5½</b></div>
+            <div class="kv"><span>Superficie</span><b>1 275 pi²</b></div>
+            <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
+            <div class="kv"><span>Écart</span><b>240 mm</b></div>
+            <div class="kv"><span>Lu dans</span><b>24 oct 2026</b></div>
+          </div>`}</div>
+      </div>
+      <div class="foot">Ouvertures de la façade sud <b>68.5 m² → 74.2 m²</b><span class="date">+5.7 m²</span>
+        <span class="sp"></span><span class="btn">Lire l'article 3.2.3.1</span></div>
+    </div>
+  </div>`;
+}
+
+const VARIANTS = [
+  { name: "Clic = seul, + pour superposer", build: varA, gain: "1 clic pour isoler",
+    why: `Un clic sur un dessin: c'est le seul à l'écran. Re-clic: les trois reviennent. Le petit + d'une autre pastille la pose par-dessus, le − la retire. <span class="cost">Le prix: deux cibles dans une pastille, donc une pastille plus large.</span>` },
+  { name: "Glisser sur les pastilles", build: varB, gain: "1 geste pour toute combinaison",
+    why: `On appuie sur un dessin — il est seul — et sans relâcher on balaie les voisines: chacune rejoint la vue. Isoler et combiner sont le même geste, continu. <span class="cost">Le prix: un geste qui ne se devine pas; il faut l'écrire une fois.</span>` },
+  { name: "Combinaisons nommées", build: varC, gain: "1 clic, aucune pile à gérer",
+    why: `Pas de calques du tout, seulement les lectures qu'on demande vraiment: « Architecte + arpenteur », « Arpenteur + paysage ». Un clic, une vue nommée. <span class="cost">Le prix: la liste grandit en carré avec le nombre de dessins; au-delà de quatre, impraticable.</span>` },
+  { name: "Survol = aperçu, clic = fixe", build: varD, gain: "0 clic pour regarder",
+    why: `Le pointeur suffit: survoler une pastille met ce dessin seul à l'écran, sortir rend la vue. Le clic fixe la lecture, un clic sur une deuxième pastille l'ajoute. <span class="cost">Le prix: un écran qui bouge au passage de la souris; sans clic, rien ne reste.</span>` },
+  { name: "Deux dessins, une ligne de partage", build: varE, gain: "comparaison sans surcharge d'encre",
+    why: `Clic: un dessin seul. Clic sur un deuxième: les deux sont coupés par une ligne qu'on tire sur la planche — la table lumineuse, plutôt que de l'encre sur de l'encre. <span class="cost">Le prix: on ne voit jamais les deux au même endroit; pour un croisement précis, il faut revenir à la superposition.</span>` },
+  { name: "Tirer une vignette sur une autre", build: varF, gain: "1 clic pour isoler, 1 glissé pour empiler",
+    why: `La tranche de film: un clic sur une planche et c'est elle à l'écran. Pour superposer, on tire une vignette sur une autre — le geste de poser une feuille sur une autre, qui est exactement le résultat. <span class="cost">Le prix: le glissé sert déjà à l'ordre d'empilement ailleurs; il faut choisir.</span>` },
+];
+
+function render(i) {
+  document.querySelector(`[data-var="${i}"] .mount`).innerHTML =
+    screenHTML(i, S[i], VARIANTS[i].build(i, S[i]));
+}
+function renderAll() {
+  document.getElementById("vars").innerHTML = VARIANTS.map((v, i) => `<div class="var" data-var="${i}">
+    <div class="vh"><span class="n">Variante ${String.fromCharCode(65 + i)}</span><b>${v.name}</b>
+      <span class="gain">${v.gain}</span></div>
+    <p class="why">${v.why}</p>
+    <div class="mount"></div></div>`).join("");
+  VARIANTS.forEach((_, i) => { S[i] = S[i] || newState(); render(i); });
+}
+
+function say(s, msg) {
+  s.toast = msg;
+  clearTimeout(s.timer);
+  s.timer = setTimeout(() => { s.toast = null; render(S.indexOf(s)); }, 3600);
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-a]");
+  /* A click anywhere else closes an open door, as a menu should. */
+  if (!el) {
+    let touched = false;
+    S.forEach((s, i) => { if (s && s.menu) { s.menu = null; render(i); touched = true; } });
+    if (touched) e.stopPropagation();
+    return;
+  }
+  const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+  if (!s) return;
+  switch (el.dataset.a) {
+    /* The one rule of this sheet: clicking a drawing replaces what is on
+       screen with that drawing. Clicking it again, when it is already
+       alone, brings the whole set back — so one control both isolates and
+       undoes, and nothing is ever left switched off by accident. */
+    case "solo": {
+      s.sel = k; s.menu = null;
+      /* Where hovering already does the looking, a click is for building:
+         the first one fixes a drawing, the next one adds to it. Where two
+         drawings are compared across a split, a click on a second chip is
+         always the other side of that split — never a third sheet. */
+      const pairing = el.closest("[data-pair]") && !s.shown.includes(k) && s.shown.length === 1;
+      const building = el.closest("[data-hover]") && s.shown.length < s.order.length && !s.shown.includes(k);
+      s.shown = (pairing || building) ? s.order.filter((x) => s.shown.includes(x) || x === k)
+        : (s.shown.length === 1 && s.shown[0] === k) ? s.order.slice() : [k];
+      break;
+    }
+    case "add":
+      if (!s.shown.includes(k)) s.shown = s.order.filter((x) => s.shown.includes(x) || x === k);
+      s.sel = k;
+      break;
+    case "drop":
+      if (s.shown.length > 1) s.shown = s.shown.filter((x) => x !== k);
+      if (s.sel === k) s.sel = s.shown[0];
+      break;
+    case "all": s.shown = s.order.slice(); break;
+    case "combo":
+      s.shown = el.dataset.c.split(",");
+      if (!s.shown.includes(s.sel)) s.sel = s.shown[0];
+      break;
+    case "tab": s.tab = el.dataset.t; break;
+    case "menu": s.menu = s.menu === k ? null : k; s.sel = k; s.panel = null; break;
+    case "open":
+      s.menu = null;
+      say(s, `${cur(s, k).file} — ouvert dans ${s.docs[k].app}.`);
+      break;
+    case "swap": s.menu = null; s.panel = "swap"; s.sel = k; break;
+    case "hist": s.menu = null; s.panel = "hist"; s.sel = k; break;
+    case "close": s.panel = null; break;
+    case "pick": {
+      const f = FOUND[k][+el.dataset.f], d = s.docs[k];
+      d.versions = [{ file: f.file, date: f.date }, ...d.versions.filter((v) => v.file !== f.file)];
+      s.panel = "hist"; s.sel = k;
+      const n = d.versions.length - 1;
+      say(s, `Calque « ${disc(s, k).label} » : ${f.file}. ${n > 1 ? `${n} documents gardés` : "1 document gardé"}.`);
+      break;
+    }
+    case "revert": {
+      const d = s.docs[k], v = d.versions[+el.dataset.v];
+      d.versions = [v, ...d.versions.filter((x) => x !== v)];
+      say(s, `${v.file} — relu.`);
+      break;
+    }
+    default: return;
+  }
+  render(i);
+});
+
+/* B: press a chip and keep sliding. The press alone isolates; every chip
+   the pointer crosses joins the view, so one continuous gesture covers
+   every combination. */
+document.addEventListener("pointerdown", (e) => {
+  const band = e.target.closest("[data-sweep]");
+  const chipEl = e.target.closest("[data-row]");
+  if (!band || !chipEl) return;
+  const i = +band.dataset.sweep, s = S[i];
+  s.shown = [chipEl.dataset.row]; s.sel = chipEl.dataset.row;
+  render(i);
+  const move = (ev) => {
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    const c = el && el.closest("[data-row]");
+    if (!c || !c.closest(`[data-sweep="${i}"]`)) return;
+    if (s.shown.includes(c.dataset.row)) return;
+    s.shown = s.order.filter((x) => s.shown.includes(x) || x === c.dataset.row);
+    render(i);
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+});
+
+/* D: the pointer alone is a reading. Hovering shows that drawing by
+   itself; leaving the band puts back whatever was fixed by clicking. */
+document.addEventListener("pointerover", (e) => {
+  const band = e.target.closest("[data-hover]");
+  if (!band) return;
+  const i = +band.dataset.hover, s = S[i];
+  const c = e.target.closest("[data-hov]");
+  const want = c ? c.dataset.hov : null;
+  if (s.preview === want) return;
+  s.preview = want;
+  render(i);
+});
+document.addEventListener("pointerout", (e) => {
+  const band = e.target.closest("[data-hover]");
+  if (!band || band.contains(e.relatedTarget)) return;
+  const i = +band.dataset.hover, s = S[i];
+  if (!s.preview) return;
+  s.preview = null;
+  render(i);
+});
+
+/* F: drag one sheet onto another and they end up on screen together —
+   the gesture of laying a sheet over a sheet. */
+document.addEventListener("pointerdown", (e) => {
+  const from = e.target.closest("[data-stack]");
+  if (!from) return;
+  const i = +from.dataset.i, s = S[i];
+  let dropped = false;
+  const move = (ev) => {
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    const onto = el && el.closest("[data-stack]");
+    if (!onto || onto === from) return;
+    s.shown = s.order.filter((x) => x === from.dataset.stack || x === onto.dataset.stack);
+    s.sel = from.dataset.stack;
+    dropped = true;
+    render(i);
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    if (dropped) say(s, `${setLabel(s)} — superposés.`);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+});
+
+/* E: the split line. Dragging it moves where one drawing stops and the
+   other starts; the drawings themselves are untouched. */
+document.addEventListener("pointerdown", (e) => {
+  const h = e.target.closest("[data-a='wipe']");
+  if (!h) return;
+  const i = +h.dataset.i, s = S[i];
+  const box = h.parentElement.getBoundingClientRect();
+  const move = (ev) => {
+    s.wipe = Math.min(0.96, Math.max(0.04, (ev.clientX - box.left) / box.width));
+    render(i);
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+});
+
+sprite();
+renderAll();
+</script>
+</body>
+</html>
