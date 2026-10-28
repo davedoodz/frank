@@ -283,6 +283,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    at full measure. A grid of cards made the quote a column three words
    wide; a list lets the sentence be read. */
 .codelist{display:flex;flex-direction:column;gap:8px}
+/* The body of rules an article belongs to, said once above its articles
+   instead of once in every row, and said in the list rather than in a
+   strip that would hide the other two. */
+.codesec{display:flex;align-items:baseline;gap:8px;padding:10px 2px 2px;
+  font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.codesec:first-child{padding-top:0}
 .coderow{display:grid;grid-template-columns:258px 1fr;gap:0;align-items:stretch;
   border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
 .coderow:hover{border-color:var(--line)}
@@ -1785,17 +1791,16 @@ const codeRank = (a) => {
   const i = CODE_ORDER.findIndex((k) => a.doc.startsWith(k));
   return i < 0 ? CODE_ORDER.length : i;
 };
-const CODE_FILTERS = {
-  "Code du Québec": (a) => a.doc.startsWith("Code de construction"),
-  "Règlement d'urbanisme": (a) => a.doc.startsWith("Règlement"),
-  "Loi-cadre": (a) => a.doc.startsWith("Loi sur"),
-  "Tous": () => true,
-  "Non résolus": (a) => a.state === "non résolu",
-};
-function codeList() {
-  const f = CODE_FILTERS[viewOf("Codes")] || (() => true);
-  return ARTICLES.filter(f).sort((x, y) => codeRank(x) - codeRank(y));
-}
+/* No filter strip: the three bodies of rules are short enough to be read
+   in one scroll, and a strip that hides two of them hides the fact that a
+   provision in one is answered by a dimension in another. They are
+   sections inside the list instead, in the order above. */
+const CODE_GROUPS = [["Code de construction", "Code du Québec"],
+  ["Loi sur", "Loi-cadre"], ["Règlement", "Règlement d'urbanisme"]];
+const codeList = () => ARTICLES.slice().sort((x, y) => codeRank(x) - codeRank(y));
+const codeGroups = () => CODE_GROUPS
+  .map(([prefix, label]) => [label, ARTICLES.filter((a) => a.doc.startsWith(prefix))])
+  .filter(([, rows]) => rows.length);
 
 /* A note is written by a person against one article, and it never leaves
    this screen: nothing is ever written back into a drawing or into the
@@ -2113,10 +2118,6 @@ function navHTML() {
 const CONTEXT = {
   "Projets": ["En cours", "Archivés"],
   "Unités": LEVEL_VIEWS,
-  /* The second row filters the list: which body of rules is being read.
-     The Québec construction code comes first because it is the one the
-     building itself is judged against. */
-  "Codes": ["Code du Québec", "Règlement d'urbanisme", "Loi-cadre", "Tous", "Non résolus"],
   /* The scale the calendar is drawn at. */
   "Échéancier": ["Mois", "Semaine", "Année"],
 };
@@ -2460,18 +2461,24 @@ function contentHTML() {
        construction code first, then the bylaw, each one with the schematic
        of what it measures, the sentence in French, what is still missing,
        and the notes written against it. Nothing here writes to a drawing.
-       The strip above filters which body of rules is being read. */
+       Every body of rules is in the one list, each under its own heading. */
     "Codes": () => {
-      const rows = codeList();
+      const groups = codeGroups();
+      const section = ([label, rows]) => {
+        const open = rows.filter((a) => a.state === "non résolu").length;
+        return `<div class="codesec"><span class="hi">${label}</span>
+            <span class="hi" style="color:var(--ink-3)">${rows.length} article${rows.length > 1 ? "s" : ""}${open ? ` · ${open} non résolu${open > 1 ? "s" : ""}` : ""}</span></div>
+          ${rows.map(codeRow).join("")}`;
+      };
       return `<div class="col" style="flex:1;gap:var(--gap)">
         <div class="pane" style="flex:0 0 auto">
           <div class="ph">${icon("hash")}<span class="lo bar" style="width:90px"></span>
-            <span class="hi">${viewOf("Codes")}</span><span style="flex:1"></span>
+            <span class="hi">Articles suivis</span><span style="flex:1"></span>
             <span class="chip"><span class="lo bar" style="width:52px"></span>
-              <span class="hi">${rows.length} article${rows.length > 1 ? "s" : ""} · ${unresolvedCount()} non résolus</span></span>
+              <span class="hi">${ARTICLES.length} articles · ${unresolvedCount()} non résolus</span></span>
             <span class="btnw solid" ${act("addcode")}>${icon("plus")}<span class="hi">Ajouter</span></span></div>
           <div class="pb">
-            <div class="codelist">${rows.map(codeRow).join("")}</div>
+            <div class="codelist">${groups.map(section).join("")}</div>
             <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
               <span class="hi" style="font-size:11.5px;color:var(--ink-2)">Extraits de travail, abrégés. La version qui fait foi est celle de la RBQ ou de l'arrondissement, liée sur chaque article. Une lecture automatique ne déclare pas une non-conformité.</span></div></div>
           </div></div>
