@@ -771,10 +771,9 @@ const SCREENS = {
      crossing lands on one unit, so it lives in that unit's inspector.
      Quantités and Suivi went the same way: the totals and the dates are
      what the project is, not two more places to go. Both are sections of
-     Aperçu now, and the rail is three entries shorter. */
-  /* The rail offered Fichiers before the screen existed, so the entry threw
-     on click. It is a screen now: what was read, and when. */
-  "Fichiers": { icon: "file", regions: ["header", "content"], steps: {} },
+     Aperçu now. Fichiers went the same way, a step further: what was read
+     and when is a property of a drawing, not a destination, so the two
+     screens left are the project and the floor. */
 };
 
 /* ------------------------------------------------------- what the screens
@@ -967,17 +966,6 @@ const PHASES = {
   "Site": ["Relevé d'implantation", "Carnet de chantier", "Tel que construit"],
 };
 
-const FILES = {
-  /* The same sheet codes the level tabs read: A-205 to A-212, one per
-     level, plus the sheets that are not a floor plan. */
-  "Dessins": [["A-209 Plan du niveau 5", "R04 · 24 Oct · lu"], ["A-212 Plan du niveau 8", "R03 · 18 Oct · lu"],
-    ["A-301 Élévations", "R03 · 02 Oct · lu"], ["A-100 Implantation", "R02 · 12 Sep · lu"],
-    ["S-301 Structure", "R02 · 19 Oct · lu"]],
-  "Maquette": [["Maquette SketchUp", "24 Oct · lue"], ["Volumétrie d'ensemble", "21 Oct · lue"]],
-  "Arpenteur": [["Plan d'arpentage", "R2 · 12 Sep · calé sur A-100"], ["Certificat de localisation", "R1 · 03 Mar · lu"]],
-  "Correspondance": [["Note à l'urbaniste", "envoyée 15 Oct"], ["Réponse de l'urbaniste", "en retard de 12 jours"],
-    ["Compte rendu de comité", "14 Nov · à venir"]],
-};
 
 /* Hand-traced wall contours on the 2000 × 1675 permit-sheet crops.
    Keys are drawing suffixes, not list indices. These are spatial reference
@@ -1183,8 +1171,6 @@ const NAV_ICONS = {
     ["Doors", "door-open"], ["Ruler", "ruler"]],
   /* Quantités and Suivi are sections inside Aperçu, so they have no rail
      glyph to choose. CONTEXT still names their tables and phases. */
-  "Fichiers": [["File", "file"], ["Folder", "folder"], ["Folder tree", "folder-tree"],
-    ["File stack", "file-stack"], ["Office server", "hard-drive"]],
 };
 const NAV = Object.keys(NAV_ICONS);
 const navIcon = (name) => V.icons[name] || NAV_ICONS[name][0][1];
@@ -1501,7 +1487,6 @@ const CONTEXT = {
      same V.view entries drive them. */
   "Quantités": ["Unités", "Superficies", "Fenêtres", "Matériaux"],
   "Suivi": ["Programme", "Esquisse", "Comité", "Permis", "Site"],
-  "Fichiers": ["Dessins", "Maquette", "Arpenteur", "Correspondance"],
 };
 
 function tabsHTML() {
@@ -1555,8 +1540,8 @@ function tabsHTML() {
       <span class="sp"></span>`;
   }
   /* The second row only exists when the screen has something to ask for.
-     Aperçu and Fichiers keep the single row, and the drawing gets the
-     thirty-two pixels back. */
+     Aperçu keeps the single row, and the drawing gets the thirty-two
+     pixels back. */
   const row2 = mode === "Two rows, no rail" && views.length
     ? `<div class="tabs lvl rg ${solo("nav")}" data-rg="vues" data-fi="${fiOf("nav")}"
          data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}">
@@ -1580,7 +1565,7 @@ function headerHTML() {
     "Aperçu": [V.project, `8 étages · ${UNITS_BY_LEVEL["Tous les niveaux"].length} unités · ${unresolved} articles non résolus`],
     "Unités": [`Plans — ${viewOf("Unités").toLowerCase()}`,
       `${rowsOf("Unités").length} unités · ${rowsOf("Unités").filter((r) => /croisement/.test(r[1])).length} avec un croisement ouvert`],
-    "Fichiers": ["Fichiers", "ce qui a été lu, et quand"] }[V.screen] || [V.screen, ""];
+  }[V.screen] || [V.screen, ""];
   const metrics = V.header.layout === "Title + metrics";
   const bare = V.header.layout === "Title only";
   return `<header class="pane rg ${solo("header")}" data-rg="entête" data-fi="${fiOf("header")}" style="flex:0 0 auto">
@@ -1799,14 +1784,6 @@ function contentHTML() {
           </div></div>`;
       return `<div class="col" style="flex:1;gap:var(--gap)">${quant}${suivi}${zoning}</div>`;
     },
-    /* Files: what was read, and when. The view picks the kind. */
-    "Fichiers": () => `<div class="col" style="flex:1">
-        ${(FILES[viewOf("Fichiers")] || []).map(([n, meta]) => `<div class="listrow" ${act("openfile", n)} title="Ouvrir ${n}">
-          <span class="dot"></span><span class="lo bar" style="flex:1"></span>
-          <span class="hi" style="font-size:12px;flex:1">${n}</span>
-          <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${meta}</span></div>`).join("")}
-        <div class="tile"><div class="row">${icon("info")}<span class="lo bar" style="width:60%"></span>
-          <span class="hi" style="font-size:11.5px">rien n'est écrit dans un fichier de dessin; les mises à jour sont proposées</span></div></div></div>`,
   }[V.screen]();
 
   /* No header strip on this pane: it only repeated the screen name already
@@ -2592,7 +2569,6 @@ function onClick(e) {
       V.view["Projets"] = 0;
       break;
     }
-    case "openfile": say(`${value} — ouvert en lecture. Rien n'est écrit dans le fichier.`); break;
     case "autocad":
       say(`Remise à AutoCAD: ${dwgName()} s'ouvre sur l'unité, la décision suit.`);
       break;
@@ -2643,8 +2619,7 @@ function onClick(e) {
 
 const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
 /* The panel names a screen in English; the prototype knows it in French. */
-const SCREEN_FR = { Projects: "Projets", Overview: "Aperçu", Units: "Unités",
-  Files: "Fichiers" };
+const SCREEN_FR = { Projects: "Projets", Overview: "Aperçu", Units: "Unités" };
 const FR_SCREEN = Object.fromEntries(Object.entries(SCREEN_FR).map(([en, fr]) => [fr, en]));
 
 const sel = (options) => ({ type: "select", options, default: options[0] });
@@ -2675,10 +2650,7 @@ const dial = DialKit.createDialKit("Wireframe C3", {
      screen actually holds rather than against a default grid of squares. */
   railIcons: { _collapsed: false,
     overview: sel(NAV_ICONS["Aperçu"].map(([l]) => l)),
-    units: sel(NAV_ICONS["Unités"].map(([l]) => l)),
-    /* No rows for Quantités or Suivi: they are sections of Aperçu and the
-       rail does not list them any more. */
-    files: sel(NAV_ICONS["Fichiers"].map(([l]) => l)) },
+    units: sel(NAV_ICONS["Unités"].map(([l]) => l)) },
   /* The plan is black and white until a typology is asked for. */
   typologies: { _collapsed: false, "3½": false, "4½": false, "5½": false },
   layers: { _collapsed: false,
@@ -2735,7 +2707,6 @@ function applyDial(v) {
   };
   pick("Aperçu", v.railIcons.overview);
   pick("Unités", v.railIcons.units);
-  pick("Fichiers", v.railIcons.files);
   const la = v.layers, al = la.align;
   TYPOS.forEach((t) => { V.typo[t] = v.typologies[t]; });
   V.lay.arp = { on: la.surveyor, opacity: la.surveyorOpacity,
