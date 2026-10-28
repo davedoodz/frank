@@ -506,7 +506,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    uses. Red X, green Y, blue Z — the convention every host application the
    file passes through already draws. */
 .axes{position:absolute;left:10px;bottom:10px;z-index:5;width:62px;height:62px;
-  background:color-mix(in srgb, var(--paper) 78%, transparent);border:1px solid var(--line-2);
   pointer-events:none}
 .axes line{stroke-width:1.8;stroke-linecap:round}
 .axes line[data-ax="x"]{stroke:#d24b3e}
@@ -558,14 +557,11 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
   padding:5px 9px;color:var(--ink-2);font-size:11px;white-space:nowrap;backdrop-filter:blur(8px)}
 .model3d[data-state="ready"] .model3d-status{visibility:hidden;opacity:0}
 .model3d[data-state="error"] .model3d-status{color:#8b2e2e;border-color:rgba(139,46,46,.25)}
-.model3d-hint{position:absolute;left:10px;top:10px;z-index:2;border-radius:5px;
-  background:rgba(255,255,255,.84);padding:4px 7px;color:var(--ink-2);font-size:10.5px;
-  pointer-events:none;backdrop-filter:blur(8px)}
-.model3d-selection{position:absolute;left:10px;top:40px;z-index:2;padding:4px 7px;
-  background:rgba(255,255,255,.9);font-size:11px;color:var(--ink-2);border-radius:5px;
-  pointer-events:none;backdrop-filter:blur(8px)}
-[data-fi="low"] .model3d-canvas,[data-fi="low"] .model3d-hint,[data-fi="low"] .model3d-selection,
-[data-fi="low"] .model3d-status{display:none}
+/* No instructions and no running commentary laid over the model: the pane
+   says what it is through the header, the corner view and the axes, and the
+   selected unit is already named in the header and the inspector. Only the
+   loading and error line remains, and it hides itself once ready. */
+[data-fi="low"] .model3d-canvas,[data-fi="low"] .model3d-status{display:none}
 [data-fi="high"] .btnw.solid{background:var(--hi);color:var(--on-hi);border-color:var(--hi)}
 /* Ready to be saved: the project's green, the same one the selected level
    wears, so the one colour means "this is live" everywhere. */
@@ -580,9 +576,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    is deliberately not in this list. */
 [data-theme="dark"] .model3d,
 [data-theme="dark"] .model3d[data-state="ready"]{background:#1b1b1f}
-[data-theme="dark"] .model3d-status,
-[data-theme="dark"] .model3d-hint,
-[data-theme="dark"] .model3d-selection{background:rgba(18,18,21,.84);
+[data-theme="dark"] .model3d-status{background:rgba(18,18,21,.84);
   border-color:rgba(255,255,255,.14)}
 [data-theme="dark"] [data-fi="high"] .listrow.on{background:#2b3313}
 [data-theme="dark"] .scrim{background:rgba(0,0,0,.55)}
@@ -1729,7 +1723,6 @@ function contentHTML() {
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
-                <div class="model3d-hint hi">Glisser pour orbiter · molette pour zoomer · cliquer une fenêtre pour sélectionner l'unité</div>
               </div>
               ${axes}${mini("model")}${zcol("model")}
             </div>`}
