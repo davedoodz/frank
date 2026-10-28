@@ -13,6 +13,7 @@
 }}
 </script>
 <script type="module" src="wireframe-c3-viewer.js"></script>
+<script type="module" src="wireframe-c3-pdf.js"></script>
 <style>
 /* Low fidelity on purpose: one grey, one line weight, one type size ramp.
    What is being tested here is where things sit and in what order they are
@@ -522,6 +523,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 /* While the pass runs, the pane says so where the file name is. */
 .pane[data-pdf="busy"] .fpath::after{content:"rendu vectoriel…";margin-left:auto;
   color:var(--ink-3);font-size:10.5px}
+.pane[data-pdf="error"] .fpath::after{content:"PDF indisponible — aperçu image";margin-left:auto;color:var(--ink-3);font-size:10.5px}
 /* The thumbnails are crops of the same plan, so they read the same way. */
 [data-fi="high"] .plan[data-img="plan"]:not(.align){filter:grayscale(1)}
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
@@ -536,7 +538,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .plan .lay[data-lay="arp"]{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
 .plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png)}
 /* The vector sheet fills the same box as the picture it replaces. */
-.plan .lay canvas{display:block;width:100%;height:100%}
+.plan .lay canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none}
 /* The three layer chips sit in the pane header, tight, so the header still
    reads as one line with the host button at its end. */
 .laychips{display:flex;gap:4px;margin-right:6px;flex:0 0 auto}
@@ -585,8 +587,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .mini .mi{position:relative;display:block;cursor:crosshair;overflow:hidden}
 .mini img{display:block;width:100%;filter:grayscale(1) contrast(.72);opacity:.85}
 .mini .mrect{position:absolute;border:1.5px solid var(--ink);background:rgba(17,17,18,.08)}
-.mini .mcap{display:block;border-top:1px solid var(--line-2);padding:2px 5px;font-size:10px;
-  color:var(--ink-3);font-family:var(--mono);font-variant-numeric:tabular-nums}
 [data-fi="low"] .mini{display:none}
 /* The model's corner view is a live render, not a picture: it keeps the
    building's proportions and is never greyed, because the marker inside it
@@ -806,9 +806,6 @@ const V = {
   mzoom: 40,
   /* The zoom bars have no stored state: they show themselves when the hand
      is on the drawing and leave on their own. */
-  /* "image" reads the exported JPEG of the sheet, "vector" reads the PDF of
-     the same crop through pdf.js and re-renders it at the zoom in use. */
-  planSrc: "image",
   query: "",         // the text in the list search
   reason: null,      // the reason picked for the decision being recorded
   note: "",          // the sentence written for the next person
@@ -1253,34 +1250,13 @@ function crop(box, pad = 0.45, axis = "width") {
     + `background-position:${(px / (1 - fw) * 100).toFixed(1)}% ${(py / (1 - fh) * 100).toFixed(1)}%`;
 }
 
-/* Where each consultant's building sits inside its own sheet, measured once
-   and normalised 0–1, with the sheet's own pixel ratio beside it. The
-   surveyor's box is the teal implantation outline; the landscaping box is
-   the same outline carried across by the two property lines, which agree to
-   within half a percent on the drive island. */
-/* Named apart from SHEETS above: that one is the project's own sheet per
-   level, this one is where a consultant's drawing sits inside its sheet. */
+/* Matching exterior-wall corners, not property lines or balcony extents.
+   Surveyor coordinates are measured after its 180-degree display rotation. */
 const OVERLAY_SHEETS = {
-  /* The surveyor's box, measured on the file as [.159,.246,.818,.814], read
-     back through the half turn: a 180° rotation about the centre sends
-     [x0,y0,x1,y1] to [1-x1,1-y1,1-x0,1-y0], so this is where the teal
-     implantation outline actually lands once the sheet is turned.
-     Each one carries a vector sheet as well as the picture: the picture is
-     there the instant the layer is switched on, the vector lands behind it
-     a moment later and holds its lines at any zoom. Both are the same crop
-     of the same page, so one can replace the other without moving. */
-  arp: { box: [.182, .186, .841, .754], ratio: 1650 / 1560, pdf: "assets/arp-site.pdf" },
-  /* The landscaping box read back the same way, in the other direction: it
-     was measured while the sheet was being turned, so dropping the turn
-     mirrors it to [.192,.204,.862,.776]. */
-  pay: { box: [.192, .204, .862, .776], ratio: 835 / 800, pdf: "assets/paysage.pdf" },
+  arp: { box: [298/1650,307/1560,1380/1650,1172/1560], ratio: 1650/1560, pdf: "assets/arp-site.pdf" },
+  pay: { box: [156/835,178/800,711/835,624/800], ratio: 835/800, pdf: "assets/paysage.pdf" },
 };
-/* The floor plan's own building, and the plan's pixel ratio — both
-   recomputed for the new consistent crop (plan-niveau-N.jpg, 2000×1675):
-   the building's own outer-wall envelope, found by contour search on the
-   thresholded ink, bounds at x 0.135–0.763, y 0.1803–0.7719 on the
-   typical floor. */
-const BASE_BOX = [.135, .1803, .763, .7719];
+const BASE_BOX = [314/2000,325/1675,1488/2000,1270/1675];
 const BASE_RATIO = 2000 / 1675;
 
 /* Places one sheet so its building lands on the floor plan's building, then
@@ -1295,9 +1271,9 @@ function sheetStyle(key) {
      height that width implies at the sheet's own proportions. */
   const w = (bx1 - bx0) / (sx1 - sx0) * L.scale / 100;
   const h = w * BASE_RATIO / S.ratio;
-  const left = bx0 - sx0 * w + L.x / 100;
+  const left = bx0 - sx0 * w + L.x / 100 - (paneLevel() === 1 ? 41/2000 : 0);
   /* Centred on the building vertically, since the height is no longer free. */
-  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h + L.y / 100;
+  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h + L.y / 100 + (paneLevel() === 1 ? 8/1675 : 0);
   return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
     + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;opacity:${L.opacity / 100}`;
 }
@@ -1306,7 +1282,7 @@ function sheetStyle(key) {
    registered by construction: a PDF page paints only its ink, and what shows
    through until it lands is the picture underneath. */
 const layersHTML = () => ["arp", "pay"].filter((k) => V.lay[k].on)
-  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"><canvas data-laypdf="${k}"></canvas></div>`).join("");
+  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"><canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${k === "arp" ? 180 : 0}"></canvas></div>`).join("");
 
 /* The plan is read in black and white. Colour only arrives when a typology
    is asked for, and then only on the units that answer. */
@@ -2127,18 +2103,17 @@ function contentHTML() {
          sheet as a picture, with the rectangle of what is on screen, dragged
          to move it. On the model it is the model itself seen from straight
          above — the roof read in the same orientation as the sheet beside
-         it — with a marker for the side the live camera stands on. The
-         percentage is already on the column an inch away, so the model's
-         view carries no caption at all. */
+         it — with a marker for the side the live camera stands on. Neither
+         carries a caption: the percentage is already on the zoom column an
+         inch away, and printing it twice only made the corner heavier. */
       const mini = (side) => (side === "plan"
         ? `<div class="mini hi" data-mini="plan">
         <span class="mi" data-mi>
           <img src="${sheet().img}" alt="">
           <span class="mrect" data-mrect></span>
         </span>
-        <span class="mcap"><span data-mpct>${V.zoom}%</span></span>
       </div>`
-        : `<div class="mini hi nocap" data-mini="model">
+        : `<div class="mini hi" data-mini="model">
         <span class="mi" data-mi><canvas data-mini3d></canvas></span>
       </div>`);
       /* North, top right of each pane. On the sheet it is a fixed mark: the
@@ -2195,7 +2170,7 @@ function contentHTML() {
               <div class="plan ${cls}" data-img="${kind}" data-src="${planVector() ? "vector" : "image"}"
                    style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})">
                 <span class="lo"></span><span class="hi">${note}</span>
-                ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf></canvas>` : ""}
+                ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}</div></div>
               ${north("plan")}${mini("plan")}${zcol("plan")}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
@@ -2400,127 +2375,9 @@ const ZMIN = 45, ZMAX = 600;
 const MZOOM_WIDE = 13, MZOOM_CLOSE = 55;
 const vpEl = () => document.querySelector("[data-vp]");
 
-/* ------------------------------------------------- the sheet as vectors
-   The exported JPEG is one resolution: past about 200 % a dimension string
-   is four grey pixels. The same crop also exists as the drawing's own
-   lines, in a PDF read by pdf.js.
-
-   Measured on these sheets: one pass costs about fifteen seconds, and the
-   cost is the geometry, not the pixels — 1 200 px and 3 400 px take the
-   same time, because a permit floor plan is a hundred thousand little
-   paths. So the sheet is not redrawn as the zoom moves. It is drawn once
-   per level, at a fixed resolution well above the picture's, in the
-   background, with the picture left in place underneath until it lands.
-   The result is kept, so coming back to a level is instant. */
-const PDF_W = 3000;                     // the width every sheet is drawn at
-const planVector = () => V.planSrc === "vector" && !!sheet().pdf;
-let pdfLib = null;
-const pdfDocs = new Map();
-const pdfBitmaps = new Map();           // url → the finished sheet
-let pdfBusy = null;                     // the url being drawn, if any
-
-function blitSheet(bmp) {
-  const el = vpEl();
-  const live = el && el.querySelector("[data-sheetpdf]");
-  if (!live) return;
-  live.width = bmp.width;
-  live.height = bmp.height;
-  live.getContext("2d").drawImage(bmp, 0, 0);
-  live.dataset.ready = "1";
-}
-
-async function renderSheetPdf() {
-  const el = vpEl();
-  if (!el || !planVector()) return;
-  const url = sheet().pdf;
-  const done = pdfBitmaps.get(url);
-  if (done) { blitSheet(done); return; }
-  if (pdfBusy) return;                  // one sheet at a time
-  pdfBusy = url;
-  const pane = el.closest(".pane");
-  if (pane) pane.dataset.pdf = "busy";
-  try {
-    const bmp = await pdfBitmap(url, PDF_W);
-    pdfBitmaps.set(url, bmp);
-    if (sheet().pdf === url && planVector()) blitSheet(bmp);
-  } catch (err) {
-    /* An unreadable sheet falls back to the picture, which is still there,
-       rather than leaving the pane empty. */
-    console.error("plan vectoriel", url, err);
-    say(`Feuille vectorielle illisible (${url}): ${err && err.message ? err.message : err}`);
-    V.planSrc = "image";
-    render();
-  } finally {
-    pdfBusy = null;
-    const p = (vpEl() || el).closest(".pane");
-    if (p) p.dataset.pdf = "";
-    // A window pick may change floors while the previous PDF is rendering.
-    if (planVector() && sheet().pdf !== url) scheduleSheetPdf();
-  }
-}
-
-/* Called on every paint; it is cheap once the sheet is in hand. */
-function scheduleSheetPdf() {
-  if (!planVector()) return;
-  renderSheetPdf();
-}
-
-/* The consultants' sheets go through the same mill as the floor plan, at a
-   smaller width because each one covers a third of the plan at most. One at
-   a time, kept once drawn, and the picture underneath carries the layer
-   until its sheet lands. */
-const OVERLAY_W = 2400;
-const layerBusy = new Set();
-async function paintLayerPdfs() {
-  for (const c of document.querySelectorAll("[data-laypdf]")) {
-    const key = c.dataset.laypdf;
-    const url = OVERLAY_SHEETS[key].pdf;
-    if (!url || c.dataset.ready === url) continue;
-    const done = pdfBitmaps.get(url);
-    if (done) { blitLayer(c, done); continue; }
-    if (layerBusy.has(url)) continue;
-    layerBusy.add(url);
-    try {
-      const bmp = await pdfBitmap(url, OVERLAY_W);
-      pdfBitmaps.set(url, bmp);
-      /* The pane is rebuilt on every render, so the canvas asked for may be
-         gone by now: paint whichever canvas is live for this layer. */
-      document.querySelectorAll(`[data-laypdf="${key}"]`).forEach((live) => blitLayer(live, bmp));
-    } catch (err) {
-      console.error("calque vectoriel", url, err);
-    } finally {
-      layerBusy.delete(url);
-    }
-  }
-}
-function blitLayer(c, bmp) {
-  c.width = bmp.width;
-  c.height = bmp.height;
-  c.getContext("2d").drawImage(bmp, 0, 0);
-  c.dataset.ready = OVERLAY_SHEETS[c.dataset.laypdf].pdf;
-}
-
-/* One page, one width, one bitmap — the floor plan and the consultants'
-   sheets all come through here. */
-async function pdfBitmap(url, width) {
-  if (!pdfLib) {
-    pdfLib = await import("./vendor/pdfjs/pdf.min.mjs");
-    pdfLib.GlobalWorkerOptions.workerSrc = "./vendor/pdfjs/pdf.worker.min.mjs";
-  }
-  let doc = pdfDocs.get(url);
-  if (!doc) { doc = await pdfLib.getDocument(url).promise; pdfDocs.set(url, doc); }
-  const page = await doc.getPage(1);
-  const base = page.getViewport({ scale: 1 });
-  const view = page.getViewport({ scale: width / base.width });
-  /* Drawn on a canvas of its own and copied over when it is finished, so
-     nothing on screen ever holds a half-drawn sheet and pdf.js never finds
-     two passes on one canvas. */
-  const off = document.createElement("canvas");
-  off.width = Math.round(view.width);
-  off.height = Math.round(view.height);
-  await page.render({ canvasContext: off.getContext("2d"), viewport: view }).promise;
-  return typeof createImageBitmap === "function" ? await createImageBitmap(off) : off;
-}
+/* PDF detail is automatic; the image remains underneath during rendering.
+   wireframe-c3-pdf.js paints viewport-sized tiles at the current pixel density. */
+const planVector = () => !!sheet().pdf;
 const SHEET_AR = 2000 / 1675;
 function layoutSheet(el) {
   const plan = el.querySelector(".plan");
@@ -2639,9 +2496,7 @@ function paintSheet() {
     label.style.transform = `translateY(${(label.dataset.side === "below" ? 2 / z : -(14 / z)).toFixed(2)}px)`;
   }
   el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / z).toFixed(3)}px`; });
-  /* The vectors are redrawn for the magnification they are now at. */
-  scheduleSheetPdf();
-  paintLayerPdfs();
+  window.dispatchEvent(new Event("fitte:plan-paint"));
   /* The corner rectangle is the same state read small; painted here so it
      cannot drift from the sheet by a frame. */
   paintMiniPlan();
@@ -2764,18 +2619,13 @@ function paintMiniPlan() {
   rect.style.top = `${y * b.height}px`;
   rect.style.width = `${w * b.width}px`;
   rect.style.height = `${h * b.height}px`;
-  const pct = box.querySelector("[data-mpct]");
-  if (pct) pct.textContent = `${V.zoom}%`;
 }
 
 /* The model's corner view is rendered by the viewer module from the live
-   scene, so nothing here draws it. The percentage under it is the one
-   number this file owns. */
+   scene, so nothing here draws it. The zoom column carries the number. */
 function paintModelRead() {
   const read = document.querySelector("[data-mread]");
   if (read) read.textContent = `${V.mzoom}%`;
-  const pct = document.querySelector('[data-mini="model"] [data-mpct]');
-  if (pct) pct.textContent = `${V.mzoom}%`;
 }
 
 window.addEventListener("fitte:model-zoom", (e) => {
@@ -3389,9 +3239,6 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   theme: sel(["Light", "Dark"]),
   homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
   isolate: sel(["none", "nav", "header", "list", "content", "inspector", "footer"]),
-  /* The drawing read as the exported picture, or as the vectors of the same
-     crop redrawn at the zoom in use. */
-  planSource: sel(["Image", "Vector"]),
   /* One shortlist per screen, so the rail can be judged against what the
      screen actually holds rather than against a default grid of squares. */
   railIcons: { _collapsed: false,
@@ -3441,7 +3288,6 @@ function applyDial(v) {
   V.chrome = v.chrome;
   V.homeLayout = v.homeLayout;
   V.isolate = v.isolate;
-  V.planSrc = String(v.planSource || "").toLowerCase() === "vector" ? "vector" : "image";
   /* On the root, not on the frame: the toast and the dialog sit outside it
      and read the same tokens. */
   document.documentElement.dataset.theme = String(v.theme || "").toLowerCase() === "dark" ? "dark" : "light";
