@@ -451,12 +451,16 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
   background-size:contain;background-position:center;pointer-events:none;z-index:2}
 [data-fi="high"] .plan[data-img] .lay{display:block}
-.plan .lay[data-lay="arp"]{background-image:url(assets/arp-site.png)}
-/* The landscaping sheet is drawn the other way round from the surveyor's:
-   the 8,26 m drive island reads (.375,.313) on one and (.354,.276) on the
-   other once both are measured against their property lines. The file stays
-   as extracted; the half turn happens here. */
+/* Both consultants' sheets are drawn the other way round from the floor
+   plan: north is at the bottom on them and at the top on A-209. The files
+   stay as they were extracted; the half turn happens here, and the box each
+   one is placed by is measured in this displayed orientation. */
+.plan .lay[data-lay="arp"]{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
 .plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png);transform:rotate(180deg)}
+/* The three layer chips sit in the pane header, tight, so the header still
+   reads as one line with the host button at its end. */
+.laychips{display:flex;gap:4px;margin-right:6px}
+.laychips .chip{padding:1px 7px;font-size:11px;cursor:pointer}
 /* One typology, one colour, laid on the unit it belongs to. */
 .plan .utagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible}
 .plan .utagsvg polygon{opacity:.45;mix-blend-mode:multiply}
@@ -493,6 +497,27 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .mini .mcap{display:block;border-top:1px solid var(--line-2);padding:2px 5px;font-size:10px;
   color:var(--ink-3);font-family:var(--mono);font-variant-numeric:tabular-nums}
 [data-fi="low"] .mini{display:none}
+/* The model's corner view is a live render, not a picture: it keeps the
+   building's proportions and is never greyed, because the marker inside it
+   is the only thing that has to stand out. */
+.mini canvas[data-mini3d]{display:block;width:100%;height:84px;background:var(--fill-2)}
+.mini[data-mini="model"] .mi{cursor:default}
+/* The three axes as the camera sees them, in the corner the drawing never
+   uses. Red X, green Y, blue Z — the convention every host application the
+   file passes through already draws. */
+.axes{position:absolute;left:10px;bottom:10px;z-index:5;width:62px;height:62px;
+  background:color-mix(in srgb, var(--paper) 78%, transparent);border:1px solid var(--line-2);
+  pointer-events:none}
+.axes line{stroke-width:1.8;stroke-linecap:round}
+.axes line[data-ax="x"]{stroke:#d24b3e}
+.axes line[data-ax="y"]{stroke:#4f9b45}
+.axes line[data-ax="z"]{stroke:#3a6fb0}
+.axes text{font-family:var(--mono);font-size:7px;text-anchor:middle;dominant-baseline:middle}
+.axes text[data-axt="x"]{fill:#d24b3e}
+.axes text[data-axt="y"]{fill:#4f9b45}
+.axes text[data-axt="z"]{fill:#3a6fb0}
+.axes circle{fill:var(--ink-3)}
+[data-fi="low"] .axes{display:none}
 /* The two drawing panes are the thing being compared, so their edge is
    stated instead of implied — including in the inset shell, where panes
    otherwise give up their border to the grid lines. */
@@ -1050,7 +1075,11 @@ function crop(box, pad = 0.45, axis = "width") {
 /* Named apart from SHEETS above: that one is the project's own sheet per
    level, this one is where a consultant's drawing sits inside its sheet. */
 const OVERLAY_SHEETS = {
-  arp: { box: [.159, .246, .818, .814], ratio: 1650 / 1560 },
+  /* The surveyor's box, measured on the file as [.159,.246,.818,.814], read
+     back through the half turn: a 180° rotation about the centre sends
+     [x0,y0,x1,y1] to [1-x1,1-y1,1-x0,1-y0], so this is where the teal
+     implantation outline actually lands once the sheet is turned. */
+  arp: { box: [.182, .186, .841, .754], ratio: 1650 / 1560 },
   pay: { box: [.138, .224, .808, .796], ratio: 835 / 800 },
 };
 /* The floor plan's own building, and the plan's pixel ratio — both
@@ -1652,20 +1681,42 @@ function contentHTML() {
         <span class="zb" ${close(side)}>${icon("minimize")}</span>
       </div>`;
       /* The corner view: the drawing whole, small, with the rectangle of
-         what the pane is showing. On the plan the rectangle is dragged to
-         move the sheet; on the model it only reports how much of the
-         building the camera holds, since the camera orbits and does not
-         pan. */
-      const mini = (side) => `<div class="mini hi" data-mini="${side}">
+         what the pane is showing. On the plan it is the sheet as a picture
+         and the rectangle is dragged to move it. On the model it is the
+         model itself, rendered a second time from a fixed wide camera, with
+         a marker for where the live camera stands — a picture would go stale
+         the moment the building is orbited. */
+      const mini = (side) => (side === "plan"
+        ? `<div class="mini hi" data-mini="plan">
         <span class="mi" data-mi>
-          <img src="${side === "plan" ? sheet().img : "assets/skp-ensemble.jpg"}" alt="">
+          <img src="${sheet().img}" alt="">
           <span class="mrect" data-mrect></span>
         </span>
-        <span class="mcap"><span data-mpct>${side === "plan" ? V.zoom : V.mzoom}%</span></span>
-      </div>`;
+        <span class="mcap"><span data-mpct>${V.zoom}%</span></span>
+      </div>`
+        : `<div class="mini hi" data-mini="model">
+        <span class="mi" data-mi><canvas data-mini3d></canvas></span>
+        <span class="mcap"><span data-mpct>${V.mzoom}%</span></span>
+      </div>`);
+      /* Which way is north, up, and along the façade: the three axes as the
+         camera sees them, red X, green Y, blue Z, redrawn as it orbits. */
+      const axes = `<svg class="axes hi" data-axes viewBox="-26 -26 52 52" aria-hidden="true">
+        ${["x", "y", "z"].map((a) => `<line data-ax="${a}" x1="0" y1="0" x2="0" y2="0"></line>
+          <text data-axt="${a}" x="0" y="0">${a.toUpperCase()}</text>`).join("")}
+        <circle cx="0" cy="0" r="1.6"></circle>
+      </svg>`;
+      /* Which sheets are laid over the floor plan was a panel setting, which
+         means it was not in the prototype at all: the person reading the
+         drawing could not ask for the surveyor. The three chips are that
+         question, on the pane that answers it. "Plan seul" is not a fourth
+         layer, it is both overlays off — the floor plan is always there. */
+      const laychip = (k, t) => `<span class="chip hi ${k === "none" ? (!V.lay.arp.on && !V.lay.pay.on ? "on" : "") : (V.lay[k].on ? "on" : "")}"
+        ${act("layer", k)} title="${k === "none" ? "Le plan d'étage seul" : `Superposer ${t.toLowerCase()}`}">${t}</span>`;
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane drawing" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
-        <span style="flex:1"></span>${hostButton(kind === "plan" ? "plan" : "model")}</div>
+        <span style="flex:1"></span>
+        ${kind === "plan" ? `<span class="laychips">${laychip("none", "Plan seul")}${laychip("arp", "Arpenteur")}${laychip("pay", "Paysage")}</span>` : ""}
+        ${hostButton(kind === "plan" ? "plan" : "model")}</div>
         ${fileStrip(kind === "plan" ? "plan" : "model")}
         ${kind === "plan"
           /* The sheet is larger than the pane, so the pane is a window onto
@@ -1686,7 +1737,7 @@ function contentHTML() {
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
                 <div class="model3d-hint hi">Glisser pour orbiter · molette pour zoomer · cliquer une fenêtre pour sélectionner l'unité</div>
               </div>
-              ${mini("model")}${zcol("model")}
+              ${axes}${mini("model")}${zcol("model")}
             </div>`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
@@ -2198,28 +2249,14 @@ function paintMiniPlan() {
   if (pct) pct.textContent = `${V.zoom}%`;
 }
 
-/* The camera neither pans nor rolls: it circles the building at a distance.
-   So the model's rectangle is centred by construction, and only its size
-   carries information — how much of the building is held at this distance. */
-function paintMiniModel() {
-  const box = document.querySelector('[data-mini="model"]');
-  if (!box) return;
-  const mi = box.querySelector("[data-mi]"), rect = box.querySelector("[data-mrect]");
-  const b = mi.getBoundingClientRect();
-  if (!b.width) return;
-  const f = Math.max(0.15, Math.min(1, 1 - V.mzoom / 120));
-  rect.style.width = `${f * b.width}px`;
-  rect.style.height = `${f * b.height}px`;
-  rect.style.left = `${(1 - f) / 2 * b.width}px`;
-  rect.style.top = `${(1 - f) / 2 * b.height}px`;
-  const pct = box.querySelector("[data-mpct]");
-  if (pct) pct.textContent = `${V.mzoom}%`;
-}
-
+/* The model's corner view is rendered by the viewer module from the live
+   scene, so nothing here draws it. The percentage under it is the one
+   number this file owns. */
 function paintModelRead() {
   const read = document.querySelector("[data-mread]");
   if (read) read.textContent = `${V.mzoom}%`;
-  paintMiniModel();
+  const pct = document.querySelector('[data-mini="model"] [data-mpct]');
+  if (pct) pct.textContent = `${V.mzoom}%`;
 }
 
 window.addEventListener("fitte:model-zoom", (e) => {
@@ -2454,6 +2491,17 @@ function onClick(e) {
        only notes what was opened. */
     case "source": say(`${value} — texte officiel ouvert dans un onglet. Lecture seule.`); return render();
     case "utab": V.utab = Number(value); break;
+    /* The chips drive the panel, not V directly: the panel is the single
+       source for the layers, and applyDial writes V and re-renders. Writing
+       both would let the two disagree on the next dial change. */
+    case "layer":
+      if (value === "none") {
+        dial.setValue("layers.surveyor", false);
+        dial.setValue("layers.landscaping", false);
+      } else {
+        dial.setValue(value === "arp" ? "layers.surveyor" : "layers.landscaping", !V.lay[value].on);
+      }
+      return;
     /* The unit the list is on, filling the pane: the move the plan is
        opened for, without hunting for it with the wheel. */
     case "fitunit": fitUnit(); break;
