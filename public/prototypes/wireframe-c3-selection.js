@@ -2,7 +2,9 @@ import * as THREE from "three";
 
 // Source-model elevations, measured from the repeated facade window bands.
 // The glazing above 10.05 is the roof pavilion, not an apartment floor.
-const ELEVATIONS = [0.05, 1.32, 2.52, 3.72, 4.92, 6.12, 7.32, 8.52, 10.05];
+// Each entry is the top of the slab a level stands on, which is what the
+// level markers in the pane point at.
+export const ELEVATIONS = [0.05, 1.32, 2.52, 3.72, 4.92, 6.12, 7.32, 8.52, 10.05];
 // Facade landmarks register the exported model to the cropped permit sheets.
 // This is spatial registration, not a verified CAD unit/window association.
 const X_ANCHORS = [[23.7, 314], [48.1, 1488]];
