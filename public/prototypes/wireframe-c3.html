@@ -439,7 +439,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    as extracted; the half turn happens here. */
 .plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png);transform:rotate(180deg)}
 /* One typology, one colour, laid on the unit it belongs to. */
-.plan .utagsvg{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible}
+.plan .utagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible}
 .plan .utagsvg polygon{opacity:.45;mix-blend-mode:multiply}
 /* The 2D pane is a window onto a sheet that is larger than it: the drawing
    and everything laid over it move and scale together inside .vp, so a
@@ -485,7 +485,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
   border:0;background-color:#fff}
 /* The selected unit, drawn over the sheet and never into it: a thin outline
    and a light wash, both in the one accent the screen already uses. */
-.umark{position:absolute;inset:0;z-index:3;overflow:visible}
+.umark{position:absolute;inset:0;width:100%;height:100%;z-index:3;overflow:visible}
 .umark polygon.hit{fill:transparent;pointer-events:auto;cursor:pointer}
 .umark polygon.on{fill:rgba(139,160,15,.16);stroke:#8ba00f;stroke-width:1.6;
   vector-effect:non-scaling-stroke;pointer-events:auto;cursor:pointer}
@@ -711,32 +711,16 @@ const SCREENS = {
    are reading. One table per question, so a control can change the answer
    instead of only changing a border colour. */
 
-/* Le Baldwin III is eight storeys, 104 logements total — the architect's
-   own title block on A-205 ("MULTI-LOGEMENT ET COMMERCES TOTALISANT 104
-   LOGEMENTS — NIVEAU 1: COMMERCES ET 2 LOGEMENTS — NIVEAUX 2 À 8: 102
-   LOGEMENTS"), confirmed against the full uncropped permit set, not the
-   pre-cropped platform JPGs, which cut the west units and hid level 1's
-   and level 8's real content. Level 1 is commerces, gym and 2
-   residential suites, UNITE 04 and UNITE 05 — not zero, not the typical
-   floor. Levels 2–7 read the typical floor (BAL3_Étage_Type.dwg); level
-   2 is missing unit 14 (confirmed on A-206 and on the unit-detail
-   sheet), so it carries 14 of the 15 typical suffixes. Levels 3–7 carry
-   all 15. Level 8 is the real penthouse: ten typical suffixes repeat
-   (3,4,5,6,7,8,12,13,14,15) and five (1,2,9,10,11) are replaced by three
-   larger units, PH16/PH17/PH18. 2 + 14 + 75 + 13 = 104. Unit numbers
-   below are the sheet's own suffixes, not list position — they are not
-   sequential (level 2 skips 14, level 8 skips 1,2,9,10,11) — so an id is
-   built as level + its real two-digit suffix, never level + (index+1). */
-/* ty and net pi², keyed by the sheet's own suffix (1–15). Four of these
-   (7, 8, 9, 10) are read directly off A-209's own area tags; the rest
-   carry the platform's marketing-sheet values, not yet individually
-   re-confirmed against this suffix on this sheet — real numbers, just
-   not proven for this exact slot. */
+/* Permit-sheet identities: 104 apartments across eight floors.
+   Ground has 04/05; level 2 omits 14; levels 3–7 have 01–15.
+   Level 8 retains ten typical units and replaces 01/02/09/10/11 with
+   PH16/17/18. IDs combine the level and drawing suffix, not list position.
+   Typologies and source areas below are read from the floor-plan tags. */
 const TYPICAL = {
-  1: ["3½", 707], 2: ["3½", 727], 3: ["3½", 753], 4: ["3½+bureau", 880],
-  5: ["4½", 968], 6: ["4½", 1012], 7: ["3½", 707], 8: ["4½", 970],
-  9: ["4½", 958], 10: ["5½", 1466], 11: ["4½", 1170], 12: ["4½", 1203],
-  13: ["5½", 1249], 14: ["5½", 1350], 15: ["4½", 1380],
+  1: ["5½", 1275], 2: ["5½", 1496], 3: ["3½", 760], 4: ["4½", 1152],
+  5: ["4½", 1221], 6: ["4½", 1106], 7: ["3½", 707], 8: ["4½", 970],
+  9: ["4½", 958], 10: ["5½", 1466], 11: ["5½", 1345], 12: ["3½", 740],
+  13: ["3½", 708], 14: ["3½", 716], 15: ["4½", 999],
 };
 /* Level 1's two suites: ground-floor layouts, not the typical floor's —
    their own area tags on A-205 (UNITE 04 NIV.1, UNITE 05 NIV.1). */
@@ -763,11 +747,8 @@ const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8];
 const baseTypo = (ty) => ty.split("+")[0];
 
 
-/* One drawing per level, the sheets the permit set actually carries: a level
-   tab does not recolour the same picture, it opens another file. Code,
-   revision and date are what the title block says; the images in assets/
-   are those sheets rendered and cropped to one shared frame, so a unit box
-   means the same thing on every level. */
+/* One source drawing per level. JPG and PDF use the same full-footprint
+   crop. Floor-specific contours account for differing layouts and offsets. */
 const SHEETS = {};
 LEVELS.forEach((lv) => {
   const code = `A-${204 + lv}`;
@@ -925,65 +906,46 @@ const FILES = {
     ["Compte rendu de comité", "14 Nov · à venir"]],
 };
 
-/* Measured wall-following polygons, normalised 0–1, keyed by the sheet's
-   own suffix (not list position) so a sparse level — level 2 without its
-   14, level 8 with only ten typical suffixes plus three penthouse suites
-   — just omits the keys it doesn't have. "typical" is traced from
-   assets/plan-niveau-5.jpg (levels 2–7's drawing; level 2 differs only
-   by omitting suffix 14, not pixel-for-pixel elsewhere — not
-   independently re-verified unit by unit for every level). Levels 1 and
-   8 are traced from their own sheets, plan-niveau-1.jpg and
-   plan-niveau-8.jpg. Method: the building's own outer wall fill gives an
-   exact envelope (contour search on the thresholded ink), each sheet's
-   "UNITE NN" / "NIVEAU 09" label gives one verified anchor point per
-   suffix, and the envelope is split by nearest anchor — real envelope,
-   real anchors, an approximated internal split. PH16/17/18 and level 1's
-   two suites sit outside that automated envelope (lighter line weight
-   over the roof terrace, and a separate lease-line boundary
-   respectively) and are traced by hand from the sheet's own walls
-   instead. */
+/* Hand-traced wall contours on the 2000 × 1675 permit-sheet crops.
+   Keys are drawing suffixes, not list indices. These are spatial reference
+   outlines, not CAD-verified boundaries. Shared typical outlines apply to
+   levels 2–7; level 2 omits the double-height hall at suffix 14. Ground
+   apartments and penthouses use their own floor's walls, excluding terraces. */
+const planContour = (points) => points.map(([x, y]) => [x / 2000, y / 1675]);
 const CONTOURS = {
   typical: {
-    1: [[0.242,0.6436],[0.243,0.7594],[0.2925,0.76],[0.294,0.7707],[0.362,0.7594],[0.362,0.6645],[0.26,0.6293]],
-    2: [[0.2415,0.6448],[0.153,0.6627],[0.153,0.7594],[0.169,0.7594],[0.1705,0.7678],[0.205,0.76],[0.206,0.7701],[0.212,0.7594],[0.2425,0.7594]],
-    3: [[0.153,0.5128],[0.157,0.5785],[0.1425,0.5928],[0.153,0.6012],[0.153,0.6615],[0.2415,0.6436],[0.2555,0.6275],[0.2525,0.5176]],
-    4: [[0.1475,0.3779],[0.1595,0.4699],[0.153,0.5122],[0.2525,0.5164],[0.2605,0.4848],[0.2555,0.391]],
-    5: [[0.2905,0.3284],[0.272,0.2794],[0.2575,0.2794],[0.257,0.2687],[0.2505,0.2794],[0.17,0.2716],[0.155,0.2806],[0.156,0.3707],[0.2565,0.3899]],
-    6: [[0.372,0.1928],[0.331,0.1851],[0.3225,0.1934],[0.3225,0.2609],[0.3135,0.2627],[0.3225,0.2788],[0.274,0.2794],[0.292,0.3313],[0.3715,0.3146]],
-    7: [[0.3725,0.1928],[0.372,0.3146],[0.4135,0.3212],[0.457,0.3128],[0.4595,0.1928]],
-    8: [[0.4655,0.1815],[0.458,0.3128],[0.545,0.3194],[0.544,0.1928],[0.471,0.1928]],
-    9: [[0.6485,0.1928],[0.635,0.1928],[0.634,0.1815],[0.5935,0.1982],[0.5445,0.1928],[0.5455,0.3194],[0.5955,0.3361],[0.6495,0.3075]],
-    10: [[0.649,0.1928],[0.65,0.3075],[0.746,0.3301],[0.746,0.3116],[0.756,0.3093],[0.746,0.3027],[0.746,0.1928]],
-    11: [[0.746,0.3313],[0.6475,0.3093],[0.594,0.3373],[0.594,0.443],[0.7005,0.443],[0.7085,0.3701],[0.746,0.3594]],
-    12: [[0.478,0.3212],[0.478,0.443],[0.533,0.4376],[0.542,0.4555],[0.55,0.443],[0.5935,0.443],[0.5935,0.3373],[0.546,0.32]],
-    13: [[0.409,0.3224],[0.4095,0.443],[0.4595,0.4376],[0.4745,0.4543],[0.4775,0.3206],[0.453,0.314]],
-    14: [[0.4085,0.3224],[0.292,0.3325],[0.2565,0.3904],[0.2615,0.4824],[0.362,0.4967],[0.3625,0.4501],[0.409,0.443]],
-    15: [[0.261,0.4836],[0.256,0.6275],[0.371,0.6591],[0.362,0.6519],[0.362,0.4979]],
+    1: planContour([[530,1060],[650,1060],[650,1023],[720,1023],[720,1270],[505,1270],[505,1205],[494,1205],[494,1130],[530,1130]]),
+    2: planContour([[314,984],[498,984],[498,1105],[494,1105],[494,1205],[505,1205],[505,1270],[314,1270]]),
+    3: planContour([[314,833],[498,833],[498,984],[314,984],[314,974],[320,970],[320,904],[314,898]]),
+    4: planContour([[314,632],[482,632],[482,734],[590,734],[590,752],[514,832],[314,832]]),
+    5: planContour([[314,472],[565,472],[565,555],[578,568],[600,568],[600,645],[482,645],[482,632],[314,632]]),
+    6: planContour([[646,325],[785,325],[785,516],[733,568],[578,568],[565,555],[565,472],[646,472]]),
+    7: planContour([[785,337],[852,337],[852,325],[925,325],[925,516],[785,516]]),
+    8: planContour([[925,325],[992,325],[992,337],[1050,337],[1050,325],[1124,325],[1124,516],[925,516]]),
+    9: planContour([[1124,337],[1198,337],[1198,325],[1318,325],[1318,472],[1244,472],[1244,516],[1124,516]]),
+    10: planContour([[1318,325],[1488,325],[1488,600],[1270,600],[1270,516],[1244,516],[1244,472],[1318,472]]),
+    11: planContour([[1244,550],[1270,550],[1270,600],[1417,600],[1417,670],[1395,670],[1395,740],[1080,740],[1080,585],[1124,585],[1124,602],[1244,602]]),
+    12: planContour([[934,550],[1124,550],[1124,585],[1080,585],[1080,740],[1070,740],[1070,730],[990,730],[990,740],[934,740]]),
+    13: planContour([[790,550],[934,550],[934,740],[925,740],[925,730],[858,730],[858,740],[790,740]]),
+    14: planContour([[646,600],[750,600],[790,560],[790,740],[720,740],[720,810],[646,810]]),
+    15: planContour([[590,810],[720,810],[720,898],[714,898],[714,945],[720,945],[720,1023],[650,1023],[650,1014],[530,1014],[530,870]]),
   },
   1: {
-    4: [[0.1,0.3881],[0.2725,0.3881],[0.2725,0.5075],[0.1,0.5075]],
-    5: [[0.1,0.194],[0.2725,0.194],[0.2725,0.3881],[0.1,0.3881]],
+    4: planContour([[273,640],[441,640],[441,742],[508,742],[508,840],[273,840]]),
+    5: planContour([[273,480],[524,480],[524,563],[537,576],[559,576],[559,653],[441,653],[441,640],[273,640]]),
   },
   8: {
-    3: [[0.153,0.5128],[0.157,0.5785],[0.1425,0.5928],[0.153,0.6012],[0.144,0.6645],[0.153,0.6985],[0.1995,0.6985],[0.2,0.7188],[0.206,0.6985],[0.257,0.6985],[0.2525,0.5176]],
-    4: [[0.155,0.3701],[0.147,0.3785],[0.1595,0.4699],[0.153,0.5122],[0.2525,0.5164],[0.2605,0.4848],[0.2555,0.3899]],
-    5: [[0.2905,0.329],[0.2725,0.2794],[0.2575,0.2794],[0.257,0.2687],[0.2505,0.2794],[0.1775,0.2794],[0.1675,0.2693],[0.155,0.2806],[0.1565,0.3696],[0.2565,0.3887]],
-    6: [[0.372,0.1928],[0.331,0.1851],[0.3225,0.1934],[0.3225,0.2609],[0.3135,0.2627],[0.3225,0.2788],[0.2745,0.2794],[0.2915,0.3313],[0.3715,0.3146]],
-    7: [[0.3725,0.1928],[0.372,0.3146],[0.4135,0.3212],[0.457,0.3128],[0.4595,0.1928]],
-    8: [[0.46,0.1928],[0.4585,0.3134],[0.697,0.311],[0.697,0.1928]],
-    12: [[0.688,0.3182],[0.478,0.3212],[0.478,0.443],[0.533,0.4376],[0.542,0.4555],[0.682,0.443]],
-    13: [[0.409,0.3224],[0.4095,0.443],[0.4595,0.4376],[0.4755,0.4537],[0.4775,0.3206],[0.453,0.314]],
-    14: [[0.4085,0.3224],[0.292,0.3325],[0.2565,0.3893],[0.2615,0.4824],[0.362,0.4967],[0.3625,0.4501],[0.409,0.443]],
-    15: [[0.261,0.4836],[0.258,0.6985],[0.362,0.6913],[0.371,0.6591],[0.362,0.4979]],
-    16: [[0.115,0.6299],[0.3075,0.6299],[0.3075,0.7761],[0.115,0.7761]],
-    17: [[0.56,0.1552],[0.625,0.1552],[0.625,0.2567],[0.56,0.2567]],
-    18: [[0.6275,0.2687],[0.74,0.2687],[0.74,0.3881],[0.6275,0.3881]],
+    16: planContour([[314,984],[498,984],[498,1064],[650,1064],[650,1023],[720,1023],[720,1158],[580,1158],[580,1168],[314,1168]]),
+    17: planContour([[1124,337],[1198,337],[1198,325],[1393,325],[1393,518],[1124,518]]),
+    18: planContour([[1290,518],[1375,518],[1375,592],[1362,592],[1362,740],[1080,740],[1080,585],[1124,585],[1124,602],[1244,602],[1244,550],[1290,550]]),
   },
 };
+for (const suffix of [3,4,5,6,7,8,12,13,14,15]) CONTOURS[8][suffix] = CONTOURS.typical[suffix];
+// Level 2 has a double-height entrance hall in place of apartment 14.
+CONTOURS[2] = Object.fromEntries(Object.entries(CONTOURS.typical).filter(([suffix]) => suffix !== "14"));
 const contoursFor = (level) => CONTOURS[level] || CONTOURS.typical;
-/* Handed to the 3D viewer for window-to-unit registration: keys "typical"
-   and 1, 8 (levels 2–7 fall back to "typical"), each keyed by the real
-   suffix, matching row[2]. */
+/* Shared with the 3D viewer; each floor is keyed by its real drawing suffix.
+   Floors without an override use the typical outlines. */
 window.fitteContours = CONTOURS;
 
 /* currentLevel() is null on "Tous les niveaux": the tabs aren't on one
@@ -1896,6 +1858,8 @@ async function renderSheetPdf() {
     pdfBusy = null;
     const p = (vpEl() || el).closest(".pane");
     if (p) p.dataset.pdf = "";
+    // A window pick may change floors while the previous PDF is rendering.
+    if (planVector() && sheet().pdf !== url) scheduleSheetPdf();
   }
 }
 
@@ -1904,7 +1868,7 @@ function scheduleSheetPdf() {
   if (!planVector()) return;
   renderSheetPdf();
 }
-const SHEET_AR = 1280 / 1160;
+const SHEET_AR = 2000 / 1675;
 function layoutSheet(el) {
   const plan = el.querySelector(".plan");
   if (!plan) return { w: 0, h: 0 };
@@ -1967,9 +1931,9 @@ function fitUnit() {
    CONTOURS polygon it falls closest to, and calls this with the real
    unit number that key implies (e.g. "816" for CONTOURS[8][16]) — the
    mirror of window.fitteSelection above. This is the same level switch
-   and row selection a list-row click already makes, including the
-   "only refit the view if it was already zoomed in" rule fitUnit's
-   caller follows. Matched against the row's own suffix (r[2]) directly:
+   and row selection a list-row click already makes, and it frames the
+   unit the same way: choosing a unit is asking to see it. Matched
+   against the row's own suffix (r[2]) directly:
    the suffixes aren't sequential, so no.slice(-2) can't be turned into
    an array index by subtracting one. */
 window.fitteSelectUnit = (unitStr) => {
@@ -1980,12 +1944,21 @@ window.fitteSelectUnit = (unitStr) => {
   if (!rows) return;
   const rowIndex = rows.findIndex((r) => r[2] === suffix);
   if (rowIndex < 0) return;
+  // A picked window must remain selectable even when the list is filtered.
+  V.query = "";
+  TYPOS.forEach((type) => {
+    if (V.typo[type]) dial.setValue(`typologies.${type}`, false);
+  });
   V.screen = "Unités";
   dial.setValue("screen", FR_SCREEN[V.screen]);
   V.view["Unités"] = LEVELS.indexOf(level);
   V.sel["Unités"] = rowIndex;
-  if (V.zoom > 130) fitUnit();
+  fitUnit();
   render();
+  /* A window click can select a row well below the fold: keep it in view,
+     but only scroll the list pane itself, never the page around it. */
+  document.querySelector(`[data-region="list"] [data-act="row"][data-value="${rowIndex}"]`)
+    ?.scrollIntoView({ block: "nearest", inline: "nearest" });
 };
 
 /* The wheel and the drag write straight to the element and to V, without a
@@ -2339,11 +2312,12 @@ function onClick(e) {
       V.view[screen] = (viewIndex(screen) + 1) % viewsOf(screen).length;
       V.sel[screen] = 0;
       break;
-    /* Picking a unit while the sheet is zoomed in moves the sheet to it:
-       otherwise the unit that was asked for is outlined off-screen. */
+    /* Picking a unit moves the sheet to it, whatever the zoom was: the list
+       is a way of looking at the plan, so the answer to a click is the unit
+       filling the pane, not a contour somewhere off-screen. */
     case "row":
       V.sel[screen] = Number(value);
-      if (screen === "Unités" && V.zoom > 130) fitUnit();
+      if (screen === "Unités") fitUnit();
       break;
     case "article": V.article = Number(value); break;
     /* The source link is a real link: the browser follows it, and the screen
