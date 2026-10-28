@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La ligne de calque — huit mises en page</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* The rail is settled: the Photoshop layers panel, with a row per document.
+   Eye on the left, a grip to drag the pile, a thumbnail, the file as the
+   office names it with the date at the end, the discipline with its own
+   glyph. No opacity: in practice nobody scrubs a percentage — they put the
+   sheet they want on top and read through it. No revision codes and no "à
+   jour": fitte cannot know what a consultant drew this morning.
+
+   What is left to decide is one thing. A row can do three things — open the
+   document where it is edited, swap it for another file, show the documents
+   it replaced — and three buttons on a row is a toolbar, not a layer. Six
+   ways below to reach the three through a single door. Everything else on
+   the screen is identical, so only the door is being judged. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e5e5e5;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#f2f2f2; --card:#fff;
+  --vert:#C3E05A; --vert-ink:#2f3a05;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.sheet{padding:22px 20px 80px;display:flex;flex-direction:column;gap:34px}
+h1{font-size:17px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:80ch}
+.lu{width:14px;height:14px;flex:0 0 14px;stroke-width:1.6}
+
+.var{display:flex;flex-direction:column;gap:9px}
+.vh{display:flex;align-items:baseline;gap:8px}
+.vh .n{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.vh b{font-size:14px;font-weight:600}
+.why{font-size:12px;color:var(--ink-2);max-width:96ch}
+.why .cost{color:var(--ink-3)}
+
+/* ------------------------------------------------------------ the screen */
+.app{border-radius:12px;overflow:hidden;background:#141416;min-width:1180px}
+.bar1{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar1 .crumb{color:rgba(255,255,255,.58)}
+.bar1 .crumb.on{color:#fff;font-weight:600;font-size:13px;margin-right:4px}
+.bar1 .tab{padding:5px 10px;border-radius:7px;display:flex;align-items:center;gap:6px;font-size:13.5px}
+.bar1 .tab.on{background:#fff;color:#141416;font-weight:600}
+.bar1 .sp{flex:1}
+.bar1 .share{border:1px solid rgba(255,255,255,.28);border-radius:5px;padding:4px 10px;font-size:12px;
+  display:flex;align-items:center;gap:6px}
+.bar2{height:32px;background:#1e1e21;border-top:1px solid #2c2c31;display:flex;align-items:center;
+  gap:3px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar2 span{padding:3px 9px;border-radius:6px}
+.bar2 span.on{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.card{background:var(--card);margin:7px;border-radius:9px;overflow:hidden;display:flex;flex-direction:column}
+.ttl{padding:10px 13px;display:flex;align-items:center;gap:10px}
+.ttl b{font-size:16px;font-weight:600}
+.ttl .sub{font-size:12px;color:var(--ink-2)}
+.ttl .sp{flex:1}
+.work{display:flex;gap:9px;padding:0 9px 9px;height:560px}
+.foot{border-top:1px solid var(--line-2);padding:8px 13px;display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--ink-2)}
+.foot b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.foot .sp{flex:1}
+
+.pane{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);
+  display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.ph{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:8px;padding:0 10px;font-size:12.5px;color:var(--ink-2)}
+.ph .sp{flex:1}
+.pb{flex:1;min-height:0;overflow:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
+
+.lst{flex:0 0 232px}
+.uc{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;flex:0 0 auto}
+.uc.on{border-color:var(--ink)}
+.uc .cr{height:88px;background-image:url(assets/plan-niveau-5.jpg);background-size:360%;
+  filter:grayscale(1);position:relative}
+.uc .no{position:absolute;left:6px;top:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;padding:0 6px;font-size:12px;font-weight:600}
+.uc .ul{display:flex;align-items:baseline;gap:6px;padding:6px 9px;font-size:12.5px}
+.uc .ul .a{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+.d2{flex:1.6;min-width:0}
+.m3{flex:1;min-width:0}
+.m3 .still{flex:1;min-height:0;background-image:url(assets/maquette-still.jpg);background-size:cover;
+  background-position:center}
+.insp{flex:0 0 280px}
+.kv{display:flex;align-items:baseline;gap:8px;font-size:12.5px}
+.kv b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.kv span{color:var(--ink-2)}
+
+.stage{flex:1;min-width:0;min-height:0;position:relative;overflow:hidden;background:var(--card)}
+.plan{position:absolute;inset:0;background-image:url(assets/plan-niveau-5.jpg);
+  background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
+.lay{position:absolute;background-repeat:no-repeat;background-size:contain;background-position:center;
+  pointer-events:none;mix-blend-mode:multiply}
+.lay.arp{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
+.lay.pay{background-image:url(assets/paysage.png)}
+.off{display:none}
+
+/* ----------------------------------------------------------- the rail */
+.rail{flex:0 0 var(--rw,272px);border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  min-height:0;background:var(--card);position:relative}
+.rh{flex:0 0 auto;border-bottom:1px solid var(--line-2);padding:6px 8px;display:flex;align-items:center;
+  gap:6px;font-size:11.5px;color:var(--ink-3)}
+.rh b{color:var(--ink-2);font-weight:500;font-size:12px}
+.rb{flex:1;min-height:0;overflow:auto;padding:5px;display:flex;flex-direction:column;gap:2px}
+.rf{flex:0 0 auto;border-top:1px solid var(--line-2);padding:5px 6px;display:flex;align-items:center;gap:4px}
+
+.lrow{border:1px solid transparent;border-radius:5px;padding:5px;display:flex;flex-direction:column;gap:4px;
+  user-select:none;background:var(--card)}
+.lrow:hover{background:var(--fill-2)}
+.lrow.sel{background:var(--fill);border-color:var(--line-2)}
+.lrow.hid{opacity:.5}
+.lrow.drag{opacity:.9;border-color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.14)}
+.grip{color:var(--ink-3);cursor:grab;flex:0 0 14px}
+.grip:active{cursor:grabbing}
+.lrow:hover .grip{color:var(--ink-2)}
+
+.thumb{width:40px;height:32px;flex:0 0 40px;border:1px solid var(--line-2);border-radius:3px;
+  background-color:#fff;background-size:contain;background-repeat:no-repeat;background-position:center}
+.eye{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-3);cursor:pointer;flex:0 0 22px}
+.eye:hover{background:var(--fill)}
+.eye.on{color:var(--ink)}
+.fname{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left;min-width:0}
+.disc{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);min-width:0;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.disc .lu{width:12px;height:12px;flex:0 0 12px}
+.date{font-size:11px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
+
+.row{display:flex;align-items:center;gap:6px;min-width:0}
+.col{display:flex;flex-direction:column;gap:5px;min-width:0}
+.btn{height:24px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:inline-flex;align-items:center;gap:5px;padding:0 8px;font-size:11.5px;color:var(--ink-2);
+  cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--fill);border-color:var(--ink-3)}
+.btn.ico{padding:0 6px}
+.btn.sm{height:21px;padding:0 6px;font-size:11px;border-radius:4px}
+.btn.on{border-color:var(--ink);color:var(--ink);background:var(--card)}
+.btn.wide{width:100%;justify-content:center}
+
+/* the one door, in its several shapes */
+.kebab{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-3);cursor:pointer;flex:0 0 22px;opacity:0}
+.lrow:hover .kebab,.lrow.sel .kebab,.kebab.open{opacity:1}
+.kebab:hover,.kebab.open{background:var(--fill);color:var(--ink)}
+.menu{position:absolute;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:7px;
+  box-shadow:0 10px 28px rgba(0,0,0,.16);padding:4px;min-width:214px;display:flex;flex-direction:column;gap:1px}
+.mi{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:5px;font-size:12px;
+  color:var(--ink);cursor:pointer}
+.mi:hover{background:var(--fill-2)}
+.mi .lu{color:var(--ink-2)}
+.mi .k{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+.msep{height:1px;background:var(--line-2);margin:3px 2px}
+.mh{font-size:10.5px;color:var(--ink-3);padding:4px 7px 2px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left;font-family:var(--mono)}
+/* An unselected row keeps its door, but barely drawn: present enough to be
+   found, quiet enough not to turn the list into a toolbar. */
+.ghost{border-color:transparent;background:transparent;color:var(--ink-3)}
+.lrow:hover .ghost{border-color:var(--line);background:var(--fill-2)}
+.ghd{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink-3);padding:7px 6px 3px}
+
+
+.panel{border-top:1px solid var(--line-2);padding:7px;display:flex;flex-direction:column;gap:6px;
+  background:var(--fill-2);flex:0 0 auto;max-height:260px;overflow:auto}
+.vrow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.vrow.cur{color:var(--ink)}
+.note{font-size:10.5px;color:var(--ink-3)}
+.found{display:flex;align-items:center;gap:6px;font-size:11px;padding:4px 6px;border:1px solid var(--line-2);
+  border-radius:4px;cursor:pointer;font-family:var(--mono);color:var(--ink-2);background:var(--card)}
+.found:hover{border-color:var(--ink);color:var(--ink)}
+.drop{border:1px dashed var(--line);border-radius:5px;padding:7px;text-align:center;font-size:11px;
+  color:var(--ink-3);cursor:pointer}
+.drop:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.path{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);background:var(--card);
+  border:1px solid var(--line-2);border-radius:4px;padding:4px 6px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left}
+.toast{position:absolute;left:10px;bottom:10px;background:#1b1b1b;color:#fff;font-size:11.5px;
+  padding:6px 10px;border-radius:5px;z-index:9;max-width:70%}
+.hint{font-size:10.5px;color:var(--ink-3)}
+.zcol{flex:0 0 30px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  align-items:center;gap:6px;padding:7px 0;color:var(--ink-3);font-size:10.5px}
+.zcol .tr{flex:1;width:3px;background:var(--line);border-radius:2px;position:relative}
+.zcol .tr::after{content:"";position:absolute;left:-4px;top:38%;width:11px;height:11px;border-radius:50%;background:var(--ink)}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>La ligne de calque — huit mises en page</h1>
+  <p class="lede">Mêmes pièces dans les huit: la poignée d'empilement, l'œil, la vignette, le nom du fichier, la discipline, la date, et un seul bouton qui mène aux trois actions du document (ouvrir, changer, documents précédents). Le reste de l'écran est identique partout.</p>
+  <p class="lede">Ce qui change: la place de chaque pièce, laquelle se lit en premier, la taille et le nom du bouton.</p>
+  <div id="vars"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["file", "ruler", "trees", "eye", "eye-off", "layers", "history", "clock",
+    "chevron-down", "chevron-right", "chevron-up", "external-link", "check", "circle", "list", "box",
+    "git-compare", "x", "folder", "folder-open", "share-2", "plus", "minus", "table", "compass",
+    "hard-hat", "grip-vertical", "replace", "ellipsis-vertical", "arrow-up-down", "mouse-pointer-click",
+    "file-text", "settings-2"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+
+/* Placement of the consultant sheets, from the prototype. */
+const BASE_BOX = [314 / 2000, 325 / 1675, 1488 / 2000, 1270 / 1675];
+const BASE_RATIO = 2000 / 1675;
+const SHEETS = {
+  arp: { box: [298 / 1650, 307 / 1560, 1380 / 1650, 1172 / 1560], ratio: 1650 / 1560 },
+  pay: { box: [156 / 835, 178 / 800, 711 / 835, 624 / 800], ratio: 835 / 800 },
+};
+function layStyle(k, z) {
+  const S = SHEETS[k];
+  const [bx0, by0, bx1, by1] = BASE_BOX;
+  const [sx0, sy0, sx1, sy1] = S.box;
+  const w = (bx1 - bx0) / (sx1 - sx0);
+  const h = w * BASE_RATIO / S.ratio;
+  const left = bx0 - sx0 * w;
+  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h;
+  return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;z-index:${z}`;
+}
+
+const DISC = {
+  arch: { label: "Architecte", icon: "compass" },
+  arp: { label: "Arpenteur-géomètre", icon: "ruler" },
+  pays: { label: "Architecte paysagiste", icon: "trees" },
+  civ: { label: "Ingénieur civil", icon: "hard-hat" },
+};
+const SERVER = "\\\\serveur-bureau\\Projets\\2026\\BAL3\\";
+const DRAWINGS = {
+  plan: { disc: "arch", app: "AutoCAD", thumb: "assets/plan-niveau-5.jpg", folder: SERVER + "Dessins\\",
+    versions: [
+      { file: "BAL3_PLAN-NIVEAU-5_2026-10-24.dwg", date: "24 oct 2026" },
+      { file: "BAL3_PLAN-NIVEAU-5_2026-09-12.dwg", date: "12 sept 2026" },
+      { file: "BAL3_PLAN-NIVEAU-5_2026-08-02.dwg", date: "2 août 2026" }] },
+  arp: { disc: "arp", app: "Acrobat", thumb: "assets/arp-site.png", folder: SERVER + "Reçu\\Arpenteur\\",
+    versions: [
+      { file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-07.pdf", date: "7 oct 2026" },
+      { file: "BAL3_RELEVE-TERRAIN_2026-05-14.pdf", date: "14 mai 2026" }] },
+  pay: { disc: "pays", app: "Acrobat", thumb: "assets/paysage.png", folder: SERVER + "Reçu\\Paysage\\",
+    versions: [
+      { file: "BAL3_AMENAGEMENT-PAYSAGER_2026-07-07.pdf", date: "7 juil 2026" }] },
+};
+const FOUND = {
+  plan: [{ file: "BAL3_PLAN-NIVEAU-5_2026-10-27.dwg", date: "27 oct 2026" },
+    { file: "BAL3_PLAN-NIVEAU-6_2026-10-24.dwg", date: "24 oct 2026" }],
+  arp: [{ file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-21.pdf", date: "21 oct 2026" },
+    { file: "BAL3_CERTIFICAT-LOCALISATION_2026-09-30.pdf", date: "30 sept 2026" }],
+  pay: [{ file: "BAL3_AMENAGEMENT-PAYSAGER_2026-10-26.pdf", date: "26 oct 2026" },
+    { file: "BAL3_PLANTATIONS-DETAILS_2026-10-26.pdf", date: "26 oct 2026" }],
+};
+
+const newState = () => ({
+  order: ["pay", "arp", "plan"],
+  on: { plan: true, arp: true, pay: true },
+  iso: null, sel: "pay",
+  menu: null,     /* which row has its door open */
+  panel: null,    /* "swap" | "hist" */
+  drag: null, toast: null,
+  docs: JSON.parse(JSON.stringify(DRAWINGS)),
+});
+const S = [];
+const visible = (s, k) => (s.iso ? s.iso === k : s.on[k]);
+const cur = (s, k) => s.docs[k].versions[0];
+const disc = (s, k) => DISC[s.docs[k].disc];
+const zOf = (s, k) => s.order.length - s.order.indexOf(k);
+
+function stageHTML(s) {
+  return `<div class="stage">
+    <div class="plan ${visible(s, "plan") ? "" : "off"}" style="z-index:${zOf(s, "plan")}"></div>
+    ${["arp", "pay"].map((k) => `<div class="lay ${k} ${visible(s, k) ? "" : "off"}"
+      style="${layStyle(k, zOf(s, k))}"></div>`).join("")}
+    ${s.toast ? `<div class="toast">${s.toast}</div>` : ""}
+  </div>`;
+}
+
+/* --------------------------------------------------------- the row pieces */
+const gripHTML = (i, k) => `<span class="grip" data-a="grip" data-i="${i}" data-k="${k}"
+  title="Tirer pour changer l'ordre d'empilement">${icon("grip-vertical")}</span>`;
+const eyeHTML = (s, i, k) => `<span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}"
+  title="${visible(s, k) ? "Masquer" : "Afficher"} · Alt-clic: ne voir que celui-ci">${icon(visible(s, k) ? "eye" : "eye-off")}</span>`;
+const fileLines = (s, k) => `<span class="fname" title="${cur(s, k).file}">${cur(s, k).file}</span>
+  <span class="row"><span class="disc">${icon(disc(s, k).icon)}${disc(s, k).label}</span>
+    <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></span>`;
+
+/* The three things a document can do, written once. Every variant below is
+   a different way of putting a hand on this list. */
+const ITEMS = (s, i, k) => [
+  ["open", "external-link", `Ouvrir dans ${s.docs[k].app}`, "⏎"],
+  ["swap", "replace", "Changer le document…", "⌘R"],
+  ["hist", "history", `Documents précédents (${s.docs[k].versions.length})`, "⌘H"],
+];
+const menuHTML = (s, i, k, style = "") => `<div class="menu" style="${style}" data-menu>
+  <div class="mh">${cur(s, k).file}</div>
+  ${ITEMS(s, i, k).map(([a, g, t, key], j) => `${j === 2 ? `<div class="msep"></div>` : ""}
+    <div class="mi" data-a="${a}" data-i="${i}" data-k="${k}">${icon(g)}${t}<span class="k">${key}</span></div>`).join("")}
+</div>`;
+
+function swapHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col">
+    <div class="row"><b style="font-size:11.5px">Changer le document</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    <div class="row">${icon("folder-open")}<span class="path" title="${d.folder}">${d.folder}</span></div>
+    ${FOUND[k].map((f, j) => `<div class="found" data-a="pick" data-i="${i}" data-k="${k}" data-f="${j}">
+      ${icon("file")}<span class="fname" style="flex:1">${f.file}</span><span class="date">${f.date}</span></div>`).join("")}
+    <div class="drop" data-a="pick" data-i="${i}" data-k="${k}" data-f="0">Déposer un fichier, ou coller un chemin</div>
+    <div class="note">Le fichier reste sur le serveur. fitte lit; il n'écrit jamais dans un dessin.</div>
+  </div>`;
+}
+function histHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col" style="gap:4px">
+    <div class="row"><b style="font-size:11.5px">Documents lus pour ce calque</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    ${d.versions.map((v, j) => `<div class="vrow ${j === 0 ? "cur" : ""}">
+      ${j === 0 ? icon("check") : `<span style="width:14px"></span>`}
+      <span class="fname" style="flex:1">${v.file}</span><span class="date">${v.date}</span>
+      ${j === 0 ? "" : `<span class="btn sm" data-a="revert" data-i="${i}" data-k="${k}" data-v="${j}">relire</span>`}
+    </div>`).join("")}
+    <div class="note">Rien n'est supprimé: on peut toujours revenir au document qui était lu.</div>
+  </div>`;
+}
+const panelHTML = (s, i) => (s.panel === "swap" ? `<div class="panel">${swapHTML(s, i, s.sel)}</div>`
+  : s.panel === "hist" ? `<div class="panel">${histHTML(s, i, s.sel)}</div>` : "");
+
+const rowAttrs = (s, i, k) => `class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}
+  ${s.drag === k ? "drag" : ""}" data-a="sel" data-i="${i}" data-k="${k}" data-row="${k}"`;
+
+const railHead = (s, i, right = "") => `<div class="rh">${icon("layers")}<b>Calques</b>
+  <span style="flex:1"></span>${right || `<span class="hint">${s.order.filter((k) => visible(s, k)).length}/3 visibles</span>`}</div>`;
+
+/* Every variant below keeps the same pieces — grip, eye, thumbnail, file
+   name, discipline, date, and one door to the document's three commands.
+   What changes is where they sit, which one is read first, how big the
+   button is and what it is called. */
+
+/* ===================================================================== A
+   The reference: two lines, the file first, one full-width button under the
+   selected row. */
+function varA(i, s) {
+  return rail(i, s, `
+    ${railHead(s, i)}
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px">${fileLines(s, k)}</div></div>
+      ${s.sel === k ? `<span class="btn sm wide" data-a="menu" data-i="${i}" data-k="${k}">
+        ${icon("file-text")}Document ${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span>` : ""}
+      ${s.menu === k ? menuHTML(s, i, k, "position:relative;margin-top:2px") : ""}
+    </div>`).join("")}</div>`);
+}
+
+/* ===================================================================== B
+   The discipline is read first, in the office's own words, and the file
+   name drops to the second line in grey. A coordinator looks for "the
+   surveyor", not for a file name. */
+function varB(i, s) {
+  return rail(i, s, `
+    ${railHead(s, i)}
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px">
+          <span class="row"><span class="disc" style="color:var(--ink);font-size:12px;font-weight:600">
+            ${icon(disc(s, k).icon)}${disc(s, k).label}</span>
+            <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></span>
+          <span class="fname" style="color:var(--ink-3)" title="${cur(s, k).file}">${cur(s, k).file}</span>
+        </div></div>
+      ${s.sel === k ? `<span class="btn sm wide" data-a="menu" data-i="${i}" data-k="${k}">
+        ${icon("file-text")}Document ${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span>` : ""}
+      ${s.menu === k ? menuHTML(s, i, k, "position:relative;margin-top:2px") : ""}
+    </div>`).join("")}</div>`);
+}
+
+/* ===================================================================== C
+   The button sits inside the row, to the right, instead of under it. The
+   list never changes height when a row is selected — the one quarrel with
+   the reference. */
+function varC(i, s) {
+  return rail(i, s, `
+    ${railHead(s, i)}
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px">${fileLines(s, k)}</div>
+        <span class="btn sm ${s.sel === k ? "" : "ghost"}" data-a="menu" data-i="${i}" data-k="${k}"
+          title="Document">${icon("file-text")}${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span></div>
+      ${s.menu === k ? menuHTML(s, i, k, "right:6px;margin-top:2px;position:relative") : ""}
+    </div>`).join("")}</div>`);
+}
+
+/* ===================================================================== D
+   The button is named after the file it would open, so the name is written
+   once instead of twice: the row keeps the discipline and the date, the
+   button carries the document. */
+function varD(i, s) {
+  return rail(i, s, `
+    ${railHead(s, i)}
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px">
+          <span class="row"><span class="disc" style="color:var(--ink);font-size:12px">
+            ${icon(disc(s, k).icon)}${disc(s, k).label}</span>
+            <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></span>
+          ${s.sel === k ? "" : `<span class="fname" style="color:var(--ink-3)">${cur(s, k).file}</span>`}
+        </div></div>
+      ${s.sel === k ? `<span class="btn sm wide" style="justify-content:space-between"
+        data-a="menu" data-i="${i}" data-k="${k}">
+        <span class="row" style="gap:5px;min-width:0">${icon("file-text")}
+          <span class="fname">${cur(s, k).file}</span></span>
+        ${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span>` : ""}
+      ${s.menu === k ? menuHTML(s, i, k, "position:relative;margin-top:2px") : ""}
+    </div>`).join("")}</div>`);
+}
+
+/* ===================================================================== E
+   One line per layer, the way a layers panel usually looks: no thumbnail,
+   the discipline glyph alone carries the recognition, the date on the
+   right. The selected row opens a strip of three short buttons — the
+   commands are spelled out rather than kept behind a word. */
+function varE(i, s) {
+  return rail(i, s, `
+    ${railHead(s, i)}
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)} style="padding:4px 5px">
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
+        <span class="disc" style="flex:0 0 auto" title="${disc(s, k).label}">${icon(disc(s, k).icon)}</span>
+        <span class="fname" style="flex:1" title="${cur(s, k).file}">${cur(s, k).file}</span>
+        <span class="date">${cur(s, k).date}</span></div>
+      ${s.sel === k ? `<div class="row" style="gap:3px;padding-left:42px">
+        ${ITEMS(s, i, k).map(([a, g]) => `<span class="btn sm" data-a="${a}" data-i="${i}" data-k="${k}">
+          ${icon(g)}${a === "open" ? s.docs[k].app : a === "swap" ? "Changer" : s.docs[k].versions.length}</span>`).join("")}
+      </div>` : ""}
+    </div>`).join("")}</div>`);
+}
+
+/* ===================================================================== F
+   A bigger thumbnail, because at 40 px a survey sheet is a grey smudge. The
+   text sits beside it and the button hangs at the bottom right of the
+   block, where the eye lands after reading. */
+function varF(i, s) {
+  return rail(i, s, `
+    ${railHead(s, i)}
+    <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row" style="align-items:flex-start">${gripHTML(i, k)}
+        <span class="thumb" style="width:60px;height:48px;flex:0 0 60px;background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:2px">
+          <span class="row">${eyeHTML(s, i, k)}
+            <span class="disc" style="color:var(--ink);font-weight:600;font-size:11.5px">${disc(s, k).label}</span>
+            <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></span>
+          <span class="fname" title="${cur(s, k).file}">${cur(s, k).file}</span>
+          ${s.sel === k ? `<span class="row"><span style="flex:1"></span>
+            <span class="btn sm" data-a="menu" data-i="${i}" data-k="${k}">${icon("file-text")}Document
+              ${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span></span>` : ""}
+        </div></div>
+      ${s.menu === k ? menuHTML(s, i, k, "position:relative;margin-top:2px") : ""}
+    </div>`).join("")}</div>`);
+}
+
+/* ===================================================================== G
+   Layers grouped by where the drawing comes from. Two consultant sheets and
+   one of ours is already a hierarchy; naming it saves the reader from
+   inferring it from the disciplines. */
+function varG(i, s) {
+  const group = (title, keys) => keys.length ? `<div class="ghd">${title}<span style="flex:1"></span>${keys.length}</div>
+    ${keys.map((k) => `<div ${rowAttrs(s, i, k)}>
+      <div class="row">${gripHTML(i, k)}${eyeHTML(s, i, k)}
+        <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+        <div class="col" style="flex:1;gap:1px">${fileLines(s, k)}</div></div>
+      ${s.sel === k ? `<span class="btn sm wide" data-a="menu" data-i="${i}" data-k="${k}">
+        ${icon("file-text")}Document ${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span>` : ""}
+      ${s.menu === k ? menuHTML(s, i, k, "position:relative;margin-top:2px") : ""}
+    </div>`).join("")}` : "";
+  const ours = s.order.filter((k) => s.docs[k].disc === "arch");
+  const theirs = s.order.filter((k) => s.docs[k].disc !== "arch");
+  return rail(i, s, `
+    ${railHead(s, i)}
+    <div class="rb">${group("Reçu des consultants", theirs)}${group("Dessiné au bureau", ours)}</div>`);
+}
+
+/* ===================================================================== H
+   The rows say only who drew and when; the selected layer gets a block of
+   its own at the foot of the rail — name, folder and the button — so the
+   list above stays a list and the detail has room to be read. */
+function varH(i, s) {
+  const k = s.sel;
+  return rail(i, s, `
+    ${railHead(s, i)}
+    <div class="rb">${s.order.map((k2) => `<div ${rowAttrs(s, i, k2)} style="padding:4px 5px">
+      <div class="row">${gripHTML(i, k2)}${eyeHTML(s, i, k2)}
+        <span class="thumb" style="background-image:url(${s.docs[k2].thumb})"></span>
+        <div class="col" style="flex:1;gap:0">
+          <span class="disc" style="color:var(--ink);font-size:12px">${icon(disc(s, k2).icon)}${disc(s, k2).label}</span>
+          <span class="date" style="font-size:10.5px">${cur(s, k2).date}</span>
+        </div></div>
+    </div>`).join("")}</div>
+    ${s.panel ? "" : `<div class="panel" style="gap:5px">
+      <div class="row"><span class="disc" style="color:var(--ink);font-weight:600">${icon(disc(s, k).icon)}${disc(s, k).label}</span>
+        <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></div>
+      <span class="fname" title="${cur(s, k).file}">${cur(s, k).file}</span>
+      <span class="path" title="${s.docs[k].folder}">${s.docs[k].folder.replace(/^\\\\/, "").replace(/\\$/, "")}</span>
+      <span class="btn sm wide" data-a="menu" data-i="${i}" data-k="${k}">
+        ${icon("file-text")}Document ${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span>
+      ${s.menu === k ? menuHTML(s, i, k, "left:7px;right:7px;bottom:40px") : ""}
+    </div>`}`);
+}
+
+/* ----------------------------------------------------------- the full screen */
+const UNITS = [["501", "5½", "1 275 pi²", "30% 40%"], ["502", "5½", "1 496 pi²", "46% 36%"],
+  ["503", "3½", "760 pi²", "38% 52%"], ["504", "4½", "1 152 pi²", "54% 46%"],
+  ["505", "4½", "1 221 pi²", "34% 30%"]];
+
+function rail(i, s, inner, width) {
+  return `<div class="rail" style="--rw:${width || 272}px">${inner}${panelHTML(s, i)}</div>`;
+}
+
+function screenHTML(i, s, railMarkup) {
+  return `<div class="app" data-i="${i}">
+    <div class="bar1">${icon("folder")}<span class="crumb">Tous les projets</span>
+      <span class="crumb on">Le Baldwin III</span>
+      <span class="tab on">${icon("git-compare")}Coordination</span>
+      <span class="tab">${icon("table")}Codes</span><span class="tab">${icon("clock")}Échéancier</span>
+      <span class="sp"></span><span class="share">${icon("share-2")}Partager</span></div>
+    <div class="bar2">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<span class="${n === 5 ? "on" : ""}">Niveau ${n}</span>`).join("")}
+      <span>Tous les niveaux</span></div>
+    <div class="card">
+      <div class="ttl"><b>Plans — niveau 5</b><span class="sub">15 unités · 4 avec un croisement ouvert</span>
+        <span class="sp"></span><span class="btn">${icon("table")}Exporter</span></div>
+      <div class="work">
+        <div class="pane lst"><div class="ph">${icon("list")}Unités</div>
+          <div class="pb">${UNITS.map((u, j) => `<div class="uc ${j === 0 ? "on" : ""}">
+            <div class="cr" style="background-position:${u[3]}"><span class="no">${u[0]}</span></div>
+            <div class="ul"><span>${u[1]}</span><span class="a">${u[2]}</span></div></div>`).join("")}</div></div>
+
+        <div class="pane d2"><div class="ph">${icon("file")}Plan 2D<span class="sp"></span>
+          <span class="hint">niveau 5 · 3 calques</span></div>
+          <div style="flex:1;min-height:0;display:flex">
+            ${stageHTML(s)}
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>100%</span></div>
+            ${railMarkup}
+          </div></div>
+
+        <div class="pane m3"><div class="ph">${icon("box")}Maquette 3D<span class="sp"></span>
+          <span class="btn">${icon("external-link")}Ouvrir dans SketchUp</span></div>
+          <div style="flex:1;min-height:0;display:flex">
+            <div class="still"></div>
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>60%</span></div>
+          </div></div>
+
+        <div class="pane insp"><div class="ph">${icon("circle")}Unité 501</div>
+          <div class="pb">
+            <div class="kv"><span>Type</span><b>5½</b></div>
+            <div class="kv"><span>Superficie</span><b>1 275 pi²</b></div>
+            <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
+            <div class="kv"><span>Écart</span><b>240 mm</b></div>
+            <div class="kv"><span>Lu dans</span><b>24 oct 2026</b></div>
+          </div></div>
+      </div>
+      <div class="foot">Ouvertures de la façade sud <b>68.5 m² → 74.2 m²</b><span class="date">+5.7 m²</span>
+        <span class="sp"></span><span class="btn">Lire l'article 3.2.3.1</span></div>
+    </div>
+  </div>`;
+}
+
+const VARIANTS = [
+  { name: "La référence", build: varA,
+    why: `Deux lignes, le fichier d'abord, un bouton pleine largeur sous la ligne sélectionnée. Les sept suivantes déplacent les mêmes pièces.` },
+  { name: "La discipline d'abord", build: varB,
+    why: `« Arpenteur-géomètre » en gras, le fichier en gris dessous. On cherche un consultant, pas un nom de fichier. <span class="cost">Le prix: le nom du document, qui est la vérité, passe au second rang.</span>` },
+  { name: "Le bouton dans la ligne", build: varC,
+    why: `Le bouton se range à droite de la ligne plutôt qu'en dessous: la liste ne change jamais de hauteur quand on sélectionne. <span class="cost">Le prix: le mot disparaît, il ne reste qu'un signe.</span>` },
+  { name: "Le bouton porte le nom du fichier", build: varD,
+    why: `Le nom n'est écrit qu'une fois: la ligne garde la discipline et la date, le bouton porte le document. Ce qu'on ouvrirait est lisible sans ouvrir le menu. <span class="cost">Le prix: la ligne sélectionnée se réécrit — le nom saute du haut vers le bouton.</span>` },
+  { name: "Une ligne par calque, trois boutons", build: varE,
+    why: `Pas de vignette, le glyphe de discipline suffit à reconnaître. La sélection déplie trois boutons courts: les commandes sont écrites, pas rangées derrière un mot. <span class="cost">Le prix: trois cibles au lieu d'une, et un rail qui redevient une barre d'outils.</span>` },
+  { name: "Grande vignette", build: varF,
+    why: `60 px: à 40 px une planche d'arpenteur n'est qu'une tache grise. Le texte se range à côté, le bouton tombe en bas à droite du bloc, là où l'œil arrive après avoir lu. <span class="cost">Le prix: trois calques remplissent déjà le rail; à dix, on défile.</span>` },
+  { name: "Groupé par provenance", build: varG,
+    why: `« Reçu des consultants » / « Dessiné au bureau ». Deux planches reçues et une à nous: la hiérarchie existe déjà, l'écrire évite de la déduire des disciplines. <span class="cost">Le prix: deux en-têtes de plus dans un rail de trois lignes.</span>` },
+  { name: "Le détail au pied du rail", build: varH,
+    why: `Les lignes ne disent que qui a dessiné et quand; le calque sélectionné obtient son bloc en bas — nom, dossier, bouton. La liste reste une liste et le détail a la place d'être lu. <span class="cost">Le prix: le bouton s'éloigne de la ligne, et le bloc mange la hauteur du rail.</span>` },
+];
+
+function render(i) {
+  document.querySelector(`[data-var="${i}"] .mount`).innerHTML =
+    screenHTML(i, S[i], VARIANTS[i].build(i, S[i]));
+}
+function renderAll() {
+  document.getElementById("vars").innerHTML = VARIANTS.map((v, i) => `<div class="var" data-var="${i}">
+    <div class="vh"><span class="n">Variante ${String.fromCharCode(65 + i)}</span><b>${v.name}</b></div>
+    <p class="why">${v.why}</p>
+    <div class="mount"></div></div>`).join("");
+  VARIANTS.forEach((_, i) => { S[i] = S[i] || newState(); render(i); });
+}
+
+function say(s, msg) {
+  s.toast = msg;
+  clearTimeout(s.timer);
+  s.timer = setTimeout(() => { s.toast = null; render(S.indexOf(s)); }, 3600);
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-a]");
+  /* A click anywhere else closes an open door, as a menu should. */
+  if (!el) {
+    let touched = false;
+    S.forEach((s, i) => { if (s && s.menu) { s.menu = null; render(i); touched = true; } });
+    if (touched) e.stopPropagation();
+    return;
+  }
+  const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+  if (!s) return;
+  switch (el.dataset.a) {
+    case "eye":
+      if (e.altKey) { s.iso = s.iso === k ? null : k; s.sel = k; break; }
+      if (s.iso) s.iso = null;
+      s.on[k] = !s.on[k];
+      s.sel = k;
+      break;
+    case "iso": s.iso = k || null; if (k) s.sel = k; break;
+    case "sel": s.sel = k; s.menu = null; break;
+    case "menu": s.menu = s.menu === k ? null : k; s.sel = k; break;
+    case "open":
+      s.menu = null;
+      say(s, `${cur(s, k).file} — ouvert dans ${s.docs[k].app}.`);
+      break;
+    case "swap": s.menu = null; s.panel = "swap"; s.sel = k; break;
+    case "hist": s.menu = null; s.panel = "hist"; s.sel = k; break;
+    case "close": s.panel = null; break;
+    case "pick": {
+      const f = FOUND[k][+el.dataset.f], d = s.docs[k];
+      d.versions = [{ file: f.file, date: f.date }, ...d.versions.filter((v) => v.file !== f.file)];
+      s.panel = "hist"; s.sel = k;
+      const n = d.versions.length - 1;
+      say(s, `Calque « ${disc(s, k).label} » : ${f.file}. ${n > 1 ? `${n} documents gardés` : "1 document gardé"}.`);
+      break;
+    }
+    case "revert": {
+      const d = s.docs[k], v = d.versions[+el.dataset.v];
+      d.versions = [v, ...d.versions.filter((x) => x !== v)];
+      say(s, `${v.file} — relu.`);
+      break;
+    }
+    default: return;
+  }
+  render(i);
+});
+
+/* The grip moves a row through the list, and the pile on the drawing
+   follows: the row at the top of the rail is the sheet on top. */
+document.addEventListener("pointerdown", (e) => {
+  const g = e.target.closest("[data-a='grip']");
+  if (!g) return;
+  const i = +g.dataset.i, k = g.dataset.k, s = S[i];
+  s.drag = k; s.sel = k; s.menu = null;
+  const list = g.closest(".rb");
+  const move = (ev) => {
+    const rows = [...list.querySelectorAll("[data-row]")];
+    const under = rows.find((r) => {
+      const b = r.getBoundingClientRect();
+      return ev.clientY >= b.top && ev.clientY <= b.bottom;
+    });
+    if (!under || under.dataset.row === k) return;
+    const from = s.order.indexOf(k), to = s.order.indexOf(under.dataset.row);
+    s.order.splice(from, 1);
+    s.order.splice(to, 0, k);
+    render(i);
+  };
+  const up = () => {
+    s.drag = null;
+    render(i);
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+});
+
+sprite();
+renderAll();
+</script>
+</body>
+</html>
