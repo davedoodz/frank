@@ -2272,9 +2272,7 @@ function listHTML() {
   /* The list reads the same rows the header counts, so the view above it and
      the search inside it both change what is on screen. */
   const pairs = rowsOf(V.screen);
-  const emptyMsg = V.screen === "Unités" && isNonresLevel(paneLevel())
-    ? "aucune unité résidentielle à ce niveau" : "rien ne correspond";
-  const rows = pairs.length ? pairs.map((r) => `${r[0]} · ${r[1]}`) : [emptyMsg];
+  const rows = pairs.length ? pairs.map((r) => `${r[0]} · ${r[1]}`) : ["rien ne correspond"];
   const sel = selIndex(V.screen);
 
   if (mode === "Filter bar only") {
@@ -2441,18 +2439,20 @@ function contentHTML() {
       const planNote = nonres
         ? `${levelView(paneLevel())} — architecture non fournie — base ${ENG_LABELS[engBaseDiscipline(paneLevel())].toLowerCase()}`
         : `${unit} — contours par-dessus`;
-      const modelNote = paneLevel() === -1 || paneLevel() === 0
-        ? `${levelView(paneLevel())} — géométrie absente de la maquette`
-        : paneLevel() === 9
+      /* The two basements are not in the model: the massing starts at the
+         ground. A pane saying so is a pane of nothing, so the plan takes
+         the full width there. The roof is in the model, so it keeps both. */
+      const noModel = paneLevel() === -1 || paneLevel() === 0;
+      const modelNote = paneLevel() === 9
         ? "Toiture — bandeau et repère affichés sur la maquette"
         : `${unit} — volumétrie, même niveau`;
       const plan = () => pane("Plan 2D", planNote, "plan", "align", typoHTML() + layersHTML() + engLayersHTML());
-      const model = () => pane("Maquette 3D", modelNote, "model", "fit");
+      const model = () => (noModel ? "" : pane("Maquette 3D", modelNote, "model", "fit"));
       if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
       if (mode === "Single pane + inset") return `<div class="col" style="flex:1;gap:var(--gap)">
         <div style="position:relative;flex:1;display:flex">${plan()}
-        <div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
-        <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div></div></div>`;
+        ${noModel ? "" : `<div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
+        <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div>`}</div></div>`;
       return `<div class="col" style="flex:1;gap:var(--gap)">
         <div class="row" style="flex:1;align-items:stretch;gap:var(--gap);min-height:0">${plan()}${model()}</div></div>`;
     },
@@ -3225,7 +3225,12 @@ function render() {
      drawings, the margin and its rail all belong to a floor, so the four
      tables take the work area on their own. */
   const whole = buildingScope();
-  const hasList = !whole && def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
+  /* A basement and the roof carry no apartment unit: a list whose only
+     line says it is empty is worse than no list, and the plan is the
+     reason one is on those levels at all. */
+  const noUnits = V.screen === "Unités" && isNonresLevel(paneLevel());
+  const hasList = !whole && !noUnits && def.regions.includes("list")
+    && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
   const hasInsp = !whole && def.regions.includes("inspector") && V.inspector.layout === "Right panel";
   /* The margin is narrower than the inspector and is followed by the rail of
      tool icons, which is what makes folding the inspector worth the trade:
@@ -3251,7 +3256,7 @@ function render() {
         <div class="work" style="grid-template-columns:${SCREENS[V.screen].home ? "1fr" : cols};grid-auto-rows:min-content 1fr min-content;align-content:stretch">
           <div style="grid-column:1/-1">${headerHTML()}</div>
           ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
-          ${SCREENS[V.screen].home ? "" : `${!whole && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
+          ${SCREENS[V.screen].home ? "" : `${!whole && !noUnits && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
           ${hasList ? listHTML() : ""}
           ${contentHTML()}
           ${hasInsp ? (V.rightTool === "notes" ? marginHTML() : inspectorHTML()) + railToolsHTML() : ""}`}
