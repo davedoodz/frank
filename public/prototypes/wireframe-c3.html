@@ -415,8 +415,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    unit carry, so one colour means "this is the thing" everywhere. */
 .tbl tr.on td{background:color-mix(in srgb, var(--vert) 34%, transparent)}
 .tbl tr.on td:first-child{box-shadow:inset 2px 0 0 var(--ink)}
-/* The levels under a building-wide count: still listed, no longer answers. */
-.tabs.lvl[data-off="true"] .views button{opacity:.38;pointer-events:none}
+/* The levels under a building-wide count: dimmed, because the figures are
+   not theirs — still clickable, because that is how one comes back. */
+.tabs.lvl[data-off="true"] .views button{opacity:.42}
 .sheet{position:absolute;left:0;right:0;bottom:0;border-top:1px solid var(--line);
   background:var(--card);box-shadow:0 -8px 24px rgba(0,0,0,.07);z-index:3}
 .drawer{position:absolute;top:0;right:0;bottom:0;width:360px;border-left:1px solid var(--line);
@@ -490,7 +491,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 [data-fi="high"] .plan[data-img] > .hi{display:none}
 /* --plan is set on the frame from the level the tabs are on: one sheet per
    level, not one picture relabelled. */
-[data-fi="high"] .plan[data-img="plan"]{background-image:var(--plan,url(assets/plan-niveau-5.jpg))}
+[data-fi="high"] .plan[data-img="plan"]{background-image:var(--plan,none)}
 /* Une vignette est recadrée sur une boîte mesurée sur l'étage type: elle lit
    donc toujours cette feuille-là, pas celle du niveau courant, sinon le
    cadrage tombe à côté de l'unité. */
@@ -511,7 +512,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .plan.align{aspect-ratio:2000 / 1675;height:auto;flex:0 0 auto;overflow:hidden}
 [data-fi="high"] .plan.align[data-img]{background:none}
 [data-fi="high"] .plan.align[data-img="plan"]::before{content:"";position:absolute;inset:0;
-  background:var(--plan,url(assets/plan-niveau-5.jpg)) center/contain no-repeat;filter:grayscale(1)}
+  background:var(--plan,none) center/contain no-repeat;filter:grayscale(1)}
 /* Vectors over the picture, not instead of it: a pass takes a few seconds
    on a permit sheet, and the pane must never be empty while it runs. The
    canvas is transparent until the sheet lands on it, then it covers the
@@ -544,6 +545,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png)}
 /* The vector sheet fills the same box as the picture it replaces. */
 .plan .lay canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none}
+/* The engineering layers are already cropped to the floor plan's own
+   2000×1675 canvas, so they fill the box edge to edge rather than being
+   scaled and centred the way the surveyor's differently-cropped sheet is. */
+.plan .lay.eng{inset:0;background-size:100% 100%}
 /* The three layer chips sit in the pane header, tight, so the header still
    reads as one line with the host button at its end. */
 .laychips{display:flex;gap:4px;margin-right:6px;flex:0 0 auto}
@@ -614,6 +619,63 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .lvls .on line{stroke:#5d6c0a;stroke-dasharray:none;stroke-width:1.4}
 .lvls .on text{fill:#5d6c0a;font-weight:500}
 [data-fi="low"] .lvls{display:none}
+
+/* ---------------------------------------------------------- the margin
+   Notes live beside the drawings, never on top of them: the margin takes
+   its own column and the inspector folds into the icon rail at the far
+   right. A studio note is a different object from a shared pin — square,
+   slate, dashed, locked — so nobody has to read a legend to tell them
+   apart, and nothing is tinted to mean private. */
+.rrail{display:flex;flex-direction:column;align-items:center;gap:6px;padding:7px 0;
+  border-left:1px solid var(--line-2);background:var(--paper)}
+.rrail .rtool{position:relative;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+  color:var(--ink-3);cursor:pointer}
+.rrail .rtool:hover{background:var(--fill-2);color:var(--ink-2)}
+.rrail .rtool.on{background:var(--fill);color:var(--ink)}
+.rrail .rtool i{position:absolute;top:-2px;right:-3px;min-width:14px;height:14px;padding:0 3px;border-radius:7px;
+  background:#8ba00f;color:#fff;font:600 9px/14px var(--sans);font-style:normal;text-align:center}
+.pane.margin .pb{gap:8px;overflow:auto}
+.nscope{gap:5px;align-items:center}
+.ncard{position:relative;border:1px solid var(--line-2);border-radius:8px;background:var(--paper);
+  padding:7px 9px;cursor:pointer}
+.ncard:hover{background:var(--fill-2)}
+.ncard.on{border-color:var(--ink)}
+.ncard.team{background:#eef2f4;border-color:#c6d4dc;border-style:dashed}
+.ncard.team.on{border-color:#2f4858}
+.ncard .tie{position:absolute;left:-9px;top:14px;width:8px;height:1px;background:var(--line)}
+.ncard .who{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.ncard .who b{color:var(--ink);font-size:12px;font-weight:600}
+.ncard .who .when{margin-left:auto;color:var(--ink-3);font-size:11px}
+.ncard .txt{margin-top:3px;font-size:12.5px}
+.ncard .anch{margin-top:5px;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink-3);
+  font-family:var(--mono)}
+.ncard.team .anch{color:#2f4858}
+.ncard .nact{margin-top:7px;display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.ncard.new{border-color:var(--ink);cursor:default}
+.ncard .nnew{width:100%;margin-top:5px;border:1px solid var(--line-2);border-radius:6px;padding:5px 7px;
+  font:inherit;font-size:12.5px;color:var(--ink);background:#fff;resize:none}
+
+/* The pin itself. On the sheet it sits inside the transformed drawing and is
+   scaled back down; over the model the viewer places it in pixels. */
+.npin{position:absolute;transform-origin:0 0;display:flex;flex-direction:column;align-items:flex-start;
+  cursor:pointer;z-index:6}
+.npins{position:absolute;inset:0;z-index:6;pointer-events:none}
+.npins .npin{transform:translate(-50%,-100%);pointer-events:auto}
+.npin .nd{width:20px;height:20px;border-radius:50% 50% 50% 2px;transform:rotate(-45deg);background:#c3e05a;
+  color:#2f3a05;border:1px solid #2f3a05;display:grid;place-items:center;font-size:10px;font-weight:700}
+.npin .nd > svg{transform:rotate(45deg);width:11px;height:11px}
+.npin.team .nd{border-radius:4px;transform:none;background:#e7eef2;color:#2f4858;border:1px dashed #2f4858}
+.npin.team .nd > svg{transform:none}
+.npin.on .nd{background:var(--ink);color:#fff;border-color:var(--ink);border-style:solid}
+.npin.pending .nd{background:#fff;border-style:dashed}
+.npin .nl{margin-top:3px;background:var(--paper);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px;
+  font-size:10px;white-space:nowrap;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.npin.team .nl{border-style:dashed;color:#2f4858}
+.npin.back{opacity:.32}
+/* Pin mode: the next click on either drawing puts a point down, and both
+   panes say so with the cursor. */
+[data-pin="on"] .zone{cursor:crosshair}
+[data-fi="low"] .npin,[data-fi="low"] .ncard .anch{display:none}
 .north text{fill:var(--ink);font-size:17px;font-weight:500;text-anchor:middle}
 [data-fi="low"] .north{display:none}
 /* The three axes as the camera sees them, in the corner the drawing never
@@ -762,6 +824,7 @@ svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
 
 <script src="vendor/lucide/lucide.min.js"></script>
 <script src="vendor/dialkit/browser.global.js"></script>
+<script src="assets/engineering/sheets.js"></script>
 <script>
 /* ---------------------------------------------------------------- state */
 
@@ -806,6 +869,17 @@ const V = {
   qrow: 0,           // which line of the quantities table is lit
   utab: 1,           // which tab of the unit inspector
   zoom: 100,         // plan zoom, in percent
+  /* The margin: notes pinned on a drawing. Two publics share one list — the
+     studio's own reminders and the pins an invited collaborator can read —
+     and the guest view does not render the studio's, it drops them. */
+  pins: [],
+  rightTool: "notes",   // which icon of the right rail is lit
+  pinScope: "equipe",   // what the next pin will be
+  guest: false,         // read the screen as the shared link shows it
+  pinMode: false,       // the next click on a drawing puts a point down
+  pending: null,        // a point put down, waiting for its sentence
+  draft: "",
+  selPin: null,
   /* Where the sheet has been dragged to inside the 2D pane, in pixels of
      the pane. Zoom and pan are one pair: the wheel writes both. */
   pan: { x: 0, y: 0 },
@@ -863,6 +937,8 @@ function sprite() {
     "share-2", "eye", "message-square",
     /* the three layer chips on the 2D pane */
     "trees",
+    /* the margin: posting a note, keeping one for the studio, reading as a guest */
+    "lock", "map-pin", "send", "users", "trash-2",
     /* the scope switch and the real .csv it exports */
     "download"];
   const defs = names.map((n) => {
@@ -1989,38 +2065,34 @@ function tabsHTML() {
   }
   /* The second row only exists when the screen has something to ask for.
      Aperçu keeps the single row, and the drawing gets the thirty-two
-     pixels back. Under "Bâtiment entier" the levels are still shown — the
-     building has eight of them — but they are inert and say why, because a
-     strip reading "Niveau 5" beside a figure counted over eight floors is
-     exactly what made the quantities unreadable. */
-  const offLevels = buildingScope();
+     pixels back. "Bâtiment entier" sits at the head of that row, before
+     Niveau 1, because it is the same question the levels answer: which
+     floor — or all of them. Chosen, it dims the levels, since a figure
+     counted over eight floors has no level; clicking one is how you come
+     back. */
+  const off = buildingScope();
+  const wholeBtn = V.screen === "Unités"
+    ? `<button ${act("scope", "Bâtiment")} aria-current="${off}" title="Compter le bâtiment entier"
+         style="flex:0 0 auto">${icon("building-2")}<span class="hi">Bâtiment entier</span></button>`
+    : "";
   const row2 = mode === "Two rows, no rail" && views.length
     ? `<div class="tabs lvl rg ${solo("nav")}" data-rg="vues" data-fi="${fiOf("nav")}"
-         data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}" data-off="${offLevels}">
-        <div class="views">${views.map(viewBtn).join("")}</div>
-        ${offLevels ? `<span class="chip hi" style="margin-left:6px;color:var(--ink-3)">sans objet : portée bâtiment</span>` : ""}</div>`
+         data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}" data-off="${off}">
+        ${wholeBtn}${wholeBtn ? `<span class="div"></span>` : ""}
+        <div class="views">${views.map(viewBtn).join("")}</div></div>`
     : "";
-  /* What is being counted, said where the level is chosen, because the two
-     answer the same question: one floor, or all of them. */
-  const scope = V.screen === "Unités"
-    ? `<span class="row" style="margin-left:auto;flex:0 0 auto;gap:4px">
-        <span class="btnw ${V.scope === "Niveau" ? "solid" : ""}" ${act("scope", "Niveau")}
-          title="Lire un niveau et l'unité choisie">${icon("layers")}<span class="hi">Niveau ${paneLevel()}</span></span>
-        <span class="btnw ${V.scope === "Bâtiment" ? "solid" : ""}" ${act("scope", "Bâtiment")}
-          title="Compter le bâtiment entier">${icon("building-2")}<span class="hi">Bâtiment entier</span></span>
-      </span>` : "";
   /* A project is read by people who do not draw: the client, the urbaniste,
      the contractor. Sharing is the end of the first row, on every screen
      that has a project open, because it is about the project and not about
      what is on screen. */
   const share = SCREENS[V.screen].index ? ""
     : `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
-         style="${scope ? "" : "margin-left:auto;"}flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
+         style="margin-left:auto;flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
        data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
-    ${items}${scope}${share}
+    ${items}${share}
   </div>${row2}`;
 }
 
@@ -2223,13 +2295,14 @@ function contentHTML() {
                    style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})">
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
-                ${layers}${unitMarkHTML()}</div></div>
+                ${layers}${unitMarkHTML()}${pinMarkHTML()}</div></div>
               ${north("plan")}${mini("plan")}${zcol("plan")}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
               </div>
+              <div class="npins" data-npins></div>
               ${levelMarks}${north("model")}${axes}${mini("model")}${zcol("model")}
             </div>`}
         </div>`;
@@ -2445,6 +2518,196 @@ function inspectorHTML() {
   return region("inspector", "inspecteur", inner, step);
 }
 
+/* ------------------------------------------------------------ the margin
+   A note is a sentence stuck to a point of a drawing. Two kinds share the
+   list: a pin the invited collaborator can read, and a studio note nobody
+   outside the office ever sees. The difference is not a shade of grey — in
+   the guest view the studio's notes are not rendered at all, and neither is
+   their count, because a count of hidden things is itself a leak. */
+const PIN_KEY = "fitte:epingles:c3";
+const PIN_SEED = [
+  { id: 1, scope: "partage", surface: "plan", level: 5, sheet: "plan", x: .455, y: .565,
+    who: "Entrepreneur général", when: "hier 16:20",
+    txt: "Le dégagement devant la porte du 507 fait 860 mm, il en faut 900." },
+  { id: 2, scope: "partage", surface: "plan", level: 5, sheet: "plan", x: .60, y: .33,
+    who: "Chargée de projet", when: "lun. 09:05",
+    txt: "Le balcon du 510 dépasse la ligne d'alignement de 0,4 m." },
+  { id: 3, scope: "equipe", surface: "plan", level: 5, sheet: "plan", x: .33, y: .70,
+    who: "Vous", when: "mar. 08:40",
+    txt: "Rappel: le corridor est encore dessiné avec l'ancienne sortie. À reprendre avant R05." },
+];
+function loadPins() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PIN_KEY));
+    if (Array.isArray(raw)) return raw;
+  } catch { /* a corrupt key is not worth a dialog: fall back to the seed */ }
+  return PIN_SEED.map((p) => ({ ...p }));
+}
+const savePins = () => localStorage.setItem(PIN_KEY, JSON.stringify(V.pins));
+const nextPinId = () => V.pins.reduce((m, p) => Math.max(m, p.id), 0) + 1;
+/* The one rule the whole feature turns on. */
+const pinsVisible = () => V.pins.filter((p) => !V.guest || p.scope === "partage");
+const teamPins = () => V.pins.filter((p) => p.scope === "equipe").length;
+const pinsOnSheet = () => pinsVisible().filter((p) => p.surface === "plan" && p.level === paneLevel());
+const pinsOnModel = () => pinsVisible().filter((p) => p.surface === "model");
+const SHEET_NAME = { plan: "plan d'unités", arp: "arpenteur", pay: "paysage" };
+const pinAnchor = (p) => (p.surface === "model"
+  ? `maquette · niv. ${p.level} · ${p.face}`
+  : `${SHEET_NAME[p.sheet] || "plan"} · niv. ${p.level}${p.zone ? ` · ${p.zone}` : ""}`);
+/* Which sheet was on screen when the point was put down: the floor plan
+   alone, or one of the two consultants' sheets laid over it. */
+const currentSheetKey = () => (V.lay.arp.on ? "arp" : V.lay.pay.on ? "pay" : "plan");
+
+/* The pins drawn on the 2D sheet. They live inside the transformed box with
+   the unit outlines, so they pan and zoom with the drawing; their size is
+   divided by the zoom so a pin stays a pin instead of growing into a sign. */
+function pinMarkHTML() {
+  const z = V.zoom / 100;
+  const list = pinsOnSheet();
+  const pending = V.pending && V.pending.surface === "plan" && V.pending.level === paneLevel()
+    ? [{ ...V.pending, id: 0, scope: V.pinScope, txt: "" }] : [];
+  return [...list, ...pending].map((p, i) => `<div class="npin ${p.scope === "equipe" ? "team" : ""}
+      ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}"
+      style="left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%;transform:scale(${(1 / z).toFixed(3)})"
+      ${p.id ? act("note", p.id) : ""}>
+      <span class="nd">${p.scope === "equipe" ? icon("lock") : (p.id ? i + 1 : "·")}</span>
+      ${p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""}
+    </div>`).join("");
+}
+
+/* The right rail: the margin on top, then what the column can hold. Reading
+   one floor that is the inspector's four tabs; counting the building there
+   is no unit to inspect, so it is the table instead. Folding the right
+   column into icons is what buys the margin its width. */
+function railToolsHTML() {
+  const n = pinsVisible().length;
+  const tool = (name, glyph, title, badge) => {
+    /* Every tool but the margin opens the right column, so the lit one is
+       what the column is showing: the table, or the tab that is open. */
+    const on = V.rightTool === "notes"
+      ? name === "notes"
+      : (name === "quant" || name === `utab${V.utab}`);
+    return `<span class="rtool ${on ? "on" : ""}"
+      ${act("rtool", name)} title="${title}" aria-label="${title}">${icon(glyph)}${badge ? `<i>${badge}</i>` : ""}</span>`;
+  };
+  return `<div class="rrail rg" data-rg="rail d'outils" data-fi="${fiOf("inspector")}">
+    ${tool("notes", "message-square", "Dans la marge", n)}
+    ${buildingScope()
+      ? tool("quant", "table", "Quantités du bâtiment", 0)
+      : UNIT_TAB_ICONS.map((g, i) => tool(`utab${i}`, g, UNIT_TABS[i], 0)).join("")}
+  </div>`;
+}
+
+function marginHTML() {
+  const list = pinsVisible();
+  const team = V.pinScope === "equipe" && !V.guest;
+  const card = (p) => `<div class="ncard ${p.scope === "equipe" ? "team" : ""} ${p.id === V.selPin ? "on" : ""}"
+      ${act("note", p.id)}>
+    <span class="tie"></span>
+    <div class="who">${icon(p.scope === "equipe" ? "lock" : "circle")}<b>${p.who}</b><span class="when">${p.when}</span></div>
+    <div class="txt">${p.txt}</div>
+    <div class="anch">${icon(p.surface === "model" ? "box" : "file")}${pinAnchor(p)}</div>
+    ${p.id === V.selPin ? `<div class="nact"><span class="chip" ${act("notedel", p.id)}>${icon("trash-2")}<span class="lb">Supprimer</span></span></div>` : ""}
+  </div>`;
+  /* The composer only appears once a point is down: a note without a place
+     is exactly what this margin exists to prevent. */
+  const composer = V.pending
+    ? `<div class="ncard new ${team ? "team" : ""}">
+        <div class="anch">${icon("map-pin")}${pinAnchor({ ...V.pending, scope: V.pinScope })}</div>
+        <textarea class="hi nnew" data-pindraft rows="3"
+          placeholder="${team ? "Note d'atelier — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
+        <div class="nact">
+          <span class="chip" ${act("pincancel")}>Annuler</span>
+          <span class="btnw solid go" ${act("pinpost")}>${icon(team ? "lock" : "send")}<span class="hi">${team ? "Garder pour l'atelier" : "Poser l'épingle"}</span></span>
+        </div></div>`
+    : "";
+  const inner = `<div class="ph">${icon("message-square")}<span class="lo bar" style="width:70px"></span>
+      <span class="hi">Dans la marge</span><span style="flex:1"></span>
+      <span class="hi" style="font-size:11px;color:var(--ink-3)">${list.length}</span></div>
+    <div class="pb nmargin">
+      ${V.guest ? "" : `<div class="row nscope">
+        <span class="chip ${V.pinScope === "equipe" ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">Atelier</span></span>
+        <span class="chip ${V.pinScope === "partage" ? "on" : ""}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
+        <span style="flex:1"></span>
+        <span class="chip ${V.pinMode ? "on" : ""}" ${act("pinmode")} title="Cliquez ensuite un dessin">${icon("map-pin")}<span class="lb">Épingler</span></span>
+      </div>`}
+      ${composer}
+      ${list.length ? list.map(card).join("")
+        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px">Aucune note sur ce projet.</div>`}
+    </div>`;
+  return `<section class="pane rg margin" data-rg="marge" data-fi="${fiOf("inspector")}"
+    data-region="margin">${inner}</section>`;
+}
+
+/* What the point landed on. The unit outlines are already in sheet
+   coordinates, so the pin can name the unit it sits in without guessing. */
+function unitAt(x, y) {
+  const polys = polysForPane();
+  const lv = paneLevel();
+  for (const r of rowsOf("Unités")) {
+    if (r[4] !== lv) continue;
+    const poly = polys[r[2]];
+    if (poly && pointInPoly(x, y, poly)) return `unité ${r[0].split(" · ")[0]}`;
+  }
+  return "";
+}
+function pointInPoly(x, y, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i, i += 1) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+function postPin() {
+  if (!V.pending) return;
+  const txt = V.draft.trim();
+  if (!txt) { document.querySelector("[data-pindraft]")?.focus(); return; }
+  V.pins.push({ id: nextPinId(), scope: V.pinScope, who: V.pinScope === "equipe" ? "Vous" : "Vous (partagé)",
+    when: "à l'instant", txt, ...V.pending });
+  V.selPin = V.pins[V.pins.length - 1].id;
+  V.pending = null; V.draft = ""; V.pinMode = false;
+  savePins();
+  render();
+}
+
+/* The model's pins are world points, not screen points — the picture turns.
+   The viewer is handed the list and projects it every frame. */
+function pushModelPins() {
+  if (!window.fitteModel?.setPins) return;
+  const pending = V.pending && V.pending.surface === "model"
+    ? [{ ...V.pending, id: 0, scope: V.pinScope, txt: "" }] : [];
+  window.fitteModel.setPins([...pinsOnModel(), ...pending].map((p, i) => ({
+    id: p.id, p: p.p, n: p.n,
+    cls: `${p.scope === "equipe" ? "team" : ""} ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}`,
+    html: `<span class="nd">${p.scope === "equipe" ? icon("lock") : (p.id ? i + 1 : "·")}</span>`
+      + (p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""),
+  })));
+}
+
+/* A click on the model is a ray into the building; a drag is an orbit. The
+   canvas belongs to the viewer and survives re-renders, so this is wired
+   once, on the pane, and asks the viewer what was hit. */
+function wireModelPins() {
+  let down = null;
+  document.addEventListener("pointerdown", (e) => {
+    down = e.target.closest('[data-zone="model"]') ? [e.clientX, e.clientY] : null;
+  }, true);
+  document.addEventListener("pointerup", (e) => {
+    const start = down; down = null;
+    if (!start || !V.pinMode || V.guest) return;
+    if (Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 4) return;
+    const hit = window.fitteModel?.pick?.(e.clientX, e.clientY);
+    if (!hit) return;
+    e.stopPropagation();
+    V.pending = { surface: "model", ...hit };
+    V.selPin = null;
+    render();
+    document.querySelector("[data-pindraft]")?.focus();
+  }, true);
+}
+
 /* ------------------------------------------------- reading the sheet
    The pane is a fixed window; the sheet moves behind it. Zoom is a number
    in percent, pan two pixel offsets, both on V, so a re-render draws the
@@ -2653,6 +2916,24 @@ function wireViewport() {
   const el = vpEl();
   if (!el) return;
   const paint = paintSheet;
+  /* With the pin armed, a click on the sheet is a point, not a unit: it is
+     caught before the outlines underneath get it. Coordinates are 0–1 of
+     the sheet itself, like the unit outlines, so the pin keeps its place
+     when the drawing is zoomed, panned, or re-exported larger. */
+  el.addEventListener("click", (e) => {
+    if (!V.pinMode || V.guest) return;
+    const plan = el.querySelector(".plan");
+    if (!plan) return;
+    const r = plan.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    e.stopPropagation();
+    V.pending = { surface: "plan", level: paneLevel(), sheet: currentSheetKey(),
+      x, y, zone: unitAt(x, y) };
+    V.selPin = null;
+    render();
+    document.querySelector("[data-pindraft]")?.focus();
+  }, true);
   /* The hand always wins: a wheel, a drag or a double-click during a glide
      stops it where it is rather than fighting it for the transform. */
   el.onwheel = (e) => {
@@ -2793,9 +3074,12 @@ function render() {
   const hasList = def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
   const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Right panel";
   /* Six columns of figures need more than a unit card does, so the right
-     column widens when it becomes the table. */
+     column widens when it becomes the table. The margin is narrower than the
+     inspector and is followed by the rail of tool icons, which is what makes
+     folding the inspector worth the trade: the drawings keep their width. */
+  const rightW = V.rightTool === "notes" ? "286px" : (buildingScope() ? "385px" : "340px");
   const cols = [hasList ? "260px" : null, "1fr",
-    hasInsp ? (buildingScope() ? "385px" : "340px") : null].filter(Boolean).join(" ");
+    hasInsp ? rightW : null, hasInsp ? "40px" : null].filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
     : { "Top bar only": "top", "Tabs only, no rail": "top", "Two rows, no rail": "top",
@@ -2817,7 +3101,7 @@ function render() {
           ${SCREENS[V.screen].home ? "" : `${V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
           ${hasList ? listHTML() : ""}
           ${contentHTML()}
-          ${hasInsp ? inspectorHTML() : ""}`}
+          ${hasInsp ? (V.rightTool === "notes" ? marginHTML() : inspectorHTML()) + railToolsHTML() : ""}`}
         </div>
         ${def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
       </div>
@@ -2844,6 +3128,13 @@ function render() {
      and drag are hooked back up every time it is drawn. */
   wireViewport();
   wireZoomRails();
+  /* The margin's three live parts: the pin cursor on the drawings, the
+     model's projected markers, and the composer's field — which writes
+     straight to state so typing never costs a re-render. */
+  document.getElementById("frame")?.setAttribute("data-pin", V.pinMode ? "on" : "off");
+  pushModelPins();
+  const draft = document.querySelector("[data-pindraft]");
+  if (draft) draft.oninput = (e) => { V.draft = e.target.value; };
   const find = document.querySelector(".find");
   if (find) find.oninput = (e) => {
     V.query = e.target.value;
@@ -3143,6 +3434,9 @@ function onClick(e) {
       V.view[screen] = Number(value);
       /* A new view is a new set of rows, so the old row number means nothing. */
       V.sel[screen] = 0;
+      /* Asking for a floor is asking to read a floor: the building-wide
+         count steps aside. */
+      if (screen === "Unités") V.scope = "Niveau";
       break;
     /* A section inside a screen names itself, because the screen it sits on
        has no views of its own: "Quantités|2" switches that table alone. */
@@ -3179,7 +3473,12 @@ function onClick(e) {
        unit that was being read, so the switch is not a one-way door. */
     case "scope":
       V.scope = value;
-      if (V.scope === "Bâtiment") TYPOS.forEach((ty) => { if (V.typo[ty]) dial.setValue(`typologies.${ty}`, false); });
+      /* Counting the building is the reason the switch was pressed, so the
+         right column shows the table rather than waiting to be asked. */
+      if (V.scope === "Bâtiment") {
+        V.rightTool = "inspector";
+        TYPOS.forEach((ty) => { if (V.typo[ty]) dial.setValue(`typologies.${ty}`, false); });
+      }
       break;
     /* A line of the table lights what it counts, where that thing exists.
        A typology is a fill on the floor plan; a level is a sheet, so the
@@ -3242,6 +3541,34 @@ function onClick(e) {
        only notes what was opened. */
     case "source": say(`${value} — texte officiel ouvert dans un onglet. Lecture seule.`); return render();
     case "utab": V.utab = Number(value); break;
+    /* The right rail: the margin, or one tab of the folded inspector. */
+    case "rtool":
+      if (value === "notes") { V.rightTool = "notes"; break; }
+      V.rightTool = "inspector";
+      if (value === "quant") break;
+      V.utab = Number(value.replace("utab", ""));
+      break;
+    case "pinscope": V.pinScope = value; break;
+    /* Arming the pin: the next click on a drawing puts the point down, and
+       nothing else on the screen changes meaning in the meantime. */
+    case "pinmode": V.pinMode = !V.pinMode; V.pending = null; break;
+    case "pincancel": V.pending = null; V.draft = ""; V.pinMode = false; break;
+    case "pinpost": postPin(); return;
+    case "note":
+      V.selPin = V.selPin === Number(value) ? null : Number(value);
+      break;
+    case "notedel":
+      V.pins = V.pins.filter((p) => p.id !== Number(value));
+      V.selPin = null;
+      savePins();
+      break;
+    /* Reading the screen as the shared link shows it. The studio's notes are
+       not greyed in this view, they are not rendered — and their count goes
+       with them, because a count of hidden things is itself a leak. */
+    case "guest":
+      V.guest = !V.guest;
+      if (V.guest) { V.pinScope = "partage"; V.pinMode = false; V.pending = null; }
+      break;
     /* The chips drive the panel, not V directly: the panel is the single
        source for the layers, and applyDial writes V and re-renders. Writing
        both would let the two disagree on the next dial change. */
