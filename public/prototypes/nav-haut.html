@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navigation en haut — six options</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Same ramp, same type and the same hairlines as wireframe-c3: these are
+   options for one screen, not a second visual language. What changes from
+   option to option is where the name of a thing sits and how far the hand
+   travels to it. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --card:#fff; --hi:#111; --vert:#c3e05a; --vert-ink:#2f3a05;
+  --wash:rgba(17,17,18,.055); --wash-2:rgba(17,17,18,.085);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:28px 24px 64px}
+.lu{width:16px;height:16px;flex:0 0 auto;stroke-width:1.6}
+
+/* page scaffolding ------------------------------------------------------ */
+.head{max-width:1180px;margin:0 auto 26px}
+.head h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.head p{color:var(--ink-2);margin-top:5px;max-width:74ch}
+.opts{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:30px}
+.opt{display:flex;flex-direction:column;gap:9px}
+.opt .cap{display:flex;align-items:baseline;gap:9px}
+.opt .cap b{font-size:13.5px;font-weight:600}
+.opt .cap .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.opt .cap .note{color:var(--ink-2);font-size:12px}
+/* The option is shown inside a window, because a navigation is judged
+   against the width it has to survive, not against the page. */
+.shot{border:1px solid var(--line-2);border-radius:8px;background:var(--card);overflow:hidden}
+
+/* shared nav parts ------------------------------------------------------ */
+.qat{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;
+  border-bottom:1px solid var(--line-2);background:var(--fill-2);font-size:11.5px;color:var(--ink-2)}
+.qat .sep{width:1px;height:14px;background:var(--line-2)}
+.qat .ic{width:22px;height:22px;display:grid;place-items:center;border-radius:5px;cursor:pointer;color:var(--ink-2)}
+.qat .ic:hover{background:var(--wash);color:var(--ink)}
+.qat .proj{font-weight:500;color:var(--ink)}
+.qat .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* the ribbon's own tab row: names only, the band below changes with it */
+.rtabs{display:flex;align-items:flex-end;gap:2px;padding:0 8px;height:30px;
+  border-bottom:1px solid var(--line-2)}
+.rtabs button{border:0;background:transparent;font:inherit;font-size:12px;color:var(--ink-2);
+  padding:0 11px;height:26px;border-radius:6px 6px 0 0;cursor:pointer}
+.rtabs button:hover{background:var(--wash)}
+.rtabs button[aria-current="true"]{background:var(--card);color:var(--ink);font-weight:500;
+  box-shadow:inset 0 -2px 0 var(--ink)}
+/* A contextual tab is AutoCAD's answer to "this only exists right now": it
+   is coloured, it sits at the end, and it leaves when its object does. */
+.rtabs button.ctx{color:var(--vert-ink);background:#eef4d8}
+.rtabs button.ctx[aria-current="true"]{box-shadow:inset 0 -2px 0 var(--vert-ink)}
+
+/* the band: groups of buttons, a caption under each group, hairline between */
+.band{display:flex;align-items:stretch;gap:0;padding:6px 8px 0;overflow-x:auto;
+  border-bottom:1px solid var(--line-2);background:var(--card)}
+.grp{display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 10px 3px;
+  border-right:1px solid var(--line-2)}
+.grp:last-child{border-right:0}
+.grp .items{display:flex;align-items:flex-start;gap:2px}
+.grp .gn{font-size:9.5px;letter-spacing:.05em;color:var(--ink-3);text-transform:uppercase}
+/* The big button is the ribbon's unit: glyph over word, one target, no
+   tooltip needed because the word is already there. */
+.big{display:flex;flex-direction:column;align-items:center;gap:4px;width:62px;padding:6px 3px 5px;
+  border:1px solid transparent;border-radius:6px;background:transparent;cursor:pointer;
+  font:inherit;font-size:10.5px;color:var(--ink-2);text-align:center;line-height:1.2}
+.big .lu{width:20px;height:20px}
+.big:hover{background:var(--wash);color:var(--ink)}
+.big[aria-current="true"]{background:var(--wash-2);color:var(--ink);font-weight:500}
+.big.sm{width:auto;flex-direction:row;gap:6px;padding:5px 9px;font-size:12px;white-space:nowrap}
+.big.sm .lu{width:16px;height:16px}
+
+/* one-line bars --------------------------------------------------------- */
+.bar{display:flex;align-items:center;gap:6px;height:44px;padding:0 10px;
+  border-bottom:1px solid var(--line-2);background:var(--card);overflow:hidden}
+/* The bar clips what overflows it, which is what keeps the level strip from
+   pushing the project name out. The one bar that opens a menu cannot clip. */
+.bar.host{overflow:visible;z-index:2}
+.bar .proj{font-weight:600;font-size:13px;white-space:nowrap}
+.bar .sep{width:1px;height:18px;background:var(--line-2);margin:0 4px;flex:0 0 auto}
+.crumb{display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:12.5px;
+  white-space:nowrap;cursor:pointer}
+.crumb:hover{color:var(--ink-2)}
+
+/* the level strip: the one row that must survive a narrow window, so it
+   scrolls on its own instead of pushing the project name off the screen */
+.lvls{display:flex;align-items:center;gap:3px;min-width:0;overflow-x:auto;
+  scrollbar-width:none;flex:1}
+.lvls::-webkit-scrollbar{display:none}
+.lvl{border:0;background:transparent;font:inherit;font-size:12px;color:var(--ink-2);
+  padding:5px 9px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.lvl:hover{background:var(--wash);color:var(--ink)}
+.lvl[aria-current="true"]{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.lvl.all{color:var(--ink-3)}
+/* second row, the one that depends on what the first row chose */
+.ctxrow{display:flex;align-items:center;gap:6px;height:34px;padding:0 10px;
+  border-bottom:1px solid var(--line-2);background:var(--fill-2)}
+.ctxrow .gn{font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);
+  padding-right:4px;white-space:nowrap}
+
+/* the level as a menu, for the narrowest option */
+.menu{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 9px;
+  border:1px solid var(--line);border-radius:6px;background:var(--fill-2);
+  font-size:12px;color:var(--ink);cursor:pointer;white-space:nowrap}
+.menu b{font-weight:600}
+.menu .lu{width:14px;height:14px;color:var(--ink-3)}
+.pop{position:absolute;z-index:5;top:34px;left:0;min-width:170px;background:var(--card);
+  border:1px solid var(--line-2);border-radius:8px;padding:4px;
+  box-shadow:0 10px 26px rgba(17,17,18,.1);display:none}
+.pop.open{display:block}
+.pop button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;
+  font:inherit;font-size:12px;color:var(--ink-2);padding:6px 8px;border-radius:5px;cursor:pointer;text-align:left}
+.pop button:hover{background:var(--wash);color:var(--ink)}
+.pop button[aria-current="true"]{color:var(--ink);font-weight:600}
+.pop button[aria-current="true"]::after{content:"·";margin-left:auto;color:var(--vert-ink)}
+
+/* the stub of the screen under each navigation ------------------------- */
+.body{position:relative;background:var(--page)}
+.title{padding:12px 14px 10px}
+.title h2{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.title p{color:var(--ink-2);font-size:12px;margin-top:2px}
+.work{display:grid;grid-template-columns:230px 1fr 1fr;gap:9px;padding:0 9px 9px}
+.pane{border:1px solid var(--line-2);border-radius:6px;background:var(--card);overflow:hidden;
+  display:flex;flex-direction:column;min-width:0}
+.ph{height:30px;display:flex;align-items:center;gap:7px;padding:0 9px;font-size:12px;
+  color:var(--ink-2);border-bottom:1px solid var(--line-2)}
+.ph .pull{margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;
+  border:1px solid var(--line-2);border-radius:5px;font-size:11px;background:var(--fill-2)}
+.field{height:148px;background:#fff}
+.rows{padding:6px;display:flex;flex-direction:column;gap:4px}
+.row{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:5px;font-size:12px;color:var(--ink-2)}
+.row.on{background:#eef1e0;color:var(--ink);font-weight:500}
+.row .dot{width:6px;height:6px;border-radius:50%;background:#8ba00f;flex:0 0 auto}
+
+/* what each option costs, side by side, under the six */
+.tbl{max-width:1180px;margin:34px auto 0;border:1px solid var(--line-2);border-radius:8px;
+  background:var(--card);border-collapse:separate;border-spacing:0;width:100%}
+.tbl th,.tbl td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line-2);font-size:12px}
+.tbl th{font-weight:500;color:var(--ink-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>Navigation en haut — six options</h1>
+  <p>Plus de rail à gauche. Tout est en haut : l'icône et le mot, comme un ruban AutoCAD.
+     Les six options partagent le même état — choisir un écran ou un niveau dans l'une les change
+     toutes, pour qu'elles soient comparées sur la même sélection. Le corps est un gabarit :
+     ce qui est jugé ici, c'est la hauteur prise avant le dessin et le chemin de la main.</p>
+</div>
+
+<div class="opts" id="opts"></div>
+
+<table class="tbl" id="cost"></table>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+/* ------------------------------------------------------------------ data
+   The same five screens and the same nine views the prototype carries, so
+   an option is measured against the real number of words, not against three
+   short ones. */
+const SCREENS = [
+  ["Aperçu", "layout-grid"],
+  ["Unités", "layers"],
+  ["Quantités", "sigma"],
+  ["Suivi", "timer"],
+  ["Fichiers", "hard-drive"],
+];
+const LEVELS = [8, 7, 6, 5, 4, 3, 2, 1];
+const VIEWS = [...LEVELS.map((l) => `Niveau ${l}`), "Tous les niveaux"];
+const TOOLS = [
+  ["Ouvrir dans AutoCAD", "external-link"],
+  ["Ouvrir dans SketchUp", "box"],
+  ["Mesurer", "ruler"],
+  ["Comparer", "git-compare"],
+];
+const FILTERS = [["Typologies", "grid-2x2"], ["Croisements", "alert-triangle"], ["Ouvertures", "door-open"]];
+
+const S = { screen: "Unités", view: "Niveau 5" };
+
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+function sprite() {
+  const names = ["folder", "chevron-right", "chevron-down", "layout-grid", "layers", "sigma", "timer",
+    "hard-drive", "external-link", "box", "ruler", "git-compare", "grid-2x2", "alert-triangle",
+    "door-open", "save", "undo-2", "redo-2", "search", "list", "file", "printer"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* ----------------------------------------------------------- nav pieces */
+const on = (c) => (c ? ' aria-current="true"' : "");
+const screenBtn = (cls) => SCREENS.map(([n, g]) =>
+  `<button class="big ${cls}" data-screen="${n}"${on(S.screen === n)}>${icon(g)}<span>${n}</span></button>`).join("");
+const toolBtn = (cls) => TOOLS.map(([n, g]) =>
+  `<button class="big ${cls}">${icon(g)}<span>${n}</span></button>`).join("");
+const filterBtn = (cls) => FILTERS.map(([n, g]) =>
+  `<button class="big ${cls}">${icon(g)}<span>${n}</span></button>`).join("");
+const group = (name, items) => `<div class="grp"><div class="items">${items}</div><div class="gn">${name}</div></div>`;
+const levelStrip = () => `<div class="lvls">${VIEWS.map((v) =>
+  `<button class="lvl ${v.startsWith("Tous") ? "all" : ""}" data-view="${v}"${on(S.view === v)}>${v}</button>`).join("")}</div>`;
+const crumb = () => `<span class="crumb">${icon("folder")} Tous les projets</span>
+  ${icon("chevron-right")}<span class="proj">Le Baldwin III</span>`;
+const qat = () => `<div class="qat">
+  <span class="proj">Le Baldwin III</span><span class="sep"></span>
+  <span class="ic" title="Enregistrer">${icon("save")}</span>
+  <span class="ic" title="Annuler">${icon("undo-2")}</span>
+  <span class="ic" title="Rétablir">${icon("redo-2")}</span>
+  <span class="sep"></span><span>permis · R04 · 24 oct</span>
+  <div class="right"><span class="ic">${icon("search")}</span><span class="ic">${icon("printer")}</span></div></div>`;
+/* The tab row can carry the project itself, which is what lets the compact
+   ribbon drop the quick-access strip without losing where it is. */
+const ribbonTabs = (extra = "", lead = "") => `<div class="rtabs">${lead}${SCREENS.map(([n]) =>
+  `<button data-screen="${n}"${on(S.screen === n)}>${n}</button>`).join("")}${extra}</div>`;
+
+/* ------------------------------------------------------- the six options
+   Each is a function of the shared state, so they all redraw together. */
+const OPTIONS = [
+  { name: "Ruban complet",
+    note: "Barre d'accès rapide, rangée d'onglets, bande de groupes à gros boutons. Le plus proche d'AutoCAD, et le plus haut : la hauteur mesurée est dans le tableau en bas.",
+    nav: () => qat() + ribbonTabs() + `<div class="band">
+      ${group("Écrans", screenBtn(""))}
+      ${group("Niveau", VIEWS.slice(0, 5).map((v) =>
+        `<button class="big" data-view="${v}"${on(S.view === v)}><span style="font-size:15px;font-weight:600">${v.replace("Niveau ", "")}</span><span>${v.startsWith("Tous") ? "tous" : "niveau"}</span></button>`).join(""))}
+      ${group("Dessin", toolBtn(""))}
+      ${group("Calques", filterBtn(""))}</div>` },
+
+  { name: "Ruban compact",
+    note: "Mêmes groupes, boutons couchés et pas de barre d'accès rapide : le ruban perd un tiers de sa hauteur et garde les neuf niveaux visibles, sur leur propre rang.",
+    nav: () => ribbonTabs("", `<span class="proj" style="font-weight:600;padding:0 10px 4px 2px">Le Baldwin III</span>`) + `<div class="band">
+      ${group("Écrans", screenBtn("sm"))}
+      ${group("Dessin", toolBtn("sm"))}
+      ${group("Calques", filterBtn("sm"))}</div>
+      <div class="ctxrow"><span class="gn">Niveau</span>${levelStrip()}</div>` },
+
+  { name: "Deux rangs",
+    note: "Rang 1 : le projet et les écrans. Rang 2 : ce que l'écran courant demande. Pas de groupes, pas de captions — la dépendance se lit dans l'ordre vertical.",
+    nav: () => `<div class="bar">${crumb()}<span class="sep"></span>
+      <div style="display:flex;gap:2px">${screenBtn("sm")}</div></div>
+      <div class="ctxrow"><span class="gn">Niveau</span>${levelStrip()}</div>` },
+
+  { name: "Barre unique",
+    note: "Tout sur une ligne de 44 px : projet, écrans, niveaux. Les niveaux défilent seuls quand la fenêtre se resserre, le nom du projet ne bouge jamais.",
+    nav: () => `<div class="bar">${crumb()}<span class="sep"></span>
+      <div style="display:flex;gap:2px;flex:0 0 auto">${screenBtn("sm")}</div>
+      <span class="sep"></span>${levelStrip()}</div>` },
+
+  { name: "Barre + menu de niveaux",
+    note: "Le niveau devient un menu. La barre ne grandit pas avec le nombre d'étages : huit ou quarante, c'est la même largeur.",
+    nav: () => `<div class="bar host">${crumb()}<span class="sep"></span>
+      <div style="display:flex;gap:2px">${screenBtn("sm")}</div>
+      <span class="sep"></span>
+      <span style="position:relative;display:inline-flex">
+        <span class="menu" data-pop>${icon("layers")}<b>${S.view}</b>${icon("chevron-down")}</span>
+        <div class="pop" data-popmenu>${VIEWS.map((v) =>
+          `<button data-view="${v}"${on(S.view === v)}>${v}</button>`).join("")}</div></span>
+      <div style="margin-left:auto;display:flex;gap:2px;min-width:0;overflow:hidden">${
+        [["AutoCAD", "external-link"], ["SketchUp", "box"], ["Mesurer", "ruler"]].map(([n, g]) =>
+          `<button class="big sm">${icon(g)}<span>${n}</span></button>`).join("")}</div></div>` },
+
+  { name: "Onglet contextuel",
+    note: "Les niveaux n'ont pas de place fixe : ils arrivent comme un onglet coloré quand Unités est ouvert, et repartent avec lui. C'est la règle AutoCAD pour ce qui dépend d'une sélection.",
+    nav: () => qat() + ribbonTabs(S.screen === "Unités"
+      ? `<button class="ctx" aria-current="true">Niveaux</button>` : "") + `<div class="band">
+      ${S.screen === "Unités"
+        ? group("Niveau", VIEWS.map((v) => `<button class="big sm" data-view="${v}"${on(S.view === v)}>${v}</button>`).join(""))
+        : group("Écrans", screenBtn("sm"))}
+      ${group("Dessin", toolBtn("sm"))}</div>` },
+];
+
+/* ------------------------------------------------------- the screen stub
+   Deliberately thin: a title, a list and two drawing panes. It is there to
+   show what the navigation leaves for the drawing, nothing more. */
+const stub = () => `<div class="body">
+  <div class="title"><h2>Plans — ${S.view.toLowerCase()}</h2>
+    <p>${S.view.startsWith("Tous") ? "87 unités · 5 croisements ouverts" : "14 unités · 4 avec un croisement ouvert"}</p></div>
+  <div class="work">
+    <div class="pane"><div class="ph">${icon("list")}Unités</div>
+      <div class="rows">${["501 · 3½ · 707 pi²", "502 · 3½ · 1 croisement", "503 · 3½ · 753 pi²", "504 · 3½+bureau"]
+        .map((r, i) => `<div class="row ${i === 0 ? "on" : ""}">${i === 1 ? '<span class="dot"></span>' : ""}${r}</div>`).join("")}</div></div>
+    <div class="pane"><div class="ph">${icon("file")}Plan 2D<span class="pull">${icon("external-link")}AutoCAD</span></div>
+      <div class="field"></div></div>
+    <div class="pane"><div class="ph">${icon("box")}Maquette 3D<span class="pull">${icon("external-link")}SketchUp</span></div>
+      <div class="field"></div></div>
+  </div></div>`;
+
+function render() {
+  document.getElementById("opts").innerHTML = OPTIONS.map((o, i) => `<section class="opt">
+    <div class="cap"><span class="n">Option ${i + 1}</span><b>${o.name}</b></div>
+    <div class="cap"><span class="note">${o.note}</span></div>
+    <div class="shot" data-opt="${i}">${o.nav()}${stub()}</div>
+  </section>`).join("");
+  /* The height each navigation takes is measured, not estimated: it is the
+     one number that decides what is left for the drawing. */
+  requestAnimationFrame(() => {
+    const rows = OPTIONS.map((o, i) => {
+      const shot = document.querySelector(`[data-opt="${i}"]`);
+      const h = Math.round(shot.querySelector(".body").getBoundingClientRect().top - shot.getBoundingClientRect().top);
+      const clicks = o.name === "Barre + menu de niveaux" || o.name === "Onglet contextuel" ? 2 : 1;
+      return [i + 1, o.name, h, clicks];
+    });
+    document.getElementById("cost").innerHTML = `<thead><tr>
+      <th>Option</th><th>Navigation</th><th>Hauteur prise</th><th>Clics pour changer de niveau</th><th>Niveaux visibles d'un coup</th></tr></thead>
+      <tbody>${rows.map(([n, name, h, c]) => `<tr><td class="n">${n}</td><td>${name}</td>
+        <td class="n">${h} px</td><td class="n">${c}</td>
+        <td class="n">${name === "Barre + menu de niveaux" ? "0" : name === "Ruban complet" ? "5" : "9"}</td></tr>`).join("")}</tbody>`;
+  });
+}
+
+document.addEventListener("click", (e) => {
+  const pop = e.target.closest("[data-pop]");
+  if (pop) {
+    const menu = pop.parentElement.querySelector("[data-popmenu]");
+    const open = menu.classList.contains("open");
+    document.querySelectorAll("[data-popmenu]").forEach((m) => m.classList.remove("open"));
+    menu.classList.toggle("open", !open);
+    return;
+  }
+  const s = e.target.closest("[data-screen]");
+  if (s) { S.screen = s.dataset.screen; render(); return; }
+  const v = e.target.closest("[data-view]");
+  if (v) { S.view = v.dataset.view; render(); return; }
+  document.querySelectorAll("[data-popmenu]").forEach((m) => m.classList.remove("open"));
+});
+
+sprite();
+render();
+</script>
+</body>
+</html>
