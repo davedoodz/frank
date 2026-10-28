@@ -2430,12 +2430,16 @@ function zoomBy(next) {
    the two readouts move, which is the same path the wheel takes. */
 let GLIDE = 0;
 const stopGlide = () => { if (GLIDE) { cancelAnimationFrame(GLIDE); GLIDE = 0; } };
-function glideTo(to, ms = 420) {
+function glideTo(to, ms = 0) {
   stopGlide();
   const z0 = V.zoom, p0 = { x: V.pan.x, y: V.pan.y };
   const dz = Math.abs(to.zoom - z0), dp = Math.hypot(to.pan.x - p0.x, to.pan.y - p0.y);
   /* A move of a few pixels is not a journey: snap, and keep the frames. */
   if (dz < 1 && dp < 2) { V.zoom = to.zoom; V.pan = to.pan; paintSheet(); return; }
+  /* Neighbours on the same floor are a short hop; the far corner of the
+     sheet is a trip. A fixed duration makes the first feel sluggish and the
+     second feel thrown, so the time follows the distance, bounded. */
+  if (!ms) ms = Math.max(240, Math.min(560, 200 + dp * 0.22 + dz * 0.25));
   /* The clock starts on the first frame, not on the call: between the two
      the screen is rebuilt, and a glide measured from before that work would
      spend part of its duration on a thread that cannot paint. */
@@ -2788,6 +2792,46 @@ function render() {
   window.dispatchEvent(new CustomEvent("fitte:render"));
 }
 
+/* Choosing a unit is not a new screen. render() rewrites the frame's whole
+   innerHTML, and the browser then re-rasterises fifteen cropped plan
+   thumbnails, the sheet and the inspector: measured here, that is ~650 ms
+   of paint on top of 5 ms of JavaScript, which swallowed the first frames
+   of the glide and turned it back into a jump. Three boxes actually change
+   when the selection moves, so three boxes are rewritten. */
+function paintSelection() {
+  const sel = selIndex("Unités");
+  document.querySelectorAll('[data-region="list"] [data-act="row"]').forEach((el) => {
+    el.classList.toggle("on", Number(el.dataset.value) === sel);
+  });
+  const insp = document.querySelector('[data-region="inspector"]');
+  const inner = inspectorHTML();
+  /* Hidden inspector, or a layout that does not draw one: nothing to swap,
+     and nothing to fall back to either. */
+  if (insp && inner) insp.outerHTML = inner;
+  /* The header and the footer strip are counted from the floor, not from
+     the selection: measured identical for every row, so they are left. */
+  /* The outline and its label are children of the scaled sheet, so they are
+     replaced inside it rather than around it. */
+  const plan = vpEl()?.querySelector(".plan");
+  if (plan) {
+    plan.querySelectorAll(".umark, .ulabel").forEach((n) => n.remove());
+    plan.insertAdjacentHTML("beforeend", unitMarkHTML());
+  }
+  /* The decision panel is drawn again, so its field is wired again; the
+     rest of the controls go through the one delegated click handler. */
+  const note = document.querySelector(".note");
+  if (note) note.oninput = (e) => { V.note = e.target.value; paintSaveButton(); };
+  /* What the 3D viewer reads to tint the right windows. Measured at ~15 ms,
+     against ~650 ms for a full render: the model follows the list without
+     the screen being rebuilt around it. */
+  const row = selRow("Unités");
+  window.fitteSelection = row
+    ? { level: currentLevel() ?? Number(row[0].split(" · ")[0].slice(0, -2)),
+        unit: row[0].split(" · ")[0], index: row[2] }
+    : { level: currentLevel(), unit: null, index: null };
+  window.dispatchEvent(new CustomEvent("fitte:render"));
+}
+
 /* Escape closes the dialog, because a dialog that can only be dismissed by
    finding the right button is a trap. */
 document.addEventListener("keydown", (e) => {
@@ -3064,10 +3108,10 @@ function onClick(e) {
        filling the pane, not a contour somewhere off-screen. */
     case "row":
       V.sel[screen] = Number(value);
-      /* Draw the new selection first, then move the sheet to it: the mark
-         on the destination unit is visible for the whole journey, and the
-         glide's first frame lands on a thread that has nothing left to do. */
-      if (screen === "Unités") { render(); fitUnit(); return; }
+      /* Mark the destination first, then move the sheet to it: the mark is
+         visible for the whole journey, and the glide's first frame lands on
+         a thread that has nothing left to rasterise. */
+      if (screen === "Unités") { paintSelection(); fitUnit(); return; }
       break;
     case "article": V.articleId = value; V.noteOn = null; break;
     /* The totals strip under the floor: one line, or the table. */
