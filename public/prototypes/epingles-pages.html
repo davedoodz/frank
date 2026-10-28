@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Épingles — cinq écrans entiers</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Five whole screens, not five panels. The question is not what a note card
+   looks like — it is what the application looks like once notes exist in it:
+   what gets pushed aside, what gets smaller, and what the guest sees when
+   the same screen is opened through a shared link. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e4e4e4;
+  --fill:#ededed; --fill-2:#f7f7f7; --page:#f3f3f3;
+  --card:#fff; --hi:#111;
+  --vert:#c3e05a; --vert-ink:#2f3a05; --vert-soft:#eef3dc;
+  --bleu:#2f4858; --bleu-fill:#e7eef2;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:26px 22px 70px}
+.lu{width:15px;height:15px;flex:0 0 auto;stroke-width:1.6}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:5px;max-width:88ch}
+.sub b{color:var(--ink);font-weight:500}
+
+.bar{position:sticky;top:0;z-index:40;margin-top:16px;padding:8px 11px;background:var(--card);
+  border:1px solid var(--line-2);border-radius:8px;display:flex;align-items:center;gap:10px}
+.bar .lab{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:7px;overflow:hidden}
+.seg button{height:27px;padding:0 11px;border:0;background:var(--card);font:inherit;font-size:12px;
+  color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button.on{background:var(--hi);color:#fff}
+.bar .r{margin-left:auto;color:var(--ink-2);font-size:12px}
+
+.ways{display:flex;flex-direction:column;gap:34px;margin-top:22px}
+.way .cap{display:flex;align-items:baseline;gap:9px;margin-bottom:3px}
+.way .cap b{font-size:14px;font-weight:600}
+.way .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.way .note{color:var(--ink-2);font-size:12.5px;max-width:98ch;margin-bottom:10px}
+.way .note b{color:var(--ink);font-weight:500}
+/* The screen is drawn at its real size and then shrunk as a whole, so the
+   proportions a designer would judge are the proportions on screen. */
+.screen{width:1560px;height:884px;zoom:.745;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 1px 2px rgba(0,0,0,.04)}
+
+/* ------------------------------------------------------------ app chrome */
+.top{height:38px;display:flex;align-items:center;gap:9px;padding:0 12px;border-bottom:1px solid var(--line-2)}
+.crumb{display:flex;align-items:center;gap:7px;color:var(--ink-3);font-size:12.5px}
+.crumb b{color:var(--ink);font-weight:600}
+.nav{display:flex;align-items:center;gap:2px;margin-left:14px}
+.nav a{height:26px;padding:0 10px;border-radius:7px;display:inline-flex;align-items:center;gap:6px;
+  color:var(--ink-2);font-size:12.5px;text-decoration:none}
+.nav a.on{background:var(--fill);color:var(--ink);font-weight:500}
+.nav a .b{min-width:16px;height:16px;padding:0 5px;border-radius:8px;background:var(--vert);color:var(--vert-ink);
+  font-size:10px;font-weight:700;display:grid;place-items:center}
+.top .r{margin-left:auto;display:flex;align-items:center;gap:8px}
+/* A pane header that wraps reads as a bug, not as a dense screen. */
+.chipbtn{height:26px;padding:0 10px;border:1px solid var(--line-2);border-radius:7px;background:var(--card);
+  font-size:12px;color:var(--ink);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chipbtn.ghost{border-color:transparent;color:var(--ink-2)}
+.chipbtn.dark{background:var(--hi);color:#fff;border-color:var(--hi)}
+.chipbtn.team{background:var(--bleu-fill);border-color:#c6d4dc;color:var(--bleu)}
+
+.levels{height:33px;display:flex;align-items:center;gap:2px;padding:0 12px;border-bottom:1px solid var(--line-2)}
+.levels span{height:23px;padding:0 9px;border-radius:6px;display:inline-flex;align-items:center;
+  font-size:12px;color:var(--ink-3)}
+.levels span.on{background:var(--vert);color:var(--vert-ink);font-weight:600}
+
+.phead{padding:11px 14px 9px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--line-2)}
+.phead h2{font-size:16px;font-weight:600}
+.phead .m{color:var(--ink-2);font-size:12px;margin-top:2px}
+.phead .r{margin-left:auto;display:flex;gap:7px}
+
+.body{flex:1;display:flex;min-height:0}
+.left{width:228px;border-right:1px solid var(--line-2);display:flex;flex-direction:column;min-height:0}
+.left .h{height:30px;display:flex;align-items:center;gap:7px;padding:0 11px;color:var(--ink-2);font-size:12px;
+  border-bottom:1px solid var(--line-2)}
+.ulist{flex:1;overflow:hidden;padding:8px;display:flex;flex-direction:column;gap:8px}
+.ucard{border:1px solid var(--line-2);border-radius:8px;overflow:hidden;position:relative}
+.ucard.on{border-color:var(--hi)}
+.ucard b{font-size:12.5px}
+.ucard .t{display:flex;align-items:baseline;gap:7px;padding:5px 8px 2px}
+.ucard .t .m{margin-left:auto;color:var(--ink-3);font-size:11px;font-family:var(--mono)}
+.ucard .img{height:72px;background:#fff;overflow:hidden;border-top:1px solid var(--line-2)}
+.ucard .img img{width:100%;height:100%;object-fit:cover;object-position:center}
+.ucard .dots{position:absolute;right:6px;top:6px;display:flex;gap:3px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--vert);border:1px solid var(--vert-ink)}
+.dot.team{background:var(--bleu-fill);border-color:var(--bleu);border-radius:2px}
+
+.mid{flex:1;min-width:0;display:flex;flex-direction:column}
+.panes{flex:1;display:flex;gap:10px;padding:10px;min-height:0}
+.pane{flex:1;border:1px solid var(--line-2);border-radius:9px;display:flex;flex-direction:column;min-width:0;
+  overflow:hidden;background:var(--card)}
+.pane .ph{height:33px;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12.5px;color:var(--ink-2);
+  border-bottom:1px solid var(--line-2);white-space:nowrap;overflow:hidden}
+.pane .ph .r{margin-left:auto;display:flex;gap:6px}
+.pane .pf{height:28px;display:flex;align-items:center;gap:7px;padding:0 10px;font-size:11.5px;color:var(--ink-3);
+  border-top:1px solid var(--line-2);font-family:var(--mono)}
+.draw{flex:1;position:relative;overflow:hidden;background:#fff}
+.draw img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.draw.fill img{object-fit:cover;object-position:center}
+.zcol{width:34px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;align-items:center;
+  padding:6px 0;gap:7px;color:var(--ink-3);font-size:10px;font-family:var(--mono)}
+.zcol .track{flex:1;width:3px;background:var(--fill);border-radius:2px;position:relative}
+.zcol .knob{position:absolute;left:-4px;width:11px;height:11px;border-radius:50%;background:var(--hi)}
+.drawrow{flex:1;display:flex;min-height:0}
+
+/* pins over the drawings */
+.pin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center}
+.pin .num{width:20px;height:20px;border-radius:50% 50% 50% 2px;transform:rotate(-45deg);background:var(--vert);
+  color:var(--vert-ink);border:1px solid var(--vert-ink);display:grid;place-items:center;font-size:10px;font-weight:700}
+.pin .num span{transform:rotate(45deg);display:grid;place-items:center}
+.pin.team .num{border-radius:4px;transform:none;background:var(--bleu-fill);color:var(--bleu);
+  border:1px dashed var(--bleu)}
+.pin.team .num span{transform:none}
+.pin.sel .num{background:var(--hi);color:#fff;border-color:var(--hi);border-style:solid}
+.pin .lbl{margin-top:3px;background:var(--card);border:1px solid var(--line-2);border-radius:5px;padding:1px 6px;
+  font-size:10px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.pin.team .lbl{border-style:dashed;color:var(--bleu)}
+
+.strip{height:30px;display:flex;align-items:center;gap:9px;padding:0 13px;border-top:1px solid var(--line-2);
+  font-size:12px;color:var(--ink-2)}
+.strip .r{margin-left:auto;color:var(--ink-3);font-size:11.5px}
+.foot{height:34px;display:flex;align-items:center;gap:9px;padding:0 13px;border-top:1px solid var(--line-2);
+  font-size:12.5px;color:var(--ink-2)}
+.foot b{color:var(--ink)}
+.foot .r{margin-left:auto}
+
+.right{width:300px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;min-height:0}
+.right .h{height:33px;display:flex;align-items:center;gap:8px;padding:0 11px;border-bottom:1px solid var(--line-2);
+  font-size:12.5px}
+.right .h .r{margin-left:auto;color:var(--ink-3);font-size:11px}
+.rtabs{display:flex;border-bottom:1px solid var(--line-2)}
+.rtabs button{flex:1;height:31px;border:0;background:none;font:inherit;font-size:12px;color:var(--ink-2);
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;border-bottom:2px solid transparent;
+  margin-bottom:-1px}
+.rtabs button.on{color:var(--ink);font-weight:500;border-bottom-color:var(--hi)}
+.rtabs button.on.team{color:var(--bleu);border-bottom-color:var(--bleu)}
+.scroll{flex:1;overflow:hidden}
+.insp{padding:10px 11px;display:flex;flex-direction:column;gap:9px}
+.insp .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.insp .g{height:52px;border:1px solid var(--line-2);border-radius:6px;background:var(--fill-2)}
+.insp .kv{display:flex;align-items:baseline;font-size:12.5px;padding:3px 0;border-bottom:1px solid var(--line-2)}
+.insp .kv span:last-child{margin-left:auto;font-family:var(--mono);font-size:12px}
+.decide{margin-top:auto;padding:10px 11px;border-top:1px solid var(--line-2)}
+.decide .q{font-size:12.5px;font-weight:500;margin-bottom:7px}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tags span{border:1px solid var(--line-2);border-radius:13px;padding:2px 9px;font-size:11.5px;color:var(--ink-2)}
+.decide .in{margin-top:7px;height:28px;border:1px solid var(--line-2);border-radius:6px;display:flex;
+  align-items:center;padding:0 8px;color:var(--ink-3);font-size:11.5px}
+.decide .go{margin-top:7px;height:29px;border-radius:7px;background:var(--fill);color:var(--ink-3);
+  display:grid;place-items:center;font-size:12px}
+
+/* threads, used by every variant */
+.thread{padding:8px 10px;border-bottom:1px solid var(--line-2)}
+.thread.sel{background:var(--vert-soft)}
+.thread.team{background:var(--bleu-fill)}
+.thread .who{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.thread .who b{color:var(--ink);font-weight:600;font-size:12px}
+.thread .who .when{margin-left:auto;color:var(--ink-3);font-size:11px}
+.thread .txt{margin-top:3px;font-size:12.5px}
+.thread .anch{margin-top:5px;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink-3);
+  border:1px solid var(--line-2);border-radius:4px;padding:1px 6px;font-family:var(--mono)}
+.thread.team .anch{border-color:#c6d4dc;color:var(--bleu)}
+.newc{border-top:1px solid var(--line-2);padding:8px 10px;display:flex;gap:7px;align-items:flex-start}
+.newc .ta{flex:1;height:44px;border:1px solid var(--line-2);border-radius:6px;padding:5px 7px;
+  color:var(--ink-3);font-size:12px}
+.newc .send{height:28px;padding:0 10px;border-radius:6px;background:var(--hi);color:#fff;font-size:12px;
+  display:inline-flex;align-items:center;gap:6px}
+.newc .send.team{background:var(--bleu)}
+
+/* variant 2: the bottom drawer */
+.drawer{border-top:1px solid var(--line-2);display:flex;flex-direction:column;background:var(--card)}
+.drawer .dh{height:31px;display:flex;align-items:center;gap:0;padding:0 10px;border-bottom:1px solid var(--line-2)}
+.drawer .dh .t{height:31px;padding:0 11px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;
+  color:var(--ink-2);border-bottom:2px solid transparent;margin-bottom:-1px}
+.drawer .dh .t.on{color:var(--ink);font-weight:500;border-bottom-color:var(--hi)}
+.drawer .dh .r{margin-left:auto;font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.dcols{display:grid;grid-template-columns:repeat(4,1fr);min-height:0}
+.dcol{border-right:1px solid var(--line-2);min-width:0}
+.dcol:last-child{border-right:0}
+.dcol .ch{height:26px;display:flex;align-items:center;gap:6px;padding:0 9px;font-size:11.5px;color:var(--ink-2);
+  background:var(--fill-2);border-bottom:1px solid var(--line-2)}
+.dcol .ch .c{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+
+/* variant 3: the register screen */
+.reg{flex:1;display:flex;min-height:0}
+.regfilters{width:208px;border-right:1px solid var(--line-2);padding:9px 7px;display:flex;flex-direction:column;gap:3px}
+.regfilters .f{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;color:var(--ink-2);font-size:12.5px}
+.regfilters .f.on{background:var(--fill);color:var(--ink);font-weight:500}
+.regfilters .f.team.on{background:var(--bleu-fill);color:var(--bleu)}
+.regfilters .f .c{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.regtable{flex:1;min-width:0;overflow:hidden}
+.rrow{display:grid;grid-template-columns:112px 1fr 190px 128px 96px;gap:11px;align-items:center;
+  padding:9px 12px;border-bottom:1px solid var(--line-2)}
+.rrow.head{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:7px 12px}
+.rrow .thumb{height:64px;border:1px solid var(--line-2);border-radius:6px;overflow:hidden;position:relative;background:#fff}
+.rrow .thumb img{width:100%;height:100%;object-fit:cover}
+.rrow .thumb .pin{transform:translate(-50%,-50%)}
+.rrow .thumb .pin .lbl{display:none}
+.rrow .txt{font-size:12.5px}
+.rrow .meta{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.rrow .who{font-size:12px;color:var(--ink-2)}
+.state{display:inline-flex;align-items:center;gap:5px;border-radius:12px;padding:2px 9px;font-size:11px;
+  border:1px solid var(--line-2);color:var(--ink-2)}
+.state.team{background:var(--bleu-fill);border-color:#c6d4dc;color:var(--bleu)}
+.state.open{background:var(--vert-soft);border-color:#cfdc9f;color:var(--vert-ink)}
+
+/* variant 4: notes floating in the margin */
+.margin{width:276px;border-left:1px solid var(--line-2);padding:10px 9px;display:flex;flex-direction:column;
+  gap:8px;background:var(--fill-2);min-height:0;overflow:hidden}
+.ncard{border:1px solid var(--line-2);border-radius:8px;background:var(--card);padding:8px 9px;position:relative}
+.ncard.team{background:var(--bleu-fill);border-color:#c6d4dc;border-style:dashed}
+.ncard .who{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.ncard .who b{color:var(--ink);font-size:12px;font-weight:600}
+.ncard .who .when{margin-left:auto;font-size:10.5px;color:var(--ink-3)}
+.ncard .txt{margin-top:3px;font-size:12.5px}
+.ncard .anch{margin-top:5px;font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.ncard .tie{position:absolute;left:-10px;top:14px;width:9px;height:1px;background:var(--line)}
+.iconrail{width:38px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;align-items:center;
+  gap:9px;padding:9px 0;color:var(--ink-3)}
+.iconrail .i{width:24px;height:24px;border-radius:6px;display:grid;place-items:center}
+.iconrail .i.on{background:var(--fill);color:var(--ink)}
+
+/* variant 5: the pin layer in the left rail */
+.tree{padding:7px 6px;font-size:12.5px;display:flex;flex-direction:column;gap:1px}
+.tree .node{display:flex;align-items:center;gap:7px;padding:4px 7px;border-radius:5px;color:var(--ink-2)}
+.tree .node.kid{padding-left:22px}
+.tree .node.on{background:var(--fill);color:var(--ink)}
+.tree .node.team.on{background:var(--bleu-fill);color:var(--bleu)}
+.tree .node .c{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.sechead{display:flex;align-items:center;gap:7px;padding:6px 11px;font-size:10.5px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-3);border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
+  background:var(--fill-2)}
+
+.tbl{margin-top:30px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);width:100%;
+  border-collapse:separate;border-spacing:0;overflow:hidden}
+.tbl td,.tbl th{border-bottom:1px solid var(--line-2);text-align:left;padding:8px 11px;font-size:12px}
+.tbl th{color:var(--ink-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.y{color:var(--vert-ink);font-weight:600}
+.verdict{margin-top:18px;border:1px solid var(--line-2);border-radius:8px;background:var(--card);
+  padding:12px 14px;font-size:12.5px;color:var(--ink-2)}
+.verdict b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Épingles — cinq écrans entiers</h1>
+  <p class="sub">La page précédente comparait des volets. Celle-ci compare des <b>écrans complets</b>: le même projet,
+     le même niveau 5, la même unité 501 sélectionnée, et cinq endroits différents où le système de notes s'installe
+     dans l'application. Ce qui compte n'est pas la carte de commentaire — c'est ce qu'elle déplace: l'inspecteur,
+     la bande de quantités, la liste d'unités, ou la largeur des dessins. Le commutateur ci-dessous relit les cinq
+     écrans comme un invité: <b>les notes d'atelier ne sont pas grisées, elles ne sont pas rendues.</b></p>
+
+  <div class="bar">
+    <span class="lab">La page est lue comme</span>
+    <span class="seg" id="as">
+      <button data-readas="equipe" class="on">L'atelier</button>
+      <button data-readas="invite">L'invité (lien partagé)</button>
+    </span>
+    <span class="r" id="tally"></span>
+  </div>
+
+  <div class="ways" id="ways"></div>
+
+  <table class="tbl" id="cost"></table>
+  <div class="verdict" id="verdict"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+const icon = (n, cls = "") => `<svg class="lu ${cls}"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["folder", "layers", "hash", "calendar", "share-2", "file", "ruler", "trees", "box", "grid-3x3",
+    "message-square", "map-pin", "lock", "users", "eye", "pencil", "external-link", "chevron-up", "chevron-down",
+    "send", "circle", "maximize-2", "minimize-2", "plus", "minus", "image", "git-compare", "clock", "filter", "pin",
+    "sliders-horizontal", "check"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* ------------------------------------------------------------------ state
+   One set of notes, read five times. x and y are 0–1 of the drawing they sit
+   on, and "surface" says which drawing that is — the unit plan, the
+   surveyor's, the landscape sheet, or the model. */
+const PINS = [
+  { id: 1, scope: "partage", surface: "plan", x: .33, y: .46, zone: "unité 507", who: "Entrepreneur général",
+    when: "hier 16:20", txt: "Le dégagement devant la porte du 507 fait 860 mm, il en faut 900.", state: "ouvert" },
+  { id: 2, scope: "partage", surface: "plan", x: .62, y: .30, zone: "unité 510", who: "Chargée de projet",
+    when: "lun. 09:05", txt: "Le balcon du 510 dépasse la ligne d'alignement de 0,4 m.", state: "ouvert" },
+  { id: 3, scope: "partage", surface: "model", x: .58, y: .42, zone: "niv. 6 · façade sud", who: "Arpenteur",
+    when: "lun. 11:40", txt: "La hauteur au faîte mesurée est 24,1 m, le plan dit 23,8 m.", state: "ouvert" },
+  { id: 4, scope: "equipe", surface: "plan", x: .46, y: .62, zone: "corridor commun", who: "Vous",
+    when: "mar. 08:40", txt: "Rappel: le corridor est encore dessiné avec l'ancienne sortie. À reprendre avant R05.", state: "atelier" },
+  { id: 5, scope: "equipe", surface: "model", x: .35, y: .66, zone: "niv. 5 · façade ouest", who: "Guy",
+    when: "mar. 09:12", txt: "On avait parlé de verre plein pour les garde-corps du 5e — la maquette montre des barreaux.", state: "atelier" },
+  { id: 6, scope: "equipe", surface: "pay", x: .50, y: .52, zone: "cour intérieure", who: "Vous",
+    when: "mar. 14:02", txt: "Vérifier avec le paysagiste: la cour a changé d'entrée depuis la version de septembre.", state: "atelier" },
+];
+const SURF = {
+  plan:  { short: "Plan 2D", long: "Plan d'unités · niveau 5", glyph: "file", img: "assets/plan-niveau-5.jpg" },
+  arp:   { short: "Arpenteur", long: "Plan d'arpenteur", glyph: "ruler", img: "assets/arp-site.png" },
+  pay:   { short: "Paysage", long: "Plan d'aménagement paysager", glyph: "trees", img: "assets/paysage.png" },
+  model: { short: "Maquette", long: "Maquette 3D", glyph: "box", img: "assets/maquette-still.jpg" },
+};
+let AS = "equipe";
+const vis = () => PINS.filter((p) => AS === "equipe" || p.scope === "partage");
+const on = (s) => vis().filter((p) => p.surface === s);
+const teamCount = () => PINS.filter((p) => p.scope === "equipe").length;
+const anch = (p) => `${SURF[p.surface].short.toLowerCase()} · ${p.zone}`;
+
+/* --------------------------------------------------------- shared pieces */
+const pin = (p, i, sel) => `<div class="pin ${p.scope === "equipe" ? "team" : ""} ${sel ? "sel" : ""}"
+    style="left:${(p.x * 100).toFixed(1)}%;top:${(p.y * 100).toFixed(1)}%">
+  <div class="num"><span>${p.scope === "equipe" ? icon("lock") : i}</span></div>
+  <div class="lbl">${p.txt.length > 26 ? `${p.txt.slice(0, 26)}…` : p.txt}</div></div>`;
+
+const pinsOn = (s) => on(s).map((p, i) => pin(p, i + 1, p.id === 1)).join("");
+
+const thread = (p) => `<div class="thread ${p.scope === "equipe" ? "team" : ""} ${p.id === 1 ? "sel" : ""}">
+  <div class="who">${icon(p.scope === "equipe" ? "lock" : "circle")}<b>${p.who}</b><span class="when">${p.when}</span></div>
+  <div class="txt">${p.txt}</div>
+  <div class="anch">${icon(SURF[p.surface].glyph)}${anch(p)}</div></div>`;
+
+const composer = (team) => `<div class="newc">
+  <div class="ta">${team ? "Note d'atelier — l'invité ne la verra pas" : "Écrire à toute l'équipe du projet…"}</div>
+  <div class="send ${team ? "team" : ""}">${icon(team ? "lock" : "send")}${team ? "Garder" : "Poser"}</div></div>`;
+
+const topBar = (screen, badge) => `<div class="top">
+  <div class="crumb">${icon("folder")}Tous les projets</div>
+  <div class="crumb" style="color:var(--ink-3)">›</div>
+  <div class="crumb"><b>Le Baldwin III</b></div>
+  <nav class="nav">
+    <a class="${screen === "Unités" ? "on" : ""}">${icon("layers")}Unités</a>
+    <a class="${screen === "Codes" ? "on" : ""}">${icon("hash")}Codes</a>
+    <a class="${screen === "Échéancier" ? "on" : ""}">${icon("calendar")}Échéancier</a>
+    ${badge ? `<a class="${screen === "Notes" ? "on" : ""}">${icon("message-square")}Notes<span class="b">${badge}</span></a>` : ""}
+  </nav>
+  <div class="r">
+    ${AS === "invite"
+      ? `<span class="chipbtn ghost">${icon("eye")}Lecture invité</span>`
+      : `<span class="chipbtn team">${icon("lock")}${teamCount()} notes d'atelier</span>`}
+    <span class="chipbtn">${icon("share-2")}Partager</span>
+  </div></div>`;
+
+const levels = () => `<div class="levels">
+  ${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<span class="${n === 5 ? "on" : ""}">Niveau ${n}</span>`).join("")}
+  <span>Tous les niveaux</span></div>`;
+
+const phead = (right = "") => `<div class="phead">
+  <div><h2>Plans — niveau 5</h2><div class="m">15 unités · 4 avec un croisement ouvert</div></div>
+  <div class="r">${right}<span class="chipbtn">${icon("grid-3x3")}Exporter</span></div></div>`;
+
+const unitList = (dots = true) => `<div class="left">
+  <div class="h">${icon("layers")}Unités</div>
+  <div class="ulist">
+    ${[["501", "5½", "1 275"], ["502", "5½", "1 496"], ["503", "3½", "760"], ["504", "4½", "1 152"]]
+      .map(([n, t, a], i) => {
+        const ps = dots ? vis().filter((p) => p.zone.includes(n)) : [];
+        return `<div class="ucard ${i === 0 ? "on" : ""}">
+          <div class="t"><b>${n}</b><span style="color:var(--ink-2);font-size:11.5px">${t}</span>
+            <span class="m">${a} pi²</span></div>
+          <div class="img"><img src="assets/unite-507.jpg" alt=""></div>
+          ${ps.length ? `<div class="dots">${ps.map((p) => `<span class="dot ${p.scope === "equipe" ? "team" : ""}"></span>`).join("")}</div>` : ""}
+        </div>`;
+      }).join("")}
+  </div></div>`;
+
+const zcol = (pct) => `<div class="zcol">${icon("maximize-2")}${icon("plus")}
+  <div class="track"><div class="knob" style="top:${pct}%"></div></div>${icon("minus")}
+  <span>${pct < 50 ? "100%" : "62%"}</span>${icon("minimize-2")}</div>`;
+
+const pane = (surface, { pins = true, tall = true } = {}) => {
+  const s = SURF[surface];
+  // The 2D pane is three drawings behind one header in the real screen, and
+  // the pin count per sheet is the only new thing the chips have to carry.
+  const chips = surface === "plan"
+    ? `<span style="display:inline-flex;gap:4px;margin-left:6px">
+        <span class="chipbtn" style="height:22px;font-size:11.5px">Plan seul</span>
+        <span class="chipbtn ghost" style="height:22px;font-size:11.5px">${icon("ruler")}Arpenteur${on("arp").length ? ` ${on("arp").length}` : ""}</span>
+        <span class="chipbtn ghost" style="height:22px;font-size:11.5px">${icon("trees")}Paysage${on("pay").length ? ` ${on("pay").length}` : ""}</span>
+      </span>` : "";
+  return `<div class="pane">
+    <div class="ph">${icon(s.glyph)}${s.short}${chips}
+      <div class="r"><span class="chipbtn ghost">${icon("external-link")}Ouvrir dans ${surface === "model" ? "SketchUp" : "AutoCAD"}</span></div></div>
+    <div class="pf">${icon("file")}${surface === "model" ? "BAL3_Maquette_R07 · 22 oct" : "A-209_PLAN_NIVEAU_5 · R04 · 24 oct"}
+      <span style="margin-left:auto">${icon("pencil")}</span></div>
+    <div class="drawrow">
+      <div class="draw ${surface === "model" ? "fill" : ""}">
+        <img src="${s.img}" alt="">
+        ${pins ? pinsOn(surface) : ""}</div>
+      ${zcol(surface === "model" ? 55 : 35)}
+    </div>
+    ${tall ? `<div class="pf" style="border-top:1px solid var(--line-2)">${surface === "model"
+      ? "62% · orbite libre" : "100% · feuille entière"}</div>` : ""}
+  </div>`;
+};
+
+const inspector = () => `<div class="right">
+  <div class="h">${icon("circle")}Unité 501<span class="r">5½ · 1 275 pi²</span></div>
+  <div class="insp">
+    <div class="grid">${[0, 1, 2, 3].map(() => `<div class="g"></div>`).join("")}</div>
+    <div>
+      <div class="kv"><span>Le plan dit</span><span>1 800 × 1 500</span></div>
+      <div class="kv"><span>La maquette dit</span><span>1 560 × 1 500</span></div>
+      <div class="kv"><span>Écart</span><span>240 mm</span></div>
+      <div class="kv"><span>Apparu dans</span><span>R04 · 24 oct</span></div>
+    </div>
+  </div>
+  <div class="decide">
+    <div class="q">Pourquoi ce changement?</div>
+    <div class="tags"><span>coût client</span><span>structure</span><span>code</span><span>ville</span><span>erreur de dessin</span></div>
+    <div class="in">une phrase pour la personne suivante</div>
+    <div class="go">Enregistrer la décision</div>
+  </div></div>`;
+
+const footStrip = () => `<div class="foot">Ouvertures de la façade sud <b>68,5 m² → 74,2 m²</b>
+  <span style="color:var(--ink-3)">+5,7 m²</span>
+  <span class="r"><span class="chipbtn ghost">Lire l'article 3.2.3.1</span></span></div>`;
+
+/* --------------------------------------------------------------- écran 1
+   The inspector keeps its place; the notes take a tab inside it. Nothing
+   else on the screen moves, which is the cheapest change available. */
+function screenPanel() {
+  const list = vis();
+  const team = AS === "equipe";
+  return `<div class="screen">${topBar("Unités")}${levels()}${phead()}
+    <div class="body">
+      ${unitList()}
+      <div class="mid">
+        <div class="panes">${pane("plan")}${pane("model")}</div>
+        <div class="strip">${icon("grid-3x3")}Quantités <span style="font-family:var(--mono);font-size:11.5px">26 × 3½ · 49 × 4½ · 22 × 5½</span>
+          <span class="r">compté à partir des dessins</span></div>
+      </div>
+      <div class="right">
+        <div class="rtabs">
+          <button>${icon("circle")}Unité 501</button>
+          <button class="on">${icon("message-square")}Épingles <b>${list.filter((p) => p.scope === "partage").length}</b></button>
+          ${team ? `<button class="team">${icon("lock")}Atelier <b>${teamCount()}</b></button>` : ""}
+        </div>
+        <div class="scroll">${list.filter((p) => p.scope === "partage").map(thread).join("")}</div>
+        ${composer(false)}
+      </div>
+    </div>${footStrip()}</div>`;
+}
+
+/* --------------------------------------------------------------- écran 2
+   The quantity strip becomes a drawer. The drawings lose 150 px of height
+   and gain a place where every open question is readable at once. */
+function screenDrawer() {
+  return `<div class="screen">${topBar("Unités")}${levels()}${phead()}
+    <div class="body">
+      ${unitList()}
+      <div class="mid">
+        <div class="panes" style="flex:1 1 auto">${pane("plan", { tall: false })}${pane("model", { tall: false })}</div>
+        <div class="drawer" style="height:214px">
+          <div class="dh">
+            <span class="t">${icon("grid-3x3")}Quantités</span>
+            <span class="t on">${icon("message-square")}Épingles <b style="margin-left:4px">${vis().length}</b></span>
+            <span class="r">${AS === "equipe"
+              ? `${icon("lock")}dont ${teamCount()} d'atelier` : `${icon("users")}lien partagé`}
+              ${icon("chevron-down")}</span>
+          </div>
+          <div class="dcols">
+            ${Object.entries(SURF).map(([k, s]) => `<div class="dcol">
+              <div class="ch">${icon(s.glyph)}${s.long}<span class="c">${on(k).length}</span></div>
+              ${on(k).map(thread).join("") || `<div style="padding:9px 10px;color:var(--ink-3);font-size:12px">—</div>`}
+            </div>`).join("")}
+          </div>
+        </div>
+      </div>
+      ${inspector()}
+    </div>${footStrip()}</div>`;
+}
+
+/* --------------------------------------------------------------- écran 3
+   Notes become their own screen in the top bar: a register, with the piece
+   of drawing each note points at. Nothing is lost, but nothing is seen in
+   context either — this is the view for a Monday morning, not for drawing. */
+function screenRegister() {
+  const list = vis();
+  return `<div class="screen">${topBar("Notes", list.length)}
+    <div class="phead"><div><h2>Notes — Le Baldwin III</h2>
+      <div class="m">${list.filter((p) => p.scope === "partage").length} partagées · ${AS === "equipe" ? `${teamCount()} d'atelier` : "lien partagé"} · toutes surfaces</div></div>
+      <div class="r"><span class="chipbtn">${icon("filter")}Filtrer</span><span class="chipbtn dark">${icon("send")}Nouvelle note</span></div></div>
+    <div class="reg">
+      <div class="regfilters">
+        <div class="f on">${icon("pin")}Toutes<span class="c">${list.length}</span></div>
+        ${Object.entries(SURF).map(([k, s]) => `<div class="f">${icon(s.glyph)}${s.long}<span class="c">${on(k).length}</span></div>`).join("")}
+        ${AS === "equipe" ? `<div class="f team on" style="margin-top:7px">${icon("lock")}Notes d'atelier<span class="c">${teamCount()}</span></div>` : ""}
+        <div class="f" style="margin-top:7px">${icon("users")}Par personne</div>
+        <div class="f">${icon("clock")}Par semaine</div>
+      </div>
+      <div class="regtable">
+        <div class="rrow head"><span>Où</span><span>La note</span><span>Ancrage</span><span>Qui</span><span>État</span></div>
+        ${list.map((p) => `<div class="rrow">
+          <div class="thumb"><img src="${SURF[p.surface].img}" alt="">
+            <div class="pin ${p.scope === "equipe" ? "team" : ""}" style="left:${(p.x * 100).toFixed(0)}%;top:${(p.y * 100).toFixed(0)}%">
+              <div class="num"><span>${p.scope === "equipe" ? icon("lock") : ""}</span></div></div></div>
+          <div class="txt">${p.txt}</div>
+          <div class="meta">${anch(p)}</div>
+          <div class="who">${p.who}<br><span style="color:var(--ink-3);font-size:11px">${p.when}</span></div>
+          <div><span class="state ${p.scope === "equipe" ? "team" : "open"}">${p.scope === "equipe" ? icon("lock") : icon("circle")}${p.state}</span></div>
+        </div>`).join("")}
+      </div>
+    </div>${footStrip()}</div>`;
+}
+
+/* --------------------------------------------------------------- écran 4
+   The inspector is folded to a rail of icons and the notes stand in the
+   margin, each tied to its pin by a line. The drawings keep their width. */
+function screenMargin() {
+  const list = vis();
+  return `<div class="screen">${topBar("Unités")}${levels()}${phead()}
+    <div class="body">
+      ${unitList()}
+      <div class="mid">
+        <div class="panes">${pane("plan")}${pane("model")}</div>
+        <div class="strip">${icon("grid-3x3")}Quantités <span style="font-family:var(--mono);font-size:11.5px">26 × 3½ · 49 × 4½ · 22 × 5½</span>
+          <span class="r">compté à partir des dessins</span></div>
+      </div>
+      <div class="margin">
+        <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2)">
+          ${icon("message-square")}Dans la marge<span style="margin-left:auto;color:var(--ink-3);font-size:11px">${list.length}</span></div>
+        ${list.slice(0, 5).map((p) => `<div class="ncard ${p.scope === "equipe" ? "team" : ""}"><span class="tie"></span>
+          <div class="who">${icon(p.scope === "equipe" ? "lock" : "circle")}<b>${p.who}</b><span class="when">${p.when}</span></div>
+          <div class="txt">${p.txt}</div>
+          <div class="anch">${anch(p)}</div></div>`).join("")}
+      </div>
+      <div class="iconrail">
+        <div class="i on">${icon("message-square")}</div>
+        <div class="i">${icon("image")}</div>
+        <div class="i">${icon("git-compare")}</div>
+        <div class="i">${icon("clock")}</div>
+        <div class="i" style="margin-top:auto">${icon("sliders-horizontal")}</div>
+      </div>
+    </div>${footStrip()}</div>`;
+}
+
+/* --------------------------------------------------------------- écran 5
+   The left rail carries both: the units, and under them the pins as a layer
+   tree. The inspector stays whole, the drawings keep their size, and the
+   list of units gets shorter — which is the price. */
+function screenRail() {
+  const list = vis();
+  return `<div class="screen">${topBar("Unités")}${levels()}${phead()}
+    <div class="body">
+      <div class="left">
+        <div class="h">${icon("layers")}Unités<span style="margin-left:auto;color:var(--ink-3);font-size:11px">15</span></div>
+        <div class="ulist" style="flex:0 0 auto">
+          ${[["501", "5½", "1 275"], ["502", "5½", "1 496"]].map(([n, t, a], i) => {
+            const ps = vis().filter((p) => p.zone.includes(n));
+            return `<div class="ucard ${i === 0 ? "on" : ""}">
+              <div class="t"><b>${n}</b><span style="color:var(--ink-2);font-size:11.5px">${t}</span>
+                <span class="m">${a} pi²</span></div>
+              <div class="img"><img src="assets/unite-507.jpg" alt=""></div>
+              ${ps.length ? `<div class="dots">${ps.map((p) => `<span class="dot ${p.scope === "equipe" ? "team" : ""}"></span>`).join("")}</div>` : ""}
+            </div>`;
+          }).join("")}
+        </div>
+        <div class="sechead">${icon("pin")}Épingles<span style="margin-left:auto;font-family:var(--mono)">${list.length}</span></div>
+        <div class="tree">
+          <div class="node on">${icon("pin")}Toutes<span class="c">${list.length}</span></div>
+          ${Object.entries(SURF).map(([k, s]) => `<div class="node kid">${icon(s.glyph)}${s.short}<span class="c">${on(k).length}</span></div>`).join("")}
+          ${AS === "equipe" ? `<div class="node team on" style="margin-top:5px">${icon("lock")}Notes d'atelier<span class="c">${teamCount()}</span></div>` : ""}
+          ${AS === "equipe" ? `<div class="node kid">${icon("users")}Partagées<span class="c">${list.filter((p) => p.scope === "partage").length}</span></div>` : ""}
+        </div>
+      </div>
+      <div class="mid">
+        <div class="panes">${pane("plan")}${pane("model")}</div>
+        <div class="strip">${icon("message-square")}
+          <span style="color:var(--ink)">${list[0].txt}</span>
+          <span class="r">${anch(list[0])} · ${list[0].who}</span></div>
+      </div>
+      ${inspector()}
+    </div>${footStrip()}</div>`;
+}
+
+const WAYS = [
+  { name: "Les épingles prennent un onglet de l'inspecteur",
+    note: "Rien ne bouge: l'inspecteur garde sa largeur et gagne deux onglets, « Épingles » et « Atelier ». Le second n'existe pas dans la vue invité. <b>Coût:</b> on ne peut pas lire une note et la fiche de l'unité en même temps — l'onglet choisit pour vous.",
+    html: screenPanel },
+  { name: "La bande de quantités devient un tiroir à quatre colonnes",
+    note: "Le tiroir du bas passe de 30 à 214 px et range les notes par dessin: plan d'unités, arpenteur, paysage, maquette. On voit d'un coup ce qui est ouvert sur chaque surface, sans cliquer. <b>Coût:</b> les dessins perdent 180 px de hauteur, ce qui est beaucoup sur un portable.",
+    html: screenDrawer },
+  { name: "Un écran « Notes » dans la barre du haut",
+    note: "Les notes deviennent un registre à part, avec une vignette du dessin et le point visible dessus. C'est la vue du lundi matin: tout ce qui est ouvert, triable par surface, par personne, par semaine. <b>Coût:</b> on quitte les dessins pour lire les notes, donc ce ne peut pas être le seul endroit où elles vivent.",
+    html: screenRegister },
+  { name: "Les notes dans la marge, l'inspecteur replié",
+    note: "L'inspecteur se replie en rail d'icônes et les cartes se rangent dans la marge, chacune reliée à son épingle par un trait. Les dessins gardent leur largeur. <b>Coût:</b> au-delà de cinq ou six notes la marge devient une file d'attente, et l'inspecteur est à un clic de distance en permanence.",
+    html: screenMargin },
+  { name: "Un calque d'épingles sous la liste d'unités",
+    note: "Le rail de gauche porte les deux: les unités en haut, les épingles en calques dessous, les notes d'atelier dans leur propre calque. La bande du bas affiche la note choisie. <b>Coût:</b> la liste d'unités tombe à deux cartes visibles — c'est la colonne qu'on consulte le plus souvent.",
+    html: screenRail },
+];
+
+const COST = [
+  ["1 · Onglet de l'inspecteur", "l'inspecteur", "rien", "oui, l'onglet disparaît", "faible"],
+  ["2 · Tiroir du bas", "la bande de quantités", "180 px de dessin", "oui, la colonne disparaît", "moyen"],
+  ["3 · Écran Notes", "un écran de plus", "rien", "oui, le filtre disparaît", "moyen"],
+  ["4 · Marge", "l'inspecteur, replié", "l'inspecteur", "oui, les cartes disparaissent", "élevé"],
+  ["5 · Calque du rail", "la liste d'unités", "la moitié de la liste", "oui, le calque disparaît", "faible"],
+];
+
+function render() {
+  document.getElementById("tally").textContent = AS === "equipe"
+    ? `${vis().length} notes lisibles · dont ${teamCount()} d'atelier`
+    : `${vis().length} épingles partagées · les notes d'atelier ne sont pas envoyées`;
+  document.getElementById("ways").innerHTML = WAYS.map((w, i) => `<section class="way">
+    <div class="cap"><span class="n">Écran ${i + 1}</span><b>${w.name}</b></div>
+    <div class="note">${w.note}</div>${w.html()}</section>`).join("");
+  document.getElementById("cost").innerHTML = `<thead><tr>
+      <th>Écran</th><th>Le dépôt occupe</th><th>Ce qu'il enlève au dessin</th><th>Séparation invité</th><th>Coût de construction</th>
+    </tr></thead><tbody>${COST.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>
+      <td class="${r[3].startsWith("oui") ? "y" : ""}">${r[3]}</td><td>${r[4]}</td></tr>`).join("")}</tbody>`;
+  document.getElementById("verdict").innerHTML = `<b>Ce que je retiendrais:</b> l'écran 1 pour écrire et répondre
+    au fil du travail, l'écran 3 pour faire le tour. Les deux lisent le même dépôt, et aucun des deux ne coûte un
+    pixel de dessin. L'écran 2 est le plus lisible des cinq mais il paie en hauteur de plan, ce qui est exactement
+    la chose dont l'atelier manque. L'écran 4 est le plus joli et le pire à six notes. L'écran 5 sacrifie la
+    colonne la plus consultée de l'application pour un gain d'organisation que l'écran 3 donne gratuitement.
+    <b>Dans tous les cas:</b> une note d'atelier n'est pas rendue en vue invité — ni grisée, ni comptée.`;
+}
+
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-readas]");
+  if (!b) return;
+  AS = b.dataset.readas;
+  document.querySelectorAll("#as button").forEach((x) => x.classList.toggle("on", x === b));
+  render();
+});
+
+sprite();
+render();
+</script>
+</body>
+</html>
