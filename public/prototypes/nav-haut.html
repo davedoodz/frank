@@ -99,7 +99,6 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
   padding:5px 9px;border-radius:6px;cursor:pointer;white-space:nowrap}
 .lvl:hover{background:var(--wash);color:var(--ink)}
 .lvl[aria-current="true"]{background:var(--vert);color:var(--vert-ink);font-weight:600}
-.lvl.all{color:var(--ink-3)}
 /* second row, the one that depends on what the first row chose */
 .ctxrow{display:flex;align-items:center;gap:6px;height:34px;padding:0 10px;
   border-bottom:1px solid var(--line-2);background:var(--fill-2)}
@@ -176,8 +175,11 @@ const SCREENS = [
   ["Suivi", "timer"],
   ["Fichiers", "hard-drive"],
 ];
-const LEVELS = [8, 7, 6, 5, 4, 3, 2, 1];
-const VIEWS = [...LEVELS.map((l) => `Niveau ${l}`), "Tous les niveaux"];
+/* Ground first, roof last: the strip reads the way the building is built,
+   left to right. There is no "all levels" view — a level strip that holds
+   a non-level is a strip with two kinds of thing in it. */
+const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8];
+const VIEWS = LEVELS.map((l) => `Niveau ${l}`);
 const TOOLS = [
   ["Ouvrir dans AutoCAD", "external-link"],
   ["Ouvrir dans SketchUp", "box"],
@@ -218,7 +220,7 @@ const filterBtn = (cls) => FILTERS.map(([n, g]) =>
   `<button class="big ${cls}">${icon(g)}<span>${n}</span></button>`).join("");
 const group = (name, items) => `<div class="grp"><div class="items">${items}</div><div class="gn">${name}</div></div>`;
 const levelStrip = () => `<div class="lvls">${VIEWS.map((v) =>
-  `<button class="lvl ${v.startsWith("Tous") ? "all" : ""}" data-view="${v}"${on(S.view === v)}>${v}</button>`).join("")}</div>`;
+  `<button class="lvl" data-view="${v}"${on(S.view === v)}>${v}</button>`).join("")}</div>`;
 const crumb = () => `<span class="crumb">${icon("folder")} Tous les projets</span>
   ${icon("chevron-right")}<span class="proj">Le Baldwin III</span>`;
 const qat = () => `<div class="qat">
@@ -241,12 +243,12 @@ const OPTIONS = [
     nav: () => qat() + ribbonTabs() + `<div class="band">
       ${group("Écrans", screenBtn(""))}
       ${group("Niveau", VIEWS.slice(0, 5).map((v) =>
-        `<button class="big" data-view="${v}"${on(S.view === v)}><span style="font-size:15px;font-weight:600">${v.replace("Niveau ", "")}</span><span>${v.startsWith("Tous") ? "tous" : "niveau"}</span></button>`).join(""))}
+        `<button class="big" data-view="${v}"${on(S.view === v)}><span style="font-size:15px;font-weight:600">${v.replace("Niveau ", "")}</span><span>niveau</span></button>`).join(""))}
       ${group("Dessin", toolBtn(""))}
       ${group("Calques", filterBtn(""))}</div>` },
 
   { name: "Ruban compact",
-    note: "Mêmes groupes, boutons couchés et pas de barre d'accès rapide : le ruban perd un tiers de sa hauteur et garde les neuf niveaux visibles, sur leur propre rang.",
+    note: "Mêmes groupes, boutons couchés et pas de barre d'accès rapide : le ruban perd un tiers de sa hauteur et garde les huit niveaux visibles, sur leur propre rang.",
     nav: () => ribbonTabs("", `<span class="proj" style="font-weight:600;padding:0 10px 4px 2px">Le Baldwin III</span>`) + `<div class="band">
       ${group("Écrans", screenBtn("sm"))}
       ${group("Dessin", toolBtn("sm"))}
@@ -257,7 +259,7 @@ const OPTIONS = [
     note: "Rang 1 : le projet et les écrans. Rang 2 : ce que l'écran courant demande. Pas de groupes, pas de captions — la dépendance se lit dans l'ordre vertical.",
     nav: () => `<div class="bar">${crumb()}<span class="sep"></span>
       <div style="display:flex;gap:2px">${screenBtn("sm")}</div></div>
-      <div class="ctxrow"><span class="gn">Niveau</span>${levelStrip()}</div>` },
+      <div class="ctxrow">${levelStrip()}</div>` },
 
   { name: "Barre unique",
     note: "Tout sur une ligne de 44 px : projet, écrans, niveaux. Les niveaux défilent seuls quand la fenêtre se resserre, le nom du projet ne bouge jamais.",
@@ -293,7 +295,7 @@ const OPTIONS = [
    show what the navigation leaves for the drawing, nothing more. */
 const stub = () => `<div class="body">
   <div class="title"><h2>Plans — ${S.view.toLowerCase()}</h2>
-    <p>${S.view.startsWith("Tous") ? "87 unités · 5 croisements ouverts" : "14 unités · 4 avec un croisement ouvert"}</p></div>
+    <p>14 unités · 4 avec un croisement ouvert</p></div>
   <div class="work">
     <div class="pane"><div class="ph">${icon("list")}Unités</div>
       <div class="rows">${["501 · 3½ · 707 pi²", "502 · 3½ · 1 croisement", "503 · 3½ · 753 pi²", "504 · 3½+bureau"]
@@ -323,7 +325,7 @@ function render() {
       <th>Option</th><th>Navigation</th><th>Hauteur prise</th><th>Clics pour changer de niveau</th><th>Niveaux visibles d'un coup</th></tr></thead>
       <tbody>${rows.map(([n, name, h, c]) => `<tr><td class="n">${n}</td><td>${name}</td>
         <td class="n">${h} px</td><td class="n">${c}</td>
-        <td class="n">${name === "Barre + menu de niveaux" ? "0" : name === "Ruban complet" ? "5" : "9"}</td></tr>`).join("")}</tbody>`;
+        <td class="n">${name === "Barre + menu de niveaux" ? "0" : name === "Ruban complet" ? "5" : "8"}</td></tr>`).join("")}</tbody>`;
   });
 }
 
