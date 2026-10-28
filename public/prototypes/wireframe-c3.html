@@ -451,12 +451,16 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
   background-size:contain;background-position:center;pointer-events:none;z-index:2}
 [data-fi="high"] .plan[data-img] .lay{display:block}
-/* Both consultants' sheets are drawn the other way round from the floor
-   plan: north is at the bottom on them and at the top on A-209. The files
-   stay as they were extracted; the half turn happens here, and the box each
-   one is placed by is measured in this displayed orientation. */
+/* The surveyor's sheet is drawn the other way round from the floor plan:
+   north is at the bottom on it and at the top on A-209, so it takes a half
+   turn here. The landscaping sheet is already the same way up as A-209 and
+   takes none — turning it put its courtyard where the building is. The
+   files stay as they were extracted; the box each one is placed by is
+   measured in the orientation it is displayed in. */
 .plan .lay[data-lay="arp"]{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
-.plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png);transform:rotate(180deg)}
+.plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png)}
+/* The vector sheet fills the same box as the picture it replaces. */
+.plan .lay canvas{display:block;width:100%;height:100%}
 /* The three layer chips sit in the pane header, tight, so the header still
    reads as one line with the host button at its end. */
 .laychips{display:flex;gap:4px;margin-right:6px}
@@ -502,6 +506,24 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    is the only thing that has to stand out. */
 .mini canvas[data-mini3d]{display:block;width:100%;height:84px;background:var(--fill-2)}
 .mini[data-mini="model"] .mi{cursor:default}
+/* North, top right of the drawing: a ring, a needle, a letter. Nothing but
+   line work, so it reads over a white sheet and over a grey render alike. */
+.north{position:absolute;right:50px;top:10px;z-index:5;width:34px;height:50px;
+  pointer-events:none;overflow:visible}
+.north circle,.north polygon{fill:none;stroke:var(--ink);stroke-width:1.7}
+.north line{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
+/* Level markers lie over the model like the annotation on a section: a thin
+   rule at the top of the slab and the level's name at the end of it. They
+   are drawn in pixel coordinates by the viewer, which is the only thing
+   that knows where the camera is. */
+.lvls{position:absolute;inset:0;z-index:4;pointer-events:none}
+.lvls line{stroke:var(--ink-2);stroke-width:1;stroke-dasharray:3 3}
+.lvls text{fill:var(--ink-2);font-size:10px;font-family:var(--mono)}
+.lvls .on line{stroke:#5d6c0a;stroke-dasharray:none;stroke-width:1.4}
+.lvls .on text{fill:#5d6c0a;font-weight:500}
+[data-fi="low"] .lvls{display:none}
+.north text{fill:var(--ink);font-size:17px;font-weight:500;text-anchor:middle}
+[data-fi="low"] .north{display:none}
 /* The three axes as the camera sees them, in the corner the drawing never
    uses. Red X, green Y, blue Z — the convention every host application the
    file passes through already draws. */
@@ -1062,9 +1084,16 @@ const OVERLAY_SHEETS = {
   /* The surveyor's box, measured on the file as [.159,.246,.818,.814], read
      back through the half turn: a 180° rotation about the centre sends
      [x0,y0,x1,y1] to [1-x1,1-y1,1-x0,1-y0], so this is where the teal
-     implantation outline actually lands once the sheet is turned. */
-  arp: { box: [.182, .186, .841, .754], ratio: 1650 / 1560 },
-  pay: { box: [.138, .224, .808, .796], ratio: 835 / 800 },
+     implantation outline actually lands once the sheet is turned.
+     Each one carries a vector sheet as well as the picture: the picture is
+     there the instant the layer is switched on, the vector lands behind it
+     a moment later and holds its lines at any zoom. Both are the same crop
+     of the same page, so one can replace the other without moving. */
+  arp: { box: [.182, .186, .841, .754], ratio: 1650 / 1560, pdf: "assets/arp-site.pdf" },
+  /* The landscaping box read back the same way, in the other direction: it
+     was measured while the sheet was being turned, so dropping the turn
+     mirrors it to [.192,.204,.862,.776]. */
+  pay: { box: [.192, .204, .862, .776], ratio: 835 / 800, pdf: "assets/paysage.pdf" },
 };
 /* The floor plan's own building, and the plan's pixel ratio — both
    recomputed for the new consistent crop (plan-niveau-N.jpg, 2000×1675):
@@ -1093,8 +1122,11 @@ function sheetStyle(key) {
     + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;opacity:${L.opacity / 100}`;
 }
 
+/* The canvas sits on top of the picture inside the same box, so the two are
+   registered by construction: a PDF page paints only its ink, and what shows
+   through until it lands is the picture underneath. */
 const layersHTML = () => ["arp", "pay"].filter((k) => V.lay[k].on)
-  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"></div>`).join("");
+  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"><canvas data-laypdf="${k}"></canvas></div>`).join("");
 
 /* The plan is read in black and white. Colour only arrives when a typology
    is asked for, and then only on the units that answer. */
@@ -1668,12 +1700,13 @@ function contentHTML() {
         <span class="zread hi" ${side === "plan" ? "data-zread" : "data-mread"}>${side === "plan" ? V.zoom : V.mzoom}%</span>
         <span class="zb" ${close(side)}>${icon("minimize")}</span>
       </div>`;
-      /* The corner view: the drawing whole, small, with the rectangle of
-         what the pane is showing. On the plan it is the sheet as a picture
-         and the rectangle is dragged to move it. On the model it is the
-         model itself, rendered a second time from a fixed wide camera, with
-         a marker for where the live camera stands — a picture would go stale
-         the moment the building is orbited. */
+      /* The corner view: the drawing whole, small. On the plan it is the
+         sheet as a picture, with the rectangle of what is on screen, dragged
+         to move it. On the model it is the model itself seen from straight
+         above — the roof read in the same orientation as the sheet beside
+         it — with a marker for the side the live camera stands on. The
+         percentage is already on the column an inch away, so the model's
+         view carries no caption at all. */
       const mini = (side) => (side === "plan"
         ? `<div class="mini hi" data-mini="plan">
         <span class="mi" data-mi>
@@ -1682,10 +1715,29 @@ function contentHTML() {
         </span>
         <span class="mcap"><span data-mpct>${V.zoom}%</span></span>
       </div>`
-        : `<div class="mini hi" data-mini="model">
+        : `<div class="mini hi nocap" data-mini="model">
         <span class="mi" data-mi><canvas data-mini3d></canvas></span>
-        <span class="mcap"><span data-mpct>${V.mzoom}%</span></span>
       </div>`);
+      /* North, top right of each pane. On the sheet it is a fixed mark: the
+         drawing does not turn. On the model it is the same mark laid flat on
+         the ground and seen from wherever the camera is, so the ring
+         flattens and the needle swings as the building is orbited. */
+      const north = (side) => (side === "plan"
+        ? `<svg class="north hi" data-north viewBox="-22 -32 44 64" aria-label="Nord">
+        <text x="0" y="-21">N</text>
+        <circle cx="0" cy="6" r="14"></circle>
+        <line x1="0" y1="6" x2="0" y2="-7"></line>
+      </svg>`
+        : `<svg class="north hi" data-north3d viewBox="-22 -32 44 64" aria-label="Nord">
+        <polygon data-nring points=""></polygon>
+        <line data-nneedle x1="0" y1="0" x2="0" y2="-14"></line>
+        <text data-nlabel x="0" y="-21">N</text>
+      </svg>`);
+      /* Where each floor sits, said on the model itself: a line at the top
+         of the slab, run out to the edge of the pane, and the level's name
+         at the end of it — the way a section is annotated. The SVG is empty
+         here; the viewer fills it once it knows where the camera is. */
+      const levelMarks = `<svg class="lvls hi" data-levels aria-hidden="true"></svg>`;
       /* Which way is north, up, and along the façade: the three axes as the
          camera sees them, red X, green Y, blue Z, redrawn as it orbits. */
       const axes = `<svg class="axes hi" data-axes viewBox="-26 -26 52 52" aria-hidden="true">
@@ -1718,13 +1770,13 @@ function contentHTML() {
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf></canvas>` : ""}
                 ${layers}${unitMarkHTML()}</div></div>
-              ${mini("plan")}${zcol("plan")}</div>`
+              ${north("plan")}${mini("plan")}${zcol("plan")}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
               </div>
-              ${axes}${mini("model")}${zcol("model")}
+              ${levelMarks}${north("model")}${axes}${mini("model")}${zcol("model")}
             </div>`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
@@ -1942,23 +1994,7 @@ async function renderSheetPdf() {
   const pane = el.closest(".pane");
   if (pane) pane.dataset.pdf = "busy";
   try {
-    if (!pdfLib) {
-      pdfLib = await import("./vendor/pdfjs/pdf.min.mjs");
-      pdfLib.GlobalWorkerOptions.workerSrc = "./vendor/pdfjs/pdf.worker.min.mjs";
-    }
-    let doc = pdfDocs.get(url);
-    if (!doc) { doc = await pdfLib.getDocument(url).promise; pdfDocs.set(url, doc); }
-    const page = await doc.getPage(1);
-    const base = page.getViewport({ scale: 1 });
-    const view = page.getViewport({ scale: PDF_W / base.width });
-    /* Drawn on a canvas of its own and copied over when it is finished, so
-       the pane never holds a half-drawn sheet and pdf.js never finds two
-       passes on one canvas. */
-    const off = document.createElement("canvas");
-    off.width = Math.round(view.width);
-    off.height = Math.round(view.height);
-    await page.render({ canvasContext: off.getContext("2d"), viewport: view }).promise;
-    const bmp = typeof createImageBitmap === "function" ? await createImageBitmap(off) : off;
+    const bmp = await pdfBitmap(url, PDF_W);
     pdfBitmaps.set(url, bmp);
     if (sheet().pdf === url && planVector()) blitSheet(bmp);
   } catch (err) {
@@ -1981,6 +2017,63 @@ async function renderSheetPdf() {
 function scheduleSheetPdf() {
   if (!planVector()) return;
   renderSheetPdf();
+}
+
+/* The consultants' sheets go through the same mill as the floor plan, at a
+   smaller width because each one covers a third of the plan at most. One at
+   a time, kept once drawn, and the picture underneath carries the layer
+   until its sheet lands. */
+const OVERLAY_W = 2400;
+const layerBusy = new Set();
+async function paintLayerPdfs() {
+  for (const c of document.querySelectorAll("[data-laypdf]")) {
+    const key = c.dataset.laypdf;
+    const url = OVERLAY_SHEETS[key].pdf;
+    if (!url || c.dataset.ready === url) continue;
+    const done = pdfBitmaps.get(url);
+    if (done) { blitLayer(c, done); continue; }
+    if (layerBusy.has(url)) continue;
+    layerBusy.add(url);
+    try {
+      const bmp = await pdfBitmap(url, OVERLAY_W);
+      pdfBitmaps.set(url, bmp);
+      /* The pane is rebuilt on every render, so the canvas asked for may be
+         gone by now: paint whichever canvas is live for this layer. */
+      document.querySelectorAll(`[data-laypdf="${key}"]`).forEach((live) => blitLayer(live, bmp));
+    } catch (err) {
+      console.error("calque vectoriel", url, err);
+    } finally {
+      layerBusy.delete(url);
+    }
+  }
+}
+function blitLayer(c, bmp) {
+  c.width = bmp.width;
+  c.height = bmp.height;
+  c.getContext("2d").drawImage(bmp, 0, 0);
+  c.dataset.ready = OVERLAY_SHEETS[c.dataset.laypdf].pdf;
+}
+
+/* One page, one width, one bitmap — the floor plan and the consultants'
+   sheets all come through here. */
+async function pdfBitmap(url, width) {
+  if (!pdfLib) {
+    pdfLib = await import("./vendor/pdfjs/pdf.min.mjs");
+    pdfLib.GlobalWorkerOptions.workerSrc = "./vendor/pdfjs/pdf.worker.min.mjs";
+  }
+  let doc = pdfDocs.get(url);
+  if (!doc) { doc = await pdfLib.getDocument(url).promise; pdfDocs.set(url, doc); }
+  const page = await doc.getPage(1);
+  const base = page.getViewport({ scale: 1 });
+  const view = page.getViewport({ scale: width / base.width });
+  /* Drawn on a canvas of its own and copied over when it is finished, so
+     nothing on screen ever holds a half-drawn sheet and pdf.js never finds
+     two passes on one canvas. */
+  const off = document.createElement("canvas");
+  off.width = Math.round(view.width);
+  off.height = Math.round(view.height);
+  await page.render({ canvasContext: off.getContext("2d"), viewport: view }).promise;
+  return typeof createImageBitmap === "function" ? await createImageBitmap(off) : off;
 }
 const SHEET_AR = 2000 / 1675;
 function layoutSheet(el) {
@@ -2102,6 +2195,7 @@ function paintSheet() {
   el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / z).toFixed(3)}px`; });
   /* The vectors are redrawn for the magnification they are now at. */
   scheduleSheetPdf();
+  paintLayerPdfs();
   /* The corner rectangle is the same state read small; painted here so it
      cannot drift from the sheet by a frame. */
   paintMiniPlan();
