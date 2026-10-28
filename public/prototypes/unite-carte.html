@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carte d'unité — dix hiérarchies</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Three facts per unit: the number, the typology, the area. The list in the
+   prototype reads them as one sentence — "205 · 4½ · 1221 pi²" — which wraps
+   to two lines on a narrow card, puts the three at the same weight, and
+   leaves the eye no place to land. Each tile below is the same fifteen units
+   with the same three facts, ordered differently.
+
+   Rule every tile obeys: the text block is a fixed number of rows, so a long
+   area never turns one card into two lines while its neighbour stays on one.
+   Figures are tabular, so the numbers line up down the column. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --card:#fff; --wash:rgba(17,17,18,.055);
+  --gap:10px; --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.sheet{padding:22px 24px 60px;display:flex;flex-direction:column;gap:20px}
+h1{font-size:17px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:62ch}
+
+/* The control bar: the width a card is given is the whole question, so it is
+   the one thing that can be changed here. */
+.bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;
+  position:sticky;top:0;z-index:5;background:var(--page);padding:8px 0;border-bottom:1px solid var(--line-2)}
+.chip{border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11.5px;
+  background:var(--card);cursor:pointer;color:var(--ink-2)}
+.chip.on{border-color:var(--ink);color:var(--ink)}
+.bar .lab{font-size:11.5px;color:var(--ink-3);margin-right:2px}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px}
+.tile{display:flex;flex-direction:column;gap:8px;min-width:0}
+.th{display:flex;gap:8px;align-items:baseline}
+.th b{font-size:13px;font-weight:600}
+.th span{font-size:11.5px;color:var(--ink-2)}
+.th .m{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3);white-space:nowrap}
+.why{font-size:11.5px;color:var(--ink-2)}
+
+/* The grid of cards. Its column width is what the chips change. */
+.grid{display:grid;gap:var(--gap);grid-template-columns:repeat(auto-fill,minmax(var(--w,150px),1fr));
+  border:1px solid var(--line-2);border-radius:8px;padding:10px;background:var(--fill-2)}
+.u{background:var(--card);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;
+  display:flex;flex-direction:column;min-width:0;cursor:default}
+.u:hover{border-color:var(--line)}
+.u.on{border-color:var(--ink)}
+/* The drawing: the unit's own contour on its own sheet, cropped to it. */
+.cr{height:62px;flex:0 0 62px;background-image:url(assets/plan-niveau-5.jpg);
+  background-repeat:no-repeat;filter:grayscale(1);position:relative}
+.tx{padding:7px 9px;display:flex;flex-direction:column;gap:2px;min-width:0}
+/* Nothing in a card wraps, wherever the text sits: the band under the
+   drawing and the three-cell foot are cards too. A fact that does not fit
+   is cut, not folded — A7's "superficie" label folded at 118 px and made
+   that one tile 16 px taller than the rest of its own grid. */
+.tx *,.bl *,.foot div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.sep{border-left:1px solid var(--line-2);padding-left:6px}
+.no{font-weight:600}
+.dim{color:var(--ink-2)}
+.dim2{color:var(--ink-3)}
+.sm{font-size:11px}
+.xs{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase}
+.big{font-size:17px;font-weight:600;line-height:1.1}
+.row{display:flex;align-items:baseline;gap:6px;min-width:0}
+.row .push{margin-left:auto}
+.badge{position:absolute;left:6px;top:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;padding:1px 5px;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+.pill{border:1px solid var(--line);border-radius:999px;padding:0 6px;font-size:10.5px;color:var(--ink-2)}
+.sep{border-left:1px solid var(--line-2);padding-left:6px}
+.mono{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums}
+.cols{display:grid;grid-template-columns:auto auto 1fr;align-items:baseline;gap:6px}
+.cols .r{text-align:right}
+.foot{display:flex;border-top:1px solid var(--line-2)}
+.foot div{flex:1;padding:5px 7px;font-size:11px;text-align:center}
+.foot div + div{border-left:1px solid var(--line-2)}
+.bl{padding:7px 9px;border-top:1px solid var(--line-2);display:flex;align-items:baseline;gap:6px}
+.note{font-size:11.5px;color:var(--ink-2);border-top:1px solid var(--line-2);padding-top:10px}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div>
+    <h1>Carte d'unité — dix hiérarchies</h1>
+    <p class="lede">Les mêmes quinze unités du niveau 5, les mêmes trois données: le numéro, la typologie, la superficie.
+      Ce qui change d'une planche à l'autre, c'est laquelle se lit en premier et comment les trois tiennent
+      sur une hauteur fixe. Aucune carte ne passe à deux lignes, quelle que soit la largeur.</p>
+  </div>
+
+  <div class="bar">
+    <span class="lab">largeur de colonne</span>
+    <span class="chip" data-w="118">118</span>
+    <span class="chip on" data-w="150">150</span>
+    <span class="chip" data-w="190">190</span>
+    <span class="chip" data-w="240">240</span>
+    <span class="lab" style="margin-left:14px">dessin</span>
+    <span class="chip on" data-draw="1">avec</span>
+    <span class="chip" data-draw="0">sans</span>
+  </div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <p class="note">Les superficies sont celles des étiquettes de A-209 (niveau 5). Une unité dont un croisement est
+    ouvert garde sa superficie ici: le croisement est un état, pas une donnée d'identité, et il a sa place dans la
+    liste, pas dans la hiérarchie de la carte.</p>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ data */
+
+/* Suffix, typology, area in pi², and the unit's contour on plan-niveau-5.jpg
+   normalised 0–1 — the same boxes the prototype crops its thumbnails with. */
+const UNITS = [
+  [1, "5½", 1275, [0.247, 0.6107, 0.113, 0.1475]],
+  [2, "5½", 1496, [0.157, 0.5875, 0.0955, 0.1707]],
+  [3, "3½", 760, [0.157, 0.4973, 0.092, 0.0901]],
+  [4, "4½", 1152, [0.157, 0.3773, 0.138, 0.1194]],
+  [5, "4½", 1221, [0.157, 0.2818, 0.143, 0.1033]],
+  [6, "4½", 1106, [0.2825, 0.194, 0.11, 0.1451]],
+  [7, "3½", 707, [0.3925, 0.194, 0.07, 0.114]],
+  [8, "4½", 970, [0.4625, 0.194, 0.0995, 0.114]],
+  [9, "4½", 958, [0.562, 0.194, 0.097, 0.114]],
+  [10, "5½", 1466, [0.622, 0.194, 0.122, 0.1642]],
+  [11, "5½", 1345, [0.54, 0.3284, 0.1685, 0.1134]],
+  [12, "3½", 740, [0.467, 0.3284, 0.095, 0.1134]],
+  [13, "3½", 708, [0.395, 0.3284, 0.072, 0.1134]],
+  [14, "3½", 716, [0.323, 0.3343, 0.072, 0.1493]],
+  [15, "4½", 999, [0.265, 0.4836, 0.095, 0.1272]],
+];
+const no = (s) => `5${String(s).padStart(2, "0")}`;
+/* Areas are stored in pi² here because that is what the sheet labels say.
+   A thousand separator is a thin space, as on the drawings. */
+const pi = (n) => `${String(n).replace(/\B(?=(\d{3})+$)/g, " ")} pi²`;
+
+/* Frames the contour with air around it, the prototype's own crop(). */
+function crop(box, pad = 0.45) {
+  const [x, y, w, h] = box;
+  const fw = Math.min(1, w * (1 + pad * 2));
+  const fh = Math.min(1, h * (1 + pad * 2));
+  const px = Math.max(0, Math.min(1 - fw, x + w / 2 - fw / 2));
+  const py = Math.max(0, Math.min(1 - fh, y + h / 2 - fh / 2));
+  return `background-size:${(100 / fw).toFixed(1)}% auto;`
+    + `background-position:${(px / (1 - fw) * 100).toFixed(1)}% ${(py / (1 - fh) * 100).toFixed(1)}%`;
+}
+
+/* ------------------------------------------------------------ the tiles */
+
+/* Each entry: the name, one sentence on what it puts first and what that
+   costs, the number of text rows it holds, and the card itself. */
+const VARIANTS = [
+  { n: "A1", t: "Numéro dominant, le reste en légende",
+    why: "Le numéro est l'identité: c'est ce qu'on dit à voix haute. Type et superficie descendent d'un cran, sur une seule ligne grise.",
+    rows: 2,
+    card: (u, drawn) => `${drawn}<div class="tx">
+      <div class="no">${no(u[0])}</div>
+      <div class="dim sm">${u[1]} · ${pi(u[2])}</div></div>` },
+
+  { n: "A2", t: "Numéro et type ensemble, superficie à droite",
+    why: "Ce qui identifie l'unité tient sur la première ligne; le chiffre qui se compare s'aligne à droite, en colonne d'une carte à l'autre.",
+    rows: 2,
+    card: (u, drawn) => `${drawn}<div class="tx">
+      <div class="row"><span class="no">${no(u[0])}</span><span class="dim sm">${u[1]}</span></div>
+      <div class="row"><span class="dim2 sm push mono">${pi(u[2])}</span></div></div>` },
+
+  { n: "A3", t: "Typologie dominante, numéro en surtitre",
+    why: "Pour choisir un logement plutôt que pour en retrouver un: le produit passe devant, le numéro devient une référence.",
+    rows: 2,
+    card: (u, drawn) => `${drawn}<div class="tx">
+      <div class="dim2 xs">unité ${no(u[0])}</div>
+      <div class="row"><span class="big">${u[1]}</span><span class="dim sm push mono">${pi(u[2])}</span></div></div>` },
+
+  { n: "A4", t: "Superficie dominante",
+    why: "Quand on lit l'étage pour les surfaces, le chiffre est le sujet. Le numéro et le type tiennent en légende sous lui.",
+    rows: 2,
+    card: (u, drawn) => `${drawn}<div class="tx">
+      <div class="big mono">${String(u[2]).replace(/\B(?=(\d{3})+$)/g, " ")}<span class="dim2 sm"> pi²</span></div>
+      <div class="dim sm">${no(u[0])} · ${u[1]}</div></div>` },
+
+  { n: "A5", t: "Trois colonnes, une seule ligne",
+    why: "Les trois données occupent toujours la même position horizontale, donc la grille se lit en colonnes autant qu'en cartes. Rien ne peut casser sur deux lignes.",
+    rows: 1,
+    card: (u, drawn) => `${drawn}<div class="tx">
+      <div class="cols"><span class="no">${no(u[0])}</span><span class="dim sm">${u[1]}</span>
+        <span class="dim2 sm r mono">${pi(u[2])}</span></div></div>` },
+
+  { n: "A6", t: "Numéro sur le dessin, le reste dessous",
+    why: "Le numéro appartient au plan, pas à la fiche: posé sur le dessin il libère la ligne de texte pour les deux données qui se comparent.",
+    rows: 1,
+    card: (u, drawn) => `${drawn.replace("</div>", `<span class="badge">${no(u[0])}</span></div>`)}
+      <div class="tx"><div class="row"><span>${u[1]}</span><span class="dim2 sm push mono">${pi(u[2])}</span></div></div>` },
+
+  { n: "A7", t: "Deux lignes assumées, séparateur",
+    why: "La ligne qui cassait toute seule devient une ligne voulue: identité en haut, mesure en bas, le filet dit que ce ne sont pas les mêmes choses.",
+    rows: 2,
+    card: (u, drawn) => `${drawn}<div class="tx">
+      <div class="row"><span class="no">${no(u[0])}</span><span class="pill">${u[1]}</span></div></div>
+      <div class="bl"><span class="dim2 xs">superficie</span><span class="push mono">${pi(u[2])}</span></div>` },
+
+  { n: "A8", t: "Les deux chiffres aux extrémités",
+    why: "Numéro à gauche, superficie à droite, le type en pastille entre les deux: trois rôles, trois places fixes.",
+    rows: 1,
+    card: (u, drawn) => `${drawn}<div class="tx">
+      <div class="row"><span class="no">${no(u[0])}</span><span class="pill">${u[1]}</span>
+        <span class="dim sm push mono">${pi(u[2])}</span></div></div>` },
+
+  { n: "A9", t: "Étiquette tabulaire, largeur fixe",
+    why: "Tout en chasse fixe: les numéros, les types et les superficies s'alignent au caractère près et la ligne a une largeur connue d'avance.",
+    rows: 1,
+    card: (u, drawn) => `${drawn}<div class="tx">
+      <div class="mono"><span class="no">${no(u[0])}</span><span class="dim"> ${u[1].padEnd(2, " ")}</span>
+        <span class="dim2">${String(u[2]).padStart(5, " ")}</span></div></div>` },
+
+  { n: "A10", t: "Pied de carte en trois cases",
+    why: "Le dessin prend toute la carte; les trois données deviennent un pied chiffré, lisible en diagonale sur toute la grille.",
+    rows: 1,
+    card: (u, drawn) => `${drawn}<div class="foot">
+      <div class="no">${no(u[0])}</div><div class="dim">${u[1]}</div><div class="dim2 mono">${u[2]}</div></div>` },
+];
+
+/* --------------------------------------------------------------- render */
+
+const S = { w: 150, draw: true };
+
+function cardsFor(v) {
+  return UNITS.map((u, i) => {
+    const drawn = S.draw ? `<div class="cr" style="${crop(u[3])}"></div>` : "";
+    return `<div class="u ${i === 3 ? "on" : ""}">${v.card(u, drawn)}</div>`;
+  }).join("");
+}
+
+function render() {
+  document.getElementById("tiles").innerHTML = VARIANTS.map((v) => `<div class="tile">
+    <div class="th"><b>${v.n} · ${v.t}</b><span class="m" data-m="${v.n}"></span></div>
+    <div class="why">${v.why}</div>
+    <div class="grid" data-v="${v.n}" style="--w:${S.w}px">${cardsFor(v)}</div></div>`).join("");
+  /* The measurement is the point of the sheet: a variant that is one line at
+     150 px and two at 118 px has not solved anything, so each tile says how
+     tall its tallest card is and whether they are all the same height. */
+  requestAnimationFrame(() => {
+    VARIANTS.forEach((v) => {
+      const cards = [...document.querySelectorAll(`[data-v="${v.n}"] .u`)];
+      const hs = cards.map((c) => Math.round(c.getBoundingClientRect().height));
+      const same = Math.max(...hs) === Math.min(...hs);
+      document.querySelector(`[data-m="${v.n}"]`).textContent =
+        `${Math.max(...hs)} px${same ? "" : ` · ${Math.min(...hs)}–${Math.max(...hs)} px, inégal`}`;
+    });
+  });
+}
+
+document.querySelector(".bar").addEventListener("click", (e) => {
+  const c = e.target.closest(".chip");
+  if (!c) return;
+  if (c.dataset.w) { S.w = Number(c.dataset.w); }
+  if (c.dataset.draw) { S.draw = c.dataset.draw === "1"; }
+  const group = c.dataset.w ? "w" : "draw";
+  document.querySelectorAll(`.chip[data-${group}]`).forEach((x) => x.classList.toggle("on", x === c));
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
