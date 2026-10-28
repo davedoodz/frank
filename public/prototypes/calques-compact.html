@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les calques sans voler le dessin</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* The rail is settled: the Photoshop layers panel, with a row per document.
+   Eye on the left, a grip to drag the pile, a thumbnail, the file as the
+   office names it with the date at the end, the discipline with its own
+   glyph. No opacity: in practice nobody scrubs a percentage — they put the
+   sheet they want on top and read through it. No revision codes and no "à
+   jour": fitte cannot know what a consultant drew this morning.
+
+   What is left to decide is one thing. A row can do three things — open the
+   document where it is edited, swap it for another file, show the documents
+   it replaced — and three buttons on a row is a toolbar, not a layer. Six
+   ways below to reach the three through a single door. Everything else on
+   the screen is identical, so only the door is being judged. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e5e5e5;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#f2f2f2; --card:#fff;
+  --vert:#C3E05A; --vert-ink:#2f3a05;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.sheet{padding:22px 20px 80px;display:flex;flex-direction:column;gap:34px}
+h1{font-size:17px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:80ch}
+.lu{width:14px;height:14px;flex:0 0 14px;stroke-width:1.6}
+
+.var{display:flex;flex-direction:column;gap:9px}
+.vh{display:flex;align-items:baseline;gap:8px}
+.vh .n{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.vh b{font-size:14px;font-weight:600}
+.why{font-size:12px;color:var(--ink-2);max-width:96ch}
+.why .cost{color:var(--ink-3)}
+
+/* ------------------------------------------------------------ the screen */
+.app{border-radius:12px;overflow:hidden;background:#141416;min-width:1180px}
+.bar1{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar1 .crumb{color:rgba(255,255,255,.58)}
+.bar1 .crumb.on{color:#fff;font-weight:600;font-size:13px;margin-right:4px}
+.bar1 .tab{padding:5px 10px;border-radius:7px;display:flex;align-items:center;gap:6px;font-size:13.5px}
+.bar1 .tab.on{background:#fff;color:#141416;font-weight:600}
+.bar1 .sp{flex:1}
+.bar1 .share{border:1px solid rgba(255,255,255,.28);border-radius:5px;padding:4px 10px;font-size:12px;
+  display:flex;align-items:center;gap:6px}
+.bar2{height:32px;background:#1e1e21;border-top:1px solid #2c2c31;display:flex;align-items:center;
+  gap:3px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar2 span{padding:3px 9px;border-radius:6px}
+.bar2 span.on{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.card{background:var(--card);margin:7px;border-radius:9px;overflow:hidden;display:flex;flex-direction:column}
+.ttl{padding:10px 13px;display:flex;align-items:center;gap:10px}
+.ttl b{font-size:16px;font-weight:600}
+.ttl .sub{font-size:12px;color:var(--ink-2)}
+.ttl .sp{flex:1}
+.work{display:flex;gap:9px;padding:0 9px 9px;height:560px}
+.foot{border-top:1px solid var(--line-2);padding:8px 13px;display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--ink-2)}
+.foot b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.foot .sp{flex:1}
+
+.pane{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);
+  display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.ph{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:8px;padding:0 10px;font-size:12.5px;color:var(--ink-2)}
+.ph .sp{flex:1}
+.pb{flex:1;min-height:0;overflow:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
+
+.lst{flex:0 0 232px}
+.uc{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;flex:0 0 auto}
+.uc.on{border-color:var(--ink)}
+.uc .cr{height:88px;background-image:url(assets/plan-niveau-5.jpg);background-size:360%;
+  filter:grayscale(1);position:relative}
+.uc .no{position:absolute;left:6px;top:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;padding:0 6px;font-size:12px;font-weight:600}
+.uc .ul{display:flex;align-items:baseline;gap:6px;padding:6px 9px;font-size:12.5px}
+.uc .ul .a{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+.d2{flex:1.6;min-width:0}
+.m3{flex:1;min-width:0}
+.m3 .still{flex:1;min-height:0;background-image:url(assets/maquette-still.jpg);background-size:cover;
+  background-position:center}
+.insp{flex:0 0 280px}
+.kv{display:flex;align-items:baseline;gap:8px;font-size:12.5px}
+.kv b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.kv span{color:var(--ink-2)}
+
+.stage{flex:1;min-width:0;min-height:0;position:relative;overflow:hidden;background:var(--card)}
+.plan{position:absolute;inset:0;background-image:url(assets/plan-niveau-5.jpg);
+  background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
+.lay{position:absolute;background-repeat:no-repeat;background-size:contain;background-position:center;
+  pointer-events:none;mix-blend-mode:multiply}
+.lay.arp{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
+.lay.pay{background-image:url(assets/paysage.png)}
+.off{display:none}
+
+/* ----------------------------------------------------------- the rail */
+.rail{flex:0 0 var(--rw,272px);border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  min-height:0;background:var(--card);position:relative}
+.rh{flex:0 0 auto;border-bottom:1px solid var(--line-2);padding:6px 8px;display:flex;align-items:center;
+  gap:6px;font-size:11.5px;color:var(--ink-3)}
+.rh b{color:var(--ink-2);font-weight:500;font-size:12px}
+.rb{flex:1;min-height:0;overflow:auto;padding:5px;display:flex;flex-direction:column;gap:2px}
+.rf{flex:0 0 auto;border-top:1px solid var(--line-2);padding:5px 6px;display:flex;align-items:center;gap:4px}
+
+.lrow{border:1px solid transparent;border-radius:5px;padding:5px;display:flex;flex-direction:column;gap:4px;
+  user-select:none;background:var(--card)}
+.lrow:hover{background:var(--fill-2)}
+.lrow.sel{background:var(--fill);border-color:var(--line-2)}
+.lrow.hid{opacity:.5}
+.lrow.drag{opacity:.9;border-color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.14)}
+.grip{color:var(--ink-3);cursor:grab;flex:0 0 14px}
+.grip:active{cursor:grabbing}
+.lrow:hover .grip{color:var(--ink-2)}
+
+.thumb{width:40px;height:32px;flex:0 0 40px;border:1px solid var(--line-2);border-radius:3px;
+  background-color:#fff;background-size:contain;background-repeat:no-repeat;background-position:center}
+.eye{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-3);cursor:pointer;flex:0 0 22px}
+.eye:hover{background:var(--fill)}
+.eye.on{color:var(--ink)}
+.fname{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left;min-width:0}
+.disc{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);min-width:0;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.disc .lu{width:12px;height:12px;flex:0 0 12px}
+.date{font-size:11px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
+
+.row{display:flex;align-items:center;gap:6px;min-width:0}
+.col{display:flex;flex-direction:column;gap:5px;min-width:0}
+.btn{height:24px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:inline-flex;align-items:center;gap:5px;padding:0 8px;font-size:11.5px;color:var(--ink-2);
+  cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--fill);border-color:var(--ink-3)}
+.btn.ico{padding:0 6px}
+.btn.sm{height:21px;padding:0 6px;font-size:11px;border-radius:4px}
+.btn.on{border-color:var(--ink);color:var(--ink);background:var(--card)}
+.btn.wide{width:100%;justify-content:center}
+
+/* the one door, in its several shapes */
+.kebab{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-3);cursor:pointer;flex:0 0 22px;opacity:0}
+.lrow:hover .kebab,.lrow.sel .kebab,.kebab.open{opacity:1}
+.kebab:hover,.kebab.open{background:var(--fill);color:var(--ink)}
+.menu{position:absolute;z-index:20;background:var(--card);border:1px solid var(--line);border-radius:7px;
+  box-shadow:0 10px 28px rgba(0,0,0,.16);padding:4px;min-width:214px;display:flex;flex-direction:column;gap:1px}
+.mi{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:5px;font-size:12px;
+  color:var(--ink);cursor:pointer}
+.mi:hover{background:var(--fill-2)}
+.mi .lu{color:var(--ink-2)}
+.mi .k{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+.msep{height:1px;background:var(--line-2);margin:3px 2px}
+.mh{font-size:10.5px;color:var(--ink-3);padding:4px 7px 2px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left;font-family:var(--mono)}
+/* An unselected row keeps its door, but barely drawn: present enough to be
+   found, quiet enough not to turn the list into a toolbar. */
+.ghost{border-color:transparent;background:transparent;color:var(--ink-3)}
+.lrow:hover .ghost{border-color:var(--line);background:var(--fill-2)}
+.ghd{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink-3);padding:7px 6px 3px}
+
+
+.panel{border-top:1px solid var(--line-2);padding:7px;display:flex;flex-direction:column;gap:6px;
+  background:var(--fill-2);flex:0 0 auto;max-height:260px;overflow:auto}
+.vrow{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.vrow.cur{color:var(--ink)}
+.note{font-size:10.5px;color:var(--ink-3)}
+.found{display:flex;align-items:center;gap:6px;font-size:11px;padding:4px 6px;border:1px solid var(--line-2);
+  border-radius:4px;cursor:pointer;font-family:var(--mono);color:var(--ink-2);background:var(--card)}
+.found:hover{border-color:var(--ink);color:var(--ink)}
+.drop{border:1px dashed var(--line);border-radius:5px;padding:7px;text-align:center;font-size:11px;
+  color:var(--ink-3);cursor:pointer}
+.drop:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.path{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);background:var(--card);
+  border:1px solid var(--line-2);border-radius:4px;padding:4px 6px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left}
+.toast{position:absolute;left:10px;bottom:10px;background:#1b1b1b;color:#fff;font-size:11.5px;
+  padding:6px 10px;border-radius:5px;z-index:9;max-width:70%}
+.hint{font-size:10.5px;color:var(--ink-3)}
+.zcol{flex:0 0 30px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  align-items:center;gap:6px;padding:7px 0;color:var(--ink-3);font-size:10.5px}
+.zcol .tr{flex:1;width:3px;background:var(--line);border-radius:2px;position:relative}
+.zcol .tr::after{content:"";position:absolute;left:-4px;top:38%;width:11px;height:11px;border-radius:50%;background:var(--ink)}
+
+/* ---------------------------------------------- the compact surfaces */
+.gain{margin-left:auto;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;
+  border:1px solid var(--line-2);border-radius:4px;padding:1px 6px}
+.vh{align-items:center}
+
+/* A: the film edge. */
+.strip{flex:0 0 44px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;gap:3px;
+  padding:5px;background:var(--card)}
+.sth{border:1px solid transparent;border-radius:4px;padding:3px;display:flex;flex-direction:column;
+  align-items:center;gap:2px;cursor:pointer;user-select:none}
+.sth:hover{background:var(--fill-2)}
+.sth.sel{background:var(--fill);border-color:var(--line-2)}
+.sth.hid{opacity:.45}
+.sdot{color:var(--ink-3);display:inline-flex;cursor:pointer}
+.sdot:hover{color:var(--ink)}
+.sth.sel .sdot,.chip.sel .sdot{color:var(--ink-2)}
+
+/* C and D: the band. A layer is a chip, the stack reads left to right. */
+.band{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:4px 8px;background:var(--card);
+  border-bottom:1px solid var(--line-2);color:var(--ink-3);overflow:hidden}
+.band:last-child{border-bottom:0;border-top:1px solid var(--line-2)}
+.chip{display:flex;align-items:center;gap:5px;border:1px solid var(--line-2);border-radius:5px;
+  padding:2px 6px;font-size:11.5px;color:var(--ink-2);cursor:pointer;white-space:nowrap;user-select:none}
+.chip:hover{border-color:var(--ink-3)}
+.chip.sel{border-color:var(--ink);color:var(--ink);background:var(--fill-2)}
+.chip.hid{opacity:.45}
+
+/* Every variant that does not take width puts its words on a card over the
+   drawing. Opaque, never tinted: the plan under it stays untouched. */
+.fcard{position:absolute;z-index:14;background:var(--card);border:1px solid var(--line);
+  border-radius:7px;box-shadow:0 10px 28px rgba(0,0,0,.14);padding:7px;max-height:88%;overflow:auto}
+.fcard .menu{position:relative;box-shadow:none;border-color:var(--line-2);margin-top:2px;min-width:0}
+
+/* G: the inspector, read two ways. */
+.tabs{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:2px;padding:0 6px}
+.tabs span{padding:3px 8px;border-radius:5px;font-size:12.5px;color:var(--ink-3);cursor:pointer}
+.tabs span:hover{background:var(--fill-2)}
+.tabs span.on{background:var(--fill);color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>Les calques sans voler le dessin</h1>
+  <p class="lede">Le rail à 272 px prend au plan presque une colonne entière sur un écran qui en compte déjà quatre. Huit façons de garder les mêmes pièces — l'œil, la poignée d'empilement, la discipline, la date, le nom du fichier et le bouton unique vers les trois actions du document — en rendant la largeur au dessin.</p>
+  <p class="lede">La largeur récupérée est indiquée à droite de chaque titre. Ce qu'on paie à la place est écrit sous le nom.</p>
+  <div id="vars"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["file", "ruler", "trees", "eye", "eye-off", "layers", "history", "clock",
+    "chevron-down", "chevron-right", "chevron-up", "external-link", "check", "circle", "list", "box",
+    "git-compare", "x", "folder", "folder-open", "share-2", "plus", "minus", "table", "compass",
+    "hard-hat", "grip-vertical", "replace", "ellipsis-vertical", "arrow-up-down", "mouse-pointer-click",
+    "file-text", "settings-2"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+
+/* Placement of the consultant sheets, from the prototype. */
+const BASE_BOX = [314 / 2000, 325 / 1675, 1488 / 2000, 1270 / 1675];
+const BASE_RATIO = 2000 / 1675;
+const SHEETS = {
+  arp: { box: [298 / 1650, 307 / 1560, 1380 / 1650, 1172 / 1560], ratio: 1650 / 1560 },
+  pay: { box: [156 / 835, 178 / 800, 711 / 835, 624 / 800], ratio: 835 / 800 },
+};
+function layStyle(k, z) {
+  const S = SHEETS[k];
+  const [bx0, by0, bx1, by1] = BASE_BOX;
+  const [sx0, sy0, sx1, sy1] = S.box;
+  const w = (bx1 - bx0) / (sx1 - sx0);
+  const h = w * BASE_RATIO / S.ratio;
+  const left = bx0 - sx0 * w;
+  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h;
+  return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;z-index:${z}`;
+}
+
+const DISC = {
+  arch: { label: "Architecte", icon: "compass" },
+  arp: { label: "Arpenteur-géomètre", icon: "ruler" },
+  pays: { label: "Architecte paysagiste", icon: "trees" },
+  civ: { label: "Ingénieur civil", icon: "hard-hat" },
+};
+const SERVER = "\\\\serveur-bureau\\Projets\\2026\\BAL3\\";
+const DRAWINGS = {
+  plan: { disc: "arch", app: "AutoCAD", thumb: "assets/plan-niveau-5.jpg", folder: SERVER + "Dessins\\",
+    versions: [
+      { file: "BAL3_PLAN-NIVEAU-5_2026-10-24.dwg", date: "24 oct 2026" },
+      { file: "BAL3_PLAN-NIVEAU-5_2026-09-12.dwg", date: "12 sept 2026" },
+      { file: "BAL3_PLAN-NIVEAU-5_2026-08-02.dwg", date: "2 août 2026" }] },
+  arp: { disc: "arp", app: "Acrobat", thumb: "assets/arp-site.png", folder: SERVER + "Reçu\\Arpenteur\\",
+    versions: [
+      { file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-07.pdf", date: "7 oct 2026" },
+      { file: "BAL3_RELEVE-TERRAIN_2026-05-14.pdf", date: "14 mai 2026" }] },
+  pay: { disc: "pays", app: "Acrobat", thumb: "assets/paysage.png", folder: SERVER + "Reçu\\Paysage\\",
+    versions: [
+      { file: "BAL3_AMENAGEMENT-PAYSAGER_2026-07-07.pdf", date: "7 juil 2026" }] },
+};
+const FOUND = {
+  plan: [{ file: "BAL3_PLAN-NIVEAU-5_2026-10-27.dwg", date: "27 oct 2026" },
+    { file: "BAL3_PLAN-NIVEAU-6_2026-10-24.dwg", date: "24 oct 2026" }],
+  arp: [{ file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-21.pdf", date: "21 oct 2026" },
+    { file: "BAL3_CERTIFICAT-LOCALISATION_2026-09-30.pdf", date: "30 sept 2026" }],
+  pay: [{ file: "BAL3_AMENAGEMENT-PAYSAGER_2026-10-26.pdf", date: "26 oct 2026" },
+    { file: "BAL3_PLANTATIONS-DETAILS_2026-10-26.pdf", date: "26 oct 2026" }],
+};
+
+const newState = () => ({
+  order: ["pay", "arp", "plan"],
+  on: { plan: true, arp: true, pay: true },
+  iso: null, sel: "pay",
+  menu: null,     /* which row has its door open */
+  panel: null,    /* "swap" | "hist" */
+  drag: null, toast: null,
+  drawer: false, /* the floating panel, for the variants that hide it */
+  tab: "lay",    /* the inspector's second reading */
+  docs: JSON.parse(JSON.stringify(DRAWINGS)),
+});
+const S = [];
+const visible = (s, k) => (s.iso ? s.iso === k : s.on[k]);
+const cur = (s, k) => s.docs[k].versions[0];
+const disc = (s, k) => DISC[s.docs[k].disc];
+const zOf = (s, k) => s.order.length - s.order.indexOf(k);
+
+function stageHTML(s) {
+  return `<div class="stage">
+    <div class="plan ${visible(s, "plan") ? "" : "off"}" style="z-index:${zOf(s, "plan")}"></div>
+    ${["arp", "pay"].map((k) => `<div class="lay ${k} ${visible(s, k) ? "" : "off"}"
+      style="${layStyle(k, zOf(s, k))}"></div>`).join("")}
+    ${s.toast ? `<div class="toast">${s.toast}</div>` : ""}
+  </div>`;
+}
+
+/* --------------------------------------------------------- the row pieces */
+const gripHTML = (i, k) => `<span class="grip" data-a="grip" data-i="${i}" data-k="${k}"
+  title="Tirer pour changer l'ordre d'empilement">${icon("grip-vertical")}</span>`;
+const eyeHTML = (s, i, k) => `<span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}"
+  title="${visible(s, k) ? "Masquer" : "Afficher"} · Alt-clic: ne voir que celui-ci">${icon(visible(s, k) ? "eye" : "eye-off")}</span>`;
+const fileLines = (s, k) => `<span class="fname" title="${cur(s, k).file}">${cur(s, k).file}</span>
+  <span class="row"><span class="disc">${icon(disc(s, k).icon)}${disc(s, k).label}</span>
+    <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></span>`;
+
+/* The three things a document can do, written once. Every variant below is
+   a different way of putting a hand on this list. */
+const ITEMS = (s, i, k) => [
+  ["open", "external-link", `Ouvrir dans ${s.docs[k].app}`, "⏎"],
+  ["swap", "replace", "Changer le document…", "⌘R"],
+  ["hist", "history", `Documents précédents (${s.docs[k].versions.length})`, "⌘H"],
+];
+const menuHTML = (s, i, k, style = "") => `<div class="menu" style="${style}" data-menu>
+  <div class="mh">${cur(s, k).file}</div>
+  ${ITEMS(s, i, k).map(([a, g, t, key], j) => `${j === 2 ? `<div class="msep"></div>` : ""}
+    <div class="mi" data-a="${a}" data-i="${i}" data-k="${k}">${icon(g)}${t}<span class="k">${key}</span></div>`).join("")}
+</div>`;
+
+function swapHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col">
+    <div class="row"><b style="font-size:11.5px">Changer le document</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    <div class="row">${icon("folder-open")}<span class="path" title="${d.folder}">${d.folder}</span></div>
+    ${FOUND[k].map((f, j) => `<div class="found" data-a="pick" data-i="${i}" data-k="${k}" data-f="${j}">
+      ${icon("file")}<span class="fname" style="flex:1">${f.file}</span><span class="date">${f.date}</span></div>`).join("")}
+    <div class="drop" data-a="pick" data-i="${i}" data-k="${k}" data-f="0">Déposer un fichier, ou coller un chemin</div>
+    <div class="note">Le fichier reste sur le serveur. fitte lit; il n'écrit jamais dans un dessin.</div>
+  </div>`;
+}
+function histHTML(s, i, k) {
+  const d = s.docs[k];
+  return `<div class="col" style="gap:4px">
+    <div class="row"><b style="font-size:11.5px">Documents lus pour ce calque</b><span style="flex:1"></span>
+      <span class="btn sm" data-a="close" data-i="${i}">${icon("x")}</span></div>
+    ${d.versions.map((v, j) => `<div class="vrow ${j === 0 ? "cur" : ""}">
+      ${j === 0 ? icon("check") : `<span style="width:14px"></span>`}
+      <span class="fname" style="flex:1">${v.file}</span><span class="date">${v.date}</span>
+      ${j === 0 ? "" : `<span class="btn sm" data-a="revert" data-i="${i}" data-k="${k}" data-v="${j}">relire</span>`}
+    </div>`).join("")}
+    <div class="note">Rien n'est supprimé: on peut toujours revenir au document qui était lu.</div>
+  </div>`;
+}
+const panelHTML = (s, i) => (s.panel === "swap" ? `<div class="panel">${swapHTML(s, i, s.sel)}</div>`
+  : s.panel === "hist" ? `<div class="panel">${histHTML(s, i, s.sel)}</div>` : "");
+
+const rowAttrs = (s, i, k) => `class="lrow ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}
+  ${s.drag === k ? "drag" : ""}" data-a="sel" data-i="${i}" data-k="${k}" data-row="${k}"`;
+
+const railHead = (s, i, right = "") => `<div class="rh">${icon("layers")}<b>Calques</b>
+  <span style="flex:1"></span>${right || `<span class="hint">${s.order.filter((k) => visible(s, k)).length}/3 visibles</span>`}</div>`;
+
+/* The rail in its settled form costs the drawing 272 px — on a screen cut
+   into four columns that is most of a column. Every variant below carries
+   the same pieces and the same single door to the document, but gives the
+   drawing back most or all of that width. What each one costs instead is
+   written under its name. */
+
+const SHORT = { arch: "Architecte", arp: "Arpenteur", pays: "Paysage", civ: "Civil" };
+const short = (s, k) => SHORT[s.docs[k].disc];
+
+/* The block of document facts, used by every floating card: who, when,
+   which file, and the one button. Inside a row that already names the
+   discipline, the first line is dropped rather than said twice. */
+const detail = (i, s, k, inRow) => `<div class="col" style="gap:4px">
+  ${inRow ? "" : `<div class="row"><span class="disc" style="color:var(--ink);font-weight:600">${icon(disc(s, k).icon)}${disc(s, k).label}</span>
+    <span style="flex:1"></span><span class="date">${cur(s, k).date}</span></div>`}
+  <span class="fname" title="${cur(s, k).file}">${cur(s, k).file}</span>
+  <span class="btn sm wide" data-a="menu" data-i="${i}" data-k="${k}">
+    ${icon("file-text")}Document ${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span>
+  ${s.menu === k ? menuHTML(s, i, k, "position:relative") : ""}
+  ${s.panel === "swap" ? swapHTML(s, i, k) : s.panel === "hist" ? histHTML(s, i, k) : ""}
+</div>`;
+
+const eyeDot = (s, i, k) => `<span class="eye ${visible(s, k) ? "on" : ""}" data-a="eye" data-i="${i}" data-k="${k}"
+  title="${visible(s, k) ? "Masquer" : "Afficher"}">${icon(visible(s, k) ? "eye" : "eye-off")}</span>`;
+
+/* ===================================================================== A
+   A 44 px strip of thumbnails, like a film edge. Recognition stays
+   visual — a floor plan, a survey, a landscape sheet — and the words appear
+   only for the layer being worked on, in a card floating over a corner of
+   the drawing. */
+function varA(i, s) {
+  return { side: `<div class="strip">${s.order.map((k) => `<div class="sth ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+        data-a="sel" data-i="${i}" data-k="${k}" data-row="${k}" title="${disc(s, k).label} · ${cur(s, k).date}">
+        <span class="thumb" style="width:34px;height:28px;flex:0 0 34px;background-image:url(${s.docs[k].thumb})"></span>
+        <span class="sdot" data-a="eye" data-i="${i}" data-k="${k}">${icon(visible(s, k) ? "eye" : "eye-off")}</span>
+      </div>`).join("")}</div>`,
+    over: `<div class="fcard" style="right:52px;top:8px;width:238px">${detail(i, s, s.sel)}</div>` };
+}
+
+/* ===================================================================== B
+   The rail unchanged, but floating over the drawing instead of pushing it.
+   The plan keeps its full width and the panel folds back to a pill when it
+   sits in the way. */
+function varB(i, s) {
+  return { over: s.drawer /* here the flag means folded: the panel starts open */
+    ? `<div class="fcard" style="right:8px;top:8px;padding:4px"><span class="btn sm" data-a="drawer" data-i="${i}">
+        ${icon("layers")}Calques 3</span></div>`
+    : `<div class="fcard" style="right:8px;top:8px;width:244px">
+        <div class="row" style="margin-bottom:5px">${icon("layers")}<b style="font-size:12px">Calques</b>
+          <span style="flex:1"></span><span class="btn sm ico" data-a="drawer" data-i="${i}">${icon("x")}</span></div>
+        ${s.order.map((k) => `<div ${rowAttrs(s, i, k)} style="padding:4px">
+          <div class="row">${gripHTML(i, k)}${eyeDot(s, i, k)}
+            <span class="thumb" style="width:30px;height:24px;flex:0 0 30px;background-image:url(${s.docs[k].thumb})"></span>
+            <div class="col" style="flex:1;gap:0">
+              <span class="disc" style="color:var(--ink);font-size:11.5px">${icon(disc(s, k).icon)}${short(s, k)}</span>
+              <span class="date" style="font-size:10.5px">${cur(s, k).date}</span></div></div>
+          ${s.sel === k ? detail(i, s, k, true) : ""}
+        </div>`).join("")}
+      </div>` };
+}
+
+/* ===================================================================== C
+   A band above the drawing: three chips, one per layer. Height is cheaper
+   than width on a screen already cut into four columns, and the stack is
+   read in one glance instead of one scan. */
+function varC(i, s) {
+  return { top: `<div class="band">${icon("layers")}
+      ${s.order.map((k) => `<span class="chip ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+        data-a="sel" data-i="${i}" data-k="${k}" data-row="${k}">
+        <span class="sdot" data-a="eye" data-i="${i}" data-k="${k}">${icon(visible(s, k) ? "eye" : "eye-off")}</span>
+        ${icon(disc(s, k).icon)}${short(s, k)}${s.sel === k ? `<span class="date">${cur(s, k).date}</span>` : ""}
+        ${s.sel === k ? `<span class="btn sm ico" data-a="menu" data-i="${i}" data-k="${k}"
+          title="Document">${icon("file-text")}${icon("chevron-down")}</span>` : ""}</span>`).join("")}
+      <span style="flex:1"></span><span class="hint">glisser pour empiler</span></div>`,
+    over: s.menu || s.panel ? `<div class="fcard" style="left:8px;top:8px;width:252px">${detail(i, s, s.sel)}</div>` : "" };
+}
+
+/* ===================================================================== D
+   The same band, at the foot of the drawing, beside the zoom reading —
+   where the state of a view already lives, and clear of the sheet title at
+   the top. */
+function varD(i, s) {
+  return { bottom: `<div class="band">${icon("layers")}
+      ${s.order.map((k) => `<span class="chip ${s.sel === k ? "sel" : ""} ${visible(s, k) ? "" : "hid"}"
+        data-a="sel" data-i="${i}" data-k="${k}" data-row="${k}">
+        <span class="sdot" data-a="eye" data-i="${i}" data-k="${k}">${icon(visible(s, k) ? "eye" : "eye-off")}</span>
+        ${icon(disc(s, k).icon)}${short(s, k)}
+        ${s.sel === k ? `<span class="btn sm ico" data-a="menu" data-i="${i}" data-k="${k}"
+          title="Document">${icon("file-text")}${icon("chevron-up")}</span>` : ""}</span>`).join("")}
+      <span style="flex:1"></span><span class="hint fname" style="max-width:40%">${cur(s, s.sel).file}</span></div>`,
+    over: s.menu || s.panel ? `<div class="fcard" style="left:8px;bottom:8px;width:252px">${detail(i, s, s.sel)}</div>` : "" };
+}
+
+/* ===================================================================== E
+   A drawer. Nothing at all until it is asked for: the head of the pane
+   carries the count, and the rail opens over the drawing and closes again.
+   Layers are not watched continuously — they are set, then forgotten. */
+function varE(i, s) {
+  return { head: `<span class="btn sm ${s.drawer ? "on" : ""}" data-a="drawer" data-i="${i}">
+      ${icon("layers")}Calques 3 ${icon(s.drawer ? "chevron-up" : "chevron-down")}</span>`,
+    over: s.drawer ? `<div class="fcard" style="right:8px;top:8px;width:244px">
+      ${s.order.map((k) => `<div ${rowAttrs(s, i, k)} style="padding:4px">
+        <div class="row">${gripHTML(i, k)}${eyeDot(s, i, k)}
+          <span class="thumb" style="width:30px;height:24px;flex:0 0 30px;background-image:url(${s.docs[k].thumb})"></span>
+          <div class="col" style="flex:1;gap:0">
+            <span class="disc" style="color:var(--ink);font-size:11.5px">${icon(disc(s, k).icon)}${short(s, k)}</span>
+            <span class="date" style="font-size:10.5px">${cur(s, k).date}</span></div></div>
+        ${s.sel === k ? detail(i, s, k, true) : ""}
+      </div>`).join("")}</div>` : "" };
+}
+
+/* ===================================================================== F
+   One control in the head of the pane, and everything inside it: the three
+   layers, their eyes, and the commands of whichever one is picked. The
+   drawing loses nothing at all, not even a band. */
+function varF(i, s) {
+  return { head: `<span class="btn sm ${s.drawer ? "on" : ""}" data-a="drawer" data-i="${i}">
+      ${icon("layers")}${s.order.filter((k) => visible(s, k)).length}/3 calques ${icon("chevron-down")}</span>`,
+    headMenu: s.drawer ? `<div class="menu" style="right:8px;top:30px;min-width:264px">
+      ${s.order.map((k) => `<div class="mi" data-a="sel" data-i="${i}" data-k="${k}" data-row="${k}"
+        style="${s.sel === k ? "background:var(--fill)" : ""}">
+        <span class="sdot" data-a="eye" data-i="${i}" data-k="${k}">${icon(visible(s, k) ? "eye" : "eye-off")}</span>
+        ${icon(disc(s, k).icon)}<span style="flex:1">${short(s, k)}</span>
+        <span class="date">${cur(s, k).date}</span></div>`).join("")}
+      <div class="msep"></div>
+      <div class="mh">${cur(s, s.sel).file}</div>
+      ${ITEMS(s, i, s.sel).map(([a, g, t]) => `<div class="mi" data-a="${a}" data-i="${i}" data-k="${s.sel}">
+        ${icon(g)}${t}</div>`).join("")}
+    </div>` : "",
+    over: s.panel ? `<div class="fcard" style="right:8px;top:8px;width:252px">${s.panel === "swap"
+      ? swapHTML(s, i, s.sel) : histHTML(s, i, s.sel)}</div>` : "" };
+}
+
+/* ===================================================================== G
+   No new column: the inspector on the right already exists and gets a
+   second tab. The unit and the layers are two readings of the same sheet,
+   and only one is needed at a time. */
+function varG(i, s) {
+  return { insp: `<div class="tabs"><span class="${s.tab === "lay" ? "on" : ""}" data-a="tab" data-i="${i}" data-t="lay">Calques</span>
+      <span class="${s.tab === "lay" ? "" : "on"}" data-a="tab" data-i="${i}" data-t="unit">Unité 501</span></div>
+    ${s.tab === "lay" ? `<div class="pb" style="padding:7px">
+      ${s.order.map((k) => `<div ${rowAttrs(s, i, k)}>
+        <div class="row">${gripHTML(i, k)}${eyeDot(s, i, k)}
+          <span class="thumb" style="background-image:url(${s.docs[k].thumb})"></span>
+          <div class="col" style="flex:1;gap:1px">${fileLines(s, k)}</div></div>
+        ${s.sel === k ? `<span class="btn sm wide" data-a="menu" data-i="${i}" data-k="${k}">
+          ${icon("file-text")}Document ${icon(s.menu === k ? "chevron-up" : "chevron-down")}</span>` : ""}
+        ${s.menu === k ? menuHTML(s, i, k, "position:relative;margin-top:2px") : ""}
+      </div>`).join("")}
+      ${s.panel === "swap" ? `<div class="panel">${swapHTML(s, i, s.sel)}</div>`
+        : s.panel === "hist" ? `<div class="panel">${histHTML(s, i, s.sel)}</div>` : ""}
+    </div>` : `<div class="pb">
+      <div class="kv"><span>Type</span><b>5½</b></div>
+      <div class="kv"><span>Superficie</span><b>1 275 pi²</b></div>
+      <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
+      <div class="kv"><span>Écart</span><b>240 mm</b></div>
+      <div class="kv"><span>Lu dans</span><b>24 oct 2026</b></div></div>`}` };
+}
+
+/* ===================================================================== H
+   The rail kept, but shaved to 150 px: no thumbnail, the discipline glyph
+   alone, the date under it. The file name waits in the card that opens with
+   the selection — it is the longest thing in the panel and the only reason
+   the panel was ever wide. */
+function varH(i, s) {
+  return { side: `<div class="rail" style="--rw:150px">
+      ${railHead(s, i, `<span class="hint">3</span>`)}
+      <div class="rb">${s.order.map((k) => `<div ${rowAttrs(s, i, k)} style="padding:4px">
+        <div class="row">${gripHTML(i, k)}${eyeDot(s, i, k)}
+          <div class="col" style="flex:1;gap:0">
+            <span class="disc" style="color:var(--ink);font-size:11.5px">${icon(disc(s, k).icon)}${short(s, k)}</span>
+            <span class="date" style="font-size:10.5px">${cur(s, k).date}</span></div>
+          ${s.sel === k ? `<span class="btn sm ico" data-a="menu" data-i="${i}" data-k="${k}"
+            title="Document">${icon("file-text")}</span>` : ""}</div>
+      </div>`).join("")}</div></div>`,
+    over: s.menu || s.panel ? `<div class="fcard" style="right:158px;top:8px;width:248px">${detail(i, s, s.sel)}</div>` : "" };
+}
+
+/* ----------------------------------------------------------- the full screen */
+const UNITS = [["501", "5½", "1 275 pi²", "30% 40%"], ["502", "5½", "1 496 pi²", "46% 36%"],
+  ["503", "3½", "760 pi²", "38% 52%"], ["504", "4½", "1 152 pi²", "54% 46%"],
+  ["505", "4½", "1 221 pi²", "34% 30%"]];
+
+/* Each variant returns where its pieces go, not a finished rail: a band
+   above or below the drawing, a strip or a narrow rail beside it, a card
+   floating over it, a control in the head of the pane, or the inspector
+   column rewritten. */
+
+function screenHTML(i, s, P) {
+  return `<div class="app" data-i="${i}">
+    <div class="bar1">${icon("folder")}<span class="crumb">Tous les projets</span>
+      <span class="crumb on">Le Baldwin III</span>
+      <span class="tab on">${icon("git-compare")}Coordination</span>
+      <span class="tab">${icon("table")}Codes</span><span class="tab">${icon("clock")}Échéancier</span>
+      <span class="sp"></span><span class="share">${icon("share-2")}Partager</span></div>
+    <div class="bar2">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<span class="${n === 5 ? "on" : ""}">Niveau ${n}</span>`).join("")}
+      <span>Tous les niveaux</span></div>
+    <div class="card">
+      <div class="ttl"><b>Plans — niveau 5</b><span class="sub">15 unités · 4 avec un croisement ouvert</span>
+        <span class="sp"></span><span class="btn">${icon("table")}Exporter</span></div>
+      <div class="work">
+        <div class="pane lst"><div class="ph">${icon("list")}Unités</div>
+          <div class="pb">${UNITS.map((u, j) => `<div class="uc ${j === 0 ? "on" : ""}">
+            <div class="cr" style="background-position:${u[3]}"><span class="no">${u[0]}</span></div>
+            <div class="ul"><span>${u[1]}</span><span class="a">${u[2]}</span></div></div>`).join("")}</div></div>
+
+        <div class="pane d2" style="position:relative">
+          <div class="ph">${icon("file")}Plan 2D<span class="sp"></span>
+            ${P.head || `<span class="hint">niveau 5 · 3 calques</span>`}</div>
+          ${P.headMenu || ""}
+          ${P.top || ""}
+          <div style="flex:1;min-height:0;display:flex;position:relative">
+            ${stageHTML(s)}
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>100%</span></div>
+            ${P.side || ""}
+            ${P.over || ""}
+          </div>
+          ${P.bottom || ""}</div>
+
+        <div class="pane m3"><div class="ph">${icon("box")}Maquette 3D<span class="sp"></span>
+          <span class="btn">${icon("external-link")}Ouvrir dans SketchUp</span></div>
+          <div style="flex:1;min-height:0;display:flex">
+            <div class="still"></div>
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>60%</span></div>
+          </div></div>
+
+        <div class="pane insp">${P.insp || `<div class="ph">${icon("circle")}Unité 501</div>
+          <div class="pb">
+            <div class="kv"><span>Type</span><b>5½</b></div>
+            <div class="kv"><span>Superficie</span><b>1 275 pi²</b></div>
+            <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
+            <div class="kv"><span>Écart</span><b>240 mm</b></div>
+            <div class="kv"><span>Lu dans</span><b>24 oct 2026</b></div>
+          </div>`}</div>
+      </div>
+      <div class="foot">Ouvertures de la façade sud <b>68.5 m² → 74.2 m²</b><span class="date">+5.7 m²</span>
+        <span class="sp"></span><span class="btn">Lire l'article 3.2.3.1</span></div>
+    </div>
+  </div>`;
+}
+
+const VARIANTS = [
+  { name: "Bande de vignettes, 44 px", build: varA, gain: "+228 px au plan",
+    why: `Une tranche de film au bord du dessin: on reconnaît les planches à l'image, et les mots n'apparaissent que pour le calque en cours, dans une carte posée sur un coin du plan. <span class="cost">Le prix: la carte couvre une partie du dessin, et à 34 px une planche d'arpenteur reste pâle.</span>` },
+  { name: "Rail flottant sur le dessin", build: varB, gain: "+272 px au plan",
+    why: `Le rail ne change pas, il cesse seulement de pousser: il flotte sur le plan et se replie en pastille quand il gêne. <span class="cost">Le prix: il cache un coin du dessin, et il faut penser à le replier.</span>` },
+  { name: "Bande au-dessus du dessin", build: varC, gain: "+272 px, −30 px de hauteur",
+    why: `Trois pastilles, une par calque: la hauteur coûte moins cher que la largeur sur un écran déjà coupé en quatre colonnes, et la pile se lit d'un coup d'œil. <span class="cost">Le prix: le nom du fichier ne tient plus dans la pastille; il faut l'ouvrir pour le lire.</span>` },
+  { name: "Bande au pied du dessin", build: varD, gain: "+272 px, −30 px de hauteur",
+    why: `La même bande, posée près du zoom — là où l'état d'une vue est déjà écrit, et loin du titre de la planche. <span class="cost">Le prix: le bas de l'écran est l'endroit le moins regardé.</span>` },
+  { name: "Tiroir, fermé par défaut", build: varE, gain: "+272 px au plan",
+    why: `Rien tant qu'on ne le demande pas: l'en-tête du volet porte le compte, le rail s'ouvre sur le dessin et se referme. On règle ses calques, puis on les oublie. <span class="cost">Le prix: un clic avant chaque réglage, et l'état des calques n'est plus visible en permanence.</span>` },
+  { name: "Un seul menu dans l'en-tête", build: varF, gain: "+272 px au plan, 0 px de bande",
+    why: `Un contrôle « 3/3 calques » et tout est dedans: les trois calques, leurs œils, et les commandes de celui qu'on choisit. Le dessin ne perd rien du tout. <span class="cost">Le prix: on ne peut pas tirer pour empiler dans un menu, et rien ne rappelle quel calque est masqué.</span>` },
+  { name: "Onglet dans l'inspecteur", build: varG, gain: "+272 px au plan, 0 px ailleurs",
+    why: `Aucune colonne nouvelle: le volet de droite existe déjà et gagne un onglet. L'unité et les calques sont deux lectures de la même planche, et une seule sert à la fois. <span class="cost">Le prix: on perd les mesures de l'unité pendant qu'on règle les calques.</span>` },
+  { name: "Rail rasé à 150 px", build: varH, gain: "+122 px au plan",
+    why: `Le rail reste un rail: pas de vignette, le glyphe de discipline et la date. Le nom du fichier attend dans la carte qui s'ouvre à la sélection — c'est lui, et lui seul, qui rendait le panneau large. <span class="cost">Le prix: la reconnaissance visuelle disparaît avec la vignette.</span>` },
+];
+
+function render(i) {
+  document.querySelector(`[data-var="${i}"] .mount`).innerHTML =
+    screenHTML(i, S[i], VARIANTS[i].build(i, S[i]));
+}
+function renderAll() {
+  document.getElementById("vars").innerHTML = VARIANTS.map((v, i) => `<div class="var" data-var="${i}">
+    <div class="vh"><span class="n">Variante ${String.fromCharCode(65 + i)}</span><b>${v.name}</b>
+      <span class="gain">${v.gain}</span></div>
+    <p class="why">${v.why}</p>
+    <div class="mount"></div></div>`).join("");
+  VARIANTS.forEach((_, i) => { S[i] = S[i] || newState(); render(i); });
+}
+
+function say(s, msg) {
+  s.toast = msg;
+  clearTimeout(s.timer);
+  s.timer = setTimeout(() => { s.toast = null; render(S.indexOf(s)); }, 3600);
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-a]");
+  /* A click anywhere else closes an open door, as a menu should. */
+  if (!el) {
+    let touched = false;
+    S.forEach((s, i) => { if (s && s.menu) { s.menu = null; render(i); touched = true; } });
+    if (touched) e.stopPropagation();
+    return;
+  }
+  const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+  if (!s) return;
+  switch (el.dataset.a) {
+    case "eye":
+      if (e.altKey) { s.iso = s.iso === k ? null : k; s.sel = k; break; }
+      if (s.iso) s.iso = null;
+      s.on[k] = !s.on[k];
+      s.sel = k;
+      break;
+    case "iso": s.iso = k || null; if (k) s.sel = k; break;
+    case "sel": s.sel = k; s.menu = null; break;
+    /* The drawer and the head menu are the same switch: both are the one
+       surface a variant opens over the drawing. */
+    case "drawer": s.drawer = !s.drawer; s.menu = null; break;
+    case "tab": s.tab = el.dataset.t; break;
+    case "menu": s.menu = s.menu === k ? null : k; s.sel = k; s.panel = null; break;
+    case "open":
+      s.menu = null;
+      say(s, `${cur(s, k).file} — ouvert dans ${s.docs[k].app}.`);
+      break;
+    case "swap": s.menu = null; s.panel = "swap"; s.sel = k; break;
+    case "hist": s.menu = null; s.panel = "hist"; s.sel = k; break;
+    case "close": s.panel = null; break;
+    case "pick": {
+      const f = FOUND[k][+el.dataset.f], d = s.docs[k];
+      d.versions = [{ file: f.file, date: f.date }, ...d.versions.filter((v) => v.file !== f.file)];
+      s.panel = "hist"; s.sel = k;
+      const n = d.versions.length - 1;
+      say(s, `Calque « ${disc(s, k).label} » : ${f.file}. ${n > 1 ? `${n} documents gardés` : "1 document gardé"}.`);
+      break;
+    }
+    case "revert": {
+      const d = s.docs[k], v = d.versions[+el.dataset.v];
+      d.versions = [v, ...d.versions.filter((x) => x !== v)];
+      say(s, `${v.file} — relu.`);
+      break;
+    }
+    default: return;
+  }
+  render(i);
+});
+
+/* The grip moves a row through the list, and the pile on the drawing
+   follows: the row at the top of the rail is the sheet on top. */
+document.addEventListener("pointerdown", (e) => {
+  const g = e.target.closest("[data-a='grip']");
+  if (!g) return;
+  const i = +g.dataset.i, k = g.dataset.k, s = S[i];
+  s.drag = k; s.sel = k; s.menu = null;
+  const list = g.closest(".rb");
+  const move = (ev) => {
+    const rows = [...list.querySelectorAll("[data-row]")];
+    const under = rows.find((r) => {
+      const b = r.getBoundingClientRect();
+      return ev.clientY >= b.top && ev.clientY <= b.bottom;
+    });
+    if (!under || under.dataset.row === k) return;
+    const from = s.order.indexOf(k), to = s.order.indexOf(under.dataset.row);
+    s.order.splice(from, 1);
+    s.order.splice(to, 0, k);
+    render(i);
+  };
+  const up = () => {
+    s.drag = null;
+    render(i);
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+});
+
+sprite();
+renderAll();
+</script>
+</body>
+</html>
