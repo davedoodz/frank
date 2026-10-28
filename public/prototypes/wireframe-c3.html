@@ -2521,12 +2521,16 @@ window.fitteSelectUnit = (unitStr) => {
   const sameSheet = V.view["Unités"] === LEVELS.indexOf(level);
   V.view["Unités"] = LEVELS.indexOf(level);
   V.sel["Unités"] = rowIndex;
-  fitUnit(sameSheet);
-  render();
+  /* A level change rebuilds the sheet and the thumbnails, so this path
+     cannot avoid a full render — but it can put it before the glide, the
+     way a list click does: a tween started ahead of ~650 ms of raster gets
+     its first frame after it is already over. */
+  if (sameSheet) paintSelection(); else render();
   /* A window click can select a row well below the fold: keep it in view,
      but only scroll the list pane itself, never the page around it. */
   document.querySelector(`[data-region="list"] [data-act="row"][data-value="${rowIndex}"]`)
     ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  fitUnit(sameSheet);
 };
 
 /* The wheel and the drag write straight to the element and to V, without a
