@@ -411,10 +411,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 /* A figure and its head belong on one line: a wrapped "pi² total" stops
    being a column heading and becomes two words floating over numbers. */
 .tbl th,.tbl td{white-space:nowrap}
-/* The line being read: the same green the selected level and the selected
-   unit carry, so one colour means "this is the thing" everywhere. */
-.tbl tr.on td{background:color-mix(in srgb, var(--vert) 34%, transparent)}
-.tbl tr.on td:first-child{box-shadow:inset 2px 0 0 var(--ink)}
 /* The levels under a building-wide count: dimmed, because the figures are
    not theirs — still clickable, because that is how one comes back. */
 .tabs.lvl[data-off="true"] .views button{opacity:.42}
@@ -870,12 +866,11 @@ const V = {
      The calendar's scale is the view in the second row. */
   day: "2026-11-14",
   task: null,
-  /* What the screen is counting. "Niveau" is one floor and the right column
-     describes the chosen unit; "Bâtiment" is the whole building, no unit is
-     chosen, and the right column becomes the quantities table. The level
-     strip has no meaning under "Bâtiment", so it is greyed out there. */
+  /* What the screen is counting. "Niveau" is one floor: the unit list, the
+     two drawings and the right column. "Bâtiment" is all eight: the work
+     area becomes the four quantity tables, and the level strip is dimmed
+     because no level answers for those figures. */
   scope: "Niveau",
-  qrow: 0,           // which line of the quantities table is lit
   utab: 1,           // which tab of the unit inspector
   zoom: 100,         // plan zoom, in percent
   /* The margin: notes pinned on a drawing. Two publics share one list — the
@@ -943,7 +938,9 @@ function sprite() {
   const names = ["home", "folder", "image", "layout-grid", "layers", "table", "hash", "git-compare", "calendar-check",
     "file", "box", "pen-line", "chevron-right", "chevron-left", "chevron-down", "chevron-up", "search", "plus", "minus", "maximize", "minimize",
     "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "x", "link",
-    /* the rail's alternatives, one shortlist per screen; see NAV_ICONS */
+    /* the rail's alternatives, one shortlist per screen; see NAV_ICONS —
+       and the glyph of each quantity table; see QTABS */
+    "app-window",
     "gauge", "building-2", "clipboard-list", "grid-2x2", "bed-double", "door-open", "ruler",
     "sigma", "calculator", "chart-column", "percent", "calendar-clock", "timer", "list-checks",
     "flag", "folder-tree", "file-stack", "hard-drive", "book-open", "shield-check",
@@ -1274,32 +1271,29 @@ const ARTICLES = [
 /* Two things are declared beside each table. "type" is what a column holds:
    "n" is a number and sits right in the head and in the body both, "t" is a
    word and sits left in both — a head that floats left of its own column of
-   figures is why a table reads as noise. "aim" says what a line can light,
-   which is a property of the thing counted and not of the table: a typology
-   is drawn on the floor plan, a level is a sheet of its own, a window type
-   and a cladding are neither, and the pane says so rather than lighting
-   something that is not the thing. */
+   figures is why a table reads as noise. "glyph" is what the table counts,
+   so four tables on one screen are told apart before they are read. */
 const QTABS = {
-  "Unités": { head: ["Type", "Par étage", "Projet", "pi² moy", "pi² total", "Part"],
+  "Unités": { glyph: "bed-double",
+    head: ["Type", "Par étage", "Projet", "pi² moy", "pi² total", "Part"],
     type: ["t", "n", "n", "n", "n", "n"],
-    aim: (r) => (TYPOS.includes(baseTypo(r[0])) ? { typo: baseTypo(r[0]), what: `les ${r[0]} du niveau` } : null),
     rows: [["3½", 3.2, 26, 724, 18824, "17 %"], ["3½+bureau", 0.9, 7, 880, 6160, "6 %"],
       ["4½", 6.1, 49, 1100, 53891, "49 %"], ["5½", 2.8, 22, 1366, 30063, "28 %"]] },
-  "Superficies": { head: ["Niveau", "Unités", "Net pi²", "Brut pi²", "Circulation", "Part"],
+  "Superficies": { glyph: "ruler",
+    head: ["Niveau", "Unités", "Net pi²", "Brut pi²", "Circulation", "Part"],
     type: ["t", "n", "n", "n", "n", "n"],
-    aim: (r) => ({ level: Number(r[0]), what: `le niveau ${r[0]} en entier` }),
     rows: [["8", 13, 14896, 17503, "15 %", "14 %"], ["7", 15, 15500, 18212, "15 %", "14 %"],
       ["6", 15, 15500, 18212, "15 %", "14 %"], ["5", 15, 15500, 18212, "15 %", "14 %"],
       ["4", 15, 15500, 18212, "15 %", "14 %"], ["3", 15, 15500, 18212, "15 %", "14 %"],
       ["2", 14, 14150, 16626, "15 %", "13 %"], ["1", 2, 2392, 2811, "15 %", "2 %"]] },
-  "Fenêtres": { head: ["Repère", "Largeur", "Hauteur", "Quantité", "Façade", "Source"],
+  "Fenêtres": { glyph: "app-window",
+    head: ["Repère", "Largeur", "Hauteur", "Quantité", "Façade", "Source"],
     type: ["t", "n", "n", "n", "t", "t"],
-    aim: () => null,
     rows: [["W-12", "1800", "1500", 24, "sud", "A-201 R04"], ["W-14", "1560", "1500", 6, "sud", "A-201 R04"],
       ["W-21", "900", "1500", 18, "est", "A-202 R03"], ["W-33", "2400", "2100", 8, "ouest", "A-202 R03"]] },
-  "Matériaux": { head: ["Matériau", "Façade", "m²", "Part", "Révision", "Source"],
+  "Matériaux": { glyph: "layers",
+    head: ["Matériau", "Façade", "m²", "Part", "Révision", "Source"],
     type: ["t", "t", "n", "n", "t", "t"],
-    aim: () => null,
     rows: [["brique grise", "sud", 412, "46 %", "R04", "A-202"], ["brique rouge", "est", 198, "22 %", "R03", "A-202"],
       ["panneau fibrociment", "ouest", 186, "21 %", "R03", "A-202"], ["verre", "toutes", 98, "11 %", "R04", "A-201"]] },
 };
@@ -1517,9 +1511,7 @@ const typoHTML = () => {
    contour doesn't belong to the sheet actually on screen. */
 function unitMarkHTML() {
   const rows = rowsOf("Unités");
-  /* Under "Bâtiment entier" nothing is selected, so nothing is outlined;
-     the hit boxes stay, because the plan is still clickable. */
-  const sel = buildingScope() ? -1 : selIndex("Unités");
+  const sel = selIndex("Unités");
   const polys = polysForPane();
   const lv = paneLevel();
   const zs = V.zoom / 100;
@@ -2127,9 +2119,6 @@ const CONTEXT = {
   "Codes": ["Code du Québec", "Règlement d'urbanisme", "Loi-cadre", "Tous", "Non résolus"],
   /* The scale the calendar is drawn at. */
   "Échéancier": ["Mois", "Semaine", "Année"],
-  /* Not a strip: the chips inside the Quantités section, driven by the
-     same V.view entries. */
-  "Quantités": ["Unités", "Superficies", "Fenêtres", "Matériaux"],
 };
 
 function tabsHTML() {
@@ -2263,7 +2252,7 @@ function headerHTML() {
           /* AutoCAD and SketchUp used to sit up here, a screen away from the
              drawing they open. They live on the drawing pane now. */
           : buildingScope()
-          ? `<span class="btnw" ${act("csv")} title="Télécharger le tableau en .csv">${icon("download")}<span class="lo bar" style="width:40px"></span><span class="hi">Exporter en .csv</span></span>`
+          ? `<span class="btnw" ${act("csvall")} title="Télécharger les quatre tableaux en .csv">${icon("download")}<span class="lo bar" style="width:40px"></span><span class="hi">Tout exporter en .csv</span></span>`
           : `<span class="btnw" ${act("export")} title="Exporter ce que cet écran montre">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Exporter</span></span>`}
       </div>
       ${metrics ? `<div class="row" style="gap:var(--gap)">${[1, 2, 3, 4].map((i) => `<div class="tile" style="flex:1">
@@ -2286,9 +2275,7 @@ function listHTML() {
   const emptyMsg = V.screen === "Unités" && isNonresLevel(paneLevel())
     ? "aucune unité résidentielle à ce niveau" : "rien ne correspond";
   const rows = pairs.length ? pairs.map((r) => `${r[0]} · ${r[1]}`) : [emptyMsg];
-  /* Counting the building is not reading a unit: no row is lit. Clicking one
-     still works, and switches the scope back. */
-  const sel = buildingScope() ? -1 : selIndex(V.screen);
+  const sel = selIndex(V.screen);
 
   if (mode === "Filter bar only") {
     return `<section class="pane rg ${solo("list")}" data-rg="liste → barre de filtres" data-fi="${fiOf("list")}" style="flex:0 0 auto;grid-column:1/-1">
@@ -2329,6 +2316,8 @@ function listHTML() {
 
 function contentHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.content : null;
+  /* Counting the building replaces the drawings: see quantScreenHTML. */
+  if (buildingScope()) return quantScreenHTML(step);
   const mode = V.content.layout;
   const body = {
     "Unités": () => {
@@ -2448,23 +2437,11 @@ function contentHTML() {
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
-      /* Under "Bâtiment entier" there is no chosen unit, so the caption says
-         what the chosen line of the table lights — or says plainly that the
-         line has nothing to light here. A window type and a cladding are
-         counted on elevations, not on this floor plan and not on a model
-         that carries no material: claiming otherwise would light the wrong
-         thing. Quantités is no longer a strip under the drawings; it is the
-         right column, where the scope switch sends it. */
-      const a = buildingScope() ? qAim() : null;
       const nonres = isNonresLevel(paneLevel());
-      const planNote = buildingScope()
-        ? (a ? `${a.what} — allumé sur le plan` : "rien à montrer sur le plan pour cette ligne")
-        : nonres
+      const planNote = nonres
         ? `${levelView(paneLevel())} — architecture non fournie — base ${ENG_LABELS[engBaseDiscipline(paneLevel())].toLowerCase()}`
         : `${unit} — contours par-dessus`;
-      const modelNote = buildingScope()
-        ? "rien à montrer sur la maquette pour cette ligne"
-        : paneLevel() === -1 || paneLevel() === 0
+      const modelNote = paneLevel() === -1 || paneLevel() === 0
         ? `${levelView(paneLevel())} — géométrie absente de la maquette`
         : paneLevel() === 9
         ? "Toiture — bandeau et repère affichés sur la maquette"
@@ -2528,56 +2505,60 @@ function contentHTML() {
 }
 
 /* ------------------------------------------------------- the quantities
-   On "Bâtiment entier" the right column stops describing one unit — there
-   is none — and becomes the table. One place on the right, two contents
-   according to the question being asked. */
+   "Bâtiment entier" is not a way of looking at one floor, so nothing that
+   belongs to a floor stays on screen: no unit list, no plan, no model, no
+   margin. A count made over eight levels cannot be lit on the sheet of one
+   of them, and a window type or a cladding is on no floor plan at all —
+   the honest screen is the four tables themselves, side by side, each with
+   the glyph of what it counts and its own .csv. */
 const buildingScope = () => V.screen === "Unités" && V.scope === "Bâtiment";
-const qTable = () => QTABS[viewOf("Quantités")];
-const qRowIndex = () => Math.min(V.qrow, qTable().rows.length - 1);
-function qAim() {
-  const t = qTable();
-  const r = t.rows[qRowIndex()];
-  return r ? t.aim(r) : null;
-}
 
-function qPaneHTML(step) {
-  const t = qTable();
-  const chips = viewsOf("Quantités").map((name, i) => `<span class="chip ${i === viewIndex("Quantités") ? "on" : ""}"
-    ${act("subview", `Quantités|${i}`)} title="${name}">
-    <span class="lo bar" style="width:40px"></span><span class="hi">${name}</span></span>`).join("");
+function qTableHTML(name) {
+  const t = QTABS[name];
   const head = t.head.map((h, i) => `<th class="${t.type[i] === "n" ? "n" : ""}">
     <span class="lo bar" style="width:40px"></span><span class="hi">${h}</span></th>`).join("");
-  const body = t.rows.map((r, i) => {
-    const a = t.aim(r);
-    return `<tr class="${i === qRowIndex() ? "on" : ""}" ${act("qrow", i)}
-        title="${a ? `Allumer ${a.what} sur le plan` : "Rien à montrer sur le plan pour cette ligne"}">
-      ${r.map((c, j) => `<td class="${t.type[j] === "n" ? "n" : ""}">
-        <span class="lo bar" style="width:${t.type[j] === "n" ? 34 : 50}px"></span>
-        <span class="hi">${c}</span></td>`).join("")}</tr>`;
-  }).join("");
-  const inner = `<div class="ph">${icon("table")}<span class="lo bar" style="width:70px"></span>
-      <span class="hi">Quantités du bâtiment</span></div>
-    <div class="pb">
-      <div class="row" style="gap:6px;flex-wrap:wrap">${chips}</div>
+  const body = t.rows.map((r) => `<tr>${r.map((c, j) => `<td class="${t.type[j] === "n" ? "n" : ""}">
+      <span class="lo bar" style="width:${t.type[j] === "n" ? 34 : 50}px"></span>
+      <span class="hi">${c}</span></td>`).join("")}</tr>`).join("");
+  return `<section class="pane" style="min-height:0">
+    <div class="ph">${icon(t.glyph)}<span class="lo bar" style="width:70px"></span><span class="hi">${name}</span>
+      <span style="flex:1"></span>
+      <span class="btnw" ${act("csv", name)} title="Télécharger « ${name} » en .csv">${icon("download")}<span class="hi">.csv</span></span></div>
+    <div class="pb" style="overflow:auto">
       <table class="tbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
       <div class="hi" style="font-size:11px;color:var(--ink-3)">compté à partir des dessins, rien de saisi</div>
-    </div>`;
-  if (V.inspector.layout === "Bottom sheet") return `<section class="pane rg sheet ${solo("inspector")}"
-      data-rg="quantités → feuille du bas" data-fi="${fiOf("inspector")}"
-      style="height:260px">${step ? `<span class="step">${step}</span>` : ""}${inner}</section>`;
-  return region("inspector", "quantités du bâtiment", inner, step);
+    </div></section>`;
+}
+
+function quantScreenHTML(step) {
+  const inner = `<div class="pb" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);align-items:start;align-content:start;overflow:auto">
+    ${Object.keys(QTABS).map(qTableHTML).join("")}</div>`;
+  return region("content", "quantités du bâtiment", inner, step);
 }
 
 /* A real file, not a toast: the table as it is on screen, in the order it
    is on screen, with the BOM Excel needs to read the accents. */
-function exportCSV() {
-  const t = qTable();
+function exportCSV(name) {
+  const t = QTABS[name];
   const q = (c) => `"${String(c).replace(/"/g, '""')}"`;
-  const lines = [[`${V.project} — ${viewOf("Quantités")} — bâtiment entier`],
+  const lines = [[`${V.project} — ${name} — bâtiment entier`],
     t.head, ...t.rows].map((r) => r.map(q).join(",")).join("\r\n");
   const url = URL.createObjectURL(new Blob(["\uFEFF" + lines], { type: "text/csv;charset=utf-8" }));
   const a = Object.assign(document.createElement("a"), { href: url,
-    download: `baldwin-iii-${viewOf("Quantités").toLowerCase()}.csv` });
+    download: `baldwin-iii-${name.toLowerCase()}.csv` });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* The same rows, four blocks, one file, a blank line between them: a
+   take-off is passed around as one sheet, not as four attachments. */
+function exportAllCSV() {
+  const q = (c) => `"${String(c).replace(/"/g, '""')}"`;
+  const block = (name) => [[`${V.project} — ${name} — bâtiment entier`],
+    QTABS[name].head, ...QTABS[name].rows].map((r) => r.map(q).join(",")).join("\r\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF" + Object.keys(QTABS).map(block).join("\r\n\r\n")],
+    { type: "text/csv;charset=utf-8" }));
+  const a = Object.assign(document.createElement("a"), { href: url, download: "baldwin-iii-quantites.csv" });
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
@@ -2613,7 +2594,7 @@ function inspectorHTML() {
   const mode = V.inspector.layout;
   if (mode === "Hidden") return "";
   const step = V.journey ? SCREENS[V.screen].steps.inspector : null;
-  if (buildingScope()) return qPaneHTML(step);
+  /* The quantities screen has no inspector: it is not reading anything. */
   if (V.screen === "Unités" && isNonresLevel(paneLevel())) return nonresInspectorHTML(mode, step);
   const row = selRow(V.screen);
   const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`,
@@ -2750,26 +2731,20 @@ function pinMarkHTML() {
     </div>`).join("");
 }
 
-/* The right rail: the margin on top, then what the column can hold. Reading
-   one floor that is the inspector's four tabs; counting the building there
-   is no unit to inspect, so it is the table instead. Folding the right
-   column into icons is what buys the margin its width. */
+/* The right rail: the margin on top, then the inspector's four tabs.
+   Folding the right column into icons is what buys the margin its width. */
 function railToolsHTML() {
   const n = pinsVisible().length;
   const tool = (name, glyph, title, badge) => {
-    /* Every tool but the margin opens the right column, so the lit one is
-       what the column is showing: the table, or the tab that is open. */
-    const on = V.rightTool === "notes"
-      ? name === "notes"
-      : (name === "quant" || name === `utab${V.utab}`);
+    /* The four tabs all open the inspector, so the lit one is the tab that
+       is open, not the word "inspector". */
+    const on = V.rightTool === "notes" ? name === "notes" : name === `utab${V.utab}`;
     return `<span class="rtool ${on ? "on" : ""}"
       ${act("rtool", name)} title="${title}" aria-label="${title}">${icon(glyph)}${badge ? `<i>${badge}</i>` : ""}</span>`;
   };
   return `<div class="rrail rg" data-rg="rail d'outils" data-fi="${fiOf("inspector")}">
     ${tool("notes", "message-square", "Dans la marge", n)}
-    ${buildingScope()
-      ? tool("quant", "table", "Quantités du bâtiment", 0)
-      : UNIT_TAB_ICONS.map((g, i) => tool(`utab${i}`, g, UNIT_TABS[i], 0)).join("")}
+    ${UNIT_TAB_ICONS.map((g, i) => tool(`utab${i}`, g, UNIT_TABS[i], 0)).join("")}
   </div>`;
 }
 
@@ -3246,13 +3221,16 @@ window.addEventListener("fitte:model-zoom", (e) => {
 
 function render() {
   const def = SCREENS[V.screen];
-  const hasList = def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
-  const hasInsp = def.regions.includes("inspector") && V.inspector.layout === "Right panel";
-  /* Six columns of figures need more than a unit card does, so the right
-     column widens when it becomes the table. The margin is narrower than the
-     inspector and is followed by the rail of tool icons, which is what makes
-     folding the inspector worth the trade: the drawings keep their width. */
-  const rightW = V.rightTool === "notes" ? "286px" : (buildingScope() ? "385px" : "340px");
+  /* Counting the building is not reading a floor: the unit list, the two
+     drawings, the margin and its rail all belong to a floor, so the four
+     tables take the work area on their own. */
+  const whole = buildingScope();
+  const hasList = !whole && def.regions.includes("list") && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
+  const hasInsp = !whole && def.regions.includes("inspector") && V.inspector.layout === "Right panel";
+  /* The margin is narrower than the inspector and is followed by the rail of
+     tool icons, which is what makes folding the inspector worth the trade:
+     the drawings keep their width. */
+  const rightW = V.rightTool === "notes" ? "286px" : "340px";
   const cols = [hasList ? "260px" : null, "1fr",
     hasInsp ? rightW : null, hasInsp ? "40px" : null].filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
@@ -3273,12 +3251,12 @@ function render() {
         <div class="work" style="grid-template-columns:${SCREENS[V.screen].home ? "1fr" : cols};grid-auto-rows:min-content 1fr min-content;align-content:stretch">
           <div style="grid-column:1/-1">${headerHTML()}</div>
           ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
-          ${SCREENS[V.screen].home ? "" : `${V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
+          ${SCREENS[V.screen].home ? "" : `${!whole && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
           ${hasList ? listHTML() : ""}
           ${contentHTML()}
           ${hasInsp ? (V.rightTool === "notes" ? marginHTML() : inspectorHTML()) + railToolsHTML() : ""}`}
         </div>
-        ${def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
+        ${!whole && def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
       </div>
     </div>`;
 
@@ -3617,20 +3595,6 @@ function onClick(e) {
          arbitrarily cropped corner of the sheet instead of the sheet. */
       if (screen === "Unités" && isNonresLevel(currentLevel())) { V.zoom = 100; V.pan = { x: 0, y: 0 }; }
       break;
-    /* A section inside a screen names itself, because the screen it sits on
-       has no views of its own: "Quantités|2" switches that table alone. */
-    case "subview": {
-      const [name, i] = value.split("|");
-      V.view[name] = Number(i);
-      V.sel[name] = 0;
-      /* Another table is another set of lines, and the fill the last line
-         left on the plan belonged to that table, not to this one. */
-      if (name === "Quantités") {
-        V.qrow = 0;
-        TYPOS.forEach((ty) => { if (V.typo[ty]) dial.setValue(`typologies.${ty}`, false); });
-      }
-      break;
-    }
     case "viewnext":
       V.view[screen] = (viewIndex(screen) + 1) % viewsOf(screen).length;
       V.sel[screen] = 0;
@@ -3653,25 +3617,15 @@ function onClick(e) {
        unit that was being read, so the switch is not a one-way door. */
     case "scope":
       V.scope = value;
-      /* Counting the building is the reason the switch was pressed, so the
-         right column shows the table rather than waiting to be asked. */
-      if (V.scope === "Bâtiment") {
-        V.rightTool = "inspector";
-        TYPOS.forEach((ty) => { if (V.typo[ty]) dial.setValue(`typologies.${ty}`, false); });
-      }
+      /* A typology fill belongs to a floor plan, and the plan is leaving
+         the screen: nothing should stay lit on a drawing no longer shown. */
+      if (V.scope === "Bâtiment") TYPOS.forEach((ty) => { if (V.typo[ty]) dial.setValue(`typologies.${ty}`, false); });
       break;
-    /* A line of the table lights what it counts, where that thing exists.
-       A typology is a fill on the floor plan; a level is a sheet, so the
-       strip moves to it even though the figures stay building-wide. A
-       window type and a cladding light nothing, and the pane says so. */
-    case "qrow": {
-      V.qrow = Number(value);
-      const a = qAim();
-      if (a && a.typo) TYPOS.forEach((ty) => dial.setValue(`typologies.${ty}`, ty === a.typo));
-      if (a && a.level) { V.view["Unités"] = viewIndexOfLevel(a.level); V.sel["Unités"] = 0; }
-      break;
-    }
-    case "csv": exportCSV(); say(`Tableau « ${viewOf("Quantités")} » téléchargé en .csv.`); break;
+    case "csv": exportCSV(value); say(`Tableau « ${value} » téléchargé en .csv.`); break;
+    /* Four files would be four clicks; the four tables in one file are read
+       as one sheet with four blocks, which is how a quantity take-off is
+       passed around anyway. */
+    case "csvall": exportAllCSV(); say("Les quatre tableaux ont été téléchargés en .csv."); break;
     /* Writing a note never touches a drawing or a bylaw: it is a sentence
        stored against the provision's number, with a name and a day. */
     case "noteopen": V.noteOn = V.noteOn === value ? null : value; break;
