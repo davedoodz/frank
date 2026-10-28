@@ -2436,11 +2436,15 @@ function glideTo(to, ms = 420) {
   const dz = Math.abs(to.zoom - z0), dp = Math.hypot(to.pan.x - p0.x, to.pan.y - p0.y);
   /* A move of a few pixels is not a journey: snap, and keep the frames. */
   if (dz < 1 && dp < 2) { V.zoom = to.zoom; V.pan = to.pan; paintSheet(); return; }
-  const t0 = performance.now();
+  /* The clock starts on the first frame, not on the call: between the two
+     the screen is rebuilt, and a glide measured from before that work would
+     spend part of its duration on a thread that cannot paint. */
+  let t0 = 0;
   /* Slow at both ends, quickest in the middle: the start says "we are
      leaving this unit", the end says "we have arrived at that one". */
   const ease = (t) => (t < .5 ? 4 * t * t * t : 1 - ((-2 * t + 2) ** 3) / 2);
   const step = (now) => {
+    if (!t0) t0 = now;
     const t = Math.min(1, (now - t0) / ms), k = ease(t);
     V.zoom = z0 * ((to.zoom / z0) ** k);
     V.pan.x = p0.x + (to.pan.x - p0.x) * k;
@@ -3060,7 +3064,10 @@ function onClick(e) {
        filling the pane, not a contour somewhere off-screen. */
     case "row":
       V.sel[screen] = Number(value);
-      if (screen === "Unités") fitUnit();
+      /* Draw the new selection first, then move the sheet to it: the mark
+         on the destination unit is visible for the whole journey, and the
+         glide's first frame lands on a thread that has nothing left to do. */
+      if (screen === "Unités") { render(); fitUnit(); return; }
       break;
     case "article": V.articleId = value; V.noteOn = null; break;
     /* The totals strip under the floor: one line, or the table. */
