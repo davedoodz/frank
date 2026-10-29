@@ -434,6 +434,25 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .tbl th{font-weight:500;color:var(--ink-3);font-size:11px;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line-2)}
 .tbl td{padding:6px 8px;border-bottom:1px solid var(--line-2);color:var(--ink-2)}
 .tbl td.n,.tbl th.n{text-align:right;font-variant-numeric:tabular-nums}
+/* The floor's quantities (?fq=): the selected unit is the plan outline's
+   green, as a row where it is one line of the table, as a column where it
+   only holds a share of what the floor counts. */
+.tbl tr.on td{background:#eef1e0;color:var(--ink);font-weight:600}
+.tbl td.hot,.tbl th.hot{background:#f4f6ea;color:#4c5906}
+.tbl tfoot td{color:var(--ink);font-weight:600}
+.fqt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fqh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink)}
+.fqh svg{width:13px;height:13px}
+.fqs{font-size:11px;font-weight:400;color:var(--ink-3);margin-left:6px}
+.fqn{font-size:11px;color:var(--ink-3)}
+.fq-stack{display:flex;flex-direction:column;gap:16px;overflow:auto}
+.pane .pb.fq-stack{padding:10px 12px}
+.fq-unit{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:10px}
+[data-theme="dark"] .tbl tr.on td{background:#2b3313}
+[data-theme="dark"] .tbl td.hot,[data-theme="dark"] .tbl th.hot{background:#232816;color:#c3e05a}
+/* Inside quantites-etage.html the bench is the control; the panel would
+   cover the margin variant. */
+html[data-fq-embed] .dialkit-root{display:none}
 /* A figure and its head belong on one line: a wrapped "pi² total" stops
    being a column heading and becomes two words floating over numbers. */
 .tbl th,.tbl td{white-space:nowrap}
@@ -644,18 +663,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 
 /* ---------------------------------------------------------- the margin
    Notes live beside the drawings, never on top of them: the margin takes
-   its own column and the inspector folds into the icon rail at the far
-   right. A studio note is a different object from a shared pin — square,
-   slate, dashed, locked — so nobody has to read a legend to tell them
-   apart, and nothing is tinted to mean private. */
-.rrail{display:flex;flex-direction:column;align-items:center;gap:6px;padding:7px 0;
-  border-left:1px solid var(--line-2);background:var(--paper)}
-.rrail .rtool{position:relative;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
-  color:var(--ink-3);cursor:pointer}
-.rrail .rtool:hover{background:var(--fill-2);color:var(--ink-2)}
-.rrail .rtool.on{background:var(--fill);color:var(--ink)}
-.rrail .rtool i{position:absolute;top:-2px;right:-3px;min-width:14px;height:14px;padding:0 3px;border-radius:7px;
-  background:#8ba00f;color:#fff;font:600 9px/14px var(--sans);font-style:normal;text-align:center}
+   its own column. A studio note is a different object from a shared pin —
+   square, slate, dashed, locked — so nobody has to read a legend to tell
+   them apart, and nothing is tinted to mean private. */
 .pane.margin .pb{gap:8px;overflow:auto}
 .nscope{gap:5px;align-items:center}
 .ncard{position:relative;border:1px solid var(--line-2);border-radius:8px;background:var(--paper);
@@ -735,6 +745,20 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    and a light wash, both in the one accent the screen already uses. */
 .umark{position:absolute;inset:0;width:100%;height:100%;z-index:3;overflow:visible}
 .umark polygon.hit{fill:transparent;pointer-events:auto;cursor:pointer}
+/* The sheet answers the pointer the way the model does: the unit under it
+   lights before any click, so a plan can be read by sweeping it. Lighter
+   than the selection, which must stay the one unit that is chosen. */
+.umark polygon.hit:hover{fill:rgba(139,160,15,.10);stroke:#8ba00f;vector-effect:non-scaling-stroke}
+.vp.drag .umark polygon.hit:hover{fill:transparent;stroke:none}
+/* Named like the model's pill, and scaled against the zoom in script: the
+   whole sheet is one transformed box, so an unscaled tag would grow into a
+   sign at 400 %. */
+.uhover{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,-100%);
+  background:#fff;color:var(--ink);border:1px solid var(--line);border-style:solid;
+  font-weight:600;line-height:1.3;white-space:nowrap;font-variant-numeric:tabular-nums;
+  box-shadow:0 1px 3px rgba(17,17,18,.14)}
+.uhover[hidden]{display:none}
+[data-fi="low"] .uhover{display:none}
 .umark polygon.on{fill:rgba(139,160,15,.16);stroke:#8ba00f;stroke-width:1.6;
   vector-effect:non-scaling-stroke;pointer-events:auto;cursor:pointer}
 .ulabel{position:absolute;z-index:4;pointer-events:none;white-space:nowrap;
@@ -917,8 +941,11 @@ const V = {
      studio's own reminders and the pins an invited collaborator can read —
      and the guest view does not render the studio's, it drops them. */
   pins: [],
-  rightTool: "notes",   // which icon of the right rail is lit
   pinScope: "equipe",   // what the next pin will be
+  fqTab: "Unités",      // the floor-quantity drawer's open table (?fq=tiroir)
+  fqOpen: true,         // the drawer unfolded
+  fqMargin: "quant",    // ?fq=marge: notes or quantities in the margin
+  fqModel: "quant",     // ?fq=maquette: the model or quantities in its pane
   guest: false,         // read the screen as the shared link shows it
   pinMode: false,       // the next click on a drawing puts a point down
   pending: null,        // a point put down, waiting for its sentence
@@ -1565,7 +1592,7 @@ function unitMarkHTML() {
        along with everything else; dividing by the zoom keeps the outline
        the hairline it is meant to be at any magnification. */
     return `<polygon class="${on ? "on" : "hit"}" points="${poly.map(([x, y]) => `${x},${y}`).join(" ")}"
-      style="stroke-width:${(1.6 / zs).toFixed(3)}px" data-act="row" data-value="${i}"><title>${r[0]} · ${r[1]}</title></polygon>`;
+      style="stroke-width:${(1.6 / zs).toFixed(3)}px" data-act="row" data-value="${i}"></polygon>`;
   }).join("");
 
   /* The label is HTML, not SVG text: the overlay is stretched to the sheet's
@@ -2180,7 +2207,8 @@ function tabsHTML() {
 
   let items;
   const views = CONTEXT[V.screen] || [];
-  const viewBtn = (t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen)}" title="${t}">
+  /* Under "Bâtiment entier" no level is the one being read, so none is lit. */
+  const viewBtn = (t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen) && !buildingScope()}" title="${t}">
     <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`;
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
@@ -2455,6 +2483,9 @@ function contentHTML() {
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>
         ${kind === "plan" ? `<span class="laychips">${laychip("none", "Architecture")}${laychip("arp", "Arpenteur")}${laychip("pay", "Paysage")}</span>` : ""}
+        ${kind === "model" && FQ === "maquette" ? `<span class="laychips" style="margin-right:8px">
+          <span class="chip ${V.fqModel === "model" ? "on" : ""}" ${act("fqmodel", "model")}>${icon("box")}<span class="lb">Maquette</span></span>
+          <span class="chip ${V.fqModel === "quant" ? "on" : ""}" ${act("fqmodel", "quant")}>${icon("table")}<span class="lb">Quantités</span></span></span>` : ""}
         ${hostButton(kind === "plan" ? "plan" : "model")}</div>
         ${kind === "plan" ? `<div class="engineering-bar hi">
           <span class="laychips eng">${ENG_DISCIPLINES.map((d) => engChip(d, paneLevel())).join("")}</span>
@@ -2472,14 +2503,14 @@ function contentHTML() {
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}${pinMarkHTML()}</div></div>
               ${north("plan")}${mini("plan")}${zcol("plan")}</div>`
-          : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
+          : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0;${FQ === "maquette" && V.fqModel === "quant" ? "display:none" : ""}" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
               </div>
               <div class="npins" data-npins></div>
               ${mtools}${north("model")}${axes}${mini("model")}${zcol("model")}
-            </div>`}
+            </div>${FQ === "maquette" && V.fqModel === "quant" ? fqBlockHTML("maquette") : ""}`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
@@ -2500,8 +2531,9 @@ function contentHTML() {
         <div style="position:relative;flex:1;display:flex">${plan()}
         ${noModel ? "" : `<div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
         <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div>`}</div></div>`;
-      return `<div class="col" style="flex:1;gap:var(--gap)">
-        <div class="row" style="flex:1;align-items:stretch;gap:var(--gap);min-height:0">${plan()}${model()}</div></div>`;
+      return `<div class="col" style="flex:1;gap:var(--gap);min-height:0">
+        <div class="row" style="flex:1;align-items:stretch;gap:var(--gap);min-height:0">${plan()}${model()}</div>
+        ${FQ === "tiroir" && !isNonresLevel(paneLevel()) ? fqBlockHTML("tiroir") : ""}</div>`;
     },
     /* Codes is the vertical reading of the provisions: the Québec
        construction code first, then the bylaw, each one with the schematic
@@ -2581,6 +2613,145 @@ function quantScreenHTML(step) {
   const inner = `<div class="pb" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);align-items:start;align-content:start;overflow:auto">
     ${Object.keys(QTABS).map(qTableHTML).join("")}</div>`;
   return region("content", "quantités du bâtiment", inner, step);
+}
+
+/* ------------------------------------------------ the floor's quantities
+   The building's four tables, read on one floor. quantites-etage.html
+   compares four places to put them through ?fq=; without it the floor
+   screen is unchanged. Each table counts the floor on screen and gives the
+   selected unit its own row or column, so a click in the list, on the plan
+   or on the model moves the tables too. Windows and materials have no
+   per-floor count in the drawings yet: their floor and unit figures are
+   the building schedule shared out by net area, and each table says so. */
+const FQ_VARIANTS = ["tiroir", "marge", "maquette", "liste"];
+const FQ = FQ_VARIANTS.find((v) => v === new URLSearchParams(location.search).get("fq")) || null;
+const FQ_TABS = ["Unités", "Superficies", "Fenêtres", "Matériaux"];
+const BUILDING_NET = ALL_UNITS.reduce((s, r) => s + r[6], 0);
+const fqNum = (n, d = 0) => n.toLocaleString("fr-CA", { minimumFractionDigits: d, maximumFractionDigits: d });
+const fqPct = (a, b) => `${b ? Math.round(a / b * 100) : 0} %`;
+const unitNo = (r) => r[0].split(" · ")[0];
+
+function floorQuant() {
+  const floor = UNITS_BY_LEVEL[viewOf("Unités")] || [];
+  const unit = selRow("Unités");
+  const visible = rowsOf("Unités");
+  const net = floor.reduce((s, r) => s + r[6], 0);
+  const brut = net / 0.85;
+  const u = unit ? unitNo(unit) : null;
+  const types = [...new Set(floor.map((r) => r[5]))].sort();
+  const ofType = (ty) => floor.filter((r) => r[5] === ty);
+  const sum = (rows) => rows.reduce((s, r) => s + r[6], 0);
+  const mean = unit ? sum(ofType(unit[5])) / ofType(unit[5]).length : 0;
+  const floorShare = (q) => q * net / BUILDING_NET;
+  const unitShare = (q) => (unit ? q * unit[6] / BUILDING_NET : 0);
+  const estimate = "estimation : bordereau du bâtiment réparti par superficie nette — à vérifier";
+  return {
+    level: viewOf("Unités"), unit, u, count: floor.length,
+    tables: {
+      "Unités": {
+        head: ["Type", "Unités", "pi² moy", "pi² total", "Part"], type: ["t", "n", "n", "n", "n"], compact: [0, 1, 2],
+        rows: types.map((ty) => [ty, ofType(ty).length, fqNum(sum(ofType(ty)) / ofType(ty).length),
+          fqNum(sum(ofType(ty))), fqPct(sum(ofType(ty)), net)]),
+        on: unit ? types.indexOf(unit[5]) : -1,
+        note: unit ? `${u} : ${unit[5]} de ${fqNum(unit[6])} pi², ${unit[6] >= mean ? "+" : "−"}${fqNum(Math.abs(unit[6] - mean))} pi² par rapport à la moyenne des ${unit[5]} de l'étage`
+          : "compté à partir des étiquettes du plan",
+      },
+      "Superficies": {
+        head: ["Unité", "Type", "Net pi²", "m²", "Part"], type: ["t", "t", "n", "n", "n"], compact: [0, 2, 4],
+        rows: floor.map((r) => [unitNo(r), r[5], fqNum(r[6]), fqNum(r[6] * 0.092903, 1), fqPct(r[6], net)]),
+        on: unit ? floor.indexOf(unit) : -1,
+        acts: floor.map((r) => visible.indexOf(r)),
+        foot: [["Net", "", fqNum(net), fqNum(net * 0.092903), "100 %"],
+          ["Circulation", "", fqNum(brut - net), fqNum((brut - net) * 0.092903), "15 %"],
+          ["Brut", "", fqNum(brut), fqNum(brut * 0.092903), ""]],
+        note: "net : étiquettes du plan · circulation : 15 %, comme le tableau du bâtiment",
+      },
+      "Fenêtres": {
+        head: ["Repère", "Largeur", "Hauteur", "Étage", u || "Unité", "Façade"], type: ["t", "n", "n", "n", "n", "t"], compact: [0, 3, 4],
+        rows: QTABS["Fenêtres"].rows.map((r) => [r[0], r[1], r[2], fqNum(floorShare(r[3]), 1), fqNum(unitShare(r[3]), 1), r[4]]),
+        hot: 4, note: estimate,
+      },
+      "Matériaux": {
+        head: ["Matériau", "Façade", "m² étage", `m² ${u || "unité"}`, "Révision"], type: ["t", "t", "n", "n", "t"], compact: [0, 2, 3],
+        rows: QTABS["Matériaux"].rows.map((r) => [r[0], r[1], fqNum(floorShare(r[2]), 1), fqNum(unitShare(r[2]), 1), r[4]]),
+        hot: 3, note: estimate,
+      },
+    },
+  };
+}
+
+/* One table, whole or narrowed to the columns a 280 px column can hold.
+   The selected unit is the green row, or the green column where the table
+   counts something the unit only has a share of. */
+function fqTableHTML(q, name, compact = false) {
+  const t = q.tables[name];
+  const cols = compact ? t.compact : t.head.map((_, i) => i);
+  const cell = (c, j, tag = "td") => `<${tag} class="${t.type[j] === "n" ? "n" : ""} ${j === t.hot ? "hot" : ""}">${c}</${tag}>`;
+  const body = t.rows.map((r, i) => {
+    const a = t.acts && t.acts[i] >= 0 ? act("row", t.acts[i]) : "";
+    return `<tr class="${i === t.on ? "on" : ""}" ${a}>${cols.map((j) => cell(r[j], j)).join("")}</tr>`;
+  }).join("");
+  const foot = (t.foot || []).map((r) => `<tr>${cols.map((j) => cell(r[j], j)).join("")}</tr>`).join("");
+  return `<div class="fqt">
+    <div class="fqh">${icon(QTABS[name].glyph)}<span>${name}</span><span class="fqs">${q.level}</span></div>
+    <table class="tbl"><thead><tr>${cols.map((j) => cell(t.head[j], j, "th")).join("")}</tr></thead>
+      <tbody>${body}</tbody>${foot ? `<tfoot>${foot}</tfoot>` : ""}</table>
+    <div class="fqn">${t.note}</div></div>`;
+}
+
+const fqTitle = (q) => `${q.level} · ${q.count} unités${q.u ? ` · unité ${q.u}` : ""}`;
+
+/* Each block carries data-fq, so a new selection redraws the tables
+   without redrawing the drawings beside them. */
+function fqBlockHTML(kind) {
+  const q = floorQuant();
+  if (kind === "tiroir") {
+    const tabs = FQ_TABS.map((n) => `<span class="chip ${V.fqTab === n ? "on" : ""}" ${act("fqtab", n)}>${icon(QTABS[n].glyph)}<span class="lb">${n}</span></span>`).join("");
+    return `<section class="pane fq-drawer" data-fq="tiroir" style="flex:0 0 ${V.fqOpen ? 260 : 37}px">
+      <div class="ph">${icon("table")}<span class="hi">Quantités</span><span class="fqs">${fqTitle(q)}</span>
+        <span class="laychips" style="margin-left:10px">${V.fqOpen ? tabs : ""}</span><span style="flex:1"></span>
+        <span class="btnw" ${act("fqopen")} title="${V.fqOpen ? "Replier" : "Déplier"} les quantités">${icon(V.fqOpen ? "chevron-down" : "chevron-up")}</span></div>
+      ${V.fqOpen ? `<div class="pb" style="overflow:auto">${fqTableHTML(q, V.fqTab)}</div>` : ""}</section>`;
+  }
+  if (kind === "marge") {
+    return `<div class="fq-stack" data-fq="marge"><div class="fqs" style="margin:0">${fqTitle(q)}</div>
+      ${FQ_TABS.map((n) => fqTableHTML(q, n, true)).join("")}</div>`;
+  }
+  if (kind === "maquette") {
+    return `<div class="pb fq-stack" data-fq="maquette">${FQ_TABS.map((n) => fqTableHTML(q, n)).join("")}</div>`;
+  }
+  /* liste: the unit list is the Superficies table; under it, the
+     selected unit's share of what the floor counts. */
+  const t = q.tables;
+  const pick = (name, col) => t[name].rows.map((r) => `<tr><td>${r[0]}</td><td class="n">${r[col]}</td></tr>`).join("");
+  return `<div class="fq-unit" data-fq="liste">
+    <div class="fqh">${icon("box")}<span>Unité ${q.u || "—"}</span><span class="fqs">${q.unit ? `${q.unit[5]} · ${fqNum(q.unit[6])} pi²` : ""}</span></div>
+    <div class="fqn">${t["Unités"].note}</div>
+    <table class="tbl"><thead><tr><th>Fenêtres</th><th class="n">qté</th></tr></thead><tbody>${pick("Fenêtres", 4)}</tbody></table>
+    <table class="tbl"><thead><tr><th>Matériaux</th><th class="n">m²</th></tr></thead><tbody>${pick("Matériaux", 3)}</tbody></table>
+    <div class="fqn">${t["Fenêtres"].note}</div></div>`;
+}
+
+/* The list as a table: every unit of the floor with its area and its
+   share, the floor's totals at the foot, and the selected unit's detail. */
+function fqListHTML(step) {
+  const q = floorQuant();
+  const types = q.tables["Unités"].rows.map((r) => `<span class="chip"><span class="lb">${r[0]} · ${r[1]}</span></span>`).join("");
+  return region("list", "liste — quantités de l'étage",
+    `<div class="ph">${icon("table")}<span class="hi">Unités et quantités</span><span class="fqs">${q.level}</span></div>
+     <div class="pb" style="overflow:auto;gap:10px">
+       <div class="laychips" style="flex-wrap:wrap">${types}</div>
+       ${fqTableHTML(q, "Superficies")}
+       ${fqBlockHTML("liste")}
+     </div>`, step);
+}
+
+function paintFQ() {
+  document.querySelectorAll("[data-fq]").forEach((el) => { el.outerHTML = fqBlockHTML(el.dataset.fq); });
+  if (FQ === "liste") {
+    const list = document.querySelector('[data-region="list"] .fqt');
+    if (list) list.outerHTML = fqTableHTML(floorQuant(), "Superficies");
+  }
 }
 
 /* A real file, not a toast: the table as it is on screen, in the order it
@@ -2809,23 +2980,6 @@ function pinMarkHTML() {
     </div>`).join("");
 }
 
-/* The right rail: the margin on top, then the inspector's four tabs.
-   Folding the right column into icons is what buys the margin its width. */
-function railToolsHTML() {
-  const n = pinsVisible().length;
-  const tool = (name, glyph, title, badge) => {
-    /* The four tabs all open the inspector, so the lit one is the tab that
-       is open, not the word "inspector". */
-    const on = V.rightTool === "notes" ? name === "notes" : name === `utab${V.utab}`;
-    return `<span class="rtool ${on ? "on" : ""}"
-      ${act("rtool", name)} title="${title}" aria-label="${title}">${icon(glyph)}${badge ? `<i>${badge}</i>` : ""}</span>`;
-  };
-  return `<div class="rrail rg" data-rg="rail d'outils" data-fi="${fiOf("inspector")}">
-    ${tool("notes", "message-square", "Dans la marge", n)}
-    ${UNIT_TAB_ICONS.map((g, i) => tool(`utab${i}`, g, UNIT_TABS[i], 0)).join("")}
-  </div>`;
-}
-
 function marginHTML() {
   const list = pinsVisible();
   const team = V.pinScope === "equipe" && !V.guest;
@@ -2863,8 +3017,16 @@ function marginHTML() {
       ${list.length ? list.map(card).join("")
         : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px">Aucune note sur ce projet.</div>`}
     </div>`;
+  /* The margin variant: the same column, one switch, notes or the floor's
+     four tables. */
+  const quant = FQ === "marge" && V.fqMargin === "quant";
+  const head = FQ === "marge" ? `<div class="ph"><span class="laychips">
+      <span class="chip ${quant ? "" : "on"}" ${act("fqmargin", "notes")}>${icon("message-square")}<span class="lb">Notes · ${list.length}</span></span>
+      <span class="chip ${quant ? "on" : ""}" ${act("fqmargin", "quant")}>${icon("table")}<span class="lb">Quantités</span></span></span></div>` : "";
+  const body = quant ? `${head}<div class="pb" style="overflow:auto">${fqBlockHTML("marge")}</div>`
+    : FQ === "marge" ? inner.replace(/^<div class="ph">[\s\S]*?<\/div>/, head) : inner;
   return `<section class="pane rg margin" data-rg="marge" data-fi="${fiOf("inspector")}"
-    data-region="margin">${inner}</section>`;
+    data-region="margin">${body}</section>`;
 }
 
 /* What the point landed on. The unit outlines are already in sheet
@@ -3146,10 +3308,48 @@ function paintSheet() {
     label.style.transform = `translateY(${(label.dataset.side === "below" ? 2 / z : -(14 / z)).toFixed(2)}px)`;
   }
   el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / z).toFixed(3)}px`; });
+  placePlanPill();
   window.dispatchEvent(new Event("fitte:plan-paint"));
   /* The corner rectangle is the same state read small; painted here so it
      cannot drift from the sheet by a frame. */
   paintMiniPlan();
+}
+
+/* What the pointer is over on the sheet. Held in a variable and not in V:
+   it changes with every mouse move, and a re-render per frame would redraw
+   the drawing to move a label. */
+let planHover = null;
+
+function placePlanPill() {
+  const el = vpEl();
+  const plan = el && el.querySelector(".plan");
+  if (!plan) return;
+  let pill = plan.querySelector(".uhover");
+  /* The overlay is rebuilt whenever the level or the layers change, so the
+     remembered outline can be a node that is no longer on the page. */
+  const poly = planHover && plan.contains(planHover) ? planHover : null;
+  if (!poly) { if (pill) pill.hidden = true; return; }
+  if (!pill) { pill = document.createElement("div"); pill.className = "uhover"; plan.append(pill); }
+  const row = rowsOf("Unités")[Number(poly.dataset.value)];
+  /* The outline is drawn in a 0–1 viewBox stretched over the sheet, so its
+     own box is already the fraction the pill is positioned with. */
+  const b = poly.getBBox();
+  const z = V.zoom / 100;
+  pill.textContent = row ? String(row[0]).split("·")[0].trim() : "";
+  pill.style.left = `${((b.x + b.width / 2) * 100).toFixed(2)}%`;
+  pill.style.top = `${(b.y * 100).toFixed(2)}%`;
+  pill.style.fontSize = `${(12 / z).toFixed(2)}px`;
+  pill.style.padding = `${(2 / z).toFixed(2)}px ${(7 / z).toFixed(2)}px`;
+  pill.style.borderRadius = `${(6 / z).toFixed(2)}px`;
+  pill.style.borderWidth = `${(1 / z).toFixed(2)}px`;
+  pill.style.marginTop = `${(-6 / z).toFixed(2)}px`;
+  pill.hidden = false;
+}
+
+function setPlanHover(poly) {
+  if (poly === planHover) return;
+  planHover = poly;
+  placePlanPill();
 }
 
 function wireViewport() {
@@ -3199,6 +3399,8 @@ function wireViewport() {
         moved = true;
         el.setPointerCapture(m.pointerId);
         el.classList.add("drag");
+        /* A pill that follows a pan reads as a thing being dragged. */
+        setPlanHover(null);
       }
       V.pan.x = start.px + (m.clientX - start.x);
       V.pan.y = start.py + (m.clientY - start.y);
@@ -3212,6 +3414,14 @@ function wireViewport() {
       if (moved) { u.stopPropagation(); u.preventDefault(); }
     };
   };
+  /* Hover is read on the pane and not on each outline: the overlay is
+     rebuilt on every level, layer or selection change, and a listener per
+     polygon would die with it. */
+  el.onmousemove = (e) => {
+    if (el.classList.contains("drag")) return setPlanHover(null);
+    setPlanHover(e.target.closest ? e.target.closest(".umark polygon.hit") : null);
+  };
+  el.onmouseleave = () => setPlanHover(null);
   /* Drawn once here: the markup carries the last transform, but the box it
      is measured against only exists after the pane has been laid out. */
   paintSheet();
@@ -3324,14 +3534,10 @@ function render() {
   const hasInsp = !whole && def.regions.includes("inspector") && V.inspector.layout === "Right panel";
   /* The margin is a note stuck to a point of a drawing, so it belongs to
      the screens that carry one. Codes carries sentences instead, and its
-     notes are written against an article in the right column — a second
-     note column beside it, and the rail that switches between them, were
-     two ways of saying the same thing. */
-  const hasMargin = hasInsp && V.screen !== "Codes";
-  const margin = hasMargin && V.rightTool === "notes";
-  const rightW = margin ? "286px" : "340px";
-  const cols = [hasList ? "260px" : null, "1fr",
-    hasInsp ? rightW : null, hasMargin ? "40px" : null].filter(Boolean).join(" ");
+     notes are written against an article in the right column. */
+  const margin = hasInsp && V.screen !== "Codes";
+  const cols = [hasList ? (FQ === "liste" ? "400px" : "260px") : null, "1fr",
+    hasInsp ? (margin ? "286px" : "340px") : null].filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
     : { "Top bar only": "top", "Tabs only, no rail": "top", "Two rows, no rail": "top",
@@ -3351,9 +3557,9 @@ function render() {
           <div style="grid-column:1/-1">${headerHTML()}</div>
           ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
           ${SCREENS[V.screen].home ? "" : `${!whole && !noUnits && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
-          ${hasList ? listHTML() : ""}
+          ${hasList ? (FQ === "liste" ? fqListHTML(V.journey ? def.steps.list : null) : listHTML()) : ""}
           ${contentHTML()}
-          ${hasInsp ? (margin ? marginHTML() : inspectorHTML()) + (hasMargin ? railToolsHTML() : "") : ""}`}
+          ${hasInsp ? (margin ? marginHTML() : inspectorHTML()) : ""}`}
         </div>
         ${!whole && def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
       </div>
@@ -3433,6 +3639,7 @@ function paintSelection() {
   document.querySelectorAll('[data-region="list"] [data-act="row"]').forEach((el) => {
     el.classList.toggle("on", Number(el.dataset.value) === sel);
   });
+  paintFQ();
   const insp = document.querySelector('[data-region="inspector"]');
   const inner = inspectorHTML();
   /* Hidden inspector, or a layout that does not draw one: nothing to swap,
@@ -3821,14 +4028,12 @@ function onClick(e) {
        only notes what was opened. */
     case "source": say(`${value} — texte officiel ouvert dans un onglet. Lecture seule.`); return render();
     case "utab": V.utab = Number(value); break;
-    /* The right rail: the margin, or one tab of the folded inspector. */
-    case "rtool":
-      if (value === "notes") { V.rightTool = "notes"; break; }
-      V.rightTool = "inspector";
-      if (value === "quant") break;
-      V.utab = Number(value.replace("utab", ""));
-      break;
     case "pinscope": V.pinScope = value; break;
+    /* The four floor-quantity variants of quantites-etage.html. */
+    case "fqtab": V.fqTab = value; paintFQ(); return;
+    case "fqopen": V.fqOpen = !V.fqOpen; break;
+    case "fqmargin": V.fqMargin = value; break;
+    case "fqmodel": V.fqModel = value; break;
     /* Arming the pin: the next click on a drawing puts the point down, and
        nothing else on the screen changes meaning in the meantime. */
     case "pinmode": V.pinMode = !V.pinMode; V.pending = null; break;
@@ -4076,6 +4281,10 @@ wireModelPins();
 /* The first paint happens while the model is still downloading, so the pins
    hung on it are handed over again the moment there is a camera. */
 window.addEventListener("fitte:model-state", (e) => { if (e.detail === "ready") pushModelPins(); });
+/* The comparison page opens each variant on a floor, whatever screen the
+   panel last remembered. */
+if (FQ && dial.values.screen !== "Units") dial.setValue("screen", "Units");
+if (FQ) { V.scope = "Niveau"; document.documentElement.dataset.fqEmbed = FQ; }
 applyDial(dial.values);
 </script>
 </body>
