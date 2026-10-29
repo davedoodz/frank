@@ -283,6 +283,16 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .mailbody{border:1px solid var(--line-2);border-radius:6px;padding:8px 9px;font:inherit;font-size:12px;
   line-height:1.45;color:var(--ink);background:var(--card);resize:vertical;min-height:150px}
 .mailbody:focus{outline:1px solid var(--ink);outline-offset:1px}
+/* The drop zone: one dashed line, the system picker behind a click, and
+   the whole dialog accepting the drop so the aim does not have to be exact. */
+.maildrop{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px;
+  border:1px dashed var(--line);border-radius:6px;color:var(--ink-2);font-size:12px;cursor:pointer}
+.maildrop:hover{background:var(--fill)}
+.maildrop.over{border-color:#8ba00f;background:#eef1e0;color:var(--ink)}
+.maildrop u{text-underline-offset:2px}
+.chip .mx{display:inline-flex;margin-left:2px;color:var(--ink-3);cursor:pointer}
+.chip .mx:hover{color:var(--ink)}
+.chip .mx svg{width:12px;height:12px}
 
 /* A provision reads as a card, drawing first: the rule is seen before its
    number is read. The drawing touches the card's edges, the words sit under
@@ -624,9 +634,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    2000×1675 canvas, so they fill the box edge to edge rather than being
    scaled and centred the way the surveyor's differently-cropped sheet is. */
 .plan .lay.eng{inset:0;background-size:100% 100%;mix-blend-mode:multiply}
-.engineering-bar{padding:6px 10px;border-bottom:1px solid var(--line-2);flex:0 0 auto}
-.engineering-bar .laychips{flex-wrap:wrap;margin:0}
-.engineering-bar .laychips .chip .lb{display:inline}
 .model-context-note{padding:6px 10px;font-size:11px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
 /* The engineering chips keep the row under the pane header; the three
    drawings moved out of it and into the strip. */
@@ -647,9 +654,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    the order is half the question. The strip is the pile, top to bottom,
    and it is reordered by dragging. */
 .lstrip{flex:0 0 104px;padding:8px 7px;display:flex;flex-direction:column;gap:6px;
-  background:var(--paper);border-left:1px solid var(--line-2);z-index:5}
+  background:var(--paper);border-left:1px solid var(--line-2);z-index:5;
+  overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .lpile{display:flex;flex-direction:column;gap:4px}
-.lhint{font-size:10px;line-height:1.3;color:var(--ink-3);text-align:center}
 .ltile{position:relative;border:1px solid transparent;border-radius:6px;padding:4px;
   display:flex;flex-direction:column;align-items:center;gap:3px;cursor:grab;user-select:none;
   transition:transform .17s cubic-bezier(.2,.7,.3,1),background .12s,box-shadow .17s;
@@ -1096,12 +1103,14 @@ const V = {
     /* The four consultant disciplines: independent toggles, full-bleed on
        the same 2000×1675 canvas the floor plan already uses, so none of
        them needs sheetStyle()'s scale-and-nudge the surveyor's sheet does. */
-    electrical: { on: false }, drainage: { on: false },
-    distribution: { on: false }, ventilation: { on: false } },
+    electrical: { on: false, opacity: 55 }, drainage: { on: false, opacity: 55 },
+    distribution: { on: false, opacity: 55 }, ventilation: { on: false, opacity: 55 } },
   /* The pile, front to back. Dragging a thumbnail rewrites this, and
      everything else — the badges, the z-index of each drawing — is read
      from it, so there is one answer to "which sheet is on top". */
-  layOrder: ["pay", "arp", "plan"],
+  /* Front first. The engineering sheets start in front of the architecture,
+     which is what reading a duct against a wall asks for. */
+  layOrder: ["electrical", "drainage", "distribution", "ventilation", "pay", "arp", "plan"],
   layPick: "plan",     /* the thumbnail whose card is open */
   layCard: true,
   layMenu: false,
@@ -1125,14 +1134,12 @@ function sprite() {
     "share-2", "eye", "message-square",
     /* the opacity line on each drawing's card */
     "blend",
-    /* the four engineering-discipline chips */
-    "zap", "droplets", "git-branch", "wind",
     /* the margin: posting a note, keeping one for the studio, reading as a guest */
     "lock", "map-pin", "send", "users", "trash-2",
     /* the scope switch and the real .csv it exports */
     "download",
     /* Codes: copying an article with its notes, writing to the person who answers for it */
-    "copy", "mail",
+    "copy", "mail", "upload", "paperclip",
     /* the 3D pane's drag tools: orbit, move */
     "rotate-3d", "move"];
   const defs = names.map((n) => {
@@ -1643,9 +1650,19 @@ function sheetStyle(key) {
 /* The canvas sits on top of the picture inside the same box, so the two are
    registered by construction: a PDF page paints only its ink, and what shows
    through until it lands is the picture underneath. */
-const layersHTML = () => layKeys().filter((k) => k !== "plan" && V.lay[k].on)
-  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)};z-index:${layZ(k)}">${
-    planVector() ? `<canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${k === "arp" ? 180 : 0}"></canvas>` : ""}</div>`).join("");
+const layersHTML = () => layKeys().filter((k) => k !== "plan" && V.lay[k].on).map((k) => {
+  /* An engineering sheet is cropped to the floor plan's own canvas by the
+     asset pipeline, so it is registered by the box rather than by
+     sheetStyle()'s scale-and-nudge. */
+  if (ENG_SET.has(k)) {
+    const s = engSheet(k, paneLevel());
+    const vector = s.pdf && s.detail !== "image";
+    return `<div class="lay eng" data-lay="${k}" style="z-index:${layZ(k)};opacity:${V.lay[k].opacity / 100};background-image:url(${s.img})">${
+      vector ? `<canvas data-laypdf="${k}" data-pdf-url="${s.pdf}"></canvas>` : ""}</div>`;
+  }
+  return `<div class="lay" data-lay="${k}" style="${sheetStyle(k)};z-index:${layZ(k)}">${
+    planVector() ? `<canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${k === "arp" ? 180 : 0}"></canvas>` : ""}</div>`;
+}).join("");
 
 /* ---------------------------------------------------------------- the pile
    Which drawings are on the sheet, in what order, and how strongly. The
@@ -1655,7 +1672,16 @@ const layersHTML = () => layKeys().filter((k) => k !== "plan" && V.lay[k].on)
 
    A level with no consultant sheet has a pile of one, and the strip says
    so by having a single thumbnail rather than two greyed ones. */
-const layKeys = () => (isNonresLevel(paneLevel()) ? ["plan"] : V.layOrder);
+const ENG_SET = new Set(ENG_DISCIPLINES);
+/* The pile holds the drawings this level actually has: the architecture
+   always, the surveyor and the landscaper on a residential floor, and an
+   engineering sheet only where one was issued. A discipline with no page
+   for this level has no thumbnail rather than a dead one. */
+const layKeys = () => {
+  const lv = paneLevel();
+  const nonres = isNonresLevel(lv);
+  return V.layOrder.filter((k) => ENG_SET.has(k) ? !!engSheet(k, lv) : k === "plan" || !nonres);
+};
 /* Front first. The number shown on a badge is this index plus one, so 1
    is always the sheet drawn over the others. */
 const layShown = () => layKeys().filter((k) => V.lay[k].on);
@@ -1674,6 +1700,16 @@ const LAYDOC = {
   pay: { short: "Paysage", disc: "Architecture de paysage", app: "Acrobat", act: "pdfview",
     thumb: () => "assets/paysage.png", file: () => "BAL3_AMENAGEMENT-PAYSAGER_2026-07-07.pdf",
     date: () => "7 juil 2026", dir: () => `${V.docs.dir}Reçus\\` },
+  /* The engineering sheets are read off the issued set, so their line is
+     the sheet itself — its number, its page, its file. No date is invented
+     for them: the set carries none. */
+  ...Object.fromEntries(ENG_DISCIPLINES.map((d) => [d, {
+    short: ENG_LABELS[d], disc: ENG_LABELS[d], app: "Acrobat", act: "pdfview",
+    thumb: () => engSheet(d, paneLevel())?.img || "",
+    file: () => { const s = engSheet(d, paneLevel()); return s ? s.pdf.split("/").pop() : "—"; },
+    date: () => { const s = engSheet(d, paneLevel()); return s ? `${s.code} · p.${s.page}` : ""; },
+    dir: () => `${V.docs.dir}Reçus\\`,
+  }])),
 };
 
 /* The mark on a thumbnail: a line per drawing in the pile with this one
@@ -1713,8 +1749,7 @@ const layTile = (k) => `<div class="ltile ${V.lay[k].on ? "on" : ""} ${V.layPick
   <span class="nm">${LAYDOC[k].short}</span></div>`;
 
 const layStripHTML = () => `<div class="lstrip hi" data-lstrip>
-  <div class="lpile" data-lpile>${layKeys().map(layTile).join("")}</div>
-  ${layKeys().length > 1 ? `<div class="lhint">glisser une vignette<br>pour changer l'ordre</div>` : ""}</div>`;
+  <div class="lpile" data-lpile>${layKeys().map(layTile).join("")}</div></div>`;
 
 /* The card is the drawing's document: what it is, which file, what can be
    done with it, and how strongly it is laid on the sheet. Nothing about
@@ -1738,31 +1773,6 @@ function layCardHTML() {
       <span class="opval">${op}%</span></div>
   </div>`;
 }
-
-/* The consultant disciplines read the same way the surveyor and the
-   landscaper already do — a chip per kind, toggled independently — except
-   none of them needs sheetStyle()'s scale-and-nudge: the asset pipeline
-   crops every engineering sheet to the floor plan's own 2000×1675 canvas,
-   so registration is "the same box", not a transform. A kind a level has
-   no page for stays on the row, greyed and unclickable: "not asked for"
-   and "nothing here yet" are different sentences. */
-function engChip(d, level) {
-  const s = engSheet(d, level);
-  const title = !s ? `${ENG_LABELS[d]} — aucune feuille pour ce niveau`
-    : `Superposer ${ENG_LABELS[d].toLowerCase()} — ${s.code} · p.${s.page}`;
-  return `<span class="chip hi ${s && V.lay[d].on ? "on" : ""}" ${s ? act("englayer", d) : ""} title="${title}"
-    ${s ? "" : `aria-disabled="true" style="opacity:.4;cursor:default"`}>${icon(ENG_LAYICON[d])}
-    <span class="lb">${ENG_LABELS[d]}</span></span>`;
-}
-/* The architecture is the base on every level, so every toggled discipline
-   paints a layer div over it. */
-const engLayersHTML = () => engOverlayDisciplines(paneLevel())
-  .map((d) => {
-    const s = engSheet(d, paneLevel());
-    const vector = s.pdf && s.detail !== "image";
-    return `<div class="lay eng" data-lay="${d}" style="opacity:.55;background-image:url(${s.img})">
-      ${vector ? `<canvas data-laypdf="${d}" data-pdf-url="${s.pdf}"></canvas>` : ""}</div>`;
-  }).join("");
 
 /* Typology fill is the one colour the prototype adds to the sheet: the
    architect's own ink stays as it was plotted. */
@@ -2649,9 +2659,7 @@ function contentHTML() {
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>
         ${hostButton(kind === "plan" ? "plan" : "model")}</div>
-        ${kind === "plan" ? `<div class="engineering-bar hi">
-          <span class="laychips eng">${ENG_DISCIPLINES.map((d) => engChip(d, paneLevel())).join("")}</span>
-        </div>` : isNonresLevel(paneLevel()) ? `<div class="model-context-note hi">${note}</div>` : ""}
+        ${kind !== "plan" && isNonresLevel(paneLevel()) ? `<div class="model-context-note hi">${note}</div>` : ""}
         ${kind === "plan"
           /* The sheet is larger than the pane, so the pane is a window onto
              it: the drawing, the consultants' layers, the typology fills and
@@ -2687,7 +2695,7 @@ function contentHTML() {
       const modelNote = paneLevel() === 9
         ? "Toiture — bandeau et repère affichés sur la maquette"
         : `${unit} — volumétrie, même niveau`;
-      const plan = () => pane("Plan 2D", planNote, "plan", "align", typoHTML() + layersHTML() + engLayersHTML());
+      const plan = () => pane("Plan 2D", planNote, "plan", "align", typoHTML() + layersHTML());
       const model = () => (noModel ? "" : pane("Maquette 3D", modelNote, "model", "fit"));
       if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
       if (mode === "Single pane + inset") return `<div class="col" style="flex:1;gap:var(--gap)">
@@ -2997,11 +3005,9 @@ function inspectorHTML() {
   };
   const rows = {
     "Unités": unitRows[UNIT_TABS[V.utab]],
-    /* The short column beside the provisions is the state of the one that
-       is open: what was read, what is asked, what is still missing. */
-    "Codes": (() => { const a = ARTICLES.find((x) => x.id === V.articleId) || ARTICLES[0];
-      return [["Article", a.id], ["Lu dans les dessins", a.measured], ["Exigé", a.required],
-        ["Manque", a.state === "non résolu" ? a.needs : "rien"]]; })(),
+    /* The short column beside the provisions names the one that is open;
+       what it asks and what the drawings say are in the reading itself. */
+    "Codes": [["Article", (ARTICLES.find((x) => x.id === V.articleId) || ARTICLES[0]).id]],
   }[V.screen] || [["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"]];
 
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
@@ -3563,6 +3569,13 @@ document.addEventListener("pointerdown", (e) => {
    drawing back under the pointer and kill the sense of carrying it. The
    held tile follows the finger exactly; the ones it passes slide out of
    its way; the order is written when it is let go. */
+/* layKeys() is a subset on a level that has no sheet for a discipline, so
+   the keys that are not on screen keep their own place in the pile. */
+function commitOrder(shown) {
+  let i = 0;
+  V.layOrder = V.layOrder.map((k) => shown.includes(k) ? shown[i++] : k);
+}
+
 document.addEventListener("pointerdown", (e) => {
   const tile = e.target.closest?.("[data-ltile]");
   if (!tile || e.target.closest(".lbadge")) return;
@@ -3635,7 +3648,7 @@ document.addEventListener("pointerdown", (e) => {
        each one from where it was to where it now is. */
     const was = {};
     els.forEach((el) => { was[el.dataset.ltile] = el.getBoundingClientRect().top; });
-    V.layOrder = orderAt(to);
+    commitOrder(orderAt(to));
     paintStrip();
     const after = [...document.querySelectorAll("[data-ltile]")].filter((el) => was[el.dataset.ltile] !== undefined);
     after.forEach((el) => {
@@ -4101,6 +4114,33 @@ function mailDialogHTML(d) {
     </div></div>`;
 }
 
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const fileSize = (n) => (n >= 1e6 ? `${(n / 1e6).toLocaleString("fr-CA", { maximumFractionDigits: 1 })} Mo`
+  : `${Math.max(1, Math.round(n / 1e3))} ko`);
+
+/* Files from the computer: dropped anywhere on the dialog, or picked with
+   the system file picker the drop zone opens. Wired after every render,
+   because the dialog is drawn again on each change. */
+function wireMailDrop() {
+  const zone = document.querySelector("[data-maildrop]");
+  if (!zone || V.dialog?.kind !== "mail") return;
+  const dialog = zone.closest(".dialog");
+  const add = (list) => {
+    const have = new Set(V.dialog.local.map((f) => `${f.name}|${f.size}`));
+    const next = [...list].map((f) => ({ name: f.name, size: f.size }))
+      .filter((f) => !have.has(`${f.name}|${f.size}`));
+    if (!next.length) return;
+    V.dialog.local = [...V.dialog.local, ...next];
+    render();
+  };
+  zone.querySelector("[data-mailpick]").onchange = (e) => add(e.target.files);
+  let depth = 0;
+  dialog.ondragenter = (e) => { e.preventDefault(); depth += 1; zone.classList.add("over"); };
+  dialog.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; };
+  dialog.ondragleave = () => { depth -= 1; if (depth <= 0) { depth = 0; zone.classList.remove("over"); } };
+  dialog.ondrop = (e) => { e.preventDefault(); depth = 0; zone.classList.remove("over"); add(e.dataTransfer.files); };
+}
+
 /* ------------------------------------------------------------ sharing
    The people who read a project are not the people who draw it. What is
    shared is a link to this project at this level, with one of two rights:
@@ -4404,14 +4444,6 @@ function onClick(e) {
     case "maillocalrm":
       V.dialog.local = V.dialog.local.filter((_, i) => i !== Number(value));
       break;
-    case "mailpicked": {
-      /* Same name and size is the same file dropped twice. */
-      const have = new Set(V.dialog.local.map((f) => `${f.name}|${f.size}`));
-      V.dialog.local = [...V.dialog.local, ...value.filter((f) => !have.has(`${f.name}|${f.size}`))];
-      break;
-    }
-    case "mailopen-files": {
-    }
     case "mailsend": {
       const d = V.dialog;
       if (!d.to.trim() || !d.subject.trim()) { d.error = "Il manque le destinataire ou l'objet."; break; }
@@ -4514,6 +4546,9 @@ function onClick(e) {
       V.layCard = true;
       V.layMenu = false;
       if (value === "plan") { V.lay.plan.on = adding; break; }
+      /* Only the surveyor's and the landscaper's sheets are dials on the
+         fidelity panel; an engineering sheet is toggled where it is seen. */
+      if (ENG_SET.has(value)) { V.lay[value].on = adding; break; }
       dial.setValue(value === "arp" ? "layers.surveyor" : "layers.landscaping", adding);
       return;
     }
@@ -4530,9 +4565,6 @@ function onClick(e) {
       V.layMenu = false;
       say(`${LAYDOC[value].file()} — ouvert dans Acrobat.`);
       break;
-    /* The four consultant disciplines are not part of the fidelity panel:
-       they toggle straight on V, the way picking a row does. */
-    case "englayer": V.lay[value].on = !V.lay[value].on; break;
     case "mtool":
       V.mtool = value;
       document.querySelectorAll('[data-act="mtool"]').forEach((b) => {
