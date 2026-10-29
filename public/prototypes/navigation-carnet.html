@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Où vivent l'échéancier et l'historique</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* One rule decides this page: a surface that spans every project cannot sit
+   in a bar that belongs to one project. The échéancier is the whole studio's
+   week; the historique is this building's memory. They are not siblings. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e4e4e4;
+  --fill:#ededed; --fill-2:#f7f7f7; --page:#f4f4f4; --paper:#fff;
+  --hi:#111;
+  --vert:#c3e05a; --vert-ink:#2f3a05; --vert-soft:#eef3dc;
+  --bleu:#2f4858; --bleu-soft:#e7eef2;
+  --rouge:#b4442f;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:26px 22px 60px}
+.lu{width:15px;height:15px;flex:0 0 auto;stroke-width:1.7}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:5px;max-width:95ch}
+.sub b{color:var(--ink);font-weight:500}
+
+/* le choix du mot */
+.names{margin:18px 0 6px;background:var(--paper);border:1px solid var(--line-2);border-radius:9px;padding:12px 13px}
+.names .lab{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.nrow{display:flex;gap:7px;flex-wrap:wrap}
+.nopt{border:1px solid var(--line-2);border-radius:8px;padding:6px 10px;background:var(--paper);cursor:pointer;
+  font:inherit;text-align:left}
+.nopt:hover{background:var(--fill-2)}
+.nopt.on{border-color:var(--hi);box-shadow:inset 0 0 0 1px var(--hi)}
+.nopt b{display:block;font-size:12.5px;font-weight:500}
+.nopt span{display:block;font-size:11px;color:var(--ink-3);margin-top:1px}
+.names .why{margin-top:10px;font-size:12px;color:var(--ink-2)}
+.names .why b{color:var(--ink);font-weight:500}
+
+.legend{display:flex;gap:14px;align-items:center;margin:16px 0 4px;font-size:11.5px;color:var(--ink-2)}
+.key{display:inline-flex;align-items:center;gap:6px}
+.key i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.k-g{background:var(--bleu)}
+.k-p{background:#aec768}
+
+.ways{display:flex;flex-direction:column;gap:30px;margin-top:14px}
+.way .cap{display:flex;align-items:baseline;gap:9px;margin-bottom:3px}
+.way .cap b{font-size:14px;font-weight:600}
+.way .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.way .note{color:var(--ink-2);font-size:12.5px;max-width:98ch;margin-bottom:10px}
+.way .note b{color:var(--ink);font-weight:500}
+
+/* the mock chrome */
+.app{border:1px solid var(--line);border-radius:11px;background:var(--paper);overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.row{display:flex;align-items:center;gap:4px;padding:0 11px;height:40px;border-bottom:1px solid var(--line-2)}
+.row.sub{height:34px;background:var(--fill-2)}
+.brand{font-size:12.5px;font-weight:600;margin-right:8px;display:flex;align-items:center;gap:7px}
+.tab{height:27px;padding:0 10px;border-radius:7px;font-size:12.5px;color:var(--ink-2);cursor:default;
+  display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;white-space:nowrap}
+.tab.on{background:var(--hi);color:#fff}
+.tab.g{color:var(--bleu);border-color:#cddbe2;background:var(--bleu-soft)}
+.tab.g.on{background:var(--bleu);border-color:var(--bleu);color:#fff}
+.tab.p{color:var(--vert-ink);border-color:#d6e3af;background:var(--vert-soft)}
+.tab.p.on{background:#63741a;border-color:#63741a;color:#fff}
+.row .r{margin-left:auto;display:flex;align-items:center;gap:7px}
+.btn{height:26px;padding:0 9px;border:1px solid var(--line-2);border-radius:7px;background:var(--paper);
+  font-size:12px;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.btn.dark{background:var(--hi);border-color:var(--hi);color:#fff}
+.who{width:21px;height:21px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:10px;line-height:1;font-weight:600;color:#fff}
+.w1{background:#2f4858}.w2{background:#7a8a2e}.w3{background:#8a5a2b}.w4{background:#5c5470}
+.proj{display:inline-flex;align-items:center;gap:7px;height:27px;padding:0 10px 0 8px;border-radius:8px;
+  border:1px solid var(--line-2);font-size:12.5px;background:var(--paper)}
+.sep{width:1px;height:18px;background:var(--line-2);margin:0 6px}
+
+.body{display:flex;min-height:250px}
+.sidebar{width:52px;border-right:1px solid var(--line-2);background:var(--fill-2);padding:9px 0;
+  display:flex;flex-direction:column;align-items:center;gap:7px}
+.sicon{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--ink-2);
+  border:1px solid transparent}
+.sicon.g{background:var(--bleu-soft);color:var(--bleu);border-color:#cddbe2}
+.sicon.on{background:var(--hi);color:#fff;border-color:var(--hi)}
+.sicon .lu{width:17px;height:17px}
+.canvas{flex:1;min-width:0;display:grid;place-items:center;color:var(--ink-3);font-size:12px;
+  background:repeating-linear-gradient(45deg,#fafafa 0 11px,#f5f5f5 11px 22px);padding:18px;text-align:center}
+.canvas .big{font-size:13px;color:var(--ink-2)}
+.canvas .sm{font-size:11.5px;margin-top:3px}
+.drawer{width:330px;border-left:1px solid var(--line-2);background:var(--paper);padding:10px 12px}
+.drawer .h{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;margin-bottom:8px}
+.drawer .h .r{margin-left:auto;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.mini{border:1px solid var(--line-2);border-radius:7px;padding:6px 8px;font-size:11.5px;margin-bottom:5px}
+.mini .m{font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.mini.p{border-left:3px solid #aec768}
+.mini.o{border-left:3px solid var(--bleu)}
+.ghost{position:absolute;right:14px;bottom:14px;background:var(--hi);color:#fff;border-radius:9px;
+  padding:7px 11px;font-size:12px;display:inline-flex;align-items:center;gap:7px;
+  box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.rel{position:relative}
+.kbd{font-family:var(--mono);font-size:10px;border:1px solid rgba(255,255,255,.3);border-radius:4px;
+  padding:0 4px;opacity:.8}
+
+.tbl{margin-top:28px;border:1px solid var(--line-2);border-radius:9px;background:var(--paper);width:100%;
+  border-collapse:separate;border-spacing:0;overflow:hidden}
+.tbl th,.tbl td{border-bottom:1px solid var(--line-2);text-align:left;padding:8px 11px;font-size:12px}
+.tbl th{color:var(--ink-3);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.y{color:var(--vert-ink);font-weight:600}
+.tbl td.n{color:var(--ink-3)}
+.tbl td.bad{color:var(--rouge)}
+.verdict{margin-top:16px;border:1px solid var(--line-2);border-radius:9px;background:var(--paper);padding:12px 14px;
+  font-size:12.5px;color:var(--ink-2)}
+.verdict b{color:var(--ink)}
+.verdict ul{margin:7px 0 0 16px}
+.verdict li{margin-bottom:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Où vivent l'échéancier et l'historique</h1>
+  <p class="sub">Deux portées différentes. <b>L'historique appartient au projet</b> — c'est la mémoire de ce
+    bâtiment-là, et elle n'a aucun sens mélangée à celle d'un autre. <b>L'échéancier appartient à l'atelier</b> —
+    ce qui tombe cette semaine tombe sur Guy, pas sur un projet. Les mettre côte à côte dans la même barre
+    d'onglets, c'est mentir sur l'un des deux. Quatre façons de les séparer.</p>
+
+  <div class="names">
+    <div class="lab">Le mot pour la page de mémoire</div>
+    <div class="nrow" id="names"></div>
+    <div class="why" id="why"></div>
+  </div>
+
+  <div class="legend">
+    <span class="key"><i class="k-g"></i>Portée atelier — tous les projets</span>
+    <span class="key"><i class="k-p"></i>Portée projet — ce bâtiment seulement</span>
+  </div>
+
+  <div class="ways" id="ways"></div>
+
+  <table class="tbl" id="tbl"></table>
+  <div class="verdict" id="verdict"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["layers", "hash", "archive", "calendar-days", "folder", "search", "plus", "chevron-down",
+    "list-checks", "building-2", "clock", "command", "panel-right", "home"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none"); s.innerHTML = defs; document.body.append(s);
+}
+
+/* Picking the word is picking what the page promises. Chosen name is applied
+   live to all four mock-ups so it can be judged in place, not in a list. */
+const NAMES = [
+  { n: "Historique", d: "ce qui s'est passé", why: "Le mot que tout le monde comprend sans explication, et le seul qui couvre aussi bien un appel reçu qu'une tâche cochée. Neutre, court, et il ne promet pas une structure qu'on n'a pas." },
+  { n: "Registre", d: "tenu, officiel", why: "Plus formel, bon si le contenu doit un jour servir de preuve à l'arrondissement. Mais « registre » annonce une rigueur de saisie qu'on ne demandera jamais à trois personnes." },
+  { n: "Journal", d: "au jour le jour", why: "Juste, mais ambigu: en informatique un journal c'est un log technique, et dans un bureau c'est le journal de chantier — qui est un autre document, tenu par l'entrepreneur." },
+  { n: "Suivi", d: "ce qu'on suit", why: "Oriente vers le futur (suivre ce qui avance) alors que la page regarde le passé. Il entre aussi en conflit avec le suivi de chantier." },
+  { n: "Mémoire", d: "ce dont on se souvient", why: "Le plus fidèle à l'intention — répondre à l'appel de dans deux mois — mais trop littéraire pour un onglet, et « mémoire » a un autre sens en architecture (mémoire descriptif)." },
+  { n: "Archives", d: "ce qui est classé", why: "Sonne mort. Ce qu'on y cherche a souvent trois jours, pas trois ans, et « archives » décourage d'y aller." },
+  { n: "Chronologie", d: "dans l'ordre", why: "Décrit la forme, pas l'usage, et il est long dans une barre d'onglets." },
+  { n: "Main courante", d: "le registre continu", why: "Le terme exact pour un journal tenu en continu, mais il vient de la sécurité et des chantiers: il dépayserait un bureau d'architecture." },
+];
+let NAME = "Historique";
+
+const people = `<span class="who w1">G</span><span class="who w2">B</span><span class="who w3">A</span><span class="who w4">D</span>`;
+const canvas = (big, sm) => `<div class="canvas"><div><div class="big">${big}</div>
+  <div class="sm">${sm}</div></div></div>`;
+const projTabs = (on) => `
+  <span class="tab p ${on === "coord" ? "on" : ""}">${icon("layers")}Coordination</span>
+  <span class="tab p ${on === "codes" ? "on" : ""}">${icon("hash")}Codes</span>
+  <span class="tab p ${on === "hist" ? "on" : ""}">${icon("archive")}${NAME}</span>`;
+
+/* A — one bar, two levels: studio line on top, project line under it */
+const wayA = () => `<div class="app">
+  <div class="row">
+    <span class="brand">${icon("building-2")}Atelier</span>
+    <span class="tab g">${icon("folder")}Projets</span>
+    <span class="tab g on">${icon("calendar-days")}Échéancier</span>
+    <span class="r">${people}<span class="btn dark">${icon("plus")}Nouvelle entrée</span></span>
+  </div>
+  <div class="row sub">
+    <span class="proj">${icon("building-2")}Le Baldwin III ${icon("chevron-down")}</span>
+    <span class="sep"></span>
+    ${projTabs("coord")}
+  </div>
+  ${canvas("Échéancier de l'atelier — les quatre projets sur un calendrier",
+    "la ligne du dessous reste le projet ouvert: on revient d'un clic, sans le perdre")}
+</div>`;
+
+/* B — studio rail on the left, the project owns the whole window */
+const wayB = () => `<div class="app">
+  <div class="row">
+    <span class="brand">${icon("building-2")}Le Baldwin III</span>
+    ${projTabs("coord")}
+    <span class="r">${people}<span class="btn dark">${icon("plus")}Nouvelle entrée</span></span>
+  </div>
+  <div class="body">
+    <div class="sidebar">
+      <span class="sicon on">${icon("building-2")}</span>
+      <span class="sicon g">${icon("calendar-days")}</span>
+      <span class="sicon g">${icon("list-checks")}</span>
+      <span class="sicon g">${icon("search")}</span>
+    </div>
+    ${canvas("Le projet occupe toute la fenêtre",
+      "le rail de gauche est l'atelier: projets, échéancier, liste du jour, recherche")}
+  </div>
+</div>`;
+
+/* C — the studio week is the home screen; a project is something you enter */
+const wayC = () => `<div class="app">
+  <div class="row">
+    <span class="brand">${icon("home")}Atelier</span>
+    <span class="tab g on">${icon("calendar-days")}Cette semaine</span>
+    <span class="tab g">${icon("folder")}Projets (4)</span>
+    <span class="r">${people}<span class="btn dark">${icon("plus")}Nouvelle entrée</span></span>
+  </div>
+  <div class="body">
+    ${canvas("Écran d'accueil: la semaine de l'atelier, tous projets confondus",
+      "on ouvre un projet depuis là, et le projet s'affiche avec ses propres onglets")}
+    <div class="drawer">
+      <div class="h">${icon("folder")}Projets<span class="r">4</span></div>
+      <div class="mini p">Le Baldwin III<div class="m">3 échéances · ${NAME.toLowerCase()} à jour</div></div>
+      <div class="mini p">Rue Mentana<div class="m">1 échéance cette semaine</div></div>
+      <div class="mini p">Saint-Zotique<div class="m">rien d'ici le 2 décembre</div></div>
+      <div class="mini p">Parc-Extension<div class="m">en attente de l'arpenteur</div></div>
+    </div>
+  </div>
+</div>`;
+
+/* D — the schedule is never a page: a panel on a shortcut, from anywhere */
+const wayD = () => `<div class="app rel">
+  <div class="row">
+    <span class="brand">${icon("building-2")}Le Baldwin III</span>
+    ${projTabs("hist")}
+    <span class="r"><span class="btn">${icon("calendar-days")}Échéancier <span class="kbd"
+      style="border-color:var(--line-2);color:var(--ink-3)">⌘K</span></span>${people}</span>
+  </div>
+  <div class="body">
+    ${canvas(`${NAME} du Baldwin III`, "la page du projet reste la page du projet")}
+    <div class="drawer" style="background:var(--fill-2)">
+      <div class="h">${icon("calendar-days")}Échéancier — atelier<span class="r">⌘K</span></div>
+      <div class="mini o">Reprendre la hauteur des garde-corps<div class="m">Baldwin III · aujourd'hui</div></div>
+      <div class="mini o">Relevé d'implantation<div class="m">Mentana · 9 février</div></div>
+      <div class="mini o">Plans d'émission pour permis<div class="m">Baldwin III · 4 décembre</div></div>
+      <div class="mini o">Rencontre de chantier<div class="m">Saint-Zotique · 2 décembre</div></div>
+    </div>
+  </div>
+  <span class="ghost">${icon("command")}Ouvert par raccourci, par-dessus n'importe quelle page</span>
+</div>`;
+
+const WAYS = [
+  { t: "Deux barres: l'atelier au-dessus, le projet en dessous", f: wayA,
+    note: "La barre du haut ne contient que ce qui traverse les projets; celle du dessous, le projet ouvert et ses onglets — dont <b class='nm'></b>. <b>Ce qu'on gagne:</b> la portée se lit à la hauteur de la ligne, et on ne perd jamais le projet ouvert. <b>Ce qu'on perd:</b> 34 px de haut, et deux barres à comprendre le premier jour." },
+  { t: "Un rail d'atelier à gauche, le projet prend la fenêtre", f: wayB,
+    note: "Le projet garde exactement l'écran d'aujourd'hui; l'atelier devient une colonne d'icônes de 52 px. <b>Ce qu'on gagne:</b> aucune hauteur perdue, et la place d'ajouter plus tard la recherche globale ou la liste du jour. <b>Ce qu'on perd:</b> des icônes sans mot — à quatre entrées c'est tenable, au-delà non." },
+  { t: "L'échéancier est l'écran d'accueil", f: wayC,
+    note: "On n'ouvre pas l'application sur un projet, on l'ouvre sur la semaine. Les projets sont une liste à droite, et entrer dans l'un d'eux donne ses onglets. <b>Ce qu'on gagne:</b> le matin, la bonne question est posée d'office. <b>Ce qu'on perd:</b> un clic de plus chaque fois qu'on veut juste un plan." },
+  { t: "L'échéancier n'est pas une page: c'est un panneau sur ⌘K", f: wayD,
+    note: "Il s'ouvre par-dessus ce qu'on regarde, de n'importe où, et se referme. Le projet n'a que ses trois onglets. <b>Ce qu'on gagne:</b> zéro navigation — on consulte sans quitter le plan. <b>Ce qu'on perd:</b> un panneau de 330 px ne tient pas un mois ni une année; il faut quand même une vraie page derrière." },
+];
+
+const TBL = [
+  ["A · Deux barres", "oui, visible", "onglet du projet", "non", "faible"],
+  ["B · Rail à gauche", "oui, en icônes", "onglet du projet", "non", "faible"],
+  ["C · Accueil = semaine", "oui, par défaut", "onglet du projet", "oui, un clic", "moyen"],
+  ["D · Panneau ⌘K", "oui, par-dessus", "onglet du projet", "non", "moyen"],
+];
+
+function render() {
+  document.getElementById("names").innerHTML = NAMES.map((n) =>
+    `<button class="nopt ${NAME === n.n ? "on" : ""}" data-name="${n.n}"><b>${n.n}</b><span>${n.d}</span></button>`).join("");
+  const cur = NAMES.find((n) => n.n === NAME);
+  document.getElementById("why").innerHTML = `<b>${cur.n}:</b> ${cur.why}`;
+  document.getElementById("ways").innerHTML = WAYS.map((w, i) => `<section class="way">
+    <div class="cap"><span class="n">Façon ${String.fromCharCode(65 + i)}</span><b>${w.t}</b></div>
+    <div class="note">${w.note.replace("<b class='nm'></b>", `<b>${NAME}</b>`)}</div>
+    ${w.f()}</section>`).join("");
+  document.getElementById("tbl").innerHTML = `<thead><tr>
+      <th>Façon</th><th>Échéancier hors projet</th><th>${NAME}</th>
+      <th>Coûte un clic pour voir un plan</th><th>Coût de construction</th></tr></thead>
+    <tbody>${TBL.map((r) => `<tr><td>${r[0]}</td>
+      ${r.slice(1, 3).map((c) => `<td class="${c.startsWith("oui") ? "y" : ""}">${c}</td>`).join("")}
+      <td class="${r[3] === "non" ? "y" : "bad"}">${r[3] === "non" ? "non" : r[3]}</td>
+      <td>${r[4]}</td></tr>`).join("")}</tbody>`;
+  document.getElementById("verdict").innerHTML = `<b>Ce que je retiendrais: B, et D par-dessus.</b>
+    <ul>
+      <li><b>Le rail de gauche (B)</b> dit la vérité sur les portées sans coûter un pixel de hauteur au dessin,
+        qui est la chose la plus précieuse de l'écran. À quatre icônes, il reste lisible; au-delà il faudrait
+        des mots, et ce jour-là on passerait à A.</li>
+      <li><b>Le panneau ⌘K (D)</b> n'est pas un concurrent: c'est la façon de consulter l'échéancier sans quitter
+        un plan. La page complète vit derrière, dans le rail.</li>
+      <li><b>${NAME} reste un onglet du projet</b>, dans les quatre façons. C'est la mémoire de ce bâtiment:
+        la sortir du projet obligerait à filtrer par projet à chaque ouverture, pour rien.</li>
+      <li><b>C est tentant et je le déconseille</b> à trois personnes: l'écran d'accueil impose une étape à
+        chaque fois qu'on veut simplement regarder un plan — ce qui est 80 % des ouvertures.</li>
+    </ul>`;
+}
+
+document.addEventListener("click", (e) => {
+  const n = e.target.closest("[data-name]");
+  if (n) { NAME = n.dataset.name; render(); }
+});
+
+sprite();
+render();
+</script>
+</body>
+</html>

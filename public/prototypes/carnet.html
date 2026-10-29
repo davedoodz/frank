@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Carnet — échéances, à faire aujourd'hui, journal</title>
+<title>Carnet — échéances, à faire aujourd'hui, historique</title>
 <link rel="stylesheet" href="vendor/geist/geist.css">
 <style>
 /* Three needs, one store. A deadline, a thing ticked off today and a change
@@ -48,8 +48,8 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .tab:hover{background:var(--fill-2)}
 .tab.on{background:var(--hi);color:#fff}
 .top .r{margin-left:auto;display:flex;align-items:center;gap:7px}
-.who{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;
-  font-weight:600;color:#fff;flex:0 0 auto}
+.who{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:10.5px;line-height:1;font-weight:600;color:#fff;flex:0 0 auto}
 .w-GY{background:#2f4858}.w-BN{background:#7a8a2e}.w-AL{background:#8a5a2b}.w-DV{background:#5c5470}
 .btn{height:28px;padding:0 10px;border:1px solid var(--line-2);border-radius:7px;background:var(--paper);
   font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
@@ -113,6 +113,24 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .ev.done .n{text-decoration:line-through}
 .ev.sel{border-color:var(--hi);box-shadow:0 0 0 1px var(--hi)}
 .who.xs{width:17px;height:17px;font-size:9px}
+
+.yr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line-2);
+  border-radius:9px;overflow:hidden}
+.ym{border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2);padding:9px 10px;cursor:pointer}
+.ym:nth-child(4n){border-right:0}
+.ym:nth-child(n+9){border-bottom:0}
+.ym:hover{background:var(--fill-2)}
+.ym.on{box-shadow:inset 0 0 0 2px var(--hi)}
+.ym .t{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.ym .t .c{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink-3)}
+.ym .g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+.ym .d{aspect-ratio:1;border-radius:3px;background:var(--fill-2);font-size:9px;color:var(--ink-3);
+  display:grid;place-items:center}
+.ym .d.n1{background:#e4ecce;color:var(--vert-ink)}
+.ym .d.n2{background:#cbdb9d;color:var(--vert-ink)}
+.ym .d.n3{background:#aec768;color:var(--vert-ink)}
+.ym .d.today{outline:2px solid var(--hi)}
+.ym .d.out{background:transparent;color:transparent}
 
 /* la colonne de droite: aujourd'hui d'abord, les échéances ensuite */
 .rail{display:flex;flex-direction:column;min-height:0}
@@ -199,7 +217,7 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .modal textarea::placeholder{color:var(--ink-3)}
 .fld .lab{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
 .pers{display:flex;gap:6px;flex-wrap:wrap}
-.pchip{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 10px 0 4px;border-radius:999px;
+.pchip{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 13px 0 3px;border-radius:999px;
   border:1px solid var(--line-2);background:var(--paper);font:inherit;font-size:12.5px;cursor:pointer}
 .pchip:hover{background:var(--fill-2)}
 .pchip.on{border-color:var(--hi);background:var(--hi);color:#fff}
@@ -208,8 +226,7 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
   text-align:left}
 .kind:hover{background:var(--fill-2)}
 .kind.on{border-color:var(--hi);box-shadow:inset 0 0 0 1px var(--hi)}
-.kind b{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500}
-.kind span{display:block;margin-top:2px;font-size:11px;color:var(--ink-3)}
+.kind b{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500}
 .modal .mf{display:flex;align-items:center;gap:9px;padding:10px 14px;border-top:1px solid var(--line-2);
   background:var(--fill-2)}
 .modal .mf .stamp{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px}
@@ -239,7 +256,7 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
       <div class="h" id="r1h"></div>
       <p>Là où les entrées <b>naissent</b>. L'appel arrive, on épingle sur le plan, on écrit. La marge sert à
         ça et ne doit rien faire d'autre: pas de liste du jour, pas d'archives. Chaque note épinglée part
-        aussi dans le journal, avec son niveau et son unité.</p>
+        aussi dans l'historique, avec son niveau et son unité.</p>
     </div>
     <div class="rc">
       <div class="w">Page échéancier</div>
@@ -249,7 +266,7 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
         au même moment: le matin.</p>
     </div>
     <div class="rc">
-      <div class="w">Page journal <i style="color:var(--vert-ink)">(nouvelle)</i></div>
+      <div class="w">Page historique <i style="color:var(--vert-ink)">(nouvelle)</i></div>
       <div class="h" id="r3h"></div>
       <p>La <b>mémoire</b>. Tout ce qui est coché, répondu, déposé y tombe automatiquement, daté et signé.
         On n'y écrit jamais directement: on le fouille. C'est la page qui répond à l'appel de dans deux mois.</p>
@@ -266,11 +283,11 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
       <li><b>Pas de date à saisir.</b> La fenêtre demande deux choses: quoi, et qui. La date est celle du moment
         — c'est ça la valeur d'un carnet. Une échéance, c'est l'exception: on la pose après coup en glissant
         l'entrée sur un jour du calendrier.</li>
-      <li><b>Le journal est une page, pas un panneau.</b> Une colonne de 300 px ne se fouille pas. La question
+      <li><b>L'historique est une page, pas un panneau.</b> Une colonne de 300 px ne se fouille pas. La question
         « quand a-t-on fait ça » arrive rarement mais exige de la place: recherche, filtre par personne, par
         unité, et des mois entiers à faire défiler.</li>
-      <li><b>Rien ne s'efface.</b> Cocher ne supprime pas: ça déplace dans le journal, avec l'heure et l'auteur.
-        Décocher n'enlève pas la ligne du journal, ça en ajoute une.</li>
+      <li><b>Rien ne s'efface.</b> Cocher ne supprime pas: ça déplace dans l'historique, avec l'heure et l'auteur.
+        Décocher n'enlève pas la ligne de l'historique, ça en ajoute une.</li>
       <li><b>La liste du jour passe au-dessus des échéances.</b> À deux ou trois personnes, ce qu'on fait
         aujourd'hui pèse plus que ce qui est dû dans trois semaines.</li>
     </ul>
@@ -411,7 +428,7 @@ const topBar = () => `<div class="top">
   <span class="proj">Le Baldwin III</span>
   <button class="tab ${S.tab === "coord" ? "on" : ""}" data-tab="coord">${icon("layers")}Coordination</button>
   <button class="tab ${S.tab === "ech" ? "on" : ""}" data-tab="ech">${icon("calendar-days")}Échéancier</button>
-  <button class="tab ${S.tab === "jrn" ? "on" : ""}" data-tab="jrn">${icon("archive")}Journal</button>
+  <button class="tab ${S.tab === "jrn" ? "on" : ""}" data-tab="jrn">${icon("archive")}Historique</button>
   <span class="r">
     ${PEOPLE.map((p) => `<span class="who w-${p.id}" title="${p.name} — ${p.role}"
       style="${S.me === p.id ? "" : "opacity:.4"}" data-me="${p.id}">${p.id[0]}</span>`).join("")}
@@ -439,11 +456,38 @@ const evHTML = (e) => `<button class="ev ${e.prio || ""} ${e.done ? "done" : ""}
   <span class="n">${e.title}</span>
   <span class="w">${(e.who || []).map((w) => avatar(w, "xs")).join("")}</span></button>`;
 
+function monthGrid(y, m) {
+  const first = new Date(y, m, 1);
+  const lead = (first.getDay() + 6) % 7;
+  return Array.from({ length: 42 }, (_, i) => {
+    const x = new Date(y, m, 1 - lead + i);
+    return { k: iso(x), out: x.getMonth() !== m };
+  });
+}
+// the year is a density map: counts, no titles, and a click lands on the month
+function yearHTML() {
+  const y = dOf(S.anchor).getFullYear();
+  const cur = dOf(S.anchor).getMonth();
+  return `<div class="yr">${Array.from({ length: 12 }, (_, m) => {
+    const cells = monthGrid(y, m);
+    const total = deadlines().filter((e) => e.due.startsWith(`${y}-${String(m + 1).padStart(2, "0")}`)).length;
+    return `<div class="ym ${m === cur ? "on" : ""}" data-month="${m}">
+      <div class="t">${MONTHS[m]}<span class="c">${total || ""}</span></div>
+      <div class="g">${cells.map(({ k, out }) => {
+        if (out) return `<span class="d out"></span>`;
+        const c = dueOn(k).length;
+        return `<span class="d ${c ? "n" + Math.min(c, 3) : ""} ${k === TODAY ? "today" : ""}"
+          title="${dayLabel(k)}${c ? ` · ${c} échéance${c > 1 ? "s" : ""}` : ""}">${c || ""}</span>`;
+      }).join("")}</div></div>`;
+  }).join("")}</div>`;
+}
+
 function screenEch() {
   const days = weekDays();
   const span = S.view === "semaine"
     ? `semaine du ${dayLabel(days[0])} au ${dayLabel(days[6])}`
-    : `${MONTHS[dOf(S.anchor).getMonth()]} ${dOf(S.anchor).getFullYear()}`;
+    : S.view === "mois" ? `${MONTHS[dOf(S.anchor).getMonth()]} ${dOf(S.anchor).getFullYear()}`
+    : `${dOf(S.anchor).getFullYear()}`;
   const td = todayTodos();
   const openCount = td.filter((e) => !e.done).length;
   const next = deadlines().filter((e) => !e.done);
@@ -451,7 +495,7 @@ function screenEch() {
       <h2>Échéancier</h2>
       <span class="m">${next.length} échéances ouvertes · ${openCount} à faire aujourd'hui</span>
       <span class="r">
-        <span class="seg">${["semaine", "mois"].map((v) =>
+        <span class="seg">${["semaine", "mois", "année"].map((v) =>
           `<button data-view="${v}" class="${S.view === v ? "on" : ""}">${v[0].toUpperCase() + v.slice(1)}</button>`).join("")}</span>
         <span class="nav" data-mv="-1">${icon("chevron-left")}</span>
         <span class="nav" data-mv="1">${icon("chevron-right")}</span>
@@ -460,8 +504,9 @@ function screenEch() {
     <div class="ech">
       <div class="cal">
         <div class="calhd">${icon("calendar-days")}<span class="t">${span}</span>
-          <span class="r note" style="color:var(--ink-3);font-size:11.5px">glissez une entrée sur un jour pour lui donner une échéance</span></div>
-        ${S.view === "semaine" ? `<div class="wk">
+          <span class="r note" style="color:var(--ink-3);font-size:11.5px">${S.view === "année"
+            ? "cliquez un mois pour l'ouvrir" : "glissez une entrée sur un jour pour lui donner une échéance"}</span></div>
+        ${S.view === "année" ? yearHTML() : S.view === "semaine" ? `<div class="wk">
           ${days.map((k) => `<div class="dh ${k === TODAY ? "today" : ""}">${DOW[(dOf(k).getDay() + 6) % 7]}
             ${dOf(k).getDate()}</div>`).join("")}
           ${days.map((k) => {
@@ -520,7 +565,7 @@ function screenJrn() {
   let lastMonth = "";
   const counts = (fn) => E.filter((e) => e.done).filter(fn).length;
   return `<div class="head">
-      <h2>Journal</h2>
+      <h2>Historique</h2>
       <span class="m">${E.filter((e) => e.done).length} entrées · tout ce qui est coché, répondu ou déposé</span>
     </div>
     <div class="jrn">
@@ -557,7 +602,7 @@ function screenJrn() {
           <div class="fcol">${Object.entries(KIND_ICON).map(([k, ic]) => `<button class="fchip ${S.fkind === k ? "on" : ""}"
             data-fkind="${k}">${icon(ic)}${{ todo: "À faire cochées", change: "Modifications", call: "Appels reçus", deadline: "Échéances" }[k]}
             <span class="c">${counts((e) => e.kind === k)}</span></button>`).join("")}</div></div>
-        <div class="note">Le journal ne s'écrit pas à la main. Une entrée y tombe quand elle est cochée,
+        <div class="note">L'historique ne s'écrit pas à la main. Une entrée y tombe quand elle est cochée,
           et personne ne peut l'en retirer — décocher ajoute une ligne, ça n'en efface pas.</div>
       </div>
     </div>`;
@@ -566,7 +611,7 @@ function screenJrn() {
 /* --------------------------------------------------------- écran plans */
 function screenCoord() {
   return `<div class="head"><h2>Coordination — niveau 5</h2>
-    <span class="m">la marge reste la marge: on y écrit, et ça part dans le journal</span></div>
+    <span class="m">la marge reste la marge: on y écrit, et ça part dans l'historique</span></div>
     <div style="display:grid;grid-template-columns:minmax(0,1fr) 330px;min-height:612px">
       <div style="display:grid;place-items:center;color:var(--ink-3);border-right:1px solid var(--line-2);
         background:repeating-linear-gradient(45deg,#fafafa 0 11px,#f4f4f4 11px 22px)">
@@ -581,7 +626,7 @@ function screenCoord() {
           <span class="b"><span class="t">${e.title}</span>
             <span class="m">${(e.who || []).map(nameOf).join(", ")} · ${relDay(e.created.slice(0, 10))}
               <span class="src">${icon("map-pin")} ${e.source}</span></span></span></div>`).join("")}
-        <div class="empty">Une note épinglée ici apparaît dans le journal le jour même, avec son niveau et
+        <div class="empty">Une note épinglée ici apparaît dans l'historique le jour même, avec son niveau et
           son unité. C'est la même entrée, pas une copie.</div>
       </div>
     </div>`;
@@ -589,9 +634,9 @@ function screenCoord() {
 
 /* ------------------------------------------------- la fenêtre de création */
 const KINDS = [
-  { k: "todo", t: "À faire", ic: "circle-check-big", d: "se coche aujourd'hui" },
-  { k: "change", t: "Modification", ic: "pencil-line", d: "ce qu'on vient de changer" },
-  { k: "call", t: "Appel reçu", ic: "phone-call", d: "ce qu'on vient de nous demander" },
+  { k: "todo", t: "À faire", ic: "circle-check-big" },
+  { k: "change", t: "Modification", ic: "pencil-line" },
+  { k: "call", t: "Appel reçu", ic: "phone-call" },
 ];
 function modalHTML() {
   const m = S.modal;
@@ -600,18 +645,17 @@ function modalHTML() {
     <div class="mh">${icon("plus")}<b>Nouvelle entrée</b>
       <span class="x" data-close>${icon("x")}</span></div>
     <div class="mb">
-      <textarea id="mtitle" placeholder="Quoi? — « le garde-corps du 5e passe à 1 070 »">${m.title}</textarea>
+      <textarea id="mtitle" placeholder="Quoi?">${m.title}</textarea>
       <div class="fld"><div class="lab">Qui s'en occupe</div>
         <div class="pers">${PEOPLE.map((p) => `<button class="pchip ${m.who.includes(p.id) ? "on" : ""}"
           data-pick="${p.id}">${avatar(p.id)}${p.name}</button>`).join("")}</div></div>
       <div class="fld"><div class="lab">Quelle sorte</div>
         <div class="kinds">${KINDS.map((k) => `<button class="kind ${m.kind === k.k ? "on" : ""}"
-          data-kind="${k.k}"><b>${icon(k.ic)}${k.t}</b><span>${k.d}</span></button>`).join("")}</div></div>
+          data-kind="${k.k}"><b>${icon(k.ic)}${k.t}</b></button>`).join("")}</div></div>
     </div>
     <div class="mf">
       <span class="stamp">${icon("clock")}Datée du ${stamp}</span>
-      <span class="r"><span class="kbd">⌘↵</span>
-        <button class="btn" data-close>Annuler</button>
+      <span class="r">
         <button class="btn dark" data-saveent>${icon("corner-down-left")}Enregistrer</button></span>
     </div></div>`;
 }
@@ -660,10 +704,14 @@ document.addEventListener("click", (e) => {
   const tab = hit("[data-tab]"); if (tab) { S.tab = tab.dataset.tab; return render(); }
   const me = hit("[data-me]"); if (me) { S.me = me.dataset.me; return render(); }
   const view = hit("[data-view]"); if (view) { S.view = view.dataset.view; return render(); }
+  const mo = hit("[data-month]");
+  if (mo) { S.anchor = iso(new Date(dOf(S.anchor).getFullYear(), Number(mo.dataset.month), 1));
+    S.view = "mois"; return render(); }
   const mv = hit("[data-mv]");
   if (mv) { const n = Number(mv.dataset.mv);
     S.anchor = S.view === "semaine" ? addDays(S.anchor, 7 * n)
-      : iso(new Date(dOf(S.anchor).getFullYear(), dOf(S.anchor).getMonth() + n, 1));
+      : S.view === "mois" ? iso(new Date(dOf(S.anchor).getFullYear(), dOf(S.anchor).getMonth() + n, 1))
+      : iso(new Date(dOf(S.anchor).getFullYear() + n, dOf(S.anchor).getMonth(), 1));
     return render(); }
   if (hit("[data-today]")) { S.anchor = TODAY; return render(); }
 
