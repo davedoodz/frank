@@ -4321,7 +4321,7 @@ function onClick(e) {
       if (screen === "Unités") { paintSelection(); fitUnit(); return; }
       break;
     case "article":
-      if (V.articleId !== value) V.noteOn = null;
+      if (V.articleId !== value) V.noteEdit = null;
       V.articleId = value; V.clarityOn = null;
       break;
     /* The office's reading of a provision, changed where it is shown. It is
