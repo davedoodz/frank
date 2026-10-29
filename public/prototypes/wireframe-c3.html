@@ -509,18 +509,19 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 /* The consultants' sheets sit over the floor plan in one shared coordinate
    space: the plan box takes the drawing's own aspect, so the drawing fills
    it without being stretched and a percentage means the same thing on every
-   layer. The plan itself is read in black and white; the sheets keep their
-   own ink, since their colour is what tells them apart. */
+   layer. Every sheet keeps its own ink: the architect's colour carries
+   meaning too — stationnement, parcours sans obstacle, pentes — so it is
+   shown as it was plotted and not flattened to grey. */
 .plan.align{aspect-ratio:2000 / 1675;height:auto;flex:0 0 auto;overflow:hidden}
 [data-fi="high"] .plan.align[data-img]{background:none}
 [data-fi="high"] .plan.align[data-img="plan"]::before{content:"";position:absolute;inset:0;
-  background:var(--plan,none) center/contain no-repeat;filter:grayscale(1)}
+  background:var(--plan,none) center/contain no-repeat}
 /* Vectors over the picture, not instead of it: a pass takes a few seconds
    on a permit sheet, and the pane must never be empty while it runs. The
    canvas is transparent until the sheet lands on it, then it covers the
    JPEG exactly, in the same box, so every overlay keeps its coordinates. */
 .plan canvas.sheetpdf{position:absolute;inset:0;width:100%;height:100%;display:block;
-  z-index:0;filter:grayscale(1)}
+  z-index:0}
 .plan canvas.sheetpdf[data-ready="1"]{background:#fff}
 /* While the pass runs the pane says so in its own title bar, at the end of
    the row: the file strip that used to carry it is gone. It is a transient
@@ -532,8 +533,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .pane[data-pdf] > .ph::after{order:9;color:var(--ink-3);font-size:10.5px;
   white-space:nowrap;flex:0 0 auto}
 @container (max-width:620px){ .pane[data-pdf] > .ph::after{display:none} }
-/* The thumbnails are crops of the same plan, so they read the same way. */
-[data-fi="high"] .plan[data-img="plan"]:not(.align){filter:grayscale(1)}
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
   background-size:contain;background-position:center;pointer-events:none;z-index:2}
 [data-fi="high"] .plan[data-img] .lay{display:block}
@@ -554,7 +553,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .engineering-bar{padding:6px 10px;border-bottom:1px solid var(--line-2);flex:0 0 auto}
 .engineering-bar .laychips{flex-wrap:wrap;margin:0}
 .engineering-bar .laychips .chip .lb{display:inline}
-.engineering-source{font-size:11px;color:var(--ink-2);margin-top:4px}
 .model-context-note{padding:6px 10px;font-size:11px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
 /* The three layer chips sit in the pane header, tight, so the header still
    reads as one line with the host button at its end. */
@@ -602,7 +600,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .mini{position:absolute;right:50px;bottom:10px;z-index:5;width:132px;background:var(--paper);
   border:1px solid var(--line);user-select:none}
 .mini .mi{position:relative;display:block;cursor:crosshair;overflow:hidden}
-.mini img{display:block;width:100%;filter:grayscale(1) contrast(.72);opacity:.85}
+.mini img{display:block;width:100%;filter:contrast(.72);opacity:.85}
 .mini .mrect{position:absolute;border:1.5px solid var(--ink);background:rgba(17,17,18,.08)}
 [data-fi="low"] .mini{display:none}
 /* The model's corner view is a live render, not a picture: it keeps the
@@ -954,7 +952,7 @@ function sprite() {
     /* sharing: the button, and the two rights it can grant */
     "share-2", "eye", "message-square",
     /* the three layer chips on the 2D pane */
-    "trees",
+    "drafting-compass", "trees",
     /* the four engineering-discipline chips */
     "zap", "droplets", "git-branch", "wind",
     /* the margin: posting a note, keeping one for the studio, reading as a guest */
@@ -1044,12 +1042,16 @@ const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8];
 const baseTypo = (ty) => ty.split("+")[0];
 
 
-/* One source drawing per level. JPG and PDF use the same full-footprint
-   crop. Floor-specific contours account for differing layouts and offsets. */
+/* One source drawing per level, residential and not. JPG and PDF use the
+   same full-footprint crop of the permit page (scripts/import/arch-plans.py
+   cut the three non-residential ones the way the floors were cut). Page is
+   the page of the permit set the sheet comes from, which is what a
+   consultant quotes. Floor-specific contours account for differing layouts
+   and offsets. */
 const SHEETS = {};
 LEVELS.forEach((lv) => {
   const code = `A-${204 + lv}`;
-  SHEETS[`Niveau ${lv}`] = { code, img: `assets/plan-niveau-${lv}.jpg`,
+  SHEETS[`Niveau ${lv}`] = { code, page: 13 + lv, img: `assets/plan-niveau-${lv}.jpg`,
     /* The same sheet, cropped the same way, kept as vectors: read by pdf.js
        and re-rendered at the zoom it is being looked at, so a dimension
        string stays a line and does not turn into four grey pixels. */
@@ -1057,10 +1059,18 @@ LEVELS.forEach((lv) => {
     file: `${code}_PLAN_NIVEAU_${lv}.dwg`, rev: lv === 8 ? "R03" : "R04",
     date: lv === 8 ? "18 Oct" : "24 Oct" };
 });
+/* The two basements and the roof carry no apartment unit, but they do carry
+   the architect's own drawing: the same set, three more pages. */
+[["Sous-sol 00", "A-203", 11, "SOUS_SOL_00"], ["Sous-sol 0", "A-202", 9, "SOUS_SOL_0"],
+  ["Toiture", "A-213", 22, "TOITURE"]].forEach(([view, code, page, name]) => {
+  const stem = { "Sous-sol 00": "sous-sol-00", "Sous-sol 0": "sous-sol-0", "Toiture": "toiture" }[view];
+  SHEETS[view] = { code, page, img: `assets/plan-${stem}.jpg`, pdf: `assets/plan-${stem}.pdf`,
+    file: `${code}_PLAN_${name}.dwg`, rev: "R04", date: "24 Oct" };
+});
 
-/* Non-residential levels: no apartment units, and — until an architectural
-   source is digitized — no architectural plan either. -1/0/9 are the
-   numeric level contract window.fitteSelection and the building model
+/* Non-residential levels: no apartment units, but an architectural plan
+   like every other level. -1/0/9 are the numeric level contract
+   window.fitteSelection and the building model
    share (window.fitteSelectUnit only ever hands back 1–8, since the model
    has no basement or roof geometry to raycast against). This is the one
    place a level number is turned into a view label or read back out of
@@ -1090,30 +1100,15 @@ const ENG_LABELS = { electrical: "Électricité", drainage: "Drainage",
   distribution: "Distribution", ventilation: "Ventilation" };
 const ENG_LAYICON = { electrical: "zap", drainage: "droplets",
   distribution: "git-branch", ventilation: "wind" };
-/* Drainage is the one discipline present on every non-residential sheet
-   (00, 0 and the roof), so it is the default base reference where no
-   architecture exists yet. */
-const ENG_BASE_DISCIPLINE = "drainage";
 const levelKey = (level) => level === -1 ? "00" : level === 9 ? "roof" : String(level);
 function engSheet(discipline, level) {
   const kind = window.fitteEngineering && window.fitteEngineering[discipline];
   return (kind && kind[levelKey(level)]) || null;
 }
-/* The discipline standing in for the missing architectural plan: the first
-   toggled-on kind that actually has a sheet for this level, or the default.
-   Switching which chip is on switches the base; turning every chip back
-   off does not blank the pane, it falls back to the default again. */
-function engBaseDiscipline(level) {
-  if (!isNonresLevel(level)) return null;
-  const on = ENG_DISCIPLINES.filter((d) => V.lay[d].on && engSheet(d, level));
-  return on[0] || ENG_BASE_DISCIPLINE;
-}
-/* The remaining toggled kinds, aligned on top of the base — never the base
-   kind itself twice. On a residential floor every toggled kind is an
-   overlay, since the architecture is always the base there. */
+/* Every toggled kind that has a sheet for this level. The architecture is
+   always the base, so a discipline is always an overlay. */
 function engOverlayDisciplines(level) {
-  const base = engBaseDiscipline(level);
-  return ENG_DISCIPLINES.filter((d) => V.lay[d].on && d !== base && engSheet(d, level));
+  return ENG_DISCIPLINES.filter((d) => V.lay[d].on && engSheet(d, level));
 }
 
 /* A crossing is where two drawings disagree in one place. It belongs to the
@@ -1473,18 +1468,14 @@ const layersHTML = () => (isNonresLevel(paneLevel()) ? [] : ["arp", "pay"]).filt
    and "nothing here yet" are different sentences. */
 function engChip(d, level) {
   const s = engSheet(d, level);
-  const isBase = isNonresLevel(level) && d === engBaseDiscipline(level);
-  const on = isBase || V.lay[d].on;
   const title = !s ? `${ENG_LABELS[d]} — aucune feuille pour ce niveau`
-    : isBase ? `${ENG_LABELS[d]} — plan de base de ce niveau — ${s.code} · p.${s.page}`
     : `Superposer ${ENG_LABELS[d].toLowerCase()} — ${s.code} · p.${s.page}`;
-  return `<span class="chip hi ${on ? "on" : ""}" ${s ? act("englayer", d) : ""} title="${title}"
+  return `<span class="chip hi ${s && V.lay[d].on ? "on" : ""}" ${s ? act("englayer", d) : ""} title="${title}"
     ${s ? "" : `aria-disabled="true" style="opacity:.4;cursor:default"`}>${icon(ENG_LAYICON[d])}
-    <span class="lb">${ENG_LABELS[d]}${isBase ? " · base" : ""}</span></span>`;
+    <span class="lb">${ENG_LABELS[d]}</span></span>`;
 }
-/* Only the overlays paint a layer div: the base kind reuses the floor
-   plan's own canvas and --plan background (see paneSheet()), the same slot
-   the architecture fills on a residential level. */
+/* The architecture is the base on every level, so every toggled discipline
+   paints a layer div over it. */
 const engLayersHTML = () => engOverlayDisciplines(paneLevel())
   .map((d) => {
     const s = engSheet(d, paneLevel());
@@ -1493,8 +1484,8 @@ const engLayersHTML = () => engOverlayDisciplines(paneLevel())
       ${vector ? `<canvas data-laypdf="${d}" data-pdf-url="${s.pdf}"></canvas>` : ""}</div>`;
   }).join("");
 
-/* The plan is read in black and white. Colour only arrives when a typology
-   is asked for, and then only on the units that answer. */
+/* Typology fill is the one colour the prototype adds to the sheet: the
+   architect's own ink stays as it was plotted. */
 const typosOn = () => TYPOS.filter((t) => V.typo[t]);
 const typoHTML = () => {
   const on = typosOn();
@@ -1650,14 +1641,10 @@ const act = (name, value) => `data-act="${name}"${value === undefined ? "" : ` d
    or, where that tab has none, the selected unit's real level (paneLevel
    above), so every other screen shows that unit's true floor rather than
    a stand-in composite. */
-/* The architectural source for a residential floor; null on a basement or
-   the roof, where none has been digitized — paneSheet() below is what the
-   pane actually paints, architecture when there is one, the engineering
-   base discipline when there is not. Never "Niveau 5": an unmapped level
-   shows its own absence, not another floor's drawing. */
-const sheet = () => SHEETS[levelView(paneLevel())] || null;
-const paneSheet = () => sheet() || engSheet(engBaseDiscipline(paneLevel()), paneLevel());
-const dwgName = () => V.docs.names[viewOf("Unités")] || sheet()?.file || "—";
+/* The architectural sheet of the level the pane is on. Every level in
+   LEVEL_VIEWS has one, so this never answers null. */
+const sheet = () => SHEETS[levelView(paneLevel())];
+const dwgName = () => V.docs.names[viewOf("Unités")] || sheet().file;
 
 /* What a drawing pane says about its file: where it is, what it is called,
    which revision was read. The button that hands the drawing back to the
@@ -1667,14 +1654,6 @@ const HOSTS = { plan: ["autocad", "Ouvrir dans AutoCAD"], model: ["sketchup", "O
 
 function hostButton(kind) {
   const [a, label] = HOSTS[kind];
-  /* No DWG to hand back on a level with no architectural source: the
-     button says so and does nothing, rather than opening on a file that
-     does not exist for this level. */
-  if (kind === "plan" && !sheet()) {
-    return `<span class="btnw hi" style="opacity:.5;cursor:default"
-      title="Aucun plan d'architecture importé pour ce niveau — remise à AutoCAD indisponible">
-      ${icon("external-link")}<span class="hi">AutoCAD — indisponible</span></span>`;
-  }
   /* Solid: handing the drawing back to its application is the one action
      on a drawing pane, so it carries the weight of the primary button. */
   return `<span class="btnw solid" ${act(a)} title="${label}">${icon("external-link")}
@@ -2353,7 +2332,7 @@ function contentHTML() {
       const mini = (side) => (side === "plan"
         ? `<div class="mini hi" data-mini="plan">
         <span class="mi" data-mi>
-          <img src="${paneSheet()?.img || ""}" alt="">
+          <img src="${sheet().img}" alt="">
           <span class="mrect" data-mrect></span>
         </span>
       </div>`
@@ -2390,28 +2369,28 @@ function contentHTML() {
       /* Which sheets are laid over the floor plan was a panel setting, which
          means it was not in the prototype at all: the person reading the
          drawing could not ask for the surveyor. The three chips are that
-         question, on the pane that answers it. "Plan seul" is not a fourth
-         layer, it is both overlays off — the floor plan is always there. */
+         question, on the pane that answers it. "Architecture" is not a
+         fourth layer, it is every overlay off — the architect's sheet is
+         always there, on every level. */
       /* One glyph each, so the row reads as three kinds of drawing before it
-         reads as three words: the sheet itself, the surveyor's rule, the
-         landscape architect's planting. */
-      const LAYICON = { none: "file", arp: "ruler", pay: "trees" };
+         reads as three words: the architect's compass, the surveyor's
+         rule, the landscape architect's planting. */
+      const LAYICON = { none: "drafting-compass", arp: "ruler", pay: "trees" };
       const laychip = (k, t) => {
         const unavailable = k !== "none" && isNonresLevel(paneLevel());
         const on = !unavailable && (k === "none"
           ? !V.lay.arp.on && !V.lay.pay.on && !ENG_DISCIPLINES.some((d) => V.lay[d].on)
           : V.lay[k].on);
         return `<span class="chip hi ${on ? "on" : ""}" ${unavailable ? 'aria-disabled="true" style="opacity:.4"' : act("layer", k)}
-          title="${unavailable ? `${t} — non disponible pour ce niveau` : k === "none" ? "Le plan de base seul" : `Superposer ${t.toLowerCase()}`}">${icon(LAYICON[k])}<span class="lb">${t}</span></span>`;
+          title="${unavailable ? `${t} — non disponible pour ce niveau` : k === "none" ? "Le plan d'architecture seul" : `Superposer ${t.toLowerCase()}`}">${icon(LAYICON[k])}<span class="lb">${t}</span></span>`;
       };
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane drawing" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>
-        ${kind === "plan" ? `<span class="laychips">${laychip("none", "Plan seul")}${laychip("arp", "Arpenteur")}${laychip("pay", "Paysage")}</span>` : ""}
+        ${kind === "plan" ? `<span class="laychips">${laychip("none", "Architecture")}${laychip("arp", "Arpenteur")}${laychip("pay", "Paysage")}</span>` : ""}
         ${hostButton(kind === "plan" ? "plan" : "model")}</div>
         ${kind === "plan" ? `<div class="engineering-bar hi">
           <span class="laychips eng">${ENG_DISCIPLINES.map((d) => engChip(d, paneLevel())).join("")}</span>
-          ${!sheet() ? `<div class="engineering-source">Architecture non fournie · ${paneSheet()?.code || "—"} · p.${paneSheet()?.page || "—"}</div>` : ""}
         </div>` : isNonresLevel(paneLevel()) ? `<div class="model-context-note hi">${note}</div>` : ""}
         ${kind === "plan"
           /* The sheet is larger than the pane, so the pane is a window onto
@@ -2423,7 +2402,7 @@ function contentHTML() {
               <div class="plan ${cls}" data-img="${kind}" data-src="${planVector() ? "vector" : "image"}"
                    style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})">
                 <span class="lo"></span><span class="hi">${note}</span>
-                ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${paneSheet().pdf}"></canvas>` : ""}
+                ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}${pinMarkHTML()}</div></div>
               ${north("plan")}${mini("plan")}${zcol("plan")}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
@@ -2437,9 +2416,8 @@ function contentHTML() {
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
-      const nonres = isNonresLevel(paneLevel());
-      const planNote = nonres
-        ? `${levelView(paneLevel())} — architecture non fournie — base ${ENG_LABELS[engBaseDiscipline(paneLevel())].toLowerCase()}`
+      const planNote = isNonresLevel(paneLevel())
+        ? `${levelView(paneLevel())} — aucune unité résidentielle à ce niveau`
         : `${unit} — contours par-dessus`;
       /* The two basements are not in the model: the massing starts at the
          ground. A pane saying so is a pane of nothing, so the plan takes
@@ -2575,22 +2553,22 @@ function exportAllCSV() {
 }
 
 /* A basement or the roof carries no apartment units: the inspector reads
-   as the level itself — which disciplines are on, their real sheet code
-   and page — never a stand-in unit, and never a decision panel with
-   nothing chosen to decide about. */
+   as the level itself — the architectural sheet it is on, then whichever
+   disciplines are laid over it, each with its real code and page — never a
+   stand-in unit, and never a decision panel with nothing to decide. */
 function nonresInspectorHTML(mode, step) {
   const level = paneLevel();
-  const base = engBaseDiscipline(level);
-  const overlays = engOverlayDisciplines(level);
-  const rows = [base, ...overlays].map((d) => {
-    const s = engSheet(d, level);
-    return [`${ENG_LABELS[d]}${d === base ? " (base)" : ""}`, s ? `${s.code} · p.${s.page}` : "aucune feuille"];
-  });
+  const s = sheet();
+  const rows = [["Architecture", `${s.code} · p.${s.page}`],
+    ...engOverlayDisciplines(level).map((d) => {
+      const e = engSheet(d, level);
+      return [ENG_LABELS[d], `${e.code} · p.${e.page}`];
+    })];
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${levelView(level)}</span></div>
     <div class="pb">
       <div class="tile"><div class="lo col">${bars(2)}</div>
-        <div class="hi" style="font-size:12px">Aucun plan d'architecture n'a encore été importé pour ce niveau.</div>
-        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Lecture par discipline technique seulement — rien à sélectionner comme unité, rien à décider ici.</div></div>
+        <div class="hi" style="font-size:12px">Ce niveau ne porte aucune unité résidentielle.</div>
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Lecture du plan et des disciplines superposées — rien à sélectionner comme unité, rien à décider ici.</div></div>
       ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
         <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>
@@ -2884,7 +2862,7 @@ const vpEl = () => document.querySelector("[data-vp]");
 
 /* PDF detail is automatic; the image remains underneath during rendering.
    wireframe-c3-pdf.js paints viewport-sized tiles at the current pixel density. */
-const planVector = () => !!(paneSheet() && paneSheet().pdf && paneSheet().detail !== "image");
+const planVector = () => !!sheet().pdf;
 const SHEET_AR = 2000 / 1675;
 function layoutSheet(el) {
   const plan = el.querySelector(".plan");
@@ -3260,7 +3238,7 @@ function render() {
          data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
          data-shell="${V.shell === "Inset card" ? "inset" : "flat"}"
          data-chrome="${V.chrome === "Black" ? "black" : "light"}"
-         style="--plan:url(${paneSheet()?.img || ""})">
+         style="--plan:url(${sheet().img})">
       ${navHTML()}
       <div class="body">
         ${tabsHTML()}
@@ -3881,7 +3859,7 @@ const dial = DialKit.createDialKit("Wireframe C3", {
     units: sel(NAV_ICONS["Unités"].map(([l]) => l)),
     codes: sel(NAV_ICONS["Codes"].map(([l]) => l)),
     schedule: sel(NAV_ICONS["Échéancier"].map(([l]) => l)) },
-  /* The plan is black and white until a typology is asked for. */
+  /* No typology fill is laid on the sheet until one is asked for. */
   typologies: { _collapsed: false, "3½": false, "4½": false, "5½": false },
   layers: { _collapsed: false,
     surveyor: true,
