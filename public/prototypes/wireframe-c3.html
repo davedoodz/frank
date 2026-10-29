@@ -474,6 +474,14 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .task:hover .tick{border-color:var(--ink-2)}
 .task .tick.on{background:var(--ink);border-color:var(--ink)}
 .task .tick .lu{width:10px;height:10px;stroke-width:3}
+.task .file{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-size:11px;cursor:pointer;flex:0 0 auto}
+.task .file:hover{border-color:var(--ink-2);color:var(--ink)}
+.task .file svg{width:12px;height:12px}
+[data-fi="high"] .task .file.hi{display:inline-flex}
+.task .file .hi{display:inline}
+/* A ticked line stays readable: it is still being looked at. */
+.task.done{opacity:.72}
 .task .tact{display:flex;align-items:center;color:var(--ink-3);opacity:0;padding:2px}
 .task:hover .tact,.task.on .tact{opacity:1}
 .task .tact:hover{color:var(--ink)}
@@ -1210,6 +1218,8 @@ function sprite() {
     "blend",
     /* the margin: posting a note, keeping one for the studio */
     "lock", "map-pin", "send", "users", "trash-2",
+    /* a ticked task is filed by hand, and can be pulled back out */
+    "archive", "archive-restore",
     /* the task editor */
     "pencil",
     /* the scope switch and the real .csv it exports */
@@ -2479,17 +2489,19 @@ function taskForm(t, isNew) {
 }
 
 function taskListHTML() {
-  const open = TASKS.filter((t) => !t.done)
+  /* On the list: everything not filed away, ticked or not. The archive is
+     what someone has deliberately put away. */
+  const live = TASKS.filter((t) => !t.archived)
     .sort((a, b) => a.day.localeCompare(b.day) || PRIO[b.prio] - PRIO[a.prio]);
-  const here = open.filter((t) => t.day === V.day);
-  const rest = open.filter((t) => t.day !== V.day);
-  const archive = TASKS.filter((t) => t.done)
+  const here = live.filter((t) => t.day === V.day);
+  const rest = live.filter((t) => t.day !== V.day);
+  const archive = TASKS.filter((t) => t.archived)
     .sort((a, b) => (b.doneAt || b.day).localeCompare(a.doneAt || a.day));
   const line = (t) => (V.taskEdit === t.id ? taskForm(t, false) : `<div class="task ${t.done ? "done" : ""}
       ${V.task === t.id ? "on" : ""} ${!t.done && t.day < TODAY ? "late" : ""}"
       data-task="${t.id}" ${act("task", t.id)}>
     <span class="tick dot ${t.done ? "on" : ""}"
-      ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — la tâche part à l'archive"}">${t.done ? icon("check") : ""}</span>
+      ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — elle reste ici, barrée"}">${t.done ? icon("check") : ""}</span>
     <span class="col" style="flex:1;gap:2px;min-width:0">
       <span class="lo bar" style="width:70%"></span>
       <span class="hi ttl" style="font-size:12.5px">${t.title}</span>
@@ -2499,9 +2511,12 @@ function taskListHTML() {
         !t.done && t.day < TODAY ? " · en retard" : ""}</span>
     </span>
     ${avatars(t)}
-    ${t.done ? "" : `<span class="hi pr" data-prio="${t.prio}">${t.prio}</span>`}
+    ${t.done ? `<span class="hi file" ${act(t.archived ? "taskunfile" : "taskfile", t.id)}
+      title="${t.archived ? "Ressortir de l'archive" : "Ranger dans l'archive"}">${icon(t.archived ? "archive-restore" : "archive")}<span
+      class="hi">${t.archived ? "Ressortir" : "Archiver"}</span></span>`
+      : `<span class="hi pr" data-prio="${t.prio}">${t.prio}</span>`}
     <span class="hi dte">${fmtDay(t.done ? t.doneAt || t.day : t.day)}</span>
-    <span class="hi tact" ${act("tedit", t.id)} title="Modifier">${icon("pencil")}</span>
+    ${t.done ? "" : `<span class="hi tact" ${act("tedit", t.id)} title="Modifier">${icon("pencil")}</span>`}
   </div>`);
   return `<div class="col" style="gap:7px">
     <div class="row" style="gap:6px">
@@ -4863,15 +4878,34 @@ function onClick(e) {
     }
     case "task": { V.task = V.task === value ? null : value; const t = TASKS.find((x) => x.id === value);
       if (t && !t.done) V.day = t.day; break; }
-    /* Ticking archives, it does not delete: the task keeps the day it was
-       closed on and can be reopened from the archive below the list. */
+    /* Ticking is not filing. A ticked task stays where it was, struck
+       through, until someone says it can go: the day's list has to show
+       what was finished today, and a line that vanishes under the cursor
+       is a line nobody can check. */
     case "tasktick": {
       const t = TASKS.find((x) => x.id === value);
       if (!t) break;
       t.done = !t.done;
-      if (t.done) { t.doneAt = TODAY; say(`Archivée: ${t.title}`); }
-      else { delete t.doneAt; V.day = t.day; say(`Rouverte: ${t.title}`); }
+      if (t.done) { t.doneAt = TODAY; say(`Faite: ${t.title}. Archiver pour la ranger.`); }
+      else { delete t.doneAt; delete t.archived; V.day = t.day; say(`Rouverte: ${t.title}`); }
       if (V.taskEdit === t.id) V.taskEdit = null;
+      break;
+    }
+    case "taskfile": {
+      const t = TASKS.find((x) => x.id === value);
+      if (!t) break;
+      t.archived = true;
+      say(`Archivée: ${t.title}. Elle reste dans l'archive, en bas de la liste.`);
+      break;
+    }
+    /* Out of the archive and back onto its day, still ticked: pulling a
+       task out is not the same as saying it was never done. */
+    case "taskunfile": {
+      const t = TASKS.find((x) => x.id === value);
+      if (!t) break;
+      delete t.archived;
+      V.day = t.doneAt || t.day;
+      say(`Ressortie: ${t.title}`);
       break;
     }
     /* The editor -------------------------------------------------------
