@@ -672,13 +672,14 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
    canvas that replaces it read the same two variables, written on .plan
    from the order and the opacity of that one drawing. */
 [data-fi="high"] .plan.align[data-img="plan"]::before{content:"";position:absolute;inset:0;
-  background:var(--plan,none) center/contain no-repeat;z-index:var(--planz,1);opacity:var(--planop,1)}
+  background:var(--plan,none) center/contain no-repeat;z-index:var(--planz,1);opacity:var(--planop,1);
+  mix-blend-mode:multiply}
 /* Vectors over the picture, not instead of it: a pass takes a few seconds
    on a permit sheet, and the pane must never be empty while it runs. The
    canvas is transparent until the sheet lands on it, then it covers the
    JPEG exactly, in the same box, so every overlay keeps its coordinates. */
 .plan canvas.sheetpdf{position:absolute;inset:0;width:100%;height:100%;display:block;
-  z-index:var(--planz,1);opacity:var(--planop,1)}
+  z-index:var(--planz,1);opacity:var(--planop,1);mix-blend-mode:multiply}
 .plan canvas.sheetpdf[data-ready="1"]{background:#fff}
 /* While the pass runs the pane says so in its own title bar, at the end of
    the row: the file strip that used to carry it is gone. It is a transient
@@ -692,8 +693,13 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 @container (max-width:620px){ .pane[data-pdf] > .ph::after{display:none} }
 /* Inline z-index from the pile's order; 1 to 3, under the typology fills
    and the unit outlines, which always stay on top of every drawing. */
+/* A drawing on tracing paper darkens what is under it; it does not hide
+   it. Multiplying is that: the white of each sheet drops out and only the
+   ink stacks, so the order of the pile can put any discipline in front
+   without blanking the rest. */
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
-  background-size:contain;background-position:center;pointer-events:none;z-index:1}
+  background-size:contain;background-position:center;pointer-events:none;z-index:1;
+  mix-blend-mode:multiply}
 [data-fi="high"] .plan[data-img] .lay{display:block}
 /* The surveyor's sheet is drawn the other way round from the floor plan:
    north is at the bottom on it and at the top on A-209, so it takes a half
@@ -1112,19 +1118,23 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .gut:hover .gfold,.gut.fold .gfold{opacity:1}
 .gut .gfold:hover{background:#000}
 .gut .gfold .lu{width:17px;height:17px;stroke-width:2.6}
-/* Folded, the tab stops being a chevron and becomes a label: the name runs
-   down the strip under the chevron, so a folded pane says what it is
-   instead of asking to be opened to find out. A label is read, so it is
-   dark on white, 12 px, and wide enough for the letters: ink on ink was lost
-   against a black chrome, and 11 px sideways capitals did not read. */
-.gut.fold .gfold{width:30px;height:auto;min-height:54px;padding:10px 0;flex-direction:column;gap:8px;
-  background:var(--paper);color:var(--ink);border:1px solid var(--line);box-shadow:none}
-.gut.fold .gfold:hover{background:var(--fill)}
-.gut.fold .gname{writing-mode:vertical-rl;font-size:12px;font-weight:600;letter-spacing:.06em;line-height:1}
-.gut.fold.edge-s{align-items:flex-start}
-.gut.fold.edge-s .gfold{margin-left:5px}
-.gut.fold.edge-e{align-items:flex-end}
-.gut.fold.edge-e .gfold{margin-right:5px}
+/* Folded, the tab stops being a chevron and becomes a label, so a folded
+   pane says what it is instead of asking to be opened to find out. The
+   label is read on one line, white on black, and the tab sits above every
+   pane and tool strip: written sideways or in grey it was not read, and the
+   layer strip's buttons covered it. It is wider than the strip it lives in
+   and lies over the drawing next to it; that drawing is still there. */
+.gut.fold{z-index:60}
+.gut.fold .gfold{width:auto;height:34px;padding:0 12px 0 9px;flex:0 0 auto;flex-direction:row;gap:6px;
+  white-space:nowrap;user-select:none;background:var(--ink);color:#fff;border:0;
+  box-shadow:0 0 0 1.5px var(--card)}
+.gut.fold .gfold:hover{background:#000}
+.gut.fold .gfold .lu{width:15px;height:15px}
+.gut.fold .gname{font-size:13px;font-weight:600;line-height:1}
+.gut.fold.fold-s{align-items:flex-start}
+.gut.fold.fold-s .gfold{margin-left:5px}
+.gut.fold.fold-e{align-items:flex-end}
+.gut.fold.fold-e .gfold{margin-right:5px}
 /* Two tabs on one edge sit one above the other, not side by side: the
    strip is ten pixels wide and they would overlap the drawings. */
 .gut .gfold + .gfold{margin-top:6px}
@@ -1276,9 +1286,12 @@ const V = {
   /* The pile, front to back. Dragging a thumbnail rewrites this, and
      everything else — the badges, the z-index of each drawing — is read
      from it, so there is one answer to "which sheet is on top". */
-  /* Front first. The engineering sheets start in front of the architecture,
-     which is what reading a duct against a wall asks for. */
-  layOrder: ["electrical", "drainage", "distribution", "ventilation", "pay", "arp", "plan"],
+  /* Front first, in the order the disciplines are read: the surveyor's
+     ground, the architecture standing on it, the landscape around it, then
+     electrical and mechanical running through it. Every sheet is printed
+     white-on-white, so the pile multiplies instead of covering — see
+     .plan .lay — and a sheet in front no longer erases the ones behind. */
+  layOrder: ["arp", "plan", "pay", "electrical", "drainage", "distribution", "ventilation"],
   /* A conflict is caught the moment the drawing that reveals it is laid
      on the sheet; the stamp is kept so the ticket can say when, and so the
      same conflict is not "caught" twice. */
@@ -2226,10 +2239,10 @@ function gutter({ size, grab, prev, next, lprev, lnext }) {
     : shutN ? tab(next, lnext, "chevron-left")
     : `${prev ? tab(prev, lprev, "chevron-left") : ""}${next ? tab(next, lnext, "chevron-right") : ""}`;
   const shut = shutP || shutN;
-  /* A pane folded against the outer edge of the screen leaves its tab on
-     that edge, where a centred tab is cut in half: it is pulled inside. */
-  const edge = shutP && !next ? " edge-s" : shutN && !prev ? " edge-e" : "";
-  return `<div class="gut${shut ? " fold" : ""}${edge}" data-gut="${size}" data-grab="${grab}"
+  /* The tab is wider than the strip, so it lies over the pane that stays
+     open: centred, it was cut in half at the screen's edge. */
+  const side = shutP ? " fold-s" : shutN ? " fold-e" : "";
+  return `<div class="gut${shut ? " fold" : ""}${side}" data-gut="${size}" data-grab="${grab}"
       title="${shut ? "" : "Glisser pour déplacer le bord"}">${tabs}</div>`;
 }
 const bars = (n, w = [100, 70, 85]) =>
