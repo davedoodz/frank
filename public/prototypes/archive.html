@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toutes les pages, jour par jour</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* An index of every HTML page built for this project, in the order it was
+   made. Two decisions:
+
+   1. The day is the unit, not the folder. The work moved by day — a morning
+      of navigation, an afternoon of layers — so the day is the heading and
+      the only thing that folds.
+   2. The thumbnail animates. A still frame of these pages is unreadable at
+      180 px, and most of them are a list of six to eighteen options; the
+      five-frame loop scrolls through the page so the eye can tell which one
+      it is without opening it. The frames are captured from the live pages
+      at 1280x800, so the loop is the page, not a drawing of it. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e5e5e5;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#f2f2f2; --card:#fff;
+  --vert:#C3E05A; --vert-ink:#2f3a05;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.sheet{padding:22px 20px 80px;display:flex;flex-direction:column;gap:22px;max-width:1120px}
+h1{font-size:17px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:86ch}
+
+.top{display:flex;align-items:flex-end;gap:12px}
+.top .sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:5px;padding:4px 10px;
+  font-size:12px;color:var(--ink-2);cursor:pointer}
+.btn:hover{border-color:var(--ink-3);color:var(--ink)}
+
+.day{background:var(--card);border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.dayhead{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;user-select:none;
+  border-bottom:1px solid var(--line-2)}
+.day.shut .dayhead{border-bottom:none}
+.dayhead:hover{background:var(--fill-2)}
+.dayhead b{font-size:13.5px;font-weight:600}
+.dayhead .n{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.dayhead .sp{flex:1}
+.caret{width:11px;height:11px;flex:0 0 11px;border-right:1.4px solid var(--ink-3);
+  border-bottom:1.4px solid var(--ink-3);transform:rotate(45deg) translate(-2px,-2px);transition:transform .12s}
+.day.shut .caret{transform:rotate(-45deg) translate(-1px,1px)}
+.day.shut .rows{display:none}
+
+.rows{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:54px 180px 1fr 250px;gap:14px;align-items:center;
+  padding:8px 12px;border-top:1px solid var(--line-2);text-decoration:none;color:inherit}
+.rows .row:first-child{border-top:none}
+.row:hover{background:var(--fill-2)}
+.row .h{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.row .vg{width:180px;height:112px;border:1px solid var(--line-2);border-radius:4px;overflow:hidden;
+  background:var(--fill-2)}
+.row .vg img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+.row .t{font-size:13px}
+.row .f{font-family:var(--mono);font-size:11px;color:var(--ink-2);text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .f .dir{color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="top">
+    <div>
+      <h1>Toutes les pages, jour par jour</h1>
+      <div class="lede">Chaque page HTML faite pour ce projet, dans l'ordre où elle a été faite.
+        La vignette est la page elle-même, captée en cinq images sur l'écran réel : elle défile pour
+        montrer ce qu'il y a dedans. Cliquez une ligne pour ouvrir la page.</div>
+    </div>
+    <div class="sp"></div>
+    <button class="btn" data-act="allopen">Tout déplier</button>
+    <button class="btn" data-act="allshut">Tout replier</button>
+  </div>
+  <div id="days"></div>
+</div>
+
+<script>
+// [date-time, dossier (p = prototypes, e = explorations), fichier, titre, vignette]
+const PAGES = [
+["2026-10-25 19:34","e","dashboard-styles.html","fitte — dashboard styles","dashboard-styles"],
+["2026-10-26 09:57","e","navigation-patterns.html","fitte — patrons de navigation","navigation-patterns"],
+["2026-10-26 10:58","e","navigation-mixes.html","fitte — mélanges de navigation","navigation-mixes"],
+["2026-10-26 17:56","p","feedback-options.html","ça fitte — user feedback on the prototype page","feedback-options"],
+["2026-10-26 18:26","p","feedback-corner.html","ça fitte — corner access to the raw interview notes","feedback-corner"],
+["2026-10-26 18:27","p","accueil-variantes.html","Home screen — layout options","accueil-variantes"],
+["2026-10-26 18:27","p","index.html","ça fitte — Prototype 01","index"],
+["2026-10-26 18:27","p","option-a.html","ça fitte — option A","option-a"],
+["2026-10-26 18:27","p","option-b.html","ça fitte — option B","option-b"],
+["2026-10-26 18:27","p","plateforme-a.html","ça fitte — option A · la coordination est une page","plateforme-a"],
+["2026-10-26 18:27","p","plateforme-b.html","ça fitte — option B · la coordination est une couche de l’unité","plateforme-b"],
+["2026-10-26 18:32","p","notes-panel.html","ça fitte — raw notes panel","notes-panel"],
+["2026-10-26 18:39","p","notes-button-options.html","ça fitte — user notes button","notes-button-options"],
+["2026-10-26 19:42","p","plateforme-c.html","ça fitte — option C · ce qui se répète","plateforme-c"],
+["2026-10-26 21:47","p","interview-features.html","What Guy and Benoît asked for","interview-features"],
+["2026-10-26 21:47","p","wireframe-c.html","Prototype C — wireframe","wireframe-c"],
+["2026-10-26 22:32","p","wireframe-c2.html","Prototype C, adapted — composable low-fidelity wireframe","wireframe-c2"],
+["2026-10-26 22:32","p","wireframe-c2-variants.html","Prototype C, adapted — ten hierarchies","wireframe-c2-variants"],
+["2026-10-26 22:32","p","wireframe-c3.html","Prototype C — wireframe","wireframe-c3"],
+["2026-10-26 22:32","p","wireframe-c3-layouts.html","Prototype C3 — the projects page, eight ways","wireframe-c3-layouts"],
+["2026-10-27 10:49","p","wireframe-c4.html","Where the projects live — five ways","wireframe-c4"],
+["2026-10-27 11:34","p","notes-presentation.html","ça fitte — six ways to open the user notes","notes-presentation"],
+["2026-10-27 13:44","p","wireframe-c3-name.html","Prototype C3 — où vit le nom du projet","wireframe-c3-name"],
+["2026-10-27 13:50","p","plan-lisibilite.html","Lire le plan — six solutions","plan-lisibilite"],
+["2026-10-27 13:51","p","zonage-visualisations.html","Zonage et code — six façons de le lire","zonage-visualisations"],
+["2026-10-27 13:54","p","wireframe-c3-couleur.html","Prototype C3 — le vert du bureau, et le chrome noir","wireframe-c3-couleur"],
+["2026-10-27 14:01","p","wireframe-c3-noir.html","Prototype C3 — chrome noir, neuf façons d'y mettre le vert","wireframe-c3-noir"],
+["2026-10-27 14:45","p","zonage-visuel.html","Zonage et code — dix lectures graphiques","zonage-visuel"],
+["2026-10-27 15:21","p","zonage-en-contexte.html","Zonage et code — quatre mises en place, un dessin par règle","zonage-en-contexte"],
+["2026-10-27 15:53","p","wireframe-c3-espace.html","Prototype C3 — dix façons de donner de la place au dessin","wireframe-c3-espace"],
+["2026-10-27 15:57","p","zoom-controles.html","Zoom, replier, montrer — huit façons de rendre le dessin au dessin","zoom-controles"],
+["2026-10-27 16:12","p","zonage-fiches.html","Zonage et code — dix façons de dessiner la fiche (option A)","zonage-fiches"],
+["2026-10-28 11:34","p","nav-haut.html","Navigation en haut — six options","nav-haut"],
+["2026-10-28 11:39","p","unite-carte.html","Carte d'unité — dix hiérarchies","unite-carte"],
+["2026-10-28 11:40","p","zoom-plat.html","Zoom à plat, et le plan dans le coin — six commandes, trois aperçus","zoom-plat"],
+["2026-10-28 13:01","p","commentaires.html","Commentaires des invités — six façons","commentaires"],
+["2026-10-28 13:34","p","quantites.html","Les quantités dans l'écran Unités — six façons","quantites"],
+["2026-10-28 13:43","p","lisibilite.html","La navigation du haut, plus lisible — six options","lisibilite"],
+["2026-10-28 13:45","p","epingles.html","Épingles et notes — internes et partagées","epingles"],
+["2026-10-28 14:28","p","epingles-pages.html","Épingles — cinq écrans entiers","epingles-pages"],
+["2026-10-28 14:46","p","dessins-sources.html","Dessins et versions — six façons","dessins-sources"],
+["2026-10-28 15:06","p","inspecteur-quantites.html","Le volet de droite et les quantités — explorations","inspecteur-quantites"],
+["2026-10-28 15:07","p","calques-compact.html","Les calques sans voler le dessin","calques-compact"],
+["2026-10-28 15:07","p","calques-ligne.html","La ligne de calque — huit mises en page","calques-ligne"],
+["2026-10-28 15:07","p","calques-rail.html","Rail de calques — une porte vers le document","calques-rail"],
+["2026-10-28 15:07","p","calques-solo.html","Montrer un dessin, en superposer deux","calques-solo"],
+["2026-10-28 17:11","p","calendrier.html","Échéancier — six façons de dessiner le calendrier","calendrier"],
+["2026-10-28 20:24","p","calques-conflits.html","Vignettes, carte ancrée, croisements","calques-conflits"],
+["2026-10-28 20:24","p","calques-mots.html","Comment nommer ce qui ne concorde pas","calques-mots"],
+["2026-10-28 20:24","p","calques-superposer.html","Superposer deux dessins — six gestes","calques-superposer"],
+["2026-10-28 20:25","p","codes-sections.html","Les trois corps de règles — 18 présentations","codes-sections"],
+["2026-10-28 20:36","p","carnet.html","Carnet — échéances, à faire aujourd'hui, historique","carnet"],
+["2026-10-28 21:16","p","navigation-carnet.html","Où vivent l'échéancier et l'historique","navigation-carnet"],
+["2026-10-28 21:17","p","niveaux-3d-variantes.html","Niveaux sur la maquette — six façons de les tenir pendant l'orbite","niveaux-3d-variantes"]
+];
+
+const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août",
+              "septembre","octobre","novembre","décembre"];
+const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+// The day is read as a local date so the weekday name matches the file's own day.
+function dayLabel(iso){
+  const [y,m,d] = iso.split("-").map(Number);
+  const dt = new Date(y, m-1, d);
+  return JOURS[dt.getDay()] + " " + d + " " + MOIS[m-1] + " " + y;
+}
+
+const DAYS = [];
+for (const p of PAGES){
+  const iso = p[0].slice(0,10);
+  let day = DAYS[DAYS.length-1];
+  if (!day || day.iso !== iso) DAYS.push(day = {iso, rows:[]});
+  day.rows.push(p);
+}
+
+function href(p){ return (p[1] === "e" ? "../explorations/" : "") + p[2]; }
+
+function rowHTML(p){
+  return '<a class="row" href="' + href(p) + '">'
+    + '<span class="h">' + p[0].slice(11) + '</span>'
+    + '<span class="vg"><img loading="lazy" src="assets/vignettes/' + p[4] + '.gif" alt=""></span>'
+    + '<span class="t">' + esc(p[3]) + '</span>'
+    + '<span class="f"><span class="dir">' + (p[1] === "e" ? "explorations/" : "prototypes/") + '</span>'
+    + esc(p[2]) + '</span></a>';
+}
+
+function dayHTML(day, i){
+  return '<section class="day" data-i="' + i + '">'
+    + '<div class="dayhead" data-act="fold"><span class="caret"></span>'
+    + '<b>' + dayLabel(day.iso) + '</b>'
+    + '<span class="n">' + day.rows.length + (day.rows.length > 1 ? " pages" : " page") + '</span>'
+    + '<span class="sp"></span></div>'
+    + '<div class="rows">' + day.rows.map(rowHTML).join("") + '</div></section>';
+}
+
+const host = document.getElementById("days");
+host.style.display = "flex";
+host.style.flexDirection = "column";
+host.style.gap = "12px";
+host.innerHTML = DAYS.map(dayHTML).join("");
+
+document.addEventListener("click", e => {
+  const head = e.target.closest('[data-act="fold"]');
+  if (head){ head.parentElement.classList.toggle("shut"); return; }
+  const btn = e.target.closest(".btn");
+  if (!btn) return;
+  const shut = btn.dataset.act === "allshut";
+  document.querySelectorAll(".day").forEach(d => d.classList.toggle("shut", shut));
+});
+</script>
+</body>
+</html>
