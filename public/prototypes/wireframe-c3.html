@@ -1114,10 +1114,17 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .gut .gfold .lu{width:17px;height:17px;stroke-width:2.6}
 /* Folded, the tab stops being a chevron and becomes a label: the name runs
    down the strip under the chevron, so a folded pane says what it is
-   instead of asking to be opened to find out. */
-.gut.fold .gfold{height:auto;min-height:54px;padding:9px 0;flex-direction:column;gap:7px}
-.gut.fold .gname{writing-mode:vertical-rl;font-size:11px;font-weight:600;letter-spacing:.09em;
-  text-transform:uppercase;line-height:1}
+   instead of asking to be opened to find out. A label is read, so it is
+   dark on white, 12 px, and wide enough for the letters: ink on ink was lost
+   against a black chrome, and 11 px sideways capitals did not read. */
+.gut.fold .gfold{width:30px;height:auto;min-height:54px;padding:10px 0;flex-direction:column;gap:8px;
+  background:var(--paper);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.gut.fold .gfold:hover{background:var(--fill)}
+.gut.fold .gname{writing-mode:vertical-rl;font-size:12px;font-weight:600;letter-spacing:.06em;line-height:1}
+.gut.fold.edge-s{align-items:flex-start}
+.gut.fold.edge-s .gfold{margin-left:5px}
+.gut.fold.edge-e{align-items:flex-end}
+.gut.fold.edge-e .gfold{margin-right:5px}
 /* Two tabs on one edge sit one above the other, not side by side: the
    strip is ten pixels wide and they would overlap the drawings. */
 .gut .gfold + .gfold{margin-top:6px}
@@ -2219,7 +2226,10 @@ function gutter({ size, grab, prev, next, lprev, lnext }) {
     : shutN ? tab(next, lnext, "chevron-left")
     : `${prev ? tab(prev, lprev, "chevron-left") : ""}${next ? tab(next, lnext, "chevron-right") : ""}`;
   const shut = shutP || shutN;
-  return `<div class="gut${shut ? " fold" : ""}" data-gut="${size}" data-grab="${grab}"
+  /* A pane folded against the outer edge of the screen leaves its tab on
+     that edge, where a centred tab is cut in half: it is pulled inside. */
+  const edge = shutP && !next ? " edge-s" : shutN && !prev ? " edge-e" : "";
+  return `<div class="gut${shut ? " fold" : ""}${edge}" data-gut="${size}" data-grab="${grab}"
       title="${shut ? "" : "Glisser pour déplacer le bord"}">${tabs}</div>`;
 }
 const bars = (n, w = [100, 70, 85]) =>
@@ -2845,8 +2855,12 @@ function tabsHTML() {
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
   const late = lateCount();
-  const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>
-    <span class="crumb ech hi" data-screen="Échéancier"
+  const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
+  /* The studio's schedule is not a step on the way into this project, so it
+     leaves the path on the left and sits at the right end of the strip with
+     the other things that are about leaving: it is a door out, like Partager
+     is a door out, and the path reads project → screen without a detour. */
+  const ech = `<span class="crumb ech hi" data-screen="Échéancier" style="margin-left:auto;flex:0 0 auto"
       title="Échéancier de l'atelier — ce qui est dû, tous les projets">${icon("calendar-check")}Échéancier${late
         ? `<span class="late">${late}</span>` : ""}</span>`;
   if (studio) {
@@ -2908,15 +2922,16 @@ function tabsHTML() {
   /* A project is read by people who do not draw: the client, the urbaniste,
      the contractor. Sharing is the end of the first row, on every screen
      that has a project open, because it is about the project and not about
-     what is on screen. */
-  const share = SCREENS[V.screen].index ? ""
+     what is on screen. The studio screens span every project at once, so
+     there is nothing there to share. */
+  const share = studio ? ""
     : `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
          style="margin-left:auto;flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
        data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
-    ${items}${share}
+    ${items}${studio ? "" : ech}${share}
   </div>${row2}`;
 }
 
@@ -4538,7 +4553,7 @@ function render() {
           ${hasList ? gutter({ size: "list", grab: "prev", prev: "list", lprev: "la liste" }) : ""}
           ${contentHTML()}
           ${hasInsp ? gutter({ size: "side", grab: "next", next: "side",
-            lnext: margin ? "la marge" : "l'inspecteur" }) : ""}
+            lnext: margin ? "les commentaires" : "l'inspecteur" }) : ""}
           ${hasInsp && !sideShut ? (margin ? marginHTML() : inspectorHTML()) : ""}`}
         </div>
         ${!whole && def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
