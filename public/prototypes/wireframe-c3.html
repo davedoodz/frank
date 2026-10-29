@@ -331,6 +331,34 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 [data-fi="high"] .nedit.hi{display:inline-flex}
 .nedit:hover{background:var(--fill-2);color:var(--ink)}
 .nedit svg{width:13px;height:13px}
+/* A disagreement between two drawings, marked where it happens. Red is
+   not decoration here: it is the one thing on the sheet that is wrong. */
+.xmark{position:absolute;z-index:6;transform:translate(-50%,-50%);display:inline-flex;align-items:center;
+  border:1px solid #b3261e;background:rgba(255,255,255,.95);color:#b3261e;font-weight:600;
+  line-height:1.2;white-space:nowrap;cursor:pointer;font-variant-numeric:tabular-nums;
+  box-shadow:0 1px 3px rgba(17,17,18,.18)}
+.xmark:hover{background:#b3261e;color:#fff}
+.xmark.has{border-color:#4c7a2f;color:#3d6b22;background:rgba(255,255,255,.95)}
+.xmark.has:hover{background:#3d6b22;color:#fff}
+[data-fi="low"] .xmark b{display:none}
+/* Its card sits in the pane, not on the sheet: it must not move or grow
+   with the drawing it is talking about. */
+.xcard{position:absolute;left:12px;top:12px;z-index:9;width:296px;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;padding:10px 11px;display:flex;flex-direction:column;gap:7px;
+  box-shadow:0 8px 24px rgba(17,17,18,.14)}
+.xcard .hd{display:flex;align-items:baseline;gap:7px}
+.xcard .hd b{font-size:12.5px}
+.xcard .hd .dt{font-size:11px;color:var(--ink-3);flex:1}
+.xcard .hd .x{cursor:pointer;color:var(--ink-3);display:inline-flex}
+.xcard .hd .x:hover{color:var(--ink)}
+.xcard .wh{font-size:12px;color:var(--ink)}
+.xcard .fn{font-family:var(--mono,monospace);font-size:10.5px;color:var(--ink-3);line-height:1.5}
+.xcard .cg{font-size:11px;color:var(--ink-2)}
+.xcard .lb{font-size:11px;color:var(--ink-3)}
+.xcard .tk{display:flex;gap:7px;align-items:flex-start;border-left:2px solid var(--vert);padding-left:8px}
+.xcard .tk svg{width:13px;height:13px;color:#3d6b22;flex:0 0 13px;margin-top:2px}
+.xcard .tk b{font-size:12px;font-weight:600;display:block}
+.xcard .tk i{font-size:11px;color:var(--ink-3);font-style:normal}
 /* The card in the list only counts them. */
 .nct{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-3)}
 [data-fi="high"] .nct.hi{display:inline-flex}
@@ -431,7 +459,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .task:hover{border-color:var(--line)}
 .task.on{box-shadow:0 0 0 1px var(--ink) inset;border-color:var(--ink)}
 .task.done{opacity:.55}
-.task.done .hi{text-decoration:line-through}
+.task.done .ttl{text-decoration:line-through}
 .task.late{border-left:3px solid var(--ink)}
 .task .pr{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);
   border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;white-space:nowrap}
@@ -439,6 +467,41 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .task .pr[data-prio="moyenne"]{color:var(--ink)}
 .task .dte{font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;
   min-width:52px;text-align:right}
+/* The tick is the one control that must be hittable without aiming, so it
+   is a real 15 px box with a pointer target around it. */
+.task .tick{flex:0 0 auto;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--line);
+  background:var(--card);display:inline-flex;align-items:center;justify-content:center;color:#fff}
+.task:hover .tick{border-color:var(--ink-2)}
+.task .tick.on{background:var(--ink);border-color:var(--ink)}
+.task .tick .lu{width:10px;height:10px;stroke-width:3}
+.task .tact{display:flex;align-items:center;color:var(--ink-3);opacity:0;padding:2px}
+.task:hover .tact,.task.on .tact{opacity:1}
+.task .tact:hover{color:var(--ink)}
+.task .tact .lu{width:13px;height:13px}
+/* Carried to another day: lifted out of the list and following the pointer,
+   with no transition, so it sits exactly where the hand is. */
+.task.carry{position:relative;z-index:30;box-shadow:0 8px 20px rgba(0,0,0,.18);
+  border-color:var(--ink);cursor:grabbing}
+body.tdrag,body.tdrag *{cursor:grabbing !important}
+/* The day the task would land on, named before the drop rather than after. */
+.day.drop,.wcol.drop{box-shadow:0 0 0 2px var(--ink) inset}
+
+/* Who holds the task: initials of the seat, not a name. */
+.avs{display:flex;gap:-2px;flex:0 0 auto}
+.av{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;
+  border-radius:50%;background:var(--fill);border:1px solid var(--line-2);color:var(--ink-2);
+  font-size:9px;font-weight:650;font-style:normal;letter-spacing:.02em}
+.avs .av + .av{margin-left:-6px}
+.chip.who .av{width:16px;height:16px;font-size:8px;margin-right:3px}
+
+/* One editor for a new task and for an existing one, in the row's place. */
+.tedit{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--ink);
+  border-radius:var(--r);background:var(--card)}
+.tin{font:inherit;font-size:12.5px;color:var(--ink);background:var(--card);
+  border:1px solid var(--line-2);border-radius:5px;padding:5px 7px;width:100%}
+.tin:focus{outline:none;border-color:var(--ink)}
+.tin.day{width:auto;font-size:11.5px;font-variant-numeric:tabular-nums}
+.tedit .chip{cursor:pointer;font-size:11px}
 .plan{position:relative;flex:1;background:repeating-linear-gradient(0deg,var(--fill-2) 0 15px,transparent 15px 16px),
   repeating-linear-gradient(90deg,var(--fill-2) 0 15px,transparent 15px 16px);
   border:1px dashed var(--line);border-radius:var(--r);display:grid;place-items:center;color:var(--ink-3);font-size:11.5px}
@@ -1116,6 +1179,12 @@ const V = {
   /* Front first. The engineering sheets start in front of the architecture,
      which is what reading a duct against a wall asks for. */
   layOrder: ["electrical", "drainage", "distribution", "ventilation", "pay", "arp", "plan"],
+  /* A conflict is caught the moment the drawing that reveals it is laid
+     on the sheet; the stamp is kept so the ticket can say when, and so the
+     same conflict is not "caught" twice. */
+  caught: {},
+  xopen: null,         /* the conflict whose card is open */
+  xdraft: { who: [], day: null },
   layPick: "plan",     /* the thumbnail whose card is open */
   layCard: true,
   layMenu: false,
@@ -1139,8 +1208,10 @@ function sprite() {
     "share-2", "eye", "message-square",
     /* the opacity line on each drawing's card */
     "blend",
-    /* the margin: posting a note, keeping one for the studio, reading as a guest */
+    /* the margin: posting a note, keeping one for the studio */
     "lock", "map-pin", "send", "users", "trash-2",
+    /* the task editor */
+    "pencil",
     /* the scope switch and the real .csv it exports */
     "download",
     /* Codes: copying an article with its notes, writing to the person who answers for it */
@@ -1336,6 +1407,21 @@ const CROSSINGS = [
   ["C-04-01", "gaine dans le rangement", "architecture", "401", 4, 0],
   ["C-02-05", "poutre contre la dalle", "structure", "202", 2, 1],
   ["C-TT-03", "drain hors colonne", "mécanique", "", 8, 0],
+  /* A seventh field: the drawing that reveals the disagreement. These only
+     exist on the sheet once that drawing is laid over the architecture,
+     which is the whole reason the pile exists — a conflict nobody has
+     superposed is a conflict nobody has seen. */
+  ["C-05-21", "colonne de chute hors du mur de la salle de bain", "drainage", "505", 5, 0, "drainage"],
+  ["C-05-22", "drain de balcon sans pente vers l'avaloir", "drainage", "509", 5, 0, "drainage"],
+  ["C-05-31", "conduit d'alimentation dans la poutre de rive", "distribution", "502", 5, 0, "distribution"],
+  ["C-05-32", "entrée d'eau sous l'escalier, dégagement de 540 mm", "distribution", "507", 5, 0, "distribution"],
+  ["C-05-41", "gaine de 300 mm dans un plafond fini à 2 440 mm", "ventilation", "503", 5, 0, "ventilation"],
+  ["C-05-42", "prise d'air à 900 mm d'une fenêtre ouvrante", "ventilation", "510", 5, 0, "ventilation"],
+  ["C-05-51", "panneau électrique devant la porte du rangement", "électricité", "506", 5, 0, "electrical"],
+  ["C-05-52", "luminaire sous la retombée de poutre", "électricité", "501", 5, 0, "electrical"],
+  ["C-04-21", "colonne de chute traversant le rangement", "drainage", "404", 4, 0, "drainage"],
+  ["C-04-41", "gaine au-dessus de la porte d'entrée", "ventilation", "408", 4, 0, "ventilation"],
+  ["C-06-31", "conduit d'alimentation contre la colonne", "distribution", "603", 6, 0, "distribution"],
 ];
 
 const crossingsFor = (no) => CROSSINGS.filter((c) => c[3] === no);
@@ -1483,6 +1569,27 @@ const ARTICLES = [
     fig: "classement" },
 ];
 
+/* Where "Lire le texte officiel" lands: the provision itself, not the top
+   of a 600-page code. Québec publishes its changes to the national code
+   only in the official PDF (the HTML page's article 1.09 is empty), so a
+   modified article opens that PDF on the page where its change is written —
+   page numbers read from the edition current to 1 July 2026. An article
+   Québec left unchanged is published only by the CNRC; it opens on
+   article 1.01, which incorporates the national code by reference. The
+   enabling law has an anchor per article. The borough bylaw is a PDF behind
+   montreal.ca with no public link to a page, so it stays on its own page. */
+const QC_CODE_PDF = "https://www.legisquebec.gouv.qc.ca/fr/pdf/cr/B-1.1,%20R.%202.pdf";
+const QC_CODE_PAGES = { "3.2.1.1": 33, "3.2.3.1": 37, "3.3.1.4": 50, "3.3.1.9": 51, "9.5.3.1": 110, "9.7.2.3": 110 };
+function officialUrl(a) {
+  if (a.url.includes("/rc/B-1.1")) {
+    const page = QC_CODE_PAGES[a.id];
+    return page ? `${QC_CODE_PDF}#page=${page}` : `${a.url}#se:1_01`;
+  }
+  const art = /^art\. (\d+(?:\.\d+)?)$/.exec(a.id);
+  if (a.url.includes("/lc/") && art) return `${a.url}#se:${art[1].replace(".", "_")}`;
+  return a.url;
+}
+
 /* Two things are declared beside each table. "type" is what a column holds:
    "n" is a number and sits right in the head and in the body both, "t" is a
    word and sits left in both — a head that floats left of its own column of
@@ -1540,6 +1647,10 @@ const TASKS = [
     prio: "moyenne", done: true, doneAt: "2026-11-05", phase: "Comité" },
   { id: "t2", day: "2026-11-09", title: "Élévations avec matériaux au comité", who: ["at", "cp"],
     prio: "moyenne", done: true, doneAt: "2026-11-10", phase: "Comité" },
+  /* One item left behind on purpose: the screen has to say what late looks
+     like, otherwise the counter above the list is never read. */
+  { id: "t15", day: "2026-11-11", title: "Coupe de la cage d'escalier à reprendre", who: ["at", "ing"],
+    prio: "haute", done: false, phase: "Permis", code: "3.4.4.1" },
   { id: "t3", day: "2026-11-14", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: ["at"],
     prio: "haute", done: false, phase: "Permis", code: "3.3.1.18" },
   { id: "t4", day: "2026-11-14", title: "Largeur libre des portes du parcours sans obstacles", who: ["at"],
@@ -1807,6 +1918,86 @@ function layCardHTML() {
         <span class="fill" style="width:${op}%"></span>
         <span class="knob" style="left:${op}%"></span></span>
       <span class="opval">${op}%</span></div>
+  </div>`;
+}
+
+/* ------------------------------------------------------- the conflicts
+   A consultant's sheet laid over the architecture is read for one thing:
+   where the two disagree. Those places are marked on the drawing itself —
+   not in a list beside it — because the answer to "is this a problem" is
+   the drawing underneath the mark. A mark only exists while the sheet that
+   reveals it is on the pile. */
+const layConflicts = () => {
+  const lv = paneLevel();
+  return CROSSINGS.filter((c) => c[4] === lv && c[6] && V.lay[c[6]].on && !c[5]);
+};
+
+/* Placed from the unit's own contour, so a mark stays on its room at any
+   zoom and survives a sheet being re-exported larger. */
+function conflictPoint(c) {
+  const row = (UNITS_BY_LEVEL[levelView(c[4])] || []).find((r) => r[0].startsWith(c[3]));
+  const poly = row && contoursFor(c[4])[row[2]];
+  if (!poly) return null;
+  const [x, y, w, h] = polyBounds(poly);
+  return [x + w / 2, y + h / 2];
+}
+
+const taskForConflict = (code) => TASKS.find((t) => t.src === code);
+
+/* The clock is real; the calendar is the project's. A stamp that said
+   "29 oct" against a file dated 14 nov would be read as an error. */
+const stampNow = () => {
+  const d = new Date();
+  return `${fmtDay(TODAY)} à ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
+
+function conflictMarkHTML() {
+  const list = layConflicts();
+  if (!list.length) return "";
+  return list.map((c) => {
+    const pt = conflictPoint(c);
+    if (!pt) return "";
+    const t = taskForConflict(c[0]);
+    return `<span class="xmark ${t ? "has" : ""}" data-xmark="${c[0]}" ${act("xopen", c[0])}
+      style="left:${(pt[0] * 100).toFixed(2)}%;top:${(pt[1] * 100).toFixed(2)}%"
+      title="${c[0]} — ${c[1]}">${icon(t ? "check" : "alert-triangle")}<b>${c[3]}</b></span>`;
+  }).join("");
+}
+
+/* Deadlines are offered the way they are said out loud, and the date field
+   stays for the day that has none of these names. */
+const dayPlus = (n) => {
+  const d = dOf(TODAY);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+const DEADLINES = [["Aujourd'hui", 0], ["Demain", 1], ["Dans 3 jours", 3], ["Dans une semaine", 7]];
+
+function conflictCardHTML() {
+  const c = CROSSINGS.find((x) => x[0] === V.xopen);
+  if (!c || !layConflicts().includes(c)) return "";
+  const t = taskForConflict(c[0]);
+  const d = V.xdraft;
+  const sheet2 = engFileName(c[6], c[4]);
+  return `<div class="xcard" data-xcard>
+    <div class="hd"><b>${c[0]}</b><span class="dt">unité ${c[3]} · niveau ${c[4]}</span>
+      <span class="x" ${act("xclose")} title="Fermer">${icon("x")}</span></div>
+    <div class="wh">${c[1]}</div>
+    <div class="fn">${dwgName()}<br>${sheet2}</div>
+    <div class="cg">Relevé ${V.caught[c[0]] || stampNow()} — en superposant ${ENG_LABELS[c[6]].toLowerCase()}</div>
+    ${t ? `<div class="tk">${icon("check")}<span><b>${t.title}</b><i>${whoLabel(t)} · échéance ${fmtDay(t.day)} · relevé ${t.caught}</i></span></div>
+      <span class="btnw" ${act("xgo")}>${icon("calendar-check")}<span class="hi">Voir dans l'échéancier</span></span>`
+      : `<div class="lb">Qui s'en occupe</div>
+      <div class="row" style="gap:3px;flex-wrap:wrap">${PEOPLE.map((p) => `<span class="chip who ${d.who.includes(p.id) ? "on" : ""}"
+        ${act("xwho", p.id)} title="${p.label}"><i class="av">${p.ini}</i><span class="lb">${p.label}</span></span>`).join("")}</div>
+      <div class="lb">Pour quand</div>
+      <div class="row" style="gap:3px;flex-wrap:wrap">${DEADLINES.map(([word, k]) => `<span
+        class="chip ${(d.day || dayPlus(3)) === dayPlus(k) ? "on" : ""}" ${act("xday", String(k))}>${word}</span>`).join("")}
+        <input class="tin day" type="date" data-xdate value="${d.day || dayPlus(3)}"></div>
+      <div class="row" style="gap:6px">
+        <span class="btnw solid" ${act("xmake")}>${icon("plus")}<span class="hi">Créer la tâche</span></span>
+        <span class="btnw" ${act("xclose")}><span class="hi">Fermer</span></span>
+      </div>`}
   </div>`;
 }
 
@@ -2091,7 +2282,7 @@ function articleText(a) {
     `« ${a.quote} »`, `Lu dans les dessins: ${a.measured} · exigé: ${a.required}`,
     `Lecture du Bureau d'Architectes: ${CLARITY_LABEL[clarityOf(a.id)].toLowerCase()}`,
     a.state === "non résolu" ? `Manque pour conclure: ${a.needs}` : "",
-    ...notes.map((n) => `— ${n.who} (${n.when}): ${n.txt}`), a.url].filter(Boolean).join("\n");
+    ...notes.map((n) => `— ${n.who} (${n.when}): ${n.txt}`), officialUrl(a)].filter(Boolean).join("\n");
 }
 /* What can be attached: the documents the project already holds, named
    the way they are named on the server. Nothing is uploaded — the message
@@ -2138,7 +2329,7 @@ function codeRow(a) {
       <div class="hi src">${a.doc} · ${a.place} · ${a.edition}</div>
       ${gap ? `<div class="hi src">manque pour conclure: ${a.needs}</div>` : ""}
       <div class="row" style="gap:6px">
-        <a class="btnw src-link hi" href="${a.url}" target="_blank" rel="noreferrer"
+        <a class="btnw src-link hi" href="${officialUrl(a)}" target="_blank" rel="noreferrer"
            ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
         <span class="btnw" ${act("copyarticle", a.id)}>${icon("copy")}<span class="hi">Copier</span></span>
         ${notes.length ? `<span class="hi nct">${icon("message-square")}${notes.length}</span>` : ""}
@@ -2300,14 +2491,15 @@ function taskListHTML() {
   const line = (t) => (V.taskEdit === t.id ? taskForm(t, false) : `<div class="task ${t.done ? "done" : ""}
       ${V.task === t.id ? "on" : ""} ${!t.done && t.day < TODAY ? "late" : ""}"
       data-task="${t.id}" ${act("task", t.id)}>
-    <span class="dot" style="border-radius:3px;${t.done ? "background:var(--ink);border-color:var(--ink)" : ""}"
-      ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — la tâche part à l'archive"}"></span>
+    <span class="tick dot ${t.done ? "on" : ""}"
+      ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — la tâche part à l'archive"}">${t.done ? icon("check") : ""}</span>
     <span class="col" style="flex:1;gap:2px;min-width:0">
       <span class="lo bar" style="width:70%"></span>
-      <span class="hi" style="font-size:12.5px">${t.title}</span>
+      <span class="hi ttl" style="font-size:12.5px">${t.title}</span>
       <span class="lo bar" style="width:40%"></span>
       <span class="hi" style="font-size:11px;color:var(--ink-3)">${whoLabel(t)} · ${t.phase}${
-        t.code ? ` · ${t.code}` : ""}${!t.done && t.day < TODAY ? " · en retard" : ""}</span>
+        t.code ? ` · ${t.code}` : ""}${t.caught ? ` · relevé ${t.caught}` : ""}${
+        !t.done && t.day < TODAY ? " · en retard" : ""}</span>
     </span>
     ${avatars(t)}
     ${t.done ? "" : `<span class="hi pr" data-prio="${t.prio}">${t.prio}</span>`}
@@ -2765,8 +2957,8 @@ function contentHTML() {
                      --planz:${layZ("plan")};--planop:${V.lay.plan.on ? V.lay.plan.opacity / 100 : 0}">
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
-                ${layers}${unitMarkHTML()}${pinMarkHTML()}</div></div>
-              ${north("plan")}${mini("plan")}${zcol("plan")}${layStripHTML()}${layCardHTML()}</div>`
+                ${layers}${unitMarkHTML()}${conflictMarkHTML()}${pinMarkHTML()}</div></div>
+              ${north("plan")}${mini("plan")}${zcol("plan")}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
@@ -3148,10 +3340,9 @@ function inspectorHTML() {
 
 /* ------------------------------------------------------------ the margin
    A note is a sentence stuck to a point of a drawing. Two kinds share the
-   list: a pin the invited collaborator can read, and a studio note nobody
-   outside the office ever sees. The difference is not a shade of grey — in
-   the guest view the studio's notes are not rendered at all, and neither is
-   their count, because a count of hidden things is itself a leak. */
+   list: a pin the invited collaborator can read, and a studio note that
+   stays inside the office. The scope is written on the pin and carried by
+   the share link; inside the studio both are shown. */
 const PIN_KEY = "fitte:epingles:c3";
 const PIN_SEED = [
   { id: 1, scope: "partage", surface: "plan", level: 5, sheet: "plan", x: .455, y: .565,
@@ -3525,6 +3716,7 @@ function paintSheet() {
   if (read) read.textContent = `${shown}%`;
   el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / V.zoom * 100).toFixed(3)}px`; });
   placePlanPills();
+  paintConflictMarks();
   window.dispatchEvent(new Event("fitte:plan-paint"));
   /* The corner rectangle is the same state read small; painted here so it
      cannot drift from the sheet by a frame. */
@@ -3620,7 +3812,8 @@ document.addEventListener("pointerdown", (e) => {
    should never need the mouse. */
 document.addEventListener("keydown", (e) => {
   if (!V.taskEdit || !e.target.closest?.("[data-tedit]")) return;
-  if (e.key === "Enter") { e.preventDefault(); onAct("tsave"); }
+  /* The same button the mouse would press, so there is one save path. */
+  if (e.key === "Enter") { e.preventDefault(); document.querySelector('[data-tedit] [data-act="tsave"]')?.click(); }
   else if (e.key === "Escape") { e.preventDefault(); V.taskEdit = null; render(); }
 });
 
@@ -3825,10 +4018,32 @@ document.addEventListener("pointerdown", (e) => {
   e.preventDefault();
 });
 
+/* The marks live inside the transformed sheet, so their type and padding
+   are divided by the zoom the way the unit pill's are: a mark is a mark at
+   any magnification, never a sign. */
+function paintConflictMarks() {
+  const el = vpEl();
+  const plan = el && el.querySelector(".plan");
+  if (!plan) return;
+  const z = V.zoom / 100;
+  plan.querySelectorAll(".xmark").forEach((m) => {
+    m.style.fontSize = `${(10.5 / z).toFixed(2)}px`;
+    m.style.padding = `${(2 / z).toFixed(2)}px ${(6 / z).toFixed(2)}px`;
+    m.style.borderRadius = `${(999 / z).toFixed(2)}px`;
+    m.style.borderWidth = `${(1 / z).toFixed(2)}px`;
+    m.style.gap = `${(4 / z).toFixed(2)}px`;
+    m.querySelectorAll("svg").forEach((g) => {
+      g.style.width = `${(11 / z).toFixed(2)}px`;
+      g.style.height = `${(11 / z).toFixed(2)}px`;
+    });
+  });
+}
+
 function setPlanHover(poly) {
   if (poly === planHover) return;
   planHover = poly;
   placePlanPills();
+  paintConflictMarks();
 }
 
 function wireViewport() {
@@ -4135,6 +4350,7 @@ function paintSelection() {
     plan.querySelectorAll(".umark").forEach((n) => n.remove());
     plan.insertAdjacentHTML("beforeend", unitMarkHTML());
     placePlanPills();
+  paintConflictMarks();
   }
   /* The decision panel is drawn again, so its field is wired again; the
      rest of the controls go through the one delegated click handler. */
@@ -4751,6 +4967,44 @@ function onClick(e) {
       if (ENG_SET.has(value)) { V.lay[value].on = adding; break; }
       dial.setValue(value === "arp" ? "layers.surveyor" : "layers.landscaping", adding);
       return;
+    }
+    /* A conflict is caught the first time it is looked at: the stamp is
+       written once and the ticket quotes it, so "when did we see this"
+       has one answer. */
+    case "xopen": {
+      V.xopen = V.xopen === value ? null : value;
+      if (V.xopen) {
+        V.caught[V.xopen] ||= stampNow();
+        V.xdraft = { who: [], day: dayPlus(3) };
+      }
+      break;
+    }
+    case "xclose": V.xopen = null; break;
+    case "xwho": {
+      const w = V.xdraft.who;
+      V.xdraft.who = w.includes(value) ? w.filter((x) => x !== value) : [...w, value];
+      break;
+    }
+    case "xday": V.xdraft.day = dayPlus(Number(value)); break;
+    case "xmake": {
+      const c = CROSSINGS.find((x) => x[0] === V.xopen);
+      if (!c) break;
+      if (!V.xdraft.who.length) { say("À qui? Une tâche sans personne n'est pas assignée."); break; }
+      const field = document.querySelector("[data-xdate]");
+      const day = (field && field.value) || V.xdraft.day || dayPlus(3);
+      TASKS.push({ id: `t${++taskSeq}`, day, title: `${c[0]} — ${c[1]} (unité ${c[3]})`,
+        who: [...V.xdraft.who], prio: "haute", done: false, phase: "Chantier",
+        src: c[0], caught: V.caught[c[0]] });
+      say(`Tâche créée pour ${c[0]}, échéance ${fmtDay(day)}.`);
+      break;
+    }
+    case "xgo": {
+      const t = taskForConflict(V.xopen);
+      V.xopen = null;
+      V.screen = "Échéancier";
+      if (t) V.day = t.day;
+      dial.setValue("screen", FR_SCREEN["Échéancier"]);
+      break;
     }
     case "ldoc": V.layMenu = !V.layMenu; break;
     case "lswap":
