@@ -1,4 +1,11 @@
-@import "tailwindcss";
+/* source(none) turns off Tailwind v4's automatic file detection, which walks
+   the whole project. public/prototypes holds 200 MB of plain HTML, GIFs, PDFs
+   and a 57 MB glb; scanning it took the production build to 12 GB of memory
+   and the Vercel container, capped at 8 GB, killed it. Only these two folders
+   carry class names. */
+@import "tailwindcss" source(none);
+@source "../app";
+@source "../components";
 
 @theme {
   /* One palette. Black, white, grey — and a single green, #C0D739, taken
