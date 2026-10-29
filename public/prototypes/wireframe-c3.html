@@ -902,8 +902,11 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
      and nothing else on the sheet carries one. */
   box-shadow:0 0 0 2px #fff,0 2px 5px rgba(17,17,18,.28)}
 .npin .nd > svg{transform:rotate(45deg);width:11px;height:11px}
-.npin.team .nd{border-radius:4px;transform:none;background:#e7eef2;color:#2f4858;border:1px dashed #2f4858}
-.npin.team .nd > svg{transform:none}
+/* An internal note is still a pin: same green drop, same number, dashed
+   outline. The lock that used to sit here read as a locked drawing rather
+   than a note kept inside the office, and it broke the one shape the eye
+   learns to look for on a sheet. */
+.npin.team .nd{border-style:dashed}
 .npin.on .nd{background:var(--ink);color:#fff;border-color:var(--ink);border-style:solid}
 .npin.pending .nd{background:#fff;border-style:dashed}
 .npin .nl{position:absolute;left:15px;top:-13px;background:#fff;border:1px solid var(--line);
@@ -911,13 +914,16 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(17,17,18,.16)}
 .npin:hover .nl{border-color:var(--ink-2)}
 .npin.on .nl{background:var(--ink);color:#fff;border-color:var(--ink)}
-.npin.team .nl{border-style:dashed;color:#2f4858}
-.npin.team .nd{box-shadow:0 0 0 2px #fff,0 2px 5px rgba(17,17,18,.2)}
+.npin.team .nl{border-style:dashed}
 /* The sentence is typed on the drawing, hung off the pin that anchors it. */
 .pbub{position:absolute;left:0;top:0;width:258px;background:var(--card);border:1px solid var(--ink);
   border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:6px;cursor:default;
   box-shadow:0 10px 26px rgba(17,17,18,.22);z-index:12}
 .pbub .zone{font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+/* Two scope chips and a zone name on one line: the chips never wrap, so
+   "À l'interne" stays a phrase rather than two stacked words. */
+.pbub{width:286px}
+.pbub .chip{white-space:nowrap}
 .pbub .nnew{width:100%;border:1px solid var(--line-2);border-radius:6px;padding:6px 7px;font:inherit;
   font-size:12.5px;color:var(--ink);background:#fff;resize:none}
 .pbub .nnew:focus{outline:1px solid var(--ink);outline-offset:1px}
@@ -3525,7 +3531,7 @@ function pinMarkHTML() {
       ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}"
       style="left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%;transform:scale(${(1 / z).toFixed(3)})"
       ${p.id ? act("note", p.id) : ""}>
-      <span class="nd">${p.scope === "equipe" ? icon("lock") : (p.id ? i + 1 : "·")}</span>
+      <span class="nd">${p.id ? i + 1 : "·"}</span>
       ${p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""}
     </div>`).join("");
 }
@@ -3539,13 +3545,13 @@ function pinBubbleHTML() {
   const team = V.pinScope === "equipe";
   return `<div class="pbub" data-pinbubble>
     <div class="row" style="gap:3px">
-      <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">Atelier</span></span>
+      <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">À l'interne</span></span>
       <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
       <span style="flex:1"></span>
       <span class="zone">${pinAnchor({ ...V.pending, scope: V.pinScope })}</span>
     </div>
     <textarea class="nnew" data-pindraft rows="3"
-      placeholder="${team ? "Note d'atelier — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
+      placeholder="${team ? "Note interne — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
     <div class="row" style="gap:6px;align-items:center">
       <span class="btnw solid" ${act("pinpost")}>${icon(team ? "lock" : "send")}<span class="hi">Épingler</span></span>
       <span class="btnw" ${act("pincancel")}><span class="hi">Annuler</span></span>
@@ -3570,20 +3576,22 @@ function marginHTML() {
   const composer = V.pending && V.pending.surface === "model"
     ? `<div class="ncard new ${team ? "team" : ""}">
         <div class="anch">${icon("map-pin")}${pinAnchor({ ...V.pending, scope: V.pinScope })}</div>
+        <div class="row nscope">
+          <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">À l'interne</span></span>
+          <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
+        </div>
         <textarea class="hi nnew" data-pindraft rows="3"
-          placeholder="${team ? "Note d'atelier — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
+          placeholder="${team ? "Note interne — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
         <div class="nact">
           <span class="chip" ${act("pincancel")}>Annuler</span>
-          <span class="btnw solid go" ${act("pinpost")}>${icon(team ? "lock" : "send")}<span class="hi">${team ? "Garder pour l'atelier" : "Poser l'épingle"}</span></span>
+          <span class="btnw solid go" ${act("pinpost")}>${icon(team ? "lock" : "send")}<span class="hi">${team ? "Garder à l'interne" : "Poser l'épingle"}</span></span>
         </div></div>`
     : "";
   const inner = `<div class="ph">${icon("message-square")}<span class="lo bar" style="width:70px"></span>
-      <span class="hi">Dans la marge</span><span style="flex:1"></span>
+      <span class="hi">Commentaires</span><span style="flex:1"></span>
       <span class="hi" style="font-size:11px;color:var(--ink-3)">${list.length}</span></div>
     <div class="pb nmargin">
       <div class="row nscope">
-        <span class="chip ${V.pinScope === "equipe" ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">Atelier</span></span>
-        <span class="chip ${V.pinScope === "partage" ? "on" : ""}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
         <span style="flex:1"></span>
         <span class="chip ${V.pinMode ? "on" : ""}" ${act("pinmode")}
           title="Cliquez ensuite un point du dessin — ou double-cliquez le plan directement">${icon("map-pin")}<span class="lb">Épingler</span></span>
