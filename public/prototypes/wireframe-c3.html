@@ -914,7 +914,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .npin.team .nl{border-style:dashed;color:#2f4858}
 .npin.team .nd{box-shadow:0 0 0 2px #fff,0 2px 5px rgba(17,17,18,.2)}
 /* The sentence is typed on the drawing, hung off the pin that anchors it. */
-.pbub{position:absolute;left:16px;top:-6px;width:258px;background:var(--card);border:1px solid var(--ink);
+.pbub{position:absolute;left:0;top:0;width:258px;background:var(--card);border:1px solid var(--ink);
   border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:6px;cursor:default;
   box-shadow:0 10px 26px rgba(17,17,18,.22);z-index:12}
 .pbub .zone{font-family:var(--mono);font-size:10px;color:var(--ink-3)}
@@ -922,8 +922,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   font-size:12.5px;color:var(--ink);background:#fff;resize:none}
 .pbub .nnew:focus{outline:1px solid var(--ink);outline-offset:1px}
 .pbub .kb{font-size:10px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:1px 5px}
-/* Off the right edge of the sheet it flips to the other side of the pin. */
-.npin.flip .pbub{left:auto;right:16px}
+
 .npin.back{opacity:.32}
 /* Pin mode: the next click on either drawing puts a point down, and both
    panes say so with the cursor. */
@@ -1083,13 +1082,34 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .gut::before{content:"";position:absolute;top:6px;bottom:6px;left:50%;margin-left:-1px;width:2px;
   border-radius:1px;background:var(--line-2);transition:background .12s}
 .gut:hover::before,body.splitting .gut.live::before{background:var(--ink)}
+/* Between the two drawings the strip carries a full-height rule instead of
+   a short hairline. Two plans side by side are two readings of the same
+   building, and the eye needs to be told where one stops: the panes' own
+   pale borders are not enough across that much white. */
+.gut[data-gut="plan"]::before{top:0;bottom:0;width:1px;margin-left:0;background:var(--line)}
+.gut[data-gut="plan"]:hover::before{width:2px;margin-left:-1px}
 .gut.fold{cursor:default}
-.gut .gfold{position:relative;z-index:2;width:18px;height:26px;border-radius:5px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;background:var(--card);
-  border:1px solid var(--line-2);color:var(--ink-2);opacity:0;transition:opacity .12s}
+/* The tab is the whole control once a pane is folded, so it is sized to be
+   seen from across the screen and hit without aiming: a 24 × 54 bar in
+   solid ink with a white chevron. A pale tab was lost against the drawing
+   on one side and the black rail on the other; ink with a light ring reads
+   on both. */
+.gut .gfold{position:relative;z-index:2;width:24px;height:54px;border-radius:7px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;background:var(--ink);
+  border:0;box-shadow:0 0 0 1.5px var(--card);color:#fff;opacity:0;transition:opacity .12s}
 .gut:hover .gfold,.gut.fold .gfold{opacity:1}
-.gut .gfold:hover{color:var(--ink);border-color:var(--ink)}
-.gut .gfold .lu{width:12px;height:12px}
+.gut .gfold:hover{background:#000}
+.gut .gfold .lu{width:17px;height:17px;stroke-width:2.6}
+/* Folded, the tab stops being a chevron and becomes a label: the name runs
+   down the strip under the chevron, so a folded pane says what it is
+   instead of asking to be opened to find out. */
+.gut.fold .gfold{height:auto;min-height:54px;padding:9px 0;flex-direction:column;gap:7px}
+.gut.fold .gname{writing-mode:vertical-rl;font-size:11px;font-weight:600;letter-spacing:.09em;
+  text-transform:uppercase;line-height:1}
+/* Two tabs on one edge sit one above the other, not side by side: the
+   strip is ten pixels wide and they would overlap the drawings. */
+.gut .gfold + .gfold{margin-top:6px}
+.gut{flex-direction:column}
 /* While an edge is being dragged every cursor on the screen is the drag
    cursor: the pointer is on a 2 px line and will leave it. */
 body.splitting,body.splitting *{cursor:col-resize !important;user-select:none}
@@ -2166,10 +2186,21 @@ const SPLIT_MIN = 170;
 const splitKey = (name) => `${V.screen}/${name}`;
 const splitW = (name, def) => (V.split[splitKey(name)] ?? def);
 const folded = (name) => !!V.fold[splitKey(name)];
+/* Tooltips read with the article — "Replier la liste" — and the tab of a
+   folded pane reads without it, sideways, as a name: "LISTE". One label
+   serves both. */
+const gutName = (label) => {
+  const noun = label.replace(/^(le |la |l'|les )/, "");
+  return noun.charAt(0).toUpperCase() + noun.slice(1);
+};
 function gutter({ size, grab, prev, next, lprev, lnext }) {
   const shutP = prev && folded(prev), shutN = next && folded(next);
-  const tab = (key, label, dir) => `<span class="gfold" ${act("gutfold", key)}
-      title="${folded(key) ? `Déplier ${label}` : `Replier ${label}`}">${icon(dir)}</span>`;
+  const tab = (key, label, dir) => {
+    const shut = folded(key);
+    return `<span class="gfold" ${act("gutfold", key)}
+      title="${shut ? `Déplier ${label}` : `Replier ${label}`}">${icon(dir)}${
+        shut ? `<span class="gname">${gutName(label)}</span>` : ""}</span>`;
+  };
   /* With a pane folded there is one thing to say, so one chevron says it,
      pointing the way the pane will come back. */
   const tabs = shutP ? tab(prev, lprev, "chevron-right")
@@ -3048,7 +3079,7 @@ function contentHTML() {
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}${conflictMarkHTML()}${pinMarkHTML()}</div></div>
-              ${north("plan")}${mini("plan")}${zcol("plan")}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}</div>`
+              ${north("plan")}${mini("plan")}${zcol("plan")}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}${pinBubbleHTML()}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
@@ -3495,7 +3526,7 @@ function pinMarkHTML() {
       style="left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%;transform:scale(${(1 / z).toFixed(3)})"
       ${p.id ? act("note", p.id) : ""}>
       <span class="nd">${p.scope === "equipe" ? icon("lock") : (p.id ? i + 1 : "·")}</span>
-      ${p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : pinBubbleHTML()}
+      ${p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""}
     </div>`).join("");
 }
 
@@ -3504,6 +3535,7 @@ function pinMarkHTML() {
    whole content of the note. Hung off the pin itself, so it travels with
    the drawing; scaled back down like the pin, so it stays a bubble. */
 function pinBubbleHTML() {
+  if (!V.pending || V.pending.surface !== "plan" || V.pending.level !== paneLevel()) return "";
   const team = V.pinScope === "equipe";
   return `<div class="pbub" data-pinbubble>
     <div class="row" style="gap:3px">
@@ -3515,7 +3547,7 @@ function pinBubbleHTML() {
     <textarea class="nnew" data-pindraft rows="3"
       placeholder="${team ? "Note d'atelier — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
     <div class="row" style="gap:6px;align-items:center">
-      <span class="btnw solid" ${act("pinpost")}>${icon(team ? "lock" : "send")}<span class="hi">${team ? "Garder pour l'atelier" : "Poser l'épingle"}</span></span>
+      <span class="btnw solid" ${act("pinpost")}>${icon(team ? "lock" : "send")}<span class="hi">Épingler</span></span>
       <span class="btnw" ${act("pincancel")}><span class="hi">Annuler</span></span>
       <span style="flex:1"></span><span class="kb">⌘↵</span>
     </div>
@@ -3558,7 +3590,8 @@ function marginHTML() {
       </div>
       ${composer}
       ${list.length ? list.map(card).join("")
-        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px">Aucune note sur ce projet.</div>`}
+        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">Aucune note sur ce projet.<br>
+            Double-cliquez un point du plan pour en poser une.</div>`}
     </div>`;
   return `<section class="pane rg margin" data-rg="marge" data-fi="${fiOf("inspector")}"
     data-region="margin">${inner}</section>`;
@@ -3844,6 +3877,7 @@ function paintSheet() {
   el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / V.zoom * 100).toFixed(3)}px`; });
   placePlanPills();
   paintConflictMarks();
+  if (V.pending) placePinBubble();
   window.dispatchEvent(new Event("fitte:plan-paint"));
   /* The corner rectangle is the same state read small; painted here so it
      cannot drift from the sheet by a frame. */
@@ -4204,6 +4238,32 @@ document.addEventListener("pointerdown", (e) => {
 /* The marks live inside the transformed sheet, so their type and padding
    are divided by the zoom the way the unit pill's are: a mark is a mark at
    any magnification, never a sign. */
+/* The bubble is pane furniture: it is put beside the point in pixels and
+   kept inside the pane, so a pin at the edge of the sheet still gets a
+   whole box to write in. */
+function placePinBubble() {
+  const el = vpEl();
+  const bub = el && el.closest(".zone")?.querySelector(".pbub");
+  if (!bub) return;
+  const plan = el.querySelector(".plan");
+  const zone = el.closest(".zone");
+  if (!plan || !zone) return;
+  const r = plan.getBoundingClientRect(), z = zone.getBoundingClientRect();
+  const v = el.getBoundingClientRect();
+  const px = r.left + V.pending.x * r.width - z.left;
+  const py = r.top + V.pending.y * r.height - z.top;
+  const pad = 10;
+  /* On a narrow pane the box gives up its width before it gives up being
+     whole. */
+  bub.style.width = `${Math.min(258, Math.round(v.width - 2 * pad))}px`;
+  const w = bub.offsetWidth, h = bub.offsetHeight;
+  const min = v.left - z.left + pad, max = v.right - z.left - w - pad;
+  /* To the right of the pin when there is room, to its left otherwise. */
+  const left = px + 18 > max ? px - 18 - w : px + 18;
+  bub.style.left = `${Math.max(min, Math.min(left, max)).toFixed(0)}px`;
+  bub.style.top = `${Math.max(v.top - z.top + pad, Math.min(py - 14, v.bottom - z.top - h - pad)).toFixed(0)}px`;
+}
+
 function paintConflictMarks() {
   const el = vpEl();
   const plan = el && el.querySelector(".plan");
@@ -4227,12 +4287,16 @@ function setPlanHover(poly) {
   planHover = poly;
   placePlanPills();
   paintConflictMarks();
+  if (V.pending) placePinBubble();
 }
 
 /* One way in for both gestures — the armed click and the double-click.
    Returns false when the pointer is off the sheet, so the caller can do
    whatever it does when there is no drawing under it. */
+const inBubble = (e) => !!(e.target.closest && e.target.closest(".pbub"));
+
 function dropPinAt(e, el) {
+  if (inBubble(e)) return false;
   const plan = el.querySelector(".plan");
   if (!plan) return false;
   const r = plan.getBoundingClientRect();
@@ -4262,6 +4326,7 @@ function wireViewport() {
   /* The hand always wins: a wheel, a drag or a double-click during a glide
      stops it where it is rather than fighting it for the transform. */
   el.onwheel = (e) => {
+    if (inBubble(e)) return;
     e.preventDefault();
     stopGlide();
     const r = el.getBoundingClientRect();
@@ -4275,6 +4340,8 @@ function wireViewport() {
   };
   el.onpointerdown = (e) => {
     if (e.button !== 0) return;
+    /* Selecting the words of a note is not a pan. */
+    if (inBubble(e)) return;
     stopGlide();
     const r = el.getBoundingClientRect();
     const start = { x: e.clientX, y: e.clientY, px: V.pan.x, py: V.pan.y };
@@ -4493,7 +4560,16 @@ function render() {
   document.getElementById("frame")?.setAttribute("data-pin", V.pinMode ? "on" : "off");
   pushModelPins();
   const draft = document.querySelector("[data-pindraft]");
-  if (draft) draft.oninput = (e) => { V.draft = e.target.value; };
+  if (draft) {
+    draft.oninput = (e) => { V.draft = e.target.value; };
+    draft.onkeydown = (e) => {
+      if (e.key === "Escape") { V.pending = null; V.draft = ""; render(); return; }
+      if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
+      e.preventDefault();
+      postPin();
+      render();
+    };
+  }
   const find = document.querySelector(".find");
   if (find) find.oninput = (e) => {
     V.query = e.target.value;
@@ -4557,6 +4633,7 @@ function paintSelection() {
     plan.insertAdjacentHTML("beforeend", unitMarkHTML());
     placePlanPills();
   paintConflictMarks();
+  if (V.pending) placePinBubble();
   }
   /* The decision panel is drawn again, so its field is wired again; the
      rest of the controls go through the one delegated click handler. */
