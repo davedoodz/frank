@@ -306,6 +306,19 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .coderow > .draw img{width:100%;height:auto;display:block;mix-blend-mode:multiply}
 .coderow > .tx{padding:11px 12px;display:flex;flex-direction:column;gap:7px;min-width:0}
 .coderow .note{border-left:2px solid var(--vert);padding-left:9px;display:flex;flex-direction:column}
+/* A note in the right column: the one place a note is written, read,
+   rewritten or dropped. */
+.anote{border-left:2px solid var(--vert);padding:2px 0 2px 9px;display:flex;flex-direction:column;gap:2px}
+.anote.edit{gap:6px}
+.nedit{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border-radius:5px;color:var(--ink-3);cursor:pointer}
+[data-fi="high"] .nedit.hi{display:inline-flex}
+.nedit:hover{background:var(--fill-2);color:var(--ink)}
+.nedit svg{width:13px;height:13px}
+/* The card in the list only counts them. */
+.nct{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-3)}
+[data-fi="high"] .nct.hi{display:inline-flex}
+.nct svg{width:12px;height:12px}
 .noteinput{flex:1;resize:vertical;border:1px solid var(--line-2);border-radius:6px;padding:6px 8px;
   font:inherit;font-size:12px;color:var(--ink);background:var(--card)}
 .noteinput:focus{outline:1px solid var(--ink);outline-offset:1px}
@@ -316,7 +329,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .clarity{position:relative;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;
   color:var(--ink-2);border:1px solid transparent;border-radius:5px;padding:2px 6px;white-space:nowrap}
 .clarity:hover{border-color:var(--line);background:var(--card)}
-.clarity::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cl)}
+/* The fidelity switch turns every .hi into a block, which dropped this
+   chip's flex row — and an inline box ignores a width, so the dot was
+   painted at nothing and the colour only ever showed in the open menu.
+   Stated again at a weight that holds. */
+[data-fi="high"] .clarity.hi{display:inline-flex}
+.clarity::before{content:"";flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:var(--cl)}
 .clarity[data-c="clair"]{--cl:#2f7a4d}
 .clarity[data-c="moyen"]{--cl:#b58900}
 .clarity[data-c="obscur"]{--cl:#b3261e}
@@ -337,7 +355,13 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .contact .who{flex:1;min-width:0;display:flex;flex-direction:column}
 .contact .who b{font-weight:600;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .contact .who span{font-size:11px;color:var(--ink-3)}
-.contact .mailto{display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:var(--ink-2);
+/* The fidelity switch blocks every .hi, which flattened this button's
+   row: the glyph and the word ran together with no gap. */
+[data-fi="high"] .contact .mailto.hi{display:inline-flex}
+.contact .mailto .hi{display:inline}
+.contact .sent{font-size:11px;color:var(--vert-ink,#4c5906)}
+.contact .mailto{display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;
+  text-decoration:none;color:var(--ink-2);
   border:1px solid var(--line-2);border-radius:5px;padding:3px 7px;font-size:11px}
 .contact .mailto:hover{background:var(--fill);color:var(--ink)}
 .contact.slow .who span{color:#b3261e}
@@ -434,25 +458,22 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .tbl th{font-weight:500;color:var(--ink-3);font-size:11px;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line-2)}
 .tbl td{padding:6px 8px;border-bottom:1px solid var(--line-2);color:var(--ink-2)}
 .tbl td.n,.tbl th.n{text-align:right;font-variant-numeric:tabular-nums}
-/* The floor's quantities (?fq=): the selected unit is the plan outline's
-   green, as a row where it is one line of the table, as a column where it
-   only holds a share of what the floor counts. */
+/* The floor's area table: the selected unit is the plan outline's green. */
 .tbl tr.on td{background:#eef1e0;color:var(--ink);font-weight:600}
-.tbl td.hot,.tbl th.hot{background:#f4f6ea;color:#4c5906}
+.tbl tbody tr[data-act]{cursor:pointer}
+.tbl tbody tr[data-act]:hover td{background:var(--fill)}
+.tbl tbody tr.on[data-act]:hover td{background:#e4e9cf}
+.tbl tr.dim td{color:var(--ink-3)}
+/* An open crossing rides on the unit number. */
+.xdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--hi);margin-left:5px;vertical-align:1px}
 .tbl tfoot td{color:var(--ink);font-weight:600}
 .fqt{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fqh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink)}
 .fqh svg{width:13px;height:13px}
 .fqs{font-size:11px;font-weight:400;color:var(--ink-3);margin-left:6px}
 .fqn{font-size:11px;color:var(--ink-3)}
-.fq-stack{display:flex;flex-direction:column;gap:16px;overflow:auto}
-.pane .pb.fq-stack{padding:10px 12px}
 .fq-unit{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:10px}
 [data-theme="dark"] .tbl tr.on td{background:#2b3313}
-[data-theme="dark"] .tbl td.hot,[data-theme="dark"] .tbl th.hot{background:#232816;color:#c3e05a}
-/* Inside quantites-etage.html the bench is the control; the panel would
-   cover the margin variant. */
-html[data-fq-embed] .dialkit-root{display:none}
 /* A figure and its head belong on one line: a wrapped "pi² total" stops
    being a column heading and becomes two words floating over numbers. */
 .tbl th,.tbl td{white-space:nowrap}
@@ -554,14 +575,19 @@ html[data-fq-embed] .dialkit-root{display:none}
    shown as it was plotted and not flattened to grey. */
 .plan.align{aspect-ratio:2000 / 1675;height:auto;flex:0 0 auto;overflow:hidden}
 [data-fi="high"] .plan.align[data-img]{background:none}
+/* The architect's sheet is a drawing in the pile like the others, so its
+   ink has to be able to pass in front of the surveyor's or sink behind
+   it. Both the raster that holds the pane while the vectors run and the
+   canvas that replaces it read the same two variables, written on .plan
+   from the order and the opacity of that one drawing. */
 [data-fi="high"] .plan.align[data-img="plan"]::before{content:"";position:absolute;inset:0;
-  background:var(--plan,none) center/contain no-repeat}
+  background:var(--plan,none) center/contain no-repeat;z-index:var(--planz,1);opacity:var(--planop,1)}
 /* Vectors over the picture, not instead of it: a pass takes a few seconds
    on a permit sheet, and the pane must never be empty while it runs. The
    canvas is transparent until the sheet lands on it, then it covers the
    JPEG exactly, in the same box, so every overlay keeps its coordinates. */
 .plan canvas.sheetpdf{position:absolute;inset:0;width:100%;height:100%;display:block;
-  z-index:0}
+  z-index:var(--planz,1);opacity:var(--planop,1)}
 .plan canvas.sheetpdf[data-ready="1"]{background:#fff}
 /* While the pass runs the pane says so in its own title bar, at the end of
    the row: the file strip that used to carry it is gone. It is a transient
@@ -573,8 +599,10 @@ html[data-fq-embed] .dialkit-root{display:none}
 .pane[data-pdf] > .ph::after{order:9;color:var(--ink-3);font-size:10.5px;
   white-space:nowrap;flex:0 0 auto}
 @container (max-width:620px){ .pane[data-pdf] > .ph::after{display:none} }
+/* Inline z-index from the pile's order; 1 to 3, under the typology fills
+   and the unit outlines, which always stay on top of every drawing. */
 .plan .lay{position:absolute;display:none;background-repeat:no-repeat;
-  background-size:contain;background-position:center;pointer-events:none;z-index:2}
+  background-size:contain;background-position:center;pointer-events:none;z-index:1}
 [data-fi="high"] .plan[data-img] .lay{display:block}
 /* The surveyor's sheet is drawn the other way round from the floor plan:
    north is at the bottom on it and at the top on A-209, so it takes a half
@@ -594,23 +622,107 @@ html[data-fq-embed] .dialkit-root{display:none}
 .engineering-bar .laychips{flex-wrap:wrap;margin:0}
 .engineering-bar .laychips .chip .lb{display:inline}
 .model-context-note{padding:6px 10px;font-size:11px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
-/* The three layer chips sit in the pane header, tight, so the header still
-   reads as one line with the host button at its end. */
+/* The engineering chips keep the row under the pane header; the three
+   drawings moved out of it and into the strip. */
 .laychips{display:flex;gap:4px;margin-right:6px;flex:0 0 auto}
 .laychips .chip{padding:1px 8px 1px 6px;font-size:11px;cursor:pointer;white-space:nowrap;
   display:inline-flex;align-items:center;gap:4px}
 .laychips .chip .lu{width:12px;height:12px;flex:0 0 12px}
-/* A pane too narrow for three words would push the title onto two lines, so
-   below that width the words go and the glyphs stay; the tooltip still names
-   each one. The pane is the container, so this follows the pane and not the
-   window: the same pane is wide in "Plan seul" and narrow beside the model. */
 .pane.drawing{container-type:inline-size}
 @container (max-width:470px){
   .laychips .chip .lb{display:none}
   .laychips .chip{padding:2px 5px}
 }
+
+/* The pile ------------------------------------------------------------
+   Which drawings are laid on the sheet, in what order, and how strongly:
+   a strip of thumbnails down the outer edge of the 2D pane. A chip row
+   could say which ones are on, but not which is in front of which, and
+   the order is half the question. The strip is the pile, top to bottom,
+   and it is reordered by dragging. */
+.lstrip{flex:0 0 104px;padding:8px 7px;display:flex;flex-direction:column;gap:6px;
+  background:var(--paper);border-left:1px solid var(--line-2);z-index:5}
+.lpile{display:flex;flex-direction:column;gap:4px}
+.lhint{font-size:10px;line-height:1.3;color:var(--ink-3);text-align:center}
+.ltile{position:relative;border:1px solid transparent;border-radius:6px;padding:4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:grab;user-select:none;
+  transition:transform .17s cubic-bezier(.2,.7,.3,1),background .12s,box-shadow .17s;
+  will-change:transform}
+.ltile .wrap{position:relative;width:100%}
+.ltile .pic{display:block;width:100%;aspect-ratio:1.18;border:1px solid var(--line-2);
+  border-radius:4px;background:#fff center/contain no-repeat}
+.ltile .nm{font-size:10.5px;line-height:1.2;color:var(--ink-2);text-align:center}
+/* The dimming goes on the picture and the name, never on the tile: put it
+   on the tile and the badge fades with it, which is how a mark meant to
+   be the loudest thing in the strip becomes invisible. */
+.ltile .pic,.ltile .nm{opacity:.45}
+.ltile:hover{background:var(--fill-2)}
+.ltile:hover .pic,.ltile:hover .nm{opacity:.8}
+.ltile.on .pic,.ltile.on .nm{opacity:1}
+.ltile.on .nm{color:#2f3a05}
+/* The selected drawing is ink with its name reversed out: a grey wash is
+   lost against the strip at this size. */
+.ltile.sel{background:var(--ink);border-color:var(--ink)}
+.ltile.sel .nm{color:#fff}
+.ltile.sel .pic{border-color:var(--ink)}
+/* Carried: no transition at all, or the tile lags behind the pointer. */
+.ltile.held{transition:none;z-index:9;cursor:grabbing;background:var(--card);
+  border-color:var(--line-2);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.ltile.held .pic{border-color:var(--ink-3)}
+/* Kept through the landing so the lift fades instead of blinking off. */
+.ltile.landing{z-index:9;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+body.ldrag,body.ldrag *{cursor:grabbing !important}
+
+/* The badge: black with a + while the drawing is aside, green with its
+   place in the pile once it is on the sheet. Two things to show means a
+   pill — a 24 px circle cannot hold a drawing and a figure at once. */
+.lbadge{position:absolute;right:3px;top:3px;width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;gap:1px;cursor:pointer;z-index:3;
+  background:var(--ink);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);
+  transition:background .12s,transform .12s}
+.lbadge:hover{background:#000;transform:scale(1.08)}
+.lbadge .lu{width:12px;height:12px}
+.lbadge.on{width:auto;min-width:40px;border-radius:12px;padding:0 7px 0 2px;
+  background:#c3e05a;color:#2f3a05;box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.lbadge.on:hover{background:#b6d93f}
+.lbadge svg.pb3{width:24px;height:24px;display:block;overflow:visible}
+.lbadge .rk{font-size:12.5px;font-weight:650;line-height:1;font-variant-numeric:tabular-nums}
+
+/* The card belongs to the thumbnail it is opened from, so it is measured
+   to that tile's height rather than parked at a corner. */
+.lcard{position:absolute;z-index:8;width:248px;padding:9px 10px;display:flex;
+  flex-direction:column;gap:7px;font-size:11.5px;background:var(--card);
+  border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.10)}
+.lcard .hd{display:flex;align-items:baseline;gap:8px}
+.lcard .hd b{font-size:12.5px;font-weight:600}
+.lcard .hd .dt{margin-left:auto;color:var(--ink-3);font-size:10.5px;white-space:nowrap}
+.lcard .fn{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--ink-2);
+  word-break:break-all}
+.lcard .docbtn{display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;
+  border:1px solid var(--line-2);border-radius:5px;padding:4px 8px;font-size:11.5px}
+.lcard .docbtn:hover{border-color:var(--ink)}
+.lcard .docbtn .lu{width:13px;height:13px}
+.lmenu{display:flex;flex-direction:column;border:1px solid var(--line-2);border-radius:5px;
+  overflow:hidden}
+.lmenu .mi{padding:5px 8px;cursor:pointer}
+.lmenu .mi:hover{background:var(--fill-2)}
+.lmenu .mi + .mi{border-top:1px solid var(--line-2)}
+/* One opacity control, named, with a knob: a bar that only fills reads as
+   progress, a knob reads as something to take hold of. */
+.oprow{display:flex;align-items:center;gap:8px}
+.oplbl{display:flex;align-items:center;gap:5px;color:var(--ink-2);white-space:nowrap}
+.oplbl .lu{width:13px;height:13px}
+.optrack{position:relative;flex:1;height:14px;display:flex;align-items:center;cursor:pointer}
+.optrack::before{content:"";position:absolute;left:0;right:0;height:3px;border-radius:2px;
+  background:var(--line-2)}
+.optrack .fill{position:absolute;left:0;height:3px;border-radius:2px;background:var(--ink)}
+.optrack .knob{position:absolute;width:11px;height:11px;border-radius:50%;background:var(--card);
+  border:1.5px solid var(--ink);transform:translateX(-50%);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.opval{min-width:32px;text-align:right;color:var(--ink-2);font-variant-numeric:tabular-nums}
+/* North and the corner view stand clear of the strip, not under it. */
+.zone[data-zone="plan"] .north,.zone[data-zone="plan"] .mini{right:154px}
 /* One typology, one colour, laid on the unit it belongs to. */
-.plan .utagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible}
+.plan .utagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;overflow:visible}
 .plan .utagsvg polygon{opacity:.45;mix-blend-mode:multiply}
 /* The 2D pane is a window onto a sheet that is larger than it: the drawing
    and everything laid over it move and scale together inside .vp, so a
@@ -636,10 +748,11 @@ html[data-fq-embed] .dialkit-root{display:none}
 .zb:hover{background:var(--fill);color:var(--ink)}
 .zb svg{width:14px;height:14px}
 .mtools{position:absolute;left:10px;top:10px;z-index:7;display:flex;gap:4px;padding:4px;
-  background:var(--paper);border:1px solid var(--line-2);border-radius:12px}
-.mtools .zb{width:52px;height:52px;flex:0 0 52px;border-radius:8px}
+  background:#fff;border:1px solid var(--line);border-radius:12px}
+.mtools .zb{width:52px;height:52px;flex:0 0 52px;border-radius:8px;color:var(--ink-3)}
 .mtools .zb svg{width:28px;height:28px}
-.mtools .zb.on{background:var(--fill);color:var(--ink)}
+/* The tool in use is the one solid thing in the corner. */
+.mtools .zb.on,.mtools .zb.on:hover{background:#111;color:#fff}
 [data-fi="low"] .mtools{display:none}
 /* The corner view, beside the column, never under it: the whole drawing at
    a glance and the rectangle of what is on screen. Flat, framed, opaque. */
@@ -743,30 +856,31 @@ html[data-fq-embed] .dialkit-root{display:none}
   border:0;background-color:#fff}
 /* The selected unit, drawn over the sheet and never into it: a thin outline
    and a light wash, both in the one accent the screen already uses. */
-.umark{position:absolute;inset:0;width:100%;height:100%;z-index:3;overflow:visible}
+.umark{position:absolute;inset:0;width:100%;height:100%;z-index:5;overflow:visible}
 .umark polygon.hit{fill:transparent;pointer-events:auto;cursor:pointer}
 /* The sheet answers the pointer the way the model does: the unit under it
    lights before any click, so a plan can be read by sweeping it. Lighter
    than the selection, which must stay the one unit that is chosen. */
 .umark polygon.hit:hover{fill:rgba(139,160,15,.10);stroke:#8ba00f;vector-effect:non-scaling-stroke}
 .vp.drag .umark polygon.hit:hover{fill:transparent;stroke:none}
-/* Named like the model's pill, and scaled against the zoom in script: the
-   whole sheet is one transformed box, so an unscaled tag would grow into a
-   sign at 400 %. */
-.uhover{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,-100%);
-  background:#fff;color:var(--ink);border:1px solid var(--line);border-style:solid;
-  font-weight:600;line-height:1.3;white-space:nowrap;font-variant-numeric:tabular-nums;
-  box-shadow:0 1px 3px rgba(17,17,18,.14)}
-.uhover[hidden]{display:none}
-[data-fi="low"] .uhover{display:none}
 .umark polygon.on{fill:rgba(139,160,15,.16);stroke:#8ba00f;stroke-width:1.6;
   vector-effect:non-scaling-stroke;pointer-events:auto;cursor:pointer}
-.ulabel{position:absolute;z-index:4;pointer-events:none;white-space:nowrap;
-  font-weight:600;color:#4c5906;background:rgba(255,255,255,.88);
-  border:1px solid rgba(139,160,15,.5);border-radius:4px;padding:1px 4px;line-height:1.25}
-/* In wireframe fidelity the mark keeps its shape and loses its words, the
-   way every other label on the screen does. */
-[data-fi="low"] .ulabel{display:none}
+/* The unit's number, over its outline: on hover, and kept on the selected
+   unit after the click. Drawn on the viewport, not on the sheet: inside the
+   scaled sheet a 12 px label became a 2 px one magnified six times — soft,
+   and its padding rounded off-centre. Placed in whole screen pixels in
+   script, above the sheet and its note pins; the viewport is isolated so
+   the north arrow and the minimap still sit over it. */
+.vp{isolation:isolate}
+.uhover{position:absolute;left:0;top:0;z-index:8;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;height:22px;padding:0 8px;box-sizing:border-box;
+  background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:6px;
+  font-size:12px;font-weight:600;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums;
+  box-shadow:0 1px 3px rgba(17,17,18,.14)}
+.uhover[data-pill="sel"]{border:1.5px solid #8ba00f}
+.uhover[hidden]{display:none}
+[data-fi="low"] .uhover{display:none}
+.vp.drag .uhover[data-pill="hover"]{display:none}
 /* The live SketchUp export fills its pane. The previous facade JPG stays
    behind it only while the 58 MB GLB loads, or if WebGL cannot start. */
 /* No border of its own: the pane around it now states the edge, and two
@@ -774,8 +888,7 @@ html[data-fq-embed] .dialkit-root{display:none}
 .model3d{position:relative;flex:1;min-height:0;overflow:hidden;
   background:#f1f3f4 url(assets/skp-facade.jpg) center/contain no-repeat}
 .model3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;
-  opacity:0;cursor:grab;touch-action:none;transition:opacity .18s ease}
-.model3d-canvas:active{cursor:grabbing}
+  opacity:0;touch-action:none;transition:opacity .18s ease}
 .model3d[data-state="ready"]{background:#f1f3f4}
 .model3d[data-state="ready"] .model3d-canvas{opacity:1}
 .model3d-status{position:absolute;left:50%;bottom:12px;z-index:2;transform:translateX(-50%);
@@ -801,9 +914,6 @@ html[data-fq-embed] .dialkit-root{display:none}
 [data-fi="high"] .btnw.solid.go{background:#8ba00f;border-color:#8ba00f;color:#fff}
 [data-fi="high"] .listrow.on{background:#eef1e0}
 [data-fi="high"] .listrow .dot{background:#8ba00f}
-/* The selected unit's number wears the plan outline's green, so the list,
-   the plan and the model mark the one unit the same way. */
-[data-fi="high"] .ucard.on .ub{background:#8ba00f;border-color:#8ba00f;color:#fff}
 
 /* ------------------------------------------------- dark mode, exceptions
    Everything else turns over through the tokens. These do not: the model's
@@ -852,29 +962,6 @@ html[data-fq-embed] .dialkit-root{display:none}
 .legend i{width:13px;height:13px;border-radius:3px;background:var(--bar);display:inline-block}
 .legend i.dash{background:none;border:1px dashed #b9b9ff}
 svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
-
-/* unit card ----------------------------------------------------------- */
-/* Three facts, three jobs: the number identifies, the typology classes, the
-   area compares. Written as one sentence they sat at one weight and wrapped
-   onto a second line on the narrow cards only, so the grid read ragged.
-   The number goes onto the drawing it belongs to, which leaves the text line
-   to the two facts that are actually compared between units. Nothing wraps:
-   a fact too long for the card is cut, never folded, so every card in the
-   grid is exactly as tall as its neighbour. */
-.ucard{position:relative}
-.ucard .ub{position:absolute;left:5px;top:5px;background:var(--card);border:1px solid var(--line);
-  border-radius:4px;padding:0 5px;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;
-  line-height:1.5;z-index:1}
-/* Scoped to high fidelity on purpose: .hi is display:none in the low-fidelity
-   pass, and a bare ".ucard .ul{display:flex}" outranks it, which would leave
-   the text showing on a wireframe that is supposed to be grey bars. */
-[data-fi="high"] .ucard .ul{display:flex;align-items:baseline;gap:6px;min-width:0;padding-top:1px}
-.ucard .ul > *{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ucard .ua{margin-left:auto;color:var(--ink-3);font-size:11.5px;font-variant-numeric:tabular-nums}
-/* A crossing is a state, not an identity: it rides on the number instead of
-   taking the area's place, so the card never loses a fact to it. */
-.ucard .uc{position:absolute;right:5px;top:5px;z-index:1;width:7px;height:7px;border-radius:50%;
-  background:var(--hi);box-shadow:0 0 0 2px var(--card)}
 </style>
 </head>
 <body>
@@ -912,7 +999,15 @@ const V = {
   /* Codes: which provision is open, which one is being annotated, and the
      notes written against each — nothing is ever written to a drawing. */
   articleId: "3.3.1.9",
-  noteOn: null,
+  /* "id|rang" while one note is being rewritten; the composer stands down
+     meanwhile, so there is never a second empty box asking for the same
+     thing. */
+  noteEdit: null,
+  /* Writing happens here, not in a mail client: the address the office
+     signs with is saved once, and every message sent stays attached to the
+     person it was sent to. */
+  mailFrom: "atelier@bureau-architectes.ca",
+  mails: {},
   notes: {
     "3.3.1.18": [{ who: "Chargée de projet", when: "24 oct", txt: "Le garde-corps est dessiné à 1 020 mm sur l'élévation sud. À reprendre avant le dépôt." }],
     "art. 71": [{ who: "Entrepreneur général", when: "22 oct", txt: "Vérifier la réduction pour proximité du métro avant de recompter les cases." }],
@@ -942,10 +1037,6 @@ const V = {
      and the guest view does not render the studio's, it drops them. */
   pins: [],
   pinScope: "equipe",   // what the next pin will be
-  fqTab: "Unités",      // the floor-quantity drawer's open table (?fq=tiroir)
-  fqOpen: true,         // the drawer unfolded
-  fqMargin: "quant",    // ?fq=marge: notes or quantities in the margin
-  fqModel: "quant",     // ?fq=maquette: the model or quantities in its pane
   guest: false,         // read the screen as the shared link shows it
   pinMode: false,       // the next click on a drawing puts a point down
   pending: null,        // a point put down, waiting for its sentence
@@ -989,13 +1080,25 @@ const V = {
      white plan, which is how the drawing is read by default. */
   typo: { "3½": false, "4½": false, "5½": false },
   inspector: { fidelity: "inherit", layout: "Right panel" },
-  lay: { arp: { on: true, opacity: 55, scale: 100, x: 0, y: 0 },
+  /* The architect's sheet is in the pile with the two consultants', so it
+     carries the same two fields. Its opacity and its presence are held
+     here and not on the fidelity panel: the panel drives the consultants'
+     sheets, and the architect's own drawing was never one of its dials. */
+  lay: { plan: { on: true, opacity: 100 },
+    arp: { on: true, opacity: 55, scale: 100, x: 0, y: 0 },
     pay: { on: false, opacity: 55, scale: 100, x: 0, y: 0 },
     /* The four consultant disciplines: independent toggles, full-bleed on
        the same 2000×1675 canvas the floor plan already uses, so none of
        them needs sheetStyle()'s scale-and-nudge the surveyor's sheet does. */
     electrical: { on: false }, drainage: { on: false },
     distribution: { on: false }, ventilation: { on: false } },
+  /* The pile, front to back. Dragging a thumbnail rewrites this, and
+     everything else — the badges, the z-index of each drawing — is read
+     from it, so there is one answer to "which sheet is on top". */
+  layOrder: ["pay", "arp", "plan"],
+  layPick: "plan",     /* the thumbnail whose card is open */
+  layCard: true,
+  layMenu: false,
 };
 
 const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
@@ -1014,8 +1117,8 @@ function sprite() {
     "flag", "folder-tree", "file-stack", "hard-drive", "book-open", "shield-check",
     /* sharing: the button, and the two rights it can grant */
     "share-2", "eye", "message-square",
-    /* the three layer chips on the 2D pane */
-    "drafting-compass", "trees",
+    /* the opacity line on each drawing's card */
+    "blend",
     /* the four engineering-discipline chips */
     "zap", "droplets", "git-branch", "wind",
     /* the margin: posting a note, keeping one for the studio, reading as a guest */
@@ -1526,8 +1629,100 @@ function sheetStyle(key) {
 /* The canvas sits on top of the picture inside the same box, so the two are
    registered by construction: a PDF page paints only its ink, and what shows
    through until it lands is the picture underneath. */
-const layersHTML = () => (isNonresLevel(paneLevel()) ? [] : ["arp", "pay"]).filter((k) => V.lay[k].on)
-  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)}"><canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${k === "arp" ? 180 : 0}"></canvas></div>`).join("");
+const layersHTML = () => layKeys().filter((k) => k !== "plan" && V.lay[k].on)
+  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)};z-index:${layZ(k)}"><canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${k === "arp" ? 180 : 0}"></canvas></div>`).join("");
+
+/* ---------------------------------------------------------------- the pile
+   Which drawings are on the sheet, in what order, and how strongly. The
+   architect's own sheet is one of the three: it can be sent behind the
+   surveyor's, faded, or taken off altogether, which is what reading one
+   drawing against another actually asks for.
+
+   A level with no consultant sheet has a pile of one, and the strip says
+   so by having a single thumbnail rather than two greyed ones. */
+const layKeys = () => (isNonresLevel(paneLevel()) ? ["plan"] : V.layOrder);
+/* Front first. The number shown on a badge is this index plus one, so 1
+   is always the sheet drawn over the others. */
+const layShown = () => layKeys().filter((k) => V.lay[k].on);
+const layZ = (k) => layKeys().length - layKeys().indexOf(k);
+
+/* What each drawing is, where it comes from, and what opens it. The
+   architect's line is read from the sheet the level tabs opened, so it
+   follows the level the way the pane does. */
+const LAYDOC = {
+  plan: { short: "Architecte", disc: "Architecture", app: "AutoCAD", act: "autocad",
+    thumb: () => sheet().img, file: () => dwgName(),
+    date: () => `${sheet().date} 2026`, dir: () => V.docs.dir },
+  arp: { short: "Arpenteur", disc: "Arpentage", app: "AutoCAD", act: "autocad",
+    thumb: () => "assets/arp-site.png", file: () => "BAL3_IMPLANTATION_2026-10-07.dwg",
+    date: () => "7 oct 2026", dir: () => `${V.docs.dir}Reçus\\` },
+  pay: { short: "Paysage", disc: "Architecture de paysage", app: "Acrobat", act: "pdfview",
+    thumb: () => "assets/paysage.png", file: () => "BAL3_AMENAGEMENT-PAYSAGER_2026-07-07.pdf",
+    date: () => "7 juil 2026", dir: () => `${V.docs.dir}Reçus\\` },
+};
+
+/* The mark on a thumbnail: a line per drawing in the pile with this one
+   lit at its own height, and the rank beside it. The drawing says where
+   without a convention to learn; the figure gives the exact place once
+   the pile is deeper than the eye can count. */
+function layBars(rank, n) {
+  const FY = 5, FH = 14;
+  const gap = n <= 5 ? 2 : 1.2;
+  const h = Math.max(1, Math.min(3, (FH - (n - 1) * gap) / n));
+  const top = FY + (FH - (n * h + (n - 1) * gap)) / 2;
+  return `<svg class="pb3" viewBox="0 0 24 24">${Array.from({ length: n }, (_, j) => j + 1)
+    .map((r) => {
+      const lit = r === rank, hh = lit ? Math.max(h, 2.6) : h;
+      return `<rect x="6" y="${(top + (r - 1) * (h + gap)).toFixed(2)}" width="12" height="${hh}"
+        rx="${Math.min(hh, 2) / 2}" fill="currentColor" opacity="${lit ? 1 : 0.22}"/>`;
+    }).join("")}</svg>`;
+}
+
+function layBadge(k) {
+  const on = V.lay[k].on, shown = layShown();
+  /* A drawing that is the only one on the sheet has nothing to be added
+     to and cannot be taken off: no badge at all. */
+  if (on && shown.length === 1) return "";
+  const rank = shown.indexOf(k) + 1;
+  const word = rank === 1 ? "devant" : rank === shown.length ? "au fond" : "au milieu";
+  const other = (shown.find((x) => x !== k) || k);
+  return `<span class="lbadge ${on ? "on" : ""}" ${act("lstack", k)}
+    title="${on ? `${LAYDOC[k].short} — ${rank} sur ${shown.length}, ${word}`
+      : `Superposer ${LAYDOC[k].short.toLowerCase()} avec ${LAYDOC[other].short.toLowerCase()}`}">${
+    on ? layBars(rank, shown.length) + `<b class="rk">${rank}</b>` : icon("plus")}</span>`;
+}
+
+const layTile = (k) => `<div class="ltile ${V.lay[k].on ? "on" : ""} ${V.layPick === k ? "sel" : ""}"
+  data-ltile="${k}" ${act("lpick", k)} title="${LAYDOC[k].disc} · ${LAYDOC[k].date()}">
+  <span class="wrap"><span class="pic" style="background-image:url(${LAYDOC[k].thumb()})"></span>${layBadge(k)}</span>
+  <span class="nm">${LAYDOC[k].short}</span></div>`;
+
+const layStripHTML = () => `<div class="lstrip hi" data-lstrip>
+  <div class="lpile" data-lpile>${layKeys().map(layTile).join("")}</div>
+  ${layKeys().length > 1 ? `<div class="lhint">glisser une vignette<br>pour changer l'ordre</div>` : ""}</div>`;
+
+/* The card is the drawing's document: what it is, which file, what can be
+   done with it, and how strongly it is laid on the sheet. Nothing about
+   the pile — that is the badge's job. */
+function layCardHTML() {
+  if (!V.layCard) return "";
+  const k = layKeys().includes(V.layPick) ? V.layPick : "plan";
+  const D = LAYDOC[k], op = Math.round(V.lay[k].opacity);
+  const items = [[D.act, `Ouvrir dans ${D.app}`], ["lswap", "Changer le document…"],
+    ["lhist", "Voir les documents précédents (3)"]];
+  return `<div class="lcard" data-lcard data-anchor="${k}">
+    <div class="hd"><b>${D.disc}</b><span class="dt">${D.date()}</span></div>
+    <div class="fn">${D.file()}</div>
+    <span class="docbtn" ${act("ldoc")}>${icon("file")}Document ${icon("chevron-down")}</span>
+    ${V.layMenu ? `<div class="lmenu">${items.map(([a, t]) =>
+      `<span class="mi" ${act(a, k)}>${t}</span>`).join("")}</div>` : ""}
+    <div class="oprow"><span class="oplbl">${icon("blend")}Opacité</span>
+      <span class="optrack" data-lop="${k}" title="Opacité ${LAYDOC[k].short} — ${op}%">
+        <span class="fill" style="width:${op}%"></span>
+        <span class="knob" style="left:${op}%"></span></span>
+      <span class="opval">${op}%</span></div>
+  </div>`;
+}
 
 /* The consultant disciplines read the same way the surveyor and the
    landscaper already do — a chip per kind, toggled independently — except
@@ -1576,7 +1771,8 @@ const typoHTML = () => {
 /* The selected unit, outlined on the sheet. Every other unit on this
    level keeps an invisible hit box, so the plan can be clicked the way
    the list can; a row from a different level is skipped, since its
-   contour doesn't belong to the sheet actually on screen. */
+   contour doesn't belong to the sheet actually on screen. Its number is a
+   pill placed in script (placePlanPills), so it follows the zoom. */
 function unitMarkHTML() {
   const rows = rowsOf("Unités");
   const sel = selIndex("Unités");
@@ -1594,21 +1790,7 @@ function unitMarkHTML() {
     return `<polygon class="${on ? "on" : "hit"}" points="${poly.map(([x, y]) => `${x},${y}`).join(" ")}"
       style="stroke-width:${(1.6 / zs).toFixed(3)}px" data-act="row" data-value="${i}"></polygon>`;
   }).join("");
-
-  /* The label is HTML, not SVG text: the overlay is stretched to the sheet's
-     own ratio, and a glyph inside it would be stretched with it. Its size is
-     divided by the zoom so it stays a label and does not grow into a sign. */
-  const cur = rows[sel];
-  const z = V.zoom / 100;
-  const tag = cur && polys[cur[2]] ? (() => {
-    const [x, y, , h] = polyBounds(polys[cur[2]]);
-    const below = y + h + 0.06 < 1;
-    return `<div class="ulabel" data-side="${below ? "below" : "above"}" style="left:${(x * 100).toFixed(2)}%;`
-      + `top:${((below ? y + h : y) * 100).toFixed(2)}%;`
-      + `font-size:${(11 / z).toFixed(2)}px;transform:translateY(${below ? 2 / z : -(14 / z)}px)">`
-      + `${cur[0]} · ${cur[1]}</div>`;
-  })() : "";
-  return `<svg class="umark" viewBox="0 0 1 1" preserveAspectRatio="none">${parts}</svg>${tag}`;
+  return `<svg class="umark" viewBox="0 0 1 1" preserveAspectRatio="none">${parts}</svg>`;
 }
 
 
@@ -1846,13 +2028,19 @@ function articleText(a) {
   const notes = V.notes[a.id] || [];
   return [`${a.id} — ${a.topic}`, `${a.doc} · ${a.place} · ${a.edition}`,
     `« ${a.quote} »`, `Lu dans les dessins: ${a.measured} · exigé: ${a.required}`,
-    `Lecture de l'atelier: ${CLARITY_LABEL[clarityOf(a.id)].toLowerCase()}`,
+    `Lecture du Bureau d'Architectes: ${CLARITY_LABEL[clarityOf(a.id)].toLowerCase()}`,
     a.state === "non résolu" ? `Manque pour conclure: ${a.needs}` : "",
     ...notes.map((n) => `— ${n.who} (${n.when}): ${n.txt}`), a.url].filter(Boolean).join("\n");
 }
-const mailHref = (a, c) => `mailto:${CONTACTS[c].mail}`
-  + `?subject=${encodeURIComponent(`[${V.project}] ${a.id} — ${a.topic}`)}`
-  + `&body=${encodeURIComponent(articleText(a) + "\n\n")}`;
+/* What can be attached: the documents the project already holds, named
+   the way they are named on the server. Nothing is uploaded — the message
+   carries the file the office would have attached by hand. */
+const MAIL_FILES = [
+  ["A-201 — plan niveau 5.pdf", "2,4 Mo"],
+  ["A-301 — élévation sud.pdf", "1,1 Mo"],
+  ["Tableau des superficies.csv", "18 ko"],
+  ["Relevé d'arpentage — 6 oct.pdf", "860 ko"],
+];
 const codeGroups = () => CODE_GROUPS
   .map(([prefix, label]) => [label, ARTICLES.filter((a) => a.doc.startsWith(prefix))])
   .filter(([, rows]) => rows.length);
@@ -1865,7 +2053,7 @@ function clarityChip(id) {
   const c = clarityOf(id);
   const menu = V.clarityOn === id ? `<div class="claritymenu">${CLARITY.map((k) => `<span class="opt" data-c="${k}" ${act("clarity", `${id}|${k}`)}>${CLARITY_LABEL[k]}</span>`).join("")}</div>` : "";
   return `<span class="clarity hi" data-c="${c}" ${act("clarityopen", id)}
-    title="Lecture de l'atelier — cliquer pour changer">${CLARITY_LABEL[c]}${icon("chevron-down")}${menu}</span>`;
+    title="Lecture du Bureau d'Architectes — cliquer pour changer">${CLARITY_LABEL[c]}${icon("chevron-down")}${menu}</span>`;
 }
 
 /* A note is written by a person against one article, and it never leaves
@@ -1873,8 +2061,10 @@ function clarityChip(id) {
    bylaw. */
 function codeRow(a) {
   const gap = a.state === "non résolu";
+  /* The card counts the notes; it no longer shows or writes them. Two
+     composers for one store meant a note could be started in the list and
+     finished in the column, and neither place owned it. */
   const notes = V.notes[a.id] || [];
-  const open = V.noteOn === a.id;
   return `<div class="coderow ${gap ? "gap" : ""} ${V.articleId === a.id ? "on" : ""}" ${act("article", a.id)}>
     <div class="draw">${codeFig(a)}</div>
     <div class="tx">
@@ -1886,19 +2076,11 @@ function codeRow(a) {
       <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
       <div class="hi src">${a.doc} · ${a.place} · ${a.edition}</div>
       ${gap ? `<div class="hi src">manque pour conclure: ${a.needs}</div>` : ""}
-      ${notes.length ? `<div class="col" style="gap:5px">${notes.map((n) => `<div class="note">
-        <span class="hi" style="font-size:11px;color:var(--ink-3)">${n.who} · ${n.when}</span>
-        <span class="hi" style="font-size:12px">${n.txt}</span></div>`).join("")}</div>` : ""}
-      ${open ? `<div class="row" style="gap:6px;align-items:flex-start">
-        <textarea class="noteinput" data-note="${a.id}" rows="2" autofocus></textarea>
-        <span class="btnw solid" ${act("notesave", a.id)}>${icon("check")}<span class="hi">Écrire</span></span>
-      </div>` : ""}
       <div class="row" style="gap:6px">
         <a class="btnw src-link hi" href="${a.url}" target="_blank" rel="noreferrer"
            ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
-        <span class="btnw" ${act("noteopen", a.id)}>${icon("message-square")}<span class="hi">${open ? "Annuler" : "Ajouter une note"}</span></span>
         <span class="btnw" ${act("copyarticle", a.id)}>${icon("copy")}<span class="hi">Copier</span></span>
-        ${notes.length ? `<span class="hi" style="font-size:11px;color:var(--ink-3)">${notes.length} note${notes.length > 1 ? "s" : ""}</span>` : ""}
+        ${notes.length ? `<span class="hi nct">${icon("message-square")}${notes.length}</span>` : ""}
       </div>
     </div>
   </div>`;
@@ -2369,23 +2551,10 @@ function listHTML() {
         ${pairs.slice(0, 4).map((r, i) => `<span class="chip ${i === sel ? "on" : ""}" ${act("row", i)}><span class="lo bar" style="width:46px"></span><span class="hi">${r[0].split(" ")[0]}</span></span>`).join("")}
       </div></section>`;
   }
-  /* A6: on Unités the number rides on the drawing and the line underneath
-     carries the typology and the area, the two facts a reader compares from
-     one card to the next. Other screens have no drawing and no typology, so
-     they keep the plain pair. */
-  const ucard = (r, i) => `<div class="tile ucard ${i === sel ? "on" : ""}" ${act("row", i)}
-      title="${r[0]} · ${r[6]} pi²${r[7] ? ` · ${r[1]}` : ""}">
-      <div class="plan" data-img="unit" style="height:88px;flex:0 0 88px;background-image:url(assets/plan-niveau-${r[4]}.jpg);${crop(boxForUnit(r[4], r[2]))}"></div>
-      <span class="hi ub">${r[0].split(" · ")[0]}</span>
-      ${r[7] ? `<span class="hi uc" title="${r[1]}"></span>` : ""}
-      <div class="lo bar" style="width:70%"></div>
-      <div class="hi ul"><span style="font-size:12px">${r[5]}</span>
-        <span class="ua">${r[6]} pi²</span></div></div>`;
-  /* One column: in two the drawings came out barely wider than a thumbnail,
-     and the plan of a unit is the point of the card. */
+  /* On a floor the list is the area table (see "the floor's quantities"). */
+  if (V.screen === "Unités") return unitListHTML(step);
   const inner = mode === "Card grid"
-    ? (pairs.length ? `<div style="display:grid;grid-template-columns:1fr;gap:8px">${pairs.map((r, i) => V.screen === "Unités" ? ucard(r, i)
-      : `<div class="tile ${i === sel ? "on" : ""}" ${act("row", i)}>
+    ? (pairs.length ? `<div style="display:grid;grid-template-columns:1fr;gap:8px">${pairs.map((r, i) => `<div class="tile ${i === sel ? "on" : ""}" ${act("row", i)}>
         <div class="plan" style="height:54px;flex:0 0 54px"></div>
         <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r[0]} · ${r[1]}</div></div>`).join("")}</div>`
       : `<div class="tile"><span class="hi" style="font-size:12px;color:var(--ink-2)">${emptyMsg}</span></div>`)
@@ -2461,31 +2630,9 @@ function contentHTML() {
           <text data-axt="${a}" x="0" y="0">${a.toUpperCase()}</text>`).join("")}
         <circle cx="0" cy="0" r="1.6"></circle>
       </svg>`;
-      /* Which sheets are laid over the floor plan was a panel setting, which
-         means it was not in the prototype at all: the person reading the
-         drawing could not ask for the surveyor. The three chips are that
-         question, on the pane that answers it. "Architecture" is not a
-         fourth layer, it is every overlay off — the architect's sheet is
-         always there, on every level. */
-      /* One glyph each, so the row reads as three kinds of drawing before it
-         reads as three words: the architect's compass, the surveyor's
-         rule, the landscape architect's planting. */
-      const LAYICON = { none: "drafting-compass", arp: "ruler", pay: "trees" };
-      const laychip = (k, t) => {
-        const unavailable = k !== "none" && isNonresLevel(paneLevel());
-        const on = !unavailable && (k === "none"
-          ? !V.lay.arp.on && !V.lay.pay.on && !ENG_DISCIPLINES.some((d) => V.lay[d].on)
-          : V.lay[k].on);
-        return `<span class="chip hi ${on ? "on" : ""}" ${unavailable ? 'aria-disabled="true" style="opacity:.4"' : act("layer", k)}
-          title="${unavailable ? `${t} — non disponible pour ce niveau` : k === "none" ? "Le plan d'architecture seul" : `Superposer ${t.toLowerCase()}`}">${icon(LAYICON[k])}<span class="lb">${t}</span></span>`;
-      };
       const pane = (t, note, kind, cls = "", layers = "") => `<div class="pane drawing" style="flex:1"><div class="ph">${icon("file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>
-        ${kind === "plan" ? `<span class="laychips">${laychip("none", "Architecture")}${laychip("arp", "Arpenteur")}${laychip("pay", "Paysage")}</span>` : ""}
-        ${kind === "model" && FQ === "maquette" ? `<span class="laychips" style="margin-right:8px">
-          <span class="chip ${V.fqModel === "model" ? "on" : ""}" ${act("fqmodel", "model")}>${icon("box")}<span class="lb">Maquette</span></span>
-          <span class="chip ${V.fqModel === "quant" ? "on" : ""}" ${act("fqmodel", "quant")}>${icon("table")}<span class="lb">Quantités</span></span></span>` : ""}
         ${hostButton(kind === "plan" ? "plan" : "model")}</div>
         ${kind === "plan" ? `<div class="engineering-bar hi">
           <span class="laychips eng">${ENG_DISCIPLINES.map((d) => engChip(d, paneLevel())).join("")}</span>
@@ -2498,19 +2645,20 @@ function contentHTML() {
           ? `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="plan">
               <div class="vp" data-vp>
               <div class="plan ${cls}" data-img="${kind}" data-src="${planVector() ? "vector" : "image"}"
-                   style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})">
+                   style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100});
+                     --planz:${layZ("plan")};--planop:${V.lay.plan.on ? V.lay.plan.opacity / 100 : 0}">
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}${pinMarkHTML()}</div></div>
-              ${north("plan")}${mini("plan")}${zcol("plan")}</div>`
-          : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0;${FQ === "maquette" && V.fqModel === "quant" ? "display:none" : ""}" data-zone="model">
+              ${north("plan")}${mini("plan")}${zcol("plan")}${layStripHTML()}${layCardHTML()}</div>`
+          : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
               </div>
               <div class="npins" data-npins></div>
               ${mtools}${north("model")}${axes}${mini("model")}${zcol("model")}
-            </div>${FQ === "maquette" && V.fqModel === "quant" ? fqBlockHTML("maquette") : ""}`}
+            </div>`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
@@ -2531,9 +2679,7 @@ function contentHTML() {
         <div style="position:relative;flex:1;display:flex">${plan()}
         ${noModel ? "" : `<div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
         <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div>`}</div></div>`;
-      return `<div class="col" style="flex:1;gap:var(--gap);min-height:0">
-        <div class="row" style="flex:1;align-items:stretch;gap:var(--gap);min-height:0">${plan()}${model()}</div>
-        ${FQ === "tiroir" && !isNonresLevel(paneLevel()) ? fqBlockHTML("tiroir") : ""}</div>`;
+      return `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap);min-height:0">${plan()}${model()}</div>`;
     },
     /* Codes is the vertical reading of the provisions: the Québec
        construction code first, then the bylaw, each one with the schematic
@@ -2616,20 +2762,18 @@ function quantScreenHTML(step) {
 }
 
 /* ------------------------------------------------ the floor's quantities
-   The building's four tables, read on one floor. quantites-etage.html
-   compares four places to put them through ?fq=; without it the floor
-   screen is unchanged. Each table counts the floor on screen and gives the
-   selected unit its own row or column, so a click in the list, on the plan
-   or on the model moves the tables too. Windows and materials have no
-   per-floor count in the drawings yet: their floor and unit figures are
-   the building schedule shared out by net area, and each table says so. */
-const FQ_VARIANTS = ["tiroir", "marge", "maquette", "liste"];
-const FQ = FQ_VARIANTS.find((v) => v === new URLSearchParams(location.search).get("fq")) || null;
-const FQ_TABS = ["Unités", "Superficies", "Fenêtres", "Matériaux"];
+   On a floor the unit list is the floor's area table: every unit with its
+   type, net area and share, the floor's totals at the foot, and under it
+   the selected unit's share of what the floor counts. A click in the
+   table, on the plan or on the model moves the selection, and the green
+   row follows. Windows and materials have no per-floor count in the
+   drawings yet: the unit's figures are the building schedule shared out by
+   net area, and the block says so. */
 const BUILDING_NET = ALL_UNITS.reduce((s, r) => s + r[6], 0);
 const fqNum = (n, d = 0) => n.toLocaleString("fr-CA", { minimumFractionDigits: d, maximumFractionDigits: d });
 const fqPct = (a, b) => `${b ? Math.round(a / b * 100) : 0} %`;
 const unitNo = (r) => r[0].split(" · ")[0];
+const M2 = 0.092903;
 
 function floorQuant() {
   const floor = UNITS_BY_LEVEL[viewOf("Unités")] || [];
@@ -2637,121 +2781,69 @@ function floorQuant() {
   const visible = rowsOf("Unités");
   const net = floor.reduce((s, r) => s + r[6], 0);
   const brut = net / 0.85;
-  const u = unit ? unitNo(unit) : null;
   const types = [...new Set(floor.map((r) => r[5]))].sort();
   const ofType = (ty) => floor.filter((r) => r[5] === ty);
-  const sum = (rows) => rows.reduce((s, r) => s + r[6], 0);
-  const mean = unit ? sum(ofType(unit[5])) / ofType(unit[5]).length : 0;
-  const floorShare = (q) => q * net / BUILDING_NET;
+  const mean = unit ? ofType(unit[5]).reduce((s, r) => s + r[6], 0) / ofType(unit[5]).length : 0;
   const unitShare = (q) => (unit ? q * unit[6] / BUILDING_NET : 0);
-  const estimate = "estimation : bordereau du bâtiment réparti par superficie nette — à vérifier";
   return {
-    level: viewOf("Unités"), unit, u, count: floor.length,
-    tables: {
-      "Unités": {
-        head: ["Type", "Unités", "pi² moy", "pi² total", "Part"], type: ["t", "n", "n", "n", "n"], compact: [0, 1, 2],
-        rows: types.map((ty) => [ty, ofType(ty).length, fqNum(sum(ofType(ty)) / ofType(ty).length),
-          fqNum(sum(ofType(ty))), fqPct(sum(ofType(ty)), net)]),
-        on: unit ? types.indexOf(unit[5]) : -1,
-        note: unit ? `${u} : ${unit[5]} de ${fqNum(unit[6])} pi², ${unit[6] >= mean ? "+" : "−"}${fqNum(Math.abs(unit[6] - mean))} pi² par rapport à la moyenne des ${unit[5]} de l'étage`
-          : "compté à partir des étiquettes du plan",
-      },
-      "Superficies": {
-        head: ["Unité", "Type", "Net pi²", "m²", "Part"], type: ["t", "t", "n", "n", "n"], compact: [0, 2, 4],
-        rows: floor.map((r) => [unitNo(r), r[5], fqNum(r[6]), fqNum(r[6] * 0.092903, 1), fqPct(r[6], net)]),
-        on: unit ? floor.indexOf(unit) : -1,
-        acts: floor.map((r) => visible.indexOf(r)),
-        foot: [["Net", "", fqNum(net), fqNum(net * 0.092903), "100 %"],
-          ["Circulation", "", fqNum(brut - net), fqNum((brut - net) * 0.092903), "15 %"],
-          ["Brut", "", fqNum(brut), fqNum(brut * 0.092903), ""]],
-        note: "net : étiquettes du plan · circulation : 15 %, comme le tableau du bâtiment",
-      },
-      "Fenêtres": {
-        head: ["Repère", "Largeur", "Hauteur", "Étage", u || "Unité", "Façade"], type: ["t", "n", "n", "n", "n", "t"], compact: [0, 3, 4],
-        rows: QTABS["Fenêtres"].rows.map((r) => [r[0], r[1], r[2], fqNum(floorShare(r[3]), 1), fqNum(unitShare(r[3]), 1), r[4]]),
-        hot: 4, note: estimate,
-      },
-      "Matériaux": {
-        head: ["Matériau", "Façade", "m² étage", `m² ${u || "unité"}`, "Révision"], type: ["t", "t", "n", "n", "t"], compact: [0, 2, 3],
-        rows: QTABS["Matériaux"].rows.map((r) => [r[0], r[1], fqNum(floorShare(r[2]), 1), fqNum(unitShare(r[2]), 1), r[4]]),
-        hot: 3, note: estimate,
-      },
-    },
+    level: viewOf("Unités"), unit, u: unit ? unitNo(unit) : null,
+    types: types.map((ty) => [ty, ofType(ty).length]),
+    /* An open crossing rides on the number, as it did on the card. */
+    rows: floor.map((r) => ({
+      cells: [`${unitNo(r)}${r[7] ? `<span class="xdot" title="${r[1]}"></span>` : ""}`, r[5],
+        fqNum(r[6]), fqNum(r[6] * M2, 1), fqPct(r[6], net)],
+      on: r === unit, index: visible.indexOf(r),
+    })),
+    foot: [["Net", "", fqNum(net), fqNum(net * M2), "100 %"],
+      ["Circulation", "", fqNum(brut - net), fqNum((brut - net) * M2), "15 %"],
+      ["Brut", "", fqNum(brut), fqNum(brut * M2), ""]],
+    versus: unit ? `${unit[6] >= mean ? "+" : "−"}${fqNum(Math.abs(unit[6] - mean))} pi² par rapport à la moyenne des ${unit[5]} de l'étage` : "",
+    windows: QTABS["Fenêtres"].rows.map((r) => [r[0], fqNum(unitShare(r[3]), 1)]),
+    materials: QTABS["Matériaux"].rows.map((r) => [r[0], fqNum(unitShare(r[2]), 1)]),
   };
 }
 
-/* One table, whole or narrowed to the columns a 280 px column can hold.
-   The selected unit is the green row, or the green column where the table
-   counts something the unit only has a share of. */
-function fqTableHTML(q, name, compact = false) {
-  const t = q.tables[name];
-  const cols = compact ? t.compact : t.head.map((_, i) => i);
-  const cell = (c, j, tag = "td") => `<${tag} class="${t.type[j] === "n" ? "n" : ""} ${j === t.hot ? "hot" : ""}">${c}</${tag}>`;
-  const body = t.rows.map((r, i) => {
-    const a = t.acts && t.acts[i] >= 0 ? act("row", t.acts[i]) : "";
-    return `<tr class="${i === t.on ? "on" : ""}" ${a}>${cols.map((j) => cell(r[j], j)).join("")}</tr>`;
-  }).join("");
-  const foot = (t.foot || []).map((r) => `<tr>${cols.map((j) => cell(r[j], j)).join("")}</tr>`).join("");
+const FQ_TYPE = ["t", "t", "n", "n", "n"];
+function fqTableHTML(q) {
+  const cell = (c, j, tag = "td") => `<${tag} class="${FQ_TYPE[j] === "n" ? "n" : ""}">${c}</${tag}>`;
+  /* A unit the typology filter hides stays in the floor's arithmetic but
+     is not offered as a click. */
+  const body = q.rows.map((r) => `<tr class="${r.on ? "on" : ""} ${r.index < 0 ? "dim" : ""}" ${r.index >= 0 ? act("row", r.index) : ""}>
+    ${r.cells.map((c, j) => cell(c, j)).join("")}</tr>`).join("");
   return `<div class="fqt">
-    <div class="fqh">${icon(QTABS[name].glyph)}<span>${name}</span><span class="fqs">${q.level}</span></div>
-    <table class="tbl"><thead><tr>${cols.map((j) => cell(t.head[j], j, "th")).join("")}</tr></thead>
-      <tbody>${body}</tbody>${foot ? `<tfoot>${foot}</tfoot>` : ""}</table>
-    <div class="fqn">${t.note}</div></div>`;
+    <table class="tbl"><thead><tr>${["Unité", "Type", "Net pi²", "m²", "Part"].map((h, j) => cell(h, j, "th")).join("")}</tr></thead>
+      <tbody>${body}</tbody><tfoot>${q.foot.map((r) => `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("")}</tfoot></table>
+    <div class="fqn">net : étiquettes du plan · circulation : 15 %, comme le tableau du bâtiment</div></div>`;
 }
 
-const fqTitle = (q) => `${q.level} · ${q.count} unités${q.u ? ` · unité ${q.u}` : ""}`;
-
-/* Each block carries data-fq, so a new selection redraws the tables
-   without redrawing the drawings beside them. */
-function fqBlockHTML(kind) {
-  const q = floorQuant();
-  if (kind === "tiroir") {
-    const tabs = FQ_TABS.map((n) => `<span class="chip ${V.fqTab === n ? "on" : ""}" ${act("fqtab", n)}>${icon(QTABS[n].glyph)}<span class="lb">${n}</span></span>`).join("");
-    return `<section class="pane fq-drawer" data-fq="tiroir" style="flex:0 0 ${V.fqOpen ? 260 : 37}px">
-      <div class="ph">${icon("table")}<span class="hi">Quantités</span><span class="fqs">${fqTitle(q)}</span>
-        <span class="laychips" style="margin-left:10px">${V.fqOpen ? tabs : ""}</span><span style="flex:1"></span>
-        <span class="btnw" ${act("fqopen")} title="${V.fqOpen ? "Replier" : "Déplier"} les quantités">${icon(V.fqOpen ? "chevron-down" : "chevron-up")}</span></div>
-      ${V.fqOpen ? `<div class="pb" style="overflow:auto">${fqTableHTML(q, V.fqTab)}</div>` : ""}</section>`;
-  }
-  if (kind === "marge") {
-    return `<div class="fq-stack" data-fq="marge"><div class="fqs" style="margin:0">${fqTitle(q)}</div>
-      ${FQ_TABS.map((n) => fqTableHTML(q, n, true)).join("")}</div>`;
-  }
-  if (kind === "maquette") {
-    return `<div class="pb fq-stack" data-fq="maquette">${FQ_TABS.map((n) => fqTableHTML(q, n)).join("")}</div>`;
-  }
-  /* liste: the unit list is the Superficies table; under it, the
-     selected unit's share of what the floor counts. */
-  const t = q.tables;
-  const pick = (name, col) => t[name].rows.map((r) => `<tr><td>${r[0]}</td><td class="n">${r[col]}</td></tr>`).join("");
-  return `<div class="fq-unit" data-fq="liste">
+function fqUnitHTML(q) {
+  const pairs = (rows) => rows.map(([k, v]) => `<tr><td>${k}</td><td class="n">${v}</td></tr>`).join("");
+  return `<div class="fq-unit" data-fq>
     <div class="fqh">${icon("box")}<span>Unité ${q.u || "—"}</span><span class="fqs">${q.unit ? `${q.unit[5]} · ${fqNum(q.unit[6])} pi²` : ""}</span></div>
-    <div class="fqn">${t["Unités"].note}</div>
-    <table class="tbl"><thead><tr><th>Fenêtres</th><th class="n">qté</th></tr></thead><tbody>${pick("Fenêtres", 4)}</tbody></table>
-    <table class="tbl"><thead><tr><th>Matériaux</th><th class="n">m²</th></tr></thead><tbody>${pick("Matériaux", 3)}</tbody></table>
-    <div class="fqn">${t["Fenêtres"].note}</div></div>`;
+    ${q.versus ? `<div class="fqn">${q.versus}</div>` : ""}
+    <table class="tbl"><thead><tr><th>Fenêtres</th><th class="n">qté</th></tr></thead><tbody>${pairs(q.windows)}</tbody></table>
+    <table class="tbl"><thead><tr><th>Matériaux</th><th class="n">m²</th></tr></thead><tbody>${pairs(q.materials)}</tbody></table>
+    <div class="fqn">estimation : bordereau du bâtiment réparti par superficie nette — à vérifier</div></div>`;
 }
 
-/* The list as a table: every unit of the floor with its area and its
-   share, the floor's totals at the foot, and the selected unit's detail. */
-function fqListHTML(step) {
+function unitListHTML(step) {
   const q = floorQuant();
-  const types = q.tables["Unités"].rows.map((r) => `<span class="chip"><span class="lb">${r[0]} · ${r[1]}</span></span>`).join("");
-  return region("list", "liste — quantités de l'étage",
-    `<div class="ph">${icon("table")}<span class="hi">Unités et quantités</span><span class="fqs">${q.level}</span></div>
+  return region("list", "liste — unités et superficies",
+    `<div class="ph">${icon("table")}<span class="hi">Unités et superficies</span><span class="fqs">${q.level}</span></div>
      <div class="pb" style="overflow:auto;gap:10px">
-       <div class="laychips" style="flex-wrap:wrap">${types}</div>
-       ${fqTableHTML(q, "Superficies")}
-       ${fqBlockHTML("liste")}
+       <div class="laychips" style="flex-wrap:wrap">${q.types.map(([ty, n]) => `<span class="chip"><span class="lb">${ty} · ${n}</span></span>`).join("")}</div>
+       ${fqTableHTML(q)}
+       ${fqUnitHTML(q)}
      </div>`, step);
 }
 
+/* A new selection redraws the table and the unit block, not the drawings. */
 function paintFQ() {
-  document.querySelectorAll("[data-fq]").forEach((el) => { el.outerHTML = fqBlockHTML(el.dataset.fq); });
-  if (FQ === "liste") {
-    const list = document.querySelector('[data-region="list"] .fqt');
-    if (list) list.outerHTML = fqTableHTML(floorQuant(), "Superficies");
-  }
+  const list = document.querySelector('[data-region="list"] .fqt');
+  if (!list) return;
+  const q = floorQuant();
+  list.outerHTML = fqTableHTML(q);
+  document.querySelector("[data-fq]")?.replaceWith(document.createRange().createContextualFragment(fqUnitHTML(q)));
 }
 
 /* A real file, not a toast: the table as it is on screen, in the order it
@@ -2816,24 +2908,40 @@ function codeSideHTML(a) {
   const notes = V.notes[a.id] || [];
   return `<div class="col" style="gap:9px">
     <div class="row" style="justify-content:space-between;align-items:center">
-      <span class="hi" style="font-size:12px;color:var(--ink-2)">Lecture de l'atelier</span>
+      <span class="hi" style="font-size:12px;color:var(--ink-2)">Lecture du Bureau d'Architectes</span>
       ${clarityChip(a.id)}
     </div>
     <div class="col" style="gap:6px">
-      ${notes.map((n) => `<div class="note">
-        <span class="hi" style="font-size:11px;color:var(--ink-3)">${n.who} · ${n.when}</span>
+      <div class="row" style="justify-content:space-between;align-items:baseline">
+        <span class="hi" style="font-size:12px;color:var(--ink-2)">Notes</span>
+        <span class="hi" style="font-size:11px;color:var(--ink-3)">${notes.length
+          ? `${notes.length} écrite${notes.length > 1 ? "s" : ""}` : "aucune"}</span>
+      </div>
+      ${notes.map((n, i) => V.noteEdit === `${a.id}|${i}` ? `<div class="anote edit">
+        <textarea class="noteinput" data-noteedit="${a.id}|${i}" rows="3">${n.txt}</textarea>
+        <div class="row" style="gap:6px">
+          <span class="btnw solid" ${act("noteeditsave", `${a.id}|${i}`)}>${icon("check")}<span class="hi">Enregistrer</span></span>
+          <span class="btnw" ${act("noteeditstop")}><span class="hi">Annuler</span></span>
+        </div></div>` : `<div class="anote">
+        <div class="row" style="align-items:baseline;gap:6px">
+          <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">${n.who} · ${n.when}</span>
+          <span class="nedit hi" ${act("noteedit", `${a.id}|${i}`)} title="Modifier la note">${icon("pen-line")}</span>
+          <span class="nedit hi" ${act("notedrop", `${a.id}|${i}`)} title="Supprimer la note">${icon("trash-2")}</span>
+        </div>
         <span class="hi" style="font-size:12px">${n.txt}</span></div>`).join("")}
-      <textarea class="noteinput" data-note="${a.id}" rows="3"></textarea>
+      ${V.noteEdit ? "" : `<textarea class="noteinput" data-note="${a.id}" rows="3"
+        placeholder="Écrire une note sur cet article…"></textarea>
       <div class="row" style="gap:6px">
         <span class="btnw solid" ${act("notesave", a.id)}>${icon("check")}<span class="hi">Écrire la note</span></span>
         <span class="btnw" ${act("copyarticle", a.id)}>${icon("copy")}<span class="hi">Copier</span></span>
-      </div>
+      </div>`}
     </div>
     <div class="col" style="gap:0">
       <span class="hi" style="font-size:12px;color:var(--ink-2);padding-bottom:4px">Qui en répond</span>
-      ${contactsFor(a).map((k) => { const c = CONTACTS[k]; return `<div class="contact ${c.waited > 14 ? "slow" : ""}">
-        <span class="who"><b class="hi">${c.role}</b><span class="hi">dernier échange le ${c.last} · il y a ${c.waited} j</span></span>
-        <a class="mailto hi" href="${mailHref(a, k)}">${icon("mail")}Écrire</a>
+      ${contactsFor(a).map((k) => { const c = CONTACTS[k]; const sent = (V.mails[k] || []).length; return `<div class="contact ${c.waited > 14 ? "slow" : ""}">
+        <span class="who"><b class="hi">${c.role}</b><span class="hi">dernier échange le ${c.last} · il y a ${c.waited} j</span>
+          ${sent ? `<span class="hi sent">${sent} courriel${sent > 1 ? "s" : ""} envoyé${sent > 1 ? "s" : ""} d'ici</span>` : ""}</span>
+        <span class="mailto hi" ${act("mailopen", `${a.id}|${k}`)} title="Écrire sans quitter fitte">${icon("mail")}<span class="hi">Écrire</span></span>
       </div>`; }).join("")}
     </div>
   </div>`;
@@ -3017,16 +3125,8 @@ function marginHTML() {
       ${list.length ? list.map(card).join("")
         : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px">Aucune note sur ce projet.</div>`}
     </div>`;
-  /* The margin variant: the same column, one switch, notes or the floor's
-     four tables. */
-  const quant = FQ === "marge" && V.fqMargin === "quant";
-  const head = FQ === "marge" ? `<div class="ph"><span class="laychips">
-      <span class="chip ${quant ? "" : "on"}" ${act("fqmargin", "notes")}>${icon("message-square")}<span class="lb">Notes · ${list.length}</span></span>
-      <span class="chip ${quant ? "on" : ""}" ${act("fqmargin", "quant")}>${icon("table")}<span class="lb">Quantités</span></span></span></div>` : "";
-  const body = quant ? `${head}<div class="pb" style="overflow:auto">${fqBlockHTML("marge")}</div>`
-    : FQ === "marge" ? inner.replace(/^<div class="ph">[\s\S]*?<\/div>/, head) : inner;
   return `<section class="pane rg margin" data-rg="marge" data-fi="${fiOf("inspector")}"
-    data-region="margin">${body}</section>`;
+    data-region="margin">${inner}</section>`;
 }
 
 /* What the point landed on. The unit outlines are already in sheet
@@ -3301,14 +3401,8 @@ function paintSheet() {
   if (slider && document.activeElement !== slider) slider.value = String(shown);
   const read = document.querySelector("[data-zread]");
   if (read) read.textContent = `${shown}%`;
-  const z = V.zoom / 100;
-  const label = el.querySelector(".ulabel");
-  if (label) {
-    label.style.fontSize = `${(11 / z).toFixed(2)}px`;
-    label.style.transform = `translateY(${(label.dataset.side === "below" ? 2 / z : -(14 / z)).toFixed(2)}px)`;
-  }
-  el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / z).toFixed(3)}px`; });
-  placePlanPill();
+  el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / V.zoom * 100).toFixed(3)}px`; });
+  placePlanPills();
   window.dispatchEvent(new Event("fitte:plan-paint"));
   /* The corner rectangle is the same state read small; painted here so it
      cannot drift from the sheet by a frame. */
@@ -3320,36 +3414,237 @@ function paintSheet() {
    the drawing to move a label. */
 let planHover = null;
 
-function placePlanPill() {
-  const el = vpEl();
-  const plan = el && el.querySelector(".plan");
-  if (!plan) return;
-  let pill = plan.querySelector(".uhover");
-  /* The overlay is rebuilt whenever the level or the layers change, so the
-     remembered outline can be a node that is no longer on the page. */
-  const poly = planHover && plan.contains(planHover) ? planHover : null;
+function placePill(vp, name, poly) {
+  let pill = vp.querySelector(`:scope > .uhover[data-pill="${name}"]`);
   if (!poly) { if (pill) pill.hidden = true; return; }
-  if (!pill) { pill = document.createElement("div"); pill.className = "uhover"; plan.append(pill); }
+  if (!pill) {
+    pill = document.createElement("div");
+    pill.className = "uhover";
+    pill.dataset.pill = name;
+    vp.append(pill);
+  }
   const row = rowsOf("Unités")[Number(poly.dataset.value)];
-  /* The outline is drawn in a 0–1 viewBox stretched over the sheet, so its
-     own box is already the fraction the pill is positioned with. */
-  const b = poly.getBBox();
-  const z = V.zoom / 100;
   pill.textContent = row ? String(row[0]).split("·")[0].trim() : "";
-  pill.style.left = `${((b.x + b.width / 2) * 100).toFixed(2)}%`;
-  pill.style.top = `${(b.y * 100).toFixed(2)}%`;
-  pill.style.fontSize = `${(12 / z).toFixed(2)}px`;
-  pill.style.padding = `${(2 / z).toFixed(2)}px ${(7 / z).toFixed(2)}px`;
-  pill.style.borderRadius = `${(6 / z).toFixed(2)}px`;
-  pill.style.borderWidth = `${(1 / z).toFixed(2)}px`;
-  pill.style.marginTop = `${(-6 / z).toFixed(2)}px`;
   pill.hidden = false;
+  /* Centred over the outline's top edge, 6 px above it, in whole pixels so
+     the text lands on the pixel grid. */
+  const b = poly.getBoundingClientRect();
+  const v = vp.getBoundingClientRect();
+  const x = Math.round(b.left + b.width / 2 - v.left - pill.offsetWidth / 2);
+  const y = Math.round(Math.max(4, b.top - v.top - pill.offsetHeight - 6));
+  pill.style.transform = `translate(${x}px,${y}px)`;
 }
+
+/* Two pills: the selected unit's stays put; the hovered one's follows the
+   pointer. Hover only finds the other units' hit boxes, so the two never
+   sit on the same outline. The overlay is rebuilt on every selection
+   change, so a remembered outline can be a node no longer on the page. */
+function placePlanPills() {
+  const vp = vpEl();
+  const plan = vp?.querySelector(".plan");
+  if (!plan) return;
+  const hover = planHover && plan.contains(planHover) ? planHover : null;
+  placePill(vp, "sel", plan.querySelector(".umark polygon.on"));
+  placePill(vp, "hover", hover);
+}
+
+/* The document card hangs off the thumbnail it belongs to: written into
+   the markup without a position, then measured to that tile's height.
+   Measuring after the fact is the only way to follow a tile that moves
+   when the pile is reordered. */
+function placeLayCard() {
+  const card = document.querySelector("[data-lcard]");
+  if (!card) return;
+  const zone = card.parentElement, strip = zone.querySelector("[data-lstrip]");
+  const tile = zone.querySelector(`[data-ltile="${card.dataset.anchor}"]`);
+  if (!tile || !strip) { card.style.display = "none"; return; }
+  const z = zone.getBoundingClientRect(), t = tile.getBoundingClientRect();
+  card.style.display = "";
+  card.style.right = `${z.right - strip.getBoundingClientRect().left + 8}px`;
+  card.style.top = `${Math.min(z.height - card.offsetHeight - 8,
+    Math.max(8, t.top - z.top + t.height / 2 - 30))}px`;
+}
+
+/* Opacity is dragged, not stepped. The value is written straight onto the
+   drawing and the card while the knob moves — a full render per frame
+   would repaint fifteen cropped thumbnails and the sheet — and the panel
+   is told once, on release, so the two never disagree. */
+function layOpacity(k, v) {
+  V.lay[k].opacity = v;
+  const zone = document.querySelector('[data-zone="plan"]');
+  if (!zone) return;
+  if (k === "plan") zone.querySelector(".plan")?.style.setProperty("--planop", v / 100);
+  else {
+    const el = zone.querySelector(`.lay[data-lay="${k}"]`);
+    if (el) el.style.opacity = v / 100;
+  }
+  const card = zone.querySelector("[data-lcard]");
+  if (!card || card.dataset.anchor !== k) return;
+  card.querySelector(".optrack .fill").style.width = `${v}%`;
+  card.querySelector(".optrack .knob").style.left = `${v}%`;
+  card.querySelector(".opval").textContent = `${Math.round(v)}%`;
+}
+
+/* The pile's order on the sheet itself: the two overlays carry it as an
+   inline z-index, the architect's ink as a variable, because its raster
+   and its canvas are two elements that must move together. */
+function applyLayOrder() {
+  const zone = document.querySelector('[data-zone="plan"]');
+  if (!zone) return;
+  zone.querySelector(".plan")?.style.setProperty("--planz", layZ("plan"));
+  zone.querySelectorAll(".plan .lay[data-lay]").forEach((el) => {
+    const k = el.dataset.lay;
+    if (V.lay[k] && layKeys().includes(k)) el.style.zIndex = layZ(k);
+  });
+}
+
+/* The strip alone, redrawn. A reorder changes three thumbnails and the
+   drawings' stacking; it does not change the unit list, the model or the
+   inspector, and a full render would cost ~650 ms of raster right at the
+   end of a gesture that has to feel immediate. */
+function paintStrip() {
+  const pile = document.querySelector("[data-lpile]");
+  if (!pile) return;
+  pile.innerHTML = layKeys().map(layTile).join("");
+  applyLayOrder();
+  placeLayCard();
+}
+
+/* A press on the knob becomes a drag on that drawing's opacity. The track
+   is measured once, so the same code serves any width. */
+document.addEventListener("pointerdown", (e) => {
+  const track = e.target.closest?.("[data-lop]");
+  if (!track) return;
+  const k = track.dataset.lop, box = track.getBoundingClientRect();
+  const apply = (ev) => {
+    /* Never to zero: a drawing at 0 % is gone without being taken off,
+       which is exactly the confusion a hidden layer used to cause. */
+    const v = Math.max(15, Math.min(100, Math.round((ev.clientX - box.left) / box.width * 100)));
+    if (v !== V.lay[k].opacity) layOpacity(k, v);
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", apply);
+    window.removeEventListener("pointerup", up);
+    /* The panel owns the consultants' sheets; told once the knob is let
+       go, it writes V back and re-renders with the same number. */
+    if (k === "arp") dial.setValue("layers.surveyorOpacity", V.lay[k].opacity);
+    else if (k === "pay") dial.setValue("layers.landscapingOpacity", V.lay[k].opacity);
+  };
+  apply(e);
+  window.addEventListener("pointermove", apply);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+/* The pile is the stacking order, so a thumbnail is dragged to its place.
+   Nothing is re-rendered during the gesture: a re-render would snap the
+   drawing back under the pointer and kill the sense of carrying it. The
+   held tile follows the finger exactly; the ones it passes slide out of
+   its way; the order is written when it is let go. */
+document.addEventListener("pointerdown", (e) => {
+  const tile = e.target.closest?.("[data-ltile]");
+  if (!tile || e.target.closest(".lbadge")) return;
+  const pile = tile.closest("[data-lpile]");
+  const els = [...pile.querySelectorAll("[data-ltile]")];
+  if (els.length < 2) return;
+  const k = tile.dataset.ltile, from = els.indexOf(tile);
+  /* Centres measured once, before anything moves: every later decision is
+     taken against these, so the maths cannot drift as things slide. */
+  const mid = els.map((el) => { const b = el.getBoundingClientRect(); return b.top + b.height / 2; });
+  const startY = e.clientY;
+  let to = from, moved = false;
+  const orderAt = (t) => {
+    const o = layKeys().slice();
+    o.splice(o.indexOf(k), 1);
+    o.splice(t, 0, k);
+    return o;
+  };
+  /* The badges and the drawings follow the provisional order directly,
+     with no re-render, so the mark and the sheet are already right while
+     the thumbnail is still in the hand. */
+  const reflect = (order) => {
+    const shown = order.filter((x) => V.lay[x].on);
+    els.forEach((el) => {
+      const kk = el.dataset.ltile, b = el.querySelector(".lbadge.on");
+      if (!b) return;
+      const r = shown.indexOf(kk) + 1;
+      b.innerHTML = layBars(r, shown.length) + `<b class="rk">${r}</b>`;
+    });
+    const zone = document.querySelector('[data-zone="plan"]');
+    order.forEach((kk, j) => {
+      const z = order.length - j;
+      if (kk === "plan") zone?.querySelector(".plan")?.style.setProperty("--planz", z);
+      else { const el = zone?.querySelector(`.lay[data-lay="${kk}"]`); if (el) el.style.zIndex = z; }
+    });
+  };
+
+  tile.classList.add("held");
+  document.body.classList.add("ldrag");
+  const move = (ev) => {
+    const dy = ev.clientY - startY;
+    if (!moved && Math.abs(dy) < 3) return;   /* a press is not a drag */
+    moved = true;
+    tile.style.transform = `translateY(${dy}px)`;
+    const c = mid[from] + dy;
+    let t = to;
+    /* One step at a time, each against a neighbour's original centre:
+       cross it going down and that sheet rises, going up and it sinks. */
+    while (t > 0 && c < mid[t - 1]) t--;
+    while (t < els.length - 1 && c > mid[t + 1]) t++;
+    if (t === to) return;
+    to = t;
+    els.forEach((el, j) => {
+      if (j === from) return;
+      const shift = j > from && j <= to ? mid[j - 1] - mid[j]
+        : j < from && j >= to ? mid[j + 1] - mid[j] : 0;
+      el.style.transform = shift ? `translateY(${shift}px)` : "";
+    });
+    reflect(orderAt(to));
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    document.body.classList.remove("ldrag");
+    if (!moved) { tile.classList.remove("held"); tile.style.transform = ""; return; }
+    /* The landing is where a drag usually stutters: animate to a guessed
+       offset, wait on a timer, re-render, and the sheet jumps because the
+       re-render put it somewhere else. Instead note where every thumbnail
+       is right now, commit the order and redraw, measure again, and carry
+       each one from where it was to where it now is. */
+    const was = {};
+    els.forEach((el) => { was[el.dataset.ltile] = el.getBoundingClientRect().top; });
+    V.layOrder = orderAt(to);
+    paintStrip();
+    const after = [...document.querySelectorAll("[data-ltile]")].filter((el) => was[el.dataset.ltile] !== undefined);
+    after.forEach((el) => {
+      const dy = was[el.dataset.ltile] - el.getBoundingClientRect().top;
+      if (!dy) return;
+      el.style.transition = "none";
+      el.style.transform = `translateY(${dy}px)`;
+      if (el.dataset.ltile === k) el.classList.add("landing");
+    });
+    /* Two frames: one for the inverted position to be taken as the start,
+       the next to release it. One alone is sometimes collapsed with the
+       style write and the animation never runs. */
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      after.forEach((el) => {
+        el.style.transition = "";
+        el.style.transform = "";
+        el.classList.remove("landing");
+      });
+    }));
+    say(`Ordre: ${layKeys().map((x) => LAYDOC[x].short).join(" devant ")}.`);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+  e.preventDefault();
+});
 
 function setPlanHover(poly) {
   if (poly === planHover) return;
   planHover = poly;
-  placePlanPill();
+  placePlanPills();
 }
 
 function wireViewport() {
@@ -3399,8 +3694,6 @@ function wireViewport() {
         moved = true;
         el.setPointerCapture(m.pointerId);
         el.classList.add("drag");
-        /* A pill that follows a pan reads as a thing being dragged. */
-        setPlanHover(null);
       }
       V.pan.x = start.px + (m.clientX - start.x);
       V.pan.y = start.py + (m.clientY - start.y);
@@ -3415,8 +3708,8 @@ function wireViewport() {
     };
   };
   /* Hover is read on the pane and not on each outline: the overlay is
-     rebuilt on every level, layer or selection change, and a listener per
-     polygon would die with it. */
+     rebuilt on every selection change, and a listener per polygon would
+     die with it. */
   el.onmousemove = (e) => {
     if (el.classList.contains("drag")) return setPlanHover(null);
     setPlanHover(e.target.closest ? e.target.closest(".umark polygon.hit") : null);
@@ -3536,7 +3829,7 @@ function render() {
      the screens that carry one. Codes carries sentences instead, and its
      notes are written against an article in the right column. */
   const margin = hasInsp && V.screen !== "Codes";
-  const cols = [hasList ? (FQ === "liste" ? "400px" : "260px") : null, "1fr",
+  const cols = [hasList ? (V.screen === "Unités" ? "400px" : "260px") : null, "1fr",
     hasInsp ? (margin ? "286px" : "340px") : null].filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
@@ -3557,7 +3850,7 @@ function render() {
           <div style="grid-column:1/-1">${headerHTML()}</div>
           ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
           ${SCREENS[V.screen].home ? "" : `${!whole && !noUnits && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
-          ${hasList ? (FQ === "liste" ? fqListHTML(V.journey ? def.steps.list : null) : listHTML()) : ""}
+          ${hasList ? listHTML() : ""}
           ${contentHTML()}
           ${hasInsp ? (margin ? marginHTML() : inspectorHTML()) : ""}`}
         </div>
@@ -3586,6 +3879,9 @@ function render() {
      and drag are hooked back up every time it is drawn. */
   wireViewport();
   wireZoomRails();
+  /* The drawing's card is written without a position and then measured to
+     its own thumbnail, so it follows a tile that the pile reordered. */
+  placeLayCard();
   /* The margin's three live parts: the pin cursor on the drawings, the
      model's projected markers, and the composer's field — which writes
      straight to state so typing never costs a re-render. */
@@ -3651,8 +3947,9 @@ function paintSelection() {
      replaced inside it rather than around it. */
   const plan = vpEl()?.querySelector(".plan");
   if (plan) {
-    plan.querySelectorAll(".umark, .ulabel").forEach((n) => n.remove());
+    plan.querySelectorAll(".umark").forEach((n) => n.remove());
     plan.insertAdjacentHTML("beforeend", unitMarkHTML());
+    placePlanPills();
   }
   /* The decision panel is drawn again, so its field is wired again; the
      rest of the controls go through the one delegated click handler. */
@@ -3663,9 +3960,11 @@ function paintSelection() {
      one is the slowest part of writing it. */
   document.querySelectorAll(".noteinput").forEach((el) => {
     el.onkeydown = (e) => {
+      if (e.key === "Escape" && el.dataset.noteedit) { V.noteEdit = null; return render(); }
       if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
       e.preventDefault();
-      saveNote(el.dataset.note); render();
+      if (el.dataset.noteedit) editNote(el.dataset.noteedit); else saveNote(el.dataset.note);
+      render();
     };
   });
   /* What the 3D viewer reads to tint the right windows. Measured at ~15 ms,
@@ -3704,6 +4003,7 @@ function dialogHTML() {
   </label>`;
   if (d.kind === "share") return shareDialogHTML(d);
   if (d.kind === "addcode") return addCodeDialogHTML(d);
+  if (d.kind === "mail") return mailDialogHTML(d);
   return `<div class="scrim" ${act("dlgclose")}>
     <div class="dialog" ${act("dlgstop")} role="dialog" aria-modal="true">
       <div class="dh"><span class="hi" style="font-weight:600;font-size:13.5px">Nouveau projet</span>
@@ -3724,6 +4024,48 @@ function dialogHTML() {
         <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Lecture seule. Aucune écriture dans un fichier de dessin.</span>
         <span class="btnw" ${act("dlgclose")}><span class="hi">Annuler</span></span>
         <span class="btnw solid" ${act("dlgcreate")}>${icon("link")}<span class="hi">Connecter le dossier</span></span>
+      </div>
+    </div></div>`;
+}
+
+/* ------------------------------------------------------------- writing
+   A question to the planner, the RBQ or the client is part of the file, so
+   it is written here and kept here: handing it to a mail client would take
+   the architect out of the project and leave no trace of what was asked.
+   The office's own address is saved once and stays editable, the article
+   is already in the body, and the attachments are the documents the
+   project holds. */
+function mailDialogHTML(d) {
+  const fld = (key, label, hint, mono) => `<label class="fld">
+    <span class="hi" style="font-size:11.5px;color:var(--ink-2)">${label}</span>
+    <input data-field="${key}" value="${(d[key] || "").replace(/"/g, "&quot;")}" placeholder="${hint}"
+      ${mono ? 'style="font-family:var(--mono,monospace);font-size:11.5px"' : ""}></label>`;
+  const c = CONTACTS[d.contact];
+  const sent = V.mails[d.contact] || [];
+  return `<div class="scrim" ${act("dlgclose")}>
+    <div class="dialog wide" ${act("dlgstop")} role="dialog" aria-modal="true">
+      <div class="dh"><span class="hi" style="font-weight:600;font-size:13.5px">Écrire à ${c.role}</span>
+        <span style="flex:1"></span>
+        <span class="btnw" ${act("dlgclose")} title="Fermer">${icon("x")}</span></div>
+      <div class="db">
+        ${fld("from", "De", "l'adresse du bureau", true)}
+        ${fld("to", "À", "destinataire", true)}
+        ${fld("subject", "Objet", "ce dont il est question")}
+        <label class="fld"><span class="hi" style="font-size:11.5px;color:var(--ink-2)">Message</span>
+          <textarea data-field="body" class="mailbody" rows="11">${d.body || ""}</textarea></label>
+        <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Pièces jointes</div>
+        <div class="row" style="flex-wrap:wrap;gap:5px">${MAIL_FILES.map(([f, size]) => `<span
+          class="chip ${d.files.includes(f) ? "on" : ""}" ${act("mailfile", f)} title="${size}">
+          ${d.files.includes(f) ? icon("check") : icon("plus")}<span class="hi">${f}</span>
+          <span class="hi" style="color:var(--ink-3)">${size}</span></span>`).join("")}</div>
+        ${sent.length ? `<div class="hi" style="font-size:11px;color:var(--ink-3)">Déjà envoyé d'ici: ${sent
+          .map((m) => `${m.when} · ${m.subject}`).join(" · ")}</div>` : ""}
+        ${d.error ? `<div class="hi" style="font-size:11.5px;color:#b3261e">${d.error}</div>` : ""}
+      </div>
+      <div class="df">
+        <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Envoyé depuis fitte. Le message reste au dossier de l'article.</span>
+        <span class="btnw" ${act("dlgclose")}><span class="hi">Annuler</span></span>
+        <span class="btnw solid" ${act("mailsend")}>${icon("send")}<span class="hi">Envoyer</span></span>
       </div>
     </div></div>`;
 }
@@ -3892,8 +4234,32 @@ function saveNote(id) {
   const txt = (el?.value || "").trim();
   if (!txt) { say("Rien à écrire: la note est vide."); return; }
   (V.notes[id] ||= []).push({ who: "Chargée de projet", when: "aujourd'hui", txt });
-  V.noteOn = null;
   say(`Note écrite sur ${id}. Elle reste dans fitte, rien n'est envoyé au texte officiel.`);
+}
+
+/* A note is rewritten in place and keeps its author: the same person is
+   still answering for it, and the date moves to the day it was changed. */
+function editNote(key) {
+  const [id, i] = key.split("|");
+  const el = document.querySelector(`[data-noteedit="${CSS.escape(key)}"]`);
+  const txt = (el?.value || "").trim();
+  const note = V.notes[id]?.[Number(i)];
+  if (!note) { V.noteEdit = null; return; }
+  if (!txt) { say("Une note vide se supprime, elle ne s'enregistre pas."); return; }
+  note.txt = txt;
+  note.when = "aujourd'hui";
+  V.noteEdit = null;
+  say(`Note modifiée sur ${id}.`);
+}
+
+function dropNote(key) {
+  const [id, i] = key.split("|");
+  const list = V.notes[id];
+  if (!list) return;
+  list.splice(Number(i), 1);
+  if (!list.length) delete V.notes[id];
+  V.noteEdit = null;
+  say(`Note supprimée sur ${id}.`);
 }
 
 function onClick(e) {
@@ -3987,8 +4353,44 @@ function onClick(e) {
     case "csvall": exportAllCSV(); say("Les quatre tableaux ont été téléchargés en .csv."); break;
     /* Writing a note never touches a drawing or a bylaw: it is a sentence
        stored against the provision's number, with a name and a day. */
-    case "noteopen": V.noteOn = V.noteOn === value ? null : value; break;
     case "notesave": saveNote(value); break;
+    /* The composer opens with the article already written into it: the
+       question is about this provision, and retyping the numbers is how
+       one of them changes on the way out. */
+    case "mailopen": {
+      const [artId, who] = value.split("|");
+      const a = ARTICLES.find((x) => x.id === artId);
+      V.dialog = { kind: "mail", art: artId, contact: who, from: V.mailFrom,
+        to: CONTACTS[who].mail, subject: `[${V.project}] ${a.id} — ${a.topic}`,
+        body: `${articleText(a)}\n\n`, files: [] };
+      break;
+    }
+    case "mailfile": {
+      const f = V.dialog.files;
+      V.dialog.files = f.includes(value) ? f.filter((x) => x !== value) : [...f, value];
+      break;
+    }
+    case "mailsend": {
+      const d = V.dialog;
+      if (!d.to.trim() || !d.subject.trim()) { d.error = "Il manque le destinataire ou l'objet."; break; }
+      if (!d.body.trim()) { d.error = "Le message est vide."; break; }
+      /* The address the office signs with is learned from the message that
+         was actually sent, so it is typed once and never again. */
+      V.mailFrom = d.from.trim() || V.mailFrom;
+      (V.mails[d.contact] ||= []).push({ when: "aujourd'hui", subject: d.subject.trim(),
+        body: d.body, files: d.files, art: d.art });
+      CONTACTS[d.contact].last = "aujourd'hui";
+      CONTACTS[d.contact].waited = 0;
+      V.dialog = null;
+      say(`Courriel envoyé à ${d.to.trim()}${d.files.length
+        ? ` avec ${d.files.length} pièce${d.files.length > 1 ? "s" : ""} jointe${d.files.length > 1 ? "s" : ""}`
+        : ""}. Il reste au dossier de l'article.`);
+      break;
+    }
+    case "noteedit": V.noteEdit = value; break;
+    case "noteeditsave": editNote(value); break;
+    case "noteeditstop": V.noteEdit = null; break;
+    case "notedrop": dropNote(value); break;
     /* Three questions, in the order a person asks them: which body of
        rules, which part of it, which article. */
     case "addcode": V.dialog = { kind: "addcode", source: CODE_SOURCES[0].name, section: null, art: null }; break;
@@ -4029,11 +4431,6 @@ function onClick(e) {
     case "source": say(`${value} — texte officiel ouvert dans un onglet. Lecture seule.`); return render();
     case "utab": V.utab = Number(value); break;
     case "pinscope": V.pinScope = value; break;
-    /* The four floor-quantity variants of quantites-etage.html. */
-    case "fqtab": V.fqTab = value; paintFQ(); return;
-    case "fqopen": V.fqOpen = !V.fqOpen; break;
-    case "fqmargin": V.fqMargin = value; break;
-    case "fqmodel": V.fqModel = value; break;
     /* Arming the pin: the next click on a drawing puts the point down, and
        nothing else on the screen changes meaning in the meantime. */
     case "pinmode": V.pinMode = !V.pinMode; V.pending = null; break;
@@ -4054,18 +4451,42 @@ function onClick(e) {
       V.guest = !V.guest;
       if (V.guest) { V.pinScope = "partage"; V.pinMode = false; V.pending = null; }
       break;
-    /* The chips drive the panel, not V directly: the panel is the single
-       source for the layers, and applyDial writes V and re-renders. Writing
-       both would let the two disagree on the next dial change. */
-    case "layer":
-      if (value === "none") {
-        ENG_DISCIPLINES.forEach((d) => { V.lay[d].on = false; });
-        dial.setValue("layers.surveyor", false);
-        dial.setValue("layers.landscaping", false);
-      } else {
-        dial.setValue(value === "arp" ? "layers.surveyor" : "layers.landscaping", !V.lay[value].on);
-      }
+    /* The pile ---------------------------------------------------------
+       Picking a thumbnail opens its document card; the badge adds the
+       drawing to the sheet or takes it off. The two consultants' sheets
+       are owned by the fidelity panel, so those two go through the dial
+       and let applyDial write V — writing both would let them disagree
+       on the next dial change. The architect's sheet is not on the panel,
+       so it is written here. */
+    case "lpick":
+      V.layCard = !(V.layPick === value && V.layCard);
+      V.layPick = value;
+      V.layMenu = false;
+      break;
+    /* The last drawing on the sheet carries no badge at all, so there is
+       no way in here to empty the pane. */
+    case "lstack": {
+      const adding = !V.lay[value].on;
+      V.layPick = value;
+      V.layCard = true;
+      V.layMenu = false;
+      if (value === "plan") { V.lay.plan.on = adding; break; }
+      dial.setValue(value === "arp" ? "layers.surveyor" : "layers.landscaping", adding);
       return;
+    }
+    case "ldoc": V.layMenu = !V.layMenu; break;
+    case "lswap":
+      V.layMenu = false;
+      say(`Choisir un autre document dans ${LAYDOC[value].dir()}`);
+      break;
+    case "lhist":
+      V.layMenu = false;
+      say(`${LAYDOC[value].short}: 3 documents lus avant celui-ci.`);
+      break;
+    case "pdfview":
+      V.layMenu = false;
+      say(`${LAYDOC[value].file()} — ouvert dans Acrobat.`);
+      break;
     /* The four consultant disciplines are not part of the fidelity panel:
        they toggle straight on V, the way picking a row does. */
     case "englayer": V.lay[value].on = !V.lay[value].on; break;
@@ -4281,10 +4702,6 @@ wireModelPins();
 /* The first paint happens while the model is still downloading, so the pins
    hung on it are handed over again the moment there is a camera. */
 window.addEventListener("fitte:model-state", (e) => { if (e.detail === "ready") pushModelPins(); });
-/* The comparison page opens each variant on a floor, whatever screen the
-   panel last remembered. */
-if (FQ && dial.values.screen !== "Units") dial.setValue("screen", "Units");
-if (FQ) { V.scope = "Niveau"; document.documentElement.dataset.fqEmbed = FQ; }
 applyDial(dial.values);
 </script>
 </body>
