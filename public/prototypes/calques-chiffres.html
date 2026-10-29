@@ -130,15 +130,25 @@ body.dragging,body.dragging *{cursor:grabbing !important}
 /* The sheets that are not being held slide out of the way; the held one
    has no transition at all, because it has to sit under the pointer to
    the pixel. Transform only — no layout is touched during the gesture. */
-.pile .tile{transition:transform .17s cubic-bezier(.2,.7,.3,1),background .12s;will-change:transform}
+.pile .tile{transition:transform .17s cubic-bezier(.2,.7,.3,1),background .12s,box-shadow .17s;
+  will-change:transform}
 .pile .tile.held{transition:none;z-index:9;position:relative;cursor:grabbing;
   box-shadow:0 6px 18px rgba(0,0,0,.18);background:var(--card);border-color:var(--line-2)}
+/* Between the release and the resting place the sheet keeps its lift, so
+   the shadow fades out as it comes down instead of blinking off. */
+.pile .tile.landing{z-index:9;position:relative;box-shadow:0 6px 18px rgba(0,0,0,.18)}
 .pile .tile.held .pic{border-color:var(--ink-3)}
 .tile .pic,.tile .nm{opacity:.45}
 .tile:hover{background:var(--fill-2)}
 .tile:hover .pic,.tile:hover .nm{opacity:.8}
 .tile.on .pic,.tile.on .nm{opacity:1}
-.tile.sel{background:var(--fill);border-color:var(--line-2)}
+/* The selected sheet is ink, not a grey wash: at this size a light fill
+   is lost against the strip, and the name reversed out is the one change
+   that reads from across the room. */
+.tile.sel{background:var(--ink);border-color:var(--ink)}
+.tile.sel:hover{background:#000}
+.strip .tile.sel .nm,.tile.sel .nm{color:#fff}
+.tile.sel .pic{border-color:var(--ink)}
 .tile .pic{width:100%;aspect-ratio:1.18;border:1px solid var(--line-2);border-radius:4px;background:#fff;
   background-size:contain;background-repeat:no-repeat;background-position:center}
 .tile .nm{font-size:10.5px;color:var(--ink-2);text-align:center;line-height:1.2}
@@ -175,6 +185,9 @@ body.dragging,body.dragging *{cursor:grabbing !important}
 .corner.on{background:var(--vert);color:var(--vert-ink);box-shadow:0 1px 3px rgba(0,0,0,.22)}
 .corner.on:hover{background:#b6d93f}
 .strip .tile.on .nm{color:var(--vert-ink)}
+/* Last word, after the green: a selected sheet is ink with a white name
+   whether it is on the plan or not. */
+.strip .tile.sel .nm{color:#fff}
 
 /* The mark is one SVG filling the badge; `overflow:hidden` on the round
    badge is what lets a full-width bar be cut by the circle. A pill has
@@ -991,19 +1004,45 @@ document.addEventListener("pointerdown", (e) => {
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", up);
     document.body.classList.remove("dragging");
-    tileEl.classList.remove("held");
-    if (!moved) { tileEl.style.transform = ""; return; }
-    /* Land on the slot rather than snapping: the held sheet is let down
-       to its new centre with the same transition the others used, and
-       the state is written once the movement is over. */
-    tileEl.style.transition = "transform .16s cubic-bezier(.2,.7,.3,1), box-shadow .16s";
-    tileEl.style.transform = `translateY(${mid[to] - mid[from]}px)`;
-    const settle = () => {
-      s.order = orderAt(to);
-      say(s, `Ordre: ${s.order.map((x) => d(x).short).join(" devant ")}.`);
-      render(i);
-    };
-    setTimeout(settle, 165);
+    if (!moved) { tileEl.classList.remove("held"); tileEl.style.transform = ""; return; }
+
+    /* The landing is where the old version stuttered: it animated to a
+       guessed offset, waited on a timer, then re-rendered — and the
+       re-render put every sheet somewhere slightly different, so the drop
+       ended with a jump.
+
+       Instead: note where every sheet is on screen right now, commit the
+       order and re-render immediately, then measure again and carry each
+       sheet from where it was to where it now is. Nothing is guessed and
+       nothing is waited for, so the sheet is let down from exactly the
+       point the hand left it. */
+    const was = {};
+    [...pile.querySelectorAll("[data-tile]")].forEach((el) => {
+      was[el.dataset.tile] = el.getBoundingClientRect().top;
+    });
+    s.order = orderAt(to);
+    say(s, `Ordre: ${s.order.map((x) => d(x).short).join(" devant ")}.`);
+    render(i);
+
+    const after = document.querySelector(`[data-var="${i}"] .pile`);
+    const moves = [...after.querySelectorAll("[data-tile]")].map((el) => {
+      const dy = was[el.dataset.tile] - el.getBoundingClientRect().top;
+      if (!dy) return null;
+      el.style.transition = "none";
+      el.style.transform = `translateY(${dy}px)`;
+      if (el.dataset.tile === k) el.classList.add("landing");
+      return el;
+    }).filter(Boolean);
+    /* Two frames: one for the inverted position to be taken as the start,
+       the next to release it. One frame alone is sometimes collapsed with
+       the style write and the animation never runs. */
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      moves.forEach((el) => {
+        el.style.transition = "";
+        el.style.transform = "";
+        el.classList.remove("landing");
+      });
+    }));
   };
   window.addEventListener("pointermove", move);
   window.addEventListener("pointerup", up);
