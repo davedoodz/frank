@@ -616,8 +616,8 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    takes none — turning it put its courtyard where the building is. The
    files stay as they were extracted; the box each one is placed by is
    measured in the orientation it is displayed in. */
-.plan .lay[data-lay="arp"]{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
-.plan .lay[data-lay="pay"]{background-image:url(assets/paysage.png)}
+.plan .lay[data-lay="arp"]{background-image:url(assets/arp-site.webp);transform:rotate(180deg)}
+.plan .lay[data-lay="pay"]{background-image:url(assets/paysage.webp)}
 /* The vector sheet fills the same box as the picture it replaces. */
 .plan .lay canvas{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none}
 /* The engineering layers are already cropped to the floor plan's own
@@ -1231,9 +1231,16 @@ const SHEETS = {};
 LEVELS.forEach((lv) => {
   const code = `A-${204 + lv}`;
   SHEETS[`Niveau ${lv}`] = { code, page: 13 + lv, img: `assets/plan-niveau-${lv}.jpg`,
-    /* The same sheet, cropped the same way, kept as vectors: read by pdf.js
-       and re-rendered at the zoom it is being looked at, so a dimension
-       string stays a line and does not turn into four grey pixels. */
+    /* The sheet the pane actually shows: the same PDF, rendered once offline
+       at 4000 px by tools/rasterize-sheets.html. An execution sheet carries
+       millions of path operators, so rendering one in the browser costs ten
+       to twenty-five seconds whatever size is asked for — the cost is the
+       operator count, not the pixel count. Baked, it decodes in about a
+       tenth of a second and stays crisp past 200 % zoom. */
+    webp: `assets/plan-niveau-${lv}.webp`,
+    /* The vectors themselves, kept for the zooms the raster cannot hold:
+       read by pdf.js only once the sheet is magnified past ZSHARP, so a
+       dimension string stays a line instead of four grey pixels. */
     pdf: `assets/plan-niveau-${lv}.pdf`,
     file: `${code}_PLAN_NIVEAU_${lv}.dwg`, rev: lv === 8 ? "R03" : "R04",
     date: lv === 8 ? "18 Oct" : "24 Oct" };
@@ -1243,7 +1250,8 @@ LEVELS.forEach((lv) => {
 [["Sous-sol 00", "A-203", 11, "SOUS_SOL_00"], ["Sous-sol 0", "A-202", 9, "SOUS_SOL_0"],
   ["Toiture", "A-213", 22, "TOITURE"]].forEach(([view, code, page, name]) => {
   const stem = { "Sous-sol 00": "sous-sol-00", "Sous-sol 0": "sous-sol-0", "Toiture": "toiture" }[view];
-  SHEETS[view] = { code, page, img: `assets/plan-${stem}.jpg`, pdf: `assets/plan-${stem}.pdf`,
+  SHEETS[view] = { code, page, img: `assets/plan-${stem}.jpg`, webp: `assets/plan-${stem}.webp`,
+    pdf: `assets/plan-${stem}.pdf`,
     file: `${code}_PLAN_${name}.dwg`, rev: "R04", date: "24 Oct" };
 });
 
@@ -1636,7 +1644,8 @@ function sheetStyle(key) {
    registered by construction: a PDF page paints only its ink, and what shows
    through until it lands is the picture underneath. */
 const layersHTML = () => layKeys().filter((k) => k !== "plan" && V.lay[k].on)
-  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)};z-index:${layZ(k)}"><canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${k === "arp" ? 180 : 0}"></canvas></div>`).join("");
+  .map((k) => `<div class="lay" data-lay="${k}" style="${sheetStyle(k)};z-index:${layZ(k)}">${
+    planVector() ? `<canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${k === "arp" ? 180 : 0}"></canvas>` : ""}</div>`).join("");
 
 /* ---------------------------------------------------------------- the pile
    Which drawings are on the sheet, in what order, and how strongly. The
@@ -3215,9 +3224,14 @@ function wireModelPins() {
 const ZMIN = 45, ZMAX = 600;
 const vpEl = () => document.querySelector("[data-vp]");
 
-/* PDF detail is automatic; the image remains underneath during rendering.
-   wireframe-c3-pdf.js paints viewport-sized tiles at the current pixel density. */
-const planVector = () => !!sheet().pdf;
+/* The baked sheet carries every ordinary zoom. Past ZSHARP a 4000 px raster
+   runs out of pixels — a 1000 px pane at two device pixels per CSS pixel
+   needs 2000 px at 100 %, so about 200 % is where it stops being honest —
+   and only then is the PDF worth its ten to twenty-five seconds. Below that
+   nothing heavy is asked for, which is why the pane now paints at once.
+   wireframe-c3-pdf.js paints viewport-sized tiles at the current density. */
+const ZSHARP = 200;
+const planVector = () => !!sheet().pdf && V.zoom > ZSHARP;
 const SHEET_AR = 2000 / 1675;
 function layoutSheet(el) {
   const plan = el.querySelector(".plan");
@@ -3849,7 +3863,7 @@ function render() {
          data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
          data-shell="${V.shell === "Inset card" ? "inset" : "flat"}"
          data-chrome="${V.chrome === "Black" ? "black" : "light"}"
-         style="--plan:url(${sheet().img})">
+         style="--plan:url(${sheet().webp || sheet().img})">
       ${navHTML()}
       <div class="body">
         ${tabsHTML()}
@@ -3913,6 +3927,7 @@ function render() {
   document.querySelectorAll("[data-field]").forEach((el) => {
     el.oninput = (e) => { V.dialog[e.target.dataset.field] = e.target.value; };
   });
+  wireMailDrop();
   const first = document.querySelector(".dialog input");
   if (first) first.focus();
   /* The selected unit as the 3D viewer needs it: the level and unit number
@@ -4041,7 +4056,8 @@ function dialogHTML() {
    the architect out of the project and leave no trace of what was asked.
    The office's own address is saved once and stays editable, the article
    is already in the body, and the attachments are the documents the
-   project holds. */
+   project holds, plus any file dropped or picked from the computer. The
+   prototype keeps only each file's name and size: nothing is uploaded. */
 function mailDialogHTML(d) {
   const fld = (key, label, hint, mono) => `<label class="fld">
     <span class="hi" style="font-size:11.5px;color:var(--ink-2)">${label}</span>
@@ -4064,7 +4080,15 @@ function mailDialogHTML(d) {
         <div class="row" style="flex-wrap:wrap;gap:5px">${MAIL_FILES.map(([f, size]) => `<span
           class="chip ${d.files.includes(f) ? "on" : ""}" ${act("mailfile", f)} title="${size}">
           ${d.files.includes(f) ? icon("check") : icon("plus")}<span class="hi">${f}</span>
-          <span class="hi" style="color:var(--ink-3)">${size}</span></span>`).join("")}</div>
+          <span class="hi" style="color:var(--ink-3)">${size}</span></span>`).join("")}
+          ${d.local.map((f, i) => `<span class="chip on" title="${esc(f.name)} · depuis l'ordinateur">
+          ${icon("paperclip")}<span class="hi">${esc(f.name)}</span>
+          <span class="hi" style="color:var(--ink-3)">${fileSize(f.size)}</span>
+          <span class="mx" ${act("maillocalrm", i)} title="Retirer">${icon("x")}</span></span>`).join("")}</div>
+        <label class="maildrop" data-maildrop>
+          <input type="file" multiple data-mailpick hidden>
+          ${icon("upload")}<span class="hi">Glissez des fichiers ici, ou <u>parcourez l'ordinateur</u></span>
+        </label>
         ${sent.length ? `<div class="hi" style="font-size:11px;color:var(--ink-3)">Déjà envoyé d'ici: ${sent
           .map((m) => `${m.when} · ${m.subject}`).join(" · ")}</div>` : ""}
         ${d.error ? `<div class="hi" style="font-size:11.5px;color:#b3261e">${d.error}</div>` : ""}
@@ -4369,13 +4393,24 @@ function onClick(e) {
       const a = ARTICLES.find((x) => x.id === artId);
       V.dialog = { kind: "mail", art: artId, contact: who, from: V.mailFrom,
         to: CONTACTS[who].mail, subject: `[${V.project}] ${a.id} — ${a.topic}`,
-        body: `${articleText(a)}\n\n`, files: [] };
+        body: `${articleText(a)}\n\n`, files: [], local: [] };
       break;
     }
     case "mailfile": {
       const f = V.dialog.files;
       V.dialog.files = f.includes(value) ? f.filter((x) => x !== value) : [...f, value];
       break;
+    }
+    case "maillocalrm":
+      V.dialog.local = V.dialog.local.filter((_, i) => i !== Number(value));
+      break;
+    case "mailpicked": {
+      /* Same name and size is the same file dropped twice. */
+      const have = new Set(V.dialog.local.map((f) => `${f.name}|${f.size}`));
+      V.dialog.local = [...V.dialog.local, ...value.filter((f) => !have.has(`${f.name}|${f.size}`))];
+      break;
+    }
+    case "mailopen-files": {
     }
     case "mailsend": {
       const d = V.dialog;
@@ -4384,13 +4419,14 @@ function onClick(e) {
       /* The address the office signs with is learned from the message that
          was actually sent, so it is typed once and never again. */
       V.mailFrom = d.from.trim() || V.mailFrom;
+      const count = d.files.length + d.local.length;
       (V.mails[d.contact] ||= []).push({ when: "aujourd'hui", subject: d.subject.trim(),
-        body: d.body, files: d.files, art: d.art });
+        body: d.body, files: [...d.files, ...d.local.map((f) => f.name)], art: d.art });
       CONTACTS[d.contact].last = "aujourd'hui";
       CONTACTS[d.contact].waited = 0;
       V.dialog = null;
-      say(`Courriel envoyé à ${d.to.trim()}${d.files.length
-        ? ` avec ${d.files.length} pièce${d.files.length > 1 ? "s" : ""} jointe${d.files.length > 1 ? "s" : ""}`
+      say(`Courriel envoyé à ${d.to.trim()}${count
+        ? ` avec ${count} pièce${count > 1 ? "s" : ""} jointe${count > 1 ? "s" : ""}`
         : ""}. Il reste au dossier de l'article.`);
       break;
     }

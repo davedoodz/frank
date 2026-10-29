@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cuire les feuilles — PDF vers WebP</title>
+<style>
+  body{font:13px/1.5 ui-sans-serif,system-ui;margin:24px;max-width:760px;color:#1b1b1b}
+  h1{font-size:15px;margin:0 0 4px}
+  p{color:#555;margin:0 0 14px}
+  table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+  td,th{border-bottom:1px solid #e6e6e6;padding:4px 6px;text-align:left}
+  td.n{text-align:right}
+  a{color:#1b1b1b}
+</style>
+</head>
+<body>
+<h1>Cuire les feuilles</h1>
+<p>Les PDF d'exécution portent des millions d'opérateurs: en rendre un dans le navigateur prend de douze à vingt-cinq secondes, quelle que soit la taille demandée — le coût est le nombre d'opérations, pas le nombre de pixels. Cette page les rend une seule fois, hors ligne, et écrit un WebP large que l'écran charge en une fraction de seconde. À relancer quand une feuille change.</p>
+<table><thead><tr><th>Feuille</th><th class="n">Rendu</th><th class="n">Pixels</th><th class="n">Poids</th><th>Fichier</th></tr></thead><tbody id="rows"></tbody></table>
+
+<script type="module">
+import * as pdfjs from "../vendor/pdfjs/pdf.min.mjs";
+pdfjs.GlobalWorkerOptions.workerSrc = "../vendor/pdfjs/pdf.worker.min.mjs";
+
+/* Wide enough that the sheet stays crisp to about 220 % on a 1000 px pane at
+   two device pixels per CSS pixel, and small enough to decode in well under a
+   second. Past that zoom the screen falls back to the PDF itself. */
+const WIDTH = 4000;
+const QUALITY = 0.92;
+
+const SHEETS = [
+  "plan-sous-sol-00", "plan-sous-sol-0", "plan-niveau-1", "plan-niveau-2",
+  "plan-niveau-3", "plan-niveau-4", "plan-niveau-5", "plan-niveau-6",
+  "plan-niveau-7", "plan-niveau-8", "plan-toiture", "arp-site", "paysage",
+];
+
+const rows = document.getElementById("rows");
+const done = [];
+window.baked = done;
+
+for (const name of SHEETS) {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${name}</td><td class="n">…</td><td class="n"></td><td class="n"></td><td></td>`;
+  rows.append(tr);
+  const t0 = performance.now();
+  const doc = await pdfjs.getDocument(`../assets/${name}.pdf`).promise;
+  const page = await doc.getPage(1);
+  const base = page.getViewport({ scale: 1 });
+  const viewport = page.getViewport({ scale: WIDTH / base.width });
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(viewport.width);
+  canvas.height = Math.round(viewport.height);
+  await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+  /* White behind the ink: a PDF page has no background of its own, and a
+     transparent WebP would let the pane's paper tint show through the sheet. */
+  const flat = document.createElement("canvas");
+  flat.width = canvas.width;
+  flat.height = canvas.height;
+  const ctx = flat.getContext("2d");
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, flat.width, flat.height);
+  ctx.drawImage(canvas, 0, 0);
+  const data = flat.toDataURL("image/webp", QUALITY);
+  canvas.width = canvas.height = 0;
+  flat.width = flat.height = 0;
+  await doc.destroy();
+
+  const ms = Math.round(performance.now() - t0);
+  const kb = Math.round(data.length * 0.75 / 1024);
+  done.push({ name, data });
+  const a = document.createElement("a");
+  a.href = data;
+  a.download = `${name}.webp`;
+  a.textContent = `${name}.webp`;
+  tr.children[1].textContent = `${ms} ms`;
+  tr.children[2].textContent = `${flat.width || WIDTH} px`;
+  tr.children[3].textContent = `${kb} ko`;
+  tr.children[4].append(a);
+}
+window.bakedReady = true;
+</script>
+</body>
+</html>
