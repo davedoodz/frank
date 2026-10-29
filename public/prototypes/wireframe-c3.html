@@ -292,7 +292,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .coderow{display:grid;grid-template-columns:258px 1fr;gap:0;align-items:stretch;
   border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
 .coderow:hover{border-color:var(--line)}
-.coderow.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
+/* An outline, not an inset shadow: a child's own background paints over a
+   parent's inset shadow, so the left edge of the selected row disappeared
+   behind the thumbnail's fill. */
+.coderow.on{border-color:var(--ink);outline:1px solid var(--ink);outline-offset:-1px}
 .coderow > .draw{padding:10px;background:var(--fill-2);border-right:1px solid var(--line-2);
   display:grid;place-items:center}
 .coderow > .draw img{width:100%;height:auto;display:block;mix-blend-mode:multiply}
@@ -301,6 +304,38 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .noteinput{flex:1;resize:vertical;border:1px solid var(--line-2);border-radius:6px;padding:6px 8px;
   font:inherit;font-size:12px;color:var(--ink);background:var(--card)}
 .noteinput:focus{outline:1px solid var(--ink);outline-offset:1px}
+/* How clear the provision is to read, as the office judged it: a dot, a
+   word, and a menu of three. The dot is the only colour on the row, and it
+   is there to be caught out of the corner of the eye when a client asks
+   why the rule says what it says. */
+.clarity{position:relative;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;
+  color:var(--ink-2);border:1px solid transparent;border-radius:5px;padding:2px 6px;white-space:nowrap}
+.clarity:hover{border-color:var(--line);background:var(--card)}
+.clarity::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cl)}
+.clarity[data-c="clair"]{--cl:#2f7a4d}
+.clarity[data-c="moyen"]{--cl:#b58900}
+.clarity[data-c="obscur"]{--cl:#b3261e}
+.clarity svg{width:12px;height:12px;color:var(--ink-3)}
+.claritymenu{position:absolute;top:calc(100% + 4px);right:0;z-index:7;min-width:168px;
+  background:var(--card);border:1px solid var(--line);border-radius:6px;
+  display:flex;flex-direction:column;overflow:hidden}
+.claritymenu .opt{display:flex;align-items:center;gap:7px;padding:6px 9px;font-size:11.5px;
+  color:var(--ink);background:var(--card)}
+.claritymenu .opt:hover{background:var(--fill-2)}
+.claritymenu .opt::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cl)}
+.claritymenu .opt[data-c="clair"]{--cl:#2f7a4d}
+.claritymenu .opt[data-c="moyen"]{--cl:#b58900}
+.claritymenu .opt[data-c="obscur"]{--cl:#b3261e}
+/* The people the provision is argued with, and how long ago each one last
+   wrote: the wait is the part of the file nobody tracks. */
+.contact{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-2)}
+.contact .who{flex:1;min-width:0;display:flex;flex-direction:column}
+.contact .who b{font-weight:600;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contact .who span{font-size:11px;color:var(--ink-3)}
+.contact .mailto{display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:var(--ink-2);
+  border:1px solid var(--line-2);border-radius:5px;padding:3px 7px;font-size:11px}
+.contact .mailto:hover{background:var(--fill);color:var(--ink)}
+.contact.slow .who span{color:#b3261e}
 @media (max-width:900px){.coderow{grid-template-columns:1fr}
   .coderow > .draw{border-right:0;border-bottom:1px solid var(--line-2)}}
 
@@ -359,26 +394,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .task .pr[data-prio="moyenne"]{color:var(--ink)}
 .task .dte{font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;
   min-width:52px;text-align:right}
-.code{border:1px solid var(--line-2);border-radius:var(--r);display:flex;flex-direction:column;
-  min-width:0;background:var(--card);overflow:hidden}
-.code:hover{border-color:var(--line)}
-.code.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
-.code .draw{padding:10px;background:var(--fill-2);border-bottom:1px solid var(--line-2)}
-/* multiply drops the file's white onto the tray without tinting the line. */
-.code .draw img{width:100%;height:auto;display:block;mix-blend-mode:multiply}
-.code .tx{padding:11px;display:flex;flex-direction:column;gap:7px;min-width:0}
-.code .tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
-  border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;color:var(--ink-2)}
-.code .src{font-size:11px;color:var(--ink-3);line-height:1.45}
-.code .quote{margin:0;border-left:2px solid var(--line);padding-left:9px;
-  font-size:12px;line-height:1.5;color:var(--ink-2)}
-.code .state{font-size:10.5px;color:var(--ink-3);display:inline-flex;align-items:center;gap:5px}
-.code .state::before{content:"";display:inline-block;vertical-align:middle;margin-right:5px;
-  width:7px;height:7px;border-radius:50%;background:var(--bar)}
-.code .state[data-state="non résolu"]::before{background:var(--hi,#b3261e)}
-.code .state[data-state="conforme"]::before{background:var(--ink-3)}
-.code .src-link{align-self:flex-start;text-decoration:none;color:var(--ink-2);gap:6px}
-.code .src-link:hover{background:var(--fill);color:var(--ink)}
 .plan{position:relative;flex:1;background:repeating-linear-gradient(0deg,var(--fill-2) 0 15px,transparent 15px 16px),
   repeating-linear-gradient(90deg,var(--fill-2) 0 15px,transparent 15px 16px);
   border:1px dashed var(--line);border-radius:var(--r);display:grid;place-items:center;color:var(--ink-3);font-size:11.5px}
@@ -742,6 +757,13 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
   padding:5px 9px;color:var(--ink-2);font-size:11px;white-space:nowrap;backdrop-filter:blur(8px)}
 .model3d[data-state="ready"] .model3d-status{visibility:hidden;opacity:0}
 .model3d[data-state="error"] .model3d-status{color:#8b2e2e;border-color:rgba(139,46,46,.25)}
+/* What a click on the model would select, named the way the plan tags a
+   unit: a white tag over the unit's glazing, or "Toiture" at the pointer. */
+.mpill{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,calc(-100% - 6px));
+  background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:6px;
+  padding:2px 8px;font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.mpill[hidden]{display:none}
 /* No instructions and no running commentary laid over the model: the pane
    says what it is through the header, the corner view and the axes, and the
    selected unit is already named in the header and the inspector. Only the
@@ -866,6 +888,14 @@ const V = {
     "3.3.1.18": [{ who: "Chargée de projet", when: "24 oct", txt: "Le garde-corps est dessiné à 1 020 mm sur l'élévation sud. À reprendre avant le dépôt." }],
     "art. 71": [{ who: "Entrepreneur général", when: "22 oct", txt: "Vérifier la réduction pour proximité du métro avant de recompter les cases." }],
   },
+  /* The office's own reading of each provision — the one judgement a code
+     screen can honestly carry, since nobody outside the firm decides how
+     hard a sentence is to interpret. Seeded with what the studio already
+     thinks; changed with a click on the row. */
+  clarity: { "art. 9": "moyen", "3.2.3.1": "obscur", "A-19.1": "obscur", "art. 71": "obscur",
+    "art. 134": "moyen", "art. 43": "clair", "art. 22": "moyen", "3.3.1.9": "clair",
+    "3.4.2.1": "clair", "3.3.1.18": "clair", "3.8.1.3": "moyen", "3.2.1.1": "obscur" },
+  clarityOn: null,
   /* Échéancier: the day the calendar is centred on, the scale it is drawn
      at — chosen on the calendar itself — and which task is open. */
   day: "2026-11-14",
@@ -958,7 +988,9 @@ function sprite() {
     /* the margin: posting a note, keeping one for the studio, reading as a guest */
     "lock", "map-pin", "send", "users", "trash-2",
     /* the scope switch and the real .csv it exports */
-    "download"];
+    "download",
+    /* Codes: copying an article with its notes, writing to the person who answers for it */
+    "copy", "mail"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
     if (!node) return "";
@@ -1664,9 +1696,6 @@ function hostButton(kind) {
    A provision is only readable next to the number the drawings produced, so
    the card carries both, plus the sentence and the page it comes from. The
    link is a real link: the regulation is read where it is published. */
-
-const unresolvedCount = () => ARTICLES.filter((a) => a.state === "non résolu").length;
-
 /* The chain of authority for the one article that has no number: the law
    enables the bylaw, the bylaw carries the article that is measured. */
 const chainSVG = () => `<svg viewBox="0 0 300 96" style="width:100%;height:auto">
@@ -1681,32 +1710,6 @@ const chainSVG = () => `<svg viewBox="0 0 300 96" style="width:100%;height:auto"
   }).join("")}
   <text x="6" y="88" font-size="10" font-family="ui-monospace,Menlo,monospace" fill="var(--ink-3)">habilite</text>
 </svg>`;
-
-/* A1: the drawing opens the card and touches its edges. The two numbers are
-   not repeated under it — they are written inside the drawing, where the
-   geometry that produced them is visible. */
-function codeCard(a, i) {
-  const gap = a.state === "non résolu";
-  return `<div class="code ${i === V.article ? "on" : ""} ${gap ? "gap" : ""}" ${act("article", i)}>
-    <div class="draw">${a.img
-      ? `<img src="${a.img}" alt="${a.topic} — ${a.measured} mesuré, ${a.required} exigé"
-           loading="lazy" style="aspect-ratio:${a.ratio}">`
-      : chainSVG()}</div>
-    <div class="tx">
-      <div class="row" style="align-items:baseline">
-        <span class="hi tag">${a.id}</span>
-        <span class="hi" style="font-weight:600;font-size:12.5px;flex:1">${a.topic}</span>
-        <span class="hi state" data-state="${a.state}">${a.state}</span>
-      </div>
-      <div class="lo col">${bars(2)}</div>
-      <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
-      <div class="hi src">${a.doc} · ${a.place}<br>${a.edition}</div>
-      ${gap ? `<div class="hi src">manque pour conclure: ${a.needs}</div>` : ""}
-      <a class="btnw src-link hi" href="${a.url}" target="_blank" rel="noreferrer"
-         ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
-    </div>
-  </div>`;
-}
 
 /* Schematics for the provisions that have no exported sheet behind them.
    They are drawn from the two numbers the provision compares, in the same
@@ -1762,25 +1765,70 @@ const codeFig = (a) => a.img
        loading="lazy" style="aspect-ratio:${a.ratio}">`
   : (FIGS[a.fig] ? FIGS[a.fig](a) : chainSVG());
 
-/* The Québec construction code first: it is what the building is judged
-   against, and the borough's dimensions only decide what is allowed on the
-   lot. Inside a body of rules the order is the one the articles were
-   written in. */
-const CODE_ORDER = ["Code de construction", "Loi sur", "Règlement"];
-const codeRank = (a) => {
-  const i = CODE_ORDER.findIndex((k) => a.doc.startsWith(k));
-  return i < 0 ? CODE_ORDER.length : i;
-};
 /* No filter strip: the three bodies of rules are short enough to be read
    in one scroll, and a strip that hides two of them hides the fact that a
    provision in one is answered by a dimension in another. They are
-   sections inside the list instead, in the order above. */
+   sections inside the list instead. The Québec code comes first: it is
+   what the building is judged against, and the borough's dimensions only
+   decide what is allowed on the lot. */
 const CODE_GROUPS = [["Code de construction", "Code du Québec"],
   ["Loi sur", "Loi-cadre"], ["Règlement", "Règlement d'urbanisme"]];
-const codeList = () => ARTICLES.slice().sort((x, y) => codeRank(x) - codeRank(y));
+
+/* The code is written to be argued over, so the one judgement this screen
+   can honestly carry is the office's own reading of it: three steps, one
+   colour each. It is a note to the firm, not a declaration of compliance —
+   when a client asks why the rule says what it says, the dot is already
+   the answer. */
+const CLARITY = ["clair", "moyen", "obscur"];
+const CLARITY_LABEL = { clair: "Clair", moyen: "Moyennement clair", obscur: "Pas clair du tout" };
+const clarityOf = (id) => V.clarity[id] || "moyen";
+
+/* An article is settled in conversation, and the slow part is the wait for
+   the answer, so who was written to and when is part of the article's
+   state. Which people a provision concerns follows from where it comes
+   from: the borough's planner answers for the bylaw, the RBQ for the
+   Québec code, and the two provisions about the ground also concern the
+   landscape architect. Addresses are fictional, like every name in this
+   prototype. */
+const CONTACTS = {
+  urbanisme: { role: "Urbaniste · arrondissement", mail: "urbanisme@exemple.ca", last: "12 oct", waited: 16 },
+  rbq: { role: "RBQ · service technique", mail: "technique@exemple.ca", last: "3 oct", waited: 25 },
+  paysage: { role: "Architecte paysagiste", mail: "paysage@exemple.ca", last: "21 oct", waited: 7 },
+  client: { role: "Client", mail: "promoteur@exemple.ca", last: "24 oct", waited: 4 },
+};
+const GROUND_ARTICLES = ["art. 134", "art. 71", "art. 22", "art. 43"];
+const contactsFor = (a) => [a.doc.startsWith("Code de construction") ? "rbq" : "urbanisme",
+  ...(GROUND_ARTICLES.includes(a.id) ? ["paysage"] : []), "client"];
+
+/* The whole article as plain text: the sentence, the two numbers, what is
+   missing, and every note written against it. This is what gets pasted
+   into the mail to the planner, so it is also what the copy button puts on
+   the clipboard — retyping it is how a number changes on the way out. */
+function articleText(a) {
+  const notes = V.notes[a.id] || [];
+  return [`${a.id} — ${a.topic}`, `${a.doc} · ${a.place} · ${a.edition}`,
+    `« ${a.quote} »`, `Lu dans les dessins: ${a.measured} · exigé: ${a.required}`,
+    `Lecture de l'atelier: ${CLARITY_LABEL[clarityOf(a.id)].toLowerCase()}`,
+    a.state === "non résolu" ? `Manque pour conclure: ${a.needs}` : "",
+    ...notes.map((n) => `— ${n.who} (${n.when}): ${n.txt}`), a.url].filter(Boolean).join("\n");
+}
+const mailHref = (a, c) => `mailto:${CONTACTS[c].mail}`
+  + `?subject=${encodeURIComponent(`[${V.project}] ${a.id} — ${a.topic}`)}`
+  + `&body=${encodeURIComponent(articleText(a) + "\n\n")}`;
 const codeGroups = () => CODE_GROUPS
   .map(([prefix, label]) => [label, ARTICLES.filter((a) => a.doc.startsWith(prefix))])
   .filter(([, rows]) => rows.length);
+
+/* The clarity chip is the row's one control: a click opens three options,
+   a second click on one of them writes it. It is rendered where the
+   compliance word used to sit, which said something the screen cannot
+   declare and could not be acted on. */
+function clarityChip(id) {
+  const c = clarityOf(id);
+  const menu = V.clarityOn === id ? `<div class="claritymenu">${CLARITY.map((k) => `<span class="opt" data-c="${k}" ${act("clarity", `${id}|${k}`)}>${CLARITY_LABEL[k]}</span>`).join("")}</div>` : "";
+  return `<span class="clarity hi" data-c="${c}" ${act("clarityopen", id)}
+    title="Lecture de l'atelier — cliquer pour changer">${CLARITY_LABEL[c]}${icon("chevron-down")}${menu}</span>`;
+}
 
 /* A note is written by a person against one article, and it never leaves
    this screen: nothing is ever written back into a drawing or into the
@@ -1795,7 +1843,7 @@ function codeRow(a) {
       <div class="row" style="align-items:baseline">
         <span class="hi tag">${a.id}</span>
         <span class="hi" style="font-weight:600;font-size:13px;flex:1">${a.topic}</span>
-        <span class="hi state" data-state="${a.state}">${a.state}</span>
+        ${clarityChip(a.id)}
       </div>
       <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
       <div class="hi src">${a.doc} · ${a.place} · ${a.edition}</div>
@@ -1804,14 +1852,14 @@ function codeRow(a) {
         <span class="hi" style="font-size:11px;color:var(--ink-3)">${n.who} · ${n.when}</span>
         <span class="hi" style="font-size:12px">${n.txt}</span></div>`).join("")}</div>` : ""}
       ${open ? `<div class="row" style="gap:6px;align-items:flex-start">
-        <textarea class="noteinput" data-note="${a.id}" rows="2"
-          placeholder="Ce qui manque, qui va le chercher, pour quand"></textarea>
+        <textarea class="noteinput" data-note="${a.id}" rows="2" autofocus></textarea>
         <span class="btnw solid" ${act("notesave", a.id)}>${icon("check")}<span class="hi">Écrire</span></span>
       </div>` : ""}
       <div class="row" style="gap:6px">
         <a class="btnw src-link hi" href="${a.url}" target="_blank" rel="noreferrer"
            ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
         <span class="btnw" ${act("noteopen", a.id)}>${icon("message-square")}<span class="hi">${open ? "Annuler" : "Ajouter une note"}</span></span>
+        <span class="btnw" ${act("copyarticle", a.id)}>${icon("copy")}<span class="hi">Copier</span></span>
         ${notes.length ? `<span class="hi" style="font-size:11px;color:var(--ink-3)">${notes.length} note${notes.length > 1 ? "s" : ""}</span>` : ""}
       </div>
     </div>
@@ -2196,8 +2244,9 @@ function tabsHTML() {
 function headerHTML() {
   const step = V.journey ? SCREENS[V.screen].steps.header : null;
   /* The subtitle answers to the state: which project is open, which level is
-     being read, how many rows the current view is actually showing. */
-  const unresolved = unresolvedCount();
+     being read, how many rows the current view is actually showing. Codes
+     has none: the articles are on screen and the only count that mattered
+     there counted a compliance the screen does not declare. */
   const open = Object.keys(V.settled).length;
   /* The index needs no count: the projects are on screen, and one line of
      arithmetic above them only repeats what the eye already did. */
@@ -2207,7 +2256,7 @@ function headerHTML() {
      The counts are summed from the table, not typed twice. */
   const sup = QTABS["Superficies"].rows;
   const title = { "Projets": ["Projets", ""],
-    "Codes": ["Codes et règlements", `${ARTICLES.length} articles suivis · ${unresolved} non résolus`],
+    "Codes": ["Codes et règlements", ""],
     "Échéancier": ["Échéancier", `${TASKS.filter((t) => !t.done).length} tâches ouvertes · ${lateCount()} en retard`],
     "Unités": buildingScope()
       ? [`${V.project} — bâtiment entier`,
@@ -2442,24 +2491,15 @@ function contentHTML() {
        and the notes written against it. Nothing here writes to a drawing.
        Every body of rules is in the one list, each under its own heading. */
     "Codes": () => {
-      const groups = codeGroups();
-      const section = ([label, rows]) => {
-        const open = rows.filter((a) => a.state === "non résolu").length;
-        return `<div class="codesec"><span class="hi">${label}</span>
-            <span class="hi" style="color:var(--ink-3)">${rows.length} article${rows.length > 1 ? "s" : ""}${open ? ` · ${open} non résolu${open > 1 ? "s" : ""}` : ""}</span></div>
+      const section = ([label, rows]) => `<div class="codesec"><span class="hi">${label}</span></div>
           ${rows.map(codeRow).join("")}`;
-      };
       return `<div class="col" style="flex:1;gap:var(--gap)">
         <div class="pane" style="flex:0 0 auto">
           <div class="ph">${icon("hash")}<span class="lo bar" style="width:90px"></span>
             <span class="hi">Articles suivis</span><span style="flex:1"></span>
-            <span class="chip"><span class="lo bar" style="width:52px"></span>
-              <span class="hi">${ARTICLES.length} articles · ${unresolvedCount()} non résolus</span></span>
             <span class="btnw solid" ${act("addcode")}>${icon("plus")}<span class="hi">Ajouter</span></span></div>
           <div class="pb">
-            <div class="codelist">${groups.map(section).join("")}</div>
-            <div class="tile"><div class="row">${icon("alert-triangle")}<span class="lo bar" style="width:70%"></span>
-              <span class="hi" style="font-size:11.5px;color:var(--ink-2)">Extraits de travail, abrégés. La version qui fait foi est celle de la RBQ ou de l'arrondissement, liée sur chaque article. Une lecture automatique ne déclare pas une non-conformité.</span></div></div>
+            <div class="codelist">${codeGroups().map(section).join("")}</div>
           </div></div>
       </div>`;
     },
@@ -2579,6 +2619,37 @@ function nonresInspectorHTML(mode, step) {
   return region("inspector", "inspecteur", inner, step);
 }
 
+/* The right column of the Codes screen is where an article is worked on:
+   how clear the office finds it, the notes written against it, and the
+   people it has to be argued with. The notes are the same store the row
+   below shows — one note, written once, read in both places. */
+function codeSideHTML(a) {
+  const notes = V.notes[a.id] || [];
+  return `<div class="col" style="gap:9px">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <span class="hi" style="font-size:12px;color:var(--ink-2)">Lecture de l'atelier</span>
+      ${clarityChip(a.id)}
+    </div>
+    <div class="col" style="gap:6px">
+      ${notes.map((n) => `<div class="note">
+        <span class="hi" style="font-size:11px;color:var(--ink-3)">${n.who} · ${n.when}</span>
+        <span class="hi" style="font-size:12px">${n.txt}</span></div>`).join("")}
+      <textarea class="noteinput" data-note="${a.id}" rows="3"></textarea>
+      <div class="row" style="gap:6px">
+        <span class="btnw solid" ${act("notesave", a.id)}>${icon("check")}<span class="hi">Écrire la note</span></span>
+        <span class="btnw" ${act("copyarticle", a.id)}>${icon("copy")}<span class="hi">Copier</span></span>
+      </div>
+    </div>
+    <div class="col" style="gap:0">
+      <span class="hi" style="font-size:12px;color:var(--ink-2);padding-bottom:4px">Qui en répond</span>
+      ${contactsFor(a).map((k) => { const c = CONTACTS[k]; return `<div class="contact ${c.waited > 14 ? "slow" : ""}">
+        <span class="who"><b class="hi">${c.role}</b><span class="hi">dernier échange le ${c.last} · il y a ${c.waited} j</span></span>
+        <a class="mailto hi" href="${mailHref(a, k)}">${icon("mail")}Écrire</a>
+      </div>`; }).join("")}
+    </div>
+  </div>`;
+}
+
 function inspectorHTML() {
   const mode = V.inspector.layout;
   if (mode === "Hidden") return "";
@@ -2587,7 +2658,7 @@ function inspectorHTML() {
   if (V.screen === "Unités" && isNonresLevel(paneLevel())) return nonresInspectorHTML(mode, step);
   const row = selRow(V.screen);
   const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`,
-    "Codes": "Ce qui bloque" }[V.screen] || "Détail";
+    "Codes": "Article ouvert" }[V.screen] || "Détail";
   /* A decision panel on the screen where something is decided; a short
      read-only column everywhere else. */
   const decides = V.screen === "Unités";
@@ -2635,7 +2706,8 @@ function inspectorHTML() {
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
         <span class="hi" style="font-size:12px;color:var(--ink-2)">${k}</span>
         <span class="hi" style="font-size:12px">${val}</span></div>`).join("")}
-      ${decides ? `<div class="decide">
+      ${V.screen === "Codes" ? codeSideHTML(ARTICLES.find((x) => x.id === V.articleId) || ARTICLES[0])
+      : decides ? `<div class="decide">
       <div class="tile" style="border-color:var(--ink)">
         <div class="lo bar" style="width:50%"></div><div class="hi" style="font-weight:600;font-size:12.5px">Pourquoi ce changement?</div>
         <div class="row" style="flex-wrap:wrap;gap:5px">${REASONS.map((m) => `<span class="chip" ${act("reason", m)} style="${m === V.reason ? "border-color:var(--ink)" : ""}">
@@ -2648,8 +2720,7 @@ function inspectorHTML() {
           title="${saveReady() ? "Enregistrer" : "Choisissez une raison ou écrivez une phrase"}"><span class="lo bar" style="width:80px;background:#fff;opacity:.6"></span><span class="hi">Enregistrer la décision</span></span>
       </div>
       </div>`
-      : `<div class="tile"><div class="lo col">${bars(3)}</div>
-          <div class="hi" style="font-size:11.5px;color:var(--ink-2)">compté à partir des dessins, rien de saisi</div></div>`}
+      : `<div class="tile"><div class="lo col">${bars(3)}</div></div>`}
     </div>`;
 
   if (mode === "Bottom sheet") {
@@ -3016,6 +3087,20 @@ window.fitteSelectUnit = (unitStr) => {
   fitUnit(sameSheet);
 };
 
+/* The roof picked in the model: the same level switch the Toiture tab
+   makes, from whichever screen the page was on. */
+window.fitteSelectLevel = (level) => {
+  const index = viewIndexOfLevel(level);
+  if (index < 0) return;
+  V.screen = "Unités";
+  dial.setValue("screen", FR_SCREEN[V.screen]);
+  V.view["Unités"] = index;
+  V.sel["Unités"] = 0;
+  V.scope = "Niveau";
+  if (isNonresLevel(level)) { V.zoom = 100; V.pan = { x: 0, y: 0 }; }
+  render();
+};
+
 /* The wheel and the drag write straight to the element and to V, without a
    re-render: a re-render per wheel tick would rebuild the whole screen and
    the drag would stutter. The slider and the percentage on the edge of the
@@ -3221,12 +3306,16 @@ function render() {
   const hasList = !whole && !noUnits && def.regions.includes("list")
     && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
   const hasInsp = !whole && def.regions.includes("inspector") && V.inspector.layout === "Right panel";
-  /* The margin is narrower than the inspector and is followed by the rail of
-     tool icons, which is what makes folding the inspector worth the trade:
-     the drawings keep their width. */
-  const rightW = V.rightTool === "notes" ? "286px" : "340px";
+  /* The margin is a note stuck to a point of a drawing, so it belongs to
+     the screens that carry one. Codes carries sentences instead, and its
+     notes are written against an article in the right column — a second
+     note column beside it, and the rail that switches between them, were
+     two ways of saying the same thing. */
+  const hasMargin = hasInsp && V.screen !== "Codes";
+  const margin = hasMargin && V.rightTool === "notes";
+  const rightW = margin ? "286px" : "340px";
   const cols = [hasList ? "260px" : null, "1fr",
-    hasInsp ? rightW : null, hasInsp ? "40px" : null].filter(Boolean).join(" ");
+    hasInsp ? rightW : null, hasMargin ? "40px" : null].filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
     : { "Top bar only": "top", "Tabs only, no rail": "top", "Two rows, no rail": "top",
@@ -3248,7 +3337,7 @@ function render() {
           ${SCREENS[V.screen].home ? "" : `${!whole && !noUnits && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
           ${hasList ? listHTML() : ""}
           ${contentHTML()}
-          ${hasInsp ? (V.rightTool === "notes" ? marginHTML() : inspectorHTML()) + railToolsHTML() : ""}`}
+          ${hasInsp ? (margin ? marginHTML() : inspectorHTML()) + (hasMargin ? railToolsHTML() : "") : ""}`}
         </div>
         ${!whole && def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
       </div>
@@ -3291,7 +3380,7 @@ function render() {
   };
   /* Typing must not re-render — the field would lose the caret — so the one
      thing that changes with the text is patched in place. */
-  const note = document.querySelector(".note");
+  const note = document.querySelector("input.note");
   if (note) note.oninput = (e) => { V.note = e.target.value; paintSaveButton(); };
 
   /* The dialog's fields write straight into state without a re-render, so
@@ -3344,8 +3433,18 @@ function paintSelection() {
   }
   /* The decision panel is drawn again, so its field is wired again; the
      rest of the controls go through the one delegated click handler. */
-  const note = document.querySelector(".note");
+  const note = document.querySelector("input.note");
   if (note) note.oninput = (e) => { V.note = e.target.value; paintSaveButton(); };
+  /* ⌘/Ctrl+Entrée writes the note from the keyboard: the composer is a
+     place where sentences are typed, and reaching for the button to end
+     one is the slowest part of writing it. */
+  document.querySelectorAll(".noteinput").forEach((el) => {
+    el.onkeydown = (e) => {
+      if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
+      e.preventDefault();
+      saveNote(el.dataset.note); render();
+    };
+  });
   /* What the 3D viewer reads to tint the right windows. Measured at ~15 ms,
      against ~650 ms for a full render: the model follows the list without
      the screen being rebuilt around it. */
@@ -3562,7 +3661,24 @@ function say(message) {
   TOAST_TIMER = setTimeout(() => { V.toast = null; render(); }, 2600);
 }
 
+/* A note is written in one place, from the button or from the keyboard:
+   the text is read off whichever composer carries the article's id — the
+   row's or the right column's — and lands in the store both read. */
+function saveNote(id) {
+  const el = document.querySelector(`[data-note="${CSS.escape(id)}"]`);
+  const txt = (el?.value || "").trim();
+  if (!txt) { say("Rien à écrire: la note est vide."); return; }
+  (V.notes[id] ||= []).push({ who: "Chargée de projet", when: "aujourd'hui", txt });
+  V.noteOn = null;
+  say(`Note écrite sur ${id}. Elle reste dans fitte, rien n'est envoyé au texte officiel.`);
+}
+
 function onClick(e) {
+  /* Typing in a field is not clicking the thing it sits in. Without this
+     the row's own action ran on pointer-down inside the note composer, the
+     screen re-rendered, and the textarea the pointer had just landed in
+     was replaced before a character could be typed. */
+  if (e.target.closest("textarea,input,a[href^='mailto:']")) return;
   const screenEl = e.target.closest("[data-screen]");
   const el = e.target.closest("[data-act]");
   if (screenEl && !el) {
@@ -3572,7 +3688,9 @@ function onClick(e) {
     dial.setValue("screen", FR_SCREEN[V.screen]);
     return render();
   }
-  if (!el) return;
+  /* A click anywhere else closes the open menu, the way a menu is dismissed
+     everywhere. */
+  if (!el) { if (V.clarityOn) { V.clarityOn = null; render(); } return; }
   const value = el.dataset.value;
   const screen = V.screen;
 
@@ -3606,7 +3724,31 @@ function onClick(e) {
          a thread that has nothing left to rasterise. */
       if (screen === "Unités") { paintSelection(); fitUnit(); return; }
       break;
-    case "article": V.articleId = value; V.noteOn = null; break;
+    case "article":
+      if (V.articleId !== value) V.noteOn = null;
+      V.articleId = value; V.clarityOn = null;
+      break;
+    /* The office's reading of a provision, changed where it is shown. It is
+       never a statement about compliance: the screen measures drawings, it
+       does not interpret the law. */
+    case "clarityopen": V.clarityOn = V.clarityOn === value ? null : value; break;
+    case "clarity": {
+      const [id, k] = value.split("|");
+      V.clarity[id] = k; V.clarityOn = null;
+      say(`${id} — ${CLARITY_LABEL[k].toLowerCase()}, lecture de l'atelier.`);
+      break;
+    }
+    /* The article and every note written against it, as text: the mail to
+       the borough is written by pasting, not by retyping a number. */
+    case "copyarticle": {
+      const a = ARTICLES.find((x) => x.id === value);
+      /* The clipboard answers after this click has already been drawn, so
+         the message it produces draws itself. */
+      navigator.clipboard.writeText(articleText(a))
+        .then(() => { say(`${value} et ses notes copiés.`); render(); })
+        .catch(() => { say("Copie refusée par le navigateur."); render(); });
+      break;
+    }
     /* One floor, or all of them. Leaving the building scope goes back to the
        unit that was being read, so the switch is not a one-way door. */
     case "scope":
@@ -3623,15 +3765,7 @@ function onClick(e) {
     /* Writing a note never touches a drawing or a bylaw: it is a sentence
        stored against the provision's number, with a name and a day. */
     case "noteopen": V.noteOn = V.noteOn === value ? null : value; break;
-    case "notesave": {
-      const el = document.querySelector(`[data-note="${CSS.escape(value)}"]`);
-      const txt = (el?.value || "").trim();
-      if (!txt) { say("Rien à écrire: la note est vide."); break; }
-      (V.notes[value] ||= []).push({ who: "Chargée de projet", when: "aujourd'hui", txt });
-      V.noteOn = null;
-      say(`Note écrite sur ${value}. Elle reste dans fitte, rien n'est envoyé au texte officiel.`);
-      break;
-    }
+    case "notesave": saveNote(value); break;
     /* Three questions, in the order a person asks them: which body of
        rules, which part of it, which article. */
     case "addcode": V.dialog = { kind: "addcode", source: CODE_SOURCES[0].name, section: null, art: null }; break;

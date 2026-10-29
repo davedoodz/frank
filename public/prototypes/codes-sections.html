@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les trois corps de règles — explorations</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Same ramp and hairlines as wireframe-c3. The question here is one
+   question: the Codes screen holds three bodies of rules — le Code du
+   Québec, la loi-cadre, le règlement d'urbanisme — and today they are
+   told apart by one grey uppercase line between the rows. Eight ways of
+   making that difference visible, from a heavier heading to moving the
+   three bodies out of the list entirely. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --card:#fff; --vert:#c3e05a; --vert-ink:#2f3a05;
+  --clair:#2f7a4d; --moyen:#b58900; --obscur:#b3261e;
+  --r:6px; --r2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:28px 24px 72px}
+
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:6px;max-width:88ch}
+.sub b{color:var(--ink);font-weight:600}
+h2.part{font-size:14px;font-weight:600;margin:40px 0 4px;padding-top:18px;border-top:1px solid var(--line-2)}
+h2.part + p{color:var(--ink-2);font-size:12.5px;max-width:88ch;margin-bottom:16px}
+.opt{display:flex;flex-direction:column;gap:9px;margin-top:26px}
+.cap{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.cap .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.cap b{font-size:13.5px;font-weight:600}
+.note{color:var(--ink-2);font-size:12px;max-width:96ch}
+.note b{color:var(--ink);font-weight:600}
+.shot{border:1px solid var(--line-2);border-radius:var(--r2);background:var(--card);overflow:hidden;padding:12px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+
+/* one article row, cut down to what the section question needs ---------- */
+.row{display:grid;grid-template-columns:116px 1fr auto;gap:10px;align-items:start;
+  border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);padding:9px 10px}
+.row .fig{height:52px;border:1px solid var(--line-2);border-radius:4px;background:var(--fill-2)}
+.row .tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--ink-2)}
+.row .tp{font-weight:600;font-size:12.5px}
+.row .qt{color:var(--ink-2);font-size:11.5px;margin-top:3px;
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.cl{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);white-space:nowrap}
+.cl::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.cl[data-c="clair"]{--c:var(--clair)} .cl[data-c="moyen"]{--c:var(--moyen)} .cl[data-c="obscur"]{--c:var(--obscur)}
+.list{display:flex;flex-direction:column;gap:7px}
+
+/* 1 — today */
+.h-flat{display:flex;gap:8px;align-items:baseline;padding:10px 2px 2px;
+  font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.h-flat span{color:var(--ink-3)}
+
+/* 2 — heading on a band */
+.h-band{display:flex;align-items:center;gap:9px;background:var(--fill);border-radius:5px;
+  padding:6px 9px;font-size:11.5px;font-weight:600;letter-spacing:.02em}
+.h-band .ct{margin-left:auto;font-weight:400;color:var(--ink-2);font-size:11px}
+
+/* 3 — heading as a rule across the list */
+.h-rule{display:flex;align-items:center;gap:10px;padding:14px 0 6px}
+.h-rule b{font-size:12.5px;white-space:nowrap}
+.h-rule i{flex:1;height:1px;background:var(--ink);font-style:normal;opacity:.5}
+
+/* 4 — left gutter rubric */
+.gutter{display:grid;grid-template-columns:26px 1fr;gap:9px;align-items:stretch}
+.gutter .rub{border-left:2px solid var(--ink);display:flex;align-items:flex-start;justify-content:center}
+.gutter .rub span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding:2px 0}
+
+/* 5 — source tag on every row */
+.src-tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);
+  border-radius:3px;padding:1px 5px;color:var(--ink-2);white-space:nowrap}
+.src-tag[data-s="qc"]{border-color:var(--ink);color:var(--ink)}
+.src-tag[data-s="loi"]{border-style:dashed}
+
+/* 6 — filter strip at the top */
+.strip{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line-2);padding-bottom:9px;margin-bottom:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:999px;
+  padding:4px 10px;font-size:11.5px;color:var(--ink-2);background:var(--card)}
+.chip.on{border-color:var(--ink);color:var(--ink);font-weight:600}
+.chip .ct{color:var(--ink-3);font-weight:400}
+
+/* 7 — three cards above the list */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px}
+.card{border:1px solid var(--line-2);border-radius:var(--r);padding:9px 10px;background:var(--card);
+  display:flex;flex-direction:column;gap:7px}
+.card.on{border-color:var(--ink);outline:1px solid var(--ink);outline-offset:-1px}
+.card b{font-size:12.5px}
+.card .mt{font-size:11px;color:var(--ink-2)}
+.card .dots{display:flex;gap:3px}
+.card .dots i{width:7px;height:7px;border-radius:50%;display:block}
+
+/* 8 — accordions */
+.acc{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
+.acc + .acc{margin-top:7px}
+.acc .hd{display:flex;align-items:center;gap:9px;padding:8px 10px;font-size:12.5px;font-weight:600;
+  background:var(--fill-2);border-bottom:1px solid var(--line-2)}
+.acc .hd .ct{margin-left:auto;font-weight:400;color:var(--ink-2);font-size:11px}
+.acc .bd{padding:9px 10px;display:flex;flex-direction:column;gap:7px}
+.acc.shut .bd{display:none}
+.acc.shut .hd{border-bottom:0}
+
+.verdict{margin-top:40px;border-top:1px solid var(--line-2);padding-top:18px}
+.verdict h2{font-size:14px;font-weight:600}
+.verdict ul{margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--ink-2);font-size:12.5px}
+.verdict b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Les trois corps de règles, en huit présentations</h1>
+  <p class="sub">La liste des articles porte trois sources: le <b>Code du Québec</b> (6 articles),
+    la <b>loi-cadre</b> (1) et le <b>règlement d'urbanisme</b> (5). Aujourd'hui elles sont séparées par
+    une ligne grise en majuscules, qui se perd dès qu'on défile. Chaque option ci-dessous est la même
+    liste, avec un seul changement: comment la source est dite. Les quatre premières la gardent dans la
+    liste; les quatre dernières la sortent en haut, là où elle devient aussi un filtre.</p>
+
+  <h2 class="part">A — la source reste dans la liste</h2>
+  <p>Tout reste lisible d'un seul défilement: un article du code est répondu par une cote du règlement,
+    et une liste qui en cache deux tiers cache ce lien.</p>
+
+  <div class="pair">
+    <div class="opt">
+      <div class="cap"><span class="n">Option 1</span><b>Ce qui existe</b></div>
+      <div class="shot">
+        <div class="h-flat">Code du Québec <span>6 articles · 4 non résolus</span></div>
+        <div class="list">
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
+              <div class="qt">La surface maximale des baies non protégées dans une façade de rayonnement…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">3.3.1.9</span> <span class="tp">Largeur des corridors communs</span>
+              <div class="qt">La largeur libre d'un corridor commun desservant des logements…</div></div>
+            <span class="cl" data-c="clair">Clair</span></div>
+        </div>
+        <div class="h-flat">Loi-cadre <span>1 article</span></div>
+        <div class="list">
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">A-19.1</span> <span class="tp">Cadre légal du zonage</span>
+              <div class="qt">La loi habilite la municipalité à régir, par règlement, l'usage du sol…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+        </div>
+      </div>
+      <p class="note">Le titre pèse moins que les cartes qu'il annonce: en gris, en 11 px, sans fond,
+        il disparaît entre deux rangées de 100 px de haut. C'est le défaut à corriger.</p>
+    </div>
+
+    <div class="opt">
+      <div class="cap"><span class="n">Option 2</span><b>Bandeau plein</b></div>
+      <div class="shot">
+        <div class="h-band">Code du Québec <span class="ct">6 articles</span></div>
+        <div class="list" style="margin-top:8px">
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
+              <div class="qt">La surface maximale des baies non protégées dans une façade de rayonnement…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">3.3.1.9</span> <span class="tp">Largeur des corridors communs</span>
+              <div class="qt">La largeur libre d'un corridor commun desservant des logements…</div></div>
+            <span class="cl" data-c="clair">Clair</span></div>
+        </div>
+        <div class="h-band" style="margin-top:14px">Loi-cadre <span class="ct">1 article</span></div>
+        <div class="list" style="margin-top:8px">
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">A-19.1</span> <span class="tp">Cadre légal du zonage</span>
+              <div class="qt">La loi habilite la municipalité à régir, par règlement, l'usage du sol…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+        </div>
+      </div>
+      <p class="note">Un aplat gris et du gras: le titre devient un objet et non une légende.
+        Le plus petit changement qui règle le problème, et le seul qui ne coûte rien au reste.</p>
+    </div>
+  </div>
+
+  <div class="pair">
+    <div class="opt">
+      <div class="cap"><span class="n">Option 3</span><b>Filet traversant</b></div>
+      <div class="shot">
+        <div class="h-rule"><b>Code du Québec</b><i></i><span class="note">6 articles</span></div>
+        <div class="list">
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
+              <div class="qt">La surface maximale des baies non protégées…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+        </div>
+        <div class="h-rule"><b>Règlement d'urbanisme</b><i></i><span class="note">5 articles</span></div>
+        <div class="list">
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">art. 71</span> <span class="tp">Stationnement</span>
+              <div class="qt">Le nombre minimal d'unités de stationnement est établi selon l'usage…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">art. 43</span> <span class="tp">Taux d'implantation</span>
+              <div class="qt">Le taux d'implantation au sol du bâtiment principal…</div></div>
+            <span class="cl" data-c="clair">Clair</span></div>
+        </div>
+      </div>
+      <p class="note">Le filet coupe la colonne en deux: on voit la frontière avant de lire le mot.
+        Moins lourd que l'aplat, un peu plus bavard en traits.</p>
+    </div>
+
+    <div class="opt">
+      <div class="cap"><span class="n">Option 4</span><b>Rubrique en marge</b></div>
+      <div class="shot">
+        <div class="gutter">
+          <div class="rub"><span>Code du Québec</span></div>
+          <div class="list">
+            <div class="row"><div class="fig"></div>
+              <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
+                <div class="qt">La surface maximale des baies non protégées…</div></div>
+              <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+            <div class="row"><div class="fig"></div>
+              <div><span class="tag">3.4.2.1</span> <span class="tp">Nombre d'issues par étage</span>
+                <div class="qt">Au moins deux issues doivent desservir chaque étage…</div></div>
+              <span class="cl" data-c="clair">Clair</span></div>
+          </div>
+        </div>
+        <div class="gutter" style="margin-top:10px">
+          <div class="rub"><span>Règlement</span></div>
+          <div class="list">
+            <div class="row"><div class="fig"></div>
+              <div><span class="tag">art. 71</span> <span class="tp">Stationnement</span>
+                <div class="qt">Le nombre minimal d'unités de stationnement…</div></div>
+              <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="note">La source tient le bloc par le côté et ne mange aucune hauteur: on sait où on est
+        même au milieu d'un groupe. Coûte 26 px de largeur, et le texte vertical se lit mal en diagonale.</p>
+    </div>
+  </div>
+
+  <h2 class="part">B — la source monte en haut et devient un filtre</h2>
+  <p>Le prix est connu: ouvrir une seule source cache les deux autres, donc cache qu'un article du code
+    est tranché par une cote du règlement. Le gain est une liste courte quand on travaille un seul corps
+    de règles — la préparation du comité, par exemple, qui ne parle que du règlement.</p>
+
+  <div class="pair">
+    <div class="opt">
+      <div class="cap"><span class="n">Option 5</span><b>Puces de filtre, « Tous » par défaut</b></div>
+      <div class="shot">
+        <div class="strip">
+          <span class="chip on">Tous <span class="ct">12</span></span>
+          <span class="chip">Code du Québec <span class="ct">6</span></span>
+          <span class="chip">Loi-cadre <span class="ct">1</span></span>
+          <span class="chip">Règlement d'urbanisme <span class="ct">5</span></span>
+        </div>
+        <div class="list">
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
+              <div class="qt">La surface maximale des baies non protégées…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">art. 71</span> <span class="tp">Stationnement</span>
+              <div class="qt">Le nombre minimal d'unités de stationnement…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">art. 43</span> <span class="tp">Taux d'implantation</span>
+              <div class="qt">Le taux d'implantation au sol du bâtiment principal…</div></div>
+            <span class="cl" data-c="clair">Clair</span></div>
+        </div>
+      </div>
+      <p class="note">« Tous » reste l'état normal, donc rien n'est caché par défaut. Mais avec « Tous »
+        actif, la liste redevient plate: il faut garder une des options A à l'intérieur.</p>
+    </div>
+
+    <div class="opt">
+      <div class="cap"><span class="n">Option 6</span><b>Étiquette de source sur chaque rangée</b></div>
+      <div class="shot">
+        <div class="list">
+          <div class="row"><div class="fig"></div>
+            <div><span class="src-tag" data-s="qc">Code QC</span> <span class="tag">3.2.3.1</span>
+              <span class="tp">Baies non protégées</span>
+              <div class="qt">La surface maximale des baies non protégées…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+          <div class="row"><div class="fig"></div>
+            <div><span class="src-tag" data-s="loi">Loi</span> <span class="tag">A-19.1</span>
+              <span class="tp">Cadre légal du zonage</span>
+              <div class="qt">La loi habilite la municipalité à régir, par règlement…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+          <div class="row"><div class="fig"></div>
+            <div><span class="src-tag">Règlement</span> <span class="tag">art. 71</span>
+              <span class="tp">Stationnement</span>
+              <div class="qt">Le nombre minimal d'unités de stationnement…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+        </div>
+      </div>
+      <p class="note">Aucune section: la source voyage avec l'article, donc le tri peut devenir
+        « par clarté » ou « par date de relance » sans rien perdre. En échange, douze étiquettes répétées
+        et une colonne de plus à l'œil.</p>
+    </div>
+  </div>
+
+  <div class="pair">
+    <div class="opt">
+      <div class="cap"><span class="n">Option 7</span><b>Trois cartes au-dessus, une liste en dessous</b></div>
+      <div class="shot">
+        <div class="cards">
+          <div class="card on"><b>Code du Québec</b>
+            <span class="mt">6 articles</span>
+            <span class="dots"><i style="background:var(--clair)"></i><i style="background:var(--clair)"></i><i style="background:var(--clair)"></i><i style="background:var(--moyen)"></i><i style="background:var(--obscur)"></i><i style="background:var(--obscur)"></i></span></div>
+          <div class="card"><b>Loi-cadre</b>
+            <span class="mt">1 article</span>
+            <span class="dots"><i style="background:var(--obscur)"></i></span></div>
+          <div class="card"><b>Règlement d'urbanisme</b>
+            <span class="mt">5 articles</span>
+            <span class="dots"><i style="background:var(--clair)"></i><i style="background:var(--moyen)"></i><i style="background:var(--moyen)"></i><i style="background:var(--obscur)"></i><i style="background:var(--obscur)"></i></span></div>
+        </div>
+        <div class="list">
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
+              <div class="qt">La surface maximale des baies non protégées…</div></div>
+            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+          <div class="row"><div class="fig"></div>
+            <div><span class="tag">3.3.1.9</span> <span class="tp">Largeur des corridors communs</span>
+              <div class="qt">La largeur libre d'un corridor commun…</div></div>
+            <span class="cl" data-c="clair">Clair</span></div>
+        </div>
+      </div>
+      <p class="note">La carte dit en une ligne ce qu'une section ne dit jamais: combien d'articles,
+        et surtout de quelle couleur ils sont. On choisit un corps de règles en sachant déjà
+        lequel va faire mal. Coûte une hauteur fixe en haut de l'écran.</p>
+    </div>
+
+    <div class="opt">
+      <div class="cap"><span class="n">Option 8</span><b>Trois blocs repliables</b></div>
+      <div class="shot">
+        <div class="acc">
+          <div class="hd">Code du Québec <span class="ct">6 articles · 2 obscurs</span></div>
+          <div class="bd">
+            <div class="row"><div class="fig"></div>
+              <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
+                <div class="qt">La surface maximale des baies non protégées…</div></div>
+              <span class="cl" data-c="obscur">Pas clair du tout</span></div>
+            <div class="row"><div class="fig"></div>
+              <div><span class="tag">3.3.1.9</span> <span class="tp">Largeur des corridors communs</span>
+                <div class="qt">La largeur libre d'un corridor commun…</div></div>
+              <span class="cl" data-c="clair">Clair</span></div>
+          </div>
+        </div>
+        <div class="acc shut"><div class="hd">Loi-cadre <span class="ct">1 article</span></div></div>
+        <div class="acc shut"><div class="hd">Règlement d'urbanisme <span class="ct">5 articles · 2 obscurs</span></div></div>
+      </div>
+      <p class="note">Les trois restent visibles en permanence, repliés: on ne perd jamais de vue
+        qu'il y a trois sources, et on travaille dans une seule. Un clic de plus pour tout lire,
+        et un état de plus à retenir d'une visite à l'autre.</p>
+    </div>
+  </div>
+
+  <div class="verdict">
+    <h2>Ce que je retiendrais</h2>
+    <ul>
+      <li><b>Option 2 (bandeau)</b> si on ne change qu'une chose: c'est le contraste demandé,
+        sans rien cacher et sans hauteur perdue.</li>
+      <li><b>Option 7 (cartes) + option 2</b> si on accepte un en-tête: la couleur des pastilles dit
+        d'avance où est le travail, ce qu'aucun compte d'articles ne dit.</li>
+      <li><b>Option 6 (étiquette par rangée)</b> seulement si la liste doit un jour se trier
+        autrement que par source — par clarté, ou par personne relancée.</li>
+      <li>À éviter: un filtre qui cache deux sources par défaut. Un article du code est souvent
+        tranché par une cote du règlement, et c'est ce lien qui se perd en premier.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
