@@ -222,7 +222,6 @@ const B_index = `<div class="app"><div class="stack">
   <div class="bar"><span class="crumb">${icon("folder")}Tous les projets</span>${right()}</div>
   <div class="row2"><span class="lv on">${icon("folder")}Projets</span>
     <span class="lv">${icon("calendar-days")}Échéancier</span>
-    <span class="lv">${icon("list-checks")}À faire</span>
     <span class="lv m">Archivés</span></div>
   ${indexBody}</div></div>`;
 const B_proj = `<div class="app"><div class="stack">
@@ -270,9 +269,9 @@ const WAYS = [
   { t: "Échéancier entre dans le fil d'Ariane, à gauche du séparateur",
     a: () => A_index, b: () => A_proj,
     note: `Une seule barre, deux zones: à gauche du trait ce qui est à l'atelier (<b>Tous les projets</b>, <b>Échéancier</b>), à droite le projet ouvert et ses onglets — dont <b class="nm"></b>. <b>Ce qu'on gagne:</b> l'échéancier est à un clic depuis n'importe quel plan, sans rien ajouter à l'écran. <b>Ce qu'on perd:</b> le trait est mince — rien n'empêche de lire « Échéancier » comme un onglet du Baldwin III, exactement l'erreur qu'on veut corriger.` },
-  { t: "Échéancier est un écran de l'atelier, voisin de la liste des projets",
+  { t: "Échéancier est un écran de l'atelier, voisin de la liste des projets — retenue",
     a: () => B_index, b: () => B_proj,
-    note: `<b>Tous les projets</b> cesse d'être un simple retour: c'est un lieu, avec ses onglets — Projets, Échéancier, À faire. Le projet, lui, n'a que Coordination, Codes, <b class="nm"></b>. <b>Ce qu'on gagne:</b> la portée est impossible à confondre, et la barre d'onglets du projet rétrécit au lieu de grossir. <b>Ce qu'on perd:</b> depuis un plan, voir la semaine coûte deux clics (retour, puis onglet).` },
+    note: `<b>Tous les projets</b> cesse d'être un simple retour: c'est un lieu, avec ses onglets — Projets et Échéancier (la liste du jour vit dans la colonne de droite de l'échéancier, elle n'a pas besoin d'onglet). Le projet, lui, n'a que Coordination, Codes, <b class="nm"></b>. <b>Ce qu'on gagne:</b> la portée est impossible à confondre, et la barre d'onglets du projet rétrécit au lieu de grossir. <b>Ce qu'on perd:</b> depuis un plan, voir la semaine coûte deux clics (retour, puis onglet).` },
   { t: "Un rail d'atelier qui survit aux deux écrans",
     a: () => C_index, b: () => C_proj,
     note: `Une colonne noire de 40 px à l'extrême gauche: projets, échéancier, à faire, recherche. <b>Ce qu'on gagne:</b> présent partout, zéro hauteur perdue. <b>Ce qu'on perd:</b> il double le fil d'Ariane qui existe déjà — deux façons de revenir aux projets — et il impose des icônes muettes pour une application qui en a déjà beaucoup.` },

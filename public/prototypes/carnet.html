@@ -43,6 +43,17 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
   box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .top{height:42px;display:flex;align-items:center;gap:3px;padding:0 11px;border-bottom:1px solid var(--line-2)}
 .top .proj{font-size:13px;font-weight:600;margin-right:10px}
+.top .crumb{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 9px;border-radius:7px;
+  color:var(--ink-2);font-size:12.5px;cursor:pointer}
+.top .crumb:hover{background:var(--fill-2);color:var(--ink)}
+.top .vdiv{width:1px;height:18px;background:var(--line-2);margin:0 8px}
+.srow{height:30px;display:flex;align-items:center;gap:3px;padding:0 11px;border-bottom:1px solid var(--line-2);
+  background:var(--fill-2);font-size:12px;color:var(--ink-2)}
+.st{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:7px;cursor:pointer}
+.st:hover{background:var(--fill)}
+.st.on{background:var(--vert);color:var(--vert-ink);font-weight:500;cursor:default}
+.st.m{color:var(--ink-3);cursor:default}
+.st.m:hover{background:none}
 .tab{height:28px;padding:0 11px;border:0;background:none;border-radius:7px;font:inherit;font-size:12.5px;
   color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .tab:hover{background:var(--fill-2)}
@@ -252,21 +263,21 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 
   <div class="rec">
     <div class="rc">
-      <div class="w">Page coordination (plans)</div>
+      <div class="w">Onglet du projet — coordination</div>
       <div class="h" id="r1h"></div>
       <p>Là où les entrées <b>naissent</b>. L'appel arrive, on épingle sur le plan, on écrit. La marge sert à
         ça et ne doit rien faire d'autre: pas de liste du jour, pas d'archives. Chaque note épinglée part
         aussi dans l'historique, avec son niveau et son unité.</p>
     </div>
     <div class="rc">
-      <div class="w">Page échéancier</div>
+      <div class="w">Niveau atelier — échéancier</div>
       <div class="h" id="r2h"></div>
-      <p>Le <b>temps</b>. Semaine et mois à gauche pour les dates qu'on se donne, et à droite — au-dessus des
-        échéances, pas en dessous — la liste du jour qu'on coche. Les deux cohabitent parce qu'on les regarde
-        au même moment: le matin.</p>
+      <p>Le <b>temps</b>, et il traverse les projets: il vit donc sous « Tous les projets », pas dans les
+        onglets du Baldwin III. Semaine, mois, année à gauche; à droite — au-dessus des échéances, pas en
+        dessous — la liste du jour qu'on coche. Pas d'onglet « À faire »: elle est déjà là.</p>
     </div>
     <div class="rc">
-      <div class="w">Page historique <i style="color:var(--vert-ink)">(nouvelle)</i></div>
+      <div class="w">Onglet du projet — historique <i style="color:var(--vert-ink)">(nouveau)</i></div>
       <div class="h" id="r3h"></div>
       <p>La <b>mémoire</b>. Tout ce qui est coché, répondu, déposé y tombe automatiquement, daté et signé.
         On n'y écrit jamais directement: on le fouille. C'est la page qui répond à l'appel de dans deux mois.</p>
@@ -301,7 +312,7 @@ const icon = (n, cls = "") => `<svg class="lu ${cls}"><use href="#lu-${n}"></use
 function sprite() {
   const names = ["calendar-days", "list-checks", "archive", "plus", "x", "check", "search", "phone-call",
     "pencil-line", "flag", "chevron-left", "chevron-right", "map-pin", "user", "clock", "corner-down-left",
-    "circle-check-big", "layers", "undo-2", "filter"];
+    "circle-check-big", "layers", "undo-2", "filter", "folder"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
     if (!node) return "";
@@ -424,17 +435,25 @@ const journal = () => E.filter((e) => e.done)
   .sort((a, b) => b.done.localeCompare(a.done));
 
 /* ------------------------------------------------------------- the frame */
-const topBar = () => `<div class="top">
-  <span class="proj">Le Baldwin III</span>
-  <button class="tab ${S.tab === "coord" ? "on" : ""}" data-tab="coord">${icon("layers")}Coordination</button>
-  <button class="tab ${S.tab === "ech" ? "on" : ""}" data-tab="ech">${icon("calendar-days")}Échéancier</button>
-  <button class="tab ${S.tab === "jrn" ? "on" : ""}" data-tab="jrn">${icon("archive")}Historique</button>
-  <span class="r">
+const topBar = () => {
+  const studio = S.tab === "ech";
+  const right = `<span class="r">
     ${PEOPLE.map((p) => `<span class="who w-${p.id}" title="${p.name} — ${p.role}"
       style="${S.me === p.id ? "" : "opacity:.4"}" data-me="${p.id}">${p.id[0]}</span>`).join("")}
     <button class="btn dark" data-new>${icon("plus")}Nouvelle entrée <span class="kbd"
       style="border-color:#444;color:#bbb;background:transparent">N</span></button>
-  </span></div>`;
+  </span>`;
+  return `<div class="top">
+    <span class="crumb" data-tab="ech">${icon("folder")}Tous les projets</span>
+    ${studio ? "" : `<span class="vdiv"></span><span class="proj">Le Baldwin III</span>
+      <button class="tab ${S.tab === "coord" ? "on" : ""}" data-tab="coord">${icon("layers")}Coordination</button>
+      <button class="tab ${S.tab === "jrn" ? "on" : ""}" data-tab="jrn">${icon("archive")}Historique</button>`}
+    ${right}</div>
+  ${studio ? `<div class="srow">
+    <span class="st" data-tab="coord" title="ouvre Le Baldwin III">${icon("folder")}Projets</span>
+    <span class="st on">${icon("calendar-days")}Échéancier</span>
+    <span class="st m">Archivés</span></div>` : ""}`;
+};
 
 /* ------------------------------------------------------- écran échéancier */
 function weekDays() {

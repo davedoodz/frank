@@ -37,6 +37,8 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .opt:hover{background:var(--fill-2)}
 .opt.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .opt .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.opt.keep .k{color:var(--vert-ink)}
+.opt.keep{background:#fcfdf8}
 .opt b{display:block;font-size:12.5px;font-weight:600;margin-top:1px}
 .opt span{display:block;font-size:11.5px;color:var(--ink-2);margin-top:3px}
 .opt .sc{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;
@@ -348,7 +350,8 @@ const KIND_WORD = { todo: "coché par", change: "modifié par", call: "appel re�
 
 const OPTIONS = [
   { k: "A", t: "Dans le fil d'Ariane", d: "Échéancier à gauche du séparateur, dans la même barre." },
-  { k: "B", t: "Écran de l'atelier", d: "« Tous les projets » devient un lieu avec ses propres onglets." },
+  { k: "B", t: "Écran de l'atelier", d: "« Tous les projets » devient un lieu avec ses propres onglets.",
+    keep: true },
   { k: "C", t: "Rail noir à gauche", d: "Une colonne d'icônes qui survit aux deux écrans." },
   { k: "D", t: "Panneau sur ⌘K", d: "Jamais un onglet: un panneau par-dessus le plan." },
 ];
@@ -376,13 +379,12 @@ function bar() {
   if (S.mode === "A") {
     return `<div class="bar">${crumb}
       <span class="pill g ${S.screen === "ech" ? "on" : ""}" data-go="ech">${icon("calendar-days")}Échéancier</span>
-      <span class="pill g ${S.screen === "todo" ? "on" : ""}" data-go="todo">${icon("list-checks")}À faire</span>
       ${inProj ? `<span class="div"></span>${projPart}` : ""}${barRight()}</div>`;
   }
   if (S.mode === "C") {
     return `<div class="bar">${inProj ? projPart
       : `<span class="pname" style="margin-left:4px">${S.screen === "ech" ? "Échéancier de l'atelier"
-        : S.screen === "todo" ? "À faire aujourd'hui" : "Projets"}</span>`}${barRight()}</div>`;
+        : "Projets"}</span>`}${barRight()}</div>`;
   }
   const extra = S.mode === "D" ? kbtn : "";
   return `<div class="bar">${crumb}${inProj ? `<span class="div"></span>${projPart}` : ""}${barRight(extra)}</div>`;
@@ -391,7 +393,6 @@ const rail = () => S.mode !== "C" ? "" : `<div class="rail">
   <span class="ri ${S.screen === "index" || S.screen === "project" ? "on" : ""}" data-go="index"
     title="Projets">${icon("folder")}</span>
   <span class="ri ${S.screen === "ech" ? "on" : ""}" data-go="ech" title="Échéancier">${icon("calendar-days")}</span>
-  <span class="ri ${S.screen === "todo" ? "on" : ""}" data-go="todo" title="À faire">${icon("list-checks")}</span>
   <span class="ri" title="Recherche">${icon("search")}</span></div>`;
 
 /* B is the only option where the studio level has its own tab row */
@@ -402,7 +403,6 @@ function studioRow() {
   return `<div class="row2">
     <span class="lv ${S.screen === "index" ? "on" : ""}" data-go="index">${icon("folder")}Projets</span>
     <span class="lv ${S.screen === "ech" ? "on" : ""}" data-go="ech">${icon("calendar-days")}Échéancier</span>
-    <span class="lv ${S.screen === "todo" ? "on" : ""}" data-go="todo">${icon("list-checks")}À faire</span>
     <span class="lv m">Archivés</span></div>`;
 }
 
@@ -520,15 +520,6 @@ const screenEch = () => `${S.mode === "B" ? studioRow() : ""}
         <span class="t">${t.t}<span class="m">${t.w} · ajoutée à ${t.h}</span></span></div>`).join("")}
     </div></div></div>`;
 
-const screenTodo = () => `${S.mode === "B" ? studioRow() : ""}
-  <div class="head"><b>À faire aujourd'hui</b><span class="m">samedi 14 novembre · tous projets</span></div>
-  <div class="body"><div class="cal" style="max-width:620px">
-    ${TODOS.map((t, i) => `<div class="todo ${S.done.includes(i) ? "done" : ""}" data-go="chk:${i}"
-      style="border:1px solid var(--line-2);border-radius:9px;margin-bottom:7px">
-      <span class="box">${icon("check")}</span>
-      <span class="t">${t.t}<span class="m">${t.w} · ajoutée à ${t.h}</span></span></div>`).join("")}
-  </div></div>`;
-
 const panelHTML = () => !S.panel ? "" : `<div class="scrim" data-go="panelclose">
   <div class="panel" data-stop>
     <div class="ph">${icon("calendar-days")}Échéancier — atelier
@@ -545,8 +536,8 @@ const panelHTML = () => !S.panel ? "" : `<div class="scrim" data-go="panelclose"
 function render(keepFocus) {
   const act = document.activeElement && document.activeElement.id;
   const caret = act && document.activeElement.selectionStart;
-  document.getElementById("opts").innerHTML = OPTIONS.map((o) => `<button class="opt ${S.mode === o.k ? "on" : ""}"
-    data-mode="${o.k}"><span class="k">Façon ${o.k}</span><b>${o.t}</b><span>${o.d}</span>
+  document.getElementById("opts").innerHTML = OPTIONS.map((o) => `<button class="opt ${S.mode === o.k ? "on" : ""} ${o.keep ? "keep" : ""}"
+    data-mode="${o.k}"><span class="k">Façon ${o.k}${o.keep ? " · retenue" : ""}</span><b>${o.t}</b><span>${o.d}</span>
     <span class="sc">${icon("target")}${S.scores[o.k] == null ? "non mesuré"
       : `${S.scores[o.k]} geste${S.scores[o.k] > 1 ? "s" : ""}${S.kinds[o.k] === "kb" ? " (⌘K)" : ""}`}</span></button>`).join("");
 
@@ -565,7 +556,7 @@ function render(keepFocus) {
 
   const inner = S.screen === "index" ? screenIndex()
     : S.screen === "project" ? screenProject()
-    : S.screen === "ech" ? screenEch() : screenTodo();
+    : screenEch();
   document.getElementById("stage").innerHTML = `${rail()}<div class="stack">${bar()}${inner}</div>`
     + panelHTML()
     + (S.mode === "D" ? `<div class="hint">${icon("command")}Appuyez sur <span class="kbd">⌘K</span>
@@ -575,8 +566,9 @@ function render(keepFocus) {
     <ul>
       <li><b>Façon A</b> — l'échéancier est à un clic, mais regardez la barre quand un projet est ouvert:
         rien d'autre qu'un trait de 1 px ne dit que « Échéancier » n'appartient pas au Baldwin III.</li>
-      <li><b>Façon B</b> — la rangée de l'atelier n'existe que hors projet, donc la portée est nette; le prix
-        est de deux clics depuis un plan (revenir, puis l'onglet).</li>
+      <li><b>Façon B — retenue.</b> La rangée de l'atelier n'existe que hors projet, donc la portée est nette;
+        le prix est de deux gestes depuis un plan (revenir, puis l'onglet), que ⌘K efface.
+        « À faire » n'est pas un onglet: la liste du jour vit dans la colonne de droite de l'échéancier.</li>
       <li><b>Façon C</b> — le rail est toujours là, mais il y a maintenant deux chemins vers les projets
         (l'icône et le fil d'Ariane) et quatre icônes sans mot.</li>
       <li><b>Façon D</b> — ⌘K depuis n'importe où, zéro navigation; mais le panneau ne montre que les jours
@@ -598,7 +590,6 @@ function go(cmd) {
   else if (k === "lv") S.level = v;
   else if (k === "unit") S.unit = v;
   else if (k === "ech") { S.screen = "ech"; S.panel = false; }
-  else if (k === "todo") { S.screen = "todo"; S.panel = false; }
   else if (k === "panel") S.panel = true;
   else if (k === "panelclose") S.panel = false;
   else if (k === "fkind") S.fkind = S.fkind === v ? null : v;
