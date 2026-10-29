@@ -735,15 +735,18 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .ltile .wrap{position:relative;width:100%}
 .ltile .pic{display:block;width:100%;aspect-ratio:1.18;border:1px solid var(--line-2);
   border-radius:4px;background:#fff center/contain no-repeat}
-.ltile .nm{font-size:10.5px;line-height:1.2;color:var(--ink-2);text-align:center}
-/* The dimming goes on the picture and the name, never on the tile: put it
-   on the tile and the badge fades with it, which is how a mark meant to
-   be the loudest thing in the strip becomes invisible. */
-.ltile .pic,.ltile .nm{opacity:.45}
+.ltile .nm{font-size:11px;font-weight:500;line-height:1.2;color:var(--ink);text-align:center}
+/* The dimming goes on the picture only, never on the tile and never on the
+   name. On the tile, the badge fades with it — a mark meant to be the
+   loudest thing in the strip goes invisible. On the name, the one word
+   that says which drawing this is becomes unreadable, and an engineering
+   sheet is a pale grid: its thumbnail alone names nothing. "Off" is said
+   by the picture and the badge; the word stays a word. */
+.ltile .pic{opacity:.45}
 .ltile:hover{background:var(--fill-2)}
-.ltile:hover .pic,.ltile:hover .nm{opacity:.8}
-.ltile.on .pic,.ltile.on .nm{opacity:1}
-.ltile.on .nm{color:#2f3a05}
+.ltile:hover .pic{opacity:.8}
+.ltile.on .pic{opacity:1}
+.ltile.on .nm{color:#2f3a05;font-weight:600}
 /* The selected drawing is ink with its name reversed out: a grey wash is
    lost against the strip at this size. */
 .ltile.sel{background:var(--ink);border-color:var(--ink)}
@@ -1045,6 +1048,31 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:13px;height:13px;border-radius:3px;background:var(--bar);display:inline-block}
 .legend i.dash{background:none;border:1px dashed #b9b9ff}
+/* --------------------------------------------------- the pane dividers
+   The edge between two panes is a thing you can take hold of. At rest it
+   is empty space the width of the gap, so the layout looks the same as
+   before; under the pointer a hairline appears where the edge will move,
+   and the little chevron folds the pane away entirely. Folding is how a
+   drawing gets the whole window without a mode. */
+/* The handle stands in for the column gap, so the panes sit exactly where
+   they sat before it existed; it reaches a few pixels into each pane so
+   there is something to catch. */
+.work{column-gap:0}
+.gut{position:relative;align-self:stretch;flex:0 0 var(--gap);width:var(--gap);cursor:col-resize;
+  margin:0 -3px;z-index:3;display:flex;align-items:center;justify-content:center}
+.gut::before{content:"";position:absolute;top:0;bottom:0;left:50%;margin-left:-1px;width:2px;
+  border-radius:1px;background:transparent;transition:background .12s}
+.gut:hover::before,body.splitting .gut.live::before{background:var(--ink)}
+.gut.fold{cursor:default}
+.gut .gfold{position:relative;z-index:2;width:18px;height:26px;border-radius:5px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;background:var(--card);
+  border:1px solid var(--line-2);color:var(--ink-2);opacity:0;transition:opacity .12s}
+.gut:hover .gfold,.gut.fold .gfold{opacity:1}
+.gut .gfold:hover{color:var(--ink);border-color:var(--ink)}
+.gut .gfold .lu{width:12px;height:12px}
+/* While an edge is being dragged every cursor on the screen is the drag
+   cursor: the pointer is on a 2 px line and will leave it. */
+body.splitting,body.splitting *{cursor:col-resize !important;user-select:none}
 svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
 </style>
 </head>
@@ -1069,6 +1097,11 @@ const V = {
   chrome: "Black",
   homeLayout: "Card grid",
   isolate: "none",
+  /* Where each movable edge sits, and which panes are folded away. Keyed
+     by screen and edge name, so widening the unit list on Unités does not
+     move the calendar on Échéancier. Empty means the designed width. */
+  split: {},
+  fold: {},
   /* One glyph per screen, written by the panel. Keyed by the French screen
      name, filled from NAV_ICONS which is declared further down the file. */
   icons: {},
@@ -2102,6 +2135,28 @@ function region(name, label, inner, step) {
   return `<section class="pane rg ${solo(name)}" data-rg="${label}" data-fi="${fiOf(name)}" data-region="${name}">${s}${inner}</section>`;
 }
 
+/* ------------------------------------------------------- movable edges
+   Every edge between two panes is the same object: a 12 px strip that
+   drags the pane beside it and folds it on a click. "grab" says which
+   side the strip answers for — the pane before it in the row, or the one
+   after it — because that decides both what a drag does and which way
+   the chevron points. */
+const SPLIT_MIN = 170;
+const splitKey = (name) => `${V.screen}/${name}`;
+const splitW = (name, def) => (V.split[splitKey(name)] ?? def);
+const folded = (name) => !!V.fold[splitKey(name)];
+function gutter(name, grab, label) {
+  const shut = folded(name);
+  /* The chevron points where the pane will go: out of the way when it is
+     open, back into place when it is folded. */
+  const dir = grab === "prev" ? (shut ? "chevron-right" : "chevron-left")
+    : (shut ? "chevron-left" : "chevron-right");
+  const tip = shut ? `Déplier ${label}` : `Replier ${label}`;
+  return `<div class="gut${shut ? " fold" : ""}" data-gut="${name}" data-grab="${grab}"
+      title="${shut ? tip : `Glisser pour redimensionner ${label}`}">
+    <span class="gfold" ${act("gutfold", name)} title="${tip}">${icon(dir)}</span></div>`;
+}
+
 const bars = (n, w = [100, 70, 85]) =>
   Array.from({ length: n }, (_, i) => `<div class="bar" style="width:${w[i % w.length]}%"></div>`).join("");
 
@@ -2999,7 +3054,15 @@ function contentHTML() {
         <div style="position:relative;flex:1;display:flex">${plan()}
         ${noModel ? "" : `<div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
         <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div>`}</div></div>`;
-      return `<div class="row" style="flex:1;align-items:stretch;gap:var(--gap);min-height:0">${plan()}${model()}</div>`;
+      /* The two drawings share the width, and the edge between them moves:
+         a plan being read closely wants the window, a massing check wants
+         the opposite. Folding either one gives the other everything. */
+      const planShut = folded("plan"), modelShut = noModel || folded("model");
+      const planW = V.split[splitKey("plan")];
+      return `<div class="row" style="flex:1;align-items:stretch;gap:0;min-height:0">${
+        planShut ? "" : `<div class="pane drawing" style="flex:${planW ? `0 0 ${planW}px` : (modelShut ? "1" : "1")}">`.replace(/^.*$/, "") }${
+        planShut ? "" : plan()}${noModel ? "" : gutter("plan", "prev", "le plan")}${
+        modelShut ? "" : model()}</div>`;
     },
     /* Codes is the vertical reading of the provisions: the Québec
        construction code first, then the bylaw, each one with the schematic
@@ -4240,8 +4303,16 @@ function render() {
      the screens that carry one. Codes carries sentences instead, and its
      notes are written against an article in the right column. */
   const margin = hasInsp && V.screen !== "Codes";
-  const cols = [hasList ? (V.screen === "Unités" ? "400px" : "260px") : null, "1fr",
-    hasInsp ? (margin ? "286px" : "340px") : null].filter(Boolean).join(" ");
+  /* A folded pane is not drawn at all — a zero-width section still paints
+     its own two borders, and the point of folding is that nothing of it
+     remains but the handle that brings it back. */
+  const listShut = hasList && folded("list");
+  const sideShut = hasInsp && folded("side");
+  const listW = splitW("list", V.screen === "Unités" ? 400 : 260);
+  const sideW = splitW("side", margin ? 286 : 340);
+  const cols = [hasList && !listShut ? `${listW}px` : null, hasList ? "var(--gap)" : null, "1fr",
+    hasInsp ? "var(--gap)" : null, hasInsp && !sideShut ? `${sideW}px` : null]
+    .filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
     : { "Top bar only": "top", "Tabs only, no rail": "top", "Two rows, no rail": "top",
@@ -4261,9 +4332,11 @@ function render() {
           <div style="grid-column:1/-1">${headerHTML()}</div>
           ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
           ${SCREENS[V.screen].home ? "" : `${!whole && !noUnits && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
-          ${hasList ? listHTML() : ""}
+          ${hasList && !listShut ? listHTML() : ""}
+          ${hasList ? gutter("list", "prev", "la liste") : ""}
           ${contentHTML()}
-          ${hasInsp ? (margin ? marginHTML() : inspectorHTML()) : ""}`}
+          ${hasInsp ? gutter("side", "next", margin ? "la marge" : "l'inspecteur") : ""}
+          ${hasInsp && !sideShut ? (margin ? marginHTML() : inspectorHTML()) : ""}`}
         </div>
         ${!whole && def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
       </div>
