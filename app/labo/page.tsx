@@ -45,17 +45,13 @@ async function lire(): Promise<Page[]> {
         };
       })
   );
-  return pages.sort((a, b) => b.modified - a.modified);
+  // Alphabetical, not by date: the build checkout gives every file the same
+  // timestamp, so a "most recent" order would be a lie in production.
+  return pages.sort((a, b) => a.file.localeCompare(b.file, "fr"));
 }
 
-// Absolute, not relative: in production the page is rendered once, at build.
-function quand(ms: number): string {
-  return new Date(ms).toLocaleString("fr-CA", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+function poids(bytes: number): string {
+  return bytes < 1024 ? `${bytes} o` : `${Math.round(bytes / 1024)} ko`;
 }
 
 export default async function LaboPage() {
@@ -66,8 +62,8 @@ export default async function LaboPage() {
       <div className="mx-auto max-w-[760px]">
         <h1 className="text-title-lg text-ink">labo</h1>
         <p className="mt-2 text-body text-ink-2">
-          Chaque fichier HTML de <code className="font-mono">public/prototypes</code>, le plus
-          récent en premier. Un nouveau fichier apparaît ici sans rien ajouter à la main.
+          Chaque fichier HTML de <code className="font-mono">public/prototypes</code>, par ordre
+          alphabétique. Un nouveau fichier apparaît ici sans rien ajouter à la main.
         </p>
 
         <ul className="mt-6 border-t border-line">
@@ -79,7 +75,7 @@ export default async function LaboPage() {
               >
                 <span className="min-w-0 flex-1 truncate text-body text-ink">{p.title}</span>
                 <span className="shrink-0 font-mono text-meta text-ink-3">{p.file}</span>
-                <span className="shrink-0 text-meta text-ink-3">{quand(p.modified)}</span>
+                <span className="shrink-0 text-meta text-ink-3">{poids(p.bytes)}</span>
               </a>
             </li>
           ))}
