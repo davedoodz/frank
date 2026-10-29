@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carnet — échéances, à faire aujourd'hui, journal</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Three needs, one store. A deadline, a thing ticked off today and a change
+   logged two months ago are the same object with different dates on it:
+   created, due (optional), done (optional). The three screens below are
+   three questions asked of that one list, not three features. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e4e4e4;
+  --fill:#ededed; --fill-2:#f7f7f7; --page:#f4f4f4; --paper:#fff;
+  --hi:#111;
+  --vert:#c3e05a; --vert-ink:#2f3a05; --vert-soft:#eef3dc;
+  --rouge:#b4442f; --rouge-soft:#f7e8e4;
+  --bleu:#2f4858; --bleu-soft:#e7eef2;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:26px 22px 60px}
+.lu{width:15px;height:15px;flex:0 0 auto;stroke-width:1.6}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:5px;max-width:96ch}
+.sub b{color:var(--ink);font-weight:500}
+
+/* the recommendation, before the screens */
+.rec{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:16px 0 22px}
+.rc{background:var(--paper);border:1px solid var(--line-2);border-radius:9px;padding:11px 12px}
+.rc .h{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;margin-bottom:3px}
+.rc .w{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.rc p{font-size:12px;color:var(--ink-2)}
+.rc p b{color:var(--ink);font-weight:500}
+
+/* the app frame */
+.app{background:var(--paper);border:1px solid var(--line);border-radius:11px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.top{height:42px;display:flex;align-items:center;gap:3px;padding:0 11px;border-bottom:1px solid var(--line-2)}
+.top .proj{font-size:13px;font-weight:600;margin-right:10px}
+.tab{height:28px;padding:0 11px;border:0;background:none;border-radius:7px;font:inherit;font-size:12.5px;
+  color:var(--ink-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.tab:hover{background:var(--fill-2)}
+.tab.on{background:var(--hi);color:#fff}
+.top .r{margin-left:auto;display:flex;align-items:center;gap:7px}
+.who{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;
+  font-weight:600;color:#fff;flex:0 0 auto}
+.w-GB{background:#2f4858}.w-CL{background:#7a8a2e}.w-DM{background:#8a5a2b}.w-EX{background:#9b9b9b}
+.btn{height:28px;padding:0 10px;border:1px solid var(--line-2);border-radius:7px;background:var(--paper);
+  font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--fill-2)}
+.btn.dark{background:var(--hi);border-color:var(--hi);color:#fff}
+.btn.dark:hover{background:#000}
+.btn.sm{height:25px;font-size:12px;padding:0 8px}
+
+.head{padding:11px 14px 9px;display:flex;align-items:flex-end;gap:10px;border-bottom:1px solid var(--line-2)}
+.head h2{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.head .m{font-size:12px;color:var(--ink-3);padding-bottom:2px}
+.head .r{margin-left:auto;display:flex;align-items:center;gap:7px}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:7px;overflow:hidden}
+.seg button{height:26px;padding:0 10px;border:0;background:var(--paper);font:inherit;font-size:12px;
+  color:var(--ink-2);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button.on{background:var(--hi);color:#fff}
+
+/* ---------------------------------------------------- écran: échéancier */
+.ech{display:grid;grid-template-columns:minmax(0,1fr) 352px;min-height:612px}
+.cal{border-right:1px solid var(--line-2);padding:12px 14px}
+.calhd{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.calhd .t{font-size:13px;color:var(--ink-2)}
+.calhd .r{margin-left:auto;display:flex;gap:5px}
+.nav{width:26px;height:26px;border:1px solid var(--line-2);border-radius:7px;display:grid;place-items:center;
+  color:var(--ink-2);cursor:pointer;background:var(--paper)}
+.nav:hover{background:var(--fill-2)}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line-2);
+  border-radius:9px;overflow:hidden}
+.wk .dh{padding:6px 8px;font-size:11px;color:var(--ink-3);border-bottom:1px solid var(--line-2);
+  border-right:1px solid var(--line-2);background:var(--fill-2);display:flex;align-items:center;gap:5px}
+.wk .dh:nth-child(7){border-right:0}
+.wk .dh.today{background:var(--hi);color:#fff}
+.wk .dc{min-height:170px;border-right:1px solid var(--line-2);padding:6px;display:flex;flex-direction:column;
+  gap:5px;cursor:pointer}
+.wk .dc:last-child{border-right:0}
+.wk .dc.we{background:#fcfcfc}
+.wk .dc.sel{box-shadow:inset 0 0 0 2px var(--hi)}
+.mon{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line-2);
+  border-radius:9px;overflow:hidden}
+.mon .dh{padding:5px 8px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);
+  border-bottom:1px solid var(--line-2);border-right:1px solid var(--line-2);background:var(--fill-2)}
+.mon .dh:nth-child(7){border-right:0}
+.mon .dc{min-height:84px;border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
+  padding:5px 6px;display:flex;flex-direction:column;gap:3px;cursor:pointer;min-width:0}
+.mon .dc:nth-child(7n+7){border-right:0}
+.mon .dc.out{background:var(--fill-2)}
+.mon .dc.sel{box-shadow:inset 0 0 0 2px var(--hi)}
+.dn{font-size:11.5px;color:var(--ink-2);display:flex;align-items:center;gap:5px}
+.dn .b{background:var(--hi);color:#fff;border-radius:5px;padding:0 5px;font-weight:600}
+.dc.out .dn{color:var(--ink-3)}
+.ev{border:1px solid var(--line-2);border-left:3px solid var(--ink-3);border-radius:6px;padding:4px 6px;
+  font-size:11.5px;background:var(--paper);cursor:pointer;text-align:left;width:100%;overflow:hidden}
+.ev:hover{background:var(--fill-2)}
+.ev .n{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev .w{margin-top:3px;display:flex;gap:3px}
+.wk .ev .n{white-space:normal}
+.ev.haute{border-left-color:var(--rouge)}
+.ev.moyenne{border-left-color:var(--bleu)}
+.ev.done{color:var(--ink-3);border-left-color:var(--line)}
+.ev.done .n{text-decoration:line-through}
+.ev.sel{border-color:var(--hi);box-shadow:0 0 0 1px var(--hi)}
+.who.xs{width:17px;height:17px;font-size:9px}
+
+/* la colonne de droite: aujourd'hui d'abord, les échéances ensuite */
+.rail{display:flex;flex-direction:column;min-height:0}
+.rsec{border-bottom:1px solid var(--line-2)}
+.rsec .rh{display:flex;align-items:center;gap:7px;padding:9px 12px;font-size:12.5px;font-weight:500}
+.rsec .rh .c{margin-left:auto;font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.rsec.grow{flex:1;min-height:0;display:flex;flex-direction:column}
+.rsec.grow .body{overflow:auto;flex:1}
+.todo{display:flex;gap:9px;padding:7px 12px;border-top:1px solid var(--line-2);cursor:pointer}
+.todo:hover{background:var(--fill-2)}
+.box{width:16px;height:16px;border:1.5px solid var(--line);border-radius:5px;flex:0 0 auto;margin-top:1px;
+  display:grid;place-items:center;color:transparent}
+.todo:hover .box{border-color:var(--ink-3)}
+.todo.done .box{background:var(--vert);border-color:var(--vert-ink);color:var(--vert-ink)}
+.todo .t{font-size:12.5px;flex:1;min-width:0}
+.todo.done .t{color:var(--ink-3);text-decoration:line-through}
+.todo .m{display:block;margin-top:2px;font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:5px}
+.todo .av{display:flex;gap:3px;margin-top:1px}
+.quick{padding:8px 12px;border-top:1px solid var(--line-2);display:flex;gap:7px;align-items:center}
+.quick input{flex:1;height:28px;border:1px solid var(--line-2);border-radius:7px;padding:0 9px;font:inherit;
+  font-size:12.5px;background:var(--fill-2)}
+.quick input:focus{outline:none;border-color:var(--ink-3);background:var(--paper)}
+.erow{display:flex;gap:9px;align-items:flex-start;padding:8px 12px;border-top:1px solid var(--line-2);cursor:pointer}
+.erow:hover{background:var(--fill-2)}
+.erow.sel{background:var(--vert-soft)}
+.erow .t{flex:1;min-width:0;font-size:12.5px}
+.erow .m{display:block;margin-top:2px;font-size:11px;color:var(--ink-3)}
+.erow .d{font-size:11px;color:var(--ink-3);font-family:var(--mono);white-space:nowrap;padding-top:1px}
+.erow.late .d{color:var(--rouge)}
+.empty{padding:14px 12px;color:var(--ink-3);font-size:12px}
+
+/* ------------------------------------------------------- écran: journal */
+.jrn{display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:612px}
+.jcol{border-right:1px solid var(--line-2);display:flex;flex-direction:column;min-height:0}
+.jbar{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line-2)}
+.jbar .find{flex:1;display:flex;align-items:center;gap:7px;height:30px;border:1px solid var(--line-2);
+  border-radius:8px;padding:0 9px;background:var(--fill-2);color:var(--ink-3)}
+.jbar .find input{flex:1;border:0;background:none;font:inherit;font-size:12.5px;color:var(--ink)}
+.jbar .find input:focus{outline:none}
+.jbody{overflow:auto;flex:1}
+.jmon{position:sticky;top:0;background:var(--fill-2);border-bottom:1px solid var(--line-2);
+  padding:5px 12px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);z-index:2}
+.jday{display:grid;grid-template-columns:104px minmax(0,1fr);border-bottom:1px solid var(--line-2)}
+.jday .g{padding:9px 12px;border-right:1px solid var(--line-2);color:var(--ink-3);font-size:11.5px}
+.jday .g b{display:block;color:var(--ink);font-size:13px}
+.jentries{padding:3px 0}
+.jen{display:flex;gap:9px;padding:7px 12px;align-items:flex-start}
+.jen+.jen{border-top:1px solid #f0f0f0}
+.jen .ic{width:21px;height:21px;border-radius:6px;display:grid;place-items:center;flex:0 0 auto;margin-top:1px}
+.ic.k-todo{background:var(--vert-soft);color:var(--vert-ink)}
+.ic.k-change{background:var(--bleu-soft);color:var(--bleu)}
+.ic.k-deadline{background:var(--fill);color:var(--ink-2)}
+.ic.k-call{background:var(--rouge-soft);color:var(--rouge)}
+.jen .b{flex:1;min-width:0}
+.jen .t{font-size:12.5px}
+.jen .m{margin-top:2px;font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.jen .m .src{border:1px solid var(--line-2);border-radius:5px;padding:0 5px;color:var(--ink-2)}
+.jen .h{font-size:11px;color:var(--ink-3);font-family:var(--mono);white-space:nowrap}
+.jside{padding:11px 12px;display:flex;flex-direction:column;gap:11px}
+.jside .lab{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.fchip{display:flex;align-items:center;gap:7px;padding:5px 8px;border:1px solid var(--line-2);border-radius:7px;
+  font-size:12px;cursor:pointer;background:var(--paper)}
+.fchip:hover{background:var(--fill-2)}
+.fchip.on{border-color:var(--hi);background:var(--hi);color:#fff}
+.fchip .c{margin-left:auto;font-family:var(--mono);font-size:10.5px;opacity:.7}
+.fcol{display:flex;flex-direction:column;gap:5px}
+.note{font-size:11.5px;color:var(--ink-3)}
+
+/* -------------------------------------------------------- la fenêtre */
+.scrim{position:fixed;inset:0;background:rgba(20,20,20,.34);display:grid;place-items:center;z-index:90;
+  backdrop-filter:blur(1.5px)}
+.scrim[hidden]{display:none}
+.modal{width:470px;background:var(--paper);border-radius:13px;border:1px solid var(--line);
+  box-shadow:0 18px 50px rgba(0,0,0,.22);overflow:hidden}
+.modal .mh{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line-2)}
+.modal .mh b{font-size:13.5px;font-weight:600}
+.modal .mh .x{margin-left:auto;cursor:pointer;color:var(--ink-3);display:grid;place-items:center;
+  width:24px;height:24px;border-radius:6px}
+.modal .mh .x:hover{background:var(--fill-2);color:var(--ink)}
+.modal .mb{padding:13px 14px;display:flex;flex-direction:column;gap:13px}
+.modal textarea{width:100%;min-height:62px;resize:none;border:0;font:inherit;font-size:15px;line-height:1.4;
+  color:var(--ink)}
+.modal textarea:focus{outline:none}
+.modal textarea::placeholder{color:var(--ink-3)}
+.fld .lab{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.pers{display:flex;gap:6px;flex-wrap:wrap}
+.pchip{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 10px 0 4px;border-radius:999px;
+  border:1px solid var(--line-2);background:var(--paper);font:inherit;font-size:12.5px;cursor:pointer}
+.pchip:hover{background:var(--fill-2)}
+.pchip.on{border-color:var(--hi);background:var(--hi);color:#fff}
+.kinds{display:flex;gap:6px}
+.kind{flex:1;border:1px solid var(--line-2);border-radius:9px;padding:8px 9px;cursor:pointer;background:var(--paper);
+  text-align:left}
+.kind:hover{background:var(--fill-2)}
+.kind.on{border-color:var(--hi);box-shadow:inset 0 0 0 1px var(--hi)}
+.kind b{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500}
+.kind span{display:block;margin-top:2px;font-size:11px;color:var(--ink-3)}
+.modal .mf{display:flex;align-items:center;gap:9px;padding:10px 14px;border-top:1px solid var(--line-2);
+  background:var(--fill-2)}
+.modal .mf .stamp{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.modal .mf .r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.kbd{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line-2);border-radius:4px;padding:0 4px;
+  color:var(--ink-3);background:var(--paper)}
+
+.foot{margin-top:20px;border:1px solid var(--line-2);border-radius:9px;background:var(--paper);padding:12px 14px;
+  font-size:12.5px;color:var(--ink-2)}
+.foot b{color:var(--ink)}
+.foot ul{margin:7px 0 0 16px}
+.foot li{margin-bottom:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Carnet — une seule mémoire, trois écrans</h1>
+  <p class="sub">Trois besoins: <b>les échéances</b> qu'on se donne, <b>les petites choses à cocher</b> dans
+    la journée, et <b>la trace</b> de ce qui a été fait, pour répondre dans deux mois à « on a changé ça quand,
+    et pourquoi? ». Ce ne sont pas trois outils: c'est une seule liste d'entrées, chacune avec une date de
+    création, parfois une échéance, parfois une date de clôture. Les écrans ci-dessous lisent cette liste de
+    trois façons.</p>
+
+  <div class="rec">
+    <div class="rc">
+      <div class="w">Page coordination (plans)</div>
+      <div class="h" id="r1h"></div>
+      <p>Là où les entrées <b>naissent</b>. L'appel arrive, on épingle sur le plan, on écrit. La marge sert à
+        ça et ne doit rien faire d'autre: pas de liste du jour, pas d'archives. Chaque note épinglée part
+        aussi dans le journal, avec son niveau et son unité.</p>
+    </div>
+    <div class="rc">
+      <div class="w">Page échéancier</div>
+      <div class="h" id="r2h"></div>
+      <p>Le <b>temps</b>. Semaine et mois à gauche pour les dates qu'on se donne, et à droite — au-dessus des
+        échéances, pas en dessous — la liste du jour qu'on coche. Les deux cohabitent parce qu'on les regarde
+        au même moment: le matin.</p>
+    </div>
+    <div class="rc">
+      <div class="w">Page journal <i style="color:var(--vert-ink)">(nouvelle)</i></div>
+      <div class="h" id="r3h"></div>
+      <p>La <b>mémoire</b>. Tout ce qui est coché, répondu, déposé y tombe automatiquement, daté et signé.
+        On n'y écrit jamais directement: on le fouille. C'est la page qui répond à l'appel de dans deux mois.</p>
+    </div>
+  </div>
+
+  <div class="app" id="app"></div>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="foot">
+    <b>Ce que j'ai tranché, et pourquoi:</b>
+    <ul>
+      <li><b>Pas de date à saisir.</b> La fenêtre demande deux choses: quoi, et qui. La date est celle du moment
+        — c'est ça la valeur d'un carnet. Une échéance, c'est l'exception: on la pose après coup en glissant
+        l'entrée sur un jour du calendrier.</li>
+      <li><b>Le journal est une page, pas un panneau.</b> Une colonne de 300 px ne se fouille pas. La question
+        « quand a-t-on fait ça » arrive rarement mais exige de la place: recherche, filtre par personne, par
+        unité, et des mois entiers à faire défiler.</li>
+      <li><b>Rien ne s'efface.</b> Cocher ne supprime pas: ça déplace dans le journal, avec l'heure et l'auteur.
+        Décocher n'enlève pas la ligne du journal, ça en ajoute une.</li>
+      <li><b>La liste du jour passe au-dessus des échéances.</b> À deux ou trois personnes, ce qu'on fait
+        aujourd'hui pèse plus que ce qui est dû dans trois semaines.</li>
+    </ul>
+  </div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+const icon = (n, cls = "") => `<svg class="lu ${cls}"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["calendar-days", "list-checks", "archive", "plus", "x", "check", "search", "phone-call",
+    "pencil-line", "flag", "chevron-left", "chevron-right", "map-pin", "user", "clock", "corner-down-left",
+    "circle-check-big", "layers", "undo-2", "filter"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* A team of two or three: the whole people list fits in the window, so no
+   search field, no autocomplete — three buttons. */
+const PEOPLE = [
+  { id: "GB", name: "Guy", role: "technicien 3D" },
+  { id: "CL", name: "Caroline", role: "chargée de projet" },
+  { id: "DM", name: "David", role: "atelier" },
+];
+const avatar = (id, cls = "") => {
+  const p = PEOPLE.find((x) => x.id === id);
+  return `<span class="who w-${id} ${cls}" title="${p ? p.name : id}">${id[0]}</span>`;
+};
+const nameOf = (id) => (PEOPLE.find((x) => x.id === id) || { name: id }).name;
+
+const NOW = new Date("2026-11-14T20:28:00");
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const TODAY = iso(NOW);
+const M3 = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre",
+  "octobre", "novembre", "décembre"];
+const DOW = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
+const dOf = (s) => { const [y, m, d] = s.slice(0, 10).split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = dOf(s); d.setDate(d.getDate() + n); return iso(d); };
+const dayLabel = (k) => `${dOf(k).getDate()} ${MONTHS[dOf(k).getMonth()]}`;
+// stamps are local wall-clock strings; toISOString would shift them by the
+// UTC offset and a carnet that lies about the hour is worthless
+const stamp = (minutes = 0) => {
+  const d = new Date(NOW.getTime() + minutes * 60000);
+  return `${iso(d)}T${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
+const hm = (stamp) => new Date(stamp).toTimeString().slice(0, 5);
+const relDay = (k) => k === TODAY ? "aujourd'hui" : k === addDays(TODAY, -1) ? "hier" : dayLabel(k);
+
+/* One entry shape for the three screens:
+   kind      todo | deadline | change | call
+   due       set only when someone promised a date
+   done      timestamp; the moment it lands in the journal */
+const KEY = "fitte:carnet";
+const SEED = [
+  { kind: "call", title: "Appel de l'entrepreneur: dégagement devant la porte du 507 à 860 mm, il en faut 900",
+    who: ["CL"], created: "2026-09-03T09:14", source: "niv. 5 · unité 507", done: "2026-09-03T09:14" },
+  { kind: "change", title: "Corridor du 5e redessiné: porte du 507 déplacée de 40 mm vers l'est",
+    who: ["GB"], created: "2026-09-04T11:02", source: "niv. 5 · plan d'unités", done: "2026-09-04T16:40",
+    note: "Suite à l'appel du 3 sept. Vérifié avec la 3.3.1.18." },
+  { kind: "todo", title: "Réémettre le plan du 5e à l'entrepreneur", who: ["CL"], created: "2026-09-04T16:45",
+    done: "2026-09-04T17:20" },
+  { kind: "change", title: "Hauteur des garde-corps portée à 1 070 mm sur les balcons nord",
+    who: ["GB"], created: "2026-09-21T14:30", source: "niv. 3 à 8 · élévations", done: "2026-09-22T10:05" },
+  { kind: "call", title: "Appel de l'arpenteur: la ligne d'implantation bouge de 0,2 m au sud",
+    who: ["DM"], created: "2026-10-06T08:40", source: "site", done: "2026-10-06T08:40" },
+  { kind: "change", title: "Implantation reprise avec le relevé du 6 octobre", who: ["GB", "DM"],
+    created: "2026-10-06T13:10", source: "site · plan d'implantation", done: "2026-10-07T09:30" },
+  { kind: "todo", title: "Envoyer le tableau des superficies à la chargée", who: ["GB"],
+    created: "2026-11-03T10:12", done: "2026-11-03T15:02" },
+  { kind: "change", title: "Mix de typologies arrêté: 4½ ramenés de 7 à 5 au niveau 2",
+    who: ["CL"], created: "2026-11-05T11:20", source: "niv. 2", done: "2026-11-05T11:55" },
+  { kind: "todo", title: "Relire les notes de l'arrondissement sur la marge avant", who: ["CL"],
+    created: "2026-11-13T08:55", done: "2026-11-13T17:40" },
+  { kind: "todo", title: "Imprimer la coupe de rue pour la rencontre", who: ["DM"], created: "2026-11-14T08:12" },
+  { kind: "todo", title: "Rappeler l'ingénieur pour le type de construction", who: ["CL"],
+    created: "2026-11-14T08:30" },
+  { kind: "todo", title: "Nettoyer les calques du 3e avant l'émission", who: ["GB"], created: "2026-11-14T09:40" },
+  { kind: "deadline", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: ["GB"],
+    created: "2026-11-10T09:00", due: "2026-11-14", prio: "haute", source: "3.3.1.18" },
+  { kind: "deadline", title: "Largeur libre des portes du parcours sans obstacles", who: ["GB"],
+    created: "2026-11-10T09:02", due: "2026-11-14", prio: "haute", source: "3.8.1.3" },
+  { kind: "deadline", title: "Élévations avec matériaux au comité", who: ["GB", "DM"],
+    created: "2026-11-02T10:00", due: "2026-11-09", prio: "moyenne", done: "2026-11-09T16:20" },
+  { kind: "deadline", title: "Confirmer le type de construction pour 8 étages", who: ["CL"],
+    created: "2026-11-10T09:05", due: "2026-11-17", prio: "haute", source: "3.2.1.1" },
+  { kind: "deadline", title: "Recompter les cases après réduction pour le métro", who: ["CL"],
+    created: "2026-11-10T09:06", due: "2026-11-20", prio: "moyenne", source: "art. 71" },
+  { kind: "deadline", title: "Note à l'urbaniste sur la marge avant", who: ["CL"],
+    created: "2026-11-11T14:00", due: "2026-11-24", prio: "moyenne", source: "art. 22" },
+  { kind: "deadline", title: "Plans d'émission pour permis", who: ["GB", "DM"],
+    created: "2026-11-11T14:02", due: "2026-12-04", prio: "haute" },
+  { kind: "deadline", title: "Dépôt de la demande de permis", who: ["CL"],
+    created: "2026-11-11T14:03", due: "2026-12-15", prio: "haute" },
+].map((e, i) => ({ id: `s${i}`, ...e }));
+
+let E = load();
+let S = { tab: "ech", view: "semaine", anchor: TODAY, sel: null, modal: null,
+  q: "", fwho: null, fkind: null, me: "GB" };
+
+function load() {
+  try { const raw = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(raw) && raw.length) return raw; }
+  catch (e) { /* a broken store must not break the page: fall back to seed */ }
+  return SEED.slice();
+}
+const save = () => localStorage.setItem(KEY, JSON.stringify(E));
+
+const openTodos = () => E.filter((e) => e.kind === "todo" && !e.done);
+const todayTodos = () => E.filter((e) => e.kind === "todo" && (!e.done || e.done.slice(0, 10) === TODAY))
+  .sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0) || a.created.localeCompare(b.created));
+const deadlines = () => E.filter((e) => e.kind === "deadline" && e.due)
+  .sort((a, b) => a.due.localeCompare(b.due));
+const dueOn = (k) => deadlines().filter((e) => e.due === k);
+const journal = () => E.filter((e) => e.done)
+  .filter((e) => !S.fwho || (e.who || []).includes(S.fwho))
+  .filter((e) => !S.fkind || e.kind === S.fkind)
+  .filter((e) => { const q = S.q.trim().toLowerCase();
+    return !q || (e.title + " " + (e.source || "") + " " + (e.note || "")).toLowerCase().includes(q); })
+  .sort((a, b) => b.done.localeCompare(a.done));
+
+/* ------------------------------------------------------------- the frame */
+const topBar = () => `<div class="top">
+  <span class="proj">Le Baldwin III</span>
+  <button class="tab ${S.tab === "coord" ? "on" : ""}" data-tab="coord">${icon("layers")}Coordination</button>
+  <button class="tab ${S.tab === "ech" ? "on" : ""}" data-tab="ech">${icon("calendar-days")}Échéancier</button>
+  <button class="tab ${S.tab === "jrn" ? "on" : ""}" data-tab="jrn">${icon("archive")}Journal</button>
+  <span class="r">
+    ${PEOPLE.map((p) => `<span class="who w-${p.id}" title="${p.name} — ${p.role}"
+      style="${S.me === p.id ? "" : "opacity:.4"}" data-me="${p.id}">${p.id[0]}</span>`).join("")}
+    <button class="btn dark" data-new>${icon("plus")}Nouvelle entrée <span class="kbd"
+      style="border-color:#444;color:#bbb;background:transparent">N</span></button>
+  </span></div>`;
+
+/* ------------------------------------------------------- écran échéancier */
+function weekDays() {
+  const d = dOf(S.anchor);
+  const monday = addDays(S.anchor, -((d.getDay() + 6) % 7));
+  return Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+}
+function monthDays() {
+  const d = dOf(S.anchor);
+  const first = new Date(d.getFullYear(), d.getMonth(), 1);
+  const lead = (first.getDay() + 6) % 7;
+  return Array.from({ length: 42 }, (_, i) => {
+    const x = new Date(d.getFullYear(), d.getMonth(), 1 - lead + i);
+    return { k: iso(x), out: x.getMonth() !== d.getMonth() };
+  });
+}
+const evHTML = (e) => `<button class="ev ${e.prio || ""} ${e.done ? "done" : ""} ${S.sel === e.id ? "sel" : ""}"
+  data-ent="${e.id}" title="${e.title}" draggable="true">
+  <span class="n">${e.title}</span>
+  <span class="w">${(e.who || []).map((w) => avatar(w, "xs")).join("")}</span></button>`;
+
+function screenEch() {
+  const days = weekDays();
+  const span = S.view === "semaine"
+    ? `semaine du ${dayLabel(days[0])} au ${dayLabel(days[6])}`
+    : `${MONTHS[dOf(S.anchor).getMonth()]} ${dOf(S.anchor).getFullYear()}`;
+  const td = todayTodos();
+  const openCount = td.filter((e) => !e.done).length;
+  const next = deadlines().filter((e) => !e.done);
+  return `<div class="head">
+      <h2>Échéancier</h2>
+      <span class="m">${next.length} échéances ouvertes · ${openCount} à faire aujourd'hui</span>
+      <span class="r">
+        <span class="seg">${["semaine", "mois"].map((v) =>
+          `<button data-view="${v}" class="${S.view === v ? "on" : ""}">${v[0].toUpperCase() + v.slice(1)}</button>`).join("")}</span>
+        <span class="nav" data-mv="-1">${icon("chevron-left")}</span>
+        <span class="nav" data-mv="1">${icon("chevron-right")}</span>
+        <button class="btn" data-today>Aujourd'hui</button>
+      </span></div>
+    <div class="ech">
+      <div class="cal">
+        <div class="calhd">${icon("calendar-days")}<span class="t">${span}</span>
+          <span class="r note" style="color:var(--ink-3);font-size:11.5px">glissez une entrée sur un jour pour lui donner une échéance</span></div>
+        ${S.view === "semaine" ? `<div class="wk">
+          ${days.map((k) => `<div class="dh ${k === TODAY ? "today" : ""}">${DOW[(dOf(k).getDay() + 6) % 7]}
+            ${dOf(k).getDate()}</div>`).join("")}
+          ${days.map((k) => {
+            const we = [5, 6].includes((dOf(k).getDay() + 6) % 7);
+            return `<div class="dc ${we ? "we" : ""} ${k === S.anchor ? "sel" : ""}" data-day="${k}" data-drop>
+              ${dueOn(k).map(evHTML).join("")}</div>`;
+          }).join("")}
+        </div>` : `<div class="mon">
+          ${DOW.map((d) => `<div class="dh">${d}</div>`).join("")}
+          ${monthDays().map(({ k, out }) => `<div class="dc ${out ? "out" : ""} ${k === S.anchor ? "sel" : ""}"
+            data-day="${k}" data-drop>
+            <div class="dn">${k === TODAY ? `<span class="b">${dOf(k).getDate()}</span>` : dOf(k).getDate()}</div>
+            ${dueOn(k).map(evHTML).join("")}</div>`).join("")}
+        </div>`}
+      </div>
+      <div class="rail">
+        <div class="rsec grow">
+          <div class="rh">${icon("list-checks")}À faire aujourd'hui
+            <span class="c">${openCount} ouverte${openCount > 1 ? "s" : ""}</span></div>
+          <div class="quick">
+            <input id="qadd" placeholder="Une chose à faire…" autocomplete="off">
+            ${PEOPLE.map((p) => `<span class="who w-${p.id}" data-me="${p.id}" title="${p.name}"
+              style="${S.me === p.id ? "" : "opacity:.35"};cursor:pointer">${p.id[0]}</span>`).join("")}
+          </div>
+          <div class="body">
+            ${td.map((e) => `<div class="todo ${e.done ? "done" : ""}" data-check="${e.id}" draggable="true">
+              <span class="box">${icon("check")}</span>
+              <span class="t">${e.title}
+                <span class="m">${e.done ? `coché à ${hm(e.done)}` : `ajoutée à ${hm(e.created)}`}</span></span>
+              <span class="av">${(e.who || []).map((w) => avatar(w, "xs")).join("")}</span>
+            </div>`).join("") || `<div class="empty">Rien pour aujourd'hui.</div>`}
+          </div>
+        </div>
+        <div class="rsec" style="flex:0 0 auto;max-height:290px;display:flex;flex-direction:column">
+          <div class="rh">${icon("flag")}Échéances<span class="c">${next.length}</span></div>
+          <div style="overflow:auto">
+            ${next.map((e) => `<div class="erow ${e.due < TODAY ? "late" : ""} ${S.sel === e.id ? "sel" : ""}"
+              data-ent="${e.id}" draggable="true">
+              <span class="t">${e.title}<span class="m">${(e.who || []).map(nameOf).join(", ")}${e.source ? ` · ${e.source}` : ""}</span></span>
+              <span class="d">${dOf(e.due).getDate()} ${M3[dOf(e.due).getMonth()]}</span>
+            </div>`).join("")}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ----------------------------------------------------------- écran journal */
+const KIND_ICON = { todo: "circle-check-big", change: "pencil-line", call: "phone-call", deadline: "flag" };
+const KIND_WORD = { todo: "coché", change: "modifié", call: "appel reçu", deadline: "échéance remplie" };
+function screenJrn() {
+  const rows = journal();
+  const byDay = {};
+  rows.forEach((e) => { const k = e.done.slice(0, 10); (byDay[k] = byDay[k] || []).push(e); });
+  const keys = Object.keys(byDay).sort((a, b) => b.localeCompare(a));
+  let lastMonth = "";
+  const counts = (fn) => E.filter((e) => e.done).filter(fn).length;
+  return `<div class="head">
+      <h2>Journal</h2>
+      <span class="m">${E.filter((e) => e.done).length} entrées · tout ce qui est coché, répondu ou déposé</span>
+    </div>
+    <div class="jrn">
+      <div class="jcol">
+        <div class="jbar">
+          <span class="find">${icon("search")}<input id="jq" value="${S.q}" placeholder="garde-corps, 507, implantation…"></span>
+          ${S.q || S.fwho || S.fkind ? `<button class="btn sm" data-clear>${icon("x")}Effacer</button>` : ""}
+        </div>
+        <div class="jbody">
+          ${keys.map((k) => {
+            const m = `${MONTHS[dOf(k).getMonth()]} ${dOf(k).getFullYear()}`;
+            const head = m !== lastMonth ? (lastMonth = m, `<div class="jmon">${m}</div>`) : "";
+            return head + `<div class="jday">
+              <div class="g"><b>${dOf(k).getDate()} ${M3[dOf(k).getMonth()]}</b>
+                ${DOW[(dOf(k).getDay() + 6) % 7]}${k === TODAY ? " · aujourd'hui" : ""}</div>
+              <div class="jentries">${byDay[k].map((e) => `<div class="jen">
+                <span class="ic k-${e.kind}">${icon(KIND_ICON[e.kind])}</span>
+                <span class="b"><span class="t">${e.title}</span>
+                  <span class="m">${KIND_WORD[e.kind]} par ${(e.who || []).map(nameOf).join(", ")}
+                    ${e.source ? `<span class="src">${icon("map-pin")} ${e.source}</span>` : ""}
+                    ${e.note ? `<span style="color:var(--ink-2)">${e.note}</span>` : ""}</span></span>
+                <span class="h">${hm(e.done)}</span>
+              </div>`).join("")}</div>
+            </div>`;
+          }).join("") || `<div class="empty">Rien ne correspond.</div>`}
+        </div>
+      </div>
+      <div class="jside">
+        <div><div class="lab" style="margin-bottom:6px">Qui</div>
+          <div class="fcol">${PEOPLE.map((p) => `<button class="fchip ${S.fwho === p.id ? "on" : ""}"
+            data-fwho="${p.id}">${avatar(p.id)}${p.name}
+            <span class="c">${counts((e) => (e.who || []).includes(p.id))}</span></button>`).join("")}</div></div>
+        <div><div class="lab" style="margin-bottom:6px">Quoi</div>
+          <div class="fcol">${Object.entries(KIND_ICON).map(([k, ic]) => `<button class="fchip ${S.fkind === k ? "on" : ""}"
+            data-fkind="${k}">${icon(ic)}${{ todo: "À faire cochées", change: "Modifications", call: "Appels reçus", deadline: "Échéances" }[k]}
+            <span class="c">${counts((e) => e.kind === k)}</span></button>`).join("")}</div></div>
+        <div class="note">Le journal ne s'écrit pas à la main. Une entrée y tombe quand elle est cochée,
+          et personne ne peut l'en retirer — décocher ajoute une ligne, ça n'en efface pas.</div>
+      </div>
+    </div>`;
+}
+
+/* --------------------------------------------------------- écran plans */
+function screenCoord() {
+  return `<div class="head"><h2>Coordination — niveau 5</h2>
+    <span class="m">la marge reste la marge: on y écrit, et ça part dans le journal</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 330px;min-height:612px">
+      <div style="display:grid;place-items:center;color:var(--ink-3);border-right:1px solid var(--line-2);
+        background:repeating-linear-gradient(45deg,#fafafa 0 11px,#f4f4f4 11px 22px)">
+        Plan 2D + maquette 3D (écran existant)</div>
+      <div style="display:flex;flex-direction:column">
+        <div class="rh" style="display:flex;align-items:center;gap:7px;padding:9px 12px;font-size:12.5px;
+          border-bottom:1px solid var(--line-2)">${icon("pencil-line")}Dans la marge
+          <span style="margin-left:auto"><button class="btn sm" data-new>${icon("plus")}Épingler</button></span></div>
+        ${E.filter((e) => e.source && e.source.startsWith("niv. 5")).map((e) => `<div class="jen"
+          style="border-bottom:1px solid var(--line-2)">
+          <span class="ic k-${e.kind}">${icon(KIND_ICON[e.kind])}</span>
+          <span class="b"><span class="t">${e.title}</span>
+            <span class="m">${(e.who || []).map(nameOf).join(", ")} · ${relDay(e.created.slice(0, 10))}
+              <span class="src">${icon("map-pin")} ${e.source}</span></span></span></div>`).join("")}
+        <div class="empty">Une note épinglée ici apparaît dans le journal le jour même, avec son niveau et
+          son unité. C'est la même entrée, pas une copie.</div>
+      </div>
+    </div>`;
+}
+
+/* ------------------------------------------------- la fenêtre de création */
+const KINDS = [
+  { k: "todo", t: "À faire", ic: "circle-check-big", d: "se coche aujourd'hui" },
+  { k: "change", t: "Modification", ic: "pencil-line", d: "ce qu'on vient de changer" },
+  { k: "call", t: "Appel reçu", ic: "phone-call", d: "ce qu'on vient de nous demander" },
+];
+function modalHTML() {
+  const m = S.modal;
+  const stamp = `${DOW[(NOW.getDay() + 6) % 7]} ${NOW.getDate()} ${MONTHS[NOW.getMonth()]} à ${hm(NOW)}`;
+  return `<div class="modal" role="dialog" aria-label="Nouvelle entrée">
+    <div class="mh">${icon("plus")}<b>Nouvelle entrée</b>
+      <span class="x" data-close>${icon("x")}</span></div>
+    <div class="mb">
+      <textarea id="mtitle" placeholder="Quoi? — « le garde-corps du 5e passe à 1 070 »">${m.title}</textarea>
+      <div class="fld"><div class="lab">Qui s'en occupe</div>
+        <div class="pers">${PEOPLE.map((p) => `<button class="pchip ${m.who.includes(p.id) ? "on" : ""}"
+          data-pick="${p.id}">${avatar(p.id)}${p.name}</button>`).join("")}</div></div>
+      <div class="fld"><div class="lab">Quelle sorte</div>
+        <div class="kinds">${KINDS.map((k) => `<button class="kind ${m.kind === k.k ? "on" : ""}"
+          data-kind="${k.k}"><b>${icon(k.ic)}${k.t}</b><span>${k.d}</span></button>`).join("")}</div></div>
+    </div>
+    <div class="mf">
+      <span class="stamp">${icon("clock")}Datée du ${stamp}</span>
+      <span class="r"><span class="kbd">⌘↵</span>
+        <button class="btn" data-close>Annuler</button>
+        <button class="btn dark" data-saveent>${icon("corner-down-left")}Enregistrer</button></span>
+    </div></div>`;
+}
+
+/* ----------------------------------------------------------------- render */
+function render(keepFocus) {
+  const sel = document.activeElement && document.activeElement.id;
+  const caret = sel && document.activeElement.selectionStart;
+  document.getElementById("r1h").innerHTML = `${icon("pencil-line")}Écrire sur le plan`;
+  document.getElementById("r2h").innerHTML = `${icon("calendar-days")}Se donner des dates`;
+  document.getElementById("r3h").innerHTML = `${icon("archive")}Se souvenir`;
+  document.getElementById("app").innerHTML = topBar()
+    + (S.tab === "ech" ? screenEch() : S.tab === "jrn" ? screenJrn() : screenCoord());
+  const scrim = document.getElementById("scrim");
+  scrim.hidden = !S.modal;
+  scrim.innerHTML = S.modal ? modalHTML() : "";
+  if (S.modal) { const ta = document.getElementById("mtitle"); ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length); }
+  else if (keepFocus && sel) { const el = document.getElementById(sel);
+    if (el) { el.focus(); if (caret != null && el.setSelectionRange) el.setSelectionRange(caret, caret); } }
+}
+
+function addEntry({ title, who, kind }) {
+  if (!title.trim()) return;
+  E.unshift({ id: "e" + Date.now(), kind, title: title.trim(), who: who.length ? who : [S.me],
+    created: stamp(E.length),
+    ...(kind === "todo" ? {} : { done: stamp(E.length) }) });
+  save();
+}
+
+document.addEventListener("click", (e) => {
+  const hit = (s) => e.target.closest(s);
+  if (hit("[data-new]")) { S.modal = { title: "", who: [S.me], kind: "todo" }; return render(); }
+  if (hit("[data-close]") || e.target.id === "scrim") { S.modal = null; return render(); }
+  const pick = hit("[data-pick]");
+  if (pick) { const id = pick.dataset.pick;
+    S.modal.title = document.getElementById("mtitle").value;
+    S.modal.who = S.modal.who.includes(id) ? S.modal.who.filter((x) => x !== id) : [...S.modal.who, id];
+    return render(); }
+  const kind = hit("[data-kind]");
+  if (kind) { S.modal.title = document.getElementById("mtitle").value;
+    S.modal.kind = kind.dataset.kind; return render(); }
+  if (hit("[data-saveent]")) { S.modal.title = document.getElementById("mtitle").value;
+    addEntry(S.modal); S.modal = null; return render(); }
+
+  const tab = hit("[data-tab]"); if (tab) { S.tab = tab.dataset.tab; return render(); }
+  const me = hit("[data-me]"); if (me) { S.me = me.dataset.me; return render(); }
+  const view = hit("[data-view]"); if (view) { S.view = view.dataset.view; return render(); }
+  const mv = hit("[data-mv]");
+  if (mv) { const n = Number(mv.dataset.mv);
+    S.anchor = S.view === "semaine" ? addDays(S.anchor, 7 * n)
+      : iso(new Date(dOf(S.anchor).getFullYear(), dOf(S.anchor).getMonth() + n, 1));
+    return render(); }
+  if (hit("[data-today]")) { S.anchor = TODAY; return render(); }
+
+  const check = hit("[data-check]");
+  if (check) { const ent = E.find((x) => x.id === check.dataset.check);
+    // ticking is not deleting: it stamps the entry and the journal picks it up
+    ent.done = ent.done ? null : stamp(62);
+    if (!ent.done) delete ent.done;
+    save(); return render(); }
+  const ent = hit("[data-ent]"); if (ent) { S.sel = S.sel === ent.dataset.ent ? null : ent.dataset.ent; return render(); }
+  const fw = hit("[data-fwho]"); if (fw) { S.fwho = S.fwho === fw.dataset.fwho ? null : fw.dataset.fwho; return render(); }
+  const fk = hit("[data-fkind]"); if (fk) { S.fkind = S.fkind === fk.dataset.fkind ? null : fk.dataset.fkind; return render(); }
+  if (hit("[data-clear]")) { S.q = ""; S.fwho = null; S.fkind = null; return render(); }
+});
+
+document.addEventListener("input", (e) => {
+  if (e.target.id === "jq") { S.q = e.target.value; render(true); }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && S.modal) { S.modal = null; return render(); }
+  if (S.modal && e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+    S.modal.title = document.getElementById("mtitle").value;
+    addEntry(S.modal); S.modal = null; return render();
+  }
+  if (e.target.id === "qadd" && e.key === "Enter") {
+    // the quick line is the same window with two fields pre-answered
+    addEntry({ title: e.target.value, who: [S.me], kind: "todo" });
+    e.target.value = ""; render(true); return;
+  }
+  const typing = /^(INPUT|TEXTAREA)$/.test(e.target.tagName);
+  if (!typing && !S.modal && (e.key === "n" || e.key === "N")) {
+    e.preventDefault(); S.modal = { title: "", who: [S.me], kind: "todo" }; render();
+  }
+});
+
+/* dragging an entry onto a day is how an echéance gets its date; no date
+   field anywhere in the product */
+document.addEventListener("dragstart", (e) => {
+  const row = e.target.closest("[data-ent],[data-check]");
+  if (!row) return;
+  e.dataTransfer.setData("text/plain", row.dataset.ent || row.dataset.check);
+});
+document.addEventListener("dragover", (e) => { if (e.target.closest("[data-drop]")) e.preventDefault(); });
+document.addEventListener("drop", (e) => {
+  const cell = e.target.closest("[data-drop]"); if (!cell) return;
+  const ent = E.find((x) => x.id === e.dataTransfer.getData("text/plain")); if (!ent) return;
+  ent.kind = "deadline"; ent.due = cell.dataset.day; ent.prio = ent.prio || "moyenne";
+  save(); render();
+});
+
+sprite();
+render();
+</script>
+</body>
+</html>
