@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { open, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 
 /* The folder is read when the page renders: on the dev server that is every
@@ -15,6 +15,19 @@ type Page = {
   bytes: number;
 };
 
+// Only the first 4 kB of each file is read: the title lives in the head, and
+// some prototypes are a quarter of a megabyte.
+async function entete(full: string): Promise<string> {
+  const fh = await open(full, "r");
+  try {
+    const tampon = Buffer.alloc(4096);
+    const { bytesRead } = await fh.read(tampon, 0, 4096, 0);
+    return tampon.subarray(0, bytesRead).toString("utf8");
+  } finally {
+    await fh.close();
+  }
+}
+
 async function lire(): Promise<Page[]> {
   const entries = await readdir(DOSSIER);
   const pages = await Promise.all(
@@ -22,10 +35,7 @@ async function lire(): Promise<Page[]> {
       .filter((f) => f.endsWith(".html"))
       .map(async (file) => {
         const full = path.join(DOSSIER, file);
-        const [info, head] = await Promise.all([
-          stat(full),
-          readFile(full, "utf8").then((s) => s.slice(0, 4000)),
-        ]);
+        const [info, head] = await Promise.all([stat(full), entete(full)]);
         const match = head.match(/<title>([\s\S]*?)<\/title>/i);
         return {
           file,
