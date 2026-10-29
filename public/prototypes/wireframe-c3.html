@@ -610,6 +610,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
   color:var(--ink-2);cursor:pointer;flex:0 0 26px}
 .zb:hover{background:var(--fill);color:var(--ink)}
 .zb svg{width:14px;height:14px}
+.mtools{position:absolute;left:10px;top:10px;z-index:7;display:flex;gap:4px;padding:4px;
+  background:var(--paper);border:1px solid var(--line-2);border-radius:12px}
+.mtools .zb{width:52px;height:52px;flex:0 0 52px;border-radius:8px}
+.mtools .zb svg{width:28px;height:28px}
+.mtools .zb.on{background:var(--fill);color:var(--ink)}
+[data-fi="low"] .mtools{display:none}
 /* The corner view, beside the column, never under it: the whole drawing at
    a glance and the rectangle of what is on screen. Flat, framed, opaque. */
 .mini{position:absolute;right:50px;bottom:10px;z-index:5;width:132px;background:var(--paper);
@@ -629,16 +635,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
   pointer-events:none;overflow:visible}
 .north circle,.north polygon{fill:none;stroke:var(--ink);stroke-width:1.7}
 .north line{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
-/* Level markers lie over the model like the annotation on a section: a thin
-   rule at the top of the slab and the level's name at the end of it. They
-   are drawn in pixel coordinates by the viewer, which is the only thing
-   that knows where the camera is. */
-.lvls{position:absolute;inset:0;z-index:4;pointer-events:none}
-.lvls line{stroke:var(--ink-2);stroke-width:1;stroke-dasharray:3 3}
-.lvls text{fill:var(--ink-2);font-size:10px;font-family:var(--mono)}
-.lvls .on line{stroke:#5d6c0a;stroke-dasharray:none;stroke-width:1.4}
-.lvls .on text{fill:#5d6c0a;font-weight:500}
-[data-fi="low"] .lvls{display:none}
 
 /* ---------------------------------------------------------- the margin
    Notes live beside the drawings, never on top of them: the margin takes
@@ -775,6 +771,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 [data-fi="high"] .btnw.solid.go{background:#8ba00f;border-color:#8ba00f;color:#fff}
 [data-fi="high"] .listrow.on{background:#eef1e0}
 [data-fi="high"] .listrow .dot{background:#8ba00f}
+/* The selected unit's number wears the plan outline's green, so the list,
+   the plan and the model mark the one unit the same way. */
+[data-fi="high"] .ucard.on .ub{background:#8ba00f;border-color:#8ba00f;color:#fff}
 
 /* ------------------------------------------------- dark mode, exceptions
    Everything else turns over through the tokens. These do not: the model's
@@ -925,6 +924,7 @@ const V = {
   /* How close the camera is to the model, 0 far to 100 near. The slider on
      the right edge writes it; orbiting or wheeling writes it back. */
   mzoom: 40,
+  mtool: "orbit",    // what a left drag on the 3D pane does: "orbit" or "pan"
   /* The zoom bars have no stored state: they show themselves when the hand
      is on the drawing and leave on their own. */
   query: "",         // the text in the list search
@@ -990,7 +990,9 @@ function sprite() {
     /* the scope switch and the real .csv it exports */
     "download",
     /* Codes: copying an article with its notes, writing to the person who answers for it */
-    "copy", "mail"];
+    "copy", "mail",
+    /* the 3D pane's drag tools: orbit, move */
+    "rotate-3d", "move"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
     if (!node) return "";
@@ -1031,6 +1033,9 @@ const SCREENS = {
     icon: "calendar-check",
     regions: ["header", "content"],
     steps: { content: 1 },
+    /* Studio scope: what is due this week falls on a person, not on a
+       building, so it sits beside the project list and not inside one. */
+    studio: true,
   },
 };
 
@@ -1589,7 +1594,7 @@ const NAV_ICONS = {
   "Échéancier": [["Calendar", "calendar-check"], ["Timer", "timer"], ["Clock", "calendar-clock"],
     ["Checklist", "list-checks"], ["Flag", "flag"]],
 };
-const NAV = Object.keys(NAV_ICONS);
+const NAV = Object.keys(NAV_ICONS).filter((n) => !SCREENS[n].studio);
 const navIcon = (name) => V.icons[name] || NAV_ICONS[name][0][1];
 
 /* The cross-screen journey the prototype is built around. Everything else
@@ -2121,7 +2126,7 @@ const HOMES = {
 };
 
 function navHTML() {
-  if (SCREENS[V.screen].index) return "";
+  if (SCREENS[V.screen].index || SCREENS[V.screen].studio) return "";
   const mode = V.nav.layout;
   if (mode === "Top bar only" || mode === "Tabs only, no rail"
     || mode === "Two rows, no rail") return "";
@@ -2152,10 +2157,14 @@ const CONTEXT = {
 
 function tabsHTML() {
   const mode = V.nav.layout;
-  if (mode === "Rail only, no tabs") return "";
+  /* The rail belongs to a project, so it never carries the studio level:
+     the studio strip is drawn even where tabs are off, or the week of the
+     whole office would have no door. */
+  const studio = SCREENS[V.screen].index || SCREENS[V.screen].studio;
+  if (mode === "Rail only, no tabs" && !studio) return "";
   const top = mode === "Top bar only";
   const ic = tabIcons();
-  const names = Object.keys(SCREENS).filter((n) => !SCREENS[n].index);
+  const names = Object.keys(SCREENS).filter((n) => !SCREENS[n].index && !SCREENS[n].studio);
   /* Icons off and labels away would leave an empty strip, so the short code
      stands in: a tab target never renders without something to read. */
   const bare = !ic && (V.nav.labels === "Hidden" || V.nav.labels === "Hover only");
@@ -2170,8 +2179,16 @@ function tabsHTML() {
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
   const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
-  if (SCREENS[V.screen].index) {
-    items = `<span class="crumb on hi">${icon("folder")}Tous les projets</span><span class="sp"></span>`;
+  if (studio) {
+    /* The studio strip: the projects and the week are siblings here, and
+       the project's own tabs are not in it at all. */
+    const stab = (name, label) => `<button data-screen="${name}" aria-current="${name === V.screen}"
+        title="${label}">${ic ? icon(SCREENS[name].icon) : ""}<span class="lo bar" style="width:46px"></span>
+        <span class="hi">${label}</span></button>`;
+    items = `<span class="crumb on hi">${icon("folder")}Tous les projets</span>
+      <span class="div"></span>
+      <div class="views">${stab("Projets", "Projets")}${stab("Échéancier", "Échéancier")}</div>
+      <span class="sp"></span>`;
   } else if (!views.length && mode !== "Two rows, no rail") {
     /* A screen that reads on one page has nothing to filter, so the strip
        carries the project's name and the way back, and no tabs at all. The
@@ -2403,11 +2420,13 @@ function contentHTML() {
         <line data-nneedle x1="0" y1="0" x2="0" y2="-14"></line>
         <text data-nlabel x="0" y="-21">N</text>
       </svg>`);
-      /* Where each floor sits, said on the model itself: a line at the top
-         of the slab, run out to the edge of the pane, and the level's name
-         at the end of it — the way a section is annotated. The SVG is empty
-         here; the viewer fills it once it knows where the camera is. */
-      const levelMarks = `<svg class="lvls hi" data-levels aria-hidden="true"></svg>`;
+      /* What a drag on the model does, top left where a hand reaches first:
+         turn around the building, or move across it. */
+      const mtools = `<div class="mtools" role="group" aria-label="Glisser pour">
+        ${[["orbit", "rotate-3d", "Orbiter : glisser pour tourner autour du bâtiment"],
+           ["pan", "move", "Déplacer : glisser pour déplacer la vue"]].map(([t, ic, tip]) =>
+          `<span class="zb ${V.mtool === t ? "on" : ""}" ${act("mtool", t)} title="${tip}" aria-pressed="${V.mtool === t}">${icon(ic)}</span>`).join("")}
+      </div>`;
       /* Which way is north, up, and along the façade: the three axes as the
          camera sees them, red X, green Y, blue Z, redrawn as it orbits. */
       const axes = `<svg class="axes hi" data-axes viewBox="-26 -26 52 52" aria-hidden="true">
@@ -2460,7 +2479,7 @@ function contentHTML() {
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
               </div>
               <div class="npins" data-npins></div>
-              ${levelMarks}${north("model")}${axes}${mini("model")}${zcol("model")}
+              ${mtools}${north("model")}${axes}${mini("model")}${zcol("model")}
             </div>`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
@@ -3059,9 +3078,9 @@ window.fitteSelectUnit = (unitStr) => {
   const level = Number(no.slice(0, -2));
   const suffix = Number(no.slice(-2));
   const rows = UNITS_BY_LEVEL[levelView(level)];
-  if (!rows) return;
+  if (!rows) return false;
   const rowIndex = rows.findIndex((r) => r[2] === suffix);
-  if (rowIndex < 0) return;
+  if (rowIndex < 0) return false;
   // A picked window must remain selectable even when the list is filtered.
   V.query = "";
   TYPOS.forEach((type) => {
@@ -3085,10 +3104,11 @@ window.fitteSelectUnit = (unitStr) => {
   document.querySelector(`[data-region="list"] [data-act="row"][data-value="${rowIndex}"]`)
     ?.scrollIntoView({ block: "nearest", inline: "nearest" });
   fitUnit(sameSheet);
+  return true;
 };
 
-/* The roof picked in the model: the same level switch the Toiture tab
-   makes, from whichever screen the page was on. */
+/* A floor or the roof picked in the model: the same level switch the
+   level tab makes, from whichever screen the page was on. */
 window.fitteSelectLevel = (level) => {
   const index = viewIndexOfLevel(level);
   if (index < 0) return;
@@ -3870,6 +3890,14 @@ function onClick(e) {
       window.fitteModel?.writeZoom(V.mzoom);
       return;
     }
+    case "mtool":
+      V.mtool = value;
+      document.querySelectorAll('[data-act="mtool"]').forEach((b) => {
+        b.classList.toggle("on", b.dataset.value === value);
+        b.setAttribute("aria-pressed", String(b.dataset.value === value));
+      });
+      window.fitteModel?.setTool(value);
+      return;
     /* The two steppers move the same numbers the sliders move, so they do
        not go through render: the drawing must not be rebuilt to be pushed
        one notch. */
