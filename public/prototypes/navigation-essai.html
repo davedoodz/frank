@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Essai de navigation — échéancier et historique</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Four navigations, one application. Everything below is the real app with
+   real drawings: switching option changes only where things live, never what
+   they are, so the comparison is made with the hands and not on paper. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e4e4e4;
+  --fill:#ededed; --fill-2:#f7f7f7; --page:#f4f4f4; --paper:#fff;
+  --dark:#1b1b1b;
+  --vert:#c3e05a; --vert-ink:#2f3a05; --vert-soft:#eef3dc;
+  --bleu:#2f4858; --bleu-soft:#e7eef2;
+  --rouge:#b4442f; --rouge-soft:#f7e8e4;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;padding:22px 20px 60px}
+.lu{width:15px;height:15px;flex:0 0 auto;stroke-width:1.7}
+.wrap{max-width:1320px;margin:0 auto}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-2);margin-top:5px;max-width:98ch}
+.sub b{color:var(--ink);font-weight:500}
+
+/* le banc d'essai */
+.bench{margin:15px 0 12px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:12px}
+.opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.opt{border:1px solid var(--line-2);border-radius:9px;background:var(--paper);padding:9px 10px;cursor:pointer;
+  text-align:left;font:inherit}
+.opt:hover{background:var(--fill-2)}
+.opt.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.opt .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.opt b{display:block;font-size:12.5px;font-weight:600;margin-top:1px}
+.opt span{display:block;font-size:11.5px;color:var(--ink-2);margin-top:3px}
+.opt .sc{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;
+  font-family:var(--mono);color:var(--ink-3)}
+.opt.on .sc{color:var(--vert-ink)}
+.mission{border:1px solid var(--line-2);border-radius:9px;background:var(--paper);padding:10px 11px}
+.mission .h{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500}
+.mission .h .r{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.mission p{font-size:11.5px;color:var(--ink-2);margin-top:5px}
+.mission .cta{margin-top:8px;display:flex;gap:7px;align-items:center}
+.btn{height:28px;padding:0 10px;border:1px solid var(--line-2);border-radius:7px;background:var(--paper);
+  font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--fill-2)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.dark:hover{background:#000}
+.done{color:var(--vert-ink);background:var(--vert-soft);border:1px solid #d6e3af;border-radius:7px;
+  padding:3px 8px;font-size:11.5px}
+
+/* ----------------------------------------------------------- the app */
+.stage{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--paper);
+  box-shadow:0 2px 10px rgba(0,0,0,.07);display:flex;height:748px;position:relative}
+.rail{width:46px;background:var(--dark);display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding:9px 0;flex:0 0 auto}
+.rail .ri{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:#8c8c8c;cursor:pointer}
+.rail .ri:hover{background:#2c2c2c;color:#ddd}
+.rail .ri.on{background:#fff;color:var(--dark)}
+.rail .ri .lu{width:17px;height:17px}
+.stack{flex:1;min-width:0;display:flex;flex-direction:column}
+.bar{height:40px;background:var(--dark);color:#d6d6d6;display:flex;align-items:center;gap:4px;padding:0 10px;
+  font-size:12.5px;flex:0 0 auto;white-space:nowrap}
+.crumb{display:inline-flex;align-items:center;gap:7px;color:#b9b9b9;cursor:pointer;padding:0 6px;height:26px;
+  border-radius:7px}
+.crumb:hover{background:#2c2c2c;color:#eee}
+.pname{color:#fff;font-weight:600;margin:0 2px 0 6px}
+.div{width:1px;height:18px;background:#575757;margin:0 8px}
+.pill{height:26px;padding:0 10px;border-radius:7px;display:inline-flex;align-items:center;gap:6px;
+  color:#c9c9c9;cursor:pointer}
+.pill:hover{background:#2c2c2c;color:#eee}
+.pill.on{background:#fff;color:var(--dark);font-weight:500}
+.pill.on:hover{background:#fff}
+.pill.g{color:var(--vert)}
+.pill.g.on{background:var(--vert);color:var(--vert-ink)}
+.pill.ghost{border:1px solid #3f3f3f;color:#c9c9c9}
+.bar .r{margin-left:auto;display:flex;align-items:center;gap:7px}
+.kbd{font-family:var(--mono);font-size:10px;border:1px solid #4a4a4a;border-radius:4px;padding:0 4px;color:#9a9a9a}
+.row2{height:32px;display:flex;align-items:center;gap:3px;padding:0 10px;border-bottom:1px solid var(--line-2);
+  font-size:12px;color:var(--ink-2);background:var(--paper);flex:0 0 auto;overflow:auto}
+.lv{padding:0 9px;height:23px;border-radius:7px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+  white-space:nowrap}
+.lv:hover{background:var(--fill-2)}
+.lv.on{background:var(--vert);color:var(--vert-ink);font-weight:500}
+.lv.m{color:var(--ink-3)}
+.head{padding:11px 14px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line-2);
+  flex:0 0 auto}
+.head b{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.head .m{font-size:12px;color:var(--ink-3)}
+.head .r{margin-left:auto;display:flex;gap:7px}
+.body{flex:1;min-height:0;display:flex}
+
+/* index */
+.cards{padding:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-content:start;
+  width:100%;overflow:auto}
+.pcard{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;cursor:pointer;background:var(--paper)}
+.pcard:hover{border-color:var(--line);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.pcard .ph{height:132px;background:var(--fill);background-size:cover;background-position:center}
+.pcard .t{padding:8px 10px}
+.pcard .t b{font-size:13px;font-weight:600}
+.pcard .t span{display:block;font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.pcard .t .st{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:var(--ink-2)}
+.dotp{width:7px;height:7px;border-radius:50%;background:var(--vert);flex:0 0 auto}
+.dotp.r{background:var(--rouge)}
+.pcard.add{border-style:dashed;display:grid;place-items:center;color:var(--ink-3);font-size:12px;
+  text-align:center;padding:16px}
+
+/* coordination */
+.units{width:186px;border-right:1px solid var(--line-2);overflow:auto;flex:0 0 auto}
+.units .uh{padding:8px 11px;font-size:11.5px;color:var(--ink-2);border-bottom:1px solid var(--line-2);
+  position:sticky;top:0;background:var(--paper)}
+.ucard{margin:8px;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;cursor:pointer}
+.ucard:hover{border-color:var(--line)}
+.ucard.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.ucard .im{height:74px;background-size:420%;background-position:38% 44%}
+.ucard .t{padding:5px 7px;font-size:11px;display:flex;align-items:center;gap:6px}
+.ucard .t b{font-weight:600}
+.ucard .t span{margin-left:auto;color:var(--ink-3)}
+.panes{flex:1;min-width:0;display:flex;gap:10px;padding:10px;background:var(--fill-2)}
+.pane{flex:1;min-width:0;border:1px solid var(--line-2);border-radius:9px;background:var(--paper);
+  display:flex;flex-direction:column;overflow:hidden}
+.pane .ph{height:34px;display:flex;align-items:center;gap:8px;padding:0 10px;border-bottom:1px solid var(--line-2);
+  font-size:12px;color:var(--ink-2)}
+.pane .ph .r{margin-left:auto}
+.pane .im{flex:1;background-size:contain;background-repeat:no-repeat;background-position:center;
+  background-color:#fff}
+.marge{width:262px;border-left:1px solid var(--line-2);flex:0 0 auto;display:flex;flex-direction:column}
+.marge .mh{padding:9px 11px;font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:7px;
+  border-bottom:1px solid var(--line-2)}
+.marge .mh .r{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.ncard{border-bottom:1px solid var(--line-2);padding:9px 11px}
+.ncard .w{font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:6px}
+.ncard .w .t{margin-left:auto;font-size:10.5px;color:var(--ink-3);font-weight:400}
+.ncard .tx{font-size:12px;color:var(--ink-2);margin-top:3px}
+.ncard .src{margin-top:5px;font-size:10.5px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:5px;
+  padding:1px 5px;display:inline-flex;gap:5px;align-items:center}
+.ncard.team{background:var(--bleu-soft)}
+
+/* codes */
+.codes{flex:1;overflow:auto;padding:12px 14px}
+.crow{border:1px solid var(--line-2);border-radius:9px;padding:9px 11px;margin-bottom:8px;display:flex;gap:11px}
+.crow .n{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);width:66px;flex:0 0 auto}
+.crow .t{flex:1}
+.crow .t b{font-size:12.5px;font-weight:500}
+.crow .t p{font-size:11.5px;color:var(--ink-2);margin-top:2px}
+.tagw{font-size:10.5px;border-radius:5px;padding:1px 6px;height:18px;display:inline-flex;align-items:center}
+.tagw.ok{background:var(--vert-soft);color:var(--vert-ink)}
+.tagw.no{background:var(--rouge-soft);color:#7d2b1b}
+
+/* historique */
+.hist{flex:1;display:flex;min-height:0}
+.hcol{flex:1;min-width:0;display:flex;flex-direction:column}
+.hbar{padding:9px 12px;border-bottom:1px solid var(--line-2);display:flex;gap:8px;align-items:center}
+.find{flex:1;display:flex;align-items:center;gap:7px;height:30px;border:1px solid var(--line-2);border-radius:8px;
+  padding:0 9px;background:var(--fill-2);color:var(--ink-3)}
+.find input{flex:1;border:0;background:none;font:inherit;font-size:12.5px;color:var(--ink)}
+.find input:focus{outline:none}
+.hbody{flex:1;overflow:auto}
+.hmon{position:sticky;top:0;background:var(--fill-2);border-bottom:1px solid var(--line-2);padding:5px 12px;
+  font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);z-index:2}
+.hday{display:grid;grid-template-columns:96px minmax(0,1fr);border-bottom:1px solid var(--line-2)}
+.hday .g{padding:9px 12px;border-right:1px solid var(--line-2);color:var(--ink-3);font-size:11.5px}
+.hday .g b{display:block;color:var(--ink);font-size:13px}
+.hen{display:flex;gap:9px;padding:8px 12px;align-items:flex-start}
+.hen+.hen{border-top:1px solid #f1f1f1}
+.ic{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex:0 0 auto;margin-top:1px}
+.ic.k-todo{background:var(--vert-soft);color:var(--vert-ink)}
+.ic.k-change{background:var(--bleu-soft);color:var(--bleu)}
+.ic.k-call{background:var(--rouge-soft);color:var(--rouge)}
+.hen .b{flex:1;min-width:0}
+.hen .t{font-size:12.5px}
+.hen .m{margin-top:2px;font-size:11px;color:var(--ink-3);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.hen .m .src{border:1px solid var(--line-2);border-radius:5px;padding:0 5px;color:var(--ink-2)}
+.hen .h{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
+.hside{width:234px;border-left:1px solid var(--line-2);padding:11px 12px;flex:0 0 auto}
+.hside .lab{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.fchip{display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid var(--line-2);border-radius:7px;
+  font-size:12px;cursor:pointer;background:var(--paper);margin-bottom:5px}
+.fchip:hover{background:var(--fill-2)}
+.fchip.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.fchip .c{margin-left:auto;font-family:var(--mono);font-size:10.5px;opacity:.7}
+
+/* échéancier */
+.ech{flex:1;display:flex;min-height:0}
+.cal{flex:1;min-width:0;padding:12px 14px;overflow:auto}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line-2);border-radius:9px;
+  overflow:hidden}
+.wk .dh{padding:7px 9px;font-size:11.5px;color:var(--ink-3);background:var(--fill-2);
+  border-bottom:1px solid var(--line-2);border-right:1px solid var(--line-2)}
+.wk .dh:nth-child(7){border-right:0}
+.wk .dh.today{background:var(--dark);color:#fff}
+.wk .dc{min-height:188px;border-right:1px solid var(--line-2);padding:7px;display:flex;flex-direction:column;
+  gap:5px}
+.wk .dc:last-child{border-right:0}
+.ev{border:1px solid var(--line-2);border-left:3px solid var(--ink-3);border-radius:7px;padding:5px 7px;
+  font-size:11.5px;cursor:pointer;background:var(--paper)}
+.ev:hover{background:var(--fill-2)}
+.ev .p{display:flex;align-items:center;gap:5px;margin-top:4px;font-size:10.5px;color:var(--ink-3)}
+.ev.bal{border-left-color:#7a8a2e}
+.ev.men{border-left-color:#2f4858}
+.ev.zot{border-left-color:#8a5a2b}
+.ev.par{border-left-color:#5c5470}
+.todos{width:286px;border-left:1px solid var(--line-2);flex:0 0 auto;display:flex;flex-direction:column}
+.todos .th{padding:9px 12px;font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:7px;
+  border-bottom:1px solid var(--line-2)}
+.todos .th .r{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.todo{display:flex;gap:9px;padding:8px 12px;border-bottom:1px solid var(--line-2);cursor:pointer}
+.todo:hover{background:var(--fill-2)}
+.box{width:16px;height:16px;border:1.5px solid var(--line);border-radius:5px;flex:0 0 auto;margin-top:1px;
+  display:grid;place-items:center;color:transparent}
+.todo.done .box{background:var(--vert);border-color:var(--vert-ink);color:var(--vert-ink)}
+.todo .t{font-size:12.5px;flex:1}
+.todo.done .t{color:var(--ink-3);text-decoration:line-through}
+.todo .m{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
+
+/* le panneau ⌘K */
+.scrim{position:absolute;inset:0;background:rgba(18,18,18,.28);display:flex;justify-content:flex-end;z-index:30}
+.panel{width:330px;background:var(--paper);border-left:1px solid var(--line);display:flex;flex-direction:column;
+  box-shadow:-14px 0 40px rgba(0,0,0,.2)}
+.panel .ph{height:40px;display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--line-2);
+  font-size:12.5px;font-weight:500}
+.panel .ph .x{margin-left:auto;cursor:pointer;color:var(--ink-3)}
+.panel .pb{flex:1;overflow:auto}
+.prow{padding:9px 12px;border-bottom:1px solid var(--line-2);cursor:pointer}
+.prow:hover{background:var(--fill-2)}
+.prow .t{font-size:12.5px}
+.prow .m{margin-top:2px;font-size:11px;color:var(--ink-3)}
+.prow.today{background:var(--vert-soft)}
+.panel .pf{padding:9px 12px;border-top:1px solid var(--line-2)}
+
+.hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:var(--dark);color:#fff;
+  border-radius:9px;padding:7px 12px;font-size:12px;display:flex;align-items:center;gap:9px;z-index:40;
+  box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.hint .kbd{border-color:#555;color:#ddd}
+.note{margin-top:14px;border:1px solid var(--line-2);border-radius:9px;background:var(--paper);padding:12px 14px;
+  font-size:12.5px;color:var(--ink-2)}
+.note b{color:var(--ink)}
+.note ul{margin:7px 0 0 16px}
+.note li{margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Essai de navigation — quatre façons, une seule application</h1>
+  <p class="sub">C'est l'application réelle, avec ses plans et sa maquette. Changer d'option ne change que
+    <b>l'endroit où vivent les choses</b>, jamais ce qu'elles sont: ouvrez un projet, changez de niveau, lisez
+    l'historique, cherchez l'échéance de jeudi. <b>Le compteur mesure ce que ça coûte</b> en gestes depuis un plan.</p>
+
+  <div class="bench">
+    <div class="opts" id="opts"></div>
+    <div class="mission" id="mission"></div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="note" id="note"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+function sprite() {
+  const names = ["folder", "layers", "hash", "archive", "calendar-days", "plus", "search", "share-2", "lock",
+    "building-2", "command", "list-checks", "check", "x", "pencil-line", "phone-call", "circle-check-big",
+    "map-pin", "table", "chevron-right", "flag", "target"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none"); s.innerHTML = defs; document.body.append(s);
+}
+
+/* ------------------------------------------------------------------ data */
+const PROJECTS = [
+  { id: "bal", name: "Le Baldwin III", m: "104 unités · 8 niveaux", img: "assets/baldwin-cover.png",
+    st: "6 écarts ouverts", warn: true },
+  { id: "men", name: "Rue Mentana", m: "38 unités · 4 niveaux", img: "assets/skp-lointain.jpg",
+    st: "en attente de l'arpenteur" },
+  { id: "zot", name: "Saint-Zotique", m: "12 unités · 3 niveaux", img: "assets/massing.jpg",
+    st: "permis déposé" },
+  { id: "par", name: "Parc-Extension", m: "61 unités · 6 niveaux", img: "assets/batiment.jpg",
+    st: "esquisse" },
+];
+const LEVELS = [
+  { k: "ss00", n: "Sous-sol 00", img: "assets/plan-sous-sol-00.jpg" },
+  { k: "ss0", n: "Sous-sol 0", img: "assets/plan-sous-sol-0.jpg" },
+  { k: "n1", n: "Niveau 1", img: "assets/plan-niveau-1.jpg" },
+  { k: "n2", n: "Niveau 2", img: "assets/plan-niveau-2.jpg" },
+  { k: "n3", n: "Niveau 3", img: "assets/plan-niveau-3.jpg" },
+  { k: "n4", n: "Niveau 4", img: "assets/plan-niveau-4.jpg" },
+  { k: "n5", n: "Niveau 5", img: "assets/plan-niveau-5.jpg" },
+  { k: "n6", n: "Niveau 6", img: "assets/plan-niveau-6.jpg" },
+  { k: "n7", n: "Niveau 7", img: "assets/plan-niveau-7.jpg" },
+  { k: "n8", n: "Niveau 8", img: "assets/plan-niveau-8.jpg" },
+  { k: "toit", n: "Toiture", img: "assets/plan-toiture.jpg" },
+];
+const UNITS = [["201", "5½", "1275"], ["202", "5½", "1496"], ["203", "3½", "760"], ["204", "4½", "1152"],
+  ["205", "4½", "1221"], ["206", "3½", "812"]];
+const WEEK = [
+  { d: "lun 9", t: [] },
+  { d: "mar 10", t: [{ p: "men", n: "Relevé d'implantation à commander", w: "Benoit" }] },
+  { d: "mer 11", t: [{ p: "bal", n: "Calcul d'ensoleillement de la cour", w: "Guy" }] },
+  { d: "jeu 12", t: [
+    { p: "bal", n: "Reprendre la hauteur des garde-corps à 1 070 mm", w: "Guy" },
+    { p: "zot", n: "Rencontre de chantier, 9 h", w: "Alain" }] },
+  { d: "ven 13", t: [{ p: "par", n: "Esquisse volumétrique à montrer au promoteur", w: "David" }] },
+  { d: "sam 14", today: true, t: [
+    { p: "bal", n: "Largeur libre des portes du parcours sans obstacles", w: "Guy" }] },
+  { d: "dim 15", t: [] },
+];
+const TODOS = [
+  { t: "Imprimer la coupe de rue pour la rencontre", w: "Alain", h: "08:12" },
+  { t: "Rappeler l'ingénieur pour le type de construction", w: "Benoit", h: "08:30" },
+  { t: "Nettoyer les calques du 3e avant l'émission", w: "Guy", h: "09:40" },
+  { t: "Vérifier les cotes de la cage d'escalier B", w: "David", h: "10:05" },
+];
+const HIST = [
+  { m: "novembre 2026", d: "13 nov", dow: "ven", k: "todo", t: "Relire les notes de l'arrondissement sur la marge avant", w: "Benoit", h: "17:40" },
+  { m: "novembre 2026", d: "12 nov", dow: "jeu", k: "change", t: "Fenêtres du 4e alignées sur la trame du 5e", w: "Alain", h: "15:10", src: "niv. 4 · élévations" },
+  { m: "novembre 2026", d: "5 nov", dow: "jeu", k: "change", t: "Mix de typologies arrêté: 4½ ramenés de 7 à 5 au niveau 2", w: "Benoit", h: "11:55", src: "niv. 2" },
+  { m: "octobre 2026", d: "7 oct", dow: "mer", k: "change", t: "Implantation reprise avec le relevé du 6 octobre", w: "Guy, Alain", h: "09:30", src: "site · implantation" },
+  { m: "octobre 2026", d: "6 oct", dow: "mar", k: "call", t: "Appel de l'arpenteur: la ligne d'implantation bouge de 0,2 m au sud", w: "Alain", h: "08:40", src: "site" },
+  { m: "septembre 2026", d: "22 sept", dow: "mar", k: "change", t: "Hauteur des garde-corps portée à 1 070 mm sur les balcons nord", w: "Guy", h: "10:05", src: "niv. 3 à 8 · élévations" },
+  { m: "septembre 2026", d: "4 sept", dow: "ven", k: "change", t: "Corridor du 5e redessiné: porte du 507 déplacée de 40 mm vers l'est", w: "Guy", h: "16:40", src: "niv. 5 · plan d'unités" },
+  { m: "septembre 2026", d: "3 sept", dow: "jeu", k: "call", t: "Appel de l'entrepreneur: dégagement devant la porte du 507 à 860 mm, il en faut 900", w: "Benoit", h: "09:14", src: "niv. 5 · unité 507" },
+];
+const CODES = [
+  ["3.3.1.18", "Hauteur des garde-corps", "1 070 mm requis aux balcons de plus de 1,8 m.", "no"],
+  ["3.8.1.3", "Largeur libre des portes", "850 mm minimum sur le parcours sans obstacles.", "no"],
+  ["3.2.1.1", "Type de construction", "Incombustible exigé au-delà de 6 étages.", "ok"],
+  ["art. 71", "Cases de stationnement", "Réduction de 20 % permise à 500 m du métro.", "ok"],
+  ["art. 22", "Marge avant", "3 m exigés; 2,6 m dessinés — dérogation à demander.", "no"],
+];
+const KIND_ICON = { todo: "circle-check-big", change: "pencil-line", call: "phone-call" };
+const KIND_WORD = { todo: "coché par", change: "modifié par", call: "appel reçu par" };
+
+const OPTIONS = [
+  { k: "A", t: "Dans le fil d'Ariane", d: "Échéancier à gauche du séparateur, dans la même barre." },
+  { k: "B", t: "Écran de l'atelier", d: "« Tous les projets » devient un lieu avec ses propres onglets." },
+  { k: "C", t: "Rail noir à gauche", d: "Une colonne d'icônes qui survit aux deux écrans." },
+  { k: "D", t: "Panneau sur ⌘K", d: "Jamais un onglet: un panneau par-dessus le plan." },
+];
+
+let S = { mode: "B", screen: "index", studio: "projets", proj: null, ptab: "coord", level: "n2",
+  unit: "201", panel: false, q: "", fkind: null, clicks: 0, mission: false, scores: {}, kinds: {}, done: [] };
+
+/* ---------------------------------------------------------------- chrome */
+const projTabs = () => `
+  <span class="pill ${S.ptab === "coord" ? "on" : ""}" data-go="ptab:coord">${icon("layers")}Coordination</span>
+  <span class="pill ${S.ptab === "codes" ? "on" : ""}" data-go="ptab:codes">${icon("hash")}Codes</span>
+  <span class="pill ${S.ptab === "hist" ? "on" : ""}" data-go="ptab:hist">${icon("archive")}Historique</span>`;
+const barRight = (extra = "") => `<span class="r">${extra}
+  <span class="pill ghost">${icon("lock")}1 note d'atelier</span>
+  <span class="pill ghost">${icon("share-2")}Partager</span></span>`;
+const kbtn = `<span class="pill ghost" data-go="panel">${icon("calendar-days")}Échéancier
+  <span class="kbd">⌘K</span></span>`;
+
+function bar() {
+  const inProj = S.screen === "project";
+  const crumb = `<span class="crumb" data-go="index">${icon("folder")}Tous les projets</span>`;
+  const projPart = inProj
+    ? `<span class="pname">${PROJECTS.find((p) => p.id === S.proj).name}</span>${projTabs()}`
+    : "";
+  if (S.mode === "A") {
+    return `<div class="bar">${crumb}
+      <span class="pill g ${S.screen === "ech" ? "on" : ""}" data-go="ech">${icon("calendar-days")}Échéancier</span>
+      <span class="pill g ${S.screen === "todo" ? "on" : ""}" data-go="todo">${icon("list-checks")}À faire</span>
+      ${inProj ? `<span class="div"></span>${projPart}` : ""}${barRight()}</div>`;
+  }
+  if (S.mode === "C") {
+    return `<div class="bar">${inProj ? projPart
+      : `<span class="pname" style="margin-left:4px">${S.screen === "ech" ? "Échéancier de l'atelier"
+        : S.screen === "todo" ? "À faire aujourd'hui" : "Projets"}</span>`}${barRight()}</div>`;
+  }
+  const extra = S.mode === "D" ? kbtn : "";
+  return `<div class="bar">${crumb}${inProj ? `<span class="div"></span>${projPart}` : ""}${barRight(extra)}</div>`;
+}
+const rail = () => S.mode !== "C" ? "" : `<div class="rail">
+  <span class="ri ${S.screen === "index" || S.screen === "project" ? "on" : ""}" data-go="index"
+    title="Projets">${icon("folder")}</span>
+  <span class="ri ${S.screen === "ech" ? "on" : ""}" data-go="ech" title="Échéancier">${icon("calendar-days")}</span>
+  <span class="ri ${S.screen === "todo" ? "on" : ""}" data-go="todo" title="À faire">${icon("list-checks")}</span>
+  <span class="ri" title="Recherche">${icon("search")}</span></div>`;
+
+/* B is the only option where the studio level has its own tab row */
+function studioRow() {
+  if (S.mode !== "B") {
+    return `<div class="row2"><span class="lv on">En cours</span><span class="lv m">Archivés</span></div>`;
+  }
+  return `<div class="row2">
+    <span class="lv ${S.screen === "index" ? "on" : ""}" data-go="index">${icon("folder")}Projets</span>
+    <span class="lv ${S.screen === "ech" ? "on" : ""}" data-go="ech">${icon("calendar-days")}Échéancier</span>
+    <span class="lv ${S.screen === "todo" ? "on" : ""}" data-go="todo">${icon("list-checks")}À faire</span>
+    <span class="lv m">Archivés</span></div>`;
+}
+
+/* --------------------------------------------------------------- screens */
+const screenIndex = () => `${studioRow()}
+  <div class="head"><b>Projets</b><span class="m">${PROJECTS.length} en cours</span>
+    <span class="r"><button class="btn dark">${icon("plus")}Nouveau projet</button></span></div>
+  <div class="body"><div class="cards">
+    ${PROJECTS.map((p) => `<div class="pcard" data-go="proj:${p.id}">
+      <div class="ph" style="background-image:url(${p.img})"></div>
+      <div class="t"><b>${p.name}</b><span>${p.m}</span>
+        <span class="st"><i class="dotp ${p.warn ? "r" : ""}"></i>${p.st}</span></div></div>`).join("")}
+    <div class="pcard add"><div>${icon("plus")}<div style="margin-top:5px">Nouveau projet</div>
+      <div style="font-size:11px;margin-top:3px">Déposez un DXF ou un PDF</div></div></div>
+  </div></div>`;
+
+function screenProject() {
+  const p = PROJECTS.find((x) => x.id === S.proj);
+  const lv = LEVELS.find((l) => l.k === S.level);
+  const levelRow = `<div class="row2">
+    <span class="lv m">${icon("building-2")}Bâtiment entier</span>
+    ${LEVELS.map((l) => `<span class="lv ${l.k === S.level ? "on" : ""}" data-go="lv:${l.k}">${l.n}</span>`).join("")}
+    <span class="lv m">Tous les niveaux</span></div>`;
+  if (S.ptab === "codes") {
+    return `${levelRow}<div class="head"><b>Codes — ${p.name}</b>
+      <span class="m">5 provisions suivies · 3 écarts</span></div>
+      <div class="body"><div class="codes">${CODES.map(([n, t, d, st]) => `<div class="crow">
+        <span class="n">${n}</span><span class="t"><b>${t}</b><p>${d}</p></span>
+        <span class="tagw ${st}">${st === "ok" ? "conforme" : "écart"}</span></div>`).join("")}</div></div>`;
+  }
+  if (S.ptab === "hist") return screenHist(p);
+  return `${levelRow}
+    <div class="head"><b>Plans — ${lv.n.toLowerCase()}</b>
+      <span class="m">${p.name} · 14 unités · 2 avec un croisement ouvert</span>
+      <span class="r"><button class="btn">${icon("table")}Exporter</button></span></div>
+    <div class="body">
+      <div class="units"><div class="uh">Unités</div>
+        ${UNITS.map(([n, ty, sf]) => `<div class="ucard ${S.unit === n ? "on" : ""}" data-go="unit:${n}">
+          <div class="im" style="background-image:url(${lv.img})"></div>
+          <div class="t"><b>${n}</b>${ty}<span>${sf} pi²</span></div></div>`).join("")}</div>
+      <div class="panes">
+        <div class="pane"><div class="ph">${icon("layers")}Plan 2D
+          <span class="r" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">${lv.n}</span></div>
+          <div class="im" style="background-image:url(${lv.img})"></div></div>
+        <div class="pane"><div class="ph">${icon("building-2")}Maquette 3D
+          <span class="r" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">51 %</span></div>
+          <div class="im" style="background-image:url(assets/maquette-still.jpg)"></div></div>
+      </div>
+      <div class="marge"><div class="mh">${icon("pencil-line")}Dans la marge<span class="r">3</span></div>
+        <div class="ncard"><div class="w">Entrepreneur général<span class="t">hier 16:20</span></div>
+          <div class="tx">Le dégagement devant la porte du 507 fait 860 mm, il en faut 900.</div>
+          <div class="src">${icon("map-pin")}niv. 5 · unité 507</div></div>
+        <div class="ncard"><div class="w">Benoit<span class="t">lun. 09:05</span></div>
+          <div class="tx">Le balcon du 510 dépasse la ligne d'alignement de 0,4 m.</div>
+          <div class="src">${icon("map-pin")}niv. 5</div></div>
+        <div class="ncard team"><div class="w">${icon("lock")}Vous<span class="t">mar. 08:40</span></div>
+          <div class="tx">Rappel: le corridor est encore dessiné avec l'ancienne sortie. À reprendre avant R05.</div>
+          <div class="src">${icon("map-pin")}niv. 5 · plan d'unités</div></div>
+      </div>
+    </div>`;
+}
+
+function screenHist(p) {
+  const rows = HIST.filter((h) => !S.fkind || h.k === S.fkind)
+    .filter((h) => { const q = S.q.trim().toLowerCase();
+      return !q || (h.t + " " + (h.src || "")).toLowerCase().includes(q); });
+  let lastM = "", lastD = "";
+  const count = (k) => HIST.filter((h) => h.k === k).length;
+  return `<div class="head"><b>Historique — ${p.name}</b>
+      <span class="m">${HIST.length} entrées · tout ce qui est coché, répondu ou déposé</span></div>
+    <div class="body"><div class="hist">
+      <div class="hcol">
+        <div class="hbar"><span class="find">${icon("search")}
+          <input id="hq" value="${S.q}" placeholder="garde-corps, 507, implantation…"></span>
+          ${S.q || S.fkind ? `<button class="btn" data-go="clear">${icon("x")}Effacer</button>` : ""}</div>
+        <div class="hbody">${rows.map((h) => {
+          const mh = h.m !== lastM ? (lastM = h.m, `<div class="hmon">${h.m}</div>`) : "";
+          const dayRows = rows.filter((x) => x.d === h.d);
+          if (h.d === lastD) return "";
+          lastD = h.d;
+          return mh + `<div class="hday"><div class="g"><b>${h.d}</b>${h.dow}</div>
+            <div>${dayRows.map((e) => `<div class="hen">
+              <span class="ic k-${e.k}">${icon(KIND_ICON[e.k])}</span>
+              <span class="b"><span class="t">${e.t}</span><span class="m">${KIND_WORD[e.k]} ${e.w}
+                ${e.src ? `<span class="src">${icon("map-pin")} ${e.src}</span>` : ""}</span></span>
+              <span class="h">${e.h}</span></div>`).join("")}</div></div>`;
+        }).join("") || `<div style="padding:16px;color:var(--ink-3)">Rien ne correspond.</div>`}</div>
+      </div>
+      <div class="hside"><div class="lab">Quoi</div>
+        ${Object.entries(KIND_ICON).map(([k, ic]) => `<div class="fchip ${S.fkind === k ? "on" : ""}"
+          data-go="fkind:${k}">${icon(ic)}${{ todo: "À faire cochées", change: "Modifications", call: "Appels reçus" }[k]}
+          <span class="c">${count(k)}</span></div>`).join("")}
+        <div style="margin-top:10px;font-size:11.5px;color:var(--ink-3)">L'historique appartient au projet.
+          Il ne s'écrit pas à la main: une entrée y tombe quand elle est cochée.</div>
+      </div>
+    </div></div>`;
+}
+
+const evHTML = (t) => `<div class="ev ${t.p}" title="${t.n}">${t.n}
+  <span class="p">${PROJECTS.find((p) => p.id === t.p).name} · ${t.w}</span></div>`;
+
+const screenEch = () => `${S.mode === "B" ? studioRow() : ""}
+  <div class="head"><b>Échéancier de l'atelier</b>
+    <span class="m">semaine du 9 au 15 novembre · les quatre projets</span>
+    <span class="r"><button class="btn">Semaine</button><button class="btn">Mois</button>
+      <button class="btn">Année</button></span></div>
+  <div class="body"><div class="ech">
+    <div class="cal"><div class="wk">
+      ${WEEK.map((d) => `<div class="dh ${d.today ? "today" : ""}">${d.d}</div>`).join("")}
+      ${WEEK.map((d) => `<div class="dc">${d.t.map(evHTML).join("")}</div>`).join("")}
+    </div></div>
+    <div class="todos"><div class="th">${icon("list-checks")}À faire aujourd'hui<span class="r">4</span></div>
+      ${TODOS.map((t, i) => `<div class="todo ${S.done.includes(i) ? "done" : ""}" data-go="chk:${i}">
+        <span class="box">${icon("check")}</span>
+        <span class="t">${t.t}<span class="m">${t.w} · ajoutée à ${t.h}</span></span></div>`).join("")}
+    </div></div></div>`;
+
+const screenTodo = () => `${S.mode === "B" ? studioRow() : ""}
+  <div class="head"><b>À faire aujourd'hui</b><span class="m">samedi 14 novembre · tous projets</span></div>
+  <div class="body"><div class="cal" style="max-width:620px">
+    ${TODOS.map((t, i) => `<div class="todo ${S.done.includes(i) ? "done" : ""}" data-go="chk:${i}"
+      style="border:1px solid var(--line-2);border-radius:9px;margin-bottom:7px">
+      <span class="box">${icon("check")}</span>
+      <span class="t">${t.t}<span class="m">${t.w} · ajoutée à ${t.h}</span></span></div>`).join("")}
+  </div></div>`;
+
+const panelHTML = () => !S.panel ? "" : `<div class="scrim" data-go="panelclose">
+  <div class="panel" data-stop>
+    <div class="ph">${icon("calendar-days")}Échéancier — atelier
+      <span class="x" data-go="panelclose">${icon("x")}</span></div>
+    <div class="pb">
+      ${WEEK.filter((d) => d.t.length).map((d) => d.t.map((t) => `<div class="prow ${d.today ? "today" : ""}">
+        <div class="t">${t.n}</div>
+        <div class="m">${d.d} · ${PROJECTS.find((p) => p.id === t.p).name} · ${t.w}</div></div>`).join("")).join("")}
+    </div>
+    <div class="pf"><button class="btn" data-go="ech">Ouvrir l'échéancier complet ${icon("chevron-right")}</button></div>
+  </div></div>`;
+
+/* ---------------------------------------------------------------- render */
+function render(keepFocus) {
+  const act = document.activeElement && document.activeElement.id;
+  const caret = act && document.activeElement.selectionStart;
+  document.getElementById("opts").innerHTML = OPTIONS.map((o) => `<button class="opt ${S.mode === o.k ? "on" : ""}"
+    data-mode="${o.k}"><span class="k">Façon ${o.k}</span><b>${o.t}</b><span>${o.d}</span>
+    <span class="sc">${icon("target")}${S.scores[o.k] == null ? "non mesuré"
+      : `${S.scores[o.k]} geste${S.scores[o.k] > 1 ? "s" : ""}${S.kinds[o.k] === "kb" ? " (⌘K)" : ""}`}</span></button>`).join("");
+
+  const m = document.getElementById("mission");
+  m.innerHTML = S.mission
+    ? `<div class="h">${icon("target")}Mission en cours<span class="r">${S.clicks} geste${S.clicks > 1 ? "s" : ""}</span></div>
+       <p>Vous êtes sur le plan du niveau 2 du Baldwin III. <b>Trouvez ce qui est dû jeudi</b>, tous projets
+         confondus. Le compteur s'arrête quand l'échéancier est à l'écran.</p>
+       <div class="cta"><button class="btn" data-go="missionstop">Abandonner</button></div>`
+    : `<div class="h">${icon("target")}Mesurer le coût réel
+       ${S.scores[S.mode] != null ? `<span class="r">${S.scores[S.mode]} geste${S.scores[S.mode] > 1 ? "s" : ""}</span>` : ""}</div>
+       <p>Même mission dans les quatre options: depuis un plan, atteindre l'échéancier de la semaine.
+         ${Object.keys(S.scores).length ? "Les résultats s'inscrivent sur les cartes." : ""}</p>
+       <div class="cta"><button class="btn dark" data-go="missionstart">Lancer la mission (façon ${S.mode})</button>
+         ${Object.keys(S.scores).length ? `<button class="btn" data-go="missionreset">Remettre à zéro</button>` : ""}</div>`;
+
+  const inner = S.screen === "index" ? screenIndex()
+    : S.screen === "project" ? screenProject()
+    : S.screen === "ech" ? screenEch() : screenTodo();
+  document.getElementById("stage").innerHTML = `${rail()}<div class="stack">${bar()}${inner}</div>`
+    + panelHTML()
+    + (S.mode === "D" ? `<div class="hint">${icon("command")}Appuyez sur <span class="kbd">⌘K</span>
+        — l'échéancier s'ouvre par-dessus, sans quitter la page</div>` : "");
+
+  document.getElementById("note").innerHTML = `<b>Ce que l'essai rend visible:</b>
+    <ul>
+      <li><b>Façon A</b> — l'échéancier est à un clic, mais regardez la barre quand un projet est ouvert:
+        rien d'autre qu'un trait de 1 px ne dit que « Échéancier » n'appartient pas au Baldwin III.</li>
+      <li><b>Façon B</b> — la rangée de l'atelier n'existe que hors projet, donc la portée est nette; le prix
+        est de deux clics depuis un plan (revenir, puis l'onglet).</li>
+      <li><b>Façon C</b> — le rail est toujours là, mais il y a maintenant deux chemins vers les projets
+        (l'icône et le fil d'Ariane) et quatre icônes sans mot.</li>
+      <li><b>Façon D</b> — ⌘K depuis n'importe où, zéro navigation; mais le panneau ne montre que les jours
+        qui viennent, donc il lui faut quand même l'écran complet de la façon B derrière.</li>
+      <li><b>L'historique</b> reste un onglet du projet dans les quatre: ouvrez-le, cherchez « 507 »,
+        l'appel de septembre et la correction du lendemain sortent ensemble.</li>
+    </ul>`;
+
+  if (keepFocus && act) { const el = document.getElementById(act);
+    if (el) { el.focus(); if (caret != null && el.setSelectionRange) el.setSelectionRange(caret, caret); } }
+}
+
+/* every click inside the app counts — that is the whole point of the trial */
+function go(cmd) {
+  const [k, v] = cmd.split(":");
+  if (k === "index") { S.screen = "index"; S.panel = false; }
+  else if (k === "proj") { S.screen = "project"; S.proj = v; S.ptab = "coord"; }
+  else if (k === "ptab") { S.ptab = v; S.q = ""; S.fkind = null; }
+  else if (k === "lv") S.level = v;
+  else if (k === "unit") S.unit = v;
+  else if (k === "ech") { S.screen = "ech"; S.panel = false; }
+  else if (k === "todo") { S.screen = "todo"; S.panel = false; }
+  else if (k === "panel") S.panel = true;
+  else if (k === "panelclose") S.panel = false;
+  else if (k === "fkind") S.fkind = S.fkind === v ? null : v;
+  else if (k === "clear") { S.q = ""; S.fkind = null; }
+  else if (k === "chk") S.done = S.done.includes(+v) ? S.done.filter((x) => x !== +v) : [...S.done, +v];
+  else if (k === "missionstart") {
+    S = { ...S, mission: true, clicks: 0, screen: "project", proj: "bal", ptab: "coord", level: "n2",
+      panel: false };
+    return render();
+  } else if (k === "missionstop") { S.mission = false; return render(); }
+  else if (k === "missionreset") { S.scores = {}; S.kinds = {}; return render(); }
+
+  // the mission ends the moment the week is actually on screen, panel included
+  if (S.mission && (S.screen === "ech" || S.panel)) {
+    S.scores = { ...S.scores, [S.mode]: S.clicks };
+    S.kinds = { ...S.kinds, [S.mode]: "click" };
+    S.mission = false;
+  }
+  render();
+}
+
+document.addEventListener("click", (e) => {
+  const mode = e.target.closest("[data-mode]");
+  if (mode) { S.mode = mode.dataset.mode; S.panel = false; return render(); }
+  const g = e.target.closest("[data-go]");
+  if (!g) return;
+  if (S.mission) S.clicks += 1;
+  go(g.dataset.go);
+});
+document.addEventListener("input", (e) => { if (e.target.id === "hq") { S.q = e.target.value; render(true); } });
+document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+    e.preventDefault();
+    if (S.mode !== "D") return;             // the shortcut belongs to option D only
+    if (S.mission) S.clicks += 1;           // a keystroke is a cost too, counted as one
+    S.panel = !S.panel;
+    if (S.mission && S.panel) { S.scores = { ...S.scores, [S.mode]: S.clicks };
+      S.kinds = { ...S.kinds, [S.mode]: "kb" }; S.mission = false; }
+    return render();
+  }
+  if (e.key === "Escape" && S.panel) { S.panel = false; render(); }
+});
+
+sprite();
+render();
+</script>
+</body>
+</html>
