@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le coin « + » — six dessins</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Three things are being tried here at once, because they only make sense
+   together.
+
+   1. A drawing is picked by its picture, not by a glyph in a pill. The
+      thumbnail carries the recognition and the word under it carries the
+      name; four arrangements of that pair are below.
+   2. The card that opens belongs to the thumbnail that was clicked: it is
+      placed at that thumbnail's own height, not at the top of the pane, so
+      the hand never travels and the eye never loses the link.
+   3. Overlapping two drawings is where the work actually happens, so the
+      card carries the small amount of tuning that matters — which other
+      drawing sits over this one, and which of the two is in front — and the
+      plan marks, in red, every place where the two sheets contradict each
+      other. A pipe through a column is not a layer problem; it is the
+      reason anyone stacked the sheets. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e5e5e5;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#f2f2f2; --card:#fff;
+  --vert:#C3E05A; --vert-ink:#2f3a05;
+  --rouge:#C0342A; --rouge-bg:#FBECEA;
+  --ambre:#A6711A; --ambre-bg:#FBF2E2;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.sheet{padding:22px 20px 80px;display:flex;flex-direction:column;gap:34px}
+h1{font-size:17px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:86ch}
+.lu{width:14px;height:14px;flex:0 0 14px;stroke-width:1.6}
+
+.var{display:flex;flex-direction:column;gap:9px}
+.vh{display:flex;align-items:center;gap:8px}
+.vh .n{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.vh b{font-size:14px;font-weight:600}
+.why{font-size:12px;color:var(--ink-2);max-width:96ch}
+.why .cost{color:var(--ink-3)}
+
+/* ------------------------------------------------------------ the screen */
+.app{border-radius:12px;overflow:hidden;background:#141416;min-width:1180px}
+.bar1{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar1 .crumb{color:rgba(255,255,255,.58)}
+.bar1 .crumb.on{color:#fff;font-weight:600;font-size:13px;margin-right:4px}
+.bar1 .tab{padding:5px 10px;border-radius:7px;display:flex;align-items:center;gap:6px;font-size:13.5px}
+.bar1 .tab.on{background:#fff;color:#141416;font-weight:600}
+.bar1 .sp{flex:1}
+.bar1 .share{border:1px solid rgba(255,255,255,.28);border-radius:5px;padding:4px 10px;font-size:12px;
+  display:flex;align-items:center;gap:6px}
+.bar2{height:32px;background:#1e1e21;border-top:1px solid #2c2c31;display:flex;align-items:center;
+  gap:3px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar2 span{padding:3px 9px;border-radius:6px}
+.bar2 span.on{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.card{background:var(--card);margin:7px;border-radius:9px;overflow:hidden;display:flex;flex-direction:column}
+.ttl{padding:10px 13px;display:flex;align-items:center;gap:10px}
+.ttl b{font-size:16px;font-weight:600}
+.ttl .sub{font-size:12px;color:var(--ink-2)}
+.ttl .sp{flex:1}
+.work{display:flex;gap:9px;padding:0 9px 9px;height:560px}
+.foot{border-top:1px solid var(--line-2);padding:8px 13px;display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--ink-2)}
+.foot b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.foot .sp{flex:1}
+
+.pane{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);
+  display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.ph{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:8px;padding:0 10px;font-size:12.5px;color:var(--ink-2)}
+.ph .sp{flex:1}
+.pb{flex:1;min-height:0;overflow:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
+
+.lst{flex:0 0 212px}
+.uc{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;flex:0 0 auto}
+.uc.on{border-color:var(--ink)}
+.uc .cr{height:84px;background-image:url(assets/plan-niveau-5.jpg);background-size:360%;
+  filter:grayscale(1);position:relative}
+.uc .no{position:absolute;left:6px;top:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;padding:0 6px;font-size:12px;font-weight:600}
+.uc .ul{display:flex;align-items:baseline;gap:6px;padding:6px 9px;font-size:12.5px}
+.uc .ul .a{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+.d2{flex:1.7;min-width:0;position:relative}
+.m3{flex:.9;min-width:0}
+.m3 .still{flex:1;min-height:0;background-image:url(assets/maquette-still.jpg);background-size:cover;
+  background-position:center}
+.insp{flex:0 0 250px}
+.kv{display:flex;align-items:baseline;gap:8px;font-size:12.5px}
+.kv b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.kv span{color:var(--ink-2)}
+
+.stage{flex:1;min-width:0;min-height:0;position:relative;overflow:hidden;background:var(--card)}
+.plan{position:absolute;inset:0;background-image:url(assets/plan-niveau-5.jpg);
+  background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
+.lay{position:absolute;background-repeat:no-repeat;background-size:contain;background-position:center;
+  pointer-events:none;mix-blend-mode:multiply}
+.lay.arp{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
+.lay.pay{background-image:url(assets/paysage.png)}
+.off{display:none}
+.zcol{flex:0 0 30px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  align-items:center;gap:6px;padding:7px 0;color:var(--ink-3);font-size:10.5px}
+.zcol .tr{flex:1;width:3px;background:var(--line);border-radius:2px;position:relative}
+.zcol .tr::after{content:"";position:absolute;left:-4px;top:38%;width:11px;height:11px;border-radius:50%;background:var(--ink)}
+
+/* --------------------------------------------- the picker, four shapes */
+.strip{flex:0 0 var(--sw,78px);border-left:1px solid var(--line-2);background:var(--card);
+  display:flex;flex-direction:column;gap:4px;padding:7px 6px;overflow:auto}
+.strip.wide{--sw:104px}
+/* A tile that is not on the drawing is dimmed — but the dimming is put on
+   the image and the name, never on the tile itself, or the corner fades
+   with them. That is exactly why the first corner was invisible. */
+.tile{border:1px solid transparent;border-radius:6px;padding:4px;display:flex;flex-direction:column;
+  align-items:center;gap:3px;cursor:pointer;user-select:none}
+.tile .pic,.tile .nm{opacity:.45}
+.tile:hover{background:var(--fill-2)}
+.tile:hover .pic,.tile:hover .nm{opacity:.8}
+.tile.on .pic,.tile.on .nm{opacity:1}
+.tile.sel{background:var(--fill);border-color:var(--line-2)}
+.tile .pic{width:100%;aspect-ratio:1.18;border:1px solid var(--line-2);border-radius:4px;background:#fff;
+  background-size:contain;background-repeat:no-repeat;background-position:center}
+.tile .nm{font-size:10.5px;color:var(--ink-2);text-align:center;line-height:1.2}
+.tile.on .nm{color:var(--ink)}
+.tile .pin{position:absolute;right:4px;top:4px;width:16px;height:16px;border-radius:4px;background:var(--card);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-3)}
+.tile .wrap{position:relative;width:100%}
+.tile .wrap .pic{display:block}
+.tile.add .pin{color:var(--ink);border-color:var(--ink)}
+
+/* The horizontal shelf: the same tile, laid on its side under the drawing. */
+.shelf{flex:0 0 auto;border-top:1px solid var(--line-2);background:var(--card);display:flex;
+  align-items:flex-start;gap:6px;padding:6px 8px;overflow:auto}
+.shelf .tile{flex:0 0 76px}
+.shelf .count{margin-left:auto;align-self:center}
+
+/* The stack: the tiles overlap like sheets in a pile, and the pile is the
+   order they are drawn in. */
+.pile{display:flex;flex-direction:column}
+.pile .tile{margin-top:-14px}
+.pile .tile:first-child{margin-top:0}
+.pile .tile.on{margin-top:-8px}
+
+/* The corner, six weights. Shared geometry first: a tile that is not on
+   the drawing is already dimmed, so its corner must not dim with it —
+   that is what made the outlined version disappear. */
+.corner{position:absolute;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;opacity:1;z-index:2}
+.tile .corner em{font-style:normal}
+
+/* A — solid: white glyph in an ink disc. Reads on any drawing. */
+.corner.solid{right:3px;top:3px;width:20px;height:20px;border-radius:50%;
+  background:var(--ink);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.corner.solid:hover{background:#000}
+.corner.solid.on{background:var(--ink);color:#fff}
+
+/* B — white chip, hard border, short shadow: contrast from the ground
+   rather than from the ink. */
+.corner.ring{right:3px;top:3px;width:21px;height:21px;border-radius:6px;background:#fff;
+  border:1.5px solid var(--ink);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.22)}
+.corner.ring:hover{background:var(--ink);color:#fff}
+.corner.ring.on{background:var(--ink);color:#fff}
+
+/* C — the folded corner: the page lifted to slide the next one under. */
+.corner.fold{right:0;top:0;width:30px;height:30px;border-radius:0 4px 0 0;
+  background:linear-gradient(225deg,var(--ink) 0 52%,transparent 52%);color:#fff;
+  align-items:flex-start;justify-content:flex-end;padding:2px 2px 0 0}
+.corner.fold .lu{width:12px;height:12px}
+.corner.fold:hover{background:linear-gradient(225deg,#000 0 56%,transparent 56%)}
+
+/* D — a bar across the foot of the image, with the word on it. */
+.corner.bar{left:0;right:0;bottom:0;height:19px;border-radius:0 0 4px 4px;gap:4px;
+  background:var(--ink);color:#fff;font-size:10px}
+.corner.bar .lu{width:12px;height:12px}
+.corner.bar.on{background:var(--ink-2)}
+
+/* E — a full-height band down the left edge, outside the drawing. */
+.corner.side{left:0;top:0;bottom:0;width:20px;border-radius:4px 0 0 4px;
+  background:var(--ink);color:#fff}
+.corner.side.on{background:var(--ink-2)}
+
+/* F — a dot at rest, the word under the pointer. */
+.corner.hov{right:3px;top:3px;width:18px;height:18px;border-radius:50%;
+  background:var(--ink);color:#fff;gap:0;overflow:hidden;
+  transition:width .12s,height .12s,border-radius .12s}
+.corner.hov em{display:none;font-size:10px}
+.tile:hover .corner.hov{right:0;top:auto;bottom:0;left:0;width:auto;height:20px;
+  border-radius:0 0 4px 4px;gap:4px}
+.tile:hover .corner.hov em{display:inline}
+.corner.hov .lu{width:13px;height:13px}
+.corner.hov.on{background:var(--ink-2)}
+
+/* ------------------------------------------- the card, tied to its tile */
+.acard{position:absolute;z-index:18;background:var(--card);border:1px solid var(--line);
+  border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.16);padding:8px;width:264px;
+  display:flex;flex-direction:column;gap:6px}
+.acard::after{content:"";position:absolute;width:9px;height:9px;background:var(--card);
+  border-right:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+.acard.right::after{right:-5px;top:var(--ay,18px)}
+.acard.below::after{left:var(--ax,22px);top:-5px;transform:rotate(-45deg)}
+.acard h4{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+.fname{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left;min-width:0}
+.date{font-size:11px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.row{display:flex;align-items:center;gap:6px;min-width:0}
+.col{display:flex;flex-direction:column;gap:5px;min-width:0}
+.sep{height:1px;background:var(--line-2);margin:1px 0}
+/* The list behind the single button. No keyboard hints and no repeat of
+   the file name: it is already written two lines above. */
+.menu{border:1px solid var(--line-2);border-radius:6px;background:var(--fill-2);padding:3px;
+  display:flex;flex-direction:column;gap:1px}
+.mi{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:4px;font-size:11.5px;
+  color:var(--ink);cursor:pointer}
+.mi:hover{background:var(--card)}
+.mi .lu{color:var(--ink-2)}
+.msep{height:1px;background:var(--line-2);margin:2px 2px}
+.lbl{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+
+.btn{height:24px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:inline-flex;align-items:center;gap:5px;padding:0 8px;font-size:11.5px;color:var(--ink-2);
+  cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--fill);border-color:var(--ink-3)}
+.btn.sm{height:21px;padding:0 6px;font-size:11px;border-radius:4px}
+.btn.wide{width:100%;justify-content:center}
+.btn.on{border-color:var(--ink);color:var(--ink);background:var(--card)}
+.btn.ico{padding:0 5px}
+
+/* The tuning: which other sheet goes over this one, and which is in front. */
+.with{display:flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:5px;
+  padding:3px 5px;font-size:11.5px;color:var(--ink-3);cursor:pointer}
+.with:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.with.on{border-color:var(--ink);color:var(--ink);background:var(--fill-2)}
+.with .mini{width:26px;height:20px;border:1px solid var(--line-2);border-radius:3px;background:#fff;
+  background-size:contain;background-repeat:no-repeat;background-position:center;flex:0 0 26px}
+.with .state{margin-left:auto;color:var(--ink-3)}
+
+/* ------------------------------------------------------- the crossings */
+.mark{position:absolute;z-index:13;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:var(--rouge-bg);border:1.5px solid var(--rouge);color:var(--rouge)}
+.mark.avert{background:var(--ambre-bg);border-color:var(--ambre);color:var(--ambre)}
+.mark.done{background:var(--fill-2);border-color:var(--line);color:var(--ink-3)}
+.mark:hover{transform:scale(1.12)}
+.mark .lu{width:13px;height:13px}
+/* The ring is drawn outside the glyph so the drawing underneath stays
+   legible: nothing is tinted, only circled. */
+.mark::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid var(--rouge);
+  opacity:.32}
+.mark.avert::after{border-color:var(--ambre)}
+.mark.done::after{display:none}
+.mark.open{box-shadow:0 0 0 3px rgba(192,52,42,.18)}
+
+.ccard{position:absolute;z-index:19;width:286px;background:var(--card);border:1px solid var(--rouge);
+  border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:8px;display:flex;
+  flex-direction:column;gap:6px}
+.ccard.avert{border-color:var(--ambre)}
+.ccard h4{font-size:12.5px;font-weight:600;color:var(--rouge);display:flex;align-items:flex-start;gap:6px}
+.ccard.avert h4{color:var(--ambre)}
+.ccard p{font-size:11.5px;color:var(--ink-2)}
+.pairline{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.pairline .mini{width:30px;height:22px;border:1px solid var(--line-2);border-radius:3px;background:#fff;
+  background-size:contain;background-repeat:no-repeat;background-position:center;flex:0 0 30px}
+.meas{font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--fill-2);
+  border:1px solid var(--line-2);border-radius:4px;padding:3px 6px}
+
+.count{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--rouge);color:var(--rouge);
+  background:var(--rouge-bg);border-radius:5px;padding:2px 7px;font-size:11.5px;cursor:pointer;white-space:nowrap}
+.count.none{border-color:var(--line-2);color:var(--ink-3);background:transparent}
+.hint{font-size:10.5px;color:var(--ink-3)}
+.toast{position:absolute;left:10px;bottom:10px;background:#1b1b1b;color:#fff;font-size:11.5px;
+  padding:6px 10px;border-radius:5px;z-index:20;max-width:70%}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>Le coin « + » — six dessins</h1>
+  <p class="lede">Le geste est arrêté: la vignette montre ce dessin seul, son coin l'ajoute par-dessus celui qui est déjà là. Reste le contraste. Le premier coin était un carré blanc à bord gris posé sur un plan blanc, dans une vignette elle-même atténuée: invisible.</p>
+  <p class="lede">Deux corrections communes aux six: l'atténuation ne porte plus sur la vignette entière mais sur l'image et le nom, de sorte que le coin reste à pleine force; et le coin ne déclenche plus de glissement, un clic dessus est un clic. Le reste de l'écran est identique partout — pile à droite, carte ancrée, conflits en rouge.</p>
+  <div id="vars"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+function sprite() {
+  const names = ["file", "ruler", "trees", "layers", "history", "clock", "chevron-down", "chevron-up",
+    "external-link", "check", "circle", "list", "box", "git-compare", "x", "folder", "share-2", "plus",
+    "minus", "table", "compass", "hard-hat", "replace", "file-text", "triangle-alert", "circle-alert",
+    "bring-to-front", "send-to-back", "circle-check", "crosshair", "ban", "scan"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* Placement of the consultant sheets over the floor plan, measured from the
+   sheets themselves. */
+const BASE_BOX = [314 / 2000, 325 / 1675, 1488 / 2000, 1270 / 1675];
+const BASE_RATIO = 2000 / 1675;
+const SHEETS = {
+  arp: { box: [298 / 1650, 307 / 1560, 1380 / 1650, 1172 / 1560], ratio: 1650 / 1560 },
+  pay: { box: [156 / 835, 178 / 800, 711 / 835, 624 / 800], ratio: 835 / 800 },
+};
+function layStyle(k, z) {
+  const S = SHEETS[k];
+  const [bx0, by0, bx1, by1] = BASE_BOX;
+  const [sx0, sy0, sx1, sy1] = S.box;
+  const w = (bx1 - bx0) / (sx1 - sx0);
+  const h = w * BASE_RATIO / S.ratio;
+  const left = bx0 - sx0 * w;
+  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h;
+  return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;z-index:${z}`;
+}
+
+const DISC = {
+  arch: { label: "Architecte", icon: "compass" },
+  arp: { label: "Arpenteur-géomètre", icon: "ruler" },
+  pays: { label: "Architecte paysagiste", icon: "trees" },
+};
+const SERVER = "\\\\serveur-bureau\\Projets\\2026\\BAL3\\";
+const DRAWINGS = {
+  plan: { disc: "arch", short: "Architecte", app: "AutoCAD", thumb: "assets/plan-niveau-5.jpg",
+    folder: SERVER + "Dessins\\", file: "BAL3_PLAN-NIVEAU-5_2026-10-24.dwg", date: "24 oct 2026" },
+  arp: { disc: "arp", short: "Arpenteur", app: "Acrobat", thumb: "assets/arp-site.png",
+    folder: SERVER + "Reçu\\Arpenteur\\", file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-07.pdf", date: "7 oct 2026" },
+  pay: { disc: "pays", short: "Paysage", app: "Acrobat", thumb: "assets/paysage.png",
+    folder: SERVER + "Reçu\\Paysage\\", file: "BAL3_AMENAGEMENT-PAYSAGER_2026-07-07.pdf", date: "7 juil 2026" },
+};
+
+/* A crossing belongs to a pair of drawings: it can only be seen, and can
+   only be true, when both are on screen. Positions are fractions of the
+   drawing area; the measurement is what makes it worth opening. */
+const CONFLICTS = [
+  { id: "x1", pair: ["plan", "arp"], at: [0.455, 0.355], sev: "grave",
+    title: "Conduite d'aqueduc dans la colonne C-4",
+    body: "La conduite de 200 mm de la servitude traverse la colonne C-4. Le relevé de l'arpenteur et la grille structurale ne peuvent pas être vrais en même temps.",
+    meas: "recoupement 140 mm sur 1,20 m de hauteur" },
+  { id: "x2", pair: ["plan", "arp"], at: [0.235, 0.63], sev: "grave",
+    title: "Mur de la façade sud hors de la limite",
+    body: "Le mur dessiné dépasse la limite d'implantation relevée. À vérifier avant le dépôt au permis.",
+    meas: "dépassement 240 mm sur 8,4 m" },
+  { id: "x3", pair: ["plan", "pay"], at: [0.64, 0.545], sev: "avert",
+    title: "Fosse de plantation sous la dalle",
+    body: "La fosse de l'arbre 12 recoupe la dalle du stationnement. Profondeur de terre insuffisante telle que dessinée.",
+    meas: "recoupement 0,8 m² · terre 350 mm" },
+  { id: "x4", pair: ["arp", "pay"], at: [0.34, 0.80], sev: "avert",
+    title: "Bordure paysagère sur l'emprise",
+    body: "La bordure empiète sur l'emprise municipale relevée au certificat.",
+    meas: "empiétement 310 mm" },
+];
+/* The hover variant shows a drawing that has not been kept yet, so every
+   reader of "what is on screen" has to go through one function. A peeked
+   drawing counts for the conflicts too — seeing them is the point of the
+   hover. */
+const live = (s) => (s.peek && !s.shown.includes(s.peek) ? [...s.shown, s.peek] : s.shown);
+const openPairs = (s) => CONFLICTS.filter((c) => c.pair.every((k) => live(s).includes(k)) && !s.fixed.includes(c.id));
+
+const ORDER0 = ["pay", "arp", "plan"];
+const newState = () => ({
+  order: ORDER0.slice(),
+  shown: ["plan"],      /* one drawing to start: the office's own */
+  sel: "plan",
+  card: true,           /* the card belongs to the selected tile */
+  menu: false,          /* the one button's list, inside that card */
+  mode: "voir",         /* variant E only: what a click on a tile does */
+  peek: null,           /* variant F only: shown while hovered, not kept */
+  conflict: null,       /* which conflict is open */
+  fixed: [],            /* conflicts marked as settled */
+  toast: null,
+});
+const S = [];
+const d = (k) => DRAWINGS[k];
+const visible = (s, k) => live(s).includes(k);
+const zOf = (s, k) => s.order.length - s.order.indexOf(k);
+const others = (s, k) => s.order.filter((x) => x !== k);
+const setLabel = (s) => {
+  const on = s.order.filter((k) => live(s).includes(k)).map((k) => d(k).short);
+  const base = on.length === 1 ? `${on[0]} seul` : on.join(" + ");
+  return s.peek && !s.shown.includes(s.peek) ? `${base} · aperçu` : base;
+};
+
+/* ------------------------------------------------------------- the stage */
+function stageHTML(i, s) {
+  const marks = openPairs(s).concat(CONFLICTS.filter((c) =>
+    c.pair.every((k) => s.shown.includes(k)) && s.fixed.includes(c.id)));
+  return `<div class="stage" data-stage="${i}">
+    <div class="plan ${visible(s, "plan") ? "" : "off"}" style="z-index:${zOf(s, "plan")}"></div>
+    ${["arp", "pay"].map((k) => `<div class="lay ${k} ${visible(s, k) ? "" : "off"}"
+      style="${layStyle(k, zOf(s, k))}"></div>`).join("")}
+    ${marks.map((c) => `<div class="mark ${c.sev === "avert" ? "avert" : ""} ${s.fixed.includes(c.id) ? "done" : ""}
+      ${s.conflict === c.id ? "open" : ""}" data-a="conflict" data-i="${i}" data-c="${c.id}"
+      style="left:${(c.at[0] * 100).toFixed(1)}%;top:${(c.at[1] * 100).toFixed(1)}%"
+      title="${c.title}">${icon(s.fixed.includes(c.id) ? "circle-check"
+        : c.sev === "avert" ? "circle-alert" : "triangle-alert")}</div>`).join("")}
+    ${s.conflict ? conflictCard(i, s) : ""}
+    ${s.toast ? `<div class="toast">${s.toast}</div>` : ""}
+  </div>`;
+}
+
+function conflictCard(i, s) {
+  const c = CONFLICTS.find((x) => x.id === s.conflict);
+  const done = s.fixed.includes(c.id);
+  /* Position is measured after the fact, like the tile card: a percentage
+     guess puts a 286 px card off the edge of a narrow pane. */
+  return `<div class="ccard ${c.sev === "avert" ? "avert" : ""}" data-cc="${c.id}"
+    data-ax="${c.at[0]}" data-ay="${c.at[1]}">
+    <div class="lbl" style="color:inherit">${VARIANTS[i].words.one}</div>
+    <h4>${icon(c.sev === "avert" ? "circle-alert" : "triangle-alert")}<span>${c.title}</span>
+      <span style="flex:1"></span><span class="btn sm ico" data-a="closec" data-i="${i}">${icon("x")}</span></h4>
+    <p>${c.body}</p>
+    <div class="meas">${c.meas}</div>
+    ${c.pair.map((k) => `<div class="pairline">
+      <span class="mini" style="background-image:url(${d(k).thumb})"></span>
+      <span class="col" style="gap:0;flex:1">
+        <span>${DISC[d(k).disc].label}</span>
+        <span class="fname" style="color:var(--ink-3)">${d(k).file}</span></span>
+      <span class="date">${d(k).date}</span></div>`).join("")}
+    <div class="row">
+      <span class="btn sm" data-a="openapp" data-i="${i}" data-k="${c.pair[0]}">
+        ${icon("external-link")}Ouvrir dans ${d(c.pair[0]).app}</span>
+      <span style="flex:1"></span>
+      <span class="btn sm ${done ? "on" : ""}" data-a="fix" data-i="${i}" data-c="${c.id}">
+        ${icon(done ? "circle-check" : "check")}${done ? "Réglé" : "Marquer réglé"}</span>
+    </div>
+  </div>`;
+}
+
+/* ------------------------------------------------------- the anchored card */
+/* The card now says one thing only: which document this drawing is, and
+   what can be done to that document. Stacking moved out of the card
+   entirely — each variant below puts the gesture somewhere else. */
+function anchorCard(i, s, place) {
+  const k = s.sel;
+  return `<div class="acard ${place}" data-card="${i}" data-anchor="${k}">
+    <div class="row"><h4>${icon(DISC[d(k).disc].icon)}${DISC[d(k).disc].label}</h4>
+      <span style="flex:1"></span><span class="date">${d(k).date}</span></div>
+    <span class="fname" title="${d(k).file}">${d(k).file}</span>
+    <span class="btn sm wide" data-a="menu" data-i="${i}" data-k="${k}">
+      ${icon("file-text")}Document ${icon(s.menu ? "chevron-up" : "chevron-down")}</span>
+    ${s.menu ? `<div class="menu">
+      <div class="mi" data-a="openapp" data-i="${i}" data-k="${k}">${icon("external-link")}Ouvrir dans ${d(k).app}</div>
+      <div class="mi" data-a="swap" data-i="${i}" data-k="${k}">${icon("replace")}Changer le document…</div>
+      <div class="msep"></div>
+      <div class="mi" data-a="hist" data-i="${i}" data-k="${k}">${icon("history")}Voir les documents précédents (3)</div>
+    </div>` : ""}
+  </div>`;
+}
+
+/* One word now, chosen: a place where two drawings cannot both be true is
+   a conflit. */
+const W = { some: (n) => `${n} conflit${n > 1 ? "s" : ""}`, none: "aucun conflit", one: "Conflit" };
+const countChip = (i, s) => {
+  const n = openPairs(s).length;
+  return `<span class="count ${n ? "" : "none"}" data-a="firstc" data-i="${i}">
+    ${icon(n ? "triangle-alert" : "circle-check")}${n ? W.some(n) : W.none}</span>`;
+};
+
+/* A tile: the drawing, then its name. Nothing else — no eye, no pill. */
+const tile = (i, s, k, extra = "", act = "pick") => `<div class="tile ${visible(s, k) ? "on" : ""} ${s.sel === k ? "sel" : ""}"
+  data-a="${act}" data-i="${i}" data-k="${k}" data-tile="${k}" title="${DISC[d(k).disc].label} · ${d(k).date}">
+  <span class="wrap"><span class="pic" style="background-image:url(${d(k).thumb})"></span>${extra}</span>
+  <span class="nm">${d(k).short}</span></div>`;
+
+/* The pile is common to all six: the tiles overlap like sheets, the top of
+   the pile is drawn in front, and a tile is dragged up or down to change
+   that. Only the gesture that adds a second drawing changes below. */
+const stripHTML = (i, s, extra, foot) => `<div class="strip wide"><div class="pile">
+    ${s.order.map((k) => tile(i, s, k, extra ? extra(k) : "")).join("")}</div>
+    <div class="hint" style="text-align:center;margin-top:6px">${foot}</div></div>`;
+const cardOf = (i, s) => (s.card ? anchorCard(i, s, "right") : "");
+
+/* The gesture is settled: the corner of the tile adds that drawing over
+   the one already shown. What is judged here is how the corner is drawn —
+   at 18 px on a white thumbnail the outlined version nearly disappears.
+   Same control, six weights. */
+const corner = (i, s, k, kind) => {
+  const on = visible(s, k);
+  /* The drawing shown alone has nothing to add to: no corner on it. */
+  if (on && s.shown.length === 1) return "";
+  return `<span class="corner ${kind} ${on ? "on" : ""}" data-a="toggle" data-i="${i}" data-k="${k}"
+    title="${on ? "Retirer" : "Superposer"} ${d(k).short}">${icon(on ? "check" : "plus")}${
+    kind === "bar" || kind === "hov" ? `<em>${on ? "Superposé" : "Superposer"}</em>` : ""}</span>`;
+};
+const build = (kind, foot) => (i, s) => ({
+  side: stripHTML(i, s, (k) => corner(i, s, k, kind), foot),
+  card: cardOf(i, s),
+});
+
+/* ------------------------------------------------------------ the screen */
+const UNITS = [["501", "5½", "1 275 pi²", "30% 40%"], ["502", "5½", "1 496 pi²", "46% 36%"],
+  ["503", "3½", "760 pi²", "38% 52%"], ["504", "4½", "1 152 pi²", "54% 46%"]];
+
+function screenHTML(i, s, P) {
+  return `<div class="app" data-i="${i}">
+    <div class="bar1">${icon("folder")}<span class="crumb">Tous les projets</span>
+      <span class="crumb on">Le Baldwin III</span>
+      <span class="tab on">${icon("git-compare")}Coordination</span>
+      <span class="tab">${icon("table")}Codes</span><span class="tab">${icon("clock")}Échéancier</span>
+      <span class="sp"></span><span class="share">${icon("share-2")}Partager</span></div>
+    <div class="bar2">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<span class="${n === 5 ? "on" : ""}">Niveau ${n}</span>`).join("")}
+      <span>Tous les niveaux</span></div>
+    <div class="card">
+      <div class="ttl"><b>Plans — niveau 5</b><span class="sub">15 unités · 4 avec un conflit ouvert</span>
+        <span class="sp"></span><span class="btn">${icon("table")}Exporter</span></div>
+      <div class="work">
+        <div class="pane lst"><div class="ph">${icon("list")}Unités</div>
+          <div class="pb">${UNITS.map((u, j) => `<div class="uc ${j === 0 ? "on" : ""}">
+            <div class="cr" style="background-position:${u[3]}"><span class="no">${u[0]}</span></div>
+            <div class="ul"><span>${u[1]}</span><span class="a">${u[2]}</span></div></div>`).join("")}</div></div>
+
+        <div class="pane d2">
+          <div class="ph">${icon("file")}Plan 2D
+            <span class="hint">${setLabel(s)}</span>
+            <span class="sp"></span>${countChip(i, s)}</div>
+          <div style="flex:1;min-height:0;display:flex;position:relative">
+            ${stageHTML(i, s)}
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>100%</span></div>
+            ${P.side || ""}
+            ${P.card || ""}
+          </div>
+          ${P.shelf || ""}</div>
+
+        <div class="pane m3"><div class="ph">${icon("box")}Maquette 3D<span class="sp"></span>
+          <span class="btn">${icon("external-link")}SketchUp</span></div>
+          <div style="flex:1;min-height:0;display:flex"><div class="still"></div></div></div>
+
+        <div class="pane insp"><div class="ph">${icon("circle")}Unité 501</div>
+          <div class="pb">
+            <div class="kv"><span>Type</span><b>5½</b></div>
+            <div class="kv"><span>Superficie</span><b>1 275 pi²</b></div>
+            <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
+            <div class="kv"><span>Écart</span><b>240 mm</b></div>
+          </div></div>
+      </div>
+      <div class="foot">Ouvertures de la façade sud <b>68.5 m² → 74.2 m²</b><span class="date">+5.7 m²</span>
+        <span class="sp"></span><span class="btn">Lire l'article 3.2.3.1</span></div>
+    </div>
+  </div>`;
+}
+
+/* Gesture and word are settled. Six drawings of the same corner, from the
+   quietest that still reads to the loudest. */
+const VARIANTS = [
+  { name: "Pastille pleine", build: build("solid", "le coin superpose<br>le haut de la pile passe devant"),
+    why: `Le + est blanc dans un rond noir: il se lit sur n'importe quel dessin, trait fin ou grande tache verte. C'est le même noir que le reste de l'interface, donc rien de neuf à expliquer. <span class="cost">Le prix: un point noir franc sur chaque vignette non affichée, donc trois points qui tirent l'œil avant le dessin.</span>` },
+  { name: "Pastille blanche cerclée", build: build("ring", "le coin superpose<br>le haut de la pile passe devant"),
+    why: `Fond blanc opaque, bord net, ombre courte: le + se détache du dessin sans poser une tache noire dessus. Le contraste vient du fond, pas de l'encre. <span class="cost">Le prix: sur un plan très pâle, la pastille blanche se fond dans le papier et il ne reste que le bord.</span>` },
+  { name: "Coin replié", build: build("fold", "le coin se replie<br>pour superposer"),
+    why: `Le coin de la feuille est replié, comme une page qu'on soulève pour glisser la suivante dessous. L'image dit le geste au lieu de le nommer. <span class="cost">Le prix: une métaphore; le triangle coupe le dessin dans l'angle et personne n'est sûr qu'on peut cliquer.</span>` },
+  { name: "Barre au bas de la vignette", build: build("bar", "la barre superpose"),
+    why: `Une barre pleine largeur sous l'image, avec le mot: <b>Superposer</b>, puis <b>Superposé</b>. La cible est large, et plus rien n'est à deviner. <span class="cost">Le prix: la vignette grandit de quinze pixels et le mot répète ce que la pile dit déjà.</span>` },
+  { name: "Bande latérale", build: build("side", "la bande superpose"),
+    why: `Le + prend toute la hauteur du bord gauche: cible immense, hors du dessin, et les trois bandes alignées forment une colonne au lieu de trois taches. <span class="cost">Le prix: l'image perd un sixième de sa largeur, donc la reconnaissance du dessin baisse.</span>` },
+  { name: "Pastille au repos, mot au survol", build: build("hov", "le coin superpose"),
+    why: `Un point plein suffit tant que la souris est ailleurs; sous le pointeur, il s'ouvre en <b>Superposer</b> sur toute la vignette. Discret au repos, explicite au moment d'agir. <span class="cost">Le prix: rien de tout cela n'existe sans souris, et le mot n'apparaît jamais à qui ne survole pas.</span>` },
+];
+
+function render(i) {
+  const mount = document.querySelector(`[data-var="${i}"] .mount`);
+  mount.innerHTML = screenHTML(i, S[i], VARIANTS[i].build(i, S[i]));
+  placeCard(i);
+}
+
+/* The card is written into the markup without a position, then put at the
+   height of its own tile. Measuring after the fact is the only way to
+   follow a tile that moves when the pile is reordered. */
+function placeCard(i) {
+  const root = document.querySelector(`[data-var="${i}"]`);
+  placeConflict(root);
+  const card = root.querySelector(".acard");
+  if (!card) return;
+  const tileEl = root.querySelector(`[data-tile="${card.dataset.anchor}"]`);
+  const host = card.parentElement.getBoundingClientRect();
+  const tb = tileEl ? tileEl.getBoundingClientRect() : null;
+  if (!tb) return;
+  if (card.classList.contains("below")) {
+    const left = Math.min(host.width - card.offsetWidth - 8,
+      Math.max(8, tb.left - host.left + tb.width / 2 - 40));
+    card.style.left = `${left}px`;
+    card.style.top = `${Math.max(8, host.height - card.offsetHeight - 8)}px`;
+    card.style.setProperty("--ax", `${tb.left - host.left + tb.width / 2 - left - 4}px`);
+  } else {
+    const strip = root.querySelector(".strip").getBoundingClientRect();
+    card.style.right = `${host.right - strip.left + 8}px`;
+    const top = Math.min(host.height - card.offsetHeight - 8,
+      Math.max(6, tb.top - host.top + tb.height / 2 - 26));
+    card.style.top = `${top}px`;
+    card.style.setProperty("--ay", `${Math.max(10, tb.top - host.top + tb.height / 2 - top - 4)}px`);
+  }
+}
+
+/* The crossing card hangs off its mark: beside it when there is room on
+   that side, flipped when there is not, and always wholly inside the
+   drawing so nothing important is pushed out of the pane. */
+function placeConflict(root) {
+  const cc = root.querySelector(".ccard");
+  if (!cc) return;
+  const stage = cc.parentElement.getBoundingClientRect();
+  const ax = +cc.dataset.ax * stage.width, ay = +cc.dataset.ay * stage.height;
+  const w = cc.offsetWidth, h = cc.offsetHeight;
+  const left = ax + 18 + w < stage.width ? ax + 18 : Math.max(8, ax - 18 - w);
+  const top = Math.min(stage.height - h - 8, Math.max(8, ay - 28));
+  cc.style.left = `${Math.max(8, left)}px`;
+  cc.style.top = `${top}px`;
+}
+
+function renderAll() {
+  document.getElementById("vars").innerHTML = VARIANTS.map((v, i) => `<div class="var" data-var="${i}">
+    <div class="vh"><span class="n">Variante ${String.fromCharCode(65 + i)}</span><b>${v.name}</b></div>
+    <p class="why">${v.why}</p>
+    <div class="mount"></div></div>`).join("");
+  VARIANTS.forEach((_, i) => { S[i] = S[i] || newState(); render(i); });
+}
+
+function say(s, msg) {
+  s.toast = msg;
+  clearTimeout(s.timer);
+  s.timer = setTimeout(() => { s.toast = null; render(S.indexOf(s)); }, 3600);
+}
+
+/* Every variant ends up here: a drawing joins what is on screen or leaves
+   it, the last one can never leave, and the stacking order of the pile
+   decides where it lands. Six gestures, one piece of state. */
+function stack(i, s, k) {
+  const on = s.shown.includes(k);
+  s.shown = on ? s.shown.filter((x) => x !== k)
+    : s.order.filter((x) => s.shown.includes(x) || x === k);
+  if (!s.shown.length) { s.shown = [k]; return; }
+  if (!s.shown.includes(s.sel)) s.sel = s.shown[s.shown.length - 1];
+  s.conflict = null;
+  s.peek = null;
+  if (!on) { s.sel = k; s.card = true; announce(s); }
+}
+
+/* Stacking is the moment conflicts can appear, so it is the moment to say
+   how many — the number alone, in the header, is easy to miss. */
+function announce(s) {
+  const n = openPairs(s).length;
+  if (n) say(s, `${setLabel(s)} — ${W.some(n)} à regarder.`);
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-a]");
+  if (!el) return;
+  const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+  if (!s) return;
+  switch (el.dataset.a) {
+    /* Clicking a drawing shows that drawing alone; its corner adds it to
+       what is already there. Clicking the one already alone closes its
+       card rather than hiding anything. */
+    case "pick":
+      if (s.sel === k && s.shown.length === 1 && s.shown[0] === k) { s.card = !s.card; s.menu = false; break; }
+      s.sel = k; s.shown = [k]; s.card = true; s.menu = false; s.conflict = null;
+      break;
+    case "menu": s.menu = !s.menu; break;
+    case "toggle": stack(i, s, k); break;
+    /* Stacking order has no buttons: the pile of tiles is the order, and
+       it is dragged. */
+    /* Two cards over one drawing is one too many: opening a crossing puts
+       the document card away, closing it brings the card back. */
+    case "conflict":
+      s.conflict = s.conflict === el.dataset.c ? null : el.dataset.c;
+      s.card = !s.conflict;
+      break;
+    case "firstc": {
+      const open = openPairs(s);
+      if (!open.length) { say(s, "Aucun conflit entre les dessins affichés."); break; }
+      s.conflict = open[0].id; s.card = false;
+      break;
+    }
+    case "closec": s.conflict = null; s.card = true; break;
+    case "fix": {
+      const id = el.dataset.c;
+      s.fixed = s.fixed.includes(id) ? s.fixed.filter((x) => x !== id) : [...s.fixed, id];
+      const c = CONFLICTS.find((x) => x.id === id);
+      say(s, s.fixed.includes(id) ? `« ${c.title} » — marqué réglé.` : `« ${c.title} » — rouvert.`);
+      break;
+    }
+    case "openapp": say(s, `${d(k).file} — ouvert dans ${d(k).app}.`); break;
+    case "swap": say(s, `Choisir un autre document dans ${d(k).folder}`); break;
+    case "hist": say(s, `${d(k).short}: 3 documents lus avant celui-ci.`); break;
+    default: return;
+  }
+  render(i);
+});
+
+window.addEventListener("resize", () => { S.forEach((_, i) => placeCard(i)); });
+
+/* The pile is the stacking order, so a tile has to be draggable to the
+   top. Tracked by where the pointer is, not by HTML5 drag and drop, which
+   never fires on these tiles. The corner is excluded: a click on it is a
+   click, not the start of a drag. */
+document.addEventListener("pointerdown", (e) => {
+  const tileEl = e.target.closest("[data-tile]");
+  if (!tileEl || e.target.closest(".corner")) return;
+  const i = +tileEl.dataset.i, s = S[i], k = tileEl.dataset.tile;
+  let moved = false;
+  const move = (ev) => {
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    const onto = el && el.closest("[data-tile]");
+    if (!onto || !onto.closest(".pile") || onto.dataset.tile === k) return;
+    const from = s.order.indexOf(k), to = s.order.indexOf(onto.dataset.tile);
+    s.order.splice(from, 1);
+    s.order.splice(to, 0, k);
+    moved = true;
+    render(i);
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    if (moved) { say(s, `Ordre: ${s.order.map((x) => d(x).short).join(" devant ")}.`); render(i); }
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+});
+
+sprite();
+renderAll();
+</script>
+</body>
+</html>
