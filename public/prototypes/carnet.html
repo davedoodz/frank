@@ -50,7 +50,7 @@ h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .top .r{margin-left:auto;display:flex;align-items:center;gap:7px}
 .who{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;
   font-weight:600;color:#fff;flex:0 0 auto}
-.w-GB{background:#2f4858}.w-CL{background:#7a8a2e}.w-DM{background:#8a5a2b}.w-EX{background:#9b9b9b}
+.w-GY{background:#2f4858}.w-BN{background:#7a8a2e}.w-AL{background:#8a5a2b}.w-DV{background:#5c5470}
 .btn{height:28px;padding:0 10px;border:1px solid var(--line-2);border-radius:7px;background:var(--paper);
   font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{background:var(--fill-2)}
@@ -302,9 +302,10 @@ function sprite() {
 /* A team of two or three: the whole people list fits in the window, so no
    search field, no autocomplete — three buttons. */
 const PEOPLE = [
-  { id: "GB", name: "Guy", role: "technicien 3D" },
-  { id: "CL", name: "Caroline", role: "chargée de projet" },
-  { id: "DM", name: "David", role: "atelier" },
+  { id: "GY", name: "Guy", role: "technicien 3D" },
+  { id: "BN", name: "Benoit", role: "chargé de projet" },
+  { id: "AL", name: "Alain", role: "technicien" },
+  { id: "DV", name: "David", role: "atelier" },
 ];
 const avatar = (id, cls = "") => {
   const p = PEOPLE.find((x) => x.id === id);
@@ -338,49 +339,52 @@ const relDay = (k) => k === TODAY ? "aujourd'hui" : k === addDays(TODAY, -1) ? "
 const KEY = "fitte:carnet";
 const SEED = [
   { kind: "call", title: "Appel de l'entrepreneur: dégagement devant la porte du 507 à 860 mm, il en faut 900",
-    who: ["CL"], created: "2026-09-03T09:14", source: "niv. 5 · unité 507", done: "2026-09-03T09:14" },
+    who: ["BN"], created: "2026-09-03T09:14", source: "niv. 5 · unité 507", done: "2026-09-03T09:14" },
   { kind: "change", title: "Corridor du 5e redessiné: porte du 507 déplacée de 40 mm vers l'est",
-    who: ["GB"], created: "2026-09-04T11:02", source: "niv. 5 · plan d'unités", done: "2026-09-04T16:40",
+    who: ["GY"], created: "2026-09-04T11:02", source: "niv. 5 · plan d'unités", done: "2026-09-04T16:40",
     note: "Suite à l'appel du 3 sept. Vérifié avec la 3.3.1.18." },
-  { kind: "todo", title: "Réémettre le plan du 5e à l'entrepreneur", who: ["CL"], created: "2026-09-04T16:45",
+  { kind: "todo", title: "Réémettre le plan du 5e à l'entrepreneur", who: ["BN"], created: "2026-09-04T16:45",
     done: "2026-09-04T17:20" },
   { kind: "change", title: "Hauteur des garde-corps portée à 1 070 mm sur les balcons nord",
-    who: ["GB"], created: "2026-09-21T14:30", source: "niv. 3 à 8 · élévations", done: "2026-09-22T10:05" },
+    who: ["GY"], created: "2026-09-21T14:30", source: "niv. 3 à 8 · élévations", done: "2026-09-22T10:05" },
   { kind: "call", title: "Appel de l'arpenteur: la ligne d'implantation bouge de 0,2 m au sud",
-    who: ["DM"], created: "2026-10-06T08:40", source: "site", done: "2026-10-06T08:40" },
-  { kind: "change", title: "Implantation reprise avec le relevé du 6 octobre", who: ["GB", "DM"],
+    who: ["AL"], created: "2026-10-06T08:40", source: "site", done: "2026-10-06T08:40" },
+  { kind: "change", title: "Implantation reprise avec le relevé du 6 octobre", who: ["GY", "AL"],
     created: "2026-10-06T13:10", source: "site · plan d'implantation", done: "2026-10-07T09:30" },
-  { kind: "todo", title: "Envoyer le tableau des superficies à la chargée", who: ["GB"],
+  { kind: "todo", title: "Envoyer le tableau des superficies au chargé de projet", who: ["GY"],
     created: "2026-11-03T10:12", done: "2026-11-03T15:02" },
   { kind: "change", title: "Mix de typologies arrêté: 4½ ramenés de 7 à 5 au niveau 2",
-    who: ["CL"], created: "2026-11-05T11:20", source: "niv. 2", done: "2026-11-05T11:55" },
-  { kind: "todo", title: "Relire les notes de l'arrondissement sur la marge avant", who: ["CL"],
+    who: ["BN"], created: "2026-11-05T11:20", source: "niv. 2", done: "2026-11-05T11:55" },
+  { kind: "todo", title: "Relire les notes de l'arrondissement sur la marge avant", who: ["BN"],
     created: "2026-11-13T08:55", done: "2026-11-13T17:40" },
-  { kind: "todo", title: "Imprimer la coupe de rue pour la rencontre", who: ["DM"], created: "2026-11-14T08:12" },
-  { kind: "todo", title: "Rappeler l'ingénieur pour le type de construction", who: ["CL"],
+  { kind: "todo", title: "Imprimer la coupe de rue pour la rencontre", who: ["AL"], created: "2026-11-14T08:12" },
+  { kind: "todo", title: "Rappeler l'ingénieur pour le type de construction", who: ["BN"],
     created: "2026-11-14T08:30" },
-  { kind: "todo", title: "Nettoyer les calques du 3e avant l'émission", who: ["GB"], created: "2026-11-14T09:40" },
-  { kind: "deadline", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: ["GB"],
+  { kind: "todo", title: "Nettoyer les calques du 3e avant l'émission", who: ["GY"], created: "2026-11-14T09:40" },
+  { kind: "todo", title: "Vérifier les cotes de la cage d'escalier B", who: ["DV"], created: "2026-11-14T10:05" },
+  { kind: "change", title: "Fenêtres du 4e alignées sur la trame du 5e", who: ["AL"],
+    created: "2026-11-12T13:25", source: "niv. 4 · élévations", done: "2026-11-12T15:10" },
+  { kind: "deadline", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: ["GY"],
     created: "2026-11-10T09:00", due: "2026-11-14", prio: "haute", source: "3.3.1.18" },
-  { kind: "deadline", title: "Largeur libre des portes du parcours sans obstacles", who: ["GB"],
+  { kind: "deadline", title: "Largeur libre des portes du parcours sans obstacles", who: ["GY"],
     created: "2026-11-10T09:02", due: "2026-11-14", prio: "haute", source: "3.8.1.3" },
-  { kind: "deadline", title: "Élévations avec matériaux au comité", who: ["GB", "DM"],
+  { kind: "deadline", title: "Élévations avec matériaux au comité", who: ["GY", "AL"],
     created: "2026-11-02T10:00", due: "2026-11-09", prio: "moyenne", done: "2026-11-09T16:20" },
-  { kind: "deadline", title: "Confirmer le type de construction pour 8 étages", who: ["CL"],
+  { kind: "deadline", title: "Confirmer le type de construction pour 8 étages", who: ["BN"],
     created: "2026-11-10T09:05", due: "2026-11-17", prio: "haute", source: "3.2.1.1" },
-  { kind: "deadline", title: "Recompter les cases après réduction pour le métro", who: ["CL"],
+  { kind: "deadline", title: "Recompter les cases après réduction pour le métro", who: ["BN"],
     created: "2026-11-10T09:06", due: "2026-11-20", prio: "moyenne", source: "art. 71" },
-  { kind: "deadline", title: "Note à l'urbaniste sur la marge avant", who: ["CL"],
+  { kind: "deadline", title: "Note à l'urbaniste sur la marge avant", who: ["BN"],
     created: "2026-11-11T14:00", due: "2026-11-24", prio: "moyenne", source: "art. 22" },
-  { kind: "deadline", title: "Plans d'émission pour permis", who: ["GB", "DM"],
+  { kind: "deadline", title: "Plans d'émission pour permis", who: ["GY", "AL"],
     created: "2026-11-11T14:02", due: "2026-12-04", prio: "haute" },
-  { kind: "deadline", title: "Dépôt de la demande de permis", who: ["CL"],
+  { kind: "deadline", title: "Dépôt de la demande de permis", who: ["BN"],
     created: "2026-11-11T14:03", due: "2026-12-15", prio: "haute" },
 ].map((e, i) => ({ id: `s${i}`, ...e }));
 
 let E = load();
 let S = { tab: "ech", view: "semaine", anchor: TODAY, sel: null, modal: null,
-  q: "", fwho: null, fkind: null, me: "GB" };
+  q: "", fwho: null, fkind: null, me: "GY" };
 
 function load() {
   try { const raw = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(raw) && raw.length) return raw; }
