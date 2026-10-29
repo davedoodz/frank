@@ -458,7 +458,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
   border-radius:var(--r);background:var(--card);cursor:pointer}
 .task:hover{border-color:var(--line)}
 .task.on{box-shadow:0 0 0 1px var(--ink) inset;border-color:var(--ink)}
-.task.done{opacity:.55}
+/* A ticked line stays readable: it is still being looked at, and it only
+   leaves the list when someone files it. */
+.task.done{opacity:.72}
 .task.done .ttl{text-decoration:line-through}
 .task.late{border-left:3px solid var(--ink)}
 .task .pr{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);
@@ -480,8 +482,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .task .file svg{width:12px;height:12px}
 [data-fi="high"] .task .file.hi{display:inline-flex}
 .task .file .hi{display:inline}
-/* A ticked line stays readable: it is still being looked at. */
-.task.done{opacity:.72}
 .task .tact{display:flex;align-items:center;color:var(--ink-3);opacity:0;padding:2px}
 .task:hover .tact,.task.on .tact{opacity:1}
 .task .tact:hover{color:var(--ink)}
