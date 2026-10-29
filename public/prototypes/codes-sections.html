@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Les trois corps de règles — explorations</title>
+<title>Les trois corps de règles — 18 présentations</title>
 <link rel="stylesheet" href="vendor/geist/geist.css">
 <style>
-/* Same ramp and hairlines as wireframe-c3. The question here is one
-   question: the Codes screen holds three bodies of rules — le Code du
-   Québec, la loi-cadre, le règlement d'urbanisme — and today they are
-   told apart by one grey uppercase line between the rows. Eight ways of
-   making that difference visible, from a heavier heading to moving the
-   three bodies out of the list entirely. */
+/* Same ramp, hairlines and radii as wireframe-c3. One question only: the
+   Codes screen carries three bodies of rules — le Code du Québec, la
+   loi-cadre, le règlement d'urbanisme — and today they are told apart by a
+   grey uppercase line that disappears between two 100 px cards. Each
+   option below is the whole screen, with real articles, real figures, a
+   working clarity menu and a working right column; only the way the
+   source is said changes. */
 :root{
   --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
   --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
@@ -23,91 +24,172 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
 body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;
-  -webkit-font-smoothing:antialiased;padding:28px 24px 72px}
+  -webkit-font-smoothing:antialiased;padding:28px 24px 96px}
+svg.lu{width:14px;height:14px;flex:0 0 auto;stroke:currentColor;fill:none;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 
-.wrap{max-width:1240px;margin:0 auto}
+/* page scaffolding ------------------------------------------------------ */
+.wrap{max-width:1320px;margin:0 auto}
 h1{font-size:19px;font-weight:600;letter-spacing:-.01em}
-.sub{color:var(--ink-2);margin-top:6px;max-width:88ch}
+.sub{color:var(--ink-2);margin-top:6px;max-width:92ch}
 .sub b{color:var(--ink);font-weight:600}
-h2.part{font-size:14px;font-weight:600;margin:40px 0 4px;padding-top:18px;border-top:1px solid var(--line-2)}
-h2.part + p{color:var(--ink-2);font-size:12.5px;max-width:88ch;margin-bottom:16px}
-.opt{display:flex;flex-direction:column;gap:9px;margin-top:26px}
+h2.part{font-size:14px;font-weight:600;margin:44px 0 4px;padding-top:18px;border-top:1px solid var(--line-2)}
+h2.part + p{color:var(--ink-2);font-size:12.5px;max-width:92ch;margin-bottom:4px}
+.opt{display:flex;flex-direction:column;gap:9px;margin-top:30px}
 .cap{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
 .cap .n{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
 .cap b{font-size:13.5px;font-weight:600}
-.note{color:var(--ink-2);font-size:12px;max-width:96ch}
+.note{color:var(--ink-2);font-size:12px;max-width:104ch}
 .note b{color:var(--ink);font-weight:600}
-.shot{border:1px solid var(--line-2);border-radius:var(--r2);background:var(--card);overflow:hidden;padding:12px}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.shot{border:1px solid var(--line-2);border-radius:var(--r2);background:var(--card);overflow:hidden}
 
-/* one article row, cut down to what the section question needs ---------- */
-.row{display:grid;grid-template-columns:116px 1fr auto;gap:10px;align-items:start;
-  border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);padding:9px 10px}
-.row .fig{height:52px;border:1px solid var(--line-2);border-radius:4px;background:var(--fill-2)}
-.row .tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--ink-2)}
-.row .tp{font-weight:600;font-size:12.5px}
-.row .qt{color:var(--ink-2);font-size:11.5px;margin-top:3px;
-  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
-.cl{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);white-space:nowrap}
-.cl::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
-.cl[data-c="clair"]{--c:var(--clair)} .cl[data-c="moyen"]{--c:var(--moyen)} .cl[data-c="obscur"]{--c:var(--obscur)}
-.list{display:flex;flex-direction:column;gap:7px}
+/* the screen, as it is in wireframe-c3 ---------------------------------- */
+.scr{display:grid;grid-template-columns:1fr 272px;height:470px}
+.scr.nolist{grid-template-columns:1fr}
+.pane{display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--line-2)}
+.ph{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid var(--line-2);
+  font-size:12.5px;color:var(--ink-2);flex:0 0 auto}
+.ph .ti{color:var(--ink)}
+.ph .sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:5px;
+  padding:3px 8px;font-size:11.5px;color:var(--ink-2);background:var(--card);cursor:pointer}
+.btn:hover{background:var(--fill-2);color:var(--ink)}
+.btn.solid{background:var(--ink);border-color:var(--ink);color:#fff}
+.pb{padding:10px 11px;overflow:auto;flex:1;display:flex;flex-direction:column;gap:8px}
+.rail{display:flex;flex-direction:column;min-width:0;background:var(--card)}
+.rail .rb{padding:10px 11px;display:flex;flex-direction:column;gap:8px;overflow:auto}
+.kv{display:flex;justify-content:space-between;gap:10px;padding-bottom:6px;
+  border-bottom:1px solid var(--line-2);font-size:12px;color:var(--ink-2)}
+.kv b{font-weight:400;color:var(--ink);text-align:right}
+.noteinput{resize:vertical;border:1px solid var(--line-2);border-radius:6px;padding:6px 8px;
+  font:inherit;font-size:12px;color:var(--ink);background:var(--card);min-height:54px}
+.noteinput:focus{outline:1px solid var(--ink);outline-offset:1px}
+.contact{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-2)}
+.contact .who{flex:1;min-width:0;display:flex;flex-direction:column}
+.contact .who b{font-weight:600;font-size:11.5px}
+.contact .who span{font-size:11px;color:var(--ink-3)}
+.contact.slow .who span{color:var(--obscur)}
 
-/* 1 — today */
-.h-flat{display:flex;gap:8px;align-items:baseline;padding:10px 2px 2px;
-  font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+/* one article, the real card -------------------------------------------- */
+.coderow{display:grid;grid-template-columns:206px 1fr;align-items:stretch;cursor:pointer;
+  border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
+.coderow:hover{border-color:var(--line)}
+.coderow.on{border-color:var(--ink);outline:1px solid var(--ink);outline-offset:-1px}
+.coderow > .draw{padding:9px;background:var(--fill-2);border-right:1px solid var(--line-2);
+  display:grid;place-items:center}
+.coderow > .draw img, .coderow > .draw svg{width:100%;height:auto;display:block;mix-blend-mode:multiply}
+.coderow > .tx{padding:10px 11px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.hdl{display:flex;align-items:baseline;gap:8px}
+.tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--ink-2)}
+.tp{font-weight:600;font-size:12.5px;flex:1}
+.quote{font-size:12px;color:var(--ink-2);line-height:1.5}
+.src{font-size:11px;color:var(--ink-3)}
+.mini-note{border-left:2px solid var(--vert);padding-left:8px;display:flex;flex-direction:column}
+.mini-note span{font-size:11px;color:var(--ink-3)}
+.mini-note b{font-size:12px;font-weight:400;color:var(--ink)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.coderow.dense{grid-template-columns:1fr}
+.coderow.dense > .draw{display:none}
+.coderow.dense > .tx{padding:7px 10px;gap:4px}
+.coderow.dense .quote,.coderow.dense .src,.coderow.dense .acts{display:none}
+
+/* the clarity control, live --------------------------------------------- */
+.clarity{position:relative;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;
+  color:var(--ink-2);border:1px solid transparent;border-radius:5px;padding:2px 6px;
+  white-space:nowrap;cursor:pointer}
+.clarity:hover{border-color:var(--line);background:var(--card)}
+.clarity::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.clarity[data-c="clair"]{--c:var(--clair)}
+.clarity[data-c="moyen"]{--c:var(--moyen)}
+.clarity[data-c="obscur"]{--c:var(--obscur)}
+.claritymenu{position:absolute;top:calc(100% + 4px);right:0;z-index:9;min-width:170px;background:var(--card);
+  border:1px solid var(--line);border-radius:6px;display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.claritymenu .o{display:flex;align-items:center;gap:7px;padding:6px 9px;font-size:11.5px;color:var(--ink)}
+.claritymenu .o:hover{background:var(--fill-2)}
+.claritymenu .o::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.claritymenu .o[data-c="clair"]{--c:var(--clair)}
+.claritymenu .o[data-c="moyen"]{--c:var(--moyen)}
+.claritymenu .o[data-c="obscur"]{--c:var(--obscur)}
+
+/* the eighteen ways of saying the source -------------------------------- */
+.h-flat{display:flex;gap:8px;align-items:baseline;padding:8px 2px 0;
+  font-size:11px;letter-spacing:.04em;text-transform:uppercase}
 .h-flat span{color:var(--ink-3)}
-
-/* 2 — heading on a band */
 .h-band{display:flex;align-items:center;gap:9px;background:var(--fill);border-radius:5px;
-  padding:6px 9px;font-size:11.5px;font-weight:600;letter-spacing:.02em}
+  padding:6px 9px;font-size:11.5px;font-weight:600}
 .h-band .ct{margin-left:auto;font-weight:400;color:var(--ink-2);font-size:11px}
-
-/* 3 — heading as a rule across the list */
-.h-rule{display:flex;align-items:center;gap:10px;padding:14px 0 6px}
+.h-rule{display:flex;align-items:center;gap:10px;padding:8px 0 2px}
 .h-rule b{font-size:12.5px;white-space:nowrap}
-.h-rule i{flex:1;height:1px;background:var(--ink);font-style:normal;opacity:.5}
-
-/* 4 — left gutter rubric */
-.gutter{display:grid;grid-template-columns:26px 1fr;gap:9px;align-items:stretch}
-.gutter .rub{border-left:2px solid var(--ink);display:flex;align-items:flex-start;justify-content:center}
-.gutter .rub span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10.5px;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding:2px 0}
-
-/* 5 — source tag on every row */
-.src-tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);
+.h-rule i{flex:1;height:1px;background:var(--ink);opacity:.45}
+.h-rule span{font-size:11px;color:var(--ink-3)}
+.h-num{display:flex;align-items:baseline;gap:10px;padding:10px 0 2px}
+.h-num i{font-style:normal;font-size:26px;font-weight:600;line-height:1;color:var(--line);
+  font-variant-numeric:tabular-nums}
+.h-num b{font-size:13px}
+.h-num span{font-size:11px;color:var(--ink-3)}
+.h-sticky{position:sticky;top:0;z-index:4;background:var(--card);border-bottom:1px solid var(--ink);
+  padding:6px 2px;font-size:11.5px;font-weight:600;display:flex;gap:8px;align-items:baseline}
+.h-sticky span{color:var(--ink-3);font-weight:400;font-size:11px}
+.gutter{display:grid;grid-template-columns:24px 1fr;gap:9px;align-items:stretch}
+.gutter .rub{border-left:2px solid var(--ink);display:flex;justify-content:center}
+.gutter .rub span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-2);padding:2px 0}
+.spine{border-left:3px solid var(--sp)}
+.srctag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);
   border-radius:3px;padding:1px 5px;color:var(--ink-2);white-space:nowrap}
-.src-tag[data-s="qc"]{border-color:var(--ink);color:var(--ink)}
-.src-tag[data-s="loi"]{border-style:dashed}
-
-/* 6 — filter strip at the top */
-.strip{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line-2);padding-bottom:9px;margin-bottom:10px}
+.srctag[data-s="qc"]{border-color:var(--ink);color:var(--ink)}
+.srctag[data-s="loi"]{border-style:dashed}
+.strip{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:999px;
-  padding:4px 10px;font-size:11.5px;color:var(--ink-2);background:var(--card)}
+  padding:4px 10px;font-size:11.5px;color:var(--ink-2);background:var(--card);cursor:pointer}
+.chip:hover{border-color:var(--line)}
 .chip.on{border-color:var(--ink);color:var(--ink);font-weight:600}
 .chip .ct{color:var(--ink-3);font-weight:400}
-
-/* 7 — three cards above the list */
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px}
-.card{border:1px solid var(--line-2);border-radius:var(--r);padding:9px 10px;background:var(--card);
-  display:flex;flex-direction:column;gap:7px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{padding:4px 10px;font-size:11.5px;border:0;border-right:1px solid var(--line);
+  background:var(--card);color:var(--ink-2);cursor:pointer;font-family:inherit}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:#fff;font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.card{border:1px solid var(--line-2);border-radius:var(--r);padding:8px 9px;background:var(--card);
+  display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.card:hover{border-color:var(--line)}
 .card.on{border-color:var(--ink);outline:1px solid var(--ink);outline-offset:-1px}
 .card b{font-size:12.5px}
 .card .mt{font-size:11px;color:var(--ink-2)}
-.card .dots{display:flex;gap:3px}
-.card .dots i{width:7px;height:7px;border-radius:50%;display:block}
-
-/* 8 — accordions */
+.dots{display:flex;gap:3px}
+.dots i{width:7px;height:7px;border-radius:50%;display:block}
 .acc{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
-.acc + .acc{margin-top:7px}
-.acc .hd{display:flex;align-items:center;gap:9px;padding:8px 10px;font-size:12.5px;font-weight:600;
-  background:var(--fill-2);border-bottom:1px solid var(--line-2)}
+.acc .hd{display:flex;align-items:center;gap:9px;padding:7px 10px;font-size:12.5px;font-weight:600;
+  background:var(--fill-2);cursor:pointer}
 .acc .hd .ct{margin-left:auto;font-weight:400;color:var(--ink-2);font-size:11px}
+.acc.open .hd{border-bottom:1px solid var(--line-2)}
 .acc .bd{padding:9px 10px;display:flex;flex-direction:column;gap:7px}
-.acc.shut .bd{display:none}
-.acc.shut .hd{border-bottom:0}
+.twocol{display:grid;grid-template-columns:150px 1fr;gap:10px;min-height:0}
+.idx{display:flex;flex-direction:column;gap:2px;border-right:1px solid var(--line-2);padding-right:9px}
+.idx .it{padding:6px 7px;border-radius:5px;font-size:11.5px;color:var(--ink-2);cursor:pointer;
+  display:flex;flex-direction:column;gap:2px}
+.idx .it:hover{background:var(--fill-2)}
+.idx .it.on{background:var(--ink);color:#fff}
+.idx .it small{font-size:10.5px;opacity:.75}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;align-items:start}
+.cols3 .ttl{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
+  padding-bottom:6px;border-bottom:1px solid var(--ink);margin-bottom:7px}
+.facets{display:flex;flex-direction:column;gap:7px;padding-bottom:9px;border-bottom:1px solid var(--line-2)}
+.facets .ln{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.facets .lb{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);width:62px}
+.find{border:1px solid var(--line-2);border-radius:5px;padding:5px 8px;font:inherit;font-size:12px;
+  width:100%;color:var(--ink);background:var(--card)}
+.sum{display:flex;gap:7px;align-items:center;font-size:11px;color:var(--ink-3)}
+.bar{height:6px;border-radius:3px;background:var(--fill);overflow:hidden;display:flex;min-width:90px;flex:1}
+.bar i{display:block;height:100%}
+.who-h{display:flex;align-items:center;gap:8px;padding:8px 0 2px;font-size:12px}
+.who-h b{font-size:12.5px}
+.who-h span{color:var(--ink-3);font-size:11px}
+.empty{font-size:12px;color:var(--ink-3);padding:10px 2px}
 
-.verdict{margin-top:40px;border-top:1px solid var(--line-2);padding-top:18px}
+.verdict{margin-top:48px;border-top:1px solid var(--line-2);padding-top:18px}
 .verdict h2{font-size:14px;font-weight:600}
 .verdict ul{margin:8px 0 0 16px;display:flex;flex-direction:column;gap:5px;color:var(--ink-2);font-size:12.5px}
 .verdict b{color:var(--ink)}
@@ -115,259 +197,526 @@ h2.part + p{color:var(--ink-2);font-size:12.5px;max-width:88ch;margin-bottom:16p
 </head>
 <body>
 <div class="wrap">
-  <h1>Les trois corps de règles, en huit présentations</h1>
+  <h1>Les trois corps de règles, en dix-huit présentations</h1>
   <p class="sub">La liste des articles porte trois sources: le <b>Code du Québec</b> (6 articles),
     la <b>loi-cadre</b> (1) et le <b>règlement d'urbanisme</b> (5). Aujourd'hui elles sont séparées par
-    une ligne grise en majuscules, qui se perd dès qu'on défile. Chaque option ci-dessous est la même
-    liste, avec un seul changement: comment la source est dite. Les quatre premières la gardent dans la
-    liste; les quatre dernières la sortent en haut, là où elle devient aussi un filtre.</p>
+    une ligne grise en majuscules, qui se perd dès qu'on défile. Chaque option ci-dessous est l'écran
+    entier — les vraies cartes, les vraies figures, le menu de clarté et le volet de droite —
+    avec un seul changement: comment la source est dite. Tout est cliquable: choisissez un article,
+    changez sa lecture, filtrez, repliez.</p>
 
-  <h2 class="part">A — la source reste dans la liste</h2>
-  <p>Tout reste lisible d'un seul défilement: un article du code est répondu par une cote du règlement,
-    et une liste qui en cache deux tiers cache ce lien.</p>
-
-  <div class="pair">
-    <div class="opt">
-      <div class="cap"><span class="n">Option 1</span><b>Ce qui existe</b></div>
-      <div class="shot">
-        <div class="h-flat">Code du Québec <span>6 articles · 4 non résolus</span></div>
-        <div class="list">
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
-              <div class="qt">La surface maximale des baies non protégées dans une façade de rayonnement…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">3.3.1.9</span> <span class="tp">Largeur des corridors communs</span>
-              <div class="qt">La largeur libre d'un corridor commun desservant des logements…</div></div>
-            <span class="cl" data-c="clair">Clair</span></div>
-        </div>
-        <div class="h-flat">Loi-cadre <span>1 article</span></div>
-        <div class="list">
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">A-19.1</span> <span class="tp">Cadre légal du zonage</span>
-              <div class="qt">La loi habilite la municipalité à régir, par règlement, l'usage du sol…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-        </div>
-      </div>
-      <p class="note">Le titre pèse moins que les cartes qu'il annonce: en gris, en 11 px, sans fond,
-        il disparaît entre deux rangées de 100 px de haut. C'est le défaut à corriger.</p>
-    </div>
-
-    <div class="opt">
-      <div class="cap"><span class="n">Option 2</span><b>Bandeau plein</b></div>
-      <div class="shot">
-        <div class="h-band">Code du Québec <span class="ct">6 articles</span></div>
-        <div class="list" style="margin-top:8px">
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
-              <div class="qt">La surface maximale des baies non protégées dans une façade de rayonnement…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">3.3.1.9</span> <span class="tp">Largeur des corridors communs</span>
-              <div class="qt">La largeur libre d'un corridor commun desservant des logements…</div></div>
-            <span class="cl" data-c="clair">Clair</span></div>
-        </div>
-        <div class="h-band" style="margin-top:14px">Loi-cadre <span class="ct">1 article</span></div>
-        <div class="list" style="margin-top:8px">
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">A-19.1</span> <span class="tp">Cadre légal du zonage</span>
-              <div class="qt">La loi habilite la municipalité à régir, par règlement, l'usage du sol…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-        </div>
-      </div>
-      <p class="note">Un aplat gris et du gras: le titre devient un objet et non une légende.
-        Le plus petit changement qui règle le problème, et le seul qui ne coûte rien au reste.</p>
-    </div>
-  </div>
-
-  <div class="pair">
-    <div class="opt">
-      <div class="cap"><span class="n">Option 3</span><b>Filet traversant</b></div>
-      <div class="shot">
-        <div class="h-rule"><b>Code du Québec</b><i></i><span class="note">6 articles</span></div>
-        <div class="list">
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
-              <div class="qt">La surface maximale des baies non protégées…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-        </div>
-        <div class="h-rule"><b>Règlement d'urbanisme</b><i></i><span class="note">5 articles</span></div>
-        <div class="list">
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">art. 71</span> <span class="tp">Stationnement</span>
-              <div class="qt">Le nombre minimal d'unités de stationnement est établi selon l'usage…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">art. 43</span> <span class="tp">Taux d'implantation</span>
-              <div class="qt">Le taux d'implantation au sol du bâtiment principal…</div></div>
-            <span class="cl" data-c="clair">Clair</span></div>
-        </div>
-      </div>
-      <p class="note">Le filet coupe la colonne en deux: on voit la frontière avant de lire le mot.
-        Moins lourd que l'aplat, un peu plus bavard en traits.</p>
-    </div>
-
-    <div class="opt">
-      <div class="cap"><span class="n">Option 4</span><b>Rubrique en marge</b></div>
-      <div class="shot">
-        <div class="gutter">
-          <div class="rub"><span>Code du Québec</span></div>
-          <div class="list">
-            <div class="row"><div class="fig"></div>
-              <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
-                <div class="qt">La surface maximale des baies non protégées…</div></div>
-              <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-            <div class="row"><div class="fig"></div>
-              <div><span class="tag">3.4.2.1</span> <span class="tp">Nombre d'issues par étage</span>
-                <div class="qt">Au moins deux issues doivent desservir chaque étage…</div></div>
-              <span class="cl" data-c="clair">Clair</span></div>
-          </div>
-        </div>
-        <div class="gutter" style="margin-top:10px">
-          <div class="rub"><span>Règlement</span></div>
-          <div class="list">
-            <div class="row"><div class="fig"></div>
-              <div><span class="tag">art. 71</span> <span class="tp">Stationnement</span>
-                <div class="qt">Le nombre minimal d'unités de stationnement…</div></div>
-              <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-          </div>
-        </div>
-      </div>
-      <p class="note">La source tient le bloc par le côté et ne mange aucune hauteur: on sait où on est
-        même au milieu d'un groupe. Coûte 26 px de largeur, et le texte vertical se lit mal en diagonale.</p>
-    </div>
-  </div>
-
-  <h2 class="part">B — la source monte en haut et devient un filtre</h2>
-  <p>Le prix est connu: ouvrir une seule source cache les deux autres, donc cache qu'un article du code
-    est tranché par une cote du règlement. Le gain est une liste courte quand on travaille un seul corps
-    de règles — la préparation du comité, par exemple, qui ne parle que du règlement.</p>
-
-  <div class="pair">
-    <div class="opt">
-      <div class="cap"><span class="n">Option 5</span><b>Puces de filtre, « Tous » par défaut</b></div>
-      <div class="shot">
-        <div class="strip">
-          <span class="chip on">Tous <span class="ct">12</span></span>
-          <span class="chip">Code du Québec <span class="ct">6</span></span>
-          <span class="chip">Loi-cadre <span class="ct">1</span></span>
-          <span class="chip">Règlement d'urbanisme <span class="ct">5</span></span>
-        </div>
-        <div class="list">
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
-              <div class="qt">La surface maximale des baies non protégées…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">art. 71</span> <span class="tp">Stationnement</span>
-              <div class="qt">Le nombre minimal d'unités de stationnement…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">art. 43</span> <span class="tp">Taux d'implantation</span>
-              <div class="qt">Le taux d'implantation au sol du bâtiment principal…</div></div>
-            <span class="cl" data-c="clair">Clair</span></div>
-        </div>
-      </div>
-      <p class="note">« Tous » reste l'état normal, donc rien n'est caché par défaut. Mais avec « Tous »
-        actif, la liste redevient plate: il faut garder une des options A à l'intérieur.</p>
-    </div>
-
-    <div class="opt">
-      <div class="cap"><span class="n">Option 6</span><b>Étiquette de source sur chaque rangée</b></div>
-      <div class="shot">
-        <div class="list">
-          <div class="row"><div class="fig"></div>
-            <div><span class="src-tag" data-s="qc">Code QC</span> <span class="tag">3.2.3.1</span>
-              <span class="tp">Baies non protégées</span>
-              <div class="qt">La surface maximale des baies non protégées…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-          <div class="row"><div class="fig"></div>
-            <div><span class="src-tag" data-s="loi">Loi</span> <span class="tag">A-19.1</span>
-              <span class="tp">Cadre légal du zonage</span>
-              <div class="qt">La loi habilite la municipalité à régir, par règlement…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-          <div class="row"><div class="fig"></div>
-            <div><span class="src-tag">Règlement</span> <span class="tag">art. 71</span>
-              <span class="tp">Stationnement</span>
-              <div class="qt">Le nombre minimal d'unités de stationnement…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-        </div>
-      </div>
-      <p class="note">Aucune section: la source voyage avec l'article, donc le tri peut devenir
-        « par clarté » ou « par date de relance » sans rien perdre. En échange, douze étiquettes répétées
-        et une colonne de plus à l'œil.</p>
-    </div>
-  </div>
-
-  <div class="pair">
-    <div class="opt">
-      <div class="cap"><span class="n">Option 7</span><b>Trois cartes au-dessus, une liste en dessous</b></div>
-      <div class="shot">
-        <div class="cards">
-          <div class="card on"><b>Code du Québec</b>
-            <span class="mt">6 articles</span>
-            <span class="dots"><i style="background:var(--clair)"></i><i style="background:var(--clair)"></i><i style="background:var(--clair)"></i><i style="background:var(--moyen)"></i><i style="background:var(--obscur)"></i><i style="background:var(--obscur)"></i></span></div>
-          <div class="card"><b>Loi-cadre</b>
-            <span class="mt">1 article</span>
-            <span class="dots"><i style="background:var(--obscur)"></i></span></div>
-          <div class="card"><b>Règlement d'urbanisme</b>
-            <span class="mt">5 articles</span>
-            <span class="dots"><i style="background:var(--clair)"></i><i style="background:var(--moyen)"></i><i style="background:var(--moyen)"></i><i style="background:var(--obscur)"></i><i style="background:var(--obscur)"></i></span></div>
-        </div>
-        <div class="list">
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
-              <div class="qt">La surface maximale des baies non protégées…</div></div>
-            <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-          <div class="row"><div class="fig"></div>
-            <div><span class="tag">3.3.1.9</span> <span class="tp">Largeur des corridors communs</span>
-              <div class="qt">La largeur libre d'un corridor commun…</div></div>
-            <span class="cl" data-c="clair">Clair</span></div>
-        </div>
-      </div>
-      <p class="note">La carte dit en une ligne ce qu'une section ne dit jamais: combien d'articles,
-        et surtout de quelle couleur ils sont. On choisit un corps de règles en sachant déjà
-        lequel va faire mal. Coûte une hauteur fixe en haut de l'écran.</p>
-    </div>
-
-    <div class="opt">
-      <div class="cap"><span class="n">Option 8</span><b>Trois blocs repliables</b></div>
-      <div class="shot">
-        <div class="acc">
-          <div class="hd">Code du Québec <span class="ct">6 articles · 2 obscurs</span></div>
-          <div class="bd">
-            <div class="row"><div class="fig"></div>
-              <div><span class="tag">3.2.3.1</span> <span class="tp">Baies non protégées</span>
-                <div class="qt">La surface maximale des baies non protégées…</div></div>
-              <span class="cl" data-c="obscur">Pas clair du tout</span></div>
-            <div class="row"><div class="fig"></div>
-              <div><span class="tag">3.3.1.9</span> <span class="tp">Largeur des corridors communs</span>
-                <div class="qt">La largeur libre d'un corridor commun…</div></div>
-              <span class="cl" data-c="clair">Clair</span></div>
-          </div>
-        </div>
-        <div class="acc shut"><div class="hd">Loi-cadre <span class="ct">1 article</span></div></div>
-        <div class="acc shut"><div class="hd">Règlement d'urbanisme <span class="ct">5 articles · 2 obscurs</span></div></div>
-      </div>
-      <p class="note">Les trois restent visibles en permanence, repliés: on ne perd jamais de vue
-        qu'il y a trois sources, et on travaille dans une seule. Un clic de plus pour tout lire,
-        et un état de plus à retenir d'une visite à l'autre.</p>
-    </div>
-  </div>
+  <div id="opts"></div>
 
   <div class="verdict">
     <h2>Ce que je retiendrais</h2>
     <ul>
       <li><b>Option 2 (bandeau)</b> si on ne change qu'une chose: c'est le contraste demandé,
         sans rien cacher et sans hauteur perdue.</li>
-      <li><b>Option 7 (cartes) + option 2</b> si on accepte un en-tête: la couleur des pastilles dit
-        d'avance où est le travail, ce qu'aucun compte d'articles ne dit.</li>
-      <li><b>Option 6 (étiquette par rangée)</b> seulement si la liste doit un jour se trier
-        autrement que par source — par clarté, ou par personne relancée.</li>
-      <li>À éviter: un filtre qui cache deux sources par défaut. Un article du code est souvent
-        tranché par une cote du règlement, et c'est ce lien qui se perd en premier.</li>
+      <li><b>Option 9 (en-tête collant)</b> par-dessus: le défaut n'est pas que le titre soit discret,
+        c'est qu'il sorte de l'écran au bout de deux cartes.</li>
+      <li><b>Option 12 (filet de couleur)</b> si la source doit rester lisible même quand la liste est
+        triée autrement: elle voyage avec la carte au lieu de dépendre de sa position.</li>
+      <li><b>Option 7 (cartes) ou 18 (facettes)</b> quand on accepte un en-tête: la couleur des pastilles
+        dit d'avance où est le travail, ce qu'aucun compte d'articles ne dit.</li>
+      <li>À éviter: un filtre qui cache deux sources par défaut. Un article du code est souvent tranché
+        par une cote du règlement, et c'est ce lien qui se perd en premier.</li>
     </ul>
   </div>
 </div>
+
+<script type="module">
+/* ---------------------------------------------------------------- data
+   The twelve provisions of the project, as they are on the Codes screen:
+   the sentence in French, the number the drawings produced, the number the
+   provision asks for, and what is still missing to conclude. Quoted text is
+   a short working excerpt, never the consolidated legal version. */
+const SRC = {
+  qc: { label: "Code du Québec", short: "Code QC", colour: "#1b1b1b",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
+    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025", answers: "rbq" },
+  loi: { label: "Loi-cadre", short: "Loi", colour: "#8a8a8a",
+    doc: "Loi sur l'aménagement et l'urbanisme", place: "Québec",
+    edition: "texte consolidé", answers: "urbanisme" },
+  reg: { label: "Règlement d'urbanisme", short: "Règlement", colour: "#4b4bd6",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal",
+    edition: "consolidé", answers: "urbanisme" },
+};
+const ORDER = ["qc", "loi", "reg"];
+
+const CONTACTS = {
+  urbanisme: { role: "Urbaniste · arrondissement", mail: "urbanisme@exemple.ca", last: "12 oct", waited: 16 },
+  rbq: { role: "RBQ · service technique", mail: "technique@exemple.ca", last: "3 oct", waited: 25 },
+  paysage: { role: "Architecte paysagiste", mail: "paysage@exemple.ca", last: "21 oct", waited: 7 },
+  client: { role: "Client", mail: "promoteur@exemple.ca", last: "24 oct", waited: 4 },
+};
+const GROUND = ["art. 134", "art. 71", "art. 22", "art. 43"];
+const contactsFor = (a) => [SRC[a.src].answers, ...(GROUND.includes(a.id) ? ["paysage"] : []), "client"];
+
+const A = (o) => ({ clarity: "moyen", notes: [], ...o });
+const ARTICLES = [
+  A({ id: "3.2.3.1", src: "qc", topic: "Baies non protégées", clarity: "obscur",
+    quote: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
+    measured: "74,2 m²", required: "68,5 m²", open: true,
+    needs: "distance limitative mesurée, surface de la façade de rayonnement",
+    img: "assets/code/art-3231-baies.png", ratio: "1642 / 958" }),
+  A({ id: "3.3.1.9", src: "qc", topic: "Largeur des corridors communs", clarity: "clair",
+    quote: "La largeur libre d'un corridor commun desservant des logements ne doit pas être inférieure à 1 100 mm.",
+    measured: "1 120 mm", required: "1 100 mm", fig: "corridor" }),
+  A({ id: "3.4.2.1", src: "qc", topic: "Nombre d'issues par étage", clarity: "clair",
+    quote: "Au moins deux issues doivent desservir chaque étage, placées de manière que les distances de parcours soient respectées.",
+    measured: "2 issues", required: "2 issues", fig: "issues" }),
+  A({ id: "3.3.1.18", src: "qc", topic: "Hauteur des garde-corps", clarity: "clair",
+    quote: "La hauteur d'un garde-corps doit être d'au moins 1 070 mm au-dessus de la surface praticable lorsque la dénivellation dépasse 1 800 mm.",
+    measured: "1 020 mm", required: "1 070 mm", open: true, fig: "garde",
+    needs: "hauteur des garde-corps de balcon cotée sur l'élévation",
+    notes: [{ who: "Chargée de projet", when: "24 oct",
+      txt: "Le garde-corps est dessiné à 1 020 mm sur l'élévation sud. À reprendre avant le dépôt." }] }),
+  A({ id: "3.8.1.3", src: "qc", topic: "Parcours sans obstacles", clarity: "moyen",
+    quote: "Un parcours sans obstacles doit relier l'entrée principale aux aires desservies; la largeur libre d'une porte ne doit pas être inférieure à 850 mm.",
+    measured: "800 mm", required: "850 mm", open: true, fig: "porte",
+    needs: "largeur libre des portes de l'entrée et du corridor" }),
+  A({ id: "3.2.1.1", src: "qc", topic: "Classement et construction du bâtiment", clarity: "obscur",
+    quote: "Le bâtiment doit être classé selon son usage principal et construit selon le type exigé pour sa hauteur et son aire de bâtiment.",
+    measured: "groupe C · 8 étages", required: "incombustible", open: true, fig: "classement",
+    needs: "aire de bâtiment par étage et type de construction retenu" }),
+  A({ id: "A-19.1", src: "loi", topic: "Cadre légal du zonage", clarity: "obscur",
+    quote: "La loi habilite la municipalité à régir, par règlement, l'usage du sol et l'implantation des bâtiments sur son territoire.",
+    measured: "—", required: "cadre habilitant", fig: "chaine",
+    needs: "aucun chiffre: la règle applicable vient du règlement de l'arrondissement" }),
+  A({ id: "art. 9", src: "reg", topic: "Hauteur en étages", clarity: "moyen",
+    quote: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
+    measured: "6 étages", required: "5 étages", open: true,
+    needs: "grille des usages et normes de la zone",
+    img: "assets/code/art-9-hauteur.png", ratio: "1649 / 954" }),
+  A({ id: "art. 71", src: "reg", topic: "Stationnement", clarity: "obscur",
+    quote: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
+    measured: "22 cases", required: "30 cases", open: true,
+    needs: "réductions applicables près du transport collectif",
+    img: "assets/code/art-71-stationnement.png", ratio: "1859 / 846",
+    notes: [{ who: "Entrepreneur général", when: "22 oct",
+      txt: "Vérifier la réduction pour proximité du métro avant de recompter les cases." }] }),
+  A({ id: "art. 134", src: "reg", topic: "Verdissement et pleine terre", clarity: "moyen",
+    quote: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
+    measured: "17 %", required: "20 %", open: true,
+    needs: "plan d'aménagement paysager coté",
+    img: "assets/code/art-134-verdissement.png", ratio: "1597 / 985" }),
+  A({ id: "art. 43", src: "reg", topic: "Taux d'implantation", clarity: "clair",
+    quote: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
+    measured: "48,2 %", required: "55 %",
+    needs: "superficie du terrain confirmée par l'arpenteur",
+    img: "assets/code/art-43-implantation.png", ratio: "1545 / 1018" }),
+  A({ id: "art. 22", src: "reg", topic: "Marge arrière", clarity: "moyen",
+    quote: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
+    measured: "2,70 m", required: "3,00 m", open: true,
+    needs: "limite arrière relevée, exceptions et saillies admises",
+    img: "assets/code/art-22-marge.png", ratio: "1602 / 982" }),
+];
+const byId = (id) => ARTICLES.find((a) => a.id === id);
+const grouped = () => ORDER.map((k) => [k, ARTICLES.filter((a) => a.src === k)]);
+
+const CLARITY = ["clair", "moyen", "obscur"];
+const CL_LABEL = { clair: "Clair", moyen: "Moyennement clair", obscur: "Pas clair du tout" };
+const CL_VAR = { clair: "var(--clair)", moyen: "var(--moyen)", obscur: "var(--obscur)" };
+
+/* ------------------------------------------------------------- figures
+   Schematics for the provisions with no exported sheet behind them, drawn
+   from the two numbers the provision compares. None of them is a plan and
+   none is derived from a drawing file. */
+const FIGS = {
+  corridor: (a) => `<svg viewBox="0 0 300 110">
+    <rect x="18" y="24" width="264" height="13" fill="var(--fill)" stroke="var(--ink)" stroke-width="1.1"/>
+    <rect x="18" y="74" width="264" height="13" fill="var(--fill)" stroke="var(--ink)" stroke-width="1.1"/>
+    <path d="M150 39 v33 m-4 -29 l4 -4 4 4 m-8 25 l4 4 4 -4" stroke="var(--ink)" fill="none" stroke-width="1"/>
+    <text x="158" y="54" font-size="12" font-weight="600" fill="var(--ink)">${a.measured}</text>
+    <text x="158" y="69" font-size="10.5" fill="var(--ink-2)">${a.required} exigés</text>
+    <text x="22" y="17" font-size="10" fill="var(--ink-3)">corridor commun · niveau type</text></svg>`,
+  issues: (a) => `<svg viewBox="0 0 300 110">
+    <rect x="22" y="20" width="256" height="72" fill="none" stroke="var(--ink)" stroke-width="1.1"/>
+    <rect x="28" y="26" width="26" height="22" fill="var(--fill)" stroke="var(--ink)" stroke-width="1"/>
+    <rect x="246" y="64" width="26" height="22" fill="var(--fill)" stroke="var(--ink)" stroke-width="1"/>
+    <path d="M54 37 H246 M150 37 v27" stroke="var(--ink)" stroke-dasharray="4 3" stroke-width="1"/>
+    <text x="26" y="15" font-size="10" fill="var(--ink-3)">étage type · distance de parcours</text>
+    <text x="100" y="82" font-size="11" fill="var(--ink-2)">${a.measured} dessinées · ${a.required} exigées</text></svg>`,
+  garde: (a) => `<svg viewBox="0 0 300 110">
+    <path d="M24 86 H276" stroke="var(--ink)" stroke-width="1.4"/>
+    ${[0, 1, 2, 3, 4, 5].map((i) => `<path d="M${40 + i * 34} 86 V46" stroke="var(--ink)" stroke-width="1"/>`).join("")}
+    <path d="M34 46 H212" stroke="var(--ink)" stroke-width="1.4"/>
+    <path d="M232 86 V38 m-4 6 l4 -6 4 6" stroke="var(--ink)" fill="none" stroke-width="1"/>
+    <text x="240" y="52" font-size="11.5" font-weight="600" fill="var(--ink)">${a.measured}</text>
+    <text x="240" y="65" font-size="10" fill="var(--ink-2)">${a.required} min exigés</text>
+    <text x="26" y="20" font-size="10" fill="var(--ink-3)">garde-corps de balcon · élévation</text></svg>`,
+  porte: (a) => `<svg viewBox="0 0 300 110">
+    <path d="M40 86 H120 M180 86 H260" stroke="var(--ink)" stroke-width="1.6"/>
+    <path d="M120 86 A60 60 0 0 1 120 26" fill="none" stroke="var(--ink)" stroke-dasharray="4 3" stroke-width="1"/>
+    <path d="M120 86 V34" stroke="var(--ink)" stroke-width="1.4"/>
+    <path d="M124 76 H176 m-6 -4 l6 4 -6 4" stroke="var(--ink)" fill="none" stroke-width="1"/>
+    <text x="128" y="68" font-size="11.5" font-weight="600" fill="var(--ink)">${a.measured}</text>
+    <text x="128" y="55" font-size="10" fill="var(--ink-2)">${a.required} exigés</text>
+    <text x="38" y="20" font-size="10" fill="var(--ink-3)">porte du parcours sans obstacles · plan</text></svg>`,
+  classement: (a) => `<svg viewBox="0 0 300 110">
+    ${[0, 1, 2, 3, 4, 5, 6, 7].map((i) => `<rect x="60" y="${84 - i * 9}" width="180" height="8" fill="${i > 4 ? "var(--fill)" : "none"}" stroke="var(--ink)" stroke-width=".9"/>`).join("")}
+    <text x="26" y="20" font-size="10" fill="var(--ink-3)">${a.measured}</text>
+    <text x="248" y="40" font-size="10.5" fill="var(--ink-2)">type exigé:</text>
+    <text x="248" y="54" font-size="11.5" font-weight="600" fill="var(--ink)">${a.required}</text></svg>`,
+  chaine: () => `<svg viewBox="0 0 300 96">
+    ${[["Loi", "A-19.1"], ["Règlement", "01-277"], ["Article", "art. 9, 22"]].map(([t, n], i) => {
+      const x = 6 + i * 98;
+      return `<rect x="${x}" y="24" width="84" height="44" rx="5" fill="var(--card)" stroke="var(--ink)" stroke-width="${i === 0 ? 1.4 : .9}"/>
+        <text x="${x + 42}" y="44" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${t}</text>
+        <text x="${x + 42}" y="59" text-anchor="middle" font-size="10" font-family="ui-monospace,Menlo,monospace" fill="var(--ink-2)">${n}</text>
+        ${i < 2 ? `<path d="M${x + 88} 46 h6 m-2.5 -3 l3 3 -3 3" stroke="var(--ink)" fill="none" stroke-width="1"/>` : ""}`;
+    }).join("")}</svg>`,
+};
+const figHTML = (a) => a.img
+  ? `<img src="${a.img}" alt="${a.topic}" loading="lazy" style="aspect-ratio:${a.ratio}">`
+  : FIGS[a.fig](a);
+
+/* ---------------------------------------------------------------- icons */
+const ICON = {
+  hash: '<line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>',
+  plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  ext: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  msg: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+  chev: '<path d="m6 9 6 6 6-6"/>',
+  circle: '<circle cx="12" cy="12" r="9"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+};
+const ic = (n) => `<svg class="lu" viewBox="0 0 24 24">${ICON[n]}</svg>`;
+
+/* ------------------------------------------------------------- the card
+   One article, exactly as the Codes screen draws it: figure, number,
+   topic, the office's reading, the sentence, the source, what is missing,
+   the notes written against it, and the three actions. */
+/* The same article is drawn twice on an option — in the list and in the
+   right column — so the open menu is remembered by place as well as by
+   article, or one click would drop two menus. */
+function clarityHTML(opt, a, place = "row") {
+  const open = STATE[opt].clarityOn === `${place}:${a.id}`;
+  return `<span class="clarity" data-c="${a.clarity}" data-act="clarityopen" data-id="${a.id}" data-p="${place}">
+    ${CL_LABEL[a.clarity]}${ic("chev")}
+    ${open ? `<span class="claritymenu">${CLARITY.map((k) => `<span class="o" data-c="${k}" data-act="clarity" data-id="${a.id}" data-k="${k}">${CL_LABEL[k]}</span>`).join("")}</span>` : ""}</span>`;
+}
+function rowHTML(opt, a, o = {}) {
+  const st = STATE[opt];
+  const s = SRC[a.src];
+  return `<div class="coderow ${st.sel === a.id ? "on" : ""} ${o.dense ? "dense" : ""}"
+      data-act="pick" data-id="${a.id}" ${o.spine ? `style="--sp:${s.colour}"` : ""}
+      ${o.spine ? 'data-spine="1"' : ""}>
+    <div class="draw">${figHTML(a)}</div>
+    <div class="tx ${o.spine ? "spine" : ""}" ${o.spine ? `style="--sp:${s.colour}"` : ""}>
+      <div class="hdl">
+        ${o.tag ? `<span class="srctag" data-s="${a.src}">${s.short}</span>` : ""}
+        <span class="tag">${a.id}</span><span class="tp">${a.topic}</span>
+        ${clarityHTML(opt, a)}
+      </div>
+      <div class="quote">«&nbsp;${a.quote}&nbsp;»</div>
+      <div class="src">${s.doc} · ${s.place} · ${s.edition}</div>
+      ${a.open ? `<div class="src">manque pour conclure: ${a.needs}</div>` : ""}
+      ${a.notes.map((n) => `<div class="mini-note"><span>${n.who} · ${n.when}</span><b>${n.txt}</b></div>`).join("")}
+      <div class="acts">
+        <span class="btn">${ic("ext")}Lire le texte officiel</span>
+        <span class="btn" data-act="note" data-id="${a.id}">${ic("msg")}Ajouter une note</span>
+        <span class="btn" data-act="copy" data-id="${a.id}">${ic("copy")}Copier</span>
+        ${a.notes.length ? `<span class="src">${a.notes.length} note${a.notes.length > 1 ? "s" : ""}</span>` : ""}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* -------------------------------------------------------- the right rail
+   The same column the real screen carries: what the article says, the
+   office's reading, the note being written, and who has to answer for it
+   — with how long each one has been silent. */
+function railHTML(opt) {
+  const a = byId(STATE[opt].sel) || ARTICLES[0];
+  return `<div class="rail">
+    <div class="ph">${ic("circle")}<span class="ti">Article ouvert</span></div>
+    <div class="rb">
+      ${[["Article", a.id], ["Lu dans les dessins", a.measured], ["Exigé", a.required],
+        ["Manque", a.open ? a.needs : "rien"]].map(([k, v]) =>
+        `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join("")}
+      <div class="kv" style="border:0;padding:0"><span>Lecture de l'atelier</span>${clarityHTML(opt, a, "rail")}</div>
+      ${a.notes.map((n) => `<div class="mini-note"><span>${n.who} · ${n.when}</span><b>${n.txt}</b></div>`).join("")}
+      <textarea class="noteinput" data-ta="${opt}" placeholder=""></textarea>
+      <div class="strip">
+        <span class="btn solid" data-act="save" data-id="${a.id}">${ic("check")}Écrire la note</span>
+        <span class="btn" data-act="copy" data-id="${a.id}">${ic("copy")}Copier</span>
+      </div>
+      <div class="src" style="padding-top:4px">Qui en répond</div>
+      ${contactsFor(a).map((k) => { const c = CONTACTS[k]; return `<div class="contact ${c.waited > 14 ? "slow" : ""}">
+        <span class="who"><b>${c.role}</b><span>dernier échange le ${c.last} · il y a ${c.waited} j</span></span>
+        <a class="btn" href="mailto:${c.mail}?subject=${encodeURIComponent(`[Le Baldwin III] ${a.id} — ${a.topic}`)}">${ic("mail")}Écrire</a></div>`; }).join("")}
+    </div>
+  </div>`;
+}
+
+/* ------------------------------------------------------- small fragments */
+const countOf = (rows) => `${rows.length} article${rows.length > 1 ? "s" : ""}`;
+const darkCount = (rows) => rows.filter((a) => a.clarity === "obscur").length;
+const dotsOf = (rows) => `<span class="dots">${rows.map((a) => `<i style="background:${CL_VAR[a.clarity]}"></i>`).join("")}</span>`;
+const paneHead = (extra = "") => `<div class="ph">${ic("hash")}<span class="ti">Articles suivis</span>
+  <span class="sp"></span>${extra}<span class="btn solid">${ic("plus")}Ajouter</span></div>`;
+
+/* ------------------------------------------------------------ the options
+   Every option renders the same twelve articles. Only the way the source is
+   said changes — which is the only variable under test. */
+const OPTIONS = [
+  { id: "o1", part: "A", title: "Ce qui existe", head: paneHead(),
+    note: "Le titre pèse moins que les cartes qu'il annonce: en gris, en 11 px, sans fond, il disparaît entre deux rangées de 100 px. C'est le défaut à corriger.",
+    body: (o) => grouped().map(([k, rows]) => `<div class="h-flat"><span style="color:var(--ink)">${SRC[k].label}</span>
+      <span>${countOf(rows)}</span></div>${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+
+  { id: "o2", part: "A", title: "Bandeau plein", head: paneHead(),
+    note: "Un aplat gris et du gras: le titre devient un objet et non une légende. Le plus petit changement qui règle le problème, et le seul qui ne coûte rien au reste.",
+    body: (o) => grouped().map(([k, rows]) => `<div class="h-band">${SRC[k].label}<span class="ct">${countOf(rows)}</span></div>
+      ${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+
+  { id: "o3", part: "A", title: "Filet traversant", head: paneHead(),
+    note: "Le filet coupe la colonne en deux: on voit la frontière avant de lire le mot. Moins lourd que l'aplat, un peu plus bavard en traits.",
+    body: (o) => grouped().map(([k, rows]) => `<div class="h-rule"><b>${SRC[k].label}</b><i></i><span>${countOf(rows)}</span></div>
+      ${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+
+  { id: "o4", part: "A", title: "Rubrique en marge", head: paneHead(),
+    note: "La source tient le bloc par le côté et ne mange aucune hauteur: on sait où on est même au milieu d'un groupe. Coûte 24 px de largeur, et le texte vertical se lit mal en diagonale.",
+    body: (o) => grouped().map(([k, rows]) => `<div class="gutter"><div class="rub"><span>${SRC[k].label}</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px">${rows.map((a) => rowHTML(o, a)).join("")}</div></div>`).join("") },
+
+  { id: "o9", part: "A", title: "En-tête collant", head: paneHead(),
+    note: "Le même bandeau, mais il reste en haut de la liste tant que le groupe défile. Le vrai défaut n'est pas que le titre soit discret: c'est qu'il sorte de l'écran au bout de deux cartes. Défilez pour le voir tenir.",
+    body: (o) => grouped().map(([k, rows]) => `<div class="h-sticky">${SRC[k].label}<span>${countOf(rows)} · ${darkCount(rows)} obscurs</span></div>
+      ${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+
+  { id: "o11", part: "A", title: "Ordinal typographique", head: paneHead(),
+    note: "Un chiffre de 26 px fait le contraste sans aplat ni filet: on compte trois blocs avant de lire trois mots. Gratuit en encre, mais le chiffre ne dit rien par lui-même — il faut lire le titre à côté.",
+    body: (o) => grouped().map(([k, rows], i) => `<div class="h-num"><i>${i + 1}</i><b>${SRC[k].label}</b>
+      <span>${countOf(rows)} · ${darkCount(rows)} obscurs</span></div>${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+
+  { id: "o12", part: "A", title: "Filet de couleur sur la carte", head: paneHead(),
+    note: "La source devient une propriété de la carte, pas de sa position: trois traits de 3 px, un par corps de règles. Tient même si la liste est un jour triée par clarté ou par relance — c'est ce qu'aucune section ne sait faire.",
+    body: (o) => grouped().map(([k, rows]) => `<div class="h-flat"><span style="color:var(--ink)">${SRC[k].label}</span><span>${countOf(rows)}</span></div>
+      ${rows.map((a) => rowHTML(o, a, { spine: true })).join("")}`).join("") },
+
+  { id: "o13", part: "A", title: "Table dense, figures repliées", head: paneHead(`<span class="btn" data-act="dense">Figures</span>`),
+    note: "Les douze articles tiennent dans un écran: la section redevient lisible parce que les rangées ne font plus 100 px. La figure revient d'un clic sur « Figures » — elle est ce qui rend la liste longue, pas le texte.",
+    body: (o) => grouped().map(([k, rows]) => `<div class="h-band">${SRC[k].label}<span class="ct">${countOf(rows)}</span></div>
+      ${rows.map((a) => rowHTML(o, a, { dense: !STATE[o].dense })).join("")}`).join("") },
+
+  { id: "o5", part: "B", title: "Puces de filtre, « Tous » par défaut",
+    head: paneHead(),
+    note: "« Tous » reste l'état normal, donc rien n'est caché par défaut. Mais avec « Tous » actif la liste redevient plate: il faut garder une des options A à l'intérieur.",
+    body: (o) => { const f = STATE[o].filter;
+      const rows = f ? ARTICLES.filter((a) => a.src === f) : ARTICLES;
+      return `<div class="strip" style="padding-bottom:9px;border-bottom:1px solid var(--line-2)">
+        <span class="chip ${!f ? "on" : ""}" data-act="filter" data-k="">Tous <span class="ct">${ARTICLES.length}</span></span>
+        ${ORDER.map((k) => `<span class="chip ${f === k ? "on" : ""}" data-act="filter" data-k="${k}">${SRC[k].label}
+          <span class="ct">${ARTICLES.filter((a) => a.src === k).length}</span></span>`).join("")}</div>
+        ${rows.map((a) => rowHTML(o, a, { tag: !f })).join("")}`; } },
+
+  { id: "o6", part: "B", title: "Étiquette de source sur chaque rangée", head: paneHead(),
+    note: "Aucune section: la source voyage avec l'article, donc le tri peut devenir « par clarté » ou « par relance » sans rien perdre. En échange, douze étiquettes répétées et une colonne de plus à l'œil.",
+    body: (o) => ARTICLES.map((a) => rowHTML(o, a, { tag: true })).join("") },
+
+  { id: "o7", part: "B", title: "Trois cartes au-dessus, une liste en dessous", head: paneHead(),
+    note: "La carte dit en une ligne ce qu'une section ne dit jamais: combien d'articles, et de quelle couleur ils sont. On choisit un corps de règles en sachant déjà lequel va faire mal.",
+    body: (o) => { const f = STATE[o].filter;
+      const rows = f ? ARTICLES.filter((a) => a.src === f) : ARTICLES;
+      return `<div class="cards">${ORDER.map((k) => { const r = ARTICLES.filter((a) => a.src === k);
+        return `<div class="card ${f === k ? "on" : ""}" data-act="filter" data-k="${f === k ? "" : k}">
+          <b>${SRC[k].label}</b><span class="mt">${countOf(r)} · ${darkCount(r)} obscurs</span>${dotsOf(r)}</div>`; }).join("")}</div>
+        ${rows.map((a) => rowHTML(o, a, { tag: !f })).join("")}`; } },
+
+  { id: "o8", part: "B", title: "Trois blocs repliables", head: paneHead(),
+    note: "Les trois restent visibles en permanence, repliés: on ne perd jamais de vue qu'il y a trois sources, et on travaille dans une seule. Un clic de plus pour tout lire, et un état de plus à retenir.",
+    body: (o) => ORDER.map((k) => { const rows = ARTICLES.filter((a) => a.src === k);
+      const open = STATE[o].acc[k];
+      return `<div class="acc ${open ? "open" : ""}"><div class="hd" data-act="acc" data-k="${k}">${ic("chev")}${SRC[k].label}
+        <span class="ct">${countOf(rows)} · ${darkCount(rows)} obscurs</span></div>
+        ${open ? `<div class="bd">${rows.map((a) => rowHTML(o, a)).join("")}</div>` : ""}</div>`; }).join("") },
+
+  { id: "o10", part: "B", title: "Index à gauche, articles à droite",
+    head: paneHead(),
+    note: "La source devient une colonne permanente, comme les niveaux sur l'écran des plans: on change de corps de règles sans quitter la liste, et l'index dit en continu ce qu'il reste ailleurs. Coûte 150 px de largeur à la lecture.",
+    body: (o) => { const f = STATE[o].filter || "qc";
+      const rows = ARTICLES.filter((a) => a.src === f);
+      return `<div class="twocol"><div class="idx">
+        ${ORDER.map((k) => { const r = ARTICLES.filter((a) => a.src === k);
+          return `<span class="it ${f === k ? "on" : ""}" data-act="filter" data-k="${k}">${SRC[k].label}
+            <small>${countOf(r)} · ${darkCount(r)} obscurs</small></span>`; }).join("")}</div>
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:0">${rows.map((a) => rowHTML(o, a)).join("")}</div></div>`; } },
+
+  { id: "o14", part: "B", title: "Onglets dans l'en-tête du volet",
+    head: () => "",
+    note: "La source rejoint les onglets, là où l'écran met déjà ses changements de vue. Lu comme un changement d'écran plutôt que comme un filtre — ce qui est exact quand on ne travaille qu'un seul corps de règles de la journée.",
+    body: (o) => { const f = STATE[o].filter;
+      const rows = f ? ARTICLES.filter((a) => a.src === f) : ARTICLES;
+      return `<div class="ph">${ic("hash")}<span class="ti">Articles suivis</span>
+        <span class="seg" style="margin-left:10px"><button class="${!f ? "on" : ""}" data-act="filter" data-k="">Tous</button>
+        ${ORDER.map((k) => `<button class="${f === k ? "on" : ""}" data-act="filter" data-k="${k}">${SRC[k].short}</button>`).join("")}</span>
+        <span class="sp"></span><span class="btn solid">${ic("plus")}Ajouter</span></div>
+        <div class="pb">${rows.map((a) => rowHTML(o, a, { tag: !f })).join("")}</div>`; }, raw: true },
+
+  { id: "o15", part: "C", title: "Grouper par clarté, la source en étiquette", head: paneHead(),
+    note: "La question change: non plus « d'où vient la règle » mais « laquelle va coûter une réunion ». Les sources deviennent des étiquettes. C'est l'ordre dans lequel on travaille réellement un dossier en retard.",
+    body: (o) => ["obscur", "moyen", "clair"].slice().map((k) => { const rows = ARTICLES.filter((a) => a.clarity === k);
+      if (!rows.length) return "";
+      return `<div class="h-rule"><b style="color:${CL_VAR[k]}">${CL_LABEL[k]}</b><i style="background:${CL_VAR[k]};opacity:.35"></i>
+        <span>${countOf(rows)}</span></div>${rows.map((a) => rowHTML(o, a, { tag: true })).join("")}`; }).join("") },
+
+  { id: "o16", part: "C", title: "Trois colonnes côte à côte", head: paneHead(),
+    note: "Les trois corps de règles sont lus en parallèle au lieu d'être empilés: on voit d'un coup que la loi-cadre ne porte qu'un article et que le règlement en porte cinq. Les cartes deviennent étroites — c'est la limite.",
+    body: (o) => `<div class="cols3">${ORDER.map((k) => { const rows = ARTICLES.filter((a) => a.src === k);
+      return `<div><div class="ttl">${SRC[k].label} · ${rows.length}</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${rows.map((a) => rowHTML(o, a, { dense: true })).join("")}</div></div>`; }).join("")}</div>` },
+
+  { id: "o17", part: "C", title: "Par personne à relancer", head: paneHead(),
+    note: "Les articles sont rangés par qui doit répondre, avec le silence en tête: c'est l'écran du lundi matin, quand on écrit trois courriels. La source redevient une étiquette, et le groupe porte l'adresse.",
+    body: (o) => Object.entries(CONTACTS).sort((x, y) => y[1].waited - x[1].waited)
+      .map(([k, c]) => { const rows = ARTICLES.filter((a) => contactsFor(a).includes(k));
+        if (!rows.length) return "";
+        return `<div class="who-h"><b>${c.role}</b><span>dernier échange le ${c.last} · il y a ${c.waited} j</span>
+          <span class="sp" style="flex:1"></span><a class="btn" href="mailto:${c.mail}">${ic("mail")}Écrire</a></div>
+          ${rows.map((a) => rowHTML(o, a, { tag: true, dense: true })).join("")}`; }).join("") },
+
+  { id: "o18", part: "C", title: "Recherche et facettes", head: paneHead(),
+    note: "Source et clarté deviennent deux lignes de facettes au-dessus d'une recherche plein texte, chacune avec son compte. C'est la version qui tient quand les douze articles deviennent soixante — et la seule où l'on peut demander « le règlement, mais seulement ce qui est obscur ».",
+    body: (o) => { const st = STATE[o];
+      const rows = ARTICLES.filter((a) => (!st.filter || a.src === st.filter)
+        && (!st.cl || a.clarity === st.cl)
+        && (!st.q || (a.topic + " " + a.quote + " " + a.id).toLowerCase().includes(st.q.toLowerCase())));
+      const bar = ["clair", "moyen", "obscur"].map((k) => { const n = rows.filter((a) => a.clarity === k).length;
+        return n ? `<i style="background:${CL_VAR[k]};width:${(n / (rows.length || 1)) * 100}%"></i>` : ""; }).join("");
+      return `<div class="facets">
+        <div class="ln">${ic("search")}<input class="find" data-q="${o}" value="${st.q || ""}" placeholder="Chercher dans les articles suivis"></div>
+        <div class="ln"><span class="lb">Source</span>
+          <span class="chip ${!st.filter ? "on" : ""}" data-act="filter" data-k="">Toutes <span class="ct">${ARTICLES.length}</span></span>
+          ${ORDER.map((k) => `<span class="chip ${st.filter === k ? "on" : ""}" data-act="filter" data-k="${k}">${SRC[k].short}
+            <span class="ct">${ARTICLES.filter((a) => a.src === k).length}</span></span>`).join("")}</div>
+        <div class="ln"><span class="lb">Lecture</span>
+          <span class="chip ${!st.cl ? "on" : ""}" data-act="cl" data-k="">Toutes</span>
+          ${CLARITY.map((k) => `<span class="chip ${st.cl === k ? "on" : ""}" data-act="cl" data-k="${k}">${CL_LABEL[k]}
+            <span class="ct">${ARTICLES.filter((a) => a.clarity === k).length}</span></span>`).join("")}</div>
+        <div class="sum">${rows.length} sur ${ARTICLES.length}<span class="bar">${bar}</span></div></div>
+        ${rows.length ? rows.map((a) => rowHTML(o, a, { tag: true })).join("") : `<div class="empty">Aucun article ne répond à ces deux filtres.</div>`}`; } },
+];
+
+const PARTS = {
+  A: ["A — la source reste dans la liste",
+    "Tout reste lisible d'un seul défilement: un article du code est répondu par une cote du règlement, et une liste qui en cache deux tiers cache ce lien."],
+  B: ["B — la source monte en haut et devient un filtre",
+    "Le prix est connu: ouvrir une seule source cache les deux autres. Le gain est une liste courte quand on travaille un seul corps de règles — la préparation du comité, par exemple, qui ne parle que du règlement."],
+  C: ["C — la source n'est plus l'axe principal",
+    "Et si la liste était rangée par ce qui reste à faire plutôt que par l'origine de la règle? La source redevient une étiquette, et l'écran répond à « par où je commence » au lieu de « d'où ça vient »."],
+};
+
+/* ------------------------------------------------------------- the state
+   One state per option, because an option is a working screen and not a
+   picture: which article is open, which menu is down, which filter is on. */
+const STATE = {};
+OPTIONS.forEach((o) => { STATE[o.id] = { sel: "3.2.3.1", clarityOn: null, filter: null,
+  cl: null, q: "", dense: false, acc: { qc: true, loi: false, reg: false } }; });
+
+function optionHTML(o, i) {
+  const body = o.body(o.id);
+  return `<div class="opt" id="${o.id}">
+    <div class="cap"><span class="n">Option ${i}</span><b>${o.title}</b></div>
+    <div class="shot"><div class="scr">
+      <div class="pane">${o.raw ? body : `${o.head === undefined ? "" : (typeof o.head === "function" ? o.head() : o.head)}<div class="pb">${body}</div>`}</div>
+      ${railHTML(o.id)}
+    </div></div>
+    <p class="note">${o.note}</p>
+  </div>`;
+}
+
+function paint(only) {
+  if (only) {
+    const o = OPTIONS.find((x) => x.id === only);
+    const i = OPTIONS.indexOf(o) + 1;
+    const el = document.getElementById(only);
+    const top = el.getBoundingClientRect().top;
+    el.outerHTML = optionHTML(o, i);
+    /* Re-rendering one option must not move the page under the pointer. */
+    const el2 = document.getElementById(only);
+    window.scrollBy(0, el2.getBoundingClientRect().top - top);
+    return;
+  }
+  const out = [];
+  let part = null;
+  OPTIONS.forEach((o, n) => {
+    if (o.part !== part) { part = o.part;
+      out.push(`<h2 class="part">${PARTS[part][0]}</h2><p>${PARTS[part][1]}</p>`); }
+    out.push(optionHTML(o, n + 1));
+  });
+  document.getElementById("opts").innerHTML = out.join("");
+}
+
+/* Redrawing everything keeps the reader where they were: the page is tall
+   and a changed reading is a one-word change halfway down it. */
+function paintAll() {
+  const y = window.scrollY;
+  paint();
+  window.scrollTo(0, y);
+}
+
+/* Every option is live, and every click is scoped to the option it lands
+   in: two options never share a selection or a menu. */
+document.addEventListener("click", (e) => {
+  const optEl = e.target.closest(".opt");
+  if (!optEl) return;
+  const o = optEl.id, st = STATE[o];
+  const el = e.target.closest("[data-act]");
+  if (!el) { if (st.clarityOn) { st.clarityOn = null; paint(o); } return; }
+  const id = el.dataset.id, k = el.dataset.k;
+  switch (el.dataset.act) {
+    case "pick": st.sel = id; st.clarityOn = null; break;
+    case "clarityopen": {
+      const key = `${el.dataset.p}:${id}`;
+      st.clarityOn = st.clarityOn === key ? null : key;
+      return paint(o);
+    }
+    /* The twelve articles are one set of data read by eighteen screens:
+       a reading changed on one of them is changed on all of them, so they
+       are all redrawn. */
+    case "clarity": byId(id).clarity = k; st.clarityOn = null; return paintAll();
+    case "filter": st.filter = k || null; break;
+    case "cl": st.cl = k || null; break;
+    case "acc": st.acc[k] = !st.acc[k]; break;
+    case "dense": st.dense = !st.dense; break;
+    case "note": st.sel = id; break;
+    case "save": {
+      const ta = optEl.querySelector(`[data-ta="${o}"]`);
+      const txt = (ta?.value || "").trim();
+      if (!txt) return;
+      byId(id).notes.push({ who: "Chargée de projet", when: "aujourd'hui", txt });
+      return paintAll();
+    }
+    case "copy": {
+      const a = byId(id);
+      navigator.clipboard?.writeText([`${a.id} — ${a.topic}`, `${SRC[a.src].doc}`, `« ${a.quote} »`,
+        `Lu: ${a.measured} · exigé: ${a.required}`, `Lecture de l'atelier: ${CL_LABEL[a.clarity].toLowerCase()}`,
+        ...a.notes.map((n) => `— ${n.who} (${n.when}): ${n.txt}`)].join("\n"));
+      el.textContent = " copié";
+      el.prepend(Object.assign(document.createElement("span"), { innerHTML: ic("check") }));
+      return;
+    }
+    default: return;
+  }
+  paint(o);
+});
+/* Typing filters without a re-render per character: the caret stays put. */
+document.addEventListener("input", (e) => {
+  const f = e.target.closest("[data-q]");
+  if (!f) return;
+  const o = f.dataset.q;
+  STATE[o].q = f.value;
+  paint(o);
+  const again = document.querySelector(`#${o} [data-q]`);
+  again.focus(); again.setSelectionRange(again.value.length, again.value.length);
+});
+
+paint();
+</script>
 </body>
 </html>
