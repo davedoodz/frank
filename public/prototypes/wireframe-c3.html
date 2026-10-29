@@ -202,9 +202,13 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .work{flex:1;min-height:0;display:grid;gap:var(--gap);padding:var(--gap)}
 .pane{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);
   display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;overflow:hidden}
-.pane > .ph{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);
-  display:flex;align-items:center;gap:8px;padding:0 10px;font-size:12px;color:var(--ink-2);
+.pane > .ph{height:38px;flex:0 0 auto;border-bottom:1px solid var(--line-2);
+  display:flex;align-items:center;gap:8px;padding:0 11px;font-size:13px;font-weight:500;color:var(--ink);
   white-space:nowrap}
+.pane > .ph > svg{width:15px;height:15px;color:var(--ink-2)}
+/* Only the title is loud: chips, counts and buttons inside the header keep
+   their own weight. */
+.pane > .ph .chip,.pane > .ph .btnw{font-weight:400}
 /* No overscroll-behavior here. A pane whose content fits still counts as a
    scroller, and `contain` on it swallows the wheel instead of handing it to
    the region behind — which is what actually scrolls on Aperçu. The window
@@ -557,7 +561,7 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .fqt{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fqh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink)}
 .fqh svg{width:13px;height:13px}
-.fqs{font-size:11px;font-weight:400;color:var(--ink-3);margin-left:6px}
+.fqs{font-size:12px;font-weight:400;color:var(--ink-2);margin-left:6px}
 .fqn{font-size:11px;color:var(--ink-3)}
 .fq-unit{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:10px}
 [data-theme="dark"] .tbl tr.on td{background:#2b3313}
@@ -713,6 +717,8 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
   display:inline-flex;align-items:center;gap:4px}
 .laychips .chip .lu{width:12px;height:12px;flex:0 0 12px}
 .pane.drawing{container-type:inline-size}
+.pane.bare{border:0;background:none;border-radius:0}
+.pane.bare > .pb{padding:0}
 @container (max-width:470px){
   .laychips .chip .lb{display:none}
   .laychips .chip{padding:2px 5px}
@@ -2176,9 +2182,9 @@ const wrap = (region, label, html, step) =>
 
 /* A region is a grid child, so the tag and fidelity attributes live on the
    element itself rather than on a wrapper that would break the layout. */
-function region(name, label, inner, step) {
+function region(name, label, inner, step, cls = "") {
   const s = step ? `<span class="step">${step}</span>` : "";
-  return `<section class="pane rg ${solo(name)}" data-rg="${label}" data-fi="${fiOf(name)}" data-region="${name}">${s}${inner}</section>`;
+  return `<section class="pane rg ${solo(name)} ${cls}" data-rg="${label}" data-fi="${fiOf(name)}" data-region="${name}">${s}${inner}</section>`;
 }
 
 /* ------------------------------------------------------- movable edges
@@ -2808,9 +2814,10 @@ function navHTML() {
 }
 
 /* The rail and the tab strip never carry the same destinations. When the
-   rail lists the screens, the strip drops to the current screen's own views. */
+   rail lists the screens, the strip drops to the current screen's own views.
+   The index has none: every project is on the page, and the Archivés tab
+   filtered nothing — it offered a second list that was the same list. */
 const CONTEXT = {
-  "Projets": ["En cours", "Archivés"],
   "Unités": LEVEL_VIEWS,
 };
 
@@ -3174,7 +3181,8 @@ function contentHTML() {
   /* No header strip on this pane: it only repeated the screen name already
      set in large type two lines above, and the pane is the whole middle of
      the card — nothing else it could be. */
-  return region("content", "contenu", `<div class="pb">${body}</div>`, step);
+  return region("content", "contenu", `<div class="pb">${body}</div>`, step,
+    V.screen === "Unités" ? "bare" : "");
 }
 
 /* ------------------------------------------------------- the quantities
