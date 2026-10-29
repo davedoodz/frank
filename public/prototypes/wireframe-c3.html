@@ -277,6 +277,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .fld{display:flex;flex-direction:column;gap:4px}
 .fld input{border:1px solid var(--line-2);border-radius:6px;padding:7px 9px;font:inherit;font-size:12px;color:var(--ink);background:var(--card)}
 .fld input:focus{outline:1px solid var(--ink);outline-offset:1px}
+/* A message carries the article, its two numbers and the notes: the box has
+   to show enough of it to be read before it is sent. */
+.dialog.wide{width:min(680px,94vw)}
+.mailbody{border:1px solid var(--line-2);border-radius:6px;padding:8px 9px;font:inherit;font-size:12px;
+  line-height:1.45;color:var(--ink);background:var(--card);resize:vertical;min-height:150px}
+.mailbody:focus{outline:1px solid var(--ink);outline-offset:1px}
 
 /* A provision reads as a card, drawing first: the rule is seen before its
    number is read. The drawing touches the card's edges, the words sit under
@@ -2939,7 +2945,8 @@ function codeSideHTML(a) {
     <div class="col" style="gap:0">
       <span class="hi" style="font-size:12px;color:var(--ink-2);padding-bottom:4px">Qui en répond</span>
       ${contactsFor(a).map((k) => { const c = CONTACTS[k]; const sent = (V.mails[k] || []).length; return `<div class="contact ${c.waited > 14 ? "slow" : ""}">
-        <span class="who"><b class="hi">${c.role}</b><span class="hi">dernier échange le ${c.last} · il y a ${c.waited} j</span>
+        <span class="who"><b class="hi">${c.role}</b><span class="hi">${c.waited === 0 ? "dernier échange aujourd'hui"
+            : `dernier échange le ${c.last} · il y a ${c.waited} j`}</span>
           ${sent ? `<span class="hi sent">${sent} courriel${sent > 1 ? "s" : ""} envoyé${sent > 1 ? "s" : ""} d'ici</span>` : ""}</span>
         <span class="mailto hi" ${act("mailopen", `${a.id}|${k}`)} title="Écrire sans quitter fitte">${icon("mail")}<span class="hi">Écrire</span></span>
       </div>`; }).join("")}
