@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le trait — huit marques de position, de 3 à 10 dessins</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* Three things are being tried here at once, because they only make sense
+   together.
+
+   1. A drawing is picked by its picture, not by a glyph in a pill. The
+      thumbnail carries the recognition and the word under it carries the
+      name; four arrangements of that pair are below.
+   2. The card that opens belongs to the thumbnail that was clicked: it is
+      placed at that thumbnail's own height, not at the top of the pane, so
+      the hand never travels and the eye never loses the link.
+   3. Overlapping two drawings is where the work actually happens, so the
+      card carries the small amount of tuning that matters — which other
+      drawing sits over this one, and which of the two is in front — and the
+      plan marks, in red, every place where the two sheets contradict each
+      other. A pipe through a column is not a layer problem; it is the
+      reason anyone stacked the sheets. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e5e5e5;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#f2f2f2; --card:#fff;
+  --vert:#C3E05A; --vert-ink:#2f3a05;
+  --rouge:#C0342A; --rouge-bg:#FBECEA;
+  --ambre:#A6711A; --ambre-bg:#FBF2E2;
+  --r:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.sheet{padding:22px 20px 80px;display:flex;flex-direction:column;gap:34px}
+h1{font-size:17px;font-weight:600}
+.lede{font-size:12.5px;color:var(--ink-2);max-width:86ch}
+.lu{width:14px;height:14px;flex:0 0 14px;stroke-width:1.6}
+
+.var{display:flex;flex-direction:column;gap:9px}
+.vh{display:flex;align-items:center;gap:8px}
+.vh .n{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.vh b{font-size:14px;font-weight:600}
+.why{font-size:12px;color:var(--ink-2);max-width:96ch}
+.why .cost{color:var(--ink-3)}
+
+/* ------------------------------------------------------------ the screen */
+.app{border-radius:12px;overflow:hidden;background:#141416;min-width:1180px}
+.bar1{height:40px;display:flex;align-items:center;gap:6px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar1 .crumb{color:rgba(255,255,255,.58)}
+.bar1 .crumb.on{color:#fff;font-weight:600;font-size:13px;margin-right:4px}
+.bar1 .tab{padding:5px 10px;border-radius:7px;display:flex;align-items:center;gap:6px;font-size:13.5px}
+.bar1 .tab.on{background:#fff;color:#141416;font-weight:600}
+.bar1 .sp{flex:1}
+.bar1 .share{border:1px solid rgba(255,255,255,.28);border-radius:5px;padding:4px 10px;font-size:12px;
+  display:flex;align-items:center;gap:6px}
+.bar2{height:32px;background:#1e1e21;border-top:1px solid #2c2c31;display:flex;align-items:center;
+  gap:3px;padding:0 12px;color:rgba(255,255,255,.72);font-size:12.5px}
+.bar2 span{padding:3px 9px;border-radius:6px}
+.bar2 span.on{background:var(--vert);color:var(--vert-ink);font-weight:600}
+.card{background:var(--card);margin:7px;border-radius:9px;overflow:hidden;display:flex;flex-direction:column}
+.ttl{padding:10px 13px;display:flex;align-items:center;gap:10px}
+.ttl b{font-size:16px;font-weight:600}
+.ttl .sub{font-size:12px;color:var(--ink-2)}
+.ttl .sp{flex:1}
+.work{display:flex;gap:9px;padding:0 9px 9px;height:560px}
+.foot{border-top:1px solid var(--line-2);padding:8px 13px;display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--ink-2)}
+.foot b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.foot .sp{flex:1}
+
+.pane{border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);
+  display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.ph{height:34px;flex:0 0 auto;border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+  gap:8px;padding:0 10px;font-size:12.5px;color:var(--ink-2)}
+.ph .sp{flex:1}
+.pb{flex:1;min-height:0;overflow:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
+
+.lst{flex:0 0 212px}
+.uc{border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;flex:0 0 auto}
+.uc.on{border-color:var(--ink)}
+.uc .cr{height:84px;background-image:url(assets/plan-niveau-5.jpg);background-size:360%;
+  filter:grayscale(1);position:relative}
+.uc .no{position:absolute;left:6px;top:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:4px;padding:0 6px;font-size:12px;font-weight:600}
+.uc .ul{display:flex;align-items:baseline;gap:6px;padding:6px 9px;font-size:12.5px}
+.uc .ul .a{margin-left:auto;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+.d2{flex:1.7;min-width:0;position:relative}
+.m3{flex:.9;min-width:0}
+.m3 .still{flex:1;min-height:0;background-image:url(assets/maquette-still.jpg);background-size:cover;
+  background-position:center}
+.insp{flex:0 0 250px}
+.kv{display:flex;align-items:baseline;gap:8px;font-size:12.5px}
+.kv b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.kv span{color:var(--ink-2)}
+
+.stage{flex:1;min-width:0;min-height:0;position:relative;overflow:hidden;background:var(--card)}
+.plan{position:absolute;inset:0;background-image:url(assets/plan-niveau-5.jpg);
+  background-size:contain;background-repeat:no-repeat;background-position:center;filter:grayscale(1)}
+.lay{position:absolute;background-repeat:no-repeat;background-size:contain;background-position:center;
+  pointer-events:none;mix-blend-mode:multiply}
+.lay.arp{background-image:url(assets/arp-site.png);transform:rotate(180deg)}
+.lay.pay{background-image:url(assets/paysage.png)}
+.off{display:none}
+.zcol{flex:0 0 30px;border-left:1px solid var(--line-2);display:flex;flex-direction:column;
+  align-items:center;gap:6px;padding:7px 0;color:var(--ink-3);font-size:10.5px}
+.zcol .tr{flex:1;width:3px;background:var(--line);border-radius:2px;position:relative}
+.zcol .tr::after{content:"";position:absolute;left:-4px;top:38%;width:11px;height:11px;border-radius:50%;background:var(--ink)}
+
+/* --------------------------------------------- the picker, four shapes */
+.strip{flex:0 0 var(--sw,78px);border-left:1px solid var(--line-2);background:var(--card);
+  display:flex;flex-direction:column;gap:4px;padding:7px 6px;overflow:auto}
+.strip.wide{--sw:104px}
+/* A tile that is not on the drawing is dimmed — but the dimming is put on
+   the image and the name, never on the tile itself, or the corner fades
+   with them. That is exactly why the first corner was invisible. */
+.tile{border:1px solid transparent;border-radius:6px;padding:4px;display:flex;flex-direction:column;
+  align-items:center;gap:3px;cursor:grab;user-select:none}
+/* While a sheet is being moved the whole page keeps the closed hand, or
+   the cursor flickers back to an arrow every time the list re-renders
+   under the pointer. */
+.tile:active{cursor:grabbing}
+body.dragging,body.dragging *{cursor:grabbing !important}
+/* The badge is a button inside a draggable tile: it says so. */
+.corner{cursor:pointer}
+.tile .pic,.tile .nm{opacity:.45}
+.tile:hover{background:var(--fill-2)}
+.tile:hover .pic,.tile:hover .nm{opacity:.8}
+.tile.on .pic,.tile.on .nm{opacity:1}
+.tile.sel{background:var(--fill);border-color:var(--line-2)}
+.tile .pic{width:100%;aspect-ratio:1.18;border:1px solid var(--line-2);border-radius:4px;background:#fff;
+  background-size:contain;background-repeat:no-repeat;background-position:center}
+.tile .nm{font-size:10.5px;color:var(--ink-2);text-align:center;line-height:1.2}
+.tile.on .nm{color:var(--ink)}
+.tile .pin{position:absolute;right:4px;top:4px;width:16px;height:16px;border-radius:4px;background:var(--card);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-3)}
+.tile .wrap{position:relative;width:100%}
+.tile .wrap .pic{display:block}
+.tile.add .pin{color:var(--ink);border-color:var(--ink)}
+
+/* The horizontal shelf: the same tile, laid on its side under the drawing. */
+.shelf{flex:0 0 auto;border-top:1px solid var(--line-2);background:var(--card);display:flex;
+  align-items:flex-start;gap:6px;padding:6px 8px;overflow:auto}
+.shelf .tile{flex:0 0 76px}
+.shelf .count{margin-left:auto;align-self:center}
+
+/* The stack: the tiles overlap like sheets in a pile, and the pile is the
+   order they are drawn in. */
+.pile{display:flex;flex-direction:column}
+.pile .tile{margin-top:-14px}
+.pile .tile:first-child{margin-top:0}
+.pile .tile.on{margin-top:-8px}
+
+/* The badge: black with a + while the drawing is aside, green with the
+   three lines once it is in the view. Square, so the symbol sits dead
+   centre whatever it is. No white ring — the green is strong enough
+   against both the drawings and the strip. */
+.corner{position:absolute;right:3px;top:3px;width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;
+  background:var(--ink);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);
+  transition:background .12s,transform .12s}
+.corner:hover{background:#000;transform:scale(1.08)}
+.corner .lu{width:12px;height:12px}
+.corner.on{background:var(--vert);color:var(--vert-ink);box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.corner.on:hover{background:#b6d93f}
+.strip .tile.on .nm{color:var(--vert-ink)}
+
+/* The mark itself is one SVG filling the badge; `overflow:hidden` on the
+   round badge is what lets the full-width bar be cut by the circle. */
+.corner svg{width:24px;height:24px;display:block;overflow:visible}
+.corner.on{overflow:hidden}
+
+/* The scale row: the same mark for a pile of 3, of 6 and of 10, drawn
+   large and then at true size, because a mark that reads at 3 can turn
+   into mush at 10 and the only way to know is to look. */
+.ech{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin:0 0 14px;
+  padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--fill-2)}
+.ech .grp{display:flex;flex-direction:column;gap:7px}
+.ech .cap{font-size:10.5px;color:var(--ink-3);letter-spacing:.02em;text-transform:uppercase}
+.ech .row{display:flex;align-items:center;gap:5px}
+.ech .corner{position:static;flex:0 0 auto}
+.ech .row.big .corner{width:44px;height:44px;transform:none}
+.ech .row.big .corner svg{width:44px;height:44px}
+.ech .corner:hover{transform:none;background:var(--vert)}
+
+/* The opacity line in the card: named, measured, and with a knob — a bar
+   that only fills looks like progress, a knob looks like a control. */
+.oprow{display:flex;align-items:center;gap:8px;color:var(--ink-2)}
+.oplbl{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-2);white-space:nowrap}
+.oplbl .lu{width:13px;height:13px}
+.oprow em{font-style:normal;font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink);
+  min-width:30px;text-align:right}
+.optrack{position:relative;flex:1;height:4px;border-radius:2px;background:var(--fill);
+  cursor:ew-resize}
+.optrack .fill{position:absolute;top:0;bottom:0;left:0;background:var(--ink);border-radius:2px}
+.optrack .knob{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;
+  background:#fff;border:1.5px solid var(--ink);transform:translate(-50%,-50%);
+  box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.optrack:hover .knob{background:var(--fill-2)}
+
+/* ------------------------------------------- the card, tied to its tile */
+.acard{position:absolute;z-index:18;background:var(--card);border:1px solid var(--line);
+  border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.16);padding:8px;width:264px;
+  display:flex;flex-direction:column;gap:6px}
+.acard::after{content:"";position:absolute;width:9px;height:9px;background:var(--card);
+  border-right:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+.acard.right::after{right:-5px;top:var(--ay,18px)}
+.acard.below::after{left:var(--ax,22px);top:-5px;transform:rotate(-45deg)}
+.acard h4{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+.fname{font-family:var(--mono);font-size:11px;color:var(--ink);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;direction:rtl;text-align:left;min-width:0}
+.date{font-size:11px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.row{display:flex;align-items:center;gap:6px;min-width:0}
+.col{display:flex;flex-direction:column;gap:5px;min-width:0}
+.sep{height:1px;background:var(--line-2);margin:1px 0}
+/* The list behind the single button. No keyboard hints and no repeat of
+   the file name: it is already written two lines above. */
+.menu{border:1px solid var(--line-2);border-radius:6px;background:var(--fill-2);padding:3px;
+  display:flex;flex-direction:column;gap:1px}
+.mi{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:4px;font-size:11.5px;
+  color:var(--ink);cursor:pointer}
+.mi:hover{background:var(--card)}
+.mi .lu{color:var(--ink-2)}
+.msep{height:1px;background:var(--line-2);margin:2px 2px}
+.lbl{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+
+.btn{height:24px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);
+  display:inline-flex;align-items:center;gap:5px;padding:0 8px;font-size:11.5px;color:var(--ink-2);
+  cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--fill);border-color:var(--ink-3)}
+.btn.sm{height:21px;padding:0 6px;font-size:11px;border-radius:4px}
+.btn.wide{width:100%;justify-content:center}
+.btn.on{border-color:var(--ink);color:var(--ink);background:var(--card)}
+.btn.ico{padding:0 5px}
+
+/* The tuning: which other sheet goes over this one, and which is in front. */
+.with{display:flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:5px;
+  padding:3px 5px;font-size:11.5px;color:var(--ink-3);cursor:pointer}
+.with:hover{border-color:var(--ink-3);color:var(--ink-2)}
+.with.on{border-color:var(--ink);color:var(--ink);background:var(--fill-2)}
+.with .mini{width:26px;height:20px;border:1px solid var(--line-2);border-radius:3px;background:#fff;
+  background-size:contain;background-repeat:no-repeat;background-position:center;flex:0 0 26px}
+.with .state{margin-left:auto;color:var(--ink-3)}
+
+/* ------------------------------------------------------- the crossings */
+.mark{position:absolute;z-index:13;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:var(--rouge-bg);border:1.5px solid var(--rouge);color:var(--rouge)}
+.mark.avert{background:var(--ambre-bg);border-color:var(--ambre);color:var(--ambre)}
+.mark.done{background:var(--fill-2);border-color:var(--line);color:var(--ink-3)}
+.mark:hover{transform:scale(1.12)}
+.mark .lu{width:13px;height:13px}
+/* The ring is drawn outside the glyph so the drawing underneath stays
+   legible: nothing is tinted, only circled. */
+.mark::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid var(--rouge);
+  opacity:.32}
+.mark.avert::after{border-color:var(--ambre)}
+.mark.done::after{display:none}
+.mark.open{box-shadow:0 0 0 3px rgba(192,52,42,.18)}
+
+.ccard{position:absolute;z-index:19;width:286px;background:var(--card);border:1px solid var(--rouge);
+  border-radius:8px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:8px;display:flex;
+  flex-direction:column;gap:6px}
+.ccard.avert{border-color:var(--ambre)}
+.ccard h4{font-size:12.5px;font-weight:600;color:var(--rouge);display:flex;align-items:flex-start;gap:6px}
+.ccard.avert h4{color:var(--ambre)}
+.ccard p{font-size:11.5px;color:var(--ink-2)}
+.pairline{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.pairline .mini{width:30px;height:22px;border:1px solid var(--line-2);border-radius:3px;background:#fff;
+  background-size:contain;background-repeat:no-repeat;background-position:center;flex:0 0 30px}
+.meas{font-family:var(--mono);font-size:11px;color:var(--ink);background:var(--fill-2);
+  border:1px solid var(--line-2);border-radius:4px;padding:3px 6px}
+
+.count{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--rouge);color:var(--rouge);
+  background:var(--rouge-bg);border-radius:5px;padding:2px 7px;font-size:11.5px;cursor:pointer;white-space:nowrap}
+.count.none{border-color:var(--line-2);color:var(--ink-3);background:transparent}
+.hint{font-size:10.5px;color:var(--ink-3)}
+.toast{position:absolute;left:10px;bottom:10px;background:#1b1b1b;color:#fff;font-size:11.5px;
+  padding:6px 10px;border-radius:5px;z-index:20;max-width:70%}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>Le trait — huit marques de position, de 3 à 10 dessins</h1>
+  <p class="lede">La marque doit se lire <b>de loin</b>, à 24 px, sur du vert, posée sur un plan chargé. Huit façons de dessiner la même information — à quelle hauteur cette feuille se trouve dans la pile — en poussant le contraste par des moyens différents: l'épaisseur, la masse, le vide, le fond inversé, le diamètre.</p>
+  <p class="lede">Et la pile n'aura pas toujours trois feuilles. Au-dessus de chaque écran, la <b>rangée d'échelle</b> montre la même marque pour une pile de 3, de 6 et de 10 dessins, d'abord en grand puis à sa taille réelle. Une marque qui tient à trois et se referme à dix est un piège: ce qui est jugé ici, c'est la tenue aux deux bouts.</p>
+  <div id="vars"></div>
+</div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+const toPascal = (n) => n.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+function sprite() {
+  const names = ["file", "ruler", "trees", "layers", "history", "clock", "chevron-down", "chevron-up",
+    "external-link", "check", "circle", "list", "box", "git-compare", "x", "folder", "share-2", "plus",
+    "minus", "table", "compass", "hard-hat", "replace", "file-text", "triangle-alert", "circle-alert",
+    "bring-to-front", "send-to-back", "circle-check", "crosshair", "ban", "scan", "eye", "contrast",
+    "blend", "arrow-up", "arrow-down"];
+  const defs = names.map((n) => {
+    const node = lucide.icons[toPascal(n)];
+    if (!node) return "";
+    const inner = node[2].map(([tag, attrs]) =>
+      `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+    return `<symbol id="lu-${n}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round">${inner}</symbol>`;
+  }).join("");
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("style", "display:none");
+  s.innerHTML = defs;
+  document.body.append(s);
+}
+
+/* Placement of the consultant sheets over the floor plan, measured from the
+   sheets themselves. */
+const BASE_BOX = [314 / 2000, 325 / 1675, 1488 / 2000, 1270 / 1675];
+const BASE_RATIO = 2000 / 1675;
+const SHEETS = {
+  arp: { box: [298 / 1650, 307 / 1560, 1380 / 1650, 1172 / 1560], ratio: 1650 / 1560 },
+  pay: { box: [156 / 835, 178 / 800, 711 / 835, 624 / 800], ratio: 835 / 800 },
+};
+function layStyle(k, z) {
+  const S = SHEETS[k];
+  const [bx0, by0, bx1, by1] = BASE_BOX;
+  const [sx0, sy0, sx1, sy1] = S.box;
+  const w = (bx1 - bx0) / (sx1 - sx0);
+  const h = w * BASE_RATIO / S.ratio;
+  const left = bx0 - sx0 * w;
+  const top = (by0 + by1) / 2 - (sy0 + sy1) / 2 * h;
+  return `left:${(left * 100).toFixed(2)}%;top:${(top * 100).toFixed(2)}%;`
+    + `width:${(w * 100).toFixed(2)}%;height:${(h * 100).toFixed(2)}%;z-index:${z}`;
+}
+
+const DISC = {
+  arch: { label: "Architecte", icon: "compass" },
+  arp: { label: "Arpenteur-géomètre", icon: "ruler" },
+  pays: { label: "Architecte paysagiste", icon: "trees" },
+};
+const SERVER = "\\\\serveur-bureau\\Projets\\2026\\BAL3\\";
+const DRAWINGS = {
+  plan: { disc: "arch", short: "Architecte", app: "AutoCAD", thumb: "assets/plan-niveau-5.jpg",
+    folder: SERVER + "Dessins\\", file: "BAL3_PLAN-NIVEAU-5_2026-10-24.dwg", date: "24 oct 2026" },
+  arp: { disc: "arp", short: "Arpenteur", app: "Acrobat", thumb: "assets/arp-site.png",
+    folder: SERVER + "Reçu\\Arpenteur\\", file: "BAL3_PLAN-PROJET-IMPLANTATION_2026-10-07.pdf", date: "7 oct 2026" },
+  pay: { disc: "pays", short: "Paysage", app: "Acrobat", thumb: "assets/paysage.png",
+    folder: SERVER + "Reçu\\Paysage\\", file: "BAL3_AMENAGEMENT-PAYSAGER_2026-07-07.pdf", date: "7 juil 2026" },
+};
+
+/* A crossing belongs to a pair of drawings: it can only be seen, and can
+   only be true, when both are on screen. Positions are fractions of the
+   drawing area; the measurement is what makes it worth opening. */
+const CONFLICTS = [
+  { id: "x1", pair: ["plan", "arp"], at: [0.455, 0.355], sev: "grave",
+    title: "Conduite d'aqueduc dans la colonne C-4",
+    body: "La conduite de 200 mm de la servitude traverse la colonne C-4. Le relevé de l'arpenteur et la grille structurale ne peuvent pas être vrais en même temps.",
+    meas: "recoupement 140 mm sur 1,20 m de hauteur" },
+  { id: "x2", pair: ["plan", "arp"], at: [0.235, 0.63], sev: "grave",
+    title: "Mur de la façade sud hors de la limite",
+    body: "Le mur dessiné dépasse la limite d'implantation relevée. À vérifier avant le dépôt au permis.",
+    meas: "dépassement 240 mm sur 8,4 m" },
+  { id: "x3", pair: ["plan", "pay"], at: [0.64, 0.545], sev: "avert",
+    title: "Fosse de plantation sous la dalle",
+    body: "La fosse de l'arbre 12 recoupe la dalle du stationnement. Profondeur de terre insuffisante telle que dessinée.",
+    meas: "recoupement 0,8 m² · terre 350 mm" },
+  { id: "x4", pair: ["arp", "pay"], at: [0.34, 0.80], sev: "avert",
+    title: "Bordure paysagère sur l'emprise",
+    body: "La bordure empiète sur l'emprise municipale relevée au certificat.",
+    meas: "empiétement 310 mm" },
+];
+const openPairs = (s) => CONFLICTS.filter((c) => c.pair.every((k) => s.shown.includes(k)) && !s.fixed.includes(c.id));
+
+const ORDER0 = ["pay", "arp", "plan"];
+const newState = () => ({
+  order: ORDER0.slice(),
+  shown: ["plan"],      /* one drawing to start: the office's own */
+  sel: "plan",
+  card: true,           /* the card belongs to the selected tile */
+  menu: false,          /* the one button's list, inside that card */
+  op: { plan: 1, arp: 1, pay: 1 },  /* opacity per drawing, 0.15 to 1 */
+  conflict: null,       /* which conflict is open */
+  fixed: [],            /* conflicts marked as settled */
+  toast: null,
+});
+const S = [];
+const d = (k) => DRAWINGS[k];
+const visible = (s, k) => s.shown.includes(k);
+const zOf = (s, k) => s.order.length - s.order.indexOf(k);
+const others = (s, k) => s.order.filter((x) => x !== k);
+const setLabel = (s) => {
+  const on = s.order.filter((k) => s.shown.includes(k)).map((k) => d(k).short);
+  return on.length === 1 ? `${on[0]} seul` : on.join(" + ");
+};
+
+/* ------------------------------------------------------------- the stage */
+function stageHTML(i, s) {
+  const marks = openPairs(s).concat(CONFLICTS.filter((c) =>
+    c.pair.every((k) => s.shown.includes(k)) && s.fixed.includes(c.id)));
+  /* Opacity is per drawing and is applied where it belongs: on the layer
+     itself. The sheet under everything keeps its own value too, because
+     fading the base is how a consultant's sheet gets read against it. */
+  return `<div class="stage" data-stage="${i}">
+    <div class="plan ${visible(s, "plan") ? "" : "off"}"
+      style="z-index:${zOf(s, "plan")};opacity:${s.op.plan}"></div>
+    ${["arp", "pay"].map((k) => `<div class="lay ${k} ${visible(s, k) ? "" : "off"}"
+      style="${layStyle(k, zOf(s, k))};opacity:${s.op[k]}"></div>`).join("")}
+    ${marks.map((c) => `<div class="mark ${c.sev === "avert" ? "avert" : ""} ${s.fixed.includes(c.id) ? "done" : ""}
+      ${s.conflict === c.id ? "open" : ""}" data-a="conflict" data-i="${i}" data-c="${c.id}"
+      style="left:${(c.at[0] * 100).toFixed(1)}%;top:${(c.at[1] * 100).toFixed(1)}%"
+      title="${c.title}">${icon(s.fixed.includes(c.id) ? "circle-check"
+        : c.sev === "avert" ? "circle-alert" : "triangle-alert")}</div>`).join("")}
+    ${s.conflict ? conflictCard(i, s) : ""}
+    ${s.toast ? `<div class="toast">${s.toast}</div>` : ""}
+  </div>`;
+}
+
+function conflictCard(i, s) {
+  const c = CONFLICTS.find((x) => x.id === s.conflict);
+  const done = s.fixed.includes(c.id);
+  /* Position is measured after the fact, like the tile card: a percentage
+     guess puts a 286 px card off the edge of a narrow pane. */
+  return `<div class="ccard ${c.sev === "avert" ? "avert" : ""}" data-cc="${c.id}"
+    data-ax="${c.at[0]}" data-ay="${c.at[1]}">
+    <div class="lbl" style="color:inherit">${VARIANTS[i].words.one}</div>
+    <h4>${icon(c.sev === "avert" ? "circle-alert" : "triangle-alert")}<span>${c.title}</span>
+      <span style="flex:1"></span><span class="btn sm ico" data-a="closec" data-i="${i}">${icon("x")}</span></h4>
+    <p>${c.body}</p>
+    <div class="meas">${c.meas}</div>
+    ${c.pair.map((k) => `<div class="pairline">
+      <span class="mini" style="background-image:url(${d(k).thumb})"></span>
+      <span class="col" style="gap:0;flex:1">
+        <span>${DISC[d(k).disc].label}</span>
+        <span class="fname" style="color:var(--ink-3)">${d(k).file}</span></span>
+      <span class="date">${d(k).date}</span></div>`).join("")}
+    <div class="row">
+      <span class="btn sm" data-a="openapp" data-i="${i}" data-k="${c.pair[0]}">
+        ${icon("external-link")}Ouvrir dans ${d(c.pair[0]).app}</span>
+      <span style="flex:1"></span>
+      <span class="btn sm ${done ? "on" : ""}" data-a="fix" data-i="${i}" data-c="${c.id}">
+        ${icon(done ? "circle-check" : "check")}${done ? "Réglé" : "Marquer réglé"}</span>
+    </div>
+  </div>`;
+}
+
+/* ------------------------------------------------------- the anchored card */
+/* The card now says one thing only: which document this drawing is, and
+   what can be done to that document. Stacking moved out of the card
+   entirely — each variant below puts the gesture somewhere else. */
+function anchorCard(i, s, place, withOp) {
+  const k = s.sel;
+  return `<div class="acard ${place}" data-card="${i}" data-anchor="${k}">
+    <div class="row"><h4>${icon(DISC[d(k).disc].icon)}${DISC[d(k).disc].label}</h4>
+      <span style="flex:1"></span><span class="date">${d(k).date}</span></div>
+    <span class="fname" title="${d(k).file}">${d(k).file}</span>
+    <span class="btn sm wide" data-a="menu" data-i="${i}" data-k="${k}">
+      ${icon("file-text")}Document ${icon(s.menu ? "chevron-up" : "chevron-down")}</span>
+    ${s.menu ? `<div class="menu">
+      <div class="mi" data-a="openapp" data-i="${i}" data-k="${k}">${icon("external-link")}Ouvrir dans ${d(k).app}</div>
+      <div class="mi" data-a="swap" data-i="${i}" data-k="${k}">${icon("replace")}Changer le document…</div>
+      <div class="msep"></div>
+      <div class="mi" data-a="hist" data-i="${i}" data-k="${k}">${icon("history")}Voir les documents précédents (3)</div>
+    </div>` : ""}
+    ${withOp ? `<div class="oprow">
+      <span class="oplbl">${icon("blend")}Opacité</span>
+      ${track(i, k, s.op[k], "wide")}<em>${pct(s.op[k])}</em></div>` : ""}
+  </div>`;
+}
+
+/* One word now, chosen: a place where two drawings cannot both be true is
+   a conflit. */
+const W = { some: (n) => `${n} conflit${n > 1 ? "s" : ""}`, none: "aucun conflit", one: "Conflit" };
+const countChip = (i, s) => {
+  const n = openPairs(s).length;
+  return `<span class="count ${n ? "" : "none"}" data-a="firstc" data-i="${i}">
+    ${icon(n ? "triangle-alert" : "circle-check")}${n ? W.some(n) : W.none}</span>`;
+};
+
+/* A tile: the drawing, then its name. `cls` lets a variant decorate the
+   tile itself — a spine, a bracket — rather than only its dot. */
+const tile = (i, s, k, extra = "", cls = "") => `<div class="tile ${cls} ${visible(s, k) ? "on" : ""} ${s.sel === k ? "sel" : ""}"
+  data-a="pick" data-i="${i}" data-k="${k}" data-tile="${k}" title="${DISC[d(k).disc].label} · ${d(k).date}">
+  <span class="wrap"><span class="pic" style="background-image:url(${d(k).thumb})"></span>${extra}</span>
+  <span class="nm">${d(k).short}</span></div>`;
+const cardOf = (i, s, withOp) => (s.card ? anchorCard(i, s, "right", withOp) : "");
+
+/* The glyph, drawn instead of written. Everything here is one SVG in a
+   24 px circle so the shapes can be placed to the half pixel, which is
+   what a mark this small lives or dies by.
+
+   Every kind takes (rank, n) and must hold up at n = 10, not only at 3.
+   `rank` counts from the front: 1 is the sheet drawn over the others.
+   The field runs from y = 5 to y = 19, so 14 px for the whole pile. */
+const FY = 5, FH = 14, FW = 12, FX = 6;
+/* The top of the bar for a given rank, bar height h, so rank 1 sits at
+   the top of the field and rank n at the bottom whatever n is. */
+const atRank = (rank, n, h) => FY + (n <= 1 ? (FH - h) / 2 : ((rank - 1) / (n - 1)) * (FH - h));
+
+const glyph = (kind, rank, n) => {
+  const id = `g${kind}${rank}x${n}`;
+  const bar = (y, h, o = 1, x = FX, w = FW) =>
+    `<rect x="${x}" y="${y.toFixed(2)}" width="${w}" height="${h}" rx="${Math.min(h, 2) / 2}"
+      fill="currentColor" opacity="${o}"/>`;
+  /* Shared by the two kinds that draw every sheet: the bars thin out as
+     the pile grows, with a floor so they never vanish. */
+  const rows = (gap) => {
+    const h = Math.max(1, Math.min(3, (FH - (n - 1) * gap) / n));
+    const top = FY + (FH - (n * h + (n - 1) * gap)) / 2;
+    return { h, top, y: (r) => top + (r - 1) * (h + gap) };
+  };
+
+  if (kind === "bars") {
+    const { h, y } = rows(n <= 5 ? 2 : 1.2);
+    return `<svg viewBox="0 0 24 24">${Array.from({ length: n }, (_, j) => j + 1)
+      .map((r) => bar(y(r), r === rank ? Math.max(h, 2.6) : h, r === rank ? 1 : 0.22)).join("")}</svg>`;
+  }
+  if (kind === "one") {
+    return `<svg viewBox="0 0 24 24">${bar(atRank(rank, n, 3.2), 3.2)}</svg>`;
+  }
+  if (kind === "rail") {
+    return `<svg viewBox="0 0 24 24">
+      <rect x="11.25" y="${FY}" width="1.5" height="${FH}" rx="0.75" fill="currentColor" opacity="0.22"/>
+      ${bar(atRank(rank, n, 3.2), 3.2)}</svg>`;
+  }
+  if (kind === "slot") {
+    /* Inverted: an ink plate with the pile cut out of it, so the lit
+       sheet is a window of badge-green inside a dark field. */
+    const { h, y } = rows(n <= 5 ? 1.8 : 1.1);
+    return `<svg viewBox="0 0 24 24">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="currentColor"/>
+      ${Array.from({ length: n }, (_, j) => j + 1).map((r) =>
+        `<rect x="6.5" y="${y(r).toFixed(2)}" width="11" height="${h}" rx="${Math.min(h, 2) / 2}"
+          fill="var(--vert)" opacity="${r === rank ? 1 : 0.34}"/>`).join("")}</svg>`;
+  }
+  if (kind === "fill") {
+    /* A level, not a mark: the badge darkens from the top down to the
+       depth of this sheet. Nothing to resolve, only an amount to see. */
+    return `<svg viewBox="0 0 24 24"><defs><clipPath id="${id}">
+        <circle cx="12" cy="12" r="12"/></clipPath></defs>
+      <rect x="0" y="0" width="24" height="${((24 * rank) / n).toFixed(2)}" fill="currentColor"
+        clip-path="url(#${id})" opacity="0.88"/></svg>`;
+  }
+  if (kind === "ring") {
+    const r = 8.6, C = 2 * Math.PI * r;
+    return `<svg viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="${r}" fill="none" stroke="currentColor" stroke-width="3" opacity="0.2"/>
+      <circle cx="12" cy="12" r="${r}" fill="none" stroke="currentColor" stroke-width="3"
+        stroke-linecap="round" stroke-dasharray="${((C * rank) / n).toFixed(2)} ${C.toFixed(2)}"
+        transform="rotate(-90 12 12)"/></svg>`;
+  }
+  if (kind === "chord") {
+    /* The bar runs the whole width of the circle: the widest, darkest
+       shape the badge can carry, cut by the circle itself. */
+    return `<svg viewBox="0 0 24 24"><defs><clipPath id="${id}">
+        <circle cx="12" cy="12" r="12"/></clipPath></defs>
+      <g clip-path="url(#${id})">${bar(atRank(rank, n, 4), 4, 1, 0, 24)}</g></svg>`;
+  }
+  /* hybrid: the drawn pile while it can be counted at a glance, a bar
+     with the plain figure once it cannot. */
+  if (n <= 4) {
+    const { h, y } = rows(2);
+    return `<svg viewBox="0 0 24 24">${Array.from({ length: n }, (_, j) => j + 1)
+      .map((r) => bar(y(r), r === rank ? Math.max(h, 2.6) : h, r === rank ? 1 : 0.22)).join("")}</svg>`;
+  }
+  /* Two digits need the room a wide bar was taking, so the bar shortens
+     and the figure drops a point rather than running off the circle. */
+  const two = rank >= 10;
+  return `<svg viewBox="0 0 24 24">${bar(atRank(rank, n, 2.6), 2.6, 1, 2.5, two ? 5 : 7)}
+    <text x="${two ? 8.5 : 13.5}" y="16" font-size="${two ? 9.5 : 11}" font-weight="650"
+      fill="currentColor" font-family="Geist, sans-serif">${rank}</text></svg>`;
+};
+
+const badge = (i, s, k, kind) => {
+  const on = visible(s, k);
+  /* Only a drawing that is actually kept, alone, has nothing to add to. */
+  if (s.shown.includes(k) && s.shown.length === 1) return "";
+  const cur = d(s.shown.find((x) => x !== k) || s.sel).short;
+  const stack = s.order.filter((x) => visible(s, x));
+  const rank = stack.indexOf(k) + 1, n = stack.length;
+  const word = rank === 1 ? "devant" : rank === n ? "au fond" : "au milieu";
+  return `<span class="corner ${kind} ${on ? "on" : ""}" data-a="toggle" data-i="${i}" data-k="${k}"
+    title="${on ? `${d(k).short} — ${word}, opacité ${pct(s.op[k])}` : `Superposer ${d(k).short} avec ${cur}`}">${
+    on ? glyph(kind, rank, n) : icon("plus")}</span>`;
+};
+
+const pct = (v) => `${Math.round(v * 100)}%`;
+/* One opacity control, the one chosen: a line in the card, named, with a
+   knob that can be taken hold of. `data-op` marks it draggable. */
+const track = (i, k, v, cls, dir = "x") => `<span class="optrack ${cls}" data-op="${k}" data-i="${i}"
+  data-dir="${dir}" title="Opacité ${d(k).short} — ${pct(v)}">
+  <span class="fill" style="${dir === "x" ? "width" : "height"}:${v * 100}%"></span>
+  <span class="knob" style="${dir === "x" ? "left" : "bottom"}:${v * 100}%"></span></span>`;
+
+const build = (kind) => (i, s) => ({
+  side: `<div class="strip wide">
+    <div class="pile">${s.order.map((k) => tile(i, s, k, badge(i, s, k, kind))).join("")}</div>
+    <div class="hint" style="text-align:center;margin-top:6px">glisser une vignette<br>pour changer l'ordre</div></div>`,
+  card: cardOf(i, s, true),
+});
+
+/* ------------------------------------------------------------ the screen */
+const UNITS = [["501", "5½", "1 275 pi²", "30% 40%"], ["502", "5½", "1 496 pi²", "46% 36%"],
+  ["503", "3½", "760 pi²", "38% 52%"], ["504", "4½", "1 152 pi²", "54% 46%"]];
+
+function screenHTML(i, s, P) {
+  return `<div class="app" data-i="${i}">
+    <div class="bar1">${icon("folder")}<span class="crumb">Tous les projets</span>
+      <span class="crumb on">Le Baldwin III</span>
+      <span class="tab on">${icon("git-compare")}Coordination</span>
+      <span class="tab">${icon("table")}Codes</span><span class="tab">${icon("clock")}Échéancier</span>
+      <span class="sp"></span><span class="share">${icon("share-2")}Partager</span></div>
+    <div class="bar2">${[1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<span class="${n === 5 ? "on" : ""}">Niveau ${n}</span>`).join("")}
+      <span>Tous les niveaux</span></div>
+    <div class="card">
+      <div class="ttl"><b>Plans — niveau 5</b><span class="sub">15 unités · 4 avec un conflit ouvert</span>
+        <span class="sp"></span><span class="btn">${icon("table")}Exporter</span></div>
+      <div class="work">
+        <div class="pane lst"><div class="ph">${icon("list")}Unités</div>
+          <div class="pb">${UNITS.map((u, j) => `<div class="uc ${j === 0 ? "on" : ""}">
+            <div class="cr" style="background-position:${u[3]}"><span class="no">${u[0]}</span></div>
+            <div class="ul"><span>${u[1]}</span><span class="a">${u[2]}</span></div></div>`).join("")}</div></div>
+
+        <div class="pane d2">
+          <div class="ph">${icon("file")}Plan 2D
+            <span class="hint">${setLabel(s)}</span>
+            <span class="sp"></span>${countChip(i, s)}</div>
+          <div style="flex:1;min-height:0;display:flex;position:relative">
+            ${stageHTML(i, s)}
+            <div class="zcol">${icon("plus")}<div class="tr"></div>${icon("minus")}<span>100%</span></div>
+            ${P.side || ""}
+            ${P.card || ""}
+          </div>
+          ${P.shelf || ""}</div>
+
+        <div class="pane m3"><div class="ph">${icon("box")}Maquette 3D<span class="sp"></span>
+          <span class="btn">${icon("external-link")}SketchUp</span></div>
+          <div style="flex:1;min-height:0;display:flex"><div class="still"></div></div></div>
+
+        <div class="pane insp"><div class="ph">${icon("circle")}Unité 501</div>
+          <div class="pb">
+            <div class="kv"><span>Type</span><b>5½</b></div>
+            <div class="kv"><span>Superficie</span><b>1 275 pi²</b></div>
+            <div class="kv"><span>Statut</span><b>Non vérifié</b></div>
+            <div class="kv"><span>Écart</span><b>240 mm</b></div>
+          </div></div>
+      </div>
+      <div class="foot">Ouvertures de la façade sud <b>68.5 m² → 74.2 m²</b><span class="date">+5.7 m²</span>
+        <span class="sp"></span><span class="btn">Lire l'article 3.2.3.1</span></div>
+    </div>
+  </div>`;
+}
+
+/* Eight ways to draw the position inside the badge. The judgement is made
+   from two things at once: the live screen, and the scale row above it,
+   where the same mark is drawn for a pile of 3, 6 and 10. */
+const VARIANTS = [
+  { name: "Toute la pile", kind: "bars",
+    why: `Un trait par dessin, celui-ci plein et épais, les autres très pâles. On voit la position <b>et</b> combien de feuilles il y a. <span class="cost">Le prix: à dix dessins les traits tombent à 1 px et se referment en bouillie.</span>` },
+  { name: "Un seul trait", kind: "one",
+    why: `Rien que le trait de cette feuille, posé à sa hauteur: en haut devant, en bas au fond. C'est le contraste maximum — une seule forme noire, épaisse, sur le vert. <span class="cost">Le prix: la hauteur seule ne dit pas combien il y a de feuilles, et deux rangs voisins se ressemblent à dix dessins.</span>` },
+  { name: "Rail et curseur", kind: "rail",
+    why: `Le trait plein glisse le long d'un rail pâle qui tient toute la hauteur: le rail donne l'échelle, le trait donne la place. Une seule forme à lire, lisible à n'importe quel nombre de dessins. <span class="cost">Le prix: le rail ajoute du bruit dans une pastille de 24 px.</span>` },
+  { name: "Fente creusée", kind: "slot",
+    why: `L'inverse: une plaque d'encre dans la pastille, la pile découpée dedans, et la feuille allumée est une fenêtre verte vive dans le noir. Le contraste ne vient plus du trait mais du fond. <span class="cost">Le prix: la pastille devient presque noire, donc proche du <b>+</b> des dessins non empilés.</span>` },
+  { name: "Niveau de remplissage", kind: "fill",
+    why: `Pas de trait du tout: la pastille se remplit d'encre depuis le haut jusqu'à la profondeur de cette feuille. Un quart pleine, elle est devant; pleine, elle est au fond. Rien à résoudre, une quantité à voir. <span class="cost">Le prix: c'est une quantité, pas un rang — deux feuilles voisines se distinguent mal.</span>` },
+  { name: "Anneau", kind: "ring",
+    why: `L'anneau de la pastille se remplit dans le sens horaire selon la profondeur. La forme fait 17 px de diamètre au lieu de 12 de large: c'est le plus visible de loin. <span class="cost">Le prix: un anneau qui se remplit veut dire « progression » partout ailleurs dans un logiciel.</span>` },
+  { name: "Barre pleine largeur", kind: "chord",
+    why: `Le trait traverse toute la pastille, bord à bord, coupé par le cercle: c'est la plus grosse masse noire possible à cette taille, et la hauteur reste la position. <span class="cost">Le prix: aux rangs extrêmes la corde se raccourcit, donc la forme change de largeur selon la place.</span>` },
+  { name: "Traits, puis chiffre", kind: "hybrid",
+    why: `La pile dessinée tant qu'elle se compte d'un coup d'œil (jusqu'à quatre), puis un trait et le chiffre au-delà. Honnête sur la limite au lieu de la nier. <span class="cost">Le prix: deux apparences pour une même chose, et le chiffre revient avec sa question — compté depuis où.</span>` },
+];
+VARIANTS.forEach((v) => { v.build = build(v.kind); });
+
+/* The scale row, above each screen: the mark at 44 px, then at its true
+   24 px, for a pile of 3, of 6 and of 10. */
+const echHTML = (kind) => [3, 6, 10].map((n) => `<div class="grp">
+  <span class="cap">${n} dessins</span>
+  <div class="row big">${[1, Math.ceil(n / 2), n].map((r) =>
+    `<span class="corner on ${kind}" title="rang ${r} sur ${n}">${glyph(kind, r, n)}</span>`).join("")}</div>
+  <div class="row">${Array.from({ length: n }, (_, j) => j + 1).map((r) =>
+    `<span class="corner on ${kind}" title="rang ${r} sur ${n}">${glyph(kind, r, n)}</span>`).join("")}</div>
+</div>`).join("");
+
+function render(i) {
+  const mount = document.querySelector(`[data-var="${i}"] .mount`);
+  mount.innerHTML = screenHTML(i, S[i], VARIANTS[i].build(i, S[i]));
+  placeCard(i);
+}
+
+/* The card is written into the markup without a position, then put at the
+   height of its own tile. Measuring after the fact is the only way to
+   follow a tile that moves when the pile is reordered. */
+function placeCard(i) {
+  const root = document.querySelector(`[data-var="${i}"]`);
+  placeConflict(root);
+  const card = root.querySelector(".acard");
+  if (!card) return;
+  const tileEl = root.querySelector(`[data-tile="${card.dataset.anchor}"]`);
+  const host = card.parentElement.getBoundingClientRect();
+  const tb = tileEl ? tileEl.getBoundingClientRect() : null;
+  if (!tb) return;
+  if (card.classList.contains("below")) {
+    const left = Math.min(host.width - card.offsetWidth - 8,
+      Math.max(8, tb.left - host.left + tb.width / 2 - 40));
+    card.style.left = `${left}px`;
+    card.style.top = `${Math.max(8, host.height - card.offsetHeight - 8)}px`;
+    card.style.setProperty("--ax", `${tb.left - host.left + tb.width / 2 - left - 4}px`);
+  } else {
+    const strip = root.querySelector(".strip").getBoundingClientRect();
+    card.style.right = `${host.right - strip.left + 8}px`;
+    const top = Math.min(host.height - card.offsetHeight - 8,
+      Math.max(6, tb.top - host.top + tb.height / 2 - 26));
+    card.style.top = `${top}px`;
+    card.style.setProperty("--ay", `${Math.max(10, tb.top - host.top + tb.height / 2 - top - 4)}px`);
+  }
+}
+
+/* The crossing card hangs off its mark: beside it when there is room on
+   that side, flipped when there is not, and always wholly inside the
+   drawing so nothing important is pushed out of the pane. */
+function placeConflict(root) {
+  const cc = root.querySelector(".ccard");
+  if (!cc) return;
+  const stage = cc.parentElement.getBoundingClientRect();
+  const ax = +cc.dataset.ax * stage.width, ay = +cc.dataset.ay * stage.height;
+  const w = cc.offsetWidth, h = cc.offsetHeight;
+  const left = ax + 18 + w < stage.width ? ax + 18 : Math.max(8, ax - 18 - w);
+  const top = Math.min(stage.height - h - 8, Math.max(8, ay - 28));
+  cc.style.left = `${Math.max(8, left)}px`;
+  cc.style.top = `${top}px`;
+}
+
+function renderAll() {
+  document.getElementById("vars").innerHTML = VARIANTS.map((v, i) => `<div class="var" data-var="${i}">
+    <div class="vh"><span class="n">Variante ${String.fromCharCode(65 + i)}</span><b>${v.name}</b></div>
+    <p class="why">${v.why}</p>
+    <div class="ech">${echHTML(v.kind)}</div>
+    <div class="mount"></div></div>`).join("");
+  VARIANTS.forEach((_, i) => { S[i] = S[i] || newState(); render(i); });
+}
+
+function say(s, msg) {
+  s.toast = msg;
+  clearTimeout(s.timer);
+  s.timer = setTimeout(() => { s.toast = null; render(S.indexOf(s)); }, 3600);
+}
+
+/* Every variant ends up here: a drawing joins what is on screen or leaves
+   it, the last one can never leave, and the stacking order of the pile
+   decides where it lands. Six gestures, one piece of state. */
+function stack(i, s, k) {
+  const on = s.shown.includes(k);
+  s.shown = on ? s.shown.filter((x) => x !== k)
+    : s.order.filter((x) => s.shown.includes(x) || x === k);
+  if (!s.shown.length) { s.shown = [k]; return; }
+  if (!s.shown.includes(s.sel)) s.sel = s.shown[s.shown.length - 1];
+  s.conflict = null;
+  s.card = true;
+  if (!on) { s.sel = k; s.card = true; announce(s); }
+}
+
+/* Stacking is the moment conflicts can appear, so it is the moment to say
+   how many — the number alone, in the header, is easy to miss. */
+function announce(s) {
+  const n = openPairs(s).length;
+  if (n) say(s, `${setLabel(s)} — ${W.some(n)} à regarder.`);
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-a]");
+  if (!el) return;
+  const i = +el.dataset.i, k = el.dataset.k, s = S[i];
+  if (!s) return;
+  switch (el.dataset.a) {
+    /* Clicking a drawing shows that drawing alone; its corner adds it to
+       what is already there. Clicking the one already alone closes its
+       card rather than hiding anything. */
+    case "pick":
+      if (s.sel === k && s.shown.length === 1 && s.shown[0] === k) { s.card = !s.card; s.menu = false; break; }
+      s.sel = k; s.shown = [k]; s.card = true; s.menu = false; s.conflict = null;
+      break;
+    case "menu": s.menu = !s.menu; break;
+    case "toggle": stack(i, s, k); break;
+    /* Stacking order has no buttons: the pile of tiles is the order, and
+       it is dragged. */
+    /* Two cards over one drawing is one too many: opening a crossing puts
+       the document card away, closing it brings the card back. */
+    case "conflict":
+      s.conflict = s.conflict === el.dataset.c ? null : el.dataset.c;
+      s.card = !s.conflict;
+      break;
+    case "firstc": {
+      const open = openPairs(s);
+      if (!open.length) { say(s, "Aucun conflit entre les dessins affichés."); break; }
+      s.conflict = open[0].id; s.card = false;
+      break;
+    }
+    case "closec": s.conflict = null; s.card = true; break;
+    case "fix": {
+      const id = el.dataset.c;
+      s.fixed = s.fixed.includes(id) ? s.fixed.filter((x) => x !== id) : [...s.fixed, id];
+      const c = CONFLICTS.find((x) => x.id === id);
+      say(s, s.fixed.includes(id) ? `« ${c.title} » — marqué réglé.` : `« ${c.title} » — rouvert.`);
+      break;
+    }
+    case "openapp": say(s, `${d(k).file} — ouvert dans ${d(k).app}.`); break;
+    case "swap": say(s, `Choisir un autre document dans ${d(k).folder}`); break;
+    case "hist": say(s, `${d(k).short}: 3 documents lus avant celui-ci.`); break;
+    default: return;
+  }
+  render(i);
+});
+
+window.addEventListener("resize", () => { S.forEach((_, i) => placeCard(i)); });
+
+/* Opacity first: a press on anything carrying `data-op` becomes a drag on
+   that drawing's transparency. The element is measured, so the same code
+   serves a 5 px edge, a bar at the foot, an upright column cell and the
+   badge itself; `data-dir` is the only difference. A drag that stays
+   still is treated as a click, which keeps the badge clickable in the
+   variant where the badge is also the gauge. */
+document.addEventListener("pointerdown", (e) => {
+  const trackEl = e.target.closest("[data-op]");
+  if (!trackEl) return;
+  const i = +trackEl.dataset.i, s = S[i], k = trackEl.dataset.op;
+  const vertical = trackEl.dataset.dir === "y";
+  const box = trackEl.getBoundingClientRect();
+  let moved = false;
+  const apply = (ev) => {
+    const raw = vertical ? (box.bottom - ev.clientY) / box.height
+      : (ev.clientX - box.left) / box.width;
+    /* Never to zero: a drawing at 0% is gone without being removed, which
+       is exactly the confusion the eye icons used to cause. */
+    const v = Math.max(0.15, Math.min(1, raw));
+    if (Math.abs(v - s.op[k]) < 0.01) return;
+    s.op[k] = v;
+    moved = true;
+    render(i);
+  };
+  const up = (ev) => {
+    window.removeEventListener("pointermove", apply);
+    window.removeEventListener("pointerup", up);
+    if (moved) { say(s, `${d(k).short} — opacité ${pct(s.op[k])}.`); render(i); }
+    else if (trackEl.classList.contains("corner")) { stack(i, s, k); render(i); }
+    ev.stopPropagation();
+  };
+  window.addEventListener("pointermove", apply);
+  window.addEventListener("pointerup", up);
+  e.stopPropagation();
+  e.preventDefault();
+});
+
+/* The pile is the stacking order, so a tile has to be draggable to the
+   top. Tracked by where the pointer is, not by HTML5 drag and drop, which
+   never fires on these tiles. The badge and the slider are excluded: a
+   press on them is their own gesture. */
+document.addEventListener("pointerdown", (e) => {
+  const tileEl = e.target.closest("[data-tile]");
+  if (!tileEl || e.target.closest(".corner") || e.target.closest("[data-op]")) return;
+  const i = +tileEl.dataset.i, s = S[i], k = tileEl.dataset.tile;
+  let moved = false;
+  document.body.classList.add("dragging");
+  const move = (ev) => {
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    const onto = el && el.closest("[data-tile]");
+    if (!onto || !onto.closest(".pile") || onto.dataset.tile === k) return;
+    const from = s.order.indexOf(k), to = s.order.indexOf(onto.dataset.tile);
+    s.order.splice(from, 1);
+    s.order.splice(to, 0, k);
+    moved = true;
+    /* Re-rendering here is the point: the three lines in every badge move
+       with the sheet while it is still held. */
+    render(i);
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    document.body.classList.remove("dragging");
+    if (moved) { say(s, `Ordre: ${s.order.map((x) => d(x).short).join(" devant ")}.`); render(i); }
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+});
+
+/* No hover preview on this sheet: the badge adds the drawing, the drag
+   reorders it, and nothing happens from merely passing over a tile. */
+
+sprite();
+renderAll();
+</script>
+</body>
+</html>
