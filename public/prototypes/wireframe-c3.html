@@ -1038,6 +1038,12 @@ const V = {
   day: "2026-11-14",
   scale: "Mois",
   task: null,
+  /* Which task's editor is open — a task id, or "new" for the composer —
+     and the draft that composer writes into before the task exists. The
+     archive is folded until it is asked for. */
+  taskEdit: null,
+  taskDraft: { title: "", day: "2026-11-14", prio: "moyenne", phase: "Permis", who: [] },
+  taskArch: false,
   /* What the screen is counting. "Niveau" is one floor: the unit list, the
      two drawings and the right column. "Bâtiment" is all eight: the work
      area becomes the four quantity tables, and the level strip is dimmed
@@ -1046,11 +1052,10 @@ const V = {
   utab: 1,           // which tab of the unit inspector
   zoom: 100,         // plan zoom, in percent
   /* The margin: notes pinned on a drawing. Two publics share one list — the
-     studio's own reminders and the pins an invited collaborator can read —
-     and the guest view does not render the studio's, it drops them. */
+     studio's own reminders, and the pins an invited collaborator can read
+     through the shared link. */
   pins: [],
   pinScope: "equipe",   // what the next pin will be
-  guest: false,         // read the screen as the shared link shows it
   pinMode: false,       // the next click on a drawing puts a point down
   pending: null,        // a point put down, waiting for its sentence
   draft: "",
@@ -1292,6 +1297,20 @@ const viewIndexOfLevel = (level) => LEVEL_VIEWS.indexOf(levelView(level));
 const ENG_DISCIPLINES = ["electrical", "drainage", "distribution", "ventilation"];
 const ENG_LABELS = { electrical: "Électricité", drainage: "Drainage",
   distribution: "Distribution", ventilation: "Ventilation" };
+/* What a consultant's drawing is called on the server. The asset pipeline
+   names its files by discipline and index (electrical-5.pdf); nobody in an
+   office ever types that. The sheet number, the discipline and the floor
+   are what is written on the title block, so they are what is written on
+   the file — the same shape as the architect's own A-209_PLAN_NIVEAU_5.dwg. */
+const ENG_FILE_WORD = { electrical: "ELECTRICITE", drainage: "DRAINAGE",
+  distribution: "DISTRIBUTION", ventilation: "VENTILATION" };
+const levelFileName = (lv) => lv === -1 ? "SOUS_SOL_00" : lv === 0 ? "SOUS_SOL_0"
+  : lv === 9 ? "TOITURE" : `NIVEAU_${lv}`;
+const engCode = (s) => s.code.replace(/^M(\d)/, "M-$1");
+const engFileName = (d, level) => {
+  const s = engSheet(d, level);
+  return s ? `BAL3_${engCode(s)}_${ENG_FILE_WORD[d]}_${levelFileName(level)}.pdf` : "—";
+};
 const ENG_LAYICON = { electrical: "zap", drainage: "droplets",
   distribution: "git-branch", ventilation: "wind" };
 const levelKey = (level) => level === -1 ? "00" : level === 9 ? "roof" : String(level);
@@ -1500,37 +1519,54 @@ const QTABS = {
    calendar and a line in the list at the same time. Mock data: the dates
    are plausible for a permit deposit in the autumn, nothing is imported. */
 const TODAY = "2026-11-14";
+/* Who a task can be handed to. The studio is small, so a person is named by
+   the seat they hold rather than by a name: a prototype has no business
+   carrying anybody's real name, and the seat is what the office says out
+   loud anyway ("c'est à l'atelier"). A task can be on two seats at once. */
+const PEOPLE = [
+  { id: "cp", label: "Chargée de projet", ini: "CP" },
+  { id: "at", label: "Atelier", ini: "AT" },
+  { id: "ing", label: "Ingénieur", ini: "IN" },
+  { id: "arp", label: "Arpenteur", ini: "AP" },
+  { id: "pay", label: "Paysagiste", ini: "PY" },
+  { id: "arr", label: "Arrondissement", ini: "AD" },
+  { id: "pro", label: "Promoteur", ini: "PR" },
+];
+const person = (id) => PEOPLE.find((p) => p.id === id);
+const whoLabel = (t) => (t.who.length ? t.who.map((id) => person(id).label).join(", ") : "Personne assignée");
+let taskSeq = 100;
 const TASKS = [
-  { id: "t1", day: "2026-11-03", title: "Tableau des superficies par étage", who: "Chargée de projet",
-    prio: "moyenne", done: true, phase: "Comité" },
-  { id: "t2", day: "2026-11-09", title: "Élévations avec matériaux au comité", who: "Atelier",
-    prio: "moyenne", done: true, phase: "Comité" },
-  { id: "t3", day: "2026-11-14", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: "Atelier",
+  { id: "t1", day: "2026-11-03", title: "Tableau des superficies par étage", who: ["cp"],
+    prio: "moyenne", done: true, doneAt: "2026-11-05", phase: "Comité" },
+  { id: "t2", day: "2026-11-09", title: "Élévations avec matériaux au comité", who: ["at", "cp"],
+    prio: "moyenne", done: true, doneAt: "2026-11-10", phase: "Comité" },
+  { id: "t3", day: "2026-11-14", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: ["at"],
     prio: "haute", done: false, phase: "Permis", code: "3.3.1.18" },
-  { id: "t4", day: "2026-11-14", title: "Largeur libre des portes du parcours sans obstacles", who: "Atelier",
+  { id: "t4", day: "2026-11-14", title: "Largeur libre des portes du parcours sans obstacles", who: ["at"],
     prio: "haute", done: false, phase: "Permis", code: "3.8.1.3" },
-  { id: "t5", day: "2026-11-17", title: "Confirmer le type de construction pour 8 étages", who: "Ingénieur",
+  { id: "t5", day: "2026-11-17", title: "Confirmer le type de construction pour 8 étages", who: ["ing"],
     prio: "haute", done: false, phase: "Permis", code: "3.2.1.1" },
-  { id: "t6", day: "2026-11-20", title: "Recompter les cases après réduction pour le métro", who: "Chargée de projet",
+  { id: "t6", day: "2026-11-20", title: "Recompter les cases après réduction pour le métro", who: ["cp"],
     prio: "moyenne", done: false, phase: "Permis", code: "art. 71" },
-  { id: "t7", day: "2026-11-24", title: "Note à l'urbaniste sur la marge avant", who: "Chargée de projet",
+  { id: "t7", day: "2026-11-24", title: "Note à l'urbaniste sur la marge avant", who: ["cp"],
     prio: "moyenne", done: false, phase: "Comité", code: "art. 22" },
-  { id: "t8", day: "2026-11-27", title: "Demande de dérogation mineure rédigée", who: "Chargée de projet",
+  { id: "t8", day: "2026-11-27", title: "Demande de dérogation mineure rédigée", who: ["cp"],
     prio: "basse", done: false, phase: "Comité" },
-  { id: "t9", day: "2026-12-04", title: "Plans d'émission pour permis", who: "Atelier",
+  { id: "t9", day: "2026-12-04", title: "Plans d'émission pour permis", who: ["at"],
     prio: "haute", done: false, phase: "Permis" },
-  { id: "t10", day: "2026-12-08", title: "Calculs de conformité joints au dépôt", who: "Atelier",
+  { id: "t10", day: "2026-12-08", title: "Calculs de conformité joints au dépôt", who: ["at", "ing"],
     prio: "haute", done: false, phase: "Permis" },
-  { id: "t11", day: "2026-12-15", title: "Dépôt de la demande de permis", who: "Chargée de projet",
+  { id: "t11", day: "2026-12-15", title: "Dépôt de la demande de permis", who: ["cp"],
     prio: "haute", done: false, phase: "Permis" },
-  { id: "t12", day: "2027-01-19", title: "Réponse de l'urbaniste attendue", who: "Arrondissement",
+  { id: "t12", day: "2027-01-19", title: "Réponse de l'urbaniste attendue", who: ["arr"],
     prio: "moyenne", done: false, phase: "Permis" },
-  { id: "t13", day: "2027-02-09", title: "Relevé d'implantation", who: "Arpenteur",
+  { id: "t13", day: "2027-02-09", title: "Relevé d'implantation", who: ["arp"],
     prio: "basse", done: false, phase: "Site" },
-  { id: "t14", day: "2026-10-27", title: "Mix de typologies arrêté", who: "Promoteur",
-    prio: "basse", done: true, phase: "Programme" },
+  { id: "t14", day: "2026-10-27", title: "Mix de typologies arrêté", who: ["pro"],
+    prio: "basse", done: true, doneAt: "2026-10-27", phase: "Programme" },
 ];
 const PRIO = { haute: 3, moyenne: 2, basse: 1 };
+const PHASES = ["Permis", "Comité", "Site", "Programme", "Chantier"];
 
 
 /* Hand-traced wall contours on the 2000 × 1675 permit-sheet crops.
@@ -1706,8 +1742,8 @@ const LAYDOC = {
   ...Object.fromEntries(ENG_DISCIPLINES.map((d) => [d, {
     short: ENG_LABELS[d], disc: ENG_LABELS[d], app: "Acrobat", act: "pdfview",
     thumb: () => engSheet(d, paneLevel())?.img || "",
-    file: () => { const s = engSheet(d, paneLevel()); return s ? s.pdf.split("/").pop() : "—"; },
-    date: () => { const s = engSheet(d, paneLevel()); return s ? `${s.code} · p.${s.page}` : ""; },
+    file: () => engFileName(d, paneLevel()),
+    date: () => { const s = engSheet(d, paneLevel()); return s ? `${engCode(s)} · p.${s.page}` : ""; },
     dir: () => `${V.docs.dir}Reçus\\`,
   }])),
 };
@@ -2193,7 +2229,7 @@ function calendarHTML() {
         <div class="wb">${ts.map((t) => `<div class="wtask" data-prio="${t.prio}" ${act("task", t.id)}>
           <span class="lo bar" style="width:80%"></span>
           <span class="hi">${t.title}</span>
-          <span class="hi who">${t.who}</span></div>`).join("")}</div></div>`;
+          <span class="hi who">${whoLabel(t)}</span></div>`).join("")}</div></div>`;
     }).join("")}</div>`;
   }
   return monthGrid(d.getUTCFullYear(), d.getUTCMonth(), true);
@@ -2201,25 +2237,83 @@ function calendarHTML() {
 
 /* The list on the right is the same tasks, ordered by day and by priority
    inside a day. The calendar filters it: a day is selected, so the list
-   opens on that day and keeps the rest below it under a divider. */
+   opens on that day and keeps the rest below it under a divider.
+
+   A ticked task leaves both lists and lands in the archive at the bottom,
+   where it keeps the day it was closed on and can be brought back. Nothing
+   is destroyed by a tick: that is what makes ticking safe to do quickly. */
+
+/* Which object the open editor is writing into: a real task, or the draft
+   that becomes one. */
+const editingTask = () => (V.taskEdit === "new" ? V.taskDraft
+  : TASKS.find((t) => t.id === V.taskEdit));
+
+/* The two inputs hold their own value between renders, so what was typed is
+   read back into the object before the screen is redrawn. Without this,
+   clicking a priority chip would throw away a half-typed title. */
+function readTaskForm() {
+  const t = editingTask();
+  const form = document.querySelector("[data-tedit]");
+  if (!t || !form) return;
+  form.querySelectorAll("[data-tfield]").forEach((el) => {
+    if (el.value !== "") t[el.dataset.tfield] = el.value;
+  });
+}
+
+const avatars = (t) => `<span class="avs">${t.who.map((id) =>
+  `<i class="av" title="${person(id).label}">${person(id).ini}</i>`).join("")}</span>`;
+
+/* One editor, used for a new task and for an existing one. It writes into
+   the task itself — or into the draft, for a new one — so there is never a
+   second copy of a task to keep in step. */
+function taskForm(t, isNew) {
+  return `<div class="tedit" data-tedit>
+    <input class="tin" data-tfield="title" value="${(t.title || "").replace(/"/g, "&quot;")}"
+      placeholder="Que faut-il faire?">
+    <div class="row" style="gap:6px;flex-wrap:wrap">
+      <input class="tin day" type="date" data-tfield="day" value="${t.day}">
+      ${["haute", "moyenne", "basse"].map((p) =>
+        `<span class="chip ${t.prio === p ? "on" : ""}" ${act("tprio", p)}>${p}</span>`).join("")}
+    </div>
+    <div class="row" style="gap:3px;flex-wrap:wrap">
+      ${PHASES.map((p) => `<span class="chip ${t.phase === p ? "on" : ""}" ${act("tphase", p)}>${p}</span>`).join("")}
+    </div>
+    <div class="row" style="gap:3px;flex-wrap:wrap">
+      ${PEOPLE.map((p) => `<span class="chip who ${t.who.includes(p.id) ? "on" : ""}" ${act("twho", p.id)}
+        title="${p.label}"><i class="av">${p.ini}</i><span class="lb">${p.label}</span></span>`).join("")}
+    </div>
+    <div class="row" style="gap:6px">
+      <span class="btnw solid" ${act("tsave")}>${icon("check")}<span class="hi">${isNew ? "Ajouter" : "Enregistrer"}</span></span>
+      <span class="btnw" ${act("tcancel")}><span class="hi">Annuler</span></span>
+      <span style="flex:1"></span>
+      ${isNew ? "" : `<span class="btnw" ${act("tdel", t.id)} title="Supprimer">${icon("trash-2")}</span>`}
+    </div></div>`;
+}
+
 function taskListHTML() {
-  const sorted = [...TASKS].sort((a, b) => a.day.localeCompare(b.day) || PRIO[b.prio] - PRIO[a.prio]);
-  const here = sorted.filter((t) => t.day === V.day);
-  const rest = sorted.filter((t) => t.day !== V.day && !t.done);
-  const line = (t) => `<div class="task ${t.done ? "done" : ""} ${V.task === t.id ? "on" : ""}
-      ${!t.done && t.day < TODAY ? "late" : ""}" ${act("task", t.id)}>
+  const open = TASKS.filter((t) => !t.done)
+    .sort((a, b) => a.day.localeCompare(b.day) || PRIO[b.prio] - PRIO[a.prio]);
+  const here = open.filter((t) => t.day === V.day);
+  const rest = open.filter((t) => t.day !== V.day);
+  const archive = TASKS.filter((t) => t.done)
+    .sort((a, b) => (b.doneAt || b.day).localeCompare(a.doneAt || a.day));
+  const line = (t) => (V.taskEdit === t.id ? taskForm(t, false) : `<div class="task ${t.done ? "done" : ""}
+      ${V.task === t.id ? "on" : ""} ${!t.done && t.day < TODAY ? "late" : ""}"
+      data-task="${t.id}" ${act("task", t.id)}>
     <span class="dot" style="border-radius:3px;${t.done ? "background:var(--ink);border-color:var(--ink)" : ""}"
-      ${act("tasktick", t.id)} title="Cocher"></span>
+      ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — la tâche part à l'archive"}"></span>
     <span class="col" style="flex:1;gap:2px;min-width:0">
       <span class="lo bar" style="width:70%"></span>
       <span class="hi" style="font-size:12.5px">${t.title}</span>
       <span class="lo bar" style="width:40%"></span>
-      <span class="hi" style="font-size:11px;color:var(--ink-3)">${t.who} · ${t.phase}${
+      <span class="hi" style="font-size:11px;color:var(--ink-3)">${whoLabel(t)} · ${t.phase}${
         t.code ? ` · ${t.code}` : ""}${!t.done && t.day < TODAY ? " · en retard" : ""}</span>
     </span>
-    <span class="hi pr" data-prio="${t.prio}">${t.prio}</span>
-    <span class="hi dte" ${act("calday", t.day)}>${fmtDay(t.day)}</span>
-  </div>`;
+    ${avatars(t)}
+    ${t.done ? "" : `<span class="hi pr" data-prio="${t.prio}">${t.prio}</span>`}
+    <span class="hi dte">${fmtDay(t.done ? t.doneAt || t.day : t.day)}</span>
+    <span class="hi tact" ${act("tedit", t.id)} title="Modifier">${icon("pencil")}</span>
+  </div>`);
   return `<div class="col" style="gap:7px">
     <div class="row" style="gap:6px">
       <span class="chip on"><span class="lo bar" style="width:40px"></span>
@@ -2227,8 +2321,9 @@ function taskListHTML() {
       <span class="chip"><span class="lo bar" style="width:40px"></span>
         <span class="hi">${lateCount()} en retard</span></span>
       <span style="flex:1"></span>
-      <span class="btnw" ${act("calday", TODAY)}>${icon("plus")}<span class="hi">Ajouter une tâche</span></span>
+      <span class="btnw" ${act("tnew")}>${icon("plus")}<span class="hi">Ajouter une tâche</span></span>
     </div>
+    ${V.taskEdit === "new" ? taskForm(V.taskDraft, true) : ""}
     ${here.length ? here.map(line).join("")
       : `<div class="tile"><span class="lo bar" style="width:60%"></span>
           <span class="hi" style="font-size:12px;color:var(--ink-2)">Rien ce jour-là.</span></div>`}
@@ -2237,6 +2332,12 @@ function taskListHTML() {
       <span class="hi" style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em">La suite</span>
       <span style="flex:1;border-top:1px solid var(--line-2)"></span></div>
     ${rest.map(line).join("")}
+    ${archive.length ? `<div class="row arch" ${act("tarch")} style="gap:8px;margin-top:2px;cursor:pointer">
+      <span class="lo bar" style="width:70px"></span>
+      <span class="hi" style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;
+        display:flex;align-items:center;gap:4px">${icon(V.taskArch ? "chevron-down" : "chevron-right")}Archive · ${archive.length}</span>
+      <span style="flex:1;border-top:1px solid var(--line-2)"></span></div>
+      ${V.taskArch ? archive.map(line).join("") : ""}` : ""}
   </div>`;
 }
 
@@ -2484,22 +2585,14 @@ function tabsHTML() {
      the contractor. Sharing is the end of the first row, on every screen
      that has a project open, because it is about the project and not about
      what is on screen. */
-  /* Reading the screen as the shared link shows it belongs next to the share
-     button, because that is the question it answers: what did the person on
-     the other end actually get. */
-  const guestChip = SCREENS[V.screen].index ? ""
-    : `<span class="btnw ${V.guest ? "solid" : ""}" ${act("guest")}
-         title="${V.guest ? "Revenir à la vue de l'atelier" : "Voir l'écran comme l'invité du lien partagé"}"
-         style="margin-left:auto;flex:0 0 auto">${icon(V.guest ? "eye" : "lock")}<span class="hi">${
-           V.guest ? "Vue invité" : `${teamPins()} note${teamPins() > 1 ? "s" : ""} d'atelier`}</span></span>`;
   const share = SCREENS[V.screen].index ? ""
     : `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
-         style="flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
+         style="margin-left:auto;flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
        data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
-    ${items}${guestChip}${share}
+    ${items}${share}
   </div>${row2}`;
 }
 
@@ -2906,7 +2999,7 @@ function nonresInspectorHTML(mode, step) {
   const rows = [["Architecture", `${s.code} · p.${s.page}`],
     ...engOverlayDisciplines(level).map((d) => {
       const e = engSheet(d, level);
-      return [ENG_LABELS[d], `${e.code} · p.${e.page}`];
+      return [ENG_LABELS[d], `${engCode(e)} · p.${e.page}`];
     })];
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${levelView(level)}</span></div>
     <div class="pb">
@@ -3080,9 +3173,11 @@ function loadPins() {
 }
 const savePins = () => localStorage.setItem(PIN_KEY, JSON.stringify(V.pins));
 const nextPinId = () => V.pins.reduce((m, p) => Math.max(m, p.id), 0) + 1;
-/* The one rule the whole feature turns on. */
-const pinsVisible = () => V.pins.filter((p) => !V.guest || p.scope === "partage");
-const teamPins = () => V.pins.filter((p) => p.scope === "equipe").length;
+/* Both publics live in one list: the studio's own reminders and the ones a
+   shared link carries. The scope is written on each pin, and the screen
+   shows them all — reading the project as the invited side sees it is the
+   share dialogue's business, not a mode the studio sits inside. */
+const pinsVisible = () => V.pins;
 const pinsOnSheet = () => pinsVisible().filter((p) => p.surface === "plan" && p.level === paneLevel());
 const pinsOnModel = () => pinsVisible().filter((p) => p.surface === "model");
 const SHEET_NAME = { plan: "plan d'unités", arp: "arpenteur", pay: "paysage" };
@@ -3112,7 +3207,7 @@ function pinMarkHTML() {
 
 function marginHTML() {
   const list = pinsVisible();
-  const team = V.pinScope === "equipe" && !V.guest;
+  const team = V.pinScope === "equipe";
   const card = (p) => `<div class="ncard ${p.scope === "equipe" ? "team" : ""} ${p.id === V.selPin ? "on" : ""}"
       ${act("note", p.id)}>
     <span class="tie"></span>
@@ -3137,12 +3232,12 @@ function marginHTML() {
       <span class="hi">Dans la marge</span><span style="flex:1"></span>
       <span class="hi" style="font-size:11px;color:var(--ink-3)">${list.length}</span></div>
     <div class="pb nmargin">
-      ${V.guest ? "" : `<div class="row nscope">
+      <div class="row nscope">
         <span class="chip ${V.pinScope === "equipe" ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">Atelier</span></span>
         <span class="chip ${V.pinScope === "partage" ? "on" : ""}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
         <span style="flex:1"></span>
         <span class="chip ${V.pinMode ? "on" : ""}" ${act("pinmode")} title="Cliquez ensuite un dessin">${icon("map-pin")}<span class="lb">Épingler</span></span>
-      </div>`}
+      </div>
       ${composer}
       ${list.length ? list.map(card).join("")
         : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px">Aucune note sur ce projet.</div>`}
@@ -3208,7 +3303,7 @@ function wireModelPins() {
   }, true);
   document.addEventListener("pointerup", (e) => {
     const start = down; down = null;
-    if (!start || !V.pinMode || V.guest) return;
+    if (!start || !V.pinMode) return;
     if (Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 4) return;
     const hit = window.fitteModel?.pick?.(e.clientX, e.clientY);
     if (!hit) return;
@@ -3474,6 +3569,61 @@ function placePlanPills() {
   placePill(vp, "sel", plan.querySelector(".umark polygon.on"));
   placePill(vp, "hover", hover);
 }
+/* Moving a task is dragging it onto a day in the calendar beside it. The
+   row is carried under the pointer and the day it is over lights up, so the
+   answer to "which day is that" is given before the drop, not after it.
+   Typing a date in the editor does the same thing; this is the fast way. */
+document.addEventListener("pointerdown", (e) => {
+  const row = e.target.closest?.("[data-task]");
+  if (!row || e.target.closest(".dot") || e.target.closest(".tact")) return;
+  const id = row.dataset.task, task = TASKS.find((t) => t.id === id);
+  if (!task) return;
+  const start = [e.clientX, e.clientY];
+  let moved = false, over = null;
+  const dayUnder = (ev) => {
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    const cell = el && el.closest('[data-act="calday"]');
+    return cell && cell.dataset.value ? cell : null;
+  };
+  const move = (ev) => {
+    if (!moved && Math.hypot(ev.clientX - start[0], ev.clientY - start[1]) < 4) return;
+    moved = true;
+    row.classList.add("carry");
+    document.body.classList.add("tdrag");
+    row.style.transform = `translate(${ev.clientX - start[0]}px,${ev.clientY - start[1]}px)`;
+    const cell = dayUnder(ev);
+    if (cell === over) return;
+    over?.classList.remove("drop");
+    over = cell;
+    over?.classList.add("drop");
+  };
+  const up = (ev) => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    document.body.classList.remove("tdrag");
+    row.classList.remove("carry");
+    row.style.transform = "";
+    over?.classList.remove("drop");
+    if (!moved) return;
+    const cell = dayUnder(ev);
+    if (!cell || cell.dataset.value === task.day) return;
+    task.day = cell.dataset.value;
+    V.day = task.day;
+    say(`${task.title} — déplacée au ${fmtDay(task.day)}.`);
+    render();
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+});
+
+/* Enter saves the task being written, Escape drops it: a one-line form
+   should never need the mouse. */
+document.addEventListener("keydown", (e) => {
+  if (!V.taskEdit || !e.target.closest?.("[data-tedit]")) return;
+  if (e.key === "Enter") { e.preventDefault(); onAct("tsave"); }
+  else if (e.key === "Escape") { e.preventDefault(); V.taskEdit = null; render(); }
+});
+
 
 /* The document card hangs off the thumbnail it belongs to: written into
    the markup without a position, then measured to that tile's height.
@@ -3690,7 +3840,7 @@ function wireViewport() {
      the sheet itself, like the unit outlines, so the pin keeps its place
      when the drawing is zoomed, panned, or re-exported larger. */
   el.addEventListener("click", (e) => {
-    if (!V.pinMode || V.guest) return;
+    if (!V.pinMode) return;
     const plan = el.querySelector(".plan");
     if (!plan) return;
     const r = plan.getBoundingClientRect();
@@ -4499,8 +4649,65 @@ function onClick(e) {
       break;
     }
     case "task": { V.task = V.task === value ? null : value; const t = TASKS.find((x) => x.id === value);
-      if (t) V.day = t.day; break; }
-    case "tasktick": { const t = TASKS.find((x) => x.id === value); if (t) t.done = !t.done; break; }
+      if (t && !t.done) V.day = t.day; break; }
+    /* Ticking archives, it does not delete: the task keeps the day it was
+       closed on and can be reopened from the archive below the list. */
+    case "tasktick": {
+      const t = TASKS.find((x) => x.id === value);
+      if (!t) break;
+      t.done = !t.done;
+      if (t.done) { t.doneAt = TODAY; say(`Archivée: ${t.title}`); }
+      else { delete t.doneAt; V.day = t.day; say(`Rouverte: ${t.title}`); }
+      if (V.taskEdit === t.id) V.taskEdit = null;
+      break;
+    }
+    /* The editor -------------------------------------------------------
+       One form serves the new task and the existing one. "new" writes into
+       V.taskDraft, an id writes into that task, and in both cases the open
+       inputs are read back first so a half-typed title is never lost to a
+       chip click. */
+    case "tnew":
+      readTaskForm();
+      V.taskDraft = { title: "", day: V.day, prio: "moyenne", phase: "Permis", who: [] };
+      V.taskEdit = "new";
+      break;
+    case "tedit": readTaskForm(); V.taskEdit = V.taskEdit === value ? null : value; break;
+    case "tcancel": V.taskEdit = null; break;
+    case "tprio": { const t = editingTask(); if (t) { readTaskForm(); t.prio = value; } break; }
+    case "tphase": { const t = editingTask(); if (t) { readTaskForm(); t.phase = value; } break; }
+    /* A task can sit on two seats at once, so the chip toggles rather than
+       replaces: handing a drawing to the atelier does not take it off the
+       project manager's list. */
+    case "twho": {
+      const t = editingTask();
+      if (!t) break;
+      readTaskForm();
+      t.who = t.who.includes(value) ? t.who.filter((x) => x !== value) : [...t.who, value];
+      break;
+    }
+    case "tsave": {
+      readTaskForm();
+      const t = editingTask();
+      if (!t) break;
+      if (!t.title.trim()) { say("Il faut un titre."); break; }
+      if (V.taskEdit === "new") {
+        TASKS.push({ ...t, id: `t${++taskSeq}`, title: t.title.trim(), done: false });
+        say(`Ajoutée: ${t.title.trim()}`);
+      } else say(`Modifiée: ${t.title.trim()}`);
+      V.day = t.day;
+      V.taskEdit = null;
+      break;
+    }
+    case "tdel": {
+      const i = TASKS.findIndex((x) => x.id === value);
+      if (i < 0) break;
+      say(`Supprimée: ${TASKS[i].title}`);
+      TASKS.splice(i, 1);
+      V.taskEdit = null;
+      V.task = null;
+      break;
+    }
+    case "tarch": V.taskArch = !V.taskArch; break;
     /* The source link is a real link: the browser follows it, and the screen
        only notes what was opened. */
     case "source": say(`${value} — texte officiel ouvert dans un onglet. Lecture seule.`); return render();
@@ -4518,13 +4725,6 @@ function onClick(e) {
       V.pins = V.pins.filter((p) => p.id !== Number(value));
       V.selPin = null;
       savePins();
-      break;
-    /* Reading the screen as the shared link shows it. The studio's notes are
-       not greyed in this view, they are not rendered — and their count goes
-       with them, because a count of hidden things is itself a leak. */
-    case "guest":
-      V.guest = !V.guest;
-      if (V.guest) { V.pinScope = "partage"; V.pinMode = false; V.pending = null; }
       break;
     /* The pile ---------------------------------------------------------
        Picking a thumbnail opens its document card; the badge adds the
