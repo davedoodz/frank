@@ -444,7 +444,8 @@ const topBar = () => {
       style="border-color:#444;color:#bbb;background:transparent">N</span></button>
   </span>`;
   return `<div class="top">
-    <span class="crumb" data-tab="ech">${icon("folder")}Tous les projets</span>
+    <span class="crumb" data-tab="ech"
+      title="Niveau atelier — l'échéancier, tous les projets">${icon("folder")}Tous les projets</span>
     ${studio ? "" : `<span class="vdiv"></span><span class="proj">Le Baldwin III</span>
       <button class="tab ${S.tab === "coord" ? "on" : ""}" data-tab="coord">${icon("layers")}Coordination</button>
       <button class="tab ${S.tab === "jrn" ? "on" : ""}" data-tab="jrn">${icon("archive")}Historique</button>`}

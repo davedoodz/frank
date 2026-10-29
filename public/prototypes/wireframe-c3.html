@@ -181,6 +181,11 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs .crumb.hi{display:inline-flex}
 .tabs .crumb .lu{width:13px;height:13px;flex:0 0 13px}
 .tabs .crumb:hover{color:var(--ink)}
+.tabs .crumb.ech{padding:0 8px;height:24px;border-radius:7px;margin-left:2px}
+.tabs .crumb.ech:hover{background:var(--fill-2)}
+.tabs .crumb.ech .late{display:inline-flex;align-items:center;justify-content:center;min-width:15px;height:15px;
+  padding:0 4px;border-radius:8px;background:var(--rouge-soft,#f7e8e4);color:var(--rouge,#b4442f);
+  font-size:10px;font-weight:600}
 .tabs .crumb.on{cursor:default}
 .tabs .crumb.on{color:var(--ink);font-weight:500}
 .tabs .grp{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
@@ -492,6 +497,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    two rows never argue over which one is the filter. */
 .frame[data-chrome="black"] .tabs button[aria-current="true"]{background:#fff;color:#141416;font-weight:600}
 .frame[data-chrome="black"] .tabs .crumb{color:rgba(255,255,255,.58)}
+.frame[data-chrome="black"] .tabs .crumb.ech:hover{background:rgba(255,255,255,.1);color:#fff}
 .frame[data-chrome="black"] .tabs .crumb.on{color:#fff;font-size:13px}
 .frame[data-chrome="black"] .tabs .div,
 .frame[data-chrome="black"] .tabs .sep{background:rgba(255,255,255,.16)}
@@ -971,7 +977,7 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
    a hidden sprite and referenced by id afterwards. */
 function sprite() {
   const names = ["home", "folder", "image", "layout-grid", "layers", "table", "hash", "git-compare", "calendar-check",
-    "file", "box", "pen-line", "chevron-right", "chevron-left", "chevron-down", "chevron-up", "search", "plus", "minus", "maximize", "minimize",
+    "file", "box", "pen-line", "chevron-right", "chevron-left", "chevron-down", "chevron-up", "search", "plus", "minus",
     "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "x", "link",
     /* the rail's alternatives, one shortlist per screen; see NAV_ICONS —
        and the glyph of each quantity table; see QTABS */
@@ -2178,7 +2184,11 @@ function tabsHTML() {
     <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`;
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
-  const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
+  const late = lateCount();
+  const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>
+    <span class="crumb ech hi" data-screen="Échéancier"
+      title="Échéancier de l'atelier — ce qui est dû, tous les projets">${icon("calendar-check")}Échéancier${late
+        ? `<span class="late">${late}</span>` : ""}</span>`;
   if (studio) {
     /* The studio strip: the projects and the week are siblings here, and
        the project's own tabs are not in it at all. */
@@ -2368,25 +2378,14 @@ function contentHTML() {
     "Unités": () => {
       const unit = (selRow("Unités") || ["—"])[0];
       /* The zoom stands against the outer edge of each pane: flat, opaque,
-         always there. Vertical, because the course it runs is vertical, and
-         the two framings cap it — corners pushed out at the top, where the
-         slider runs toward the whole drawing, corners pulled in at the
-         bottom, where it runs toward the close view. */
-      const wide = side => side === "plan"
-        ? `${act("fitsheet")} title="Voir toute la feuille"`
-        : `${act("mwide")} title="Voir tout le bâtiment"`;
-      const close = side => side === "plan"
-        ? `${act("fitunit")} title="Cadrer l'unité sélectionnée"`
-        : `${act("mclose")} title="Se rapprocher du bâtiment"`;
+         always there. Vertical, because the course it runs is vertical. */
       const zcol = (side) => `<div class="zcol" data-zcol="${side}">
-        <span class="zb" ${wide(side)}>${icon("maximize")}</span>
         <span class="zb" ${act("zstep", side + ":+")} title="Agrandir">${icon("plus")}</span>
         <input class="zslider" type="range" ${side === "plan"
           ? `min="${ZMIN}" max="${ZMAX}" step="1" value="${V.zoom}" data-zoom aria-label="Zoom du plan"`
           : `min="0" max="100" step="1" value="${V.mzoom}" data-mzoom aria-label="Zoom de la maquette"`}>
         <span class="zb" ${act("zstep", side + ":-")} title="Reculer">${icon("minus")}</span>
         <span class="zread hi" ${side === "plan" ? "data-zread" : "data-mread"}>${side === "plan" ? V.zoom : V.mzoom}%</span>
-        <span class="zb" ${close(side)}>${icon("minimize")}</span>
       </div>`;
       /* The corner view: the drawing whole, small. On the plan it is the
          sheet as a picture, with the rectangle of what is on screen, dragged
@@ -2943,11 +2942,8 @@ function wireModelPins() {
    drawing exactly where it was left. Nothing here touches the file. */
 
 /* 100 % is the sheet filling the pane; below it the paper keeps going, which
-   is what lets the eye step back from a drawing that runs to its own edges.
-   The two camera stops are the wide shot and the close one, the numbers the
-   viewer settles at when either framing is asked for. */
+   is what lets the eye step back from a drawing that runs to its own edges. */
 const ZMIN = 45, ZMAX = 600;
-const MZOOM_WIDE = 13, MZOOM_CLOSE = 55;
 const vpEl = () => document.querySelector("[data-vp]");
 
 /* PDF detail is automatic; the image remains underneath during rendering.
@@ -3868,28 +3864,6 @@ function onClick(e) {
     /* The four consultant disciplines are not part of the fidelity panel:
        they toggle straight on V, the way picking a row does. */
     case "englayer": V.lay[value].on = !V.lay[value].on; break;
-    /* The unit the list is on, filling the pane: the move the plan is
-       opened for, without hunting for it with the wheel. */
-    case "fitunit": fitUnit(); break;
-    /* The way back out: the sheet at its own size, centred, which is the
-       state the pane opens in. No render — only the transform moves. */
-    case "fitsheet":
-      /* The sheet filling the pane, not the floor of the slider: below 100 %
-         there is only paper, and nothing more of the drawing to see. */
-      stopGlide();
-      V.zoom = 100; V.pan = { x: 0, y: 0 };
-      paintSheet();
-      return;
-    /* The camera has the same pair: the whole building in the pane, or close
-       enough to read a façade. Both write the one number the slider shows. */
-    case "mwide": case "mclose": {
-      V.mzoom = el.dataset.act === "mwide" ? MZOOM_WIDE : MZOOM_CLOSE;
-      const cam = document.querySelector("[data-mzoom]");
-      if (cam) cam.value = String(V.mzoom);
-      paintModelRead();
-      window.fitteModel?.writeZoom(V.mzoom);
-      return;
-    }
     case "mtool":
       V.mtool = value;
       document.querySelectorAll('[data-act="mtool"]').forEach((b) => {
