@@ -132,8 +132,8 @@ h2.part + p{color:var(--ink-2);font-size:12.5px;max-width:92ch;margin-bottom:4px
   padding:6px 2px;font-size:11.5px;font-weight:600;display:flex;gap:8px;align-items:baseline}
 .h-sticky span{color:var(--ink-3);font-weight:400;font-size:11px}
 .gutter{display:grid;grid-template-columns:24px 1fr;gap:9px;align-items:stretch}
-.gutter .rub{border-left:2px solid var(--ink);display:flex;justify-content:center}
-.gutter .rub span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;letter-spacing:.08em;
+.gutter .rub{border-left:2px solid var(--ink);display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:4px}
+.gutter .rub > span:last-child{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--ink-2);padding:2px 0}
 .spine{border-left:3px solid var(--sp)}
 .srctag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);
@@ -175,7 +175,16 @@ h2.part + p{color:var(--ink-2);font-size:12.5px;max-width:92ch;margin-bottom:4px
 .idx .it small{font-size:10.5px;opacity:.75}
 .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;align-items:start}
 .cols3 .ttl{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);
-  padding-bottom:6px;border-bottom:1px solid var(--ink);margin-bottom:7px}
+  padding-bottom:6px;border-bottom:1px solid var(--ink);margin-bottom:7px;
+  display:flex;align-items:center;gap:6px}
+/* A section and its rows. Every heading is a hit target, and the caret is
+   the only thing that moves when it is shut. */
+.sec{display:flex;flex-direction:column;gap:8px}
+.secrows{display:flex;flex-direction:column;gap:8px;min-width:0}
+.sec > *:first-child, .ttl, .rub, .acc .hd, .who-h{cursor:pointer;user-select:none}
+.caret{display:inline-flex;align-items:center;color:var(--ink-3)}
+.caret svg{width:13px;height:13px}
+.caret.shut svg{transform:rotate(-90deg)}
 .facets{display:flex;flex-direction:column;gap:7px;padding-bottom:9px;border-bottom:1px solid var(--line-2)}
 .facets .ln{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .facets .lb{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);width:62px}
@@ -457,131 +466,182 @@ function railHTML(opt) {
 const countOf = (rows) => `${rows.length} article${rows.length > 1 ? "s" : ""}`;
 const darkCount = (rows) => rows.filter((a) => a.clarity === "obscur").length;
 const dotsOf = (rows) => `<span class="dots">${rows.map((a) => `<i style="background:${CL_VAR[a.clarity]}"></i>`).join("")}</span>`;
-const paneHead = (extra = "") => `<div class="ph">${ic("hash")}<span class="ti">Articles suivis</span>
-  <span class="sp"></span>${extra}<span class="btn solid">${ic("plus")}Ajouter</span></div>`;
+
+/* --------------------------------------------------------------- folding
+   Any section of any option can be shut. A shut section keeps its header
+   and its count: hiding twelve cards must never hide the fact that eight
+   of them are still unresolved. The keys are collected while the body is
+   built, so the pane header knows whether « tout replier » or « tout
+   déplier » is the useful word. */
+const shut = (o, key) => !!STATE[o].shut[key];
+const fold = (key) => `data-act="fold" data-k="${key}"`;
+const caret = (o, key) => `<span class="caret ${shut(o, key) ? "shut" : ""}">${ic("chev")}</span>`;
+function sec(o, key, head, rows) {
+  STATE[o].keys.push(key);
+  return `<div class="sec">${head}${shut(o, key) ? "" : `<div class="secrows">${rows()}</div>`}</div>`;
+}
+/* A flat option has no section heading to click, so its one fold lives in
+   the pane header: the filters stay, the cards go. */
+function flat(o, key, rows) {
+  STATE[o].keys.push(key);
+  return shut(o, key)
+    ? `<div class="empty">${countOf(rows)} repliés — « tout déplier » pour les revoir.</div>`
+    : rows.map((a) => a.html).join("");
+}
+const paneHead = (o, extra = "") => {
+  const keys = STATE[o].keys;
+  const all = keys.length && keys.every((k) => shut(o, k));
+  return `<div class="ph">${ic("hash")}<span class="ti">Articles suivis</span>
+    <span class="sp"></span>${extra}
+    <span class="btn" data-act="foldall">${ic("chev")}${all ? "Tout déplier" : "Tout replier"}</span>
+    <span class="btn solid">${ic("plus")}Ajouter</span></div>`;
+};
 
 /* ------------------------------------------------------------ the options
    Every option renders the same twelve articles. Only the way the source is
    said changes — which is the only variable under test. */
 const OPTIONS = [
-  { id: "o1", part: "A", title: "Ce qui existe", head: paneHead(),
-    note: "Le titre pèse moins que les cartes qu'il annonce: en gris, en 11 px, sans fond, il disparaît entre deux rangées de 100 px. C'est le défaut à corriger.",
-    body: (o) => grouped().map(([k, rows]) => `<div class="h-flat"><span style="color:var(--ink)">${SRC[k].label}</span>
-      <span>${countOf(rows)}</span></div>${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+  { id: "o1", part: "A", title: "Ce qui existe",
+    note: "Le titre pèse moins que les cartes qu'il annonce: en gris, en 11 px, sans fond, il disparaît entre deux rangées de 100 px. C'est le défaut à corriger. Replié, il ne reste qu'une ligne grise — c'est aussi la preuve que la ligne est trop faible pour porter un groupe.",
+    body: (o) => grouped().map(([k, rows]) => sec(o, k,
+      `<div class="h-flat" ${fold(k)}>${caret(o, k)}<span style="color:var(--ink)">${SRC[k].label}</span>
+        <span>${countOf(rows)}</span></div>`,
+      () => rows.map((a) => rowHTML(o, a)).join(""))).join("") },
 
-  { id: "o2", part: "A", title: "Bandeau plein", head: paneHead(),
-    note: "Un aplat gris et du gras: le titre devient un objet et non une légende. Le plus petit changement qui règle le problème, et le seul qui ne coûte rien au reste.",
-    body: (o) => grouped().map(([k, rows]) => `<div class="h-band">${SRC[k].label}<span class="ct">${countOf(rows)}</span></div>
-      ${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+  { id: "o2", part: "A", title: "Bandeau plein",
+    note: "Un aplat gris et du gras: le titre devient un objet et non une légende. Le plus petit changement qui règle le problème, et le seul qui ne coûte rien au reste. Replié, le bandeau tient tout seul comme une rangée de table des matières.",
+    body: (o) => grouped().map(([k, rows]) => sec(o, k,
+      `<div class="h-band" ${fold(k)}>${caret(o, k)}${SRC[k].label}<span class="ct">${countOf(rows)} · ${darkCount(rows)} obscurs</span></div>`,
+      () => rows.map((a) => rowHTML(o, a)).join(""))).join("") },
 
-  { id: "o3", part: "A", title: "Filet traversant", head: paneHead(),
+  { id: "o3", part: "A", title: "Filet traversant",
     note: "Le filet coupe la colonne en deux: on voit la frontière avant de lire le mot. Moins lourd que l'aplat, un peu plus bavard en traits.",
-    body: (o) => grouped().map(([k, rows]) => `<div class="h-rule"><b>${SRC[k].label}</b><i></i><span>${countOf(rows)}</span></div>
-      ${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+    body: (o) => grouped().map(([k, rows]) => sec(o, k,
+      `<div class="h-rule" ${fold(k)}>${caret(o, k)}<b>${SRC[k].label}</b><i></i><span>${countOf(rows)}</span></div>`,
+      () => rows.map((a) => rowHTML(o, a)).join(""))).join("") },
 
-  { id: "o4", part: "A", title: "Rubrique en marge", head: paneHead(),
-    note: "La source tient le bloc par le côté et ne mange aucune hauteur: on sait où on est même au milieu d'un groupe. Coûte 24 px de largeur, et le texte vertical se lit mal en diagonale.",
-    body: (o) => grouped().map(([k, rows]) => `<div class="gutter"><div class="rub"><span>${SRC[k].label}</span></div>
-      <div style="display:flex;flex-direction:column;gap:8px">${rows.map((a) => rowHTML(o, a)).join("")}</div></div>`).join("") },
+  { id: "o4", part: "A", title: "Rubrique en marge",
+    note: "La source tient le bloc par le côté et ne mange aucune hauteur: on sait où on est même au milieu d'un groupe. Repliée, la rubrique garde sa barre et son compte, donc la marge reste lisible comme un sommaire. Coûte 24 px de largeur, et le texte vertical se lit mal en diagonale.",
+    body: (o) => grouped().map(([k, rows]) => { STATE[o].keys.push(k);
+      return `<div class="gutter"><div class="rub" ${fold(k)}>${caret(o, k)}<span>${SRC[k].label}</span></div>
+        <div class="secrows">${shut(o, k) ? `<div class="empty">${countOf(rows)} repliés</div>`
+          : rows.map((a) => rowHTML(o, a)).join("")}</div></div>`; }).join("") },
 
-  { id: "o9", part: "A", title: "En-tête collant", head: paneHead(),
-    note: "Le même bandeau, mais il reste en haut de la liste tant que le groupe défile. Le vrai défaut n'est pas que le titre soit discret: c'est qu'il sorte de l'écran au bout de deux cartes. Défilez pour le voir tenir.",
-    body: (o) => grouped().map(([k, rows]) => `<div class="h-sticky">${SRC[k].label}<span>${countOf(rows)} · ${darkCount(rows)} obscurs</span></div>
-      ${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+  { id: "o9", part: "A", title: "En-tête collant",
+    note: "Le même bandeau, mais il reste en haut de la liste tant que le groupe défile. Le vrai défaut n'est pas que le titre soit discret: c'est qu'il sorte de l'écran au bout de deux cartes. Défilez pour le voir tenir; repliez pour sauter au groupe suivant.",
+    body: (o) => grouped().map(([k, rows]) => sec(o, k,
+      `<div class="h-sticky" ${fold(k)}>${caret(o, k)}${SRC[k].label}<span>${countOf(rows)} · ${darkCount(rows)} obscurs</span></div>`,
+      () => rows.map((a) => rowHTML(o, a)).join(""))).join("") },
 
-  { id: "o11", part: "A", title: "Ordinal typographique", head: paneHead(),
+  { id: "o11", part: "A", title: "Ordinal typographique",
     note: "Un chiffre de 26 px fait le contraste sans aplat ni filet: on compte trois blocs avant de lire trois mots. Gratuit en encre, mais le chiffre ne dit rien par lui-même — il faut lire le titre à côté.",
-    body: (o) => grouped().map(([k, rows], i) => `<div class="h-num"><i>${i + 1}</i><b>${SRC[k].label}</b>
-      <span>${countOf(rows)} · ${darkCount(rows)} obscurs</span></div>${rows.map((a) => rowHTML(o, a)).join("")}`).join("") },
+    body: (o) => grouped().map(([k, rows], i) => sec(o, k,
+      `<div class="h-num" ${fold(k)}><i>${i + 1}</i><b>${SRC[k].label}</b>
+        <span>${countOf(rows)} · ${darkCount(rows)} obscurs</span>${caret(o, k)}</div>`,
+      () => rows.map((a) => rowHTML(o, a)).join(""))).join("") },
 
-  { id: "o12", part: "A", title: "Filet de couleur sur la carte", head: paneHead(),
+  { id: "o12", part: "A", title: "Filet de couleur sur la carte",
     note: "La source devient une propriété de la carte, pas de sa position: trois traits de 3 px, un par corps de règles. Tient même si la liste est un jour triée par clarté ou par relance — c'est ce qu'aucune section ne sait faire.",
-    body: (o) => grouped().map(([k, rows]) => `<div class="h-flat"><span style="color:var(--ink)">${SRC[k].label}</span><span>${countOf(rows)}</span></div>
-      ${rows.map((a) => rowHTML(o, a, { spine: true })).join("")}`).join("") },
+    body: (o) => grouped().map(([k, rows]) => sec(o, k,
+      `<div class="h-flat" ${fold(k)}>${caret(o, k)}<span style="color:${SRC[k].colour}">${SRC[k].label}</span>
+        <span>${countOf(rows)}</span></div>`,
+      () => rows.map((a) => rowHTML(o, a, { spine: true })).join(""))).join("") },
 
-  { id: "o13", part: "A", title: "Table dense, figures repliées", head: paneHead(`<span class="btn" data-act="dense">Figures</span>`),
-    note: "Les douze articles tiennent dans un écran: la section redevient lisible parce que les rangées ne font plus 100 px. La figure revient d'un clic sur « Figures » — elle est ce qui rend la liste longue, pas le texte.",
-    body: (o) => grouped().map(([k, rows]) => `<div class="h-band">${SRC[k].label}<span class="ct">${countOf(rows)}</span></div>
-      ${rows.map((a) => rowHTML(o, a, { dense: !STATE[o].dense })).join("")}`).join("") },
+  { id: "o13", part: "A", title: "Table dense, figures repliées",
+    head: (o) => paneHead(o, `<span class="btn" data-act="dense">Figures</span>`),
+    note: "Les douze articles tiennent dans un écran: la section redevient lisible parce que les rangées ne font plus 100 px. La figure revient d'un clic sur « Figures » — elle est ce qui rend la liste longue, pas le texte. Avec le repli, deux niveaux de compression se cumulent.",
+    body: (o) => grouped().map(([k, rows]) => sec(o, k,
+      `<div class="h-band" ${fold(k)}>${caret(o, k)}${SRC[k].label}<span class="ct">${countOf(rows)}</span></div>`,
+      () => rows.map((a) => rowHTML(o, a, { dense: !STATE[o].dense })).join(""))).join("") },
 
   { id: "o5", part: "B", title: "Puces de filtre, « Tous » par défaut",
-    head: paneHead(),
-    note: "« Tous » reste l'état normal, donc rien n'est caché par défaut. Mais avec « Tous » actif la liste redevient plate: il faut garder une des options A à l'intérieur.",
+    note: "« Tous » reste l'état normal, donc rien n'est caché par défaut. Mais avec « Tous » actif la liste redevient plate: il n'y a aucun titre de section à replier, seulement la liste entière depuis l'en-tête. C'est exactement ce qui manque à cette option.",
     body: (o) => { const f = STATE[o].filter;
       const rows = f ? ARTICLES.filter((a) => a.src === f) : ARTICLES;
       return `<div class="strip" style="padding-bottom:9px;border-bottom:1px solid var(--line-2)">
         <span class="chip ${!f ? "on" : ""}" data-act="filter" data-k="">Tous <span class="ct">${ARTICLES.length}</span></span>
         ${ORDER.map((k) => `<span class="chip ${f === k ? "on" : ""}" data-act="filter" data-k="${k}">${SRC[k].label}
           <span class="ct">${ARTICLES.filter((a) => a.src === k).length}</span></span>`).join("")}</div>
-        ${rows.map((a) => rowHTML(o, a, { tag: !f })).join("")}`; } },
+        ${flat(o, "liste", rows.map((a) => ({ html: rowHTML(o, a, { tag: !f }) })))}`; } },
 
-  { id: "o6", part: "B", title: "Étiquette de source sur chaque rangée", head: paneHead(),
-    note: "Aucune section: la source voyage avec l'article, donc le tri peut devenir « par clarté » ou « par relance » sans rien perdre. En échange, douze étiquettes répétées et une colonne de plus à l'œil.",
-    body: (o) => ARTICLES.map((a) => rowHTML(o, a, { tag: true })).join("") },
+  { id: "o6", part: "B", title: "Étiquette de source sur chaque rangée",
+    note: "Aucune section: la source voyage avec l'article, donc le tri peut devenir « par clarté » ou « par relance » sans rien perdre. Le prix se voit au repli: il n'y a rien à replier par corps de règles, seulement la liste entière.",
+    body: (o) => flat(o, "liste", ARTICLES.map((a) => ({ html: rowHTML(o, a, { tag: true }) }))) },
 
-  { id: "o7", part: "B", title: "Trois cartes au-dessus, une liste en dessous", head: paneHead(),
-    note: "La carte dit en une ligne ce qu'une section ne dit jamais: combien d'articles, et de quelle couleur ils sont. On choisit un corps de règles en sachant déjà lequel va faire mal.",
+  { id: "o7", part: "B", title: "Trois cartes au-dessus, une liste en dessous",
+    note: "La carte dit en une ligne ce qu'une section ne dit jamais: combien d'articles, et de quelle couleur ils sont. Repliée, la liste disparaît et les trois cartes restent: c'est un sommaire du dossier en trois lignes.",
     body: (o) => { const f = STATE[o].filter;
       const rows = f ? ARTICLES.filter((a) => a.src === f) : ARTICLES;
       return `<div class="cards">${ORDER.map((k) => { const r = ARTICLES.filter((a) => a.src === k);
         return `<div class="card ${f === k ? "on" : ""}" data-act="filter" data-k="${f === k ? "" : k}">
           <b>${SRC[k].label}</b><span class="mt">${countOf(r)} · ${darkCount(r)} obscurs</span>${dotsOf(r)}</div>`; }).join("")}</div>
-        ${rows.map((a) => rowHTML(o, a, { tag: !f })).join("")}`; } },
+        ${flat(o, "liste", rows.map((a) => ({ html: rowHTML(o, a, { tag: !f }) })))}`; } },
 
-  { id: "o8", part: "B", title: "Trois blocs repliables", head: paneHead(),
-    note: "Les trois restent visibles en permanence, repliés: on ne perd jamais de vue qu'il y a trois sources, et on travaille dans une seule. Un clic de plus pour tout lire, et un état de plus à retenir.",
+  { id: "o8", part: "B", title: "Trois blocs repliables",
+    note: "Les trois restent visibles en permanence, repliés: on ne perd jamais de vue qu'il y a trois sources, et on travaille dans une seule. C'est l'option où le repli est la forme même, pas une commande en plus.",
     body: (o) => ORDER.map((k) => { const rows = ARTICLES.filter((a) => a.src === k);
-      const open = STATE[o].acc[k];
-      return `<div class="acc ${open ? "open" : ""}"><div class="hd" data-act="acc" data-k="${k}">${ic("chev")}${SRC[k].label}
+      STATE[o].keys.push(k);
+      const open = !shut(o, k);
+      return `<div class="acc ${open ? "open" : ""}"><div class="hd" ${fold(k)}>${caret(o, k)}${SRC[k].label}
         <span class="ct">${countOf(rows)} · ${darkCount(rows)} obscurs</span></div>
         ${open ? `<div class="bd">${rows.map((a) => rowHTML(o, a)).join("")}</div>` : ""}</div>`; }).join("") },
 
   { id: "o10", part: "B", title: "Index à gauche, articles à droite",
-    head: paneHead(),
-    note: "La source devient une colonne permanente, comme les niveaux sur l'écran des plans: on change de corps de règles sans quitter la liste, et l'index dit en continu ce qu'il reste ailleurs. Coûte 150 px de largeur à la lecture.",
+    note: "La source devient une colonne permanente, comme les niveaux sur l'écran des plans: on change de corps de règles sans quitter la liste, et l'index dit en continu ce qu'il reste ailleurs. Replié, l'index reste seul — une table des matières de trois lignes.",
     body: (o) => { const f = STATE[o].filter || "qc";
       const rows = ARTICLES.filter((a) => a.src === f);
       return `<div class="twocol"><div class="idx">
         ${ORDER.map((k) => { const r = ARTICLES.filter((a) => a.src === k);
           return `<span class="it ${f === k ? "on" : ""}" data-act="filter" data-k="${k}">${SRC[k].label}
             <small>${countOf(r)} · ${darkCount(r)} obscurs</small></span>`; }).join("")}</div>
-        <div style="display:flex;flex-direction:column;gap:8px;min-width:0">${rows.map((a) => rowHTML(o, a)).join("")}</div></div>`; } },
+        <div class="secrows" style="min-width:0">${sec(o, f,
+          `<div class="h-flat" ${fold(f)}>${caret(o, f)}<span style="color:var(--ink)">${SRC[f].label}</span>
+            <span>${countOf(rows)}</span></div>`,
+          () => rows.map((a) => rowHTML(o, a)).join(""))}</div></div>`; } },
 
   { id: "o14", part: "B", title: "Onglets dans l'en-tête du volet",
-    head: () => "",
     note: "La source rejoint les onglets, là où l'écran met déjà ses changements de vue. Lu comme un changement d'écran plutôt que comme un filtre — ce qui est exact quand on ne travaille qu'un seul corps de règles de la journée.",
     body: (o) => { const f = STATE[o].filter;
       const rows = f ? ARTICLES.filter((a) => a.src === f) : ARTICLES;
+      const list = flat(o, "liste", rows.map((a) => ({ html: rowHTML(o, a, { tag: !f }) })));
+      const all = STATE[o].keys.every((k) => shut(o, k));
       return `<div class="ph">${ic("hash")}<span class="ti">Articles suivis</span>
         <span class="seg" style="margin-left:10px"><button class="${!f ? "on" : ""}" data-act="filter" data-k="">Tous</button>
         ${ORDER.map((k) => `<button class="${f === k ? "on" : ""}" data-act="filter" data-k="${k}">${SRC[k].short}</button>`).join("")}</span>
-        <span class="sp"></span><span class="btn solid">${ic("plus")}Ajouter</span></div>
-        <div class="pb">${rows.map((a) => rowHTML(o, a, { tag: !f })).join("")}</div>`; }, raw: true },
+        <span class="sp"></span><span class="btn" data-act="foldall">${ic("chev")}${all ? "Tout déplier" : "Tout replier"}</span>
+        <span class="btn solid">${ic("plus")}Ajouter</span></div>
+        <div class="pb">${list}</div>`; }, raw: true },
 
-  { id: "o15", part: "C", title: "Grouper par clarté, la source en étiquette", head: paneHead(),
-    note: "La question change: non plus « d'où vient la règle » mais « laquelle va coûter une réunion ». Les sources deviennent des étiquettes. C'est l'ordre dans lequel on travaille réellement un dossier en retard.",
-    body: (o) => ["obscur", "moyen", "clair"].slice().map((k) => { const rows = ARTICLES.filter((a) => a.clarity === k);
+  { id: "o15", part: "C", title: "Grouper par clarté, la source en étiquette",
+    note: "La question change: non plus « d'où vient la règle » mais « laquelle va coûter une réunion ». Replier « clair » laisse à l'écran exactement ce qui reste à débattre.",
+    body: (o) => ["obscur", "moyen", "clair"].map((k) => { const rows = ARTICLES.filter((a) => a.clarity === k);
       if (!rows.length) return "";
-      return `<div class="h-rule"><b style="color:${CL_VAR[k]}">${CL_LABEL[k]}</b><i style="background:${CL_VAR[k]};opacity:.35"></i>
-        <span>${countOf(rows)}</span></div>${rows.map((a) => rowHTML(o, a, { tag: true })).join("")}`; }).join("") },
+      return sec(o, k, `<div class="h-rule" ${fold(k)}>${caret(o, k)}<b style="color:${CL_VAR[k]}">${CL_LABEL[k]}</b>
+        <i style="background:${CL_VAR[k]};opacity:.35"></i><span>${countOf(rows)}</span></div>`,
+        () => rows.map((a) => rowHTML(o, a, { tag: true })).join("")); }).join("") },
 
-  { id: "o16", part: "C", title: "Trois colonnes côte à côte", head: paneHead(),
-    note: "Les trois corps de règles sont lus en parallèle au lieu d'être empilés: on voit d'un coup que la loi-cadre ne porte qu'un article et que le règlement en porte cinq. Les cartes deviennent étroites — c'est la limite.",
-    body: (o) => `<div class="cols3">${ORDER.map((k) => { const rows = ARTICLES.filter((a) => a.src === k);
-      return `<div><div class="ttl">${SRC[k].label} · ${rows.length}</div>
-        <div style="display:flex;flex-direction:column;gap:8px">${rows.map((a) => rowHTML(o, a, { dense: true })).join("")}</div></div>`; }).join("")}</div>` },
+  { id: "o16", part: "C", title: "Trois colonnes côte à côte",
+    note: "Les trois corps de règles sont lus en parallèle au lieu d'être empilés: on voit d'un coup que la loi-cadre ne porte qu'un article et que le règlement en porte cinq. Replier une colonne ramène les deux autres à pleine largeur.",
+    body: (o) => { const open = ORDER.filter((k) => !shut(o, k));
+      return `<div class="cols3" style="grid-template-columns:${ORDER.map((k) => shut(o, k) ? "minmax(120px,.4fr)" : "1fr").join(" ")}">
+        ${ORDER.map((k) => { const rows = ARTICLES.filter((a) => a.src === k);
+          STATE[o].keys.push(k);
+          return `<div><div class="ttl" ${fold(k)}>${caret(o, k)}${SRC[k].label} · ${rows.length}</div>
+            ${shut(o, k) ? "" : `<div class="secrows">${rows.map((a) => rowHTML(o, a, { dense: true })).join("")}</div>`}</div>`; }).join("")}</div>
+        ${open.length ? "" : `<div class="empty">Les trois colonnes sont repliées.</div>`}`; } },
 
-  { id: "o17", part: "C", title: "Par personne à relancer", head: paneHead(),
-    note: "Les articles sont rangés par qui doit répondre, avec le silence en tête: c'est l'écran du lundi matin, quand on écrit trois courriels. La source redevient une étiquette, et le groupe porte l'adresse.",
+  { id: "o17", part: "C", title: "Par personne à relancer",
+    note: "Les articles sont rangés par qui doit répondre, avec le silence en tête: c'est l'écran du lundi matin, quand on écrit trois courriels. On replie une personne dès que son courriel est parti.",
     body: (o) => Object.entries(CONTACTS).sort((x, y) => y[1].waited - x[1].waited)
       .map(([k, c]) => { const rows = ARTICLES.filter((a) => contactsFor(a).includes(k));
         if (!rows.length) return "";
-        return `<div class="who-h"><b>${c.role}</b><span>dernier échange le ${c.last} · il y a ${c.waited} j</span>
-          <span class="sp" style="flex:1"></span><a class="btn" href="mailto:${c.mail}">${ic("mail")}Écrire</a></div>
-          ${rows.map((a) => rowHTML(o, a, { tag: true, dense: true })).join("")}`; }).join("") },
+        return sec(o, k, `<div class="who-h" ${fold(k)}>${caret(o, k)}<b>${c.role}</b>
+          <span>${countOf(rows)} · dernier échange le ${c.last} · il y a ${c.waited} j</span>
+          <span style="flex:1"></span><a class="btn" href="mailto:${c.mail}">${ic("mail")}Écrire</a></div>`,
+          () => rows.map((a) => rowHTML(o, a, { tag: true, dense: true })).join("")); }).join("") },
 
-  { id: "o18", part: "C", title: "Recherche et facettes", head: paneHead(),
-    note: "Source et clarté deviennent deux lignes de facettes au-dessus d'une recherche plein texte, chacune avec son compte. C'est la version qui tient quand les douze articles deviennent soixante — et la seule où l'on peut demander « le règlement, mais seulement ce qui est obscur ».",
+  { id: "o18", part: "C", title: "Recherche et facettes",
+    note: "Source et clarté deviennent deux lignes de facettes au-dessus d'une recherche plein texte, chacune avec son compte. Les résultats restent groupés par source, et chaque groupe se replie: filtrer et replier répondent à deux questions différentes — « lesquels » et « lesquels maintenant ».",
     body: (o) => { const st = STATE[o];
       const rows = ARTICLES.filter((a) => (!st.filter || a.src === st.filter)
         && (!st.cl || a.clarity === st.cl)
@@ -599,7 +659,10 @@ const OPTIONS = [
           ${CLARITY.map((k) => `<span class="chip ${st.cl === k ? "on" : ""}" data-act="cl" data-k="${k}">${CL_LABEL[k]}
             <span class="ct">${ARTICLES.filter((a) => a.clarity === k).length}</span></span>`).join("")}</div>
         <div class="sum">${rows.length} sur ${ARTICLES.length}<span class="bar">${bar}</span></div></div>
-        ${rows.length ? rows.map((a) => rowHTML(o, a, { tag: true })).join("") : `<div class="empty">Aucun article ne répond à ces deux filtres.</div>`}`; } },
+        ${rows.length ? ORDER.map((k) => { const g = rows.filter((a) => a.src === k);
+          return g.length ? sec(o, k, `<div class="h-flat" ${fold(k)}>${caret(o, k)}<span style="color:var(--ink)">${SRC[k].label}</span>
+            <span>${countOf(g)}</span></div>`, () => g.map((a) => rowHTML(o, a, { tag: true })).join("")) : ""; }).join("")
+          : `<div class="empty">Aucun article ne répond à ces deux filtres.</div>`}`; } },
 ];
 
 const PARTS = {
@@ -613,17 +676,24 @@ const PARTS = {
 
 /* ------------------------------------------------------------- the state
    One state per option, because an option is a working screen and not a
-   picture: which article is open, which menu is down, which filter is on. */
+   picture: which article is open, which menu is down, which filter is on,
+   which sections are shut. Option 8 opens with two of three shut, because
+   that is the form of the option. */
 const STATE = {};
 OPTIONS.forEach((o) => { STATE[o.id] = { sel: "3.2.3.1", clarityOn: null, filter: null,
-  cl: null, q: "", dense: false, acc: { qc: true, loi: false, reg: false } }; });
+  cl: null, q: "", dense: false, keys: [],
+  shut: o.id === "o8" ? { loi: true, reg: true } : {} }; });
 
 function optionHTML(o, i) {
+  /* The body is built first: it is what declares the sections, and the
+     pane header has to know them to offer « tout replier ». */
+  STATE[o.id].keys = [];
   const body = o.body(o.id);
+  const head = o.raw ? "" : (o.head ? o.head(o.id) : paneHead(o.id));
   return `<div class="opt" id="${o.id}">
     <div class="cap"><span class="n">Option ${i}</span><b>${o.title}</b></div>
     <div class="shot"><div class="scr">
-      <div class="pane">${o.raw ? body : `${o.head === undefined ? "" : (typeof o.head === "function" ? o.head() : o.head)}<div class="pb">${body}</div>`}</div>
+      <div class="pane">${o.raw ? body : `${head}<div class="pb">${body}</div>`}</div>
       ${railHTML(o.id)}
     </div></div>
     <p class="note">${o.note}</p>
@@ -682,7 +752,14 @@ document.addEventListener("click", (e) => {
     case "clarity": byId(id).clarity = k; st.clarityOn = null; return paintAll();
     case "filter": st.filter = k || null; break;
     case "cl": st.cl = k || null; break;
-    case "acc": st.acc[k] = !st.acc[k]; break;
+    /* One section, or every section of this option at once: all open when
+       anything is open, all shut otherwise. */
+    case "fold": st.shut[k] = !st.shut[k]; break;
+    case "foldall": {
+      const all = st.keys.every((key) => st.shut[key]);
+      st.keys.forEach((key) => { st.shut[key] = !all; });
+      break;
+    }
     case "dense": st.dense = !st.dense; break;
     case "note": st.sel = id; break;
     case "save": {
