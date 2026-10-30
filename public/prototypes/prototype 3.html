@@ -338,21 +338,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    it, and the two numbers are not repeated — they are inside the drawing. */
 .codegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;align-items:start}
 
-/* One column per body of rules — the Québec code, the framework act, the
-   bylaw — side by side, so the three are read against each other. In a
-   column the drawing sits above its text. */
-.codelist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
-.codecol{display:flex;flex-direction:column;gap:8px;min-width:0}
-.codecol .codeempty{font-size:12px;color:var(--ink-3);padding:4px 2px}
-.codecol .coderow{grid-template-columns:1fr}
-.codecol .coderow > .draw{border-right:0;border-bottom:1px solid var(--line-2)}
-.codecol .coderow > .draw img{max-width:300px}
-/* The body of rules an article belongs to, said once above its articles
-   instead of once in every row, and said in the list rather than in a
-   strip that would hide the other two. */
-.codesec{display:flex;align-items:baseline;gap:8px;padding:10px 2px 2px;
-  font-size:11px;letter-spacing:.04em;text-transform:uppercase}
-.codesec:first-child{padding-top:0}
+/* One body of rules at a time, named by the tab above the page: the three
+   codes no longer share the width three ways, so an article reads at the
+   full width of the card — drawing at the left, sentence at the right —
+   instead of in a column narrow enough to stack them. */
+.codelist{display:flex;flex-direction:column;gap:8px}
+.codelist .codeempty{font-size:12px;color:var(--ink-3);padding:4px 2px}
 .coderow{display:grid;grid-template-columns:258px 1fr;gap:0;align-items:stretch;
   border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
 .coderow:hover{border-color:var(--line)}
@@ -621,7 +612,9 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .secseg .ss:hover{background:var(--wash)}
 .secseg .ss[aria-current="true"]{background:var(--card);color:var(--ink);font-weight:600;
   box-shadow:0 1px 2px rgba(17,17,18,.12)}
-.fq-unit{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:10px}
+/* The figures switch sits over the table it changes, at its left. */
+.fqcolrow{display:flex;margin:0 0 6px}
+.fqcols{display:inline-flex}
 /* Façade tables: the head row opens the elevation, a material row keeps
    that material in colour. The swatch is the colour the model paints it. */
 .fq-fac{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line-2);padding-top:10px}
@@ -737,6 +730,15 @@ body.elev .mtools{display:none}
    read as one stack rather than three strips that happen to be piled. */
 .tabs.one{height:36px;padding:0 9px}
 .tabs.two{height:38px;padding:0 9px}
+/* The screen switch at the head of the project's row. */
+.tabs.lvl .mseg{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;align-self:center;margin-top:2px;padding:2px;
+  border-radius:8px;background:rgba(255,255,255,.08)}
+.tabs.lvl .ms{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:6px;cursor:pointer;
+  font-size:12.5px;font-weight:500;color:rgba(255,255,255,.72);white-space:nowrap}
+.tabs.lvl .ms:hover{color:#fff}
+.tabs.lvl .ms[aria-current="true"]{background:rgba(255,255,255,.16);color:#fff;font-weight:600}
+.tabs.lvl .ms .lu{width:14px;height:14px}
+.tabs.lvl .msep{flex:0 0 1px;width:1px;height:18px;align-self:center;margin:2px 8px 0;background:rgba(255,255,255,.16)}
 .tabs.one .crumb,.tabs.two .crumb{padding:5px 10px;border-radius:7px}
 .tabs.one .crumb[data-screen]{cursor:pointer}
 .tabs.one .crumb[data-screen]:hover{background:var(--wash)}
@@ -850,6 +852,14 @@ body.elev .mtools{display:none}
 /* The card is the same white card; only what holds it changes. */
 .frame[data-chrome="black"][data-shell="inset"] .work{border-color:rgba(255,255,255,.1);
   box-shadow:0 1px 2px rgba(0,0,0,.3),0 14px 34px rgba(0,0,0,.35)}
+/* On a project the white page rests inside the project's grey sheet rather
+   than flush with it: the sheet runs on around the page's sides and foot,
+   as wide as the black frame's own margin, so black → grey → white step in
+   by the same 6 px all round. The grey around the page is the page's own
+   spread shadow, so it follows the page's corners at radius + 6. */
+.frame[data-shell="inset"] .body:has(> .projsheet) > .work{margin:0 6px 6px;
+  box-shadow:0 0 0 6px #232327}
+.body > .projsheet{border-radius:18px 18px 0 0}
 .frame[data-chrome="black"] .rg::before{color:rgba(255,255,255,.45)}
 
 /* High fidelity swaps the hatch for the drawing it stands for: the floor
@@ -3894,6 +3904,12 @@ function navHTML() {
    filtered nothing — it offered a second list that was the same list. */
 const CONTEXT = {
   "Unités": LEVEL_VIEWS,
+  /* A body of rules is a tab the way a floor is: the page under it holds
+     one code, read whole, instead of three codes each squeezed into a
+     third of the width. The three are always offered, even when one has
+     no article followed yet, so the strip does not change shape as
+     articles are added. */
+  "Codes": CODE_GROUPS.map(([, label]) => label),
 };
 
 function tabsHTML() {
@@ -3941,9 +3957,13 @@ function tabsHTML() {
      schedule there is no project open and no sheet under the line, so the
      name is not there to be read either. */
   const projTab = studio ? "" : `<span class="projtab">${V.project}</span>`;
+  /* Sharing names the project it shares, so on a project screen it sits on
+     the studio's line, after the project's tab, beside the person sharing. */
+  const shareTop = studio || mode !== "Two rows, no rail" ? "" : `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
+       style="flex:0 0 auto;margin-right:8px;align-self:center">${icon("share-2")}<span class="hi">Partager</span></span>`;
   const one = `<div class="tabs one ${studio ? "studio" : ""} rg ${solo("nav")}" data-rg="atelier" data-fi="${fiOf("nav")}"
        data-labels-mode="${V.nav.labels}">
-      ${back}${ech}${projTab}<span class="sp"></span>${me}
+      ${back}${ech}${projTab}<span class="sp"></span>${shareTop}${me}
     </div>`;
   if (studio) return one;
   if (!views.length && mode !== "Two rows, no rail") {
@@ -3986,11 +4006,17 @@ function tabsHTML() {
     ? `<button ${act("scope", "Bâtiment")} aria-current="${off}" title="Compter le bâtiment entier"
          style="flex:0 0 auto">${icon("building-2")}<span class="hi">Bâtiment entier</span></button>`
     : "";
-  const row2 = mode === "Two rows, no rail" && views.length
+  /* One row for the project: the screen is a quiet switch at its head, and
+     the levels follow it. The only white tab is the level, which touches
+     the page it opens; the switch is a control, not a tab. Codes has no
+     levels: the switch stands alone. */
+  const modeSeg = `<span class="mseg" role="group" aria-label="Écran">${names.map((n, i) =>
+    `<span class="ms" data-screen="${n}" aria-current="${n === V.screen}" title="${labelOf(n)}">${ic ? icon(SCREENS[n].icon) : ""}<span class="hi">${navLabel(n, i)}</span></span>`).join("")}</span>`;
+  const row2 = mode === "Two rows, no rail"
     ? `<div class="tabs lvl rg ${solo("nav")}" data-rg="vues" data-fi="${fiOf("nav")}"
          data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}" data-off="${off}">
-        ${wholeBtn}
-        <div class="views">${views.map(viewBtn).join("")}</div></div>`
+        ${modeSeg}${views.length ? `<span class="msep"></span>${wholeBtn}
+        <div class="views">${views.map(viewBtn).join("")}</div>` : ""}</div>`
     : "";
   /* A project is read by people who do not draw: the client, the urbaniste,
      the contractor. Sharing ends the project's own row, on the same line as
@@ -3998,21 +4024,14 @@ function tabsHTML() {
   const share = `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
          style="margin-left:auto;flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
 
-  /* Two rows, two subjects. The first belongs to the studio: every project,
-     the week across them all, and the person signed in. The second belongs
-     to this project: its name, its screens, and sharing it — the thing
-     being shared is named on the same line as the button that shares it.
-     The project's row and its levels then sit on a raised sheet, so the
-     project reads as a thing resting in the studio's chrome, the way the
-     white page rests on the sheet in turn. */
+  /* Two subjects, two rows. The first belongs to the studio: every project,
+     the week across them all, the person signed in — and, on a project, the
+     project's tab and the button that shares it. The second is the
+     project's sheet, one shade lighter: which screen, which level, down to
+     the white page. */
   if (mode === "Two rows, no rail") {
     return `${one}
-      <div class="projsheet">
-        <div class="tabs two" data-labels-mode="${V.nav.labels}">
-          <div class="views">${names.map(tab).join("")}</div>
-          <span class="sp"></span>${share}
-        </div>${row2}
-      </div>`;
+      <div class="projsheet">${row2}</div>`;
   }
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
@@ -4238,21 +4257,23 @@ function contentHTML() {
           prev: "plan", next: "model", lprev: "le plan", lnext: "la maquette" })}${
         noModel ? "" : modelShut ? foldStripHTML("model", "la maquette") : model()}</div>`;
     },
-    /* Codes is the vertical reading of the provisions: the Québec
-       construction code first, then the bylaw, each one with the schematic
-       of what it measures, the sentence in French, what is still missing,
-       and the notes written against it. Nothing here writes to a drawing.
-       Every body of rules is in the one list, each under its own heading. */
+    /* Codes is the vertical reading of the provisions: the schematic of
+       what each article measures, the sentence in French, what is still
+       missing, and the notes written against it. Nothing here writes to a
+       drawing. One body of rules is read at a time — the tab above the
+       page names it, so the list under it needs no heading of its own. */
     "Codes": () => {
-      const section = ([label, rows]) => `<div class="codecol"><div class="codesec"><span class="hi">${label}</span></div>
-          ${rows.length ? rows.map(codeRow).join("") : `<div class="codeempty">Aucun article suivi</div>`}</div>`;
+      const label = viewOf("Codes");
+      const rows = codeGroups().find(([name]) => name === label)?.[1] || [];
       return `<div class="col" style="flex:1;gap:var(--gap)">
         <div class="pane" style="flex:0 0 auto">
           <div class="ph">${icon("hash")}<span class="lo bar" style="width:90px"></span>
-            <span class="hi">Articles suivis</span><span style="flex:1"></span>
+            <span class="hi">${label}</span><span class="fqs hi">${rows.length} article${rows.length > 1 ? "s" : ""} suivi${rows.length > 1 ? "s" : ""}</span>
+            <span style="flex:1"></span>
             <span class="btnw solid" ${act("addcode")}>${icon("plus")}<span class="hi">Ajouter</span></span></div>
           <div class="pb">
-            <div class="codelist">${codeGroups().map(section).join("")}</div>
+            <div class="codelist">${rows.length ? rows.map(codeRow).join("")
+              : `<div class="codeempty">Aucun article suivi dans ce code</div>`}</div>
           </div></div>
       </div>`;
     },
@@ -4366,16 +4387,51 @@ function fqMixHTML(q, onPlan = true) {
   </div>`;
 }
 
+/* One table of units, two sets of figures. The units are written once and
+   never move; the switch above the table swaps only the number columns —
+   the areas, or the openings the model counts in each unit — so the list
+   is not read twice to learn both. The building reads the same way, one
+   line per level. The choice holds from floor to building. */
+const FQ_COLS = [["s", "Superficies"], ["o", "Ouvertures"]];
+function fqColsHTML() {
+  return `<span class="secseg fqcols" role="group" aria-label="Chiffres">${FQ_COLS.map(([k, label]) =>
+    `<span class="ss" ${act("fqcols", k)} aria-current="${(V.fqCols || "s") === k}">${label}</span>`).join("")}</span>`;
+}
+/* Openings, as the columns of either table: windows, patio doors, glazing
+   in ft² and its share. Until the model has counted them, each figure is
+   an ellipsis rather than a zero, which would be a count. */
+const OPEN_HEAD = [["Fen.", "Fenêtres"], ["P.-p.", "Portes-patio"], ["Vitr. pi²", "Vitrage pi²"], ["Part", "Part du vitrage"]];
+function openCells(o, total, cell) {
+  if (!o) return OPEN_HEAD.map(() => cell("…", 1)).join("");
+  const ft2 = window.fitteMaterials.FT2_PER_UNIT2;
+  return `${cell(o.windows, 1)}${cell(o.doors, 1)}${cell(fqNum(o.glass * ft2), 1)}${cell(fqPct(o.glass, total.glass), 1)}`;
+}
+const openHead = (cell) => OPEN_HEAD.map(([h, long]) => `<th class="n" title="${long}">${h}</th>`).join("");
+const openFoot = (total, cell, lead) => `<tr>${cell("Total")}${lead}${total
+  ? `${cell(total.windows, 1)}${cell(total.doors, 1)}${cell(fqNum(total.glass * window.fitteMaterials.FT2_PER_UNIT2), 1)}${cell(total.glass ? "100 %" : "", 1)}`
+  : OPEN_HEAD.map(() => cell("…", 1)).join("")}</tr>`;
+
 const FQ_TYPE = ["t", "t", "n", "n", "n"];
 function fqTableHTML(q) {
   const cell = (c, j, tag = "td") => `<${tag} class="${FQ_TYPE[j] === "n" ? "n" : ""}">${c}</${tag}>`;
+  const num = (c, n) => `<td class="${n ? "n" : ""}">${c}</td>`;
+  const open = (V.fqCols || "s") === "o";
+  const floor = UNITS_BY_LEVEL[q.level] || [];
+  const counted = modelCounted();
+  const each = counted ? floor.map((r) => unitOpenings(unitNo(r))) : [];
+  const total = counted ? sumOpenings(each) : null;
   /* A unit the typology filter hides stays in the floor's arithmetic but
      is not offered as a click. */
-  const body = q.rows.map((r) => `<tr class="${r.on ? "on" : ""} ${r.index < 0 ? "dim" : ""}" ${r.index >= 0 ? act("row", r.index) : ""}>
-    ${r.cells.map((c, j) => cell(c, j)).join("")}</tr>`).join("");
-  return `<div class="fqt">
-    <table class="tbl"><thead><tr>${["Unité", "Type", "Net pi²", "m²", "Part"].map((h, j) => cell(h, j, "th")).join("")}</tr></thead>
-      <tbody>${body}</tbody><tfoot>${q.foot.map((r) => r[0] === "Circulation" ? circulationRowHTML(r, cell) : `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("")}</tfoot></table></div>`;
+  const body = q.rows.map((r, i) => `<tr class="${r.on ? "on" : ""} ${r.index < 0 ? "dim" : ""}" ${r.index >= 0 ? act("row", r.index) : ""}>
+    ${cell(r.cells[0], 0)}${cell(r.cells[1], 1)}${open ? openCells(each[i], total, num)
+      : r.cells.slice(2).map((c, j) => cell(c, j + 2)).join("")}</tr>`).join("");
+  const head = `${cell("Unité", 0, "th")}${cell("Type", 1, "th")}${open ? openHead()
+    : ["Net pi²", "m²", "Part"].map((h, j) => cell(h, j + 2, "th")).join("")}`;
+  const foot = open ? (floor.length ? openFoot(total, num, num("")) : "")
+    : q.foot.map((r) => r[0] === "Circulation" ? circulationRowHTML(r, cell) : `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("");
+  return `<div class="fqt">${q.count ? `<div class="fqcolrow">${fqColsHTML()}</div>` : ""}
+    <table class="tbl"><thead><tr>${head}</tr></thead>
+      <tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`;
 }
 
 /* The openings, counted in the model and read like the area table: on a
@@ -4396,36 +4452,6 @@ function unitOpenings(u) {
 const sumOpenings = (list) => list.reduce((s, o) => ({ windows: s.windows + o.windows, doors: s.doors + o.doors, glass: s.glass + o.glass }),
   { windows: 0, doors: 0, glass: 0 });
 const levelRows = (lv) => UNITS_BY_LEVEL[levelView(lv)] || [];
-
-function fqUnitHTML(q) {
-  const whole = buildingScope();
-  const ft2 = window.fitteMaterials.FT2_PER_UNIT2;
-  const cell = (c, n, tag = "td") => `<${tag} class="${n ? "n" : ""}">${c}</${tag}>`;
-  const head = (first) => `<thead><tr>${cell(first, 0, "th")}${["Fenêtres", "Portes-patio", "Vitrage pi²", "Part"].map((h) => cell(h, 1, "th")).join("")}</tr></thead>`;
-  const nums = (o, total) => `${cell(o.windows, 1)}${cell(o.doors, 1)}${cell(fqNum(o.glass * ft2), 1)}${cell(fqPct(o.glass, total.glass), 1)}`;
-  const foot = (total) => `<tfoot><tr>${cell("Total")}${cell(total.windows, 1)}${cell(total.doors, 1)}${cell(fqNum(total.glass * ft2), 1)}${cell(total.glass ? "100 %" : "", 1)}</tr></tfoot>`;
-  const lead = (sub) => `<div class="fqh">${icon("app-window")}<span>Ouvertures</span><span class="fqs">${sub}</span></div>`;
-  const wrap = (inner) => `<div class="fq-unit fqo" data-sec="o" data-fq>${inner}</div>`;
-  if (!modelCounted()) return wrap(`${lead("")}<div class="fqn">Lecture de la maquette 3D…</div>`);
-  if (whole) {
-    const lines = LEVELS.map((lv) => ({ lv, o: sumOpenings(levelRows(lv).map((r) => unitOpenings(unitNo(r)))) }));
-    const total = sumOpenings(lines.map((l) => l.o));
-    const views = viewsOf("Unités");
-    return wrap(`${lead(`${total.windows + total.doors} ouvertures`)}
-      <table class="tbl">${head("Niveau")}<tbody>${lines.map(({ lv, o }) =>
-        `<tr ${act("view", views.indexOf(levelView(lv)))} title="Lire le ${levelView(lv).toLowerCase()}">${cell(levelView(lv))}${nums(o, total)}</tr>`).join("")}</tbody>${foot(total)}</table>`);
-  }
-  const floor = UNITS_BY_LEVEL[q.level] || [];
-  const visible = rowsOf("Unités");
-  const lines = floor.map((r) => ({ r, u: unitNo(r), o: unitOpenings(unitNo(r)) }));
-  const total = sumOpenings(lines.map((l) => l.o));
-  if (!lines.length) return wrap(`${lead("aucune unité à ce niveau")}`);
-  return wrap(`${lead(q.u ? `unité ${q.u} surlignée` : `${total.windows + total.doors} ouvertures`)}
-    <table class="tbl">${head("Unité")}<tbody>${lines.map(({ r, u, o }) => {
-      const i = visible.indexOf(r);
-      return `<tr class="${r === q.unit ? "on" : ""} ${i < 0 ? "dim" : ""}" ${i >= 0 ? act("row", i) : ""}>${cell(u)}${nums(o, total)}</tr>`;
-    }).join("")}</tbody>${foot(total)}</table>`);
-}
 
 /* The materials of each façade, as the elevation sheet's legend numbers
    them, in square feet and as a share of that façade. The areas are what
@@ -4559,8 +4585,7 @@ function exportMenuHTML() {
    scroll spy and the section heads all read this list, so a target cannot
    drift from the thing it jumps to. */
 const FQ_SECS = [
-  { id: "u", short: "Unités", long: "Unités et superficies", icon: "table" },
-  { id: "o", short: "Ouvertures", long: "Ouvertures", icon: "app-window" },
+  { id: "u", short: "Unités", long: "Unités et ouvertures", icon: "table" },
   { id: "m", short: "Matériaux", long: "Matériaux par façade", icon: "layers" },
 ];
 
@@ -4577,18 +4602,28 @@ function buildingQuant() {
       ofType(ty).reduce((s, r) => s + r[6], 0)]),
   };
 }
+/* The building, one line per level, read the way a floor is: the level
+   and its unit count written once, the switch choosing areas or openings. */
 function buildingTableHTML(q) {
   const cell = (c, n, tag = "td") => `<${tag} class="${n ? "n" : ""}">${c}</${tag}>`;
   const views = viewsOf("Unités");
   const brut = q.net / 0.85;
-  const body = LEVELS.map((lv) => {
+  const open = (V.fqCols || "s") === "o";
+  const counted = modelCounted();
+  const each = counted ? LEVELS.map((lv) => sumOpenings(levelRows(lv).map((r) => unitOpenings(unitNo(r))))) : [];
+  const total = counted ? sumOpenings(each) : null;
+  const body = LEVELS.map((lv, i) => {
     const rows = levelRows(lv), net = rows.reduce((s, r) => s + r[6], 0);
     return `<tr ${act("view", views.indexOf(levelView(lv)))} title="Lire le ${levelView(lv).toLowerCase()}">
-      ${cell(levelView(lv))}${cell(rows.length, 1)}${cell(fqNum(net), 1)}${cell(fqNum(net * M2, 1), 1)}${cell(fqPct(net, q.net), 1)}</tr>`;
+      ${cell(levelView(lv))}${cell(rows.length, 1)}${open ? openCells(each[i], total, cell)
+        : `${cell(fqNum(net), 1)}${cell(fqNum(net * M2, 1), 1)}${cell(fqPct(net, q.net), 1)}`}</tr>`;
   }).join("");
-  const foot = [["Net", q.net, "100 %"], ["Circulation", brut - q.net, "15 %"], ["Brut", brut, ""]]
-    .map(([k, v, p]) => `<tr>${cell(k)}${cell("", 1)}${cell(fqNum(v), 1)}${cell(fqNum(v * M2), 1)}${cell(p, 1)}</tr>`).join("");
-  return `<div class="fqt"><table class="tbl"><thead><tr>${cell("Niveau", 0, "th")}${["Unités", "Net pi²", "m²", "Part"].map((h) => cell(h, 1, "th")).join("")}</tr></thead>
+  const foot = open ? openFoot(total, cell, cell(q.count, 1))
+    : [["Net", q.net, "100 %"], ["Circulation", brut - q.net, "15 %"], ["Brut", brut, ""]]
+      .map(([k, v, p]) => `<tr>${cell(k)}${cell("", 1)}${cell(fqNum(v), 1)}${cell(fqNum(v * M2), 1)}${cell(p, 1)}</tr>`).join("");
+  const head = `${cell("Niveau", 0, "th")}${cell("Unités", 1, "th")}${open ? openHead()
+    : ["Net pi²", "m²", "Part"].map((h) => cell(h, 1, "th")).join("")}`;
+  return `<div class="fqt"><div class="fqcolrow">${fqColsHTML()}</div><table class="tbl"><thead><tr>${head}</tr></thead>
     <tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`;
 }
 
@@ -4597,21 +4632,19 @@ function unitListHTML(step) {
      building, not to one floor: they are counted on « Bâtiment entier » only. */
   const whole = buildingScope();
   const q = whole ? buildingQuant() : floorQuant();
-  const secs = whole ? FQ_SECS : FQ_SECS.filter((s) => s.id !== "m");
   return region("list", whole ? "liste — statistiques du bâtiment" : "liste — statistiques du niveau",
-    `<div class="ph">${icon("table")}<span class="hi">Statistiques</span>${issueBadge(whole ? ["unit", "mat"] : ["unit"])}
+    `<div class="ph">${icon("table")}<span class="hi">${whole ? "Statistiques" : "Unités & ouvertures"}</span>${issueBadge(whole ? ["unit", "mat"] : ["unit"])}
        <span style="flex:1"></span>
-       <span class="secseg" role="group" aria-label="Section">${secs.map((s) =>
+       ${whole ? `<span class="secseg" role="group" aria-label="Section">${FQ_SECS.map((s) =>
          `<span class="ss" ${act("fqsec", s.id)} aria-current="${s.id === "u"}"
-            title="Aller à ${s.long.toLowerCase()}">${s.short}</span>`).join("")}</span>
+            title="Aller à ${s.long.toLowerCase()}">${s.short}</span>`).join("")}</span>` : ""}
        ${exportMenuHTML()}</div>
      <div class="pb" data-fqscroll style="overflow:auto;gap:10px">
        <div data-sec="u" style="display:flex;flex-direction:column;gap:10px">
-         <div class="fqh">${icon("table")}<span>Unités et superficies</span><span class="fqs">${q.count} unités</span></div>
+         ${whole ? `<div class="fqh">${icon("table")}<span>Unités & ouvertures</span><span class="fqs">${q.count} unités</span></div>` : ""}
          ${fqMixHTML(q, !whole)}
          ${whole ? buildingTableHTML(q) : fqTableHTML(q)}
        </div>
-       ${fqUnitHTML(q)}
        ${whole ? facadeTablesHTML() : ""}
      </div>`, step);
 }
@@ -4635,14 +4668,12 @@ document.addEventListener("scroll", (e) => {
   if (e.target instanceof HTMLElement && e.target.hasAttribute("data-fqscroll")) paintFQSec();
 }, true);
 
-/* A new selection redraws the table and the unit block, not the drawings.
-   The building's tables carry no selection. */
+/* A new selection, the figures switch or the model's count redraws the
+   table alone, not the drawings and not the pane's scroll. */
 function paintFQ() {
   const list = document.querySelector('[data-region="list"] .fqt');
-  if (!list || buildingScope()) return;
-  const q = floorQuant();
-  list.outerHTML = fqTableHTML(q);
-  document.querySelector("[data-fq]")?.replaceWith(document.createRange().createContextualFragment(fqUnitHTML(q)));
+  if (!list) return;
+  list.outerHTML = buildingScope() ? buildingTableHTML(buildingQuant()) : fqTableHTML(floorQuant());
 }
 
 /* The same rows, four blocks, one file, a blank line between them: a
@@ -4769,7 +4800,7 @@ function inspectorHTML() {
     "Unités": unitRows[UNIT_TABS[V.utab]],
     /* The short column beside the provisions names the one that is open;
        what it asks and what the drawings say are in the reading itself. */
-    "Codes": [["Article", (ARTICLES.find((x) => x.id === V.articleId) || ARTICLES[0]).id]],
+    "Codes": [["Article", ARTICLES.find((x) => x.id === V.articleId)?.id || "—"]],
   }[V.screen] || [["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"]];
 
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
@@ -6662,6 +6693,13 @@ function onClick(e) {
          residential floor's zoom and pan left over would show an empty,
          arbitrarily cropped corner of the sheet instead of the sheet. */
       if (screen === "Unités" && isNonresLevel(currentLevel())) { V.zoom = 100; V.pan = { x: 0, y: 0 }; }
+      /* A code tab is a different set of articles, so the one open in the
+         inspector would be read under a heading it does not belong to:
+         the first article of the code chosen takes its place. */
+      if (screen === "Codes") {
+        const picked = codeGroups().find(([name]) => name === viewsOf("Codes")[Number(value)]);
+        V.articleId = picked?.[1][0]?.id ?? null;
+      }
       break;
     case "viewnext":
       V.view[screen] = (viewIndex(screen) + 1) % viewsOf(screen).length;
@@ -6697,6 +6735,14 @@ function onClick(e) {
       return;
     }
     case "row":
+      /* Clicking the unit already chosen lets it go: nothing is chosen, the
+         whole sheet comes back, and the model shows the floor — the same
+         reading as picking the level's tab. */
+      if (screen === "Unités" && V.scope !== "Bâtiment" && selIndex(screen) === Number(value)) {
+        V.sel[screen] = -1;
+        V.zoom = 100; V.pan = { x: 0, y: 0 };
+        break;
+      }
       V.sel[screen] = Number(value);
       if (screen === "Unités" && V.scope === "Bâtiment") { V.scope = "Niveau"; break; }
       /* Mark the destination first, then move the sheet to it: the mark is
@@ -6794,7 +6840,11 @@ function onClick(e) {
     case "notedrop": dropNote(value); break;
     /* Three questions, in the order a person asks them: which body of
        rules, which part of it, which article. */
-    case "addcode": V.dialog = { kind: "addcode", source: CODE_SOURCES[0].name, section: null, art: null }; break;
+    case "addcode": {
+      const open = CODE_SOURCES.find((x) => x.short === viewOf("Codes")) || CODE_SOURCES[0];
+      V.dialog = { kind: "addcode", source: open.name, section: null, art: null };
+      break;
+    }
     case "picksource": V.dialog = { ...V.dialog, source: value, section: null, art: null }; break;
     case "picksection": V.dialog = { ...V.dialog, section: value, art: null }; break;
     case "pickart": V.dialog = { ...V.dialog, art: value }; break;
@@ -7153,6 +7203,10 @@ function onClick(e) {
     case "expmenu": V.exportMenu = !V.exportMenu; break;
     /* A jump is not a state change: scrolling the pane and then rendering
        it would throw away the scroll that was just asked for. */
+    case "fqcols":
+      V.fqCols = value;
+      paintFQ();
+      return;
     case "fqsec": {
       const box = document.querySelector("[data-fqscroll]");
       const el = box?.querySelector(`[data-sec="${value}"]`);
@@ -7332,8 +7386,8 @@ V.pins = loadPins();
 window.addEventListener("fitte:model-state", (e) => {
   if (e.detail !== "ready") return;
   pushModelPins();
-  /* The unit's openings are counted in the model: drawn once it is in. */
-  document.querySelector("[data-fq]")?.replaceWith(document.createRange().createContextualFragment(fqUnitHTML(floorQuant())));
+  /* The openings are counted in the model: drawn once it is in. */
+  paintFQ();
 });
 /* The façade areas are counted once, after the model loads. The materials'
    problems are only known then, so every count on the page is redrawn. */
