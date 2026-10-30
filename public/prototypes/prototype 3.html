@@ -245,7 +245,8 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .pane > .ph{height:38px;flex:0 0 auto;border-bottom:1px solid var(--line-2);
   display:flex;align-items:center;gap:8px;padding:0 11px;font-size:13px;font-weight:500;color:var(--ink);
   white-space:nowrap}
-.pane > .ph > svg{width:15px;height:15px;color:var(--ink-2)}
+/* A crowded header squeezes the title, never its icon. */
+.pane > .ph > svg{width:15px;height:15px;flex:0 0 15px;color:var(--ink-2)}
 /* Only the title is loud: chips, counts and buttons inside the header keep
    their own weight. */
 .pane > .ph .chip,.pane > .ph .btnw{font-weight:400}
@@ -291,6 +292,27 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .listrow{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:5px}
 .listrow.on{background:var(--fill)}
 .listrow .dot{width:8px;height:8px;border-radius:50%;background:var(--bar);flex:0 0 8px}
+/* The link carries its own copy button: the field is what is copied. */
+.fpath.sharelink{cursor:default;padding-right:4px}
+.fpath.sharelink .btnw{height:24px;cursor:pointer;flex:0 0 auto}
+/* An invited person: initials, name over role, and their access as the
+   one control. The controls open under the row, inside the dialog's
+   scroll, so nothing is clipped. */
+.sperson{border-radius:6px}
+.sperson.open{background:var(--fill-2)}
+.sperson .avatar{width:26px;height:26px;flex:0 0 26px;border-radius:50%;background:var(--fill);color:var(--ink);
+  display:grid;place-items:center;font-size:10.5px;font-weight:600;letter-spacing:.02em}
+.sperson .who{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.sperson .nm{font-size:12.5px;color:var(--ink);font-weight:500}
+.sperson .rl{font-size:11.5px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sperson .acc{cursor:pointer;flex:0 0 auto}
+.sperson .acc .lu{width:12px;height:12px;color:var(--ink-3)}
+.sperson .accrow{display:flex;align-items:center;gap:8px;padding:0 8px 8px 42px}
+.accseg{display:inline-flex;padding:2px;border-radius:7px;background:var(--fill);font-size:11.5px}
+.accseg span{padding:3px 8px;border-radius:5px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.accseg span[aria-current="true"]{background:var(--card);color:var(--ink);font-weight:500}
+.sperson .accdel{cursor:pointer;color:#b3261e}
+.sperson .accdel .lu{width:12px;height:12px}
 
 /* Anything that does something says so under the cursor, and anything that
    cannot act yet is visibly out of reach rather than silently inert. */
@@ -304,7 +326,7 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .btnw[data-act]:not(.solid):not(.off):hover .hi{color:inherit}
 /* On the black top bar an ink fill would vanish into the bar, so there the
    same press turns the light button full white with black words instead. */
-.frame[data-chrome="black"] .tabs .btnw[data-act]:not(.solid):not(.off):hover{background:#fff;border-color:#fff;color:#111}
+.frame[data-chrome="black"] .tabs .btnw[data-act]:not(.solid):not(.off):not(.lvlshare):hover{background:#fff;border-color:#fff;color:#111}
 .listrow[data-act]:hover{background:var(--fill-2)}
 .tbl tr[data-act]:hover td{background:var(--fill-2)}
 .tile[data-act].on,.chip.on{border-color:var(--ink)}
@@ -649,6 +671,8 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
    section counts and the material rows carry. */
 .tbl .xwarn{display:inline-flex;margin-left:5px;color:#b3261e;vertical-align:-2px}
 .tbl .xwarn svg{width:12px;height:12px}
+.tbl .xwarn[data-act]{cursor:pointer;border-radius:4px;padding:1px;margin:-1px -1px -1px 4px}
+.tbl .xwarn[data-act]:hover{background:rgba(179,38,30,.1)}
 .tbl tfoot td{color:var(--ink);font-weight:600}
 .fqt{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fqh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink)}
@@ -1869,6 +1893,7 @@ body.splitting .frame[data-shell="inset"] .gut[data-gut="cal"].live::before{widt
 .pane.fstrip .fsv{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;padding-top:12px;overflow:hidden}
 .pane.fstrip .fsv span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap}
 .pane.fstrip .fsv > .lu{width:15px;height:15px;flex:0 0 15px;color:var(--ink-2);margin-top:8px}
+:root[data-fold-icon="turn"] .pane.fstrip .fsv > .lu{transform:rotate(-90deg)}
 /* The edge stops where the table would start to be cut, and says so. */
 .pane > .stop{position:absolute;top:50%;right:6px;transform:translateY(-50%);z-index:20;font-size:10.5px;font-style:italic;
   color:#fff;background:var(--ink);border-radius:4px;padding:2px 6px;pointer-events:none}
@@ -3289,7 +3314,7 @@ function goIssue(id) {
     V.xopen = c[0];
     V.caught[c[0]] ||= stampNow();
     V.xdraft = { who: [], day: dayPlus(3) };
-  }
+  } else V.xopen = null;
   render();
   if (it.kind === "plan") {
     /* The surveyor's and the landscaper's sheets are dials; they would
@@ -4696,7 +4721,7 @@ function floorQuant() {
     net,
     /* An open conflict rides on the number, as it did on the card. */
     rows: floor.map((r) => ({
-      cells: [`${unitNo(r)}${r[7] ? `<span class="xwarn" title="${r[7]} conflit${r[7] > 1 ? "s" : ""} ouvert${r[7] > 1 ? "s" : ""} — voir Conflits">${icon("alert-triangle")}</span>` : ""}`,
+      cells: [`${unitNo(r)}${r[7] ? `<span class="xwarn" ${act("uconf", r[0].split(" ")[0])} title="${r[7]} conflit${r[7] > 1 ? "s" : ""} ouvert${r[7] > 1 ? "s" : ""} — afficher sur le dessin">${icon("alert-triangle")}</span>` : ""}`,
         `<span class="chip tpill"><span class="sw" style="background:${TYPO_INK[baseTypo(r[5])]}"></span>${r[5]}</span>`,
         fqNum(r[6]), fqNum(r[6] * M2, 1), fqPct(r[6], net)],
       on: r === unit, index: visible.indexOf(r),
@@ -6847,10 +6872,14 @@ const SHARE_RIGHTS = [
   ["Lecture seule", "voir les plans, les quantités et les dates", "eye"],
   ["Lecture et commentaires", "voir, et écrire une note ancrée sur une unité", "message-square"],
 ];
+/* The people already invited, by name first: a share is given to a
+   person, and the role is how the office remembers why. Names are
+   fictional, like every person in this prototype. The list changes in
+   place: a right is changed or the person removed from the dialog. */
 const SHARE_PEOPLE = [
-  ["Chargée de projet", "lecture et commentaires", "depuis le 12 sep"],
-  ["Entrepreneur général", "lecture et commentaires", "depuis le 02 oct"],
-  ["Urbaniste de l'arrondissement", "lecture seule", "lien ouvert 3 fois"],
+  { name: "Camille Tremblay", role: "Chargée de projet", right: "Lecture et commentaires" },
+  { name: "Marc-André Gagnon", role: "Entrepreneur général", right: "Lecture et commentaires" },
+  { name: "Sophie Lavoie", role: "Urbaniste de l'arrondissement", right: "Lecture seule" },
 ];
 function shareDialogHTML(d) {
   const link = `fitte.app/p/baldwin-iii?niveau=${paneLevel()}`;
@@ -6867,21 +6896,26 @@ function shareDialogHTML(d) {
         <span class="btnw" ${act("dlgclose")} title="Fermer">${icon("x")}</span></div>
       <div class="db">
         <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Le lien ouvre le projet là où il est ouvert ici: le niveau et l'unité sont dans l'adresse. Un invité ne dessine rien et n'écrit dans aucun fichier.</div>
-        <div class="fpath" ${act("sharecopy", link)} title="Copier le lien">
+        <div class="fpath sharelink" title="${link}">
           ${icon("link")}<span class="hi" style="flex:1;overflow:hidden;text-overflow:ellipsis">${link}</span>
-          <span class="hi" style="font-size:11px;color:var(--ink-3)">copier</span></div>
+          <span class="btnw solid" ${act("sharecopy", link)}>${icon("link")}<span class="hi">Copier le lien</span></span></div>
         <div class="hi" style="font-size:11.5px;color:var(--ink-2);padding-top:2px">Droit accordé par le lien</div>
         <div class="col" style="gap:4px">${SHARE_RIGHTS.map(([l, n, g]) => right(l, n, g)).join("")}</div>
         <div class="hi" style="font-size:11.5px;color:var(--ink-2);padding-top:2px">Déjà invités</div>
-        <div class="col" style="gap:4px">${SHARE_PEOPLE.map(([who, what, when]) => `<div class="listrow">
-          ${icon("circle")}
-          <span class="hi" style="font-size:12px;flex:1">${who}</span>
-          <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${what} — ${when}</span></div>`).join("")}</div>
+        <div class="col" style="gap:2px">${SHARE_PEOPLE.length ? SHARE_PEOPLE.map((p, i) => `<div class="sperson ${d.edit === i ? "open" : ""}">
+          <div class="listrow">
+            <span class="avatar">${p.name.split(" ").map((w) => w[0]).join("").toUpperCase()}</span>
+            <span class="who"><span class="nm">${p.name}</span><span class="rl">${p.role}</span></span>
+            <span class="btnw acc" ${act("sharepedit", i)} aria-expanded="${d.edit === i}" title="Modifier l'accès de ${p.name}">${p.right}${icon(d.edit === i ? "chevron-up" : "chevron-down")}</span></div>
+          ${d.edit === i ? `<div class="accrow">
+            <span class="accseg">${SHARE_RIGHTS.map(([l]) => `<span ${act("sharepright", `${i}|${l}`)} aria-current="${p.right === l}">${l}</span>`).join("")}</span>
+            <span style="flex:1"></span>
+            <span class="btnw accdel" ${act("sharepremove", i)}>${icon("trash-2")}Retirer l'accès</span></div>` : ""}
+        </div>`).join("") : `<div class="listrow" style="font-size:12px;color:var(--ink-3)">Personne n'a encore été invité.</div>`}</div>
       </div>
       <div class="df">
-        <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Un commentaire est une note à côté du plan. Aucun fichier de dessin n'est modifié.</span>
+        <span style="flex:1"></span>
         <span class="btnw" ${act("dlgclose")}><span class="hi">Fermer</span></span>
-        <span class="btnw solid" ${act("sharecopy", link)}>${icon("link")}<span class="hi">Copier le lien</span></span>
       </div>
     </div></div>`;
 }
@@ -7437,6 +7471,15 @@ function onClick(e) {
     case "mtab": V.marginTab = value; break;
     case "issues": V.marginTab = "conf"; break;
     case "issue": goIssue(value); return;
+    /* The warning beside a unit opens its conflict where it is seen: the
+       drawing that reveals it laid over the architecture, its card open.
+       A unit with two takes the next one on each click. */
+    case "uconf": {
+      const list = crossingsFor(value).filter((c) => !c[5]).sort((a, b) => Boolean(b[6]) - Boolean(a[6]));
+      const at = list.findIndex((c) => c[0] === V.issueSel);
+      goIssue(list[(at + 1) % list.length][0]);
+      return;
+    }
     case "xwho": {
       const w = V.xdraft.who;
       V.xdraft.who = w.includes(value) ? w.filter((x) => x !== value) : [...w, value];
@@ -7581,6 +7624,25 @@ function onClick(e) {
     case "shareright":
       V.dialog = { ...V.dialog, right: value };
       break;
+    /* One person's access opens under their row: change the right, or
+       take it away. */
+    case "sharepedit": {
+      const i = Number(value);
+      V.dialog = { ...V.dialog, edit: V.dialog.edit === i ? null : i };
+      break;
+    }
+    case "sharepright": {
+      const [i, right] = value.split("|");
+      const p = SHARE_PEOPLE[Number(i)];
+      if (p && p.right !== right) { p.right = right; say(`${p.name}: ${right.toLowerCase()}.`); }
+      break;
+    }
+    case "sharepremove": {
+      const [p] = SHARE_PEOPLE.splice(Number(value), 1);
+      V.dialog = { ...V.dialog, edit: null };
+      if (p) say(`${p.name} n'a plus accès au projet.`);
+      break;
+    }
     case "sharecopy":
       say(`Lien copié: ${value} — ${(V.dialog && V.dialog.right) || "Lecture et commentaires"}.`);
       break;
@@ -7684,6 +7746,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   tabMotion: { _collapsed: false,
     style: sel(["Slide", "Spring", "Stretch", "Rise", "Fade", "None"]),
     ms: [280, 100, 700, 10] },
+  /* A folded pane writes its name up the strip; its icon can stand upright
+     or lie on its side with the words, a quarter-turn counterclockwise. */
+  foldedIcons: sel(["Upright", "Turned with text"]),
   /* The whole screen on a dark ramp. The drawing keeps its own paper: a
      plan is a white sheet, and inverting it would be redrawing it. */
   theme: sel(["Light", "Dark"]),
@@ -7775,6 +7840,7 @@ function applyDial(v) {
     { toneTop: tone(cc.topBar), toneRow: tone(cc.tabRow), toneBand: tone(cc.pageBorder) });
   TAB_MOTION.kind = String(v.tabMotion?.style || "none").toLowerCase();
   TAB_MOTION.ms = v.tabMotion?.ms ?? 280;
+  document.documentElement.dataset.foldIcon = v.foldedIcons === "Turned with text" ? "turn" : "upright";
   /* The panel names the glyph in English and title-cases what it is given,
      so the label is matched without regard to case. */
   const pick = (screen, label) => {

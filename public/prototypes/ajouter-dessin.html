@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>« Ajouter un dessin » — tenir sur une ligne</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* La bande des dessins fait 104 px de large. « Ajouter un dessin » y passe
+   sur deux lignes et le bouton devient le plus gros objet d'une colonne
+   faite de vignettes. Sept façons de le tenir sur une ligne, toutes à la
+   largeur réelle de la bande, avec la même pile de dessins au-dessus. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --paper:#fbfbfc;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:900px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,232px);gap:26px 22px;margin-top:22px;align-items:start}
+.v h2{margin:0;font-size:14px;font-weight:600}
+.v p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:76px}
+.v .meas{margin:7px 0 0;font-size:11.5px;color:var(--ink-3)}
+.v .meas b{color:var(--ink);font-weight:600}
+
+/* la bande, à sa largeur réelle ---------------------------------------- */
+.zone{display:flex;height:268px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.plan{flex:1;background:repeating-linear-gradient(0deg,var(--fill-2) 0 15px,transparent 15px 16px),
+  repeating-linear-gradient(90deg,var(--fill-2) 0 15px,transparent 15px 16px);}
+.lstrip{flex:0 0 104px;padding:8px 7px;display:flex;flex-direction:column;gap:6px;
+  background:var(--paper);border-left:1px solid var(--line-2);overflow:auto;scrollbar-width:thin}
+.lpile{display:flex;flex-direction:column;gap:4px}
+.ltile{position:relative;border:1px solid transparent;border-radius:6px;padding:4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;user-select:none}
+.ltile .pic{display:block;width:100%;aspect-ratio:1.18;border:1px solid var(--line-2);border-radius:4px;background:#fff;opacity:.45}
+.ltile .pic.on{opacity:1;background:
+  repeating-linear-gradient(0deg,#eceff3 0 6px,transparent 6px 7px),
+  repeating-linear-gradient(90deg,#eceff3 0 6px,transparent 6px 7px),#fff}
+.ltile .nm{font-size:11px;font-weight:500;line-height:1.2;color:var(--ink);text-align:center}
+.ltile .nm svg{width:13px;height:13px;vertical-align:-2px;margin-right:4px}
+.ltile:hover{background:var(--fill-2)}
+
+/* le pied de la bande, commun à toutes les options */
+.ladd{position:sticky;bottom:-8px;margin:auto -7px -8px;padding:8px 7px;background:var(--paper);
+  border-top:1px solid var(--line-2);z-index:2}
+.ladd .b{display:flex;align-items:center;justify-content:center;gap:5px;min-height:28px;padding:4px 6px;
+  border:1px solid var(--line);border-radius:6px;background:var(--card);font-size:11.5px;font-weight:500;
+  line-height:1.2;text-align:center;cursor:pointer;white-space:nowrap}
+.ladd .b:hover{border-color:var(--ink)}
+.ladd .b svg{width:13px;height:13px;flex:0 0 13px}
+
+/* A — le mot de trop tombe */
+/* B — le bouton dit le verbe, la bande dit déjà « dessins » */
+/* C — le plus seul, centré */
+.c .b{width:28px;height:28px;min-height:0;padding:0;margin:0 auto;border-radius:50%}
+/* D — une vignette d'ajout, du même vocabulaire que la pile */
+.d .b{flex-direction:column;gap:3px;padding:6px 4px;min-height:0;white-space:normal}
+.d .b .sq{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1.18;
+  border:1px solid var(--line-2);border-radius:4px;background:var(--fill-2)}
+.d .b .sq svg{width:16px;height:16px;color:var(--ink-3)}
+.d .b i{font-style:normal;font-size:11px;font-weight:500}
+/* E — le pied porte le plus à gauche et le mot à droite */
+.e .b{justify-content:space-between;padding:4px 8px}
+.e .b em{font-style:normal;color:var(--ink-2);font-size:11px}
+/* F — la bande s'élargit de 18 px pour que la phrase entière tienne */
+.f .lstrip{flex:0 0 146px}
+/* G — le mot sort du bouton : un titre de section, le bouton ne porte que le plus */
+.g .cap{margin:2px 0 -2px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:center}
+.g .b{min-height:26px}
+</style>
+</head>
+<body>
+<main>
+  <h1>« Ajouter un dessin » — le tenir sur une ligne</h1>
+  <p class="lede">La bande fait 104 px : la phrase y passe sur deux lignes et le bouton devient le plus gros objet d'une colonne de vignettes.
+    Sept façons de régler ça, toutes à la largeur réelle, même pile au-dessus. La mesure sous chaque bande dit la largeur du texte et celle qui reste dans le bouton.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const PLUS = svg(`<path d="M5 12h14"/><path d="M12 5v14"/>`);
+const PEN = svg(`<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/>`);
+const RULER = svg(`<path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4"/><path d="m7.5 10.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m13.5 4.5 2 2"/><path d="m4.5 13.5 2 2"/>`);
+const ZAP = svg(`<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>`);
+
+const TILES = [["Architecte", PEN, true], ["Arpenteur", RULER, false], ["Électricité", ZAP, false]];
+const pile = () => `<div class="lpile">${TILES.map(([nm, ic, on]) =>
+  `<div class="ltile"><span class="pic ${on ? "on" : ""}"></span><span class="nm">${ic}${nm}</span></div>`).join("")}</div>`;
+
+const O = [
+{ id:"A", cls:"a", title:"A — « Ajouter un dessin » devient « Ajouter »",
+  note:"La bande ne contient que des dessins : le mot « dessin » est déjà dit par tout ce qui est au-dessus. Le bouton garde sa forme, sa place et son infobulle complète.",
+  foot: () => `<div class="ladd"><div class="b" title="Ajouter un dessin">${PLUS}Ajouter</div></div>` },
+
+{ id:"B", cls:"b", title:"B — « Un dessin »",
+  note:"L'inverse : le verbe tombe, le complément reste. Le plus porte l'action, le mot dit ce qu'on ajoute. Se lit « + un dessin ».",
+  foot: () => `<div class="ladd"><div class="b" title="Ajouter un dessin">${PLUS}Un dessin</div></div>` },
+
+{ id:"C", cls:"c", title:"C — le plus seul",
+  note:"Un rond de 28 px centré au pied de la bande. Rien à faire tenir, et le pied cesse d'être le plus gros objet de la colonne. L'infobulle porte la phrase entière ; sans elle, l'action n'est pas nommée.",
+  foot: () => `<div class="ladd"><div class="b" title="Ajouter un dessin">${PLUS}</div></div>` },
+
+{ id:"D", cls:"d", title:"D — une vignette d'ajout",
+  note:"Le bouton prend la forme des vignettes : un cadre au même format, le plus au centre, le mot dessous comme un nom de dessin. Deux lignes, mais ce sont les deux lignes de la pile — l'ajout entre dans le même vocabulaire.",
+  foot: () => `<div class="ladd"><div class="b" title="Ajouter un dessin"><span class="sq">${PLUS}</span><i>Ajouter</i></div></div>` },
+
+{ id:"E", cls:"e", title:"E — le plus à gauche, le mot à droite",
+  note:"Le pied devient une ligne d'outil : le plus tient le bord gauche, « Ajouter » le bord droit. La largeur du bouton est occupée au lieu d'être centrée, ce qui donne au mot toute la place entre les deux.",
+  foot: () => `<div class="ladd"><div class="b" title="Ajouter un dessin">${PLUS}<em>Ajouter</em></div></div>` },
+
+{ id:"F", cls:"f", title:"F — la bande s'élargit à 146 px",
+  note:"On ne touche pas au mot, on donne la largeur qui manque. Mesuré : le texte fait 97 px, plus l'icône, les marges et le trait, il faut 146 px de bande — 42 de plus. La phrase tient, les vignettes gagnent en lisibilité, et le plan perd 42 px à chaque niveau et sur tous les écrans.",
+  foot: () => `<div class="ladd"><div class="b">${PLUS}Ajouter un dessin</div></div>` },
+
+{ id:"G", cls:"g", title:"G — le mot devient un titre de pied",
+  note:"« Ajouter » sort du bouton et devient le titre de la section, en petites capitales, au-dessus d'un bouton qui ne porte plus que le plus. La phrase est dite une fois, et le bouton reste petit.",
+  foot: () => `<div class="ladd"><div class="cap">Ajouter</div><div class="b" title="Ajouter un dessin">${PLUS}</div></div>` },
+];
+
+document.getElementById("grid").innerHTML = O.map((o) => `<section class="v ${o.cls}">
+  <h2>${o.title}</h2><p>${o.note}</p>
+  <div class="zone"><span class="plan"></span><div class="lstrip">${pile()}${o.foot()}</div></div>
+  <p class="meas" data-meas="${o.id}"></p></section>`).join("");
+
+/* La mesure sous chaque bande : la largeur du bouton, celle de son texte,
+   et si le texte y tient. Elle est lue sur la page, pas estimée. */
+for (const o of O) {
+  const sec = document.querySelector(`.v.${o.cls}`);
+  const b = sec.querySelector(".ladd .b");
+  const label = b.querySelector("i,em") || b;
+  const r = Math.round(b.getBoundingClientRect().width);
+  const txt = label.textContent.trim();
+  const probe = document.createElement("span");
+  probe.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font:${getComputedStyle(label).font}`;
+  probe.textContent = txt;
+  document.body.appendChild(probe);
+  const w = Math.round(probe.getBoundingClientRect().width);
+  probe.remove();
+  const room = r - 2 - 12 - (txt && b.querySelector("svg") && !sec.classList.contains("d") ? 18 : 0);
+  sec.querySelector("[data-meas]").innerHTML = txt
+    ? `bouton <b>${r} px</b> — texte « ${txt} » <b>${w} px</b> — place pour le texte <b>${Math.round(room)} px</b> ${w <= room ? "— tient sur une ligne" : "— ne tient pas"}`
+    : `bouton <b>${r} px</b> — aucun texte à faire tenir`;
+}
+</script>
+</body>
+</html>
