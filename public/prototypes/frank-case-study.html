@@ -319,7 +319,9 @@ tr.hl td{background:var(--vert-pale)}
 .st{display:grid;grid-template-columns:540px 1fr;gap:56px;flex:1;min-height:0}
 /* the problem's number, big and bold like a chapter mark; its name beside it */
 .pnum{display:flex;align-items:flex-end;gap:20px}
-.pnum b{font-size:150px;font-weight:700;letter-spacing:-.06em;line-height:.74;color:var(--vert)}
+/* The decision numbers are hidden, not deleted: saved text edits are matched
+   by each block's position on its slide, and the number is block 1. */
+.pnum b{display:none}
 .pnum>span{display:flex;flex-direction:column;gap:6px;font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.1;color:var(--ink)}
 .st h2{font-size:34px;margin-top:22px}
 .st .rule{margin-top:20px}
@@ -734,17 +736,8 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ 10 divider: process -->
-<section class="s div" data-sec="Process — Ideation">
-<div class="b">
-  <p class="big">03</p>
-  <h1>Ideation</h1>
-  <p class="lede">Process, part 1. Three reframes, two rounds of testing, and twelve problems solved one at a time. It started with flows written with AI.</p>
-</div>
-</section>
-
 <!-- ============================================================ ideation: concepts with Claude, screens with ChatGPT, chosen on a Figma board -->
-<section class="s" data-sec="Process — Ideation">
+<section class="s" data-sec="Overview">
 <div class="b">
   <p class="k">Ideation — October 24–26</p>
   <h2>I generated the flows with AI, then chose on a board.</h2>
@@ -772,7 +765,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 
 <!-- ============================================================ ideation 3: prototype 1 core flow -->
-<section class="s" data-sec="Process — Ideation">
+<section class="s" data-sec="Overview">
 <div class="b">
   <p class="k">Ideation — the core flow</p>
   <h2>Prototype&nbsp;1 followed one flow, from a new revision to a new baseline.</h2>
@@ -802,9 +795,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ divider: prototype 1 -->
 <section class="s div" data-sec="Process — Prototype 1">
 <div class="b">
-  <p class="big">04</p>
+  <p class="big">03</p>
   <h1>Prototype 1</h1>
-  <p class="lede">Process, part 2. October 25: two directions, tested side by side.</p>
+  <p class="lede">Process, part 1. October 25: two directions, tested side by side.</p>
 </div>
 </section>
 
@@ -875,9 +868,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ divider: feedback 1 -->
 <section class="s div" data-sec="Process — Feedback 1">
 <div class="b">
-  <p class="big">05</p>
+  <p class="big">04</p>
   <h1>Feedback 1</h1>
-  <p class="lede">Process, part 3. October 26: what the technicians asked for after the first test, and the product it pointed to.</p>
+  <p class="lede">Process, part 2. October 26: what the technicians asked for after the first test, and the product it pointed to.</p>
 </div>
 </section>
 
@@ -925,9 +918,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ divider: prototype 2 -->
 <section class="s div" data-sec="Process — Prototype 2">
 <div class="b">
-  <p class="big">06</p>
+  <p class="big">05</p>
   <h1>Prototype 2</h1>
-  <p class="lede">Process, part 4. October 27: one coordination workspace, tested on the real screen.</p>
+  <p class="lede">Process, part 3. October 27: one coordination workspace, tested on the real screen.</p>
 </div>
 </section>
 
@@ -989,9 +982,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ divider: feedback 2 -->
 <section class="s div" data-sec="Process — Feedback 2">
 <div class="b">
-  <p class="big">07</p>
+  <p class="big">06</p>
   <h1>Feedback 2</h1>
-  <p class="lede">Process, part 5. October 28: the second test, and the change each note became.</p>
+  <p class="lede">Process, part 4. October 28: the second test, and the change each note became.</p>
 </div>
 </section>
 
@@ -1005,7 +998,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     <div class="q"><blockquote>Both technicians focused on usability and workflow details rather than new features.</blockquote><cite>Central finding, prototype 2 testing notes</cite>
       <p style="margin-top:28px">So prototype 3 added little. It made what was there behave the way an architect expects.</p></div>
     <figure style="margin:0;display:flex;flex-direction:column;min-height:0">
-      <div class="shot" style="aspect-ratio:4/3"><img src="assets/frank/tl-feedback2.jpg" alt="Two people at the office counter, prototype 2 open on the laptop, a printed set beside it" style="object-position:50% 28%"></div>
+      <div class="shot" style="aspect-ratio:16/11"><img src="assets/frank/tl-feedback2.jpg" alt="Two people at the office counter, prototype 2 open on the laptop, a printed set beside it" style="object-position:50% 28%"></div>
       <figcaption class="cap">Test of prototype 2 at the office counter, October 28, with the permit set the screen was built from.</figcaption>
     </figure>
   </div>
@@ -1034,9 +1027,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ divider: prototype 3 -->
 <section class="s div" data-sec="Process — Prototype 3">
 <div class="b">
-  <p class="big">08</p>
+  <p class="big">07</p>
   <h1>Prototype 3</h1>
-  <p class="lede">Process, part 6. October 29: Frank, every note from the second test answered.</p>
+  <p class="lede">Process, part 5. October 29: Frank, every note from the second test answered.</p>
 </div>
 </section>
 
@@ -1431,7 +1424,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ 22 divider: trade-offs -->
 <section class="s div" data-sec="Trade-offs">
 <div class="b">
-  <p class="big">09</p>
+  <p class="big">08</p>
   <h1>Trade-offs</h1>
   <p class="lede">What I chose, what I gave up for it, and why the cost was worth paying.</p>
 </div>
@@ -1618,7 +1611,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ 29 divider: outcome -->
 <section class="s div" data-sec="Outcome">
 <div class="b">
-  <p class="big">10</p>
+  <p class="big">09</p>
   <h1>Outcome</h1>
   <p class="lede">Prototype 3: one floor of a real building, every drawing that describes it, and every place where they disagree.</p>
 </div>
@@ -1759,17 +1752,19 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   if (!saved) return;
   const byId = new Map(src.map((sl) => [sl.dataset.edk, sl]));
   const out = [];
-  /* A saved section the file has since retired (User Problem joined
-     Overview) or a slide the file has moved into a feedback section takes
-     the file's section. A decision kept under Prototype 2 answers the
-     second test, so it reads as Feedback 2. */
+  /* A saved section the file has since retired (User Problem and Ideation
+     joined Overview) or a slide the file has moved into a feedback section
+     takes the file's section. A slide saved under a prototype after that
+     prototype's feedback has begun answers the feedback, so it joins it. */
   const KEEP = ["Background", "Overview", "Process", "Trade-offs", "Outcome"];
+  let fb = null;
   saved.forEach(({ id, sec }) => {
     const sl = byId.get(id);
     if (!sl) return;
     const file = sl.dataset.sec || "";
+    if (/Feedback/.test(file)) fb = { from: sec, to: file };
     sl.dataset.sec = /Feedback/.test(file) || !KEEP.includes((sec || "").split(" — ")[0]) ? file
-      : sec === "Process — Prototype 2" && sl.querySelector(".pnum") ? "Process — Feedback 2" : sec;
+      : fb && sec === fb.from ? fb.to : sec;
     out.push(sl); byId.delete(id);
   });
   src.forEach((sl, i) => {
