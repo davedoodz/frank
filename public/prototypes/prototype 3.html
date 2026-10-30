@@ -1679,7 +1679,10 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .ncard .au .w{display:flex;flex-direction:column;line-height:1.25;min-width:0}
 .ncard .au b{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ncard .au .w > span{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ncard .meta{display:flex;align-items:center;gap:8px;min-width:0}
+/* The foot of a comment wraps rather than setting the column's width:
+     the margin should be as narrow as its own header, not as wide as the
+     longest anchor it happens to hold. */
+.ncard .meta{display:flex;align-items:center;gap:8px 8px;min-width:0;flex-wrap:wrap}
 .ncard .meta .when{margin-left:auto;color:var(--ink-3);font-size:11px;white-space:nowrap}
 .ncard .int{display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 6px;border-radius:4px;background:var(--fill);
   font-size:10.5px;color:var(--ink-2);white-space:nowrap;flex:0 0 auto}
@@ -2169,6 +2172,9 @@ const V = {
      area becomes the four quantity tables, and the level strip is dimmed
      because no level answers for those figures. */
   scope: "Niveau",
+  /* The sheet is folded while the building is counted — the massing and
+     the tables are what is read there — until the reader opens it. */
+  planWhole: false,
   utab: 1,           // which tab of the unit inspector
   zoom: 100,         // plan zoom, in percent
   rot: 0,            // plan turn in degrees, kept unwrapped so each quarter turn goes the short way
@@ -3743,7 +3749,7 @@ function region(name, label, inner, step, cls = "") {
 const SPLIT_MIN = 170;
 const splitKey = (name) => `${V.screen}/${name}`;
 const splitW = (name, def) => (V.split[splitKey(name)] ?? def);
-const folded = (name) => !!V.fold[splitKey(name)];
+const folded = (name) => (name === "plan" && buildingScope() ? !V.planWhole : !!V.fold[splitKey(name)]);
 /* Tooltips read with the article — "Replier la liste"; a folded pane whose
    header was never read names itself from the same label: "Liste". */
 const gutName = (label) => {
@@ -6833,10 +6839,13 @@ function render() {
   const listShut = hasList && folded("list");
   const sideShut = hasInsp && folded("side");
   const listW = splitW("list", V.screen === "Unités" ? 400 : 260);
-  const sideW = splitW("side", margin ? 286 : 340);
+  /* The margin opens at the width of its own header — the two tabs and
+     the fold button side by side — and is widened by dragging, not by
+     default. The inspector keeps a readable column. */
+  const sideW = splitW("side", margin ? null : 340);
   /* A side column is never narrower than what it holds: the track's floor
      is its content's own width, so a table is never cut at the edge. */
-  const side = (shut, w) => (shut ? `${FOLD_W}px` : `minmax(min-content, ${w}px)`);
+  const side = (shut, w) => (shut ? `${FOLD_W}px` : w === null ? "min-content" : `minmax(min-content, ${w}px)`);
   /* Beside a folded strip — a side column's, or the plan's or the model's at
      the content's own edge — the edge takes no room in the white card, so
      no white sliver opens between the strip and the pane next to it. */
@@ -7735,6 +7744,10 @@ function onClick(e) {
        a pane is coming back to the layout it was designed with, unless the
        edge is moved again. */
     case "gutfold": {
+      /* While the building is counted the plan's state is its own: the
+         strip reopens the sheet there without unfolding it on the floors,
+         and leaving the scope puts the floor's own state back. */
+      if (value === "plan" && buildingScope()) { V.planWhole = !V.planWhole; break; }
       const k = splitKey(value);
       if (V.fold[k]) delete V.fold[k];
       else { V.fold[k] = true; delete V.split[k]; }
