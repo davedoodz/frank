@@ -874,7 +874,8 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
    line work, so it reads over a white sheet and over a grey render alike. */
 .north{position:absolute;right:50px;top:10px;z-index:5;width:34px;height:50px;
   pointer-events:none;overflow:visible}
-.north circle,.north polygon{fill:none;stroke:var(--ink);stroke-width:1.7}
+.north circle{fill:#fff;stroke:var(--ink);stroke-width:1.7}
+.north polygon{fill:none;stroke:var(--ink);stroke-width:1.7}
 .north line{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
 
 /* ---------------------------------------------------------- the margin
@@ -1030,9 +1031,11 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   padding:2px 8px;font-size:13px;font-weight:600;line-height:1.3;white-space:nowrap;
   font-variant-numeric:tabular-nums}
 .mpill[hidden]{display:none}
-/* The selected unit wears the colour it wears everywhere else, so the tag
-   on the model and the outline on the sheet are read as one thing. */
-.mpill.sel{background:#c3e05a;border-color:#2f3a05;color:#2f3a05}
+/* The same tag as on the sheet: white, with the selection's green as its
+   edge. Filling it green made it a second kind of object on a facade that
+   is already tinted green where the unit is. */
+.mpill.sel{background:#fff;color:var(--ink);border:1.5px solid #8ba00f;
+  box-shadow:0 1px 3px rgba(17,17,18,.14)}
 /* No instructions and no running commentary laid over the model: the pane
    says what it is through the header, the corner view and the axes, and the
    selected unit is already named in the header and the inspector. Only the
@@ -1165,6 +1168,7 @@ svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
 <script src="vendor/lucide/lucide.min.js"></script>
 <script src="vendor/dialkit/browser.global.js"></script>
 <script src="assets/engineering/sheets.js"></script>
+<script src="wireframe-c3-circulation.js"></script>
 <script>
 /* ---------------------------------------------------------------- state */
 
@@ -2167,7 +2171,7 @@ function unitMarkHTML() {
     return `<polygon class="${on ? "on" : "hit"}" points="${poly.map(([x, y]) => `${x},${y}`).join(" ")}"
       style="stroke-width:${(1.6 / zs).toFixed(3)}px" data-act="row" data-value="${i}"></polygon>`;
   }).join("");
-  return `<svg class="umark" viewBox="0 0 1 1" preserveAspectRatio="none">${parts}</svg>`;
+  return `<svg class="umark" viewBox="0 0 1 1" preserveAspectRatio="none">${circulationMarkHTML()}${parts}</svg>`;
 }
 
 
@@ -3308,7 +3312,7 @@ function fqTableHTML(q) {
     ${r.cells.map((c, j) => cell(c, j)).join("")}</tr>`).join("");
   return `<div class="fqt">
     <table class="tbl"><thead><tr>${["Unité", "Type", "Net pi²", "m²", "Part"].map((h, j) => cell(h, j, "th")).join("")}</tr></thead>
-      <tbody>${body}</tbody><tfoot>${q.foot.map((r) => `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("")}</tfoot></table>
+      <tbody>${body}</tbody><tfoot>${q.foot.map((r) => r[0] === "Circulation" ? circulationRowHTML(r, cell) : `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("")}</tfoot></table>
     <div class="fqn">net : étiquettes du plan · circulation : 15 %, comme le tableau du bâtiment</div></div>`;
 }
 
@@ -5081,6 +5085,7 @@ function onClick(e) {
        is a way of looking at the plan, so the answer to a click is the unit
        filling the pane, not a contour somewhere off-screen. Choosing a unit
        is also choosing to read a floor, so it ends the building scope. */
+    case "circulation": selectCirculation(); return;
     case "row":
       V.sel[screen] = Number(value);
       if (screen === "Unités" && V.scope === "Bâtiment") { V.scope = "Niveau"; break; }
