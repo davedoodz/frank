@@ -143,12 +143,15 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    corner under a tab reads as two sheets, not one. The tab then has to sit
    on the card's own left edge — inset by the row's padding it would leave a
    sliver of chrome over a squared corner, which reads as a chip out of the
-   page — so the row loses its left padding and the tab its left foot:
-   there is nothing on that side to curve into. Its top corners stay round
-   on both sides, like every other tab. */
+   page — so the row loses its left padding, and the tab loses its left
+   radius and its left foot: there is nothing on that side to curve into.
+   The card is a sibling of the sheet the levels now sit on, not of the
+   level row itself, so the corner is squared from there. */
 .tabs.lvl[data-head="true"]{padding-left:0}
+.tabs.lvl[data-head="true"] button[aria-current="true"]{border-radius:0 8px 0 0}
 .tabs.lvl[data-head="true"] button[aria-current="true"]::before{display:none}
-.tabs.lvl[data-head="true"] + .work{border-top-left-radius:0}
+.tabs.lvl[data-head="true"] + .work,
+.projsheet:has(.tabs.lvl[data-head="true"]) + .work{border-top-left-radius:0}
 .frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.72);font-size:12.5px}
 .frame[data-chrome="black"] .tabs.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
 .frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{background:var(--card);color:var(--ink)}
@@ -590,8 +593,10 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .tbl tbody tr[data-act]:hover td{background:var(--fill)}
 .tbl tbody tr.on[data-act]:hover td{background:#e4e9cf}
 .tbl tr.dim td{color:var(--ink-3)}
-/* An open crossing rides on the unit number. */
-.xdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--hi);margin-left:5px;vertical-align:1px}
+/* An open conflict rides on the unit number: the same red triangle the
+   section counts and the material rows carry. */
+.tbl .xwarn{display:inline-flex;margin-left:5px;color:#b3261e;vertical-align:-2px}
+.tbl .xwarn svg{width:12px;height:12px}
 .tbl tfoot td{color:var(--ink);font-weight:600}
 .fqt{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fqh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink)}
@@ -884,6 +889,12 @@ body.elev .mtools{display:none}
 .fqt tr.on .tpill{border-color:var(--ink-3);color:var(--ink);font-weight:600}
 .fqmix .mixnet{font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .fqmix .mixnet b{color:var(--ink);font-weight:600}
+/* Where the mix is: one button lays every type's colour on the plan. */
+.fqmix .mixsee{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;
+  border:1px solid var(--line);border-radius:6px;background:var(--card);font-size:11.5px;font-weight:500;cursor:pointer;white-space:nowrap}
+.fqmix .mixsee svg{width:13px;height:13px}
+.fqmix .mixsee:hover{border-color:var(--ink)}
+.fqmix .mixsee.on{background:#111;color:#fff;border-color:#111}
 .laychips{display:flex;gap:4px;margin-right:6px;flex:0 0 auto}
 .laychips .chip{padding:1px 8px 1px 6px;font-size:11px;cursor:pointer;white-space:nowrap;
   display:inline-flex;align-items:center;gap:4px}
@@ -907,7 +918,7 @@ body.elev .mtools{display:none}
   overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .lpile{display:flex;flex-direction:column;gap:4px}
 .ltile{position:relative;border:1px solid transparent;border-radius:6px;padding:4px;
-  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:default;user-select:none;
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;user-select:none;
   transition:transform .17s cubic-bezier(.2,.7,.3,1),background .12s,box-shadow .17s;
   will-change:transform}
 .ltile .wrap{position:relative;width:100%}
@@ -934,36 +945,24 @@ body.elev .mtools{display:none}
 /* Colour only: a bolder weight is wider, so a two-line name such as
    "Drainage (Plomb. & Méc.)" broke onto a third line and the tile grew. */
 .ltile.on .nm{color:#2f3a05}
-/* The selected drawing is ink with its name reversed out: a grey wash is
-   lost against the strip at this size. */
-.ltile.sel{background:var(--ink);border-color:var(--ink)}
-.ltile.sel .nm{color:#fff}
-.ltile.sel .pic{border-color:var(--ink)}
-/* Carried: no transition at all, or the tile lags behind the pointer. A
-   carried tile keeps its own colours: the selected one stays ink with its
-   name in white — turned white on white, the name vanished mid-drag. */
-.ltile.held{transition:none;z-index:9;box-shadow:0 6px 18px rgba(0,0,0,.18)}
-.ltile.held:not(.sel){background:var(--card);border-color:var(--line-2)}
-.ltile.held:not(.sel) .pic{border-color:var(--ink-3)}
+/* Carried: no transition at all, or the tile lags behind the pointer. */
+.ltile.held{transition:none;z-index:9;box-shadow:0 6px 18px rgba(0,0,0,.18);background:var(--card);border-color:var(--line-2)}
+.ltile.held .pic{border-color:var(--ink-3)}
 /* Kept through the landing so the lift fades instead of blinking off. */
 .ltile.landing{z-index:9;box-shadow:0 6px 18px rgba(0,0,0,.18)}
 body.ldrag,body.ldrag *{cursor:grabbing !important}
 
-/* The badge: black with a + while the drawing is aside, green with its
-   place in the pile once it is on the sheet. Two things to show means a
-   pill — a 24 px circle cannot hold a drawing and a figure at once. */
+/* The eye: ink with the eye open while the drawing is shown, white with
+   the eye crossed out while it is hidden. A shown eye stays ink under the
+   pointer; a hidden one turns ink, previewing what the click will do. */
 .lbadge{position:absolute;right:3px;top:3px;width:24px;height:24px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;gap:1px;cursor:pointer;z-index:3;
-  background:var(--ink);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);
-  transition:background .12s,transform .12s}
-/* The + turns the green it will become: the hover says what the click does. */
-.lbadge:hover{background:#c3e05a;color:#2f3a05;transform:scale(1.08)}
-.lbadge .lu{width:12px;height:12px}
-.lbadge.on{width:auto;min-width:40px;border-radius:12px;padding:0 7px 0 2px;
-  background:#c3e05a;color:#2f3a05;box-shadow:0 1px 3px rgba(0,0,0,.22)}
-.lbadge.on:hover{background:#b6d93f}
-.lbadge svg.pb3{width:24px;height:24px;display:block;overflow:visible}
-.lbadge .rk{font-size:12.5px;font-weight:650;line-height:1;font-variant-numeric:tabular-nums}
+  display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;
+  background:var(--card);color:var(--ink-3);border:1px solid var(--line);
+  transition:background .12s,color .12s,border-color .12s}
+.lbadge .lu{width:13px;height:13px}
+.lbadge:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.lbadge.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.lbadge.last,.lbadge.last:hover{cursor:default;background:var(--ink);color:#fff;border-color:var(--ink)}
 
 /* The card belongs to the thumbnail it is opened from, so it is measured
    to that tile's height rather than parked at a corner. */
@@ -1159,6 +1158,9 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 /* One typology, one colour, laid on the unit it belongs to. */
 .plan .utagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:14;pointer-events:none;overflow:visible}
 .plan .utagsvg polygon{opacity:.45;mix-blend-mode:multiply}
+/* Each unit's edge in its type's colour, a hairline at any zoom, so two
+   units of one type still read as two. */
+.plan .utagsvg polygon{stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 /* The 2D pane is a window onto a sheet that is larger than it: the drawing
    and everything laid over it move and scale together inside .vp, so a
    percentage keeps meaning the same thing at every zoom. */
@@ -1203,16 +1205,17 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .zb:hover{background:var(--fill);color:var(--ink)}
 .zb svg{width:14px;height:14px}
 /* The orbit / move switch, at 60 % of its first size: a tool in the corner,
-   not a toolbar over the building. */
-.mtools{position:absolute;left:10px;top:10px;z-index:7;display:flex;gap:2px;padding:2px;
+   not a toolbar over the building. It sits in the foot row beside the
+   zoom, as the plan's quarter turn does: every control for the view in one place. */
+.mtools{display:flex;gap:2px;padding:2px;
   background:#fff;border:1px solid var(--line);border-radius:7px}
 .mtools .zb{width:31px;height:31px;flex:0 0 31px;border-radius:5px;color:var(--ink-3)}
 .mtools .zb svg{width:17px;height:17px}
 /* The tool in use is the one solid thing in the corner. */
 .mtools .zb.on,.mtools .zb.on:hover{background:#111;color:#fff}
 [data-fi="low"] .mtools{display:none}
-/* The view switch, top left: the model, or one façade seen square. The drag
-   tools step right to make room; in an elevation they are hidden anyway. */
+/* The view switch, top left: the model, or one façade seen square. In an
+   elevation the drag tools in the foot row are hidden. */
 .eseg{position:absolute;left:10px;top:10px;z-index:8;display:flex;gap:2px;padding:2px;
   background:#fff;border:1px solid var(--line);border-radius:8px}
 .eseg .zs{height:31px;min-width:31px;padding:0 9px;border-radius:6px;display:flex;align-items:center;
@@ -1220,7 +1223,6 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .eseg .zs:hover{background:var(--fill);color:var(--ink)}
 .eseg .zs.on,.eseg .zs.on:hover{background:#111;color:#fff}
 .eseg .div{width:1px;background:var(--line-2);margin:5px 2px}
-.zone[data-zone="model"] .mtools{left:auto;right:56px}
 [data-fi="low"] .eseg{display:none}
 /* The corner view, bottom right, never under the zoom: the whole drawing at
    a glance and the rectangle of what is on screen. Flat, framed, opaque. */
@@ -1353,7 +1355,10 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 /* The three axes as the camera sees them, in the corner the drawing never
    uses. Red X, green Y, blue Z — the convention every host application the
    file passes through already draws. */
-.axes{position:absolute;left:10px;bottom:50px;z-index:5;width:62px;height:62px;
+/* The origin stands over the zoom figure: the readout is 46 px wide and
+   centred, starting 10 + 33 px in, so its middle is at 66 px; the 62 px box
+   has the origin at its own middle, so its left edge is at 66 − 31. */
+.axes{position:absolute;left:35px;bottom:50px;z-index:5;width:62px;height:62px;
   pointer-events:none}
 .axes line{stroke-width:1.8;stroke-linecap:round}
 .axes line[data-ax="x"]{stroke:#d24b3e}
@@ -1394,6 +1399,9 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .vp.drag .umark polygon.hit:hover{fill:transparent;stroke:none}
 .umark polygon.on{fill:rgba(139,160,15,.16);stroke:#8ba00f;stroke-width:1.6;
   vector-effect:non-scaling-stroke;pointer-events:auto;cursor:pointer}
+/* With the typologies on, the unit's own colour is its fill: the
+   selection keeps only its outline, so 4½ never reads as a fourth type. */
+.plan:has(.utagsvg) .umark polygon.on{fill:transparent}
 /* The unit's number, over its outline: on hover, and kept on the selected
    unit after the click. Drawn on the viewport, not on the sheet: inside the
    scaled sheet a 12 px label became a 2 px one magnified six times — soft,
@@ -1748,22 +1756,23 @@ const V = {
      here and not on the fidelity panel: the panel drives the consultants'
      sheets, and the architect's own drawing was never one of its dials. */
   lay: { plan: { on: true, opacity: 100 },
-    arp: { on: true, opacity: 55, scale: 100, x: 0, y: 0 },
-    pay: { on: false, opacity: 55, scale: 100, x: 0, y: 0 },
+    arp: { on: false, opacity: 100, scale: 100, x: 0, y: 0 },
+    pay: { on: false, opacity: 100, scale: 100, x: 0, y: 0 },
     /* The four consultant disciplines: independent toggles, full-bleed on
        the same 2000×1675 canvas the floor plan already uses, so none of
        them needs sheetStyle()'s scale-and-nudge the surveyor's sheet does. */
-    electrical: { on: false, opacity: 55 }, drainage: { on: false, opacity: 55 },
-    distribution: { on: false, opacity: 55 }, ventilation: { on: false, opacity: 55 } },
+    electrical: { on: false, opacity: 100 }, drainage: { on: false, opacity: 100 },
+    distribution: { on: false, opacity: 100 }, ventilation: { on: false, opacity: 100 } },
   /* The pile, front to back. Dragging a thumbnail rewrites this, and
      everything else — the badges, the z-index of each drawing — is read
      from it, so there is one answer to "which sheet is on top". */
-  /* Front first, in the order the disciplines are read: the surveyor's
-     ground, the architecture standing on it, the landscape around it, then
-     electrical and mechanical running through it. Every sheet is printed
+  /* Front first: the architecture is what the screen opens on, the
+     surveyor's ground right under it, then the landscape and the
+     electrical and mechanical sheets. Only the architecture is shown at
+     first; the rest wait, hidden, in the pile. Every sheet is printed
      white-on-white, so the pile multiplies instead of covering — see
      .plan .lay — and a sheet in front no longer erases the ones behind. */
-  layOrder: ["arp", "plan", "pay", "electrical", "drainage", "distribution", "ventilation"],
+  layOrder: ["plan", "arp", "pay", "electrical", "drainage", "distribution", "ventilation"],
   /* A conflict is caught the moment the drawing that reveals it is laid
      on the sheet; the stamp is kept so the ticket can say when, and so the
      same conflict is not "caught" twice. */
@@ -1801,13 +1810,15 @@ function sprite() {
     "sigma", "calculator", "chart-column", "percent", "calendar-clock", "timer", "list-checks",
     "flag", "folder-tree", "file-stack", "hard-drive", "book-open", "shield-check",
     /* sharing: the button, and the two rights it can grant */
-    "share-2", "eye", "message-square",
+    "share-2", "eye", "eye-off", "message-square",
     /* the opacity line on each drawing's card */
     "blend",
     /* each drawing's discipline, centred on its thumbnail; see LAYGLYPH */
     "map", "drafting-compass", "trees", "zap", "waves", "droplet", "fan",
     /* the margin: posting a note, keeping one for the studio */
     "lock", "map-pin", "send", "users", "trash-2",
+    /* the plan's comment button */
+    "message-circle-plus",
     /* a ticked task is filed by hand, and can be pulled back out */
     "archive", "archive-restore",
     /* the task editor */
@@ -2480,62 +2491,29 @@ const LAYDOC = {
   }])),
 };
 
-/* The mark on a thumbnail: a line per drawing in the pile with this one
-   lit at its own height, and the rank beside it. The drawing says where
-   without a convention to learn; the figure gives the exact place once
-   the pile is deeper than the eye can count. */
-function layBars(rank, n) {
-  const FY = 5, FH = 14;
-  const gap = n <= 5 ? 2 : 1.2;
-  const h = Math.max(1, Math.min(3, (FH - (n - 1) * gap) / n));
-  const top = FY + (FH - (n * h + (n - 1) * gap)) / 2;
-  return `<svg class="pb3" viewBox="0 0 24 24">${Array.from({ length: n }, (_, j) => j + 1)
-    .map((r) => {
-      const lit = r === rank, hh = lit ? Math.max(h, 2.6) : h;
-      return `<rect x="6" y="${(top + (r - 1) * (h + gap)).toFixed(2)}" width="12" height="${hh}"
-        rx="${Math.min(hh, 2) / 2}" fill="currentColor" opacity="${lit ? 1 : 0.22}"/>`;
-    }).join("")}</svg>`;
-}
-
+/* The eye on each thumbnail says whether that drawing is seen, and
+   switches it: open, the drawing is on the sheet at its own opacity;
+   crossed out, it is hidden and reads 0 %. The last drawing shown keeps
+   its eye open and cannot be hidden, so the pane is never left empty. */
 function layBadge(k) {
-  const on = V.lay[k].on, shown = layShown();
-  /* A drawing that is the only one on the sheet has nothing to be added
-     to and cannot be taken off: no badge at all. */
-  if (on && shown.length === 1) return "";
-  const rank = shown.indexOf(k) + 1;
-  const word = rank === 1 ? "devant" : rank === shown.length ? "au fond" : "au milieu";
-  const other = (shown.find((x) => x !== k) || k);
-  return `<span class="lbadge ${on ? "on" : ""}" ${act("lstack", k)}
-    title="${on ? `${LAYDOC[k].short} — ${rank} sur ${shown.length}, ${word}`
-      : `Superposer ${LAYDOC[k].short.toLowerCase()} avec ${LAYDOC[other].short.toLowerCase()}`}">${
-    on ? layBars(rank, shown.length) + `<b class="rk">${rank}</b>` : icon("plus")}</span>`;
+  const on = V.lay[k].on, last = on && layShown().length === 1;
+  const name = LAYDOC[k].short;
+  return `<span class="lbadge ${on ? "on" : ""} ${last ? "last" : ""}" ${last ? "" : act("lstack", k)}
+    title="${last ? `${name} — seul dessin affiché` : on ? `Masquer ${name}` : `Afficher ${name}`}">${icon(on ? "eye" : "eye-off")}</span>`;
 }
 
-/* Putting a drawing on the sheet, or taking it off, is one button changing
-   shape: the circle with its + stretches into the pill with its pile and
-   rank, or the pill draws back into the circle. The click re-renders the
-   strip, so the old badge's size and colour are read first and the new one
-   is grown from them on the next frame. */
-function morphBadge(k) {
-  const sel = `[data-ltile="${k}"] .lbadge`;
-  const old = document.querySelector(sel);
-  if (!old) return;
-  const r = old.getBoundingClientRect();
-  const cs = getComputedStyle(old);
-  const from = { width: `${r.width}px`, minWidth: "0px", padding: cs.padding, borderRadius: cs.borderRadius,
-    backgroundColor: cs.backgroundColor, color: cs.color };
-  requestAnimationFrame(() => {
-    const el = document.querySelector(sel);
-    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const ns = getComputedStyle(el);
-    const to = { width: `${el.getBoundingClientRect().width}px`, minWidth: "0px", padding: ns.padding,
-      borderRadius: ns.borderRadius, backgroundColor: ns.backgroundColor, color: ns.color };
-    const ease = "cubic-bezier(.2,.7,.3,1)";
-    el.animate([from, to], { duration: 240, easing: ease });
-    [...el.children].forEach((c) => c.animate(
-      [{ opacity: 0, transform: "scale(.6)" }, { opacity: 1, transform: "scale(1)" }],
-      { duration: 200, delay: 60, easing: ease, fill: "backwards" }));
-  });
+/* Shown or hidden, in one place for the eye, the thumbnail and the
+   opacity knob. The two consultants' sheets are dials on the panel, so
+   they go through it and the panel and the sheet never disagree. A hidden
+   drawing keeps its opacity, to come back at the same strength. */
+function setLayShown(k, on) {
+  if (k === "arp" || k === "pay") {
+    dial.setValue(k === "arp" ? "layers.surveyor" : "layers.landscaping", on);
+    return;
+  }
+  V.lay[k].on = on;
+  if (on && !V.lay[k].opacity) V.lay[k].opacity = 100;
+  render();
 }
 
 /* The discipline, large in the middle of the thumbnail: at strip size the
@@ -2669,7 +2647,7 @@ const fileGlyph = (file) => {
 function layCardHTML(peekKey = null) {
   if (!peekKey && !V.layCard) return "";
   const k = peekKey || (layKeys().includes(V.layPick) ? V.layPick : "plan");
-  const D = LAYDOC[k], op = Math.round(V.lay[k].opacity);
+  const D = LAYDOC[k], op = V.lay[k].on ? Math.round(V.lay[k].opacity) : 0;
   const docs = layDocs(k), cur = V.layCur[k] || 0, doc = docs[cur];
   const past = docs.map((d, i) => ({ ...d, i })).filter((d) => d.i !== cur);
   const pdf = extOf(doc.file) === "pdf";
@@ -3046,7 +3024,7 @@ const typoHTML = () => {
     if (!on.includes(r[3])) return "";
     const poly = polys[r[2]];
     if (!poly) return "";
-    return `<polygon points="${poly.map(([x, y]) => `${x},${y}`).join(" ")}" fill="${TYPO_INK[r[3]]}"></polygon>`;
+    return `<polygon points="${poly.map(([x, y]) => `${x},${y}`).join(" ")}" fill="${TYPO_INK[r[3]]}" stroke="${TYPO_INK[r[3]]}"></polygon>`;
   }).join("");
   return parts ? `<svg class="utagsvg" viewBox="0 0 1 1" preserveAspectRatio="none">${parts}</svg>` : "";
 };
@@ -4090,7 +4068,7 @@ function contentHTML() {
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
               </div>
               <div class="npins" data-npins></div>
-              ${elevNavHTML()}${mtools}${north("model")}${axes}${mini("model")}${zoomPill("model")}
+              ${elevNavHTML()}${north("model")}${axes}${mini("model")}<div class="zctl">${zoomPill("model")}${mtools}</div>
             </div>`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
@@ -4236,9 +4214,9 @@ function floorQuant() {
       ofType(ty).reduce((s, r) => s + r[6], 0)]),
     count: floor.length,
     net,
-    /* An open crossing rides on the number, as it did on the card. */
+    /* An open conflict rides on the number, as it did on the card. */
     rows: floor.map((r) => ({
-      cells: [`${unitNo(r)}${r[7] ? `<span class="xdot" title="${r[1]}"></span>` : ""}`,
+      cells: [`${unitNo(r)}${r[7] ? `<span class="xwarn" title="${r[7]} conflit${r[7] > 1 ? "s" : ""} ouvert${r[7] > 1 ? "s" : ""} — voir Conflits">${icon("alert-triangle")}</span>` : ""}`,
         `<span class="chip tpill"><span class="sw" style="background:${TYPO_INK[baseTypo(r[5])]}"></span>${r[5]}</span>`,
         fqNum(r[6]), fqNum(r[6] * M2, 1), fqPct(r[6], net)],
       on: r === unit, index: visible.indexOf(r),
@@ -4270,6 +4248,13 @@ function fqMixHTML(q) {
       <span style="flex:1"></span>
       <span class="mixnet"><b>${fqNum(q.net)}</b> pi² nets sur ${q.count} unités</span>
     </div>
+    ${(() => {
+      /* The mix says how many; this says where: every unit of the level
+         filled on the plan in its type's colour, the three types at once. */
+      const all = TYPOS.every((t) => V.typo[t]);
+      return `<span class="mixsee ${all ? "on" : ""}" ${act("typoall")} aria-pressed="${all}"
+        title="${all ? "Retirer les typologies du plan" : "Colorer chaque unité du plan selon sa typologie"}">${icon("eye")}Voir sur le plan</span>`;
+    })()}
   </div>`;
 }
 
@@ -4717,19 +4702,12 @@ function pinBubbleHTML() {
     <div class="row" style="gap:3px">
       <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">À l'interne</span></span>
       <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
-      <span style="flex:1"></span>
-      <span class="zone">${(() => {
-        /* Two short lines, as in the study: the drawing, then where on it. */
-        const [what, ...where] = pinAnchor({ ...V.pending, scope: V.pinScope }).split(" — ");
-        return where.length ? `${what}<br>${where.join(" — ")}` : what;
-      })()}</span>
     </div>
     <textarea class="nnew" data-pindraft rows="3"
-      placeholder="${team ? "Note interne — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
+      placeholder="${team ? "Note interne — les collaborateurs ne la verront pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
     <div class="row" style="gap:6px;align-items:center">
-      <span class="btnw solid" ${act("pinpost")}>${icon(team ? "lock" : "send")}<span class="hi">Épingler</span></span>
+      <span class="btnw solid" ${act("pinpost")} title="Commenter (⌘↵)">${icon("send")}<span class="hi">Commenter</span></span>
       <span class="btnw" ${act("pincancel")}><span class="hi">Annuler</span></span>
-      <span style="flex:1"></span><span class="kb">⌘↵</span>
     </div>
   </div>`;
 }
@@ -4741,8 +4719,8 @@ function pinBubbleHTML() {
    drawings can be measured against. */
 function pinArmHTML() {
   return `<span class="pinarm ${V.pinMode ? "on" : ""}" ${act("pinmode")}
-    title="${V.pinMode ? "Échap pour reposer l'épingle" : "Déposer une épingle sur le plan — ou double-cliquez le plan directement"}">${icon("map-pin")}<span
-    class="hi">${V.pinMode ? "Cliquez un point du plan" : "Épingler"}</span></span>`;
+    title="${V.pinMode ? "Échap pour reposer l'épingle" : "Commenter un point du plan — ou double-cliquez le plan directement"}">${icon("message-circle-plus")}<span
+    class="hi">${V.pinMode ? "Cliquez un point du plan" : "Commenter"}</span></span>`;
 }
 
 function marginHTML() {
@@ -4769,7 +4747,7 @@ function marginHTML() {
           <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
         </div>
         <textarea class="hi nnew" data-mdraft rows="3"
-          placeholder="${team ? "Commentaire interne — l'invité ne le verra pas" : "Commentaire partagé — visible par le lien"}">${V.mdraft.replace(/</g, "&lt;")}</textarea>
+          placeholder="${team ? "Commentaire interne — les collaborateurs ne le verront pas" : "Commentaire partagé — visible par le lien"}">${V.mdraft.replace(/</g, "&lt;")}</textarea>
         <div class="nact">
           <span class="chip ${V.pinMode ? "on" : ""}" ${act("markpin")} title="Armer l'épingle, puis cliquer un point du plan">${icon("map-pin")}<span class="lb">${V.pinMode ? "Cliquez le plan" : "Épingler au plan"}</span></span>
           <span style="flex:1"></span>
@@ -5092,7 +5070,10 @@ window.fitteSelectUnit = (unitStr) => {
   if (rowIndex < 0) return false;
   // A picked window must remain selectable even when the list is filtered.
   V.query = "";
-  TYPOS.forEach((type) => {
+  /* The typologies filter the list too: they give way only when they
+     would hide the unit picked, never when they already show it. */
+  const on = typosOn();
+  if (on.length && !on.includes(rows[rowIndex][3])) TYPOS.forEach((type) => {
     if (V.typo[type]) dial.setValue(`typologies.${type}`, false);
   });
   V.screen = "Unités";
@@ -5470,6 +5451,8 @@ document.addEventListener("pointerdown", (e) => {
   const track = e.target.closest?.("[data-lop]");
   if (!track) return;
   const k = track.dataset.lop, box = track.getBoundingClientRect();
+  /* A hidden drawing reads 0 %: taking hold of its opacity brings it back. */
+  if (!V.lay[k].on) setLayShown(k, true);
   const apply = (ev) => {
     /* Never to zero: a drawing at 0 % is gone without being taken off,
        which is exactly the confusion a hidden layer used to cause. */
@@ -5503,6 +5486,40 @@ function commitOrder(shown) {
   V.layOrder = V.layOrder.map((k) => shown.includes(k) ? shown[i++] : k);
 }
 
+/* Thumbnails slide from where they were to where the new order puts them,
+   the same landing a drag gets: positions noted, the change made, the
+   difference played back. */
+function slideStrip(change) {
+  const was = {};
+  document.querySelectorAll("[data-ltile]").forEach((el) => { was[el.dataset.ltile] = el.getBoundingClientRect().top; });
+  change();
+  const after = [...document.querySelectorAll("[data-ltile]")].filter((el) => was[el.dataset.ltile] !== undefined);
+  after.forEach((el) => {
+    const dy = was[el.dataset.ltile] - el.getBoundingClientRect().top;
+    if (!dy) return;
+    el.style.transition = "none";
+    el.style.transform = `translateY(${dy}px)`;
+  });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    after.forEach((el) => { el.style.transition = ""; el.style.transform = ""; });
+  }));
+}
+/* A drawing brought to the front: first in the pile, on if it was off. A
+   drawing already on only changes place, so the strip and the stacking are
+   redrawn alone; one that was off needs its sheet drawn, so the whole pane
+   is. The two consultants' sheets are switched on through their dials, as
+   their badge does, so the panel and the sheet never disagree. */
+function bringLayFront(k) {
+  if (!layKeys().includes(k)) return;
+  const wasOn = V.lay[k].on;
+  slideStrip(() => {
+    commitOrder([k, ...layKeys().filter((x) => x !== k)]);
+    if (wasOn) { paintStrip(); return; }
+    setLayShown(k, true);
+  });
+  say(`${LAYDOC[k].short} devant${wasOn ? "" : ", posé sur le plan"}.`);
+}
+
 document.addEventListener("pointerdown", (e) => {
   const tile = e.target.closest?.("[data-ltile]");
   if (!tile || e.target.closest(".lbadge")) return;
@@ -5525,13 +5542,6 @@ document.addEventListener("pointerdown", (e) => {
      with no re-render, so the mark and the sheet are already right while
      the thumbnail is still in the hand. */
   const reflect = (order) => {
-    const shown = order.filter((x) => V.lay[x].on);
-    els.forEach((el) => {
-      const kk = el.dataset.ltile, b = el.querySelector(".lbadge.on");
-      if (!b) return;
-      const r = shown.indexOf(kk) + 1;
-      b.innerHTML = layBars(r, shown.length) + `<b class="rk">${r}</b>`;
-    });
     const zone = document.querySelector('[data-zone="plan"]');
     order.forEach((kk, j) => {
       const z = order.length - j;
@@ -6375,6 +6385,14 @@ function addCodeDialogHTML(d) {
 let TOAST_TIMER = null;
 function say(message) {
   V.toast = message;
+  /* Shown now, not at the next render: a strip reorder redraws only the
+     strip, and its message would otherwise wait for an unrelated change. */
+  const frame = document.getElementById("frame");
+  if (frame) {
+    let t = frame.querySelector(":scope > .toast");
+    if (!t) { t = document.createElement("div"); t.className = "toast hi"; frame.appendChild(t); }
+    t.textContent = message;
+  }
   clearTimeout(TOAST_TIMER);
   TOAST_TIMER = setTimeout(() => { V.toast = null; render(); }, 2600);
 }
@@ -6527,6 +6545,13 @@ function onClick(e) {
       if (V.scope === "Bâtiment") TYPOS.forEach((ty) => { if (V.typo[ty]) dial.setValue(`typologies.${ty}`, false); });
       break;
     case "csv": exportCSV(value); say(`Tableau « ${value} » téléchargé en .csv.`); break;
+    /* The typologies are dials (the fidelity panel owns them), so the
+       button goes through the dial and lets applyDial write V. */
+    case "typoall": {
+      const on = !TYPOS.every((t) => V.typo[t]);
+      TYPOS.forEach((t) => dial.setValue(`typologies.${t}`, on));
+      return;
+    }
     /* Four files would be four clicks; the four tables in one file are read
        as one sheet with four blocks, which is how a quantity take-off is
        passed around anyway. */
@@ -6738,28 +6763,23 @@ function onClick(e) {
        and let applyDial write V — writing both would let them disagree
        on the next dial change. The architect's sheet is not on the panel,
        so it is written here. */
-    /* Picking a thumbnail selects it; its card stays a hover card, shown
-       again at once since the click redrew the strip under the pointer. */
+    /* Picking a thumbnail puts that drawing on top of the sheet: it is laid
+       on if it was off, and moved to the head of the pile, which is the
+       front of the stack. Its card stays a hover card. */
     case "lpick":
       V.layCard = false;
       V.layPick = value;
       V.layMenu = false;
-      render();
-      showLayPeek(value);
+      bringLayFront(value);
       return;
     /* The last drawing on the sheet carries no badge at all, so there is
        no way in here to empty the pane. */
     case "lstack": {
-      morphBadge(value);
-      const adding = !V.lay[value].on;
+      const show = !V.lay[value].on;
       V.layPick = value;
-      V.layCard = true;
       V.layMenu = false;
-      if (value === "plan") { V.lay.plan.on = adding; break; }
-      /* Only the surveyor's and the landscaper's sheets are dials on the
-         fidelity panel; an engineering sheet is toggled where it is seen. */
-      if (ENG_SET.has(value)) { V.lay[value].on = adding; break; }
-      dial.setValue(value === "arp" ? "layers.surveyor" : "layers.landscaping", adding);
+      setLayShown(value, show);
+      say(`${LAYDOC[value].short} ${show ? "affiché" : "masqué"}.`);
       return;
     }
     /* A conflict is caught the first time it is looked at: the stamp is
@@ -6992,10 +7012,10 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   /* No typology fill is laid on the sheet until one is asked for. */
   typologies: { _collapsed: false, "3½": false, "4½": false, "5½": false },
   layers: { _collapsed: false,
-    surveyor: true,
-    surveyorOpacity: [55, 0, 100, 5],
+    surveyor: false,
+    surveyorOpacity: [100, 0, 100, 5],
     landscaping: false,
-    landscapingOpacity: [55, 0, 100, 5],
+    landscapingOpacity: [100, 0, 100, 5],
     align: { _collapsed: true,
       surveyorScale: [100, 60, 160, 1],
       surveyorX: [0, -40, 40, .5],
@@ -7027,6 +7047,21 @@ const dial = DialKit.createDialKit("Wireframe C3", {
 }, { id: "wireframe-c3-r7", persist: true });
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
+/* Every drawing opens at full opacity. A panel saved before that holds the
+   two consultants' sheets at 55 %: they are raised once, here, rather than
+   by a new panel id, which would also drop every other saved setting. */
+if (!localStorage.getItem("wireframe-c3-op100")) {
+  dial.setValue("layers.surveyorOpacity", 100);
+  dial.setValue("layers.landscapingOpacity", 100);
+  localStorage.setItem("wireframe-c3-op100", "1");
+}
+/* The screen opens on the architecture alone: a panel saved with the
+   surveyor's or the landscaper's sheet shown is set back once. */
+if (!localStorage.getItem("wireframe-c3-arch-only")) {
+  dial.setValue("layers.surveyor", false);
+  dial.setValue("layers.landscaping", false);
+  localStorage.setItem("wireframe-c3-arch-only", "1");
+}
 
 function applyDial(v) {
   V.screen = SCREEN_FR[v.screen] || V.screen;
