@@ -337,6 +337,58 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    instead of in a column narrow enough to stack them. */
 .codelist{display:flex;flex-direction:column;gap:8px}
 .codelist .codeempty{font-size:12px;color:var(--ink-3);padding:4px 2px}
+/* The question bar of a code: the whole code is read, in the office's
+   copy then online, and the answer is the articles that govern the
+   question, each saying where it was found. Its words show at any
+   fidelity, like the dialog: it is the application answering. */
+.cask{display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 10px;border:1px solid var(--line);border-radius:7px;background:var(--card);margin-bottom:8px}
+.cask:focus-within{border-color:var(--ink)}
+.cask svg{width:14px;height:14px;color:var(--ink-3);flex:none}
+.cask .in{display:inline-flex;align-items:center;height:21px;padding:0 7px;border-radius:5px;background:var(--fill);font-size:11.5px;color:var(--ink-2);white-space:nowrap}
+.cask input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:12.5px;color:var(--ink);background:transparent}
+.cask input::placeholder{color:var(--ink-3)}
+.cask .x{display:none}
+.cask.has .x{display:flex}
+.cask.has kbd{display:none}
+.cask .x,.cask kbd{align-items:center;color:var(--ink-3);cursor:pointer;padding:3px}
+.cask kbd{display:flex;font:inherit;font-size:11px;border:1px solid var(--line-2);border-radius:4px;height:20px;padding:0 5px;cursor:default}
+.cans{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.cans:empty{display:none}
+.cprog{display:flex;align-items:center;gap:12px;font-size:11.5px;color:var(--ink-3);flex-wrap:wrap}
+.cprog .s{display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none}
+.cprog .s b{font-weight:500;color:var(--ink-2)}
+.cprog .s.off{text-decoration:line-through;opacity:.6}
+.cprog .s .ok svg{width:12px;height:12px;color:#2f7a4d}
+.cprog .s svg{width:12px;height:12px}
+.cprog .run{width:10px;height:10px;border:1.5px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:cspin .8s linear infinite}
+@keyframes cspin{to{transform:rotate(360deg)}}
+.chead{font-size:11.5px;color:var(--ink-3)}
+.chead b{color:var(--ink);font-weight:600}
+.csyn{padding:8px 10px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--fill-2);font-size:12.5px;color:var(--ink)}
+.csyn .cite{display:inline-flex;height:18px;padding:0 5px;margin:0 1px;border:1px solid var(--line);border-radius:4px;background:var(--card);font-size:11px;color:var(--ink-2);vertical-align:1px}
+.csyn .cite[data-act]{cursor:pointer}
+.csyn small{display:block;margin-top:3px;color:var(--ink-3);font-size:11px}
+.chit{display:grid;grid-template-columns:minmax(78px,max-content) 1fr auto;gap:2px 12px;padding:9px 11px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--card)}
+.chit:hover{border-color:var(--line)}
+.chit .id{font-weight:600;font-size:12.5px;white-space:nowrap}
+.chit .t{font-weight:600;font-size:13px}
+.chit .q{grid-column:2 / 4;color:var(--ink-2);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chit .q mark{background:#f6e7a6;color:var(--ink);padding:0 1px;border-radius:2px}
+.chit .why{grid-column:2 / 4;font-size:12.5px;color:var(--ink)}
+.chit .why i{font-style:normal;color:var(--ink-3)}
+.chit .from{grid-column:2 / 4;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-3);min-width:0}
+.chit .from > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chit .from b{font-weight:500;color:var(--ink-2)}
+.chit .from svg{width:12px;height:12px;flex:none}
+.chit .from a{color:var(--ink-2);margin-left:auto;white-space:nowrap}
+.chit .flag{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:4px;font-size:10.5px;white-space:nowrap;border:1px solid var(--line);flex:none}
+.chit .flag.new{border-color:#b3261e;color:#b3261e}
+.chit .clarity{cursor:default}
+.chit .clarity:hover{border-color:transparent;background:none}
+.celse{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.celse svg{width:12px;height:12px}
+.celse u{color:var(--ink);cursor:pointer}
+.clh{font-size:11.5px;color:var(--ink-3);padding-top:2px}
 .coderow{display:grid;grid-template-columns:258px 1fr;gap:0;align-items:stretch;
   border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
 .coderow:hover{border-color:var(--line)}
@@ -608,27 +660,40 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 /* Façade tables: the head row opens the elevation, a material row keeps
    that material in colour. The swatch is the colour the model paints it. */
 .fq-fac{display:flex;flex-direction:column;gap:8px}
-/* The building's materials table sums the four below it: not a door to
-   one elevation, so its head is not a button. */
-.fbat thead tr{cursor:default}
+/* The matrix: the material names on the left, the four façades as columns.
+   Only the façade headings are doors, so only they take the pointer. */
+.fmx th,.fmx td{padding-left:3px;padding-right:3px}
+.fmx th.n{width:48px}
+.fmx th.fsum{width:54px}
+/* The eye leads its façade's name: hidden eye is grey, the open one white
+   on the lit heading. */
+.fmx th.fh{padding-top:1px;line-height:1.25}
+.fmx th.fh svg{display:block;width:13px;height:13px;color:var(--ink-3);margin:0 0 1px auto}
+.fmx th.fh:hover svg{color:var(--ink)}
+.fmx th.fh.fon svg{color:#fff}
+.fmx .fnm{cursor:pointer}
+.fmx .fnm:hover{background:var(--fill-2)}
+.fmx th.fh{cursor:pointer;color:var(--ink);font-weight:600}
+.fmx th.fh .fhl{text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px}
+.fmx th.fh:hover .fhl{text-decoration-color:var(--ink-3)}
+.fmx th.fh.fon{background:#111;color:#fff;border-radius:5px 5px 0 0}
+.fmx td.fcol{background:var(--fill-2)}
+.fmx tbody tr.on td.fcol{background:#e3ebc8;font-weight:600}
+.fmx td.fnil{color:var(--ink-3)}
+.fmx td.n{cursor:pointer}
+.fmx td.fnil{cursor:default}
+.fmx .fsum{border-left:1px solid var(--line-2)}
+.fmx .fno{min-width:16px;margin-right:2px}
+.fmx .fsw{margin-right:5px}
 /* The types table: a swatch before each type, as in the mix band. */
 .btypes .fsw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
 .btypes tbody tr{cursor:pointer}
-.ftbl thead tr{cursor:pointer}
 .ftbl thead th{color:var(--ink);font-size:12px;font-weight:600;border-bottom-color:var(--line)}
 .ftbl thead th svg{width:13px;height:13px;margin-right:6px;vertical-align:-2px;color:var(--ink-3)}
-.ftbl thead tr:hover th{background:var(--fill)}
-.ftbl.open thead th{background:#111;color:#fff}
-.ftbl.open thead th svg{color:#fff}
-.ftbl.open thead tr:hover th{background:#000}
 .ftbl td:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;width:100%}
 .ftbl .fsw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;vertical-align:-1px}
 .ftbl .fno{display:inline-block;min-width:21px;color:var(--ink-3);font-variant-numeric:tabular-nums}
-/* The dropdown at the end of a material row, and the sheet it opens. */
-.ftbl th.fdd,.ftbl td.fdd{width:26px;padding-left:0;padding-right:2px;text-align:right}
-.ftbl .fddb{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:5px;color:var(--ink-3);cursor:pointer}
-.ftbl .fddb:hover{background:var(--fill);color:var(--ink)}
-.ftbl .fddb svg{width:14px;height:14px}
+/* The sheet a material's name opens, under its row. */
 .ftbl tr.fopen td{border-bottom-color:transparent}
 .ftbl tr.fsheet td{padding:2px 6px 12px;background:none;white-space:normal;max-width:none;overflow:visible}
 .fsh{display:flex;gap:12px;align-items:flex-start}
@@ -1987,6 +2052,8 @@ function sprite() {
     "archive", "archive-restore",
     /* the task editor */
     "pencil",
+    /* the code question: where an article was found, and the other code */
+    "globe", "file-text", "arrow-right",
     /* the scope switch and the real .csv it exports */
     "download",
     /* Codes: copying an article with its notes, writing to the person who answers for it */
@@ -3167,7 +3234,7 @@ function goIssue(id) {
     const face = it.faces[0];
     if (face) {
       V.facade = { face, focus: it.n };
-      V.matOpen = { ...V.matOpen, [`${face}|${it.n}`]: true };
+      V.matOpen = { ...V.matOpen, [`mat|${it.n}`]: true };
     }
     paintFacades();
     document.querySelector(face ? "[data-facades] tr.fopen" : "[data-facades] > .fqn:last-child")
@@ -3565,6 +3632,189 @@ const codeGroups = () => CODE_GROUPS
   .map(([prefix, label]) => [label, ARTICLES.filter((a) => a.doc.startsWith(prefix))
     .sort((x, y) => x.id.localeCompare(y.id, "fr", { numeric: true }))])
   .filter(([, rows]) => rows.length);
+
+/* ------------------------------------------------- the code question */
+
+/* Where each code is read: the office's copy in its document database, page
+   by page, then the official site, which can be newer than the copy. */
+const CODE_READ = {
+  "Code du Québec": { docs: ["Code de construction du Québec — chapitre I, CNB 2020 modifié.pdf", "Guide de l'utilisateur — CNB 2020, partie 3.pdf"],
+    sites: ["legisquebec.gouv.qc.ca", "nrc-cnrc.gc.ca"] },
+  "Loi-cadre": { docs: ["Loi sur l'aménagement et l'urbanisme — A-19.1.pdf"], sites: ["legisquebec.gouv.qc.ca", "quebec.ca"] },
+  "Règlement d'urbanisme": { docs: ["Règlement d'urbanisme 01-277 — consolidé.pdf", "Notes d'interprétation du bureau — arrondissement.docx"],
+    sites: ["montreal.ca"] },
+};
+/* The index: what each article is found by (its words and the words people
+   use for them), why it bears on this project, and where it was read. An
+   article the project does not follow carries its own text. */
+const CODE_INDEX = {
+  "Code du Québec": [
+    { id: "3.8.1.3", page: 612, k: "porte largeur fauteuil roulant accessible accessibilite handicap universel obstacle entree rampe 850", why: "Relevé: 800 mm à la porte d'entrée, 50 mm sous l'exigence." },
+    { id: "3.3.4.4", page: 471, k: "porte largeur logement corridor entree 810", why: "S'applique aux 104 portes de logement sur les corridors communs." },
+    { id: "3.4.2.1", page: 498, k: "issue issues sortie sorties evacuation escalier etage combien nombre incendie", why: "Chaque étage est desservi par 2 issues." },
+    { id: "3.3.1.4", page: 433, k: "distance parcours issue sortie evacuation gicleur gicleurs incendie loin", why: "À mesurer depuis la porte de logement la plus éloignée de chaque étage." },
+    { id: "3.4.3.2", page: 509, k: "escalier escaliers issue largeur main courante marche evacuation", why: "Les deux cages d'escalier, au plan de chaque étage." },
+    { id: "3.3.1.18", page: 455, k: "garde-corps garde corps balcon rampe terrasse chute hauteur toit", why: "Coté à 1 020 mm sur l'élévation des balcons." },
+    { id: "3.2.3.1", page: 301, k: "fenetre fenetres baie baies vitrage ouverture ouvertures facade limite voisin proche distance limitative rayonnement incendie", why: "Façade est: 74,2 m² dessinés pour 68,5 m² permis." },
+    { id: "3.3.1.9", page: 441, k: "corridor couloir largeur commun passage", why: "Relevé: 1 120 mm au point le plus étroit." },
+    { id: "3.2.1.1", page: 288, k: "classement classe construction incombustible combustible usage groupe hauteur aire batiment", why: "Groupe C sur 8 étages: construction incombustible exigée." },
+    { id: "9.7.2.3", page: 1088, k: "fenetre fenetres vitrage vitree lumiere eclairage naturel chambre piece", why: "Se lit pièce par pièce; les vitrages par unité sont dans Unités & ouvertures." },
+    { id: "9.5.3.1", page: 1061, k: "plafond hauteur libre piece sous-sol mezzanine", why: "À vérifier sous les retombées de poutres et les plafonds suspendus." },
+    { id: "A-3.2.3.1", from: "web", site: "nrc-cnrc.gc.ca", sec: "Note explicative", topic: "Calcul des baies d'une façade en biais", fig: "classement",
+      quote: "Lorsque la façade n'est pas parallèle à la limite, la distance limitative se mesure perpendiculairement à la façade, baie par baie.",
+      k: "fenetre fenetres baie baies facade limite voisin proche distance limitative biais calcul", why: "La façade est est en biais sur la limite: la surface permise peut monter.",
+      needs: "angle de la façade est sur le plan d'implantation" },
+  ],
+  "Loi-cadre": [
+    { id: "A-19.1", page: 1, k: "zonage cadre loi municipalite reglement pouvoir usage", why: "C'est d'elle que vient le règlement de l'arrondissement." },
+    { id: "art. 145.1", page: 88, k: "derogation mineure depasser exception ecart permettre accorder hauteur marge conseil", why: "Seule voie courte pour un petit écart, comme les 30 cm de marge arrière." },
+    { id: "art. 145.36", page: 97, sec: "Projets particuliers", topic: "Projet particulier (PPCMOI)", fig: "classement",
+      quote: "Le conseil peut autoriser un projet particulier qui déroge au règlement, à certaines conditions, par résolution.",
+      k: "ppcmoi projet particulier depasser exception hauteur densite usage deroger", why: "La voie pour l'étage de trop, qu'une dérogation mineure ne couvre pas.",
+      needs: "l'écart demandé et les conditions de la résolution" },
+    { id: "art. 123", page: 61, sec: "Approbation", topic: "Approbation référendaire", fig: "classement",
+      quote: "Certaines modifications au règlement de zonage sont soumises à l'approbation des personnes habiles à voter.",
+      k: "referendum referendaire voisins opposer opposition citoyens vote consultation", why: "Un projet particulier sur la hauteur peut y être soumis.",
+      needs: "si la disposition visée est susceptible d'approbation référendaire" },
+    { id: "Guide MAMH", from: "web", site: "quebec.ca", sec: "Guide municipal", topic: "Ce qu'une dérogation mineure ne peut pas viser", fig: "classement",
+      quote: "Une dérogation mineure ne peut porter ni sur l'usage ni sur la densité d'occupation du sol; elle vise un écart de faible portée.",
+      k: "derogation mineure depasser exception ecart hauteur densite usage limite", why: "Un étage entier n'est pas un écart de faible portée.",
+      needs: "aucun chiffre: guide d'interprétation" },
+  ],
+  "Règlement d'urbanisme": [
+    { id: "art. 9", page: 14, k: "hauteur etage etages maximale maximum haut grille zone depasser", why: "6 étages dessinés, 5 prescrits à la grille." },
+    { id: "art. 22", page: 29, k: "marge recul arriere limite terrain fond cour distance", why: "2,70 m dessinés pour 3,00 m exigés." },
+    { id: "art. 43", page: 41, k: "implantation taux sol emprise couverture terrain densite", why: "48,2 % pour 55 % permis." },
+    { id: "art. 71", page: 66, k: "stationnement case cases auto voiture voitures parking garage logement logements combien nombre", why: "104 logements; 22 cases dessinées pour 30 exigées." },
+    { id: "art. 72", page: 67, sec: "Stationnement", topic: "Réduction près du transport collectif", fig: "issues",
+      quote: "Le nombre minimal d'unités de stationnement peut être réduit pour un terrain situé près d'une station de transport collectif.",
+      k: "stationnement case cases reduction reduire metro autobus transport collectif station combien", why: "C'est la pièce qui manque pour conclure l'art. 71.",
+      needs: "distance à pied jusqu'à la station la plus proche" },
+    { id: "art. 86", page: 74, k: "velo velos bicyclette stationnement support logement", why: "104 supports requis, un par logement." },
+    { id: "art. 134", page: 112, k: "vert verdissement pleine terre gazon arbre arbres paysage vegetal vegetalise jardin", why: "17 % mesurés pour 20 % exigés." },
+    { id: "art. 21", page: 28, sec: "Implantation", topic: "Marges latérales", fig: "classement",
+      quote: "Une marge latérale minimale doit être conservée entre le bâtiment et chaque limite latérale du terrain.",
+      k: "marge recul laterale cote limite voisin terrain distance", why: "Lu sur le plan d'implantation, des deux côtés.",
+      needs: "limites latérales relevées par l'arpenteur" },
+    { id: "art. 71 (2026)", from: "web", site: "montreal.ca", newer: true, sec: "Stationnement", topic: "Stationnement — minimum retiré près du métro", fig: "issues",
+      quote: "Aucun nombre minimal d'unités de stationnement n'est exigé pour un terrain situé à moins de 500 m d'une station de métro.",
+      k: "stationnement case cases auto voiture parking garage logement logements combien nombre metro station reduction minimum",
+      why: "Plus récent que la copie du bureau (2024-03-12): l'exigence de 30 cases peut tomber.", needs: "distance à pied jusqu'à la station" },
+    { id: "Note interne", from: "bureau", file: "Notes d'interprétation du bureau — arrondissement.docx", page: 3, sec: "Note du bureau",
+      topic: "Balcons acceptés comme saillies dans la marge arrière", fig: "classement",
+      quote: "Sur un projet voisin, l'arrondissement a accepté des balcons jusqu'à 1,5 m dans la marge arrière, comptés comme saillies.",
+      k: "marge recul arriere limite balcon balcons saillie saillies terrain fond cour", why: "Les 30 cm manquants sont des balcons: la marge passerait.",
+      needs: "confirmer que l'interprétation vaut pour ce terrain" },
+  ],
+};
+const codeSource = (label) => CODE_SOURCES.find((x) => x.short === label);
+/* An entry with the article's own words: from the followed list, else from
+   the codes' table of contents, else from the entry itself. */
+function codeEntry(label, e) {
+  const f = ARTICLES.find((a) => a.id === e.id);
+  const toc = Object.values(codeSource(label)?.arts || {}).flat().find((a) => a.id === e.id);
+  return { from: "both", ...e, topic: f?.topic || toc?.topic || e.topic, quote: f?.quote || toc?.quote || e.quote,
+    fig: e.fig || toc?.fig, needs: e.needs || toc?.needs, required: toc?.required, followed: Boolean(f) };
+}
+/* A small French matcher: accents dropped, empty words set aside, plurals
+   folded. It stands for the retrieval; it is not one. */
+const cqNorm = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’']/g, " ");
+const CQ_STOP = new Set("le la les de des du un une pour par sur au aux et ou en a l d est il on peut qui que quoi quel quelle combien peut-on est-ce faut doit dans ce cette mon ma nos notre se s y avec".split(" "));
+const cqWords = (t) => cqNorm(t).split(/[^a-z0-9-]+/).filter((w) => w && !CQ_STOP.has(w));
+const cqFold = (w) => w.length > 4 ? w.replace(/(s|x)$/, "") : w;
+function codeSearch(label, q, from = { bureau: true, web: true }) {
+  const qw = cqWords(q);
+  if (!qw.length) return [];
+  const all = (CODE_INDEX[label] || []).map((e) => codeEntry(label, e))
+    .filter((e) => e.from === "both" ? from.bureau || from.web : from[e.from])
+    .map((e) => {
+      const bag = [...new Set(cqWords(`${e.k} ${e.topic}`).map(cqFold))];
+      const hits = qw.filter((w) => bag.includes(cqFold(w)) || bag.some((b) => b.length > 4 && cqFold(w).length > 4 && (b.startsWith(cqFold(w)) || cqFold(w).startsWith(b))));
+      return { e, n: hits.length, hits };
+    }).filter((r) => r.n);
+  /* A word in common is not an answer: an article stays when it shares at
+     least half as many of the question's words as the best one does. */
+  const top = Math.max(0, ...all.map((r) => r.n));
+  return all.filter((r) => r.n >= Math.ceil(top / 2))
+    .sort((x, y) => y.n - x.n || !!y.e.newer - !!x.e.newer || y.e.followed - x.e.followed).slice(0, 5);
+}
+const cqLit = (text, hits) => {
+  const keys = hits.map(cqFold).filter((w) => w.length > 2);
+  return text.replace(/[A-Za-zÀ-ÿ-]+/g, (w) => keys.some((k) => cqFold(cqNorm(w)).startsWith(k) || k.startsWith(cqFold(cqNorm(w))) && cqNorm(w).length > 3) ? `<mark>${w}</mark>` : w);
+};
+const codeQ = () => (V.codeQ ||= { q: "", asked: "", phase: 3, from: { bureau: true, web: true } });
+/* What has been read so far: the office's documents answer first, the
+   official sites after them. */
+const codeFound = (label, q) => { const c = codeQ(); return codeSearch(label, q, { bureau: c.from.bureau && c.phase >= 2, web: c.from.web && c.phase >= 3 }); };
+
+function codeAskBarHTML(label) {
+  const c = codeQ();
+  return `<label class="cask ${c.q ? "has" : ""}">${icon("search")}<span class="in">dans ${label}</span>
+    <input data-codeq value="${c.q.replace(/"/g, "&quot;")}" placeholder="Poser une question ${label === "Loi-cadre" ? "à la Loi-cadre" : `au ${label}`} — ex. « ${{ "Code du Québec": "largeur de porte fauteuil roulant", "Loi-cadre": "peut-on dépasser la hauteur", "Règlement d'urbanisme": "combien de cases pour les logements" }[label]} »" autocomplete="off" spellcheck="false">
+    <span class="x" ${act("codeqclear")} title="Effacer">${icon("x")}</span><kbd>↵</kbd></label>`;
+}
+function codeAskHTML(label) {
+  const c = codeQ();
+  if (!c.asked) return `<div class="cans" data-codeask></div>`;
+  const R = CODE_READ[label];
+  const step = (k, name, detail, done) => `<span class="s ${c.from[k] ? "" : "off"}" ${act("codeqsrc", k)} title="${c.from[k] ? "Ne plus chercher ici" : "Chercher ici"}">
+    ${!c.from[k] ? icon(k === "web" ? "globe" : "file-text") : done ? `<span class="ok">${icon("check")}</span>` : `<span class="run"></span>`}<b>${name}</b>${detail}</span>`;
+  const rows = codeFound(label, c.asked);
+  const ofCode = label === "Loi-cadre" ? "de la Loi-cadre" : `du ${label}`;
+  const views = viewsOf("Codes");
+  /* Another code that answers better is named, never mixed in. */
+  const here = rows[0]?.n || 0;
+  const other = views.filter((v) => v !== label && CODE_INDEX[v]).map((v) => ({ v, r: codeFound(v, c.asked) }))
+    .filter((o) => o.r.length && o.r[0].n >= Math.max(2, here)).sort((a, b) => b.r[0].n - a.r[0].n)[0];
+  const from = (e) => e.from === "web"
+    ? `${icon("globe")}<span><b>En ligne</b> · ${e.site}</span><span class="flag ${e.newer ? "new" : ""}">${e.newer ? "Plus récent que la copie du bureau" : "pas dans les documents du bureau"}</span>`
+    : e.from === "bureau" ? `${icon("file-text")}<span><b>Bureau</b> · ${e.file}, p. ${e.page}</span><span class="flag">note interne</span>`
+    : `${icon("file-text")}<span><b>Bureau</b> · ${R.docs[0]}, p. ${e.page} · aussi sur ${R.sites[0]}</span>`;
+  const hit = ({ e, hits }) => `<div class="chit">
+    <span class="id">${e.id}</span><span class="t">${e.topic}</span>
+    ${e.followed ? `<span class="clarity" data-c="${clarityOf(e.id)}">${CLARITY_LABEL[clarityOf(e.id)]}</span>`
+      : `<span class="btnw" ${act("codeqfollow", e.id)}>${icon("plus")}Suivre</span>`}
+    <span></span><span class="q">«&nbsp;${cqLit(e.quote, hits)}&nbsp;»</span>
+    <span></span><span class="why"><i>Pourquoi:</i> ${e.why}</span>
+    <span></span><span class="from">${from(e)}</span></div>`;
+  const cite = (e) => `<span class="cite" ${e.followed ? act("article", e.id) : ""}>${e.id}</span>`;
+  return `<div class="cans" data-codeask>
+    <div class="cprog">${step("bureau", "Documents du bureau", ` ${R.docs.length} fichier${R.docs.length > 1 ? "s" : ""}`, c.phase >= 2)}
+      ${step("web", "En ligne", ` ${R.sites.join(", ")}`, c.phase >= 3)}</div>
+    ${rows.length ? `<div class="chead"><b>${rows.length} article${rows.length > 1 ? "s" : ""}</b> ${ofCode} pour « ${c.asked} »</div>
+      <div class="csyn">${rows.slice(0, 2).map((r) => `${cite(r.e)} ${r.e.topic.toLowerCase()}`).join(" et ")}${rows.length > 2 ? `, puis ${rows.length - 2} autre${rows.length > 3 ? "s" : ""}` : ""}.
+        <small>Résumé tiré des articles; le texte officiel fait foi.</small></div>
+      ${rows.map(hit).join("")}`
+      : c.phase >= 3 ? `<div class="chead">Aucun article ${ofCode} ne répond à « ${c.asked} ».</div>` : ""}
+    ${other && c.phase >= 3 ? `<div class="celse">${icon("arrow-right")}${other.r.length} article${other.r.length > 1 ? "s" : ""} dans
+      <u ${act("view", views.indexOf(other.v))}>${other.v}</u> répond${other.r.length > 1 ? "ent" : ""} aussi à cette question</div>` : ""}
+    <div class="clh">Articles suivis</div>
+  </div>`;
+}
+/* The answer is redrawn in place, so the field keeps its caret and the
+   list under it keeps its scroll. */
+function paintCodeAsk() {
+  const el = document.querySelector("[data-codeask]");
+  if (el) el.outerHTML = codeAskHTML(viewOf("Codes"));
+}
+function codeScan() {
+  const c = codeQ();
+  clearTimeout(c.t1); clearTimeout(c.t2);
+  c.phase = 1; paintCodeAsk();
+  c.t1 = setTimeout(() => { c.phase = 2; paintCodeAsk(); }, 450);
+  c.t2 = setTimeout(() => { c.phase = 3; paintCodeAsk(); }, 1100);
+}
+document.addEventListener("input", (e) => {
+  if (!e.target.matches?.("[data-codeq]")) return;
+  codeQ().q = e.target.value;
+  e.target.closest(".cask")?.classList.toggle("has", Boolean(e.target.value));
+});
+document.addEventListener("keydown", (e) => {
+  if (!e.target.matches?.("[data-codeq]")) return;
+  const c = codeQ();
+  if (e.key === "Enter") { c.q = c.asked = e.target.value.trim(); codeScan(); }
+  if (e.key === "Escape") { c.q = c.asked = ""; e.target.value = ""; paintCodeAsk(); }
+});
 
 /* The clarity chip is the row's one control: a click opens three options,
    a second click on one of them writes it. It is rendered where the
@@ -4328,6 +4578,7 @@ function contentHTML() {
             <span style="flex:1"></span>
             <span class="btnw solid" ${act("addcode")}>${icon("plus")}<span class="hi">Ajouter</span></span></div>
           <div class="pb">
+            ${codeAskBarHTML(label)}${codeAskHTML(label)}
             <div class="codelist">${rows.length ? rows.map(codeRow).join("")
               : `<div class="codeempty">Aucun article suivi dans ce code</div>`}</div>
           </div></div>
@@ -4509,13 +4760,15 @@ const sumOpenings = (list) => list.reduce((s, o) => ({ windows: s.windows + o.wi
   { windows: 0, doors: 0, glass: 0 });
 const levelRows = (lv) => UNITS_BY_LEVEL[levelView(lv)] || [];
 
-/* The materials of each façade, as the elevation sheet's legend numbers
-   them, in square feet and as a share of that façade. The areas are what
-   each material covers in the model's elevation of that façade. A click
-   on a façade turns the model to that elevation, square and without
-   perspective, every material in the colour of its swatch; a click on a
-   material keeps that one in colour and greys the rest. A second click on
-   the open façade goes back to the 3D view. */
+/* The materials of the envelope, as the elevation sheets' legend numbers
+   them, in square feet seen in elevation. The areas are what
+   each material covers in the model's elevation of that façade. The nine
+   materials are written once, the four façades are the columns: a click
+   on a façade's heading turns the model to that elevation, square and
+   without perspective, every material in the colour of its swatch; a
+   click on a figure opens that façade with that material alone in colour;
+   a click on the material's name opens its product sheet. A second click
+   on the open façade goes back to the 3D view. */
 const FACADES = ["nord", "est", "sud", "ouest"];
 function facadeTablesHTML() {
   const fm = window.fitteMaterials;
@@ -4524,57 +4777,46 @@ function facadeTablesHTML() {
   const head = `<div class="fqh">${icon("layers")}<span>Matériaux</span>${issueBadge(["mat"])}<span class="fqs">pi² vus en élévation</span>
     ${open ? `<span style="flex:1"></span><span class="btnw sm" ${act("facade", open.face)} title="Revenir à la vue 3D">${icon("rotate-3d")}<span class="hi">Vue 3D</span></span>` : ""}</div>`;
   if (!data) return `<div class="fq-fac" data-facades>${head}<div class="fqn">Lecture de la maquette 3D…</div></div>`;
-  const tables = FACADES.map((face) => {
-    const rows = data[face].filter((r) => r.ft2 >= 1);
-    const total = rows.reduce((s, r) => s + r.ft2, 0);
-    const on = open?.face === face;
-    const body = rows.map((r) => {
-      const c = fm.category(r.n);
-      const key = `${face}|${r.n}`;
-      const sheet = V.matOpen?.[key];
-      return `<tr class="${on && open.focus === r.n ? "on" : ""} ${sheet ? "fopen" : ""}" ${act("facmat", key)} title="${c.note}">
-        <td><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}${c.check
-          ? `<span class="fwarn" title="${c.check}">${icon("alert-triangle")}</span>` : ""}</td>
-        <td class="n">${fqNum(r.ft2)}</td><td class="n">${fqPct(r.ft2, total)}</td>
-        <td class="fdd"><span class="fddb" ${act("matinfo", key)} role="button" aria-expanded="${Boolean(sheet)}"
-          title="${sheet ? "Masquer la fiche" : "Voir la fiche du produit"}">${icon(sheet ? "chevron-up" : "chevron-down")}</span></td></tr>
-        ${sheet ? `<tr class="fsheet"><td colspan="4">${materialSheetHTML(c)}</td></tr>` : ""}`;
+  const at = (face, n) => data[face].find((r) => r.n === n)?.ft2 || 0;
+  const facTotal = (face) => data[face].reduce((s, r) => s + r.ft2, 0);
+  /* Every number the legend gives on any façade, in the legend's order. A
+     material under a square foot is not drawn and is not listed. */
+  const nums = [...new Set(FACADES.flatMap((face) => data[face].filter((r) => r.ft2 >= 1).map((r) => r.n)))].sort((a, b) => a - b);
+  const total = FACADES.reduce((s, face) => s + facTotal(face), 0);
+  const body = nums.map((n) => {
+    const c = fm.category(n);
+    const sheet = V.matOpen?.[`mat|${n}`];
+    const sum = FACADES.reduce((s, face) => s + at(face, n), 0);
+    const cells = FACADES.map((face) => {
+      const v = at(face, n);
+      const lit = open?.face === face;
+      return `<td class="n ${lit ? "fcol" : ""} ${v ? "" : "fnil"}" ${v ? act("facmat", `${face}|${n}`) : ""}
+        title="${v ? `${c.name} sur la façade ${face} — ${fqNum(v)} pi², ${fqPct(v, facTotal(face))} de la façade` : `${c.name} ne paraît pas sur la façade ${face}`}">${v ? fqNum(v) : "—"}</td>`;
     }).join("");
-    return `<table class="tbl ftbl ${on ? "open" : ""}">
-      <thead><tr ${act("facade", face)} title="${on ? "Revenir à la vue 3D" : `Voir l'élévation ${face} dans la maquette`}">
-        <th>${icon(on ? "eye" : "scan")}Façade ${face}${(() => {
-          const n = rows.filter((r) => fm.category(r.n).check).length;
-          return n ? `<span class="ibadge sm" title="${n} matériau${n > 1 ? "x" : ""} à vérifier sur cette façade">${icon("alert-triangle")}${n}</span>` : "";
-        })()}</th><th class="n">pi²</th><th class="n">Part</th><th class="fdd"></th></tr></thead>
-      <tbody>${body}</tbody>
-      <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td><td class="fdd"></td></tr></tfoot></table>`;
-  }).join("");
-  return `<div class="fq-fac" data-facades>${head}${buildingMaterialsHTML(data)}${tables}</div>`;
-}
-
-/* Every material over the whole building: what it covers on the four
-   elevations together, and its share of them. Listed in the legend's
-   order; each façade's own figures are in its table below. The sheet
-   opens under its row as on a façade. */
-function buildingMaterialsHTML(data) {
-  const fm = window.fitteMaterials;
-  const by = new Map();
-  FACADES.forEach((face) => data[face].forEach((r) => by.set(r.n, (by.get(r.n) || 0) + r.ft2)));
-  const rows = [...by].filter(([, ft2]) => ft2 >= 1).sort((a, b) => a[0] - b[0]);
-  const total = rows.reduce((s, [, ft2]) => s + ft2, 0);
-  const body = rows.map(([n, ft2]) => {
-    const c = fm.category(n), key = `bat|${n}`, sheet = V.matOpen?.[key];
-    return `<tr class="${sheet ? "fopen" : ""}" ${act("matinfo", key)} title="${c.note}">
-      <td><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}${c.check
+    return `<tr class="${open && open.focus === n ? "on" : ""} ${sheet ? "fopen" : ""}">
+      <td class="fnm" ${act("matinfo", `mat|${n}`)} role="button" aria-expanded="${Boolean(sheet)}"
+        title="${sheet ? "Masquer la fiche" : `${c.note} — voir la fiche du produit`}"><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}${c.check
         ? `<span class="fwarn" title="${c.check}">${icon("alert-triangle")}</span>` : ""}</td>
-      <td class="n">${fqNum(ft2)}</td><td class="n">${fqPct(ft2, total)}</td>
-      <td class="fdd"><span class="fddb" role="button" aria-expanded="${Boolean(sheet)}">${icon(sheet ? "chevron-up" : "chevron-down")}</span></td></tr>
-      ${sheet ? `<tr class="fsheet"><td colspan="4">${materialSheetHTML(c)}</td></tr>` : ""}`;
+      ${cells}<td class="n fsum">${fqNum(sum)}</td></tr>
+      ${sheet ? `<tr class="fsheet"><td colspan="6">${materialSheetHTML(c)}</td></tr>` : ""}`;
   }).join("");
-  return `<table class="tbl ftbl fbat">
-    <thead><tr><th>${icon("box")}Bâtiment entier — 4 façades</th><th class="n">pi²</th><th class="n">Part</th><th class="fdd"></th></tr></thead>
-    <tbody>${body}</tbody>
-    <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td><td class="fdd"></td></tr></tfoot></table>`;
+  /* The façade headings are the doors of the table: the eye says the
+     elevation is on screen, the crossed eye that the model is. The same
+     eye as the drawing strip, so one glyph means one thing. */
+  const heads = FACADES.map((face) => {
+    const on = open?.face === face;
+    return `<th class="n fh ${on ? "fon" : ""}" ${act("facade", face)} aria-pressed="${on}"
+      title="${on ? `Masquer l'élévation ${face} et revenir à la maquette` : `Afficher l'élévation ${face}`}">${icon(on ? "eye" : "eye-off")}<span class="fhl">${face[0].toUpperCase()}${face.slice(1)}</span></th>`;
+  }).join("");
+  const foot = FACADES.map((face) => `<td class="n ${open?.face === face ? "fcol" : ""}">${fqNum(facTotal(face))}</td>`).join("");
+  return `<div class="fq-fac" data-facades>${head}
+    <table class="tbl ftbl fmx">
+      <thead><tr><th>Matériau</th>${heads}<th class="n fsum">Total</th></tr></thead>
+      <tbody>${body}</tbody>
+      <tfoot><tr><td>Total pi²</td>${foot}<td class="n fsum">${fqNum(total)}</td></tr></tfoot>
+    </table>
+    <div class="fqn">${open ? `Élévation ${open.face} ouverte — ${fqNum(facTotal(open.face))} pi², ${fqPct(facTotal(open.face), total)} de l'enveloppe`
+      : "Maquette 3D — un en-tête de façade ouvre son élévation"}</div></div>`;
 }
 
 /* A material's sheet, opened under its row: the legend's swatch, then what
@@ -6937,6 +7179,21 @@ function onClick(e) {
     case "picksource": V.dialog = { ...V.dialog, source: value, section: null, art: null }; break;
     case "picksection": V.dialog = { ...V.dialog, section: value, art: null }; break;
     case "pickart": V.dialog = { ...V.dialog, art: value }; break;
+    case "codeqclear": { const c = codeQ(); c.q = c.asked = ""; break; }
+    case "codeqsrc": { const c = codeQ(); c.from[value] = !c.from[value]; codeScan(); return; }
+    /* Following a found article puts it in the list as the Ajouter dialog
+       does: unmeasured until the drawings are read against it. */
+    case "codeqfollow": {
+      const label = viewOf("Codes"), src = codeSource(label);
+      const e = codeEntry(label, (CODE_INDEX[label] || []).find((x) => x.id === value) || {});
+      if (!e.id || ARTICLES.some((x) => x.id === e.id)) break;
+      ARTICLES.push({ id: e.id, topic: e.topic, doc: src.name, place: src.place,
+        edition: e.from === "web" ? `en ligne — ${e.site}` : e.from === "bureau" ? "note interne du bureau" : src.edition,
+        quote: e.quote, measured: "—", required: e.required || "—", state: "non résolu",
+        needs: e.needs || "à lire contre les dessins", url: src.url, fig: e.fig || "classement" });
+      say(`${e.id} suivi. Rien n'est mesuré tant que le dessin n'a pas été lu.`);
+      break;
+    }
     case "addcodeok": {
       const d = V.dialog, src = CODE_SOURCES.find((s) => s.name === d.source);
       const a = (src?.arts[d.section] || []).find((x) => x.id === d.art);
