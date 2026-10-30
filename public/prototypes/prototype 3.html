@@ -297,6 +297,11 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    air, 1 of border), so its radius is the field's 8 less 4. */
 .fpath.sharelink{cursor:default;height:34px;border-radius:8px;padding:3px 3px 3px 10px;gap:7px;font-size:12px}
 .fpath.sharelink:hover{background:var(--fill-2);border-color:var(--line-2)}
+.btnw.done{border-color:#2f7a4d;color:#2f7a4d}
+.btnw.done svg{color:#2f7a4d}
+.lcrumbs.done,.lcrumbs.done .c{color:#2f7a4d}
+.fpath.sharelink .copy.done{background:#2f7a4d;border-color:#2f7a4d;color:#fff}
+.fpath.sharelink .copy.done .lu{color:#fff}
 .fpath.sharelink .copy{height:26px;border-radius:4px;padding:0 10px;cursor:pointer;flex:0 0 auto;
   background:var(--ink);border-color:var(--ink);color:#fff}
 .fpath.sharelink .copy .lu{width:13px;height:13px;color:#fff}
@@ -1590,7 +1595,7 @@ body:has([data-skppop]) .lcard{visibility:hidden}
   color:var(--ink-3);opacity:0;border:1px solid transparent;background:var(--paper)}
 .ncard .chk .lu{width:14px;height:14px}
 .ncard:hover .chk,.ncard.on .chk{opacity:1;border-color:var(--line-2)}
-.ncard .chk:hover{background:#2f7a4d;border-color:#2f7a4d;color:#fff}
+.ncard .chk:hover{background:var(--vert);border-color:var(--vert);color:var(--vert-ink)}
 .ncard.res .txt{color:var(--ink-3)}
 .ncard .resl{display:flex;align-items:center;gap:8px}
 .ncard .resby{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#2f7a4d;margin-right:auto}
@@ -1605,6 +1610,9 @@ body:has([data-skppop]) .lcard{visibility:hidden}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ncard .anch .lu{width:12px;height:12px;flex:0 0 12px}
 .ncard .nact{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+/* Deleting is the one act a comment cannot take back: it turns red under the cursor. */
+.ncard .nact .chip.del:hover{background:#b3261e;border-color:#b3261e;color:#fff}
+.ncard .nact .chip.del:hover .lb,.ncard .nact .chip.del:hover .lu{color:#fff}
 .ncard.new{border-color:var(--ink);cursor:default}
 .ncard .nnew{width:100%;margin-top:5px;border:1px solid var(--line-2);border-radius:6px;padding:5px 7px;
   font:inherit;font-size:12.5px;color:var(--ink);background:#fff;resize:none}
@@ -2062,6 +2070,8 @@ const V = {
   pending: null,        // a point put down, waiting for its sentence
   draft: "",
   mdraft: "",           /* the comment being written in the margin */
+  /* Which copy button has just answered, by key; cleared after a moment. */
+  copied: "",
   selPin: null,
   /* Where the sheet has been dragged to inside the 2D pane, in pixels of
      the pane. Zoom and pan are one pair: the wheel writes both. */
@@ -3045,8 +3055,10 @@ function layCardHTML(peekKey = null) {
   const hist = !peekKey && V.layHist;
   return `<div class="lcard" data-lcard data-anchor="${k}" ${peekKey ? "data-peek" : ""}>
     <div class="hd ${V.laySwap === k ? "swapped" : ""}">${fileGlyph(doc.file)}<b>${keepTail(doc.file)}</b></div>
-    <span class="lcrumbs" ${peekKey ? "" : act("lcopy", k)} title="${D.dir()}${doc.file} — cliquer pour copier le chemin">${icon("folder")}<span class="c">…</span>${icon("chevron-right")}${
-      D.dir().split("\\").filter(Boolean).slice(-2).map((s, i) => `<span class="c ${i ? "last" : ""}">${s}</span>`).join(icon("chevron-right"))}</span>
+    <span class="lcrumbs ${copied(`path|`+k) ? "done" : ""}" ${peekKey ? "" : act("lcopy", k)} title="${D.dir()}${doc.file} — cliquer pour copier le chemin">${copied(`path|`+k)
+      ? `${icon("check")}<span class="c last">Chemin copié</span>`
+      : `${icon("folder")}<span class="c">…</span>${icon("chevron-right")}${
+        D.dir().split("\\").filter(Boolean).slice(-2).map((s, i) => `<span class="c ${i ? "last" : ""}">${s}</span>`).join(icon("chevron-right"))}`}</span>
     <div class="lpair">
       <span class="docbtn" ${act(pdf ? "pdfview" : "autocad", k)} title="Ouvrir dans ${pdf ? "Acrobat" : "AutoCAD"}">${icon("external-link")}${pdf ? "Acrobat" : "AutoCAD"}</span>
       <span class="docbtn" ${act("lswap", k)} title="Choisir un autre document dans ${D.dir()}">${icon("folder-open")}Changer…</span></div>
@@ -3744,6 +3756,22 @@ function articleText(a) {
     a.state === "non résolu" ? `Manque pour conclure: ${a.needs}` : "",
     ...notes.map((n) => `— ${n.who} (${n.when}): ${n.txt}`), officialUrl(a)].filter(Boolean).join("\n");
 }
+
+/* A copy button answers on itself: for a moment its glyph is a check and
+   its label says the thing was copied, so the proof is under the pointer
+   that asked for it rather than only in the toast at the foot of the
+   window. One mark at a time — a second copy takes it from the first. */
+let copyTimer = 0;
+function markCopied(key) {
+  V.copied = key;
+  clearTimeout(copyTimer);
+  copyTimer = setTimeout(() => { V.copied = ""; render(); }, 1800);
+  render();
+}
+const copied = (key) => V.copied === key;
+/* The label a copy button wears: its own word, or the word for done. */
+const copyFace = (key, word, glyph, done) =>
+  `${icon(copied(key) ? "check" : glyph)}<span class="hi">${copied(key) ? done : word}</span>`;
 /* What can be attached: the documents the project already holds, named
    the way they are named on the server. Nothing is uploaded — the message
    carries the file the office would have attached by hand. */
@@ -3977,7 +4005,7 @@ function codeRow(a) {
       <div class="row" style="gap:6px">
         <a class="btnw src-link hi" href="${officialUrl(a)}" target="_blank" rel="noreferrer"
            ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
-        <span class="btnw" ${act("copyarticle", a.id)}>${icon("copy")}<span class="hi">Copier</span></span>
+        <span class="btnw ${copied(`art|`+a.id) ? "done" : ""}" ${act("copyarticle", a.id)}>${copyFace(`art|`+a.id, "Copier", "copy", "Copié")}</span>
         ${notes.length ? `<span class="hi nct">${icon("message-square")}${notes.length}</span>` : ""}
       </div>
     </div>
@@ -5216,7 +5244,7 @@ function codeSideHTML(a) {
         placeholder="Écrire une note sur cet article…"></textarea>
       <div class="row" style="gap:6px">
         <span class="btnw solid" ${act("notesave", a.id)}>${icon("check")}<span class="hi">Écrire la note</span></span>
-        <span class="btnw" ${act("copyarticle", a.id)}>${icon("copy")}<span class="hi">Copier</span></span>
+        <span class="btnw ${copied(`art|`+a.id) ? "done" : ""}" ${act("copyarticle", a.id)}>${copyFace(`art|`+a.id, "Copier", "copy", "Copié")}</span>
       </div>`}
     </div>
     <div class="col" style="gap:0">
@@ -5434,7 +5462,7 @@ function marginHTML() {
       ? `<span class="int">${icon("house")}À l'interne</span>` : ""}<span class="when">${p.when}</span></div>
     ${p.res ? `<div class="resl"><span class="resby">${icon("check")}Résolu par ${p.res.by === ME.id ? ME.name : p.res.by} · ${p.res.when}</span>
       <span class="btnw" ${act("notereo", p.id)}>${icon("undo-2")}<span class="hi">Rouvrir</span></span></div>` : ""}
-    ${p.id === V.selPin && !p.res ? `<div class="nact"><span class="chip" ${act("notedel", p.id)}>${icon("trash-2")}<span class="lb">Supprimer</span></span></div>` : ""}
+    ${p.id === V.selPin && !p.res ? `<div class="nact"><span class="chip del" ${act("notedel", p.id)}>${icon("trash-2")}<span class="lb">Supprimer</span></span></div>` : ""}
   </div>`;
   };
   const shown = tabOn === "o" ? open : done;
@@ -6987,7 +7015,7 @@ function shareDialogHTML(d) {
         <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Le lien ouvre le projet là où il est ouvert ici: le niveau et l'unité sont dans l'adresse. Un invité ne dessine rien et n'écrit dans aucun fichier.</div>
         <div class="fpath sharelink" title="${link}">
           ${icon("link")}<span class="hi" style="flex:1;overflow:hidden;text-overflow:ellipsis">${link}</span>
-          <span class="btnw copy" ${act("sharecopy", link)}>${icon("link")}<span class="hi">Copier le lien</span></span></div>
+          <span class="btnw copy ${copied(`link|`+link) ? "done" : ""}" ${act("sharecopy", link)}>${copyFace(`link|`+link, "Copier le lien", "link", "Lien copié")}</span></div>
         <div class="hi" style="font-size:11.5px;color:var(--ink-2);padding-top:2px">Droit accordé par le lien</div>
         <div class="col" style="gap:4px">${SHARE_RIGHTS.map(([l, n, g]) => right(l, n, g)).join("")}</div>
         <div class="hi" style="font-size:11.5px;color:var(--ink-2);padding-top:2px">Déjà invités</div>
@@ -7272,14 +7300,14 @@ function onClick(e) {
       say(`${id} — ${CLARITY_LABEL[k].toLowerCase()}, lecture de l'atelier.`);
       break;
     }
-    /* The article and every note written against it, as text: the mail to
+        /* The article and every note written against it, as text: the mail to
        the borough is written by pasting, not by retyping a number. */
     case "copyarticle": {
       const a = ARTICLES.find((x) => x.id === value);
       /* The clipboard answers after this click has already been drawn, so
          the message it produces draws itself. */
       navigator.clipboard.writeText(articleText(a))
-        .then(() => { say(`${value} et ses notes copiés.`); render(); })
+        .then(() => { say(`${value} et ses notes copiés.`); markCopied(`art|`+value); })
         .catch(() => { say("Copie refusée par le navigateur."); render(); });
       break;
     }
@@ -7617,7 +7645,8 @@ function onClick(e) {
     case "lcopy":
       navigator.clipboard?.writeText(`${LAYDOC[value].dir()}${layDoc(value).file}`).catch(() => {});
       say(`Chemin copié: ${LAYDOC[value].dir()}${layDoc(value).file}`);
-      break;
+      markCopied(`path|`+value);
+      return;
     case "lswap":
       V.layHist = false;
       say(`Choisir un autre document dans ${LAYDOC[value].dir()}`);
@@ -7756,8 +7785,10 @@ function onClick(e) {
       break;
     }
     case "sharecopy":
+      navigator.clipboard?.writeText(value).catch(() => {});
       say(`Lien copié: ${value} — ${(V.dialog && V.dialog.right) || "Lecture et commentaires"}.`);
-      break;
+      markCopied(`link|`+value);
+      return;
     case "autocad":
       say(`Remise à AutoCAD: ${value && LAYDOC[value] ? layDoc(value).file : dwgName()} s'ouvre sur l'unité, la décision suit.`);
       break;
