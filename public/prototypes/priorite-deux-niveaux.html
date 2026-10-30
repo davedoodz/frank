@@ -87,6 +87,35 @@ h1{margin:0;font-size:17px;font-weight:600}
 .d .rail{width:3px;align-self:stretch;margin:6px 0;border-radius:2px;background:transparent;flex:0 0 3px}
 .d .day[data-h="1"]{background:#fdf0ef}
 .d .day[data-h="1"] .t{color:#8f2a22}
+
+/* E — l'ordre : des intertitres, et le chiffre du jour en rouge */
+.e .gh{display:flex;align-items:center;gap:6px;padding:7px 0 3px;font-size:10.5px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--haute);font-weight:600}
+.e .gh.gn{color:var(--ink-3)}
+.e .gh i{font-style:normal;font-weight:600;font-size:10px;color:var(--ink-3)}
+.e .task{border-top:0}
+.e .day[data-h="1"] .n{color:var(--haute)}
+.e .day[data-h="1"].today .n{color:#fff;background:var(--haute)}
+
+/* F — le drapeau : plein pour la haute, creux au survol pour le reste */
+.f .mk svg,.f .spec svg,.f .leg svg{width:14px;height:14px;flex:0 0 14px;color:var(--haute)}
+.f .flagbtn{cursor:pointer}
+.f .task .flagbtn svg[fill="none"],.f .spec .one:last-child svg,.f .leg span:last-child svg{color:var(--ink-3);opacity:.45}
+.f .task:hover .flagbtn svg[fill="none"]{opacity:1}
+.f .cday{display:inline-flex;align-items:center;gap:3px}
+.f .cday svg{width:10px;height:10px;flex:0 0 10px;color:var(--haute)}
+
+/* G — la case à cocher porte la couleur */
+.g .tick.hi{border-color:var(--haute);box-shadow:inset 0 0 0 1px var(--haute)}
+.g .cday{display:inline-flex;align-items:center;gap:4px}
+.g .cbox{width:8px;height:8px;border:1px solid var(--line);border-radius:2px;flex:0 0 8px}
+.g .cbox.hi{border-color:var(--haute);box-shadow:inset 0 0 0 1px var(--haute)}
+
+/* H — le mot dans la liste, le compte dans le mois */
+.h .mk{min-width:46px}
+.h .cnt{float:right;display:inline-flex;align-items:center;justify-content:center;min-width:15px;height:15px;
+  padding:0 4px;border-radius:8px;background:var(--haute);color:#fff;font-size:9.5px;font-weight:600}
+.h .leg .cnt,.h .spec .cnt{float:none}
 </style>
 </head>
 <body>
@@ -99,6 +128,8 @@ h1{margin:0;font-size:17px;font-weight:600}
 </main>
 <script>
 const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const FLAG_ON = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V4" stroke-linecap="round"/></svg>`;
+const FLAG_OFF = svg(`<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V4"/>`);
 const ALERT = svg(`<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>`);
 
 /* Les tâches du prototype, ramenées à deux niveaux : ce qui était moyenne
@@ -124,8 +155,10 @@ const on = (s) => TASKS.filter((t) => t.day === s);
 const cut = (s, n) => s.length > n ? `${s.slice(0, n - 1)}…` : s;
 const WD = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
 
-function list(cls, row) {
-  return `<div class="card ${cls}">${LIST.map((t) => row(t)).join("")}</div>`;
+/* A family may draw the whole list itself — one of them sorts the rows
+   rather than marking them, which no per-row function can express. */
+function list(cls, row, whole) {
+  return `<div class="card ${cls}">${whole ? whole(LIST) : LIST.map((t) => row(t)).join("")}</div>`;
 }
 function month(cls, cell, legend, dayAttr) {
   return `<div class="cal ${cls}"><div class="cw">${WD.map((w) => `<span class="hd">${w}</span>`).join("")}</div>
@@ -173,12 +206,54 @@ const O = [
     + (ts.length > 2 ? `<div class="more">+${ts.length - 2}</div>` : ""),
   dayAttr:(ts) => ts.some((t) => t.prio === "haute" && !t.done) ? `data-h="1"` : "",
   legend:`<span><i style="display:inline-block;width:14px;height:11px;border-radius:2px;background:#fdf0ef;border:1px solid var(--line-2)"></i> une haute ce jour-là</span>` },
+
+{ cls:"e", title:"E — l'ordre, pas la marque",
+  note:"Rien n'est marqué : ce qui presse est écrit en premier, sous un intertitre qui le compte, et le reste suit sous le sien. La liste répond à « par quoi je commence » en étant dans cet ordre, ce qui est le seul usage qu'on fait de la priorité.",
+  says:"Encode la <b>haute</b> par la <b>place</b> dans la liste et par le numéro du jour en rouge dans le mois. Aucune marque sur aucune ligne, aucune légende à lire.",
+  spec:`<span class="one"><b class="gh">À passer avant le reste</b> haute</span><span class="one"><b class="gh gn">Le reste</b> normale</span>`,
+  whole:(ts) => { const hi = ts.filter((t) => t.prio === "haute"), lo = ts.filter((t) => t.prio !== "haute");
+    const grp = (nm, arr, cls) => arr.length ? `<div class="gh ${cls}">${nm}<i>${arr.length}</i></div>${arr.map((t) =>
+      `<div class="task"><span class="tick"></span>${plain(t)}<span class="av">${t.av}</span></div>`).join("")}` : "";
+    return grp("À passer avant le reste", hi, "") + grp("Le reste", lo, "gn"); },
+  cell:(ts) => ts.slice(0, 2).map((t) => `<span class="t ${t.done ? "done" : ""}">${cut(t.title, 21)}</span>`).join("")
+    + (ts.length > 2 ? `<div class="more">+${ts.length - 2}</div>` : ""),
+  dayAttr:(ts) => ts.some((t) => t.prio === "haute" && !t.done) ? `data-h="1"` : "",
+  legend:`<span><b style="color:var(--haute)">17</b> une haute ouverte ce jour-là</span>` },
+
+{ cls:"f", title:"F — le drapeau, qui se pose et s'enlève",
+  note:"Un drapeau plein rouge sur ce qui presse, et son contour gris, visible seulement au survol, sur le reste : la marque devient le bouton qui la pose. On hausse une tâche là où on la lit, sans ouvrir son formulaire.",
+  says:"Encode la <b>haute</b> par le drapeau plein, et porte en plus l'<b>action</b> de hausser ou d'abaisser. Dans le mois, le drapeau se lit comme dans la liste.",
+  spec:`<span class="one">${FLAG_ON} haute</span><span class="one">${FLAG_OFF} normale, au survol</span>`,
+  list:(t) => `<div class="task"><span class="tick"></span>${plain(t)}<span class="av">${t.av}</span><span class="mk flagbtn" title="${
+    t.prio === "haute" ? "Abaisser" : "Faire passer avant le reste"}">${t.prio === "haute" ? FLAG_ON : FLAG_OFF}</span></div>`,
+  cell:(ts) => ts.slice(0, 2).map((t) => `<span class="cday">${t.prio === "haute" && !t.done ? FLAG_ON : ""}<span class="t ${t.done ? "done" : ""}">${cut(t.title, 20)}</span></span>`).join("")
+    + (ts.length > 2 ? `<div class="more">+${ts.length - 2}</div>` : ""),
+  legend:`<span>${FLAG_ON} haute</span><span>${FLAG_OFF} cliquer pour hausser</span>` },
+
+{ cls:"g", title:"G — la case à cocher rouge",
+  note:"Aucune marque ajoutée : celle qui existe déjà change de couleur. La case à cocher d'une tâche haute est cernée de rouge, celle des autres reste grise. La ligne ne compte pas un objet de plus, et la couleur tombe au début de la ligne, là où l'œil entre.",
+  says:"Encode la <b>haute</b> sur un élément <b>déjà présent</b>. Rien ne s'ajoute à gauche ni à droite ; la marque disparaît dès que la tâche est cochée, ce qui est juste.",
+  spec:`<span class="one"><span class="tick hi"></span> haute</span><span class="one"><span class="tick"></span> normale</span>`,
+  list:(t) => `<div class="task"><span class="tick ${t.prio === "haute" ? "hi" : ""}"></span>${plain(t)}<span class="av">${t.av}</span></div>`,
+  cell:(ts) => ts.slice(0, 2).map((t) => `<span class="cday"><i class="cbox ${t.prio === "haute" && !t.done ? "hi" : ""}"></i><span class="t ${t.done ? "done" : ""}">${cut(t.title, 19)}</span></span>`).join("")
+    + (ts.length > 2 ? `<div class="more">+${ts.length - 2}</div>` : ""),
+  legend:`<span><i class="cbox hi"></i> haute</span><span><i class="cbox"></i> normale</span>` },
+
+{ cls:"h", title:"H — le mois compte, la liste nomme",
+  note:"Les deux surfaces ne disent pas la même chose : la liste écrit « haute » quand il le faut, le mois ne porte qu'un chiffre rouge — combien de hautes ce jour-là — et laisse le titre tranquille. Chaque surface dit ce qu'on lui demande à son échelle.",
+  says:"Encode la <b>haute</b> par le mot dans la liste et par un <b>compte</b> dans le mois. La case du mois cesse de répéter la liste : elle la résume.",
+  spec:`<span class="one"><span class="word">haute</span> dans la liste</span><span class="one"><span class="cnt">2</span> dans le mois</span>`,
+  list:(t) => `<div class="task"><span class="tick"></span>${plain(t)}<span class="av">${t.av}</span><span class="mk">${t.prio === "haute" ? `<span class="word">haute</span>` : ""}</span></div>`,
+  cell:(ts) => { const hi = ts.filter((t) => t.prio === "haute" && !t.done).length;
+    return `${hi ? `<span class="cnt">${hi}</span>` : ""}${ts.slice(0, 2).map((t) =>
+      `<span class="t ${t.done ? "done" : ""}">${cut(t.title, hi ? 17 : 21)}</span>`).join("")}${ts.length > 2 ? `<div class="more">+${ts.length - 2}</div>` : ""}`; },
+  legend:`<span><span class="cnt">2</span> hautes ouvertes ce jour-là</span>` },
 ];
 
 document.getElementById("grid").innerHTML = O.map((o) => `<section class="v ${o.cls}">
   <h2>${o.title}</h2><p>${o.note}</p>
   <div class="sec">La marque</div>${`<div class="spec">${o.spec}</div>`}
-  <div class="sec">La liste, à droite</div>${list(o.cls, o.list)}
+  <div class="sec">La liste, à droite</div>${list(o.cls, o.list, o.whole)}
   <div class="sec">Le mois</div>${month(o.cls, o.cell, o.legend, o.dayAttr)}
   <p class="says">${o.says}</p></section>`).join("");
 </script>
