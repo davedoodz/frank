@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Le volet de gauche — trois niveaux de titre</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The left pane stacks three different kinds of thing and draws them all
+   the same way: the pane's own subject (Unités et superficies), the
+   sections under it (Matériaux par façade, Unité 513), and the parts of a
+   section (Façade nord, Façade est). Scrolling, nothing tells you which
+   level you are in. Six ways of stating the three levels. The content is
+   identical in all six — level 5 of Le Baldwin III — and every pane
+   scrolls at the same height, because the whole question is what happens
+   when the titles leave the top. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#ededed;--fill-2:#f6f6f7;--page:#fafafa;--card:#fff;
+  --wash:rgba(17,17,18,.055);--t3:#e0736e;--t4:#5b9bd5;--t5:#5cb46e;--red:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.45 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--page)}
+main{padding:24px 28px 80px;max-width:1500px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:880px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:24px;margin-top:24px}
+section > h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section > h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section > p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:4.2em}
+
+/* the pane, at the width and height it has in the prototype ---------- */
+.pane{background:var(--card);border:1px solid var(--line-2);border-radius:10px;overflow:hidden;
+  display:flex;flex-direction:column;height:560px}
+.ph{display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;flex:0 0 auto;
+  border-bottom:1px solid var(--line-2);font-size:13px;font-weight:500}
+.ph .n{margin-left:auto;color:var(--ink-3);font-size:12px}
+.scroll{overflow-y:auto;flex:1;scrollbar-width:thin}
+
+/* the three levels, as drawn today: all of them a row of bold text ---- */
+.sec{display:flex;align-items:center;gap:7px;padding:9px 12px 7px;font-weight:600;font-size:12.5px}
+.sub{display:flex;align-items:center;gap:7px;padding:8px 12px 6px;font-weight:600;font-size:12.5px}
+.sec,.sub{white-space:nowrap}
+.sec .q,.sub .q{margin-left:auto;color:var(--ink-3);font-weight:400;font-size:11.5px;
+  overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* The narrower variants pay for their inset out of the cell padding, not
+   out of the figures: a cut number is worse than a tight one. */
+[data-v="C"] th,[data-v="C"] td,[data-v="E"] th,[data-v="E"] td{padding-left:8px;padding-right:8px;font-size:11.5px}
+.ico{width:13px;height:13px;flex:0 0 13px;color:var(--ink-2)}
+.warn{display:inline-flex;align-items:center;gap:3px;background:var(--red);color:#fff;border-radius:9px;
+  padding:0 6px;height:16px;font-size:10.5px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:5px 12px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+th{color:var(--ink-3);font-weight:500;font-size:11.5px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.tot td{font-weight:600;border-bottom:1px solid var(--line)}
+.sw{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+.mix{padding:10px 12px}
+.bar{display:flex;height:7px;border-radius:4px;overflow:hidden;gap:2px}
+.chips{display:flex;gap:6px;margin-top:9px;font-size:11.5px;color:var(--ink-2)}
+.chip{display:flex;align-items:center;gap:5px;border:1px solid var(--line-2);border-radius:999px;padding:2px 9px}
+.sum{margin-top:8px;font-size:12.5px;color:var(--ink-2)}
+.sum b{color:var(--ink)}
+
+/* ---------------------------------------------------------- A: today
+   Everything is 12.5px semibold on white. Nothing says which level a
+   title belongs to; the only cue is the order they happen to be in. */
+
+/* B — a band for the section, bare text for its parts. The section's title
+   gets the pane's grey and runs full width; a part is only indented text.
+   One level is a field, the other is a line. */
+[data-v="B"] .sec{background:var(--fill-2);border-top:1px solid var(--line-2);
+  border-bottom:1px solid var(--line-2);padding:7px 12px}
+[data-v="B"] .sub{padding-left:12px;font-size:11.5px;color:var(--ink-2);text-transform:uppercase;
+  letter-spacing:.06em}
+
+/* C — the sections are cards on the pane's grey. Each one is a sheet with
+   its own edge, so the gap between two sections is a real gap and not a
+   rule shared by both. */
+[data-v="C"] .scroll{background:var(--page);padding:10px;display:flex;flex-direction:column;gap:10px}
+[data-v="C"] .blk{background:var(--card);border:1px solid var(--line-2);border-radius:9px;overflow:hidden}
+[data-v="C"] .sec{padding:8px 11px 7px;border-bottom:1px solid var(--line-2)}
+[data-v="C"] .sub{padding:7px 11px 5px;font-size:11.5px;color:var(--ink-2)}
+[data-v="C"] table{font-size:12px}
+
+/* D — the titles stay. Both levels stick as you scroll, the section above
+   the part, so the pane always states where you are: you are in Matériaux,
+   in Façade est. Depth is told by what refuses to leave. */
+[data-v="D"] .sec{position:sticky;top:0;z-index:3;background:var(--card);
+  box-shadow:0 1px 0 var(--line)}
+[data-v="D"] .sub{position:sticky;top:33px;z-index:2;background:var(--card);font-size:11.5px;
+  color:var(--ink-2);box-shadow:0 1px 0 var(--line-2)}
+[data-v="D"] thead th{position:sticky;top:64px;z-index:1;background:var(--card)}
+
+/* E — a rail. The section's title is full width; everything that belongs
+   to it is pushed in behind a hairline, so belonging is drawn as a line
+   you can follow with a finger instead of a weight you have to compare. */
+[data-v="E"] .sec{padding:10px 12px 6px;font-size:13px}
+[data-v="E"] .body{margin-left:10px;border-left:1px solid var(--line-2)}
+[data-v="E"] .sub{padding:7px 12px 5px;font-size:11.5px;color:var(--ink-2);font-weight:600}
+[data-v="E"] th:first-child,[data-v="E"] td:first-child{padding-left:10px}
+
+/* F — size, not weight. Three sizes and three colours of ink: the pane's
+   subject at 14, a section at 12.5 in ink, a part at 11 in grey small
+   caps. No bands, no boxes, no rules between sections — only type. */
+[data-v="F"] .sec{padding:16px 12px 4px;font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+[data-v="F"] .sub{padding:10px 12px 4px;font-size:10.5px;font-weight:600;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.08em}
+[data-v="F"] td,[data-v="F"] th{border-bottom:0}
+[data-v="F"] tr.tot td{border-top:1px solid var(--line-2);border-bottom:0}
+
+/* G — sections fold. Each one carries its own count and can be shut, so a
+   long pane is made short by the reader instead of being scrolled. */
+[data-v="G"] .sec{cursor:pointer;background:var(--fill-2);border-top:1px solid var(--line-2);
+  border-bottom:1px solid var(--line-2);padding:7px 12px}
+[data-v="G"] .sec .ch{transition:transform .16s ease}
+[data-v="G"] .blk[data-shut="true"] .ch{transform:rotate(-90deg)}
+[data-v="G"] .blk[data-shut="true"] .body{display:none}
+[data-v="G"] .sub{padding:7px 12px 5px;font-size:11.5px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Le volet de gauche — trois niveaux de titre</h1>
+  <p class="lede">Le volet empile trois choses différentes et les dessine pareil: son sujet
+     (Unités et superficies), les sections dessous (Unité 513, Matériaux par façade) et les parties d'une
+     section (Façade nord, Façade est). En défilant, rien ne dit à quel niveau on est. Six façons de l'énoncer,
+     à contenu identique et à hauteur identique — toute la question est ce qui arrive quand les titres quittent
+     le haut. Faites défiler chaque volet.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n, cls = "ico") => { const i = lucide.icons[pascal(n)];
+  return i ? `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">${i[2].map(([t, a]) =>
+      `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : ""; };
+
+const UNITS = [["501","5½",1275,118.5,8],["502","5½",1496,139.0,10],["503","3½",760,70.6,5],
+  ["504","4½",1152,107.0,7],["505","4½",1221,113.4,8],["506","4½",1106,102.8,7],["507","3½",707,65.7,5],
+  ["508","4½",970,90.1,6],["509","4½",958,89.0,6],["510","5½",1466,136.2,9],["511","5½",1345,125.0,9],
+  ["512","3½",740,68.7,5],["513","3½",708,65.8,5],["514","3½",716,66.5,5],["515","4½",999,92.8,6]];
+const INK = { "3½": "var(--t3)", "4½": "var(--t4)", "5½": "var(--t5)" };
+const MAT = {
+  "Façade nord": [["Brique Melville Slik","#b3261e",2485,13],["Bloc architectural Tapestry","#e0922f",2429,13],
+    ["Brique Strata","#2f6fd0",3664,19],["Panneau d'aluminium série 300","#7a3fb5",29,0],
+    ["Solin, marquise et parapet","#0f7a6c",518,3],["Allège fenêtre et porte-patio","#e2622b",346,2],
+    ["Fenêtre et porte-patio","#1b1b1b",1619,8],["Vitrage","#4fc3e8",4632,24],["Garde-corps","#5cb46e",3431,18]],
+  "Façade est": [["Brique Melville Slik","#b3261e",2779,17],["Bloc architectural Tapestry","#e0922f",336,2],
+    ["Brique Strata","#2f6fd0",5187,33],["Panneau d'aluminium série 300","#7a3fb5",221,1],
+    ["Solin, marquise et parapet","#0f7a6c",576,4],["Vitrage","#4fc3e8",3980,25],["Garde-corps","#5cb46e",2812,18]],
+  "Façade sud": [["Brique Melville Slik","#b3261e",3104,19],["Brique Strata","#2f6fd0",4120,26],
+    ["Fenêtre et porte-patio","#1b1b1b",1870,12],["Vitrage","#4fc3e8",4410,28],["Garde-corps","#5cb46e",2390,15]],
+};
+const nb = (n) => n.toLocaleString("fr-CA").replace(/\u202f|\u00a0/g, " ");
+const fr = (n) => n.toLocaleString("fr-CA", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+const mix = () => `<div class="mix">
+  <div class="bar">${["3½","4½","5½"].map((t) => {
+    const n = UNITS.filter((u) => u[1] === t).reduce((s, u) => s + u[2], 0);
+    return `<span style="flex:${n} 0 0;background:${INK[t]}"></span>`; }).join("")}</div>
+  <div class="chips">${["3½","4½","5½"].map((t) => {
+    const r = UNITS.filter((u) => u[1] === t);
+    return `<span class="chip"><i class="sw" style="background:${INK[t]}"></i><b>${t}</b>
+      ${Math.round(r.reduce((s, u) => s + u[2], 0) / 15619 * 100)} %</span>`; }).join("")}</div>
+  <div class="sum"><b>15 619</b> pi² nets sur 15 unités</div></div>`;
+
+const unitRows = () => `<table><thead><tr><th>Unité</th><th>Type</th><th class="n">Net pi²</th>
+  <th class="n">m²</th><th class="n">Part</th></tr></thead><tbody>
+  ${UNITS.map(([n, t, a, m, p]) => `<tr><td>${n}</td>
+    <td><i class="sw" style="background:${INK[t]}"></i>${t}</td>
+    <td class="n">${nb(a)}</td><td class="n">${fr(m)}</td><td class="n">${p} %</td></tr>`).join("")}
+  <tr class="tot"><td>Net</td><td></td><td class="n">15 619</td><td class="n">1 451</td><td class="n">100 %</td></tr>
+  <tr class="tot"><td>Circulation</td><td></td><td class="n">2 756</td><td class="n">256</td><td class="n">15 %</td></tr>
+  <tr class="tot"><td>Brut</td><td></td><td class="n">18 375</td><td class="n">1 707</td><td class="n"></td></tr>
+  </tbody></table>`;
+
+const matRows = (rows) => `<table><thead><tr><th>Matériau</th><th class="n">pi²</th><th class="n">Part</th></tr></thead>
+  <tbody>${rows.map(([n, c, a, p]) => `<tr><td><i class="sw" style="background:${c}"></i>${n}</td>
+    <td class="n">${nb(a)}</td><td class="n">${p} %</td></tr>`).join("")}
+  <tr class="tot"><td>Total</td><td class="n">${nb(rows.reduce((s, r) => s + r[2], 0))}</td>
+    <td class="n">100 %</td></tr></tbody></table>`;
+
+/* The same stack in every variant: pane subject, then two sections, the
+   second of which has three parts. */
+const stack = (v) => {
+  const blk = (inner, i) => v === "C" || v === "G"
+    ? `<div class="blk" data-shut="${v === "G" && i === 2}">${inner}</div>` : inner;
+  const chev = v === "G" ? `${svg("chevron-down", "ico ch")}` : "";
+  const secRow = (icon, label, tail = "") =>
+    `<div class="sec" ${v === "G" ? `data-fold` : ""}>${chev}${svg(icon)}${label}${tail}</div>`;
+  const body = (inner) => v === "E" || v === "G" ? `<div class="body">${inner}</div>` : inner;
+
+  return `
+  ${blk(`${mix()}${unitRows()}`, 0)}
+  ${blk(`${secRow("box", "Unité 513", `<span class="q">3½ — 708 pi²</span>`)}
+    ${body(`<table><tbody>
+      <tr><td>Façade est</td><td class="n">4 fenêtres</td><td class="n">93 pi²</td></tr>
+      <tr><td>Façade sud</td><td class="n">5 fenêtres</td><td class="n">122 pi²</td></tr>
+      <tr class="tot"><td>Total</td><td class="n">9</td><td class="n">215 pi²</td></tr>
+      </tbody></table>`)}`, 1)}
+  ${blk(`${secRow("layers", "Matériaux par façade", `<span class="warn">${svg("alert-triangle")}2</span>
+      <span class="q">pi² vus en élévation</span>`)}
+    ${body(Object.entries(MAT).map(([f, rows]) => `
+      <div class="sub">${svg("scan")}${f}${f === "Façade nord" || f === "Façade est"
+        ? `<span class="warn">${svg("alert-triangle")}1</span>` : ""}</div>
+      ${matRows(rows)}`).join(""))}`, 2)}`;
+};
+
+const VARIANTS = [
+  ["A", "Tel quel", "Les trois niveaux sont la même ligne de texte gras sur blanc. Rien ne dit lequel contient lequel: seul l'ordre le suggère, et l'ordre disparaît dès qu'on défile."],
+  ["B", "Une bande pour la section", "Le titre de section prend le gris du volet et traverse toute la largeur; une partie n'est qu'une ligne de petites capitales. Un niveau est un champ, l'autre est une ligne."],
+  ["C", "Des cartes", "Chaque section devient une feuille avec son propre bord, posée sur le gris: l'espace entre deux sections est un vrai vide, pas un filet qu'elles partagent."],
+  ["D", "Les titres restent", "Les deux niveaux collent en défilant, la section au-dessus de la partie: le volet dit toujours où l'on est — dans Matériaux, dans Façade est. La profondeur se lit à ce qui refuse de partir."],
+  ["E", "Un rail", "Le titre de section traverse; tout ce qui lui appartient est repoussé derrière un filet vertical. L'appartenance devient une ligne qu'on suit du doigt au lieu d'un gras qu'on compare."],
+  ["F", "La taille, pas le gras", "Trois tailles et trois encres: le sujet du volet à 14, une section à 12,5 en noir, une partie à 10,5 en gris espacé. Ni bande, ni boîte, ni filet entre les sections."],
+  ["G", "Les sections se replient", "Chaque section porte son compte et peut se fermer: un volet long devient court parce que le lecteur l'a décidé, au lieu d'être défilé."],
+];
+
+function paint() {
+  grid.innerHTML = VARIANTS.map(([v, h, p]) => `<section data-v="${v}">
+    <h2>${h}<i>${v}</i></h2><p>${p}</p>
+    <div class="pane"><div class="ph">${svg("table")}Unités et superficies<span class="n">niveau 5</span></div>
+      <div class="scroll">${stack(v)}</div></div></section>`).join("");
+}
+document.addEventListener("click", (e) => {
+  const f = e.target.closest("[data-fold]");
+  if (!f) return;
+  const blk = f.closest(".blk");
+  blk.dataset.shut = blk.dataset.shut === "true" ? "false" : "true";
+});
+paint();
+</script>
+</body>
+</html>
