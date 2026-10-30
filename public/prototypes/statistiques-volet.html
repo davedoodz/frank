@@ -158,11 +158,26 @@ const of = (t) => UNITS.filter((u) => u[1] === t);
 const net = (r) => r.reduce((s, u) => s + u[2], 0);
 const pc = (t) => Math.round(net(of(t)) / net(UNITS) * 100);
 
+/* The openings of the selected unit, by repère: the mark on the drawing,
+   its size, how many of it, and which façade it looks onto. The question
+   the section answers is not "how many holes" but "how many different
+   ones": a floor built from three repeated marks is bought and installed
+   differently from one with nine singles. */
+const OPEN = [
+  ["W-21", "Fenêtre", 900, 1500, "est", 4],
+  ["W-12", "Fenêtre", 1800, 1500, "sud", 3],
+  ["W-14", "Fenêtre", 1560, 1500, "sud", 1],
+  ["P-02", "Porte-patio", 1700, 2100, "sud", 1],
+];
+const sqft = (w, h) => w * h / 1e6 * 10.7639;
+const OPEN_N = OPEN.reduce((s, o) => s + o[5], 0);
+
 /* The three sections, named once and used by every shortcut: a jump list
    that is typed twice drifts from the thing it jumps to. */
 const KEYS = [
   { id: "u", short: "Unités", long: "Unités et superficies", icon: "table", q: "15 unités" },
-  { id: "s", short: "Unité 513", long: "Unité 513", icon: "box", q: "9 ouvertures" },
+  { id: "s", short: "Ouvertures", long: "Ouvertures — unité 513", icon: "app-window",
+    q: `${OPEN_N} pour ${OPEN.length} repères` },
   { id: "m", short: "Matériaux", long: "Matériaux par façade", icon: "layers", q: "3 façades" },
 ];
 
@@ -187,10 +202,24 @@ const matTable = (rows) => `<table><thead><tr><th>Matériau</th><th class="n">pi
 
 const BODY = {
   u: () => `${mix()}${unitTable()}`,
-  s: () => `<table><tbody>
-    <tr><td>Façade est</td><td class="n">4 fenêtres</td><td class="n">93 pi²</td></tr>
-    <tr><td>Façade sud</td><td class="n">5 fenêtres</td><td class="n">122 pi²</td></tr>
-    <tr class="tot"><td>Total</td><td class="n">9</td><td class="n">215 pi²</td></tr></tbody></table>`,
+  /* One line per repère, not per hole: nine openings drawn from four marks
+   is the fact that decides the order, and the repeat count says which
+   mark carries the unit. The line above the table answers the variety
+   question before the eye has to count rows. */
+  s: () => `<div class="mix" style="padding-bottom:9px">
+    <div class="sum"><b>${OPEN_N} ouvertures</b> tirées de ${OPEN.length} repères —
+      le W-21 en fait ${Math.round(OPEN[0][5] / OPEN_N * 100)} %</div></div>
+    <table><thead><tr><th>Repère</th><th>Type et dimensions</th><th>Façade</th><th class="n">Qté</th>
+      <th class="n">pi²</th></tr></thead><tbody>
+    ${OPEN.map(([r, ty, w, h, f, q]) => `<tr><td>${r}</td>
+      <td>${ty} <span style="color:var(--ink-3)">${w} × ${h}</span></td>
+      <td>${f}</td><td class="n">${q}</td>
+      <td class="n">${Math.round(sqft(w, h) * q)}</td></tr>`).join("")}
+    <tr class="tot"><td>Total</td>
+      <td>${new Set(OPEN.map((o) => o[1])).size} types, ${OPEN.length} repères</td><td></td>
+      <td class="n">${OPEN_N}</td>
+      <td class="n">${Math.round(OPEN.reduce((s, o) => s + sqft(o[2], o[3]) * o[5], 0))}</td></tr>
+    </tbody></table>`,
   m: () => Object.entries(MAT).map(([f, rows]) => `<div class="sub">${f}</div>${matTable(rows)}`).join(""),
 };
 
