@@ -737,7 +737,18 @@ body.elev .mtools{display:none}
 .tabs.one .crumb[data-screen]{cursor:pointer}
 .tabs.one .crumb[data-screen]:hover{background:var(--wash)}
 .frame[data-chrome="black"] .tabs.one .crumb[data-screen]:hover{background:rgba(255,255,255,.1);color:#fff}
-.tabs.two .proj{font-size:15px;font-weight:600}
+/* The project's name is the tab of the sheet it names, the way a level is
+   the tab of its page: it stands on the studio's line, in the sheet's own
+   shade, and its two flared feet carry it down into the sheet. Naming the
+   project on the sheet itself left the sheet unlabelled above and the name
+   competing with the screens beside it; as a tab it labels the sheet from
+   outside and gives the second row back to the screens. */
+.projtab{position:relative;align-self:flex-end;display:flex;align-items:center;height:30px;
+  padding:0 12px;border-radius:8px 8px 0 0;background:#232327;color:#fff;font-size:15px;
+  font-weight:600;white-space:nowrap;flex:0 0 auto;margin-left:6px;--tabc:#232327}
+.projtab::before,.projtab::after{content:"";position:absolute;bottom:0;width:8px;height:8px}
+.projtab::before{right:100%;background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tabc) 8px)}
+.projtab::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tabc) 8px)}
 /* Who is signed in: the initials are the mark, the name is there because
    an office runs on several people with the same two letters. */
 .me{display:flex;align-items:center;gap:8px;padding:3px 9px 3px 3px;border-radius:999px;
@@ -3884,7 +3895,7 @@ function tabsHTML() {
   const me = `<span class="me" title="${ME.name}"><i>${ME.ini}</i><span class="hi">${ME.name}</span></span>`;
   const one = `<div class="tabs one rg ${solo("nav")}" data-rg="atelier" data-fi="${fiOf("nav")}"
        data-labels-mode="${V.nav.labels}">
-      ${back}${ech}<span class="sp"></span>${me}
+      ${back}${ech}<span class="projtab">${V.project}</span><span class="sp"></span>${me}
     </div>`;
   if (studio) return one;
   if (!views.length && mode !== "Two rows, no rail") {
@@ -3950,7 +3961,6 @@ function tabsHTML() {
     return `${one}
       <div class="projsheet">
         <div class="tabs two" data-labels-mode="${V.nav.labels}">
-          <span class="crumb on hi proj">${V.project}</span>
           <div class="views">${names.map(tab).join("")}</div>
           <span class="sp"></span>${share}
         </div>${row2}
