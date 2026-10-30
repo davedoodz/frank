@@ -798,7 +798,7 @@ body.elev .mtools{display:none}
   overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .lpile{display:flex;flex-direction:column;gap:4px}
 .ltile{position:relative;border:1px solid transparent;border-radius:6px;padding:4px;
-  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:grab;user-select:none;
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:default;user-select:none;
   transition:transform .17s cubic-bezier(.2,.7,.3,1),background .12s,box-shadow .17s;
   will-change:transform}
 .ltile .wrap{position:relative;width:100%}
@@ -822,11 +822,12 @@ body.elev .mtools{display:none}
 .ltile.sel .nm{color:#fff}
 .ltile.sel .pic{border-color:var(--ink)}
 /* Carried: no transition at all, or the tile lags behind the pointer. */
-.ltile.held{transition:none;z-index:9;cursor:grabbing;background:var(--card);
+.ltile.held{transition:none;z-index:9;background:var(--card);
   border-color:var(--line-2);box-shadow:0 6px 18px rgba(0,0,0,.18)}
 .ltile.held .pic{border-color:var(--ink-3)}
 /* Kept through the landing so the lift fades instead of blinking off. */
 .ltile.landing{z-index:9;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+body.lpress,body.lpress *{cursor:grab !important}
 body.ldrag,body.ldrag *{cursor:grabbing !important}
 
 /* The badge: black with a + while the drawing is aside, green with its
@@ -4555,26 +4556,23 @@ document.addEventListener("keydown", (e) => {
    placed first and keeps its place; a hovered card that would land on top
    of it is pushed clear, above or below, whichever side it came from. */
 function placeLayCard() {
+  /* The cards stack from the top of the pane, beside the strip, in the
+     order they were asked for: the kept one first, the hovered one under
+     it. Hanging each card off its own thumbnail looked tidier one at a
+     time, but two cards then had to be pushed apart, and pushing one could
+     put it back onto the other. A single column cannot overlap. */
   const cards = [...document.querySelectorAll("[data-lcard]")]
-    .sort((a, b) => (a.hasAttribute("data-peek") ? 1 : 0) - (b.hasAttribute("data-peek") ? 1 : 0));
-  const taken = [];
+    .sort((x, y) => (x.hasAttribute("data-peek") ? 1 : 0) - (y.hasAttribute("data-peek") ? 1 : 0));
+  const pad = 12;
+  let top = pad;
   for (const card of cards) {
     const zone = card.parentElement, strip = zone.querySelector("[data-lstrip]");
-    const tile = zone.querySelector(`[data-ltile="${card.dataset.anchor}"]`);
-    if (!tile || !strip) { card.style.display = "none"; continue; }
-    const z = zone.getBoundingClientRect(), t = tile.getBoundingClientRect();
+    if (!strip) { card.style.display = "none"; continue; }
+    const z = zone.getBoundingClientRect();
     card.style.display = "";
     card.style.right = `${z.right - strip.getBoundingClientRect().left + 8}px`;
-    const h = card.offsetHeight;
-    const fit = (v) => Math.min(z.height - h - 8, Math.max(8, v));
-    let top = fit(t.top - z.top + t.height / 2 - 30);
-    for (const r of taken) {
-      if (top + h + 8 <= r.top || top >= r.top + r.h + 8) continue;
-      const below = top >= r.top;
-      top = fit(below ? r.top + r.h + 8 : r.top - h - 8);
-    }
-    taken.push({ top, h });
     card.style.top = `${top}px`;
+    top += card.offsetHeight + 8;
   }
 }
 
@@ -4699,11 +4697,14 @@ document.addEventListener("pointerdown", (e) => {
     });
   };
 
+  /* Pressed, the open hand: the tile can be carried. Moving, the closed
+     hand: it is being carried. Before the press it is the ordinary arrow. */
   tile.classList.add("held");
-  document.body.classList.add("ldrag");
+  document.body.classList.add("lpress");
   const move = (ev) => {
     const dy = ev.clientY - startY;
     if (!moved && Math.abs(dy) < 3) return;   /* a press is not a drag */
+    if (!moved) document.body.classList.replace("lpress", "ldrag");
     moved = true;
     tile.style.transform = `translateY(${dy}px)`;
     const c = mid[from] + dy;
@@ -4725,7 +4726,7 @@ document.addEventListener("pointerdown", (e) => {
   const up = () => {
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", up);
-    document.body.classList.remove("ldrag");
+    document.body.classList.remove("lpress", "ldrag");
     if (!moved) { tile.classList.remove("held"); tile.style.transform = ""; return; }
     /* The landing is where a drag usually stutters: animate to a guessed
        offset, wait on a timer, re-render, and the sheet jumps because the
