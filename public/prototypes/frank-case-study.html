@@ -228,9 +228,12 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 
 /* Trade-offs: every sentence sits under a zoomed piece of the prototype it is
    about. Left is what came before (or what was given up), right what shipped. */
-.tx{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:40px;flex:1;min-height:0}
-.tx.c3{grid-template-columns:repeat(3,1fr);gap:36px}
-.tx>figure{margin:0;display:flex;flex-direction:column;min-height:0}
+/* Two shared rows: the image box, then the caption. Figures opt into them with
+   subgrid, so a one-line caption no longer grows its own image box and every
+   image bottom and caption top lands on the same line across the row. */
+.tx{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr auto;column-gap:48px;row-gap:0;margin-top:40px;flex:1;min-height:0}
+.tx.c3{grid-template-columns:repeat(3,1fr);column-gap:36px}
+.tx>figure{margin:0;display:grid;grid-template-rows:subgrid;grid-row:span 2;min-height:0}
 .zm{position:relative;flex:1;min-height:0;border-radius:8px;background:var(--fill);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px;overflow:hidden}
 .zm img{max-width:100%;max-height:100%;min-height:0;object-fit:contain;border-radius:6px;background:#fff;box-shadow:0 0 0 1px var(--line)}
 .zm.full{padding:0}
@@ -513,6 +516,25 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
+<!-- ============================================================ 02 before Frank -->
+<section class="s" data-sec="Background">
+<div class="b">
+  <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
+    <div>
+      <p class="k">Before Frank</p>
+      <h2>Trained in architecture first.</h2>
+      <div class="rule"></div>
+      <p class="lede" style="font-size:22px">My MIT SA+P application portfolio, M.Arch / M.CP, 2024. The drawings Frank reads are the drawings I was trained to make.</p>
+      <div class="links">
+        <a href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener">Harvard / MIT portfolio <span class="mono">davidlafond.xyz/work/harvard-mit</span>
+          <svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+      </div>
+    </div>
+    <a class="book" href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener" aria-label="Open the Harvard / MIT portfolio">
+      <img src="assets/frank/mit-portfolio-book.png" alt="Book cover: David Khanh Lafond, MIT SA+P application, M.Arch / M.CP 2024"></a>
+  </div>
+</div>
+</section>
 <!-- ============================================================ divider: overview -->
 <section class="s div" data-sec="Overview">
 <div class="b">
@@ -1517,7 +1539,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <figcaption><span class="k">Cut to a mockup — Revision impact</span><p>It needs two clean revisions first. Working, it would have been a fake.</p></figcaption>
     </figure>
     <figure>
-      <div class="zm full"><span class="src">Office DNA</span><img src="assets/frank/to/t6-dna.jpg" alt="Office DNA: a past unit 508 found as a close match, its plan and area" style="object-position:50% 30%"></div>
+      <div class="zm"><span class="src">Office DNA</span><img src="assets/frank/to/t6-dna.jpg" alt="Office DNA: a past unit 508 found as a close match, its plan and area" style="width:100%"></div>
       <figcaption><span class="k">Demoted — Office DNA</span><p>Built and working. A second product; it does not explain the first.</p></figcaption>
     </figure>
     <figure>
@@ -1607,31 +1629,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ 02 before Frank -->
-<section class="s" data-sec="Background">
-<div class="b">
-  <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
-    <div>
-      <p class="k">Before Frank</p>
-      <h2>Trained in architecture first.</h2>
-      <div class="rule"></div>
-      <p class="lede" style="font-size:22px">My MIT SA+P application portfolio, M.Arch / M.CP, 2024. The drawings Frank reads are the drawings I was trained to make.</p>
-      <div class="links">
-        <a href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener">Harvard / MIT portfolio <span class="mono">davidlafond.xyz/work/harvard-mit</span>
-          <svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
-      </div>
-    </div>
-    <a class="book" href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener" aria-label="Open the Harvard / MIT portfolio">
-      <img src="assets/frank/mit-portfolio-book.png" alt="Book cover: David Khanh Lafond, MIT SA+P application, M.Arch / M.CP 2024"></a>
-  </div>
-</div>
-</section>
 <!-- ============================================================ 37 end -->
 <section class="s title end" data-sec="">
 <div class="b">
   <p class="k">Case study</p>
   <h1 style="margin-top:22px">Frank</h1>
-  <p class="byline">David Lafond</p>
   <div class="rule"></div>
   <div class="links" style="align-items:center;margin-top:56px">
     <a href="https://cafitte-prototype1.vercel.app/prototypes/index.html" target="_blank" rel="noopener">Frank Prototype 1 <span class="mono">cafitte-prototype1.vercel.app</span></a>
@@ -1893,7 +1895,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     localStorage.removeItem("frank-deck-edits-v1");
   }
   const save = () => localStorage.setItem(STORE, JSON.stringify(edits));
-  const SKIP = ".foot, .trk, script, style, svg";
+  /* elements added to a slide after edits were saved stay out of the numbering,
+     so saved edits keep landing on the element they were made on */
+  const SKIP = ".foot, .trk, script, style, svg, .byline, .pdf";
   const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
   const blocks = [];
   allSlides.forEach((slide) => {
