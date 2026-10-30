@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Le coin — quand l'onglet se tient au bord de la page</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* "Bâtiment entier" is the first item of the level row, so when it is the
+   current tab it stands exactly on the card's top-left corner. Six ways of
+   resolving that corner. Each is shown in both states, because the corner
+   has to hold when the tab is elsewhere too: a resolution that only works
+   when the building is chosen is not a resolution, it is a coincidence. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --card:#fff;--chrome:#141416;--red:#b3261e;--r:12px}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:24px 28px 70px;max-width:1280px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:780px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:26px;margin-top:26px}
+section h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:3.2em}
+
+/* the frame, cut down to the corner in question --------------------- */
+.frame{background:var(--chrome);border-radius:12px;overflow:hidden;margin-bottom:10px}
+.top{display:flex;align-items:center;gap:8px;height:34px;padding:0 12px;color:rgba(255,255,255,.6);font-size:12px;
+  white-space:nowrap;overflow:hidden}
+.top > *{flex:0 0 auto}
+.lvl{overflow:hidden}
+.top b{color:#fff;font-weight:500}
+.top .cur{background:#fff;color:#141416;font-weight:600;border-radius:6px;padding:3px 9px;font-size:12px}
+.lvl{position:relative;display:flex;align-items:flex-end;height:34px;padding:0 12px;gap:2px}
+.lvl button{position:relative;height:28px;margin-bottom:3px;padding:0 10px;border:0;background:none;
+  font:inherit;font-size:12px;color:rgba(255,255,255,.72);border-radius:6px;cursor:pointer;
+  white-space:nowrap;display:flex;align-items:center;gap:6px}
+.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
+.lvl button svg{width:13px;height:13px}
+.lvl .div{width:1px;height:16px;background:rgba(255,255,255,.16);margin:0 6px 9px}
+.hold{padding:0 10px 10px}
+.card{background:var(--card);border-radius:var(--r);height:132px;overflow:hidden}
+.card .t{padding:11px 14px 9px;border-bottom:1px solid var(--line-2)}
+.card .t b{font-size:14px;font-weight:600}
+.card .t span{display:block;color:var(--ink-2);font-size:11.5px;margin-top:2px}
+.card .h{display:flex;align-items:center;gap:7px;height:32px;padding:0 14px;font-weight:500;
+  border-bottom:1px solid var(--line-2)}
+.card .h svg{width:13px;height:13px;color:var(--ink-2)}
+.card .r{padding:7px 14px;color:var(--ink-2);font-size:12px}
+
+/* the current tab, common to every option --------------------------- */
+.lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 12px;border-radius:8px 8px 0 0;
+  background:var(--card);color:var(--ink);font-weight:600;z-index:1;--tabc:var(--card)}
+.lvl button[aria-current="true"]:hover{background:var(--card);color:var(--ink)}
+.lvl button[aria-current="true"]::before,
+.lvl button[aria-current="true"]::after{content:"";position:absolute;bottom:0;width:8px;height:8px}
+.lvl button[aria-current="true"]::before{right:100%;
+  background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tabc) 8px)}
+.lvl button[aria-current="true"]::after{left:100%;
+  background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tabc) 8px)}
+
+/* A — square it off. The card loses its top-left radius while the first
+   tab stands on it, and gets it back the moment another level is read.
+   What is drawn today. */
+[data-o="A"] .frame[data-head="true"] .card{border-top-left-radius:0}
+
+/* B — the row is indented past the card's corner. The level row starts
+   where the card's straight edge starts, so no tab ever stands on a
+   rounded corner and nothing has to change shape. */
+[data-o="B"] .lvl{padding-left:24px}
+
+/* C — the tab wears the card's corner. Its left side is rounded by the
+   same 12px as the card below, so tab and card read as one sheet folded
+   up: the corner is not removed, it is continued. */
+[data-o="C"] .frame[data-head="true"] .lvl button[aria-current="true"]{border-radius:var(--r) 8px 0 0}
+[data-o="C"] .frame[data-head="true"] .lvl button[aria-current="true"]::before{display:none}
+
+/* D — the tab keeps a shoulder. It is pulled in by 10px and the card's
+   corner is left alone: there is always a strip of chrome between the
+   corner and the tab, so the two curves never meet. */
+[data-o="D"] .frame[data-head="true"] .lvl button[aria-current="true"]{margin-left:10px}
+
+/* E — the whole left edge is given to the building. Chosen, "Bâtiment
+   entier" is a full-height block down the card's left corner: the tab
+   does not stand on the corner, it is the corner. */
+[data-o="E"] .frame[data-head="true"] .lvl{padding-left:0}
+[data-o="E"] .frame[data-head="true"] .hold{padding-left:0}
+[data-o="E"] .frame[data-head="true"] .card{border-top-left-radius:0;border-bottom-left-radius:0}
+[data-o="E"] .frame[data-head="true"] .lvl button[aria-current="true"]{border-radius:0;padding-left:22px}
+[data-o="E"] .frame[data-head="true"] .lvl button[aria-current="true"]::before{display:none}
+
+/* F — the building is not a level and leaves the row. It goes up to the
+   first row with the project, where scope is already chosen, and the
+   level row begins at "Sous-sol 00": the corner case is deleted rather
+   than drawn. */
+[data-o="F"] .frame[data-head="true"] .top .scope{background:#fff;color:#141416;font-weight:600;
+  border-radius:6px;padding:3px 9px}
+[data-o="F"] .lvl .bldg{display:none}
+[data-o="F"] .lvl .div{display:none}
+
+footer{margin-top:34px;color:var(--ink-2);font-size:12.5px;max-width:860px;line-height:1.6}
+footer b{color:var(--ink)}
+.sw{display:inline-flex;gap:0;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-top:14px}
+.sw button{border:0;background:#fff;font:inherit;font-size:12px;padding:5px 11px;cursor:pointer;color:var(--ink-2)}
+.sw button[aria-pressed="true"]{background:var(--ink);color:#fff}
+</style>
+</head>
+<body>
+<main>
+  <h1>Le coin — quand l'onglet se tient au bord de la page</h1>
+  <p class="lede">« Bâtiment entier » ouvre la rangée des niveaux: choisi, il se tient exactement sur le coin
+     haut-gauche de la carte. Six façons de résoudre ce coin, chacune montrée dans les deux états, car un coin
+     qui ne tient que dans un seul n'est pas résolu, il est chanceux.</p>
+  <div class="sw" id="sw">
+    <button data-at="0" aria-pressed="true">Bâtiment entier</button>
+    <button data-at="3" aria-pressed="false">Niveau 2</button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <footer>
+    <b>Ce que chacune coûte:</b> A change la forme de la carte selon l'onglet lu; B déplace toute la rangée de
+    12 px pour un seul cas; C demande que l'onglet connaisse le rayon de la carte; D laisse une épaule de chrome
+    que rien d'autre n'explique; E donne un bord entier à une seule valeur; F enlève le cas en sortant le
+    bâtiment de la rangée des niveaux.
+  </footer>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n) => { const i = lucide.icons[pascal(n)];
+  return i ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+    stroke-linejoin="round">${i[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : ""; };
+
+/* Short list on purpose: the corner is what is being judged, and a row
+    that scrolls the current tab out of sight hides the very join. */
+const LEVELS = ["Bâtiment entier", "Sous-sol 00", "Niveau 1", "Niveau 2", "Toiture"];
+const OPTIONS = [
+  ["A", "Coin carré", "La carte perd son rayon tant que le premier onglet se tient dessus, et le reprend dès qu'un niveau est lu. Ce qui est dessiné aujourd'hui."],
+  ["B", "Rangée en retrait", "La rangée commence là où le bord droit de la carte commence: aucun onglet ne se tient jamais sur un coin rond, et rien ne change de forme."],
+  ["C", "L'onglet porte le coin", "Son côté gauche prend le même rayon de 12 px que la carte: l'onglet et la carte se lisent comme une seule feuille repliée. Le coin n'est pas enlevé, il est continué."],
+  ["D", "Une épaule de chrome", "L'onglet est rentré de 10 px et le coin de la carte est laissé tranquille: une bande de noir sépare toujours les deux courbes."],
+  ["E", "Le bord entier", "Choisi, « Bâtiment entier » devient un bloc sur tout le bord gauche: l'onglet ne se tient pas sur le coin, il est le coin."],
+  ["F", "Le bâtiment quitte la rangée", "Le bâtiment n'est pas un niveau: il remonte à la première rangée, avec le projet, et la rangée des niveaux commence à « Sous-sol 00 ». Le cas est supprimé au lieu d'être dessiné."],
+];
+let at = 0;
+
+function frame(o) {
+  const head = at === 0;
+  const tabs = LEVELS.map((l, i) => {
+    const on = i === at && !(o === "F" && i === 0);
+    const cls = i === 0 ? "bldg" : "";
+    return `${i === 1 && o !== "F" ? `<i class="div"></i>` : ""}<button class="${cls}" data-at="${i}" aria-current="${on}">
+      ${i === 0 ? svg("building-2") : ""}<span>${l}</span></button>`;
+  }).join("");
+  const title = head ? "Le Baldwin III — bâtiment entier" : `Plans — ${LEVELS[at].toLowerCase()}`;
+  const sub = head ? "8 niveaux — 104 unités — 108 938 pi² nets" : "15 unités — 15 619 pi² nets";
+  return `<div class="frame" data-head="${head}">
+    <div class="top"><span>Tous les projets</span><b>Le Baldwin III</b><span class="cur">Coordination</span>
+      ${o === "F" ? `<span class="scope">Bâtiment entier</span>` : ""}</div>
+    <nav class="lvl">${tabs}</nav>
+    <div class="hold"><div class="card">
+      <div class="t"><b>${title}</b><span>${sub}</span></div>
+      <div class="h">${svg("bed-double")}Unités</div>
+      <div class="r">Type</div><div class="r">3½</div>
+    </div></div></div>`;
+}
+function paint() {
+  grid.innerHTML = OPTIONS.map(([o, h, p]) => `<section data-o="${o}"><h2>${h}<i>${o}</i></h2><p>${p}</p>${frame(o)}</section>`).join("");
+  [...sw.children].forEach((b) => b.setAttribute("aria-pressed", Number(b.dataset.at) === at));
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-at]");
+  if (!b) return;
+  at = Number(b.dataset.at);
+  paint();
+});
+paint();
+</script>
+</body>
+</html>
