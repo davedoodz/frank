@@ -877,10 +877,11 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .lcard{position:fixed;z-index:80;width:248px;padding:9px 10px;display:flex;
   flex-direction:column;gap:7px;font-size:11.5px;background:var(--card);
   border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.10)}
-.lcard .hd{display:flex;align-items:baseline;gap:8px}
-.lcard .hd b{font-size:12.5px;font-weight:600}
-.lcard .hd .dt{margin-left:auto;color:var(--ink-3);font-size:10.5px;white-space:nowrap}
-.lcard .hd .x{display:grid;place-items:center;width:20px;height:20px;margin:-3px -4px -3px 2px;
+.lcard .hd{display:flex;align-items:center;gap:8px}
+.lcard .hd .fglyph{width:19px;height:22px;flex:0 0 19px}
+.lcard .hd b{font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:500;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lcard .hd .x{display:grid;place-items:center;width:20px;height:20px;margin:0 -4px 0 0;flex:0 0 20px;
   border-radius:5px;color:var(--ink-3);cursor:pointer}
 .lcard .hd .x:hover{background:var(--fill);color:var(--ink)}
 .lcard .hd .x svg{width:14px;height:14px}
@@ -888,8 +889,6 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
    the two the pointer is responsible for is never in doubt. */
 .lcard[data-peek]{border-color:var(--line-2);box-shadow:0 4px 14px rgba(17,17,18,.10)}
 .lcard[data-peek] .hd .x{display:none}
-.lcard .fn{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--ink-2);
-  word-break:break-all}
 .lcard .docbtn{display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;
   border:1px solid var(--line-2);border-radius:5px;padding:4px 8px;font-size:11.5px}
 .lcard .docbtn .lu{width:13px;height:13px}
@@ -917,10 +916,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .fglyph .band{fill:var(--ink)}
 .fglyph.pdf .band{fill:#c8372d}
 .fglyph text{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:7.4px;fill:#fff;letter-spacing:.03em}
-.lcard .fn{display:flex;align-items:center;gap:7px}
-.lcard .fn > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.lcard .fn .fglyph{width:19px;height:22px;flex:0 0 19px}
-.lcard .fn.swapped{animation:fnswap .9s ease}
+.lcard .hd.swapped{animation:fnswap .9s ease}
 @keyframes fnswap{0%{background:var(--vert);color:var(--vert-ink)}100%{background:transparent}}
 /* The swap, mimicked: the sheet is wiped from the top and drawn back in
    behind a moving line, as if the new file were being read. Nothing stays
@@ -958,7 +954,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 @keyframes swapveilx{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}
 @keyframes swaplinex{0%{right:100%;opacity:.9}100%{right:0;opacity:0}}
 @keyframes layinx{0%{clip-path:inset(0 100% 0 0)}100%{clip-path:inset(0 0 0 0)}}
-@media (prefers-reduced-motion: reduce){.swapfx,.swapfx::after,.swapin,.lcard .fn.swapped{animation-duration:.01s}}
+@media (prefers-reduced-motion: reduce){.swapfx,.swapfx::after,.swapin,.lcard .hd.swapped{animation-duration:.01s}}
 .lpast .pdt{font-size:10.5px;color:var(--ink-3)}
 /* The export menu hangs off the table's header, right-aligned to the
    button that opens it so it never leaves the pane. */
@@ -2376,9 +2372,8 @@ function layCardHTML(peekKey = null) {
   const pdf = extOf(doc.file) === "pdf";
   const menu = !peekKey && V.layMenu, hist = !peekKey && V.layHist;
   return `<div class="lcard" data-lcard data-anchor="${k}" ${peekKey ? "data-peek" : ""}>
-    <div class="hd"><b>${D.disc}</b><span class="dt">${doc.date}</span>
+    <div class="hd ${V.laySwap === k ? "swapped" : ""}">${fileGlyph(doc.file)}<b>${doc.file}</b>
       <span class="x" ${act("lclose")} title="Fermer">${icon("x")}</span></div>
-    <div class="fn ${V.laySwap === k ? "swapped" : ""}">${fileGlyph(doc.file)}<span>${doc.file}</span></div>
     <span class="docbtn" ${act("ldoc")}>${icon("file")}Document ${icon("chevron-down")}</span>
     ${menu ? `<div class="lmenu">
       <span class="mi" ${act(pdf ? "pdfview" : "autocad", k)}>Ouvrir dans ${pdf ? "Acrobat" : "AutoCAD"}</span>
@@ -4673,34 +4668,33 @@ document.addEventListener("keydown", (e) => {
 
 /* Each card stands right beside the thumbnail it belongs to, on the strip's
    right — over the model's pane if need be, since the drawing on the left is
-   what the card adjusts and must stay in view. Its top is level with the
-   tile's top, measured after render so it follows a tile the pile reordered.
-   Fixed to the viewport, so no pane's overflow crops it. The kept card is
-   placed first; a hovered card that would land on it is pushed clear,
-   below or above, on the side its own tile is. */
+   what the card adjusts and must stay in view. Fixed to the viewport, so no
+   pane's overflow crops it. The cards stack in the order of their tiles,
+   each as close to its tile's top as the card above it allows: a card for a
+   tile higher up pushes the other one down, never up past the pane's top
+   onto it. If the stack runs off the bottom it is lifted as a block. Two
+   cards cannot overlap. */
 function placeLayCard() {
-  const cards = [...document.querySelectorAll("[data-lcard]")]
-    .sort((x, y) => (x.hasAttribute("data-peek") ? 1 : 0) - (y.hasAttribute("data-peek") ? 1 : 0));
-  const pad = 8, gap = 8;
-  const placed = [];
-  for (const card of cards) {
+  const live = [];
+  for (const card of document.querySelectorAll("[data-lcard]")) {
     const zone = card.parentElement, strip = zone.querySelector("[data-lstrip]");
     const tile = zone.querySelector(`[data-ltile="${card.dataset.anchor}"]`);
     if (!strip || !tile) { card.style.display = "none"; continue; }
     card.style.display = "";
-    const z = zone.getBoundingClientRect(), t = tile.getBoundingClientRect();
-    const h = card.offsetHeight, max = Math.max(z.top + pad, z.bottom - h - pad);
-    const clamp = (v) => Math.min(Math.max(v, z.top + pad), max);
-    let top = clamp(t.top);
-    for (const p of placed) {
-      if (top < p.top + p.h + gap && top + h + gap > p.top) {
-        top = t.top >= p.top ? clamp(p.top + p.h + gap) : clamp(p.top - h - gap);
-      }
-    }
-    card.style.right = "";
-    card.style.left = `${strip.getBoundingClientRect().right + 8}px`;
-    card.style.top = `${top}px`;
-    placed.push({ top, h });
+    live.push({ card, zone, strip, t: tile.getBoundingClientRect().top, h: card.offsetHeight });
+  }
+  if (!live.length) return;
+  live.sort((a, b) => a.t - b.t);
+  const pad = 8, gap = 8;
+  const z = live[0].zone.getBoundingClientRect();
+  let y = z.top + pad;
+  for (const c of live) { c.top = Math.max(c.t, y); y = c.top + c.h + gap; }
+  const over = Math.max(0, y - gap - (z.bottom - pad));
+  const left = live[0].strip.getBoundingClientRect().right + 8;
+  for (const c of live) {
+    c.card.style.right = "";
+    c.card.style.left = `${left}px`;
+    c.card.style.top = `${Math.max(z.top + pad, c.top - over)}px`;
   }
 }
 
