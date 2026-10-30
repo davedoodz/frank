@@ -725,6 +725,14 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .fqmix .mixrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .fqmix .chip{padding:1px 8px 1px 6px;font-size:11px;white-space:nowrap;gap:5px}
 .fqmix .chip .sw{width:8px;height:8px;border-radius:2px;flex:0 0 8px}
+.fqmix .chip b{font-weight:600;color:var(--ink)}
+.fqmix .chip .pc{color:var(--ink);font-variant-numeric:tabular-nums}
+.fqmix .chip .ct{color:var(--ink-3);font-variant-numeric:tabular-nums}
+/* The type column repeats the mix chips above it, so a row's type reads
+   in the same colour as its share of the floor. */
+.fqt .tpill{height:20px;padding:0 8px 0 6px;font-size:11px;gap:5px;white-space:nowrap;vertical-align:middle}
+.fqt .tpill .sw{width:8px;height:8px;border-radius:2px;flex:0 0 8px}
+.fqt tr.on .tpill{border-color:var(--ink-3);color:var(--ink);font-weight:600}
 .fqmix .mixnet{font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .fqmix .mixnet b{color:var(--ink);font-weight:600}
 .laychips{display:flex;gap:4px;margin-right:6px;flex:0 0 auto}
@@ -1287,7 +1295,7 @@ const V = {
   query: "",         // the text in the list search
   reason: null,      // the reason picked for the decision being recorded
   note: "",          // the sentence written for the next person
-  settled: {},       // "screen · row" → the reason it was settled with
+  settled: {},       // "screen — row" → the reason it was settled with
   toast: null,       // what the last action answered
   /* The new-project dialog, while it is open: what has been typed, which
      kinds of file the office folder will be read for, and what is missing. */
@@ -1606,7 +1614,7 @@ LEVELS.forEach((lv) => {
     const open = crossingsFor(no).filter((c) => !c[5]).length;
     /* The area stays on the row even when a crossing is open: a crossing is
        a state, not an identity, and the card shows both. */
-    return [`${no} · ${ty}`, open ? `${open} croisement${open > 1 ? "s" : ""}` : `${pi2} pi²`,
+    return [`${no} — ${ty}`, open ? `${open} croisement${open > 1 ? "s" : ""}` : `${pi2} pi²`,
       suffix, baseTypo(ty), lv, ty, pi2, open];
   });
 });
@@ -1726,7 +1734,7 @@ const ARTICLES = [
     doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
     edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
     quote: "Le bâtiment doit être classé selon son usage principal et construit selon le type exigé pour sa hauteur et son aire de bâtiment.",
-    measured: "groupe C · 8 étages", required: "incombustible", state: "non résolu",
+    measured: "groupe C — 8 étages", required: "incombustible", state: "non résolu",
     needs: "aire de bâtiment par étage et type de construction retenu",
     url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
     fig: "classement" },
@@ -1794,10 +1802,10 @@ const TODAY = "2026-11-14";
    people at once. Outside parties (the borough, the surveyor) are not
    assignable: the studio member who follows up holds the task. */
 const PEOPLE = [
-  { id: "al", label: "Alain · architecte principal", ini: "AL" },
-  { id: "gr", label: "Guy · modélisation 3D, esquisses, codes", ini: "GR" },
-  { id: "ba", label: "Benoit · dessin 2D", ini: "BA" },
-  { id: "dl", label: "David · assistant modélisation 3D/2D", ini: "DL" },
+  { id: "al", label: "Alain — architecte principal", ini: "AL" },
+  { id: "gr", label: "Guy — modélisation 3D, esquisses, codes", ini: "GR" },
+  { id: "ba", label: "Benoit — dessin 2D", ini: "BA" },
+  { id: "dl", label: "David — assistant modélisation 3D/2D", ini: "DL" },
 ];
 const person = (id) => PEOPLE.find((p) => p.id === id);
 const whoLabel = (t) => (t.who.length ? t.who.map((id) => person(id).label).join(", ") : "Personne assignée");
@@ -2024,7 +2032,7 @@ const LAYDOC = {
     disc: ENG_LABELS[d], app: "Acrobat", act: "pdfview",
     thumb: () => engSheet(d, paneLevel())?.img || "",
     file: () => engFileName(d, paneLevel()),
-    date: () => { const s = engSheet(d, paneLevel()); return s ? `${engCode(s)} · p.${s.page}` : ""; },
+    date: () => { const s = engSheet(d, paneLevel()); return s ? `${engCode(s)} — p.${s.page}` : ""; },
     dir: () => `${V.docs.dir}Reçus\\`,
   }])),
 };
@@ -2061,7 +2069,7 @@ function layBadge(k) {
 }
 
 const layTile = (k) => `<div class="ltile ${V.lay[k].on ? "on" : ""} ${V.layPick === k ? "sel" : ""}"
-  data-ltile="${k}" ${act("lpick", k)} title="${LAYDOC[k].disc} · ${LAYDOC[k].date()}">
+  data-ltile="${k}" ${act("lpick", k)} title="${LAYDOC[k].disc} — ${LAYDOC[k].date()}">
   <span class="wrap"><span class="pic" style="background-image:url(${LAYDOC[k].thumb()})"></span>${layBadge(k)}</span>
   <span class="nm">${LAYDOC[k].short}</span></div>`;
 
@@ -2151,12 +2159,12 @@ function conflictCardHTML() {
   const d = V.xdraft;
   const sheet2 = engFileName(c[6], c[4]);
   return `<div class="xcard" data-xcard>
-    <div class="hd"><b>${c[0]}</b><span class="dt">unité ${c[3]} · niveau ${c[4]}</span>
+    <div class="hd"><b>${c[0]}</b><span class="dt">unité ${c[3]} — niveau ${c[4]}</span>
       <span class="x" ${act("xclose")} title="Fermer">${icon("x")}</span></div>
     <div class="wh">${c[1]}</div>
     <div class="fn">${dwgName()}<br>${sheet2}</div>
     <div class="cg">Relevé ${V.caught[c[0]] || stampNow()} — en superposant ${ENG_LABELS[c[6]].toLowerCase()}</div>
-    ${t ? `<div class="tk">${icon("check")}<span><b>${t.title}</b><i>${whoLabel(t)} · échéance ${fmtDay(t.day)} · relevé ${t.caught}</i></span></div>
+    ${t ? `<div class="tk">${icon("check")}<span><b>${t.title}</b><i>${whoLabel(t)} — échéance ${fmtDay(t.day)} — relevé ${t.caught}</i></span></div>
       <span class="btnw" ${act("xgo")}>${icon("calendar-check")}<span class="hi">Voir dans l'échéancier</span></span>`
       : `<div class="lb">Qui s'en occupe</div>
       <div class="row" style="gap:3px;flex-wrap:wrap">${PEOPLE.map((p) => `<span class="chip who ${d.who.includes(p.id) ? "on" : ""}"
@@ -2334,7 +2342,7 @@ const selIndex = (screen) => {
   return Math.min(V.sel[screen] === undefined ? 0 : V.sel[screen], n - 1);
 };
 const selRow = (screen) => rowsOf(screen)[selIndex(screen)];
-const settleKey = () => `${V.screen} · ${(selRow(V.screen) || [""])[0]}`;
+const settleKey = () => `${V.screen} — ${(selRow(V.screen) || [""])[0]}`;
 /* A decision is saveable as soon as there is something to save: a reason
    from the list, or a sentence written by hand. */
 const saveReady = () => Boolean(V.reason || V.note.trim());
@@ -2404,7 +2412,7 @@ const FIGS = {
     <path d="M150 42 v36 m-4 -32 l4 -4 4 4 m-8 28 l4 4 4 -4" stroke="var(--ink)" fill="none" stroke-width="1"/>
     <text x="158" y="58" font-size="12" font-weight="600" fill="var(--ink)">${a.measured}</text>
     <text x="158" y="74" font-size="10.5" fill="var(--ink-2)">${a.required} exigés</text>
-    <text x="22" y="20" font-size="10" fill="var(--ink-3)">corridor commun · niveau type</text>
+    <text x="22" y="20" font-size="10" fill="var(--ink-3)">corridor commun — niveau type</text>
     <text x="22" y="110" font-size="10" fill="var(--ink-3)">largeur libre au point le plus étroit</text></svg>`,
   issues: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
     <rect x="20" y="24" width="260" height="72" fill="none" stroke="var(--ink)" stroke-width="1.1"/>
@@ -2414,7 +2422,7 @@ const FIGS = {
     <path d="M70 60 h160" stroke="var(--ink-2)" stroke-dasharray="4 3" stroke-width="1"/>
     <text x="150" y="56" text-anchor="middle" font-size="11" fill="var(--ink-2)">distance de parcours</text>
     <text x="20" y="16" font-size="10" fill="var(--ink-3)">étage type</text>
-    <text x="20" y="112" font-size="11" font-weight="600" fill="var(--ink)">${a.measured} dessinées · ${a.required} exigées</text></svg>`,
+    <text x="20" y="112" font-size="11" font-weight="600" fill="var(--ink)">${a.measured} dessinées — ${a.required} exigées</text></svg>`,
   garde: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
     <path d="M20 96 h150" stroke="var(--ink)" stroke-width="1.4"/>
     <path d="M170 96 v-14 h110" stroke="var(--ink)" stroke-width="1.1" fill="none"/>
@@ -2423,7 +2431,7 @@ const FIGS = {
     <path d="M184 96 v-34 m-4 30 l4 4 4 -4 m-8 -26 l4 -4 4 4" stroke="var(--ink)" fill="none" stroke-width="1"/>
     <text x="192" y="74" font-size="12" font-weight="600" fill="var(--ink)">${a.measured}</text>
     <text x="192" y="90" font-size="10.5" fill="var(--ink-2)">${a.required} exigés</text>
-    <text x="20" y="20" font-size="10" fill="var(--ink-3)">garde-corps de balcon · élévation</text>
+    <text x="20" y="20" font-size="10" fill="var(--ink-3)">garde-corps de balcon — élévation</text>
     <text x="20" y="114" font-size="10" fill="var(--ink-3)">dénivellation supérieure à 1 800 mm</text></svg>`,
   porte: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
     <path d="M40 92 h60 M200 92 h60" stroke="var(--ink)" stroke-width="3"/>
@@ -2432,7 +2440,7 @@ const FIGS = {
     <path d="M100 104 h100 m-96 -4 l-4 4 4 4 m92 -8 l4 4 -4 4" stroke="var(--ink)" fill="none" stroke-width="1"/>
     <text x="150" y="26" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${a.measured}</text>
     <text x="150" y="42" text-anchor="middle" font-size="10.5" fill="var(--ink-2)">${a.required} exigés</text>
-    <text x="20" y="16" font-size="10" fill="var(--ink-3)">porte du parcours sans obstacles · plan</text></svg>`,
+    <text x="20" y="16" font-size="10" fill="var(--ink-3)">porte du parcours sans obstacles — plan</text></svg>`,
   classement: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
     ${[0, 1, 2, 3, 4, 5, 6, 7].map((k) => `<rect x="${60 + 0}" y="${14 + k * 11}" width="130" height="9"
       fill="${k === 7 ? "var(--fill)" : "none"}" stroke="var(--ink)" stroke-width=".9"/>`).join("")}
@@ -2472,8 +2480,8 @@ const clarityOf = (id) => V.clarity[id] || "moyen";
    landscape architect. Addresses are fictional, like every name in this
    prototype. */
 const CONTACTS = {
-  urbanisme: { role: "Urbaniste · arrondissement", mail: "urbanisme@exemple.ca", last: "12 oct", waited: 16 },
-  rbq: { role: "RBQ · service technique", mail: "technique@exemple.ca", last: "3 oct", waited: 25 },
+  urbanisme: { role: "Urbaniste — arrondissement", mail: "urbanisme@exemple.ca", last: "12 oct", waited: 16 },
+  rbq: { role: "RBQ — service technique", mail: "technique@exemple.ca", last: "3 oct", waited: 25 },
   paysage: { role: "Architecte paysagiste", mail: "paysage@exemple.ca", last: "21 oct", waited: 7 },
   client: { role: "Client", mail: "promoteur@exemple.ca", last: "24 oct", waited: 4 },
 };
@@ -2487,8 +2495,8 @@ const contactsFor = (a) => [a.doc.startsWith("Code de construction") ? "rbq" : "
    the clipboard — retyping it is how a number changes on the way out. */
 function articleText(a) {
   const notes = V.notes[a.id] || [];
-  return [`${a.id} — ${a.topic}`, `${a.doc} · ${a.place} · ${a.edition}`,
-    `« ${a.quote} »`, `Lu dans les dessins: ${a.measured} · exigé: ${a.required}`,
+  return [`${a.id} — ${a.topic}`, `${a.doc} — ${a.place} — ${a.edition}`,
+    `« ${a.quote} »`, `Lu dans les dessins: ${a.measured} — exigé: ${a.required}`,
     `Lecture du Bureau d'Architectes: ${CLARITY_LABEL[clarityOf(a.id)].toLowerCase()}`,
     a.state === "non résolu" ? `Manque pour conclure: ${a.needs}` : "",
     ...notes.map((n) => `— ${n.who} (${n.when}): ${n.txt}`), officialUrl(a)].filter(Boolean).join("\n");
@@ -2535,7 +2543,7 @@ function codeRow(a) {
         ${clarityChip(a.id)}
       </div>
       <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
-      <div class="hi src">${a.doc} · ${a.place} · ${a.edition}</div>
+      <div class="hi src">${a.doc} — ${a.place} — ${a.edition}</div>
       ${gap ? `<div class="hi src">manque pour conclure: ${a.needs}</div>` : ""}
       <div class="row" style="gap:6px">
         <a class="btnw src-link hi" href="${officialUrl(a)}" target="_blank" rel="noreferrer"
@@ -2582,7 +2590,7 @@ function dayCell(s, dim, big) {
   const ts = tasksOn(s), open = ts.filter((t) => !t.done);
   const cls = [s === V.day ? "on" : "", dim ? "dim" : "", s === TODAY ? "today" : "",
     open.some((t) => t.day < TODAY) ? "late" : ""].join(" ");
-  return `<div class="day ${cls}" ${act("calday", s)} title="${fmtDay(s)} · ${ts.length} élément${ts.length > 1 ? "s" : ""}">
+  return `<div class="day ${cls}" ${act("calday", s)} title="${fmtDay(s)} — ${ts.length} élément${ts.length > 1 ? "s" : ""}">
     <span class="lo bar" style="width:14px"></span>
     <span class="hi n">${dOf(s).getUTCDate()}</span>
     ${ts.length ? `<span class="hi dots">${ts.slice(0, big ? 4 : 3).map((t) =>
@@ -2708,9 +2716,9 @@ function taskListHTML() {
       <span class="lo bar" style="width:70%"></span>
       <span class="hi ttl" style="font-size:12.5px">${t.title}</span>
       <span class="lo bar" style="width:40%"></span>
-      <span class="hi" style="font-size:11px;color:var(--ink-3)">${whoLabel(t)} · ${t.phase}${
-        t.code ? ` · ${t.code}` : ""}${t.caught ? ` · relevé ${t.caught}` : ""}${
-        !t.done && t.day < TODAY ? " · en retard" : ""}</span>
+      <span class="hi" style="font-size:11px;color:var(--ink-3)">${whoLabel(t)} — ${t.phase}${
+        t.code ? ` — ${t.code}` : ""}${t.caught ? ` — relevé ${t.caught}` : ""}${
+        !t.done && t.day < TODAY ? " — en retard" : ""}</span>
     </span>
     ${avatars(t)}
     ${t.done ? `<span class="hi file" ${act(t.archived ? "taskunfile" : "taskfile", t.id)}
@@ -2741,7 +2749,7 @@ function taskListHTML() {
     ${archive.length ? `<div class="row arch" ${act("tarch")} style="gap:8px;margin-top:2px;cursor:pointer">
       <span class="lo bar" style="width:70px"></span>
       <span class="hi" style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;
-        display:flex;align-items:center;gap:4px">${icon(V.taskArch ? "chevron-down" : "chevron-right")}Archive · ${archive.length}</span>
+        display:flex;align-items:center;gap:4px">${icon(V.taskArch ? "chevron-down" : "chevron-right")}Archive — ${archive.length}</span>
       <span style="flex:1;border-top:1px solid var(--line-2)"></span></div>
       ${V.taskArch ? archive.map(line).join("") : ""}` : ""}
   </div>`;
@@ -2785,7 +2793,7 @@ const tabIcons = () => V.nav.layout === "Two rows, no rail"
 /* One real project, the one every drawing in assets/ belongs to:
    Le Baldwin III, boulevard Saint-Jean, Dollard-des-Ormeaux. */
 const PROJECTS = [
-  ["Le Baldwin III", `${ALL_UNITS.length} unités · 8 niveaux`, "BAL3_Étage_Type R04 · 24 Oct", "6 écarts", 1],
+  ["Le Baldwin III", `${ALL_UNITS.length} unités — 8 niveaux`, "BAL3_Étage_Type R04 — 24 Oct", "6 écarts", 1],
 ];
 
 /* The state is the one word on a card allowed colour: a project with
@@ -2808,7 +2816,7 @@ const pcard = (p, i = 0) => `<div class="tile pcard" ${act("open", p[0])} title=
     <span>${initials(p[0])}</span></div>
   <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
   <div><span class="lo bar lt" style="width:72%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
-  <div><span class="lo bar lt" style="width:60%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[2]} · ${pstate(p)}</span></div>
+  <div><span class="lo bar lt" style="width:60%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[2]} — ${pstate(p)}</span></div>
 </div>`;
 
 /* The tile takes the thumbnail's shape, so it sits in the row instead of
@@ -2854,7 +2862,7 @@ const HOMES = {
   "List + preview": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
       ${pane("projets", "Tous les projets", `${plist(0)}<span class="btnw solid" ${act("newproject")} style="justify-content:center">${icon("plus")}<span class="hi">Nouveau projet</span></span>`, "flex:.85")}
       ${pane("aperçu", "Le Baldwin III", `<div class="plan ghost cover" style="min-height:140px">${icon("image")}</div>
-        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">${ALL_UNITS.length} unités · 8 niveaux · lu il y a 6 min</span></div></div>`, "flex:1.5")}
+        <div class="tile"><div class="row"><span class="lo bar" style="width:40%"></span><span class="hi">${ALL_UNITS.length} unités — 8 niveaux — lu il y a 6 min</span></div></div>`, "flex:1.5")}
     </div>`,
 
   "Recent, then all": () => `<div style="display:flex;gap:var(--gap);flex:1;min-height:0">
@@ -3023,13 +3031,13 @@ function headerHTML() {
   const sup = QTABS["Superficies"].rows;
   const title = { "Projets": ["Projets", ""],
     "Codes": ["Codes et règlements", ""],
-    "Échéancier": ["Échéancier", `${TASKS.filter((t) => !t.done).length} tâches ouvertes · ${lateCount()} en retard`],
+    "Échéancier": ["Échéancier", `${TASKS.filter((t) => !t.done).length} tâches ouvertes — ${lateCount()} en retard`],
     "Unités": buildingScope()
       ? [`${V.project} — bâtiment entier`,
-        `${sup.length} niveaux · ${sup.reduce((n, r) => n + r[1], 0)} unités · `
+        `${sup.length} niveaux — ${sup.reduce((n, r) => n + r[1], 0)} unités — `
         + `${sup.reduce((n, r) => n + r[2], 0).toLocaleString("fr-CA")} pi² nets`]
       : [`Plans — ${viewOf("Unités").toLowerCase()}`,
-        `${rowsOf("Unités").length} unités · ${rowsOf("Unités").filter((r) => /croisement/.test(r[1])).length} avec un croisement ouvert`],
+        `${rowsOf("Unités").length} unités — ${rowsOf("Unités").filter((r) => /croisement/.test(r[1])).length} avec un croisement ouvert`],
   }[V.screen] || [V.screen, ""];
   const metrics = V.header.layout === "Title + metrics";
   const bare = V.header.layout === "Title only";
@@ -3070,7 +3078,7 @@ function listHTML() {
   /* The list reads the same rows the header counts, so the view above it and
      the search inside it both change what is on screen. */
   const pairs = rowsOf(V.screen);
-  const rows = pairs.length ? pairs.map((r) => `${r[0]} · ${r[1]}`) : ["rien ne correspond"];
+  const rows = pairs.length ? pairs.map((r) => `${r[0]} — ${r[1]}`) : ["rien ne correspond"];
   const sel = selIndex(V.screen);
 
   if (mode === "Filter bar only") {
@@ -3087,10 +3095,10 @@ function listHTML() {
   const inner = mode === "Card grid"
     ? (pairs.length ? `<div style="display:grid;grid-template-columns:1fr;gap:8px">${pairs.map((r, i) => `<div class="tile ${i === sel ? "on" : ""}" ${act("row", i)}>
         <div class="plan" style="height:54px;flex:0 0 54px"></div>
-        <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r[0]} · ${r[1]}</div></div>`).join("")}</div>`
+        <div class="lo bar" style="width:70%"></div><div class="hi" style="font-size:11.5px">${r[0]} — ${r[1]}</div></div>`).join("")}</div>`
       : `<div class="tile"><span class="hi" style="font-size:12px;color:var(--ink-2)">${emptyMsg}</span></div>`)
     : rows.map((r, i) => `<div class="listrow ${i === sel ? "on" : ""}" ${pairs.length ? act("row", i) : ""}><span class="dot"></span>
-        <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}${V.settled[`${V.screen} · ${(pairs[i] || [""])[0]}`] ? " · réglé" : ""}</span></div>`).join("");
+        <span class="lo bar" style="flex:1"></span><span class="hi" style="font-size:12px">${r}${V.settled[`${V.screen} — ${(pairs[i] || [""])[0]}`] ? " — réglé" : ""}</span></div>`).join("");
 
   return region("list", `list — ${label.toLowerCase()}`,
     `<div class="ph">${icon("list")}<span class="lo bar" style="width:60px"></span><span class="hi">${label}</span></div>
@@ -3316,7 +3324,7 @@ function quantScreenHTML(step) {
 const BUILDING_NET = ALL_UNITS.reduce((s, r) => s + r[6], 0);
 const fqNum = (n, d = 0) => n.toLocaleString("fr-CA", { minimumFractionDigits: d, maximumFractionDigits: d });
 const fqPct = (a, b) => `${b ? Math.round(a / b * 100) : 0} %`;
-const unitNo = (r) => r[0].split(" · ")[0];
+const unitNo = (r) => r[0].split(" — ")[0];
 const M2 = 0.092903;
 
 function floorQuant() {
@@ -3340,7 +3348,8 @@ function floorQuant() {
     net,
     /* An open crossing rides on the number, as it did on the card. */
     rows: floor.map((r) => ({
-      cells: [`${unitNo(r)}${r[7] ? `<span class="xdot" title="${r[1]}"></span>` : ""}`, r[5],
+      cells: [`${unitNo(r)}${r[7] ? `<span class="xdot" title="${r[1]}"></span>` : ""}`,
+        `<span class="chip tpill"><span class="sw" style="background:${TYPO_INK[baseTypo(r[5])]}"></span>${r[5]}</span>`,
         fqNum(r[6]), fqNum(r[6] * M2, 1), fqPct(r[6], net)],
       on: r === unit, index: visible.indexOf(r),
     })),
@@ -3362,10 +3371,11 @@ function fqMixHTML(q) {
     <div class="mixbar">${q.types.map(([ty, , share]) =>
       `<span style="width:${(share * 100).toFixed(1)}%;background:${TYPO_INK[ty]}" title="${ty} — ${Math.round(share * 100)} %"></span>`).join("")}</div>
     <div class="mixrow">
-      ${q.types.map(([ty, count, share]) => `<span class="chip"><span class="sw" style="background:${TYPO_INK[ty]}"></span><span
-        class="lb">${ty} · ${count} · ${Math.round(share * 100)} %</span></span>`).join("")}
+      ${q.types.map(([ty, count, share]) => `<span class="chip" title="${count} unités de ${ty}">
+        <span class="sw" style="background:${TYPO_INK[ty]}"></span><b>${ty}</b>
+        <span class="pc">${Math.round(share * 100)} %</span><span class="ct">${count}</span></span>`).join("")}
       <span style="flex:1"></span>
-      <span class="mixnet"><b>${fqNum(q.net)}</b> pi² nets · ${q.count} unités</span>
+      <span class="mixnet"><b>${fqNum(q.net)}</b> pi² nets sur ${q.count} unités</span>
     </div>
   </div>`;
 }
@@ -3380,13 +3390,13 @@ function fqTableHTML(q) {
   return `<div class="fqt">
     <table class="tbl"><thead><tr>${["Unité", "Type", "Net pi²", "m²", "Part"].map((h, j) => cell(h, j, "th")).join("")}</tr></thead>
       <tbody>${body}</tbody><tfoot>${q.foot.map((r) => r[0] === "Circulation" ? circulationRowHTML(r, cell) : `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("")}</tfoot></table>
-    <div class="fqn">net : étiquettes du plan · circulation : 15 %, comme le tableau du bâtiment</div></div>`;
+    <div class="fqn">net : étiquettes du plan — circulation : 15 %, comme le tableau du bâtiment</div></div>`;
 }
 
 function fqUnitHTML(q) {
   const pairs = (rows) => rows.map(([k, v]) => `<tr><td>${k}</td><td class="n">${v}</td></tr>`).join("");
   return `<div class="fq-unit" data-fq>
-    <div class="fqh">${icon("box")}<span>Unité ${q.u || "—"}</span><span class="fqs">${q.unit ? `${q.unit[5]} · ${fqNum(q.unit[6])} pi²` : ""}</span></div>
+    <div class="fqh">${icon("box")}<span>Unité ${q.u || "—"}</span><span class="fqs">${q.unit ? `${q.unit[5]} — ${fqNum(q.unit[6])} pi²` : ""}</span></div>
     ${q.versus ? `<div class="fqn">${q.versus}</div>` : ""}
     <table class="tbl"><thead><tr><th>Fenêtres</th><th class="n">qté</th></tr></thead><tbody>${pairs(q.windows)}</tbody></table>
     <table class="tbl"><thead><tr><th>Matériaux</th><th class="n">m²</th></tr></thead><tbody>${pairs(q.materials)}</tbody></table>
@@ -3465,10 +3475,10 @@ function exportAllCSV() {
 function nonresInspectorHTML(mode, step) {
   const level = paneLevel();
   const s = sheet();
-  const rows = [["Architecture", `${s.code} · p.${s.page}`],
+  const rows = [["Architecture", `${s.code} — p.${s.page}`],
     ...engOverlayDisciplines(level).map((d) => {
       const e = engSheet(d, level);
-      return [ENG_LABELS[d], `${engCode(e)} · p.${e.page}`];
+      return [ENG_LABELS[d], `${engCode(e)} — p.${e.page}`];
     })];
   const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${levelView(level)}</span></div>
     <div class="pb">
@@ -3509,7 +3519,7 @@ function codeSideHTML(a) {
           <span class="btnw" ${act("noteeditstop")}><span class="hi">Annuler</span></span>
         </div></div>` : `<div class="anote">
         <div class="row" style="align-items:baseline;gap:6px">
-          <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">${n.who} · ${n.when}</span>
+          <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">${n.who} — ${n.when}</span>
           <span class="nedit hi" ${act("noteedit", `${a.id}|${i}`)} title="Modifier la note">${icon("pen-line")}</span>
           <span class="nedit hi" ${act("notedrop", `${a.id}|${i}`)} title="Supprimer la note">${icon("trash-2")}</span>
         </div>
@@ -3525,7 +3535,7 @@ function codeSideHTML(a) {
       <span class="hi" style="font-size:12px;color:var(--ink-2);padding-bottom:4px">Qui en répond</span>
       ${contactsFor(a).map((k) => { const c = CONTACTS[k]; const sent = (V.mails[k] || []).length; return `<div class="contact ${c.waited > 14 ? "slow" : ""}">
         <span class="who"><b class="hi">${c.role}</b><span class="hi">${c.waited === 0 ? "dernier échange aujourd'hui"
-            : `dernier échange le ${c.last} · il y a ${c.waited} j`}</span>
+            : `dernier échange le ${c.last} — il y a ${c.waited} j`}</span>
           ${sent ? `<span class="hi sent">${sent} courriel${sent > 1 ? "s" : ""} envoyé${sent > 1 ? "s" : ""} d'ici</span>` : ""}</span>
         <span class="mailto hi" ${act("mailopen", `${a.id}|${k}`)} title="Écrire sans quitter fitte">${icon("mail")}<span class="hi">Écrire</span></span>
       </div>`; }).join("")}
@@ -3553,17 +3563,17 @@ function inspectorHTML() {
      no crossing says so, and says what the level and the project carry. */
   const mine = crossingsFor(no);
   const crossRows = mine.length
-    ? mine.map(([id, what, disc, , , done]) => [`${id} · ${disc}`, done ? "réglé" : what])
+    ? mine.map(([id, what, disc, , , done]) => [`${id} — ${disc}`, done ? "réglé" : what])
     : [["Sur cette unité", "aucun croisement"],
       ["Sur ce niveau", `${CROSSINGS.filter((c) => c[4] === level && !c[5]).length} ouverts`],
       ["Dans le projet", `${openCrossings().length} ouverts`],
       ["Dernier dessin lu", "S-301 R02"]];
   const unitRows = {
-    "Vue d'ensemble": [["Typologie", (row || ["", ""])[0].split(" · ")[1] || "—"],
+    "Vue d'ensemble": [["Typologie", (row || ["", ""])[0].split(" — ")[1] || "—"],
       ["Superficie", (row || ["", ""])[1]], ["Niveau", `Niveau ${paneLevel()}`], ["Statut", V.settled[settleKey()] ? "réglé" : "non vérifié"]],
-    "Ouvertures": [["Le plan dit", "1800 × 1500"], ["La maquette dit", "1560 × 1500"], ["Écart", "240 mm"], ["Apparu dans", "R04 · 24 Oct"]],
+    "Ouvertures": [["Le plan dit", "1800 × 1500"], ["La maquette dit", "1560 × 1500"], ["Écart", "240 mm"], ["Apparu dans", "R04 — 24 Oct"]],
     "Coordination": crossRows,
-    "Historique": [["R04 · 24 Oct", "fenêtre élargie"], ["R03 · 02 Oct", "cloison déplacée"], ["R02 · 19 Oct", "unité découpée"], ["R01 · 12 Sep", "première lecture"]],
+    "Historique": [["R04 — 24 Oct", "fenêtre élargie"], ["R03 — 02 Oct", "cloison déplacée"], ["R02 — 19 Oct", "unité découpée"], ["R01 — 12 Sep", "première lecture"]],
   };
   const rows = {
     "Unités": unitRows[UNIT_TABS[V.utab]],
@@ -3580,8 +3590,8 @@ function inspectorHTML() {
       ${V.utab === 1
         /* Ouvertures is about doors and windows, so it shows the schedule
            sheet the sizes are read from, not a crop of the floor plan. */
-        ? `<div class="plan" data-img="openings" style="height:110px;flex:0 0 110px"><span class="hi">A-308 · tableau des fenêtres</span></div>
-           <div class="plan" data-img="doors" style="height:96px;flex:0 0 96px"><span class="hi">A-314 · tableau des portes</span></div>`
+        ? `<div class="plan" data-img="openings" style="height:110px;flex:0 0 110px"><span class="hi">A-308 — tableau des fenêtres</span></div>
+           <div class="plan" data-img="doors" style="height:96px;flex:0 0 96px"><span class="hi">A-314 — tableau des portes</span></div>`
         : `<div class="plan" data-img="unit" style="height:110px;flex:0 0 110px;background-image:url(assets/plan-niveau-${(selRow("Unités") || [])[4] || paneLevel()}.jpg);${crop(boxForUnit((selRow("Unités") || [])[4] || paneLevel(), (selRow("Unités") || [])[2] ?? 0), .25, "height")}"><span class="hi">${UNIT_TABS[V.utab]} — recadrage de l'unité</span></div>`}` : ""}
       ${rows.map(([k, val]) => `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line-2);padding-bottom:6px">
         <span class="lo bar" style="width:70px"></span><span class="lo bar" style="width:46px"></span>
@@ -3650,8 +3660,8 @@ const pinsOnSheet = () => pinsVisible().filter((p) => p.surface === "plan" && p.
 const pinsOnModel = () => pinsVisible().filter((p) => p.surface === "model");
 const SHEET_NAME = { plan: "plan d'unités", arp: "arpenteur", pay: "paysage" };
 const pinAnchor = (p) => (p.surface === "model"
-  ? `maquette · niv. ${p.level} · ${p.face}`
-  : `${SHEET_NAME[p.sheet] || "plan"} · niv. ${p.level}${p.zone ? ` · ${p.zone}` : ""}`);
+  ? `maquette — niv. ${p.level} — ${p.face}`
+  : `${SHEET_NAME[p.sheet] || "plan"} — niv. ${p.level}${p.zone ? ` — ${p.zone}` : ""}`);
 /* Which sheet was on screen when the point was put down: the floor plan
    alone, or one of the two consultants' sheets laid over it. */
 const currentSheetKey = () => {
@@ -3672,7 +3682,7 @@ function pinMarkHTML() {
       ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}"
       style="left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%;transform:scale(${(1 / z).toFixed(3)})"
       ${p.id ? act("note", p.id) : ""}>
-      <span class="nd">${p.id ? i + 1 : "·"}</span>
+      <span class="nd">${p.id ? i + 1 : "+"}</span>
       ${p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""}
     </div>`).join("");
 }
@@ -3754,7 +3764,7 @@ function unitAt(x, y) {
   for (const r of rowsOf("Unités")) {
     if (r[4] !== lv) continue;
     const poly = polys[r[2]];
-    if (poly && pointInPoly(x, y, poly)) return `unité ${r[0].split(" · ")[0]}`;
+    if (poly && pointInPoly(x, y, poly)) return `unité ${r[0].split(" — ")[0]}`;
   }
   return "";
 }
@@ -3788,7 +3798,7 @@ function pushModelPins() {
   window.fitteModel.setPins([...pinsOnModel(), ...pending].map((p, i) => ({
     id: p.id, p: p.p, n: p.n,
     cls: `${p.scope === "equipe" ? "team" : ""} ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}`,
-    html: `<span class="nd">${p.scope === "equipe" ? icon("lock") : (p.id ? i + 1 : "·")}</span>`
+    html: `<span class="nd">${p.scope === "equipe" ? icon("lock") : (p.id ? i + 1 : "+")}</span>`
       + (p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""),
   })));
 }
@@ -4048,7 +4058,7 @@ function placePill(vp, name, poly) {
     vp.append(pill);
   }
   const row = rowsOf("Unités")[Number(poly.dataset.value)];
-  pill.textContent = row ? String(row[0]).split("·")[0].trim() : "";
+  pill.textContent = row ? String(row[0]).split("—")[0].trim() : "";
   pill.hidden = false;
   /* Centred over the outline's top edge, 6 px above it, in whole pixels so
      the text lands on the pixel grid. */
@@ -4746,7 +4756,7 @@ function render() {
      number since the row itself no longer carries a single one. */
   const selectedRow = selRow("Unités");
   if (selectedRow) {
-    const no = selectedRow[0].split(" · ")[0];
+    const no = selectedRow[0].split(" — ")[0];
     const level = currentLevel() ?? Number(no.slice(0, -2));
     window.fitteSelection = { level, unit: no, index: selectedRow[2] };
   } else {
@@ -4805,8 +4815,8 @@ function paintSelection() {
      the screen being rebuilt around it. */
   const row = selRow("Unités");
   window.fitteSelection = row
-    ? { level: currentLevel() ?? Number(row[0].split(" · ")[0].slice(0, -2)),
-        unit: row[0].split(" · ")[0], index: row[2] }
+    ? { level: currentLevel() ?? Number(row[0].split(" — ")[0].slice(0, -2)),
+        unit: row[0].split(" — ")[0], index: row[2] }
     : { level: currentLevel(), unit: null, index: null };
   window.dispatchEvent(new CustomEvent("fitte:render"));
 }
@@ -4905,7 +4915,7 @@ function mailDialogHTML(d) {
           class="chip ${d.files.includes(f) ? "on" : ""}" ${act("mailfile", f)} title="${size}">
           ${d.files.includes(f) ? icon("check") : icon("plus")}<span class="hi">${f}</span>
           <span class="hi" style="color:var(--ink-3)">${size}</span></span>`).join("")}
-          ${d.local.map((f, i) => `<span class="chip on" title="${esc(f.name)} · depuis l'ordinateur">
+          ${d.local.map((f, i) => `<span class="chip on" title="${esc(f.name)} — depuis l'ordinateur">
           ${icon("paperclip")}<span class="hi">${esc(f.name)}</span>
           <span class="hi" style="color:var(--ink-3)">${fileSize(f.size)}</span>
           <span class="mx" ${act("maillocalrm", i)} title="Retirer">${icon("x")}</span></span>`).join("")}</div>
@@ -4914,7 +4924,7 @@ function mailDialogHTML(d) {
           ${icon("upload")}<span class="hi">Glissez des fichiers ici, ou <u>parcourez l'ordinateur</u></span>
         </label>
         ${sent.length ? `<div class="hi" style="font-size:11px;color:var(--ink-3)">Déjà envoyé d'ici: ${sent
-          .map((m) => `${m.when} · ${m.subject}`).join(" · ")}</div>` : ""}
+          .map((m) => `${m.when} — ${m.subject}`).join(" — ")}</div>` : ""}
         ${d.error ? `<div class="hi" style="font-size:11.5px;color:#b3261e">${d.error}</div>` : ""}
       </div>
       <div class="df">
@@ -4990,7 +5000,7 @@ function shareDialogHTML(d) {
         <div class="col" style="gap:4px">${SHARE_PEOPLE.map(([who, what, when]) => `<div class="listrow">
           ${icon("circle")}
           <span class="hi" style="font-size:12px;flex:1">${who}</span>
-          <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${what} · ${when}</span></div>`).join("")}</div>
+          <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${what} — ${when}</span></div>`).join("")}</div>
       </div>
       <div class="df">
         <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Un commentaire est une note à côté du plan. Aucun fichier de dessin n'est modifié.</span>
@@ -5524,7 +5534,7 @@ function onClick(e) {
     case "reason": V.reason = V.reason === value ? null : value; break;
     case "save":
       if (!saveReady()) { say("Rien à enregistrer: choisissez une raison ou écrivez une phrase."); break; }
-      V.settled[settleKey()] = [V.reason, V.note.trim()].filter(Boolean).join(" · ");
+      V.settled[settleKey()] = [V.reason, V.note.trim()].filter(Boolean).join(" — ");
       say(`Décision enregistrée sur ${settleKey()}.`);
       V.reason = null; V.note = "";
       break;
@@ -5559,7 +5569,7 @@ function onClick(e) {
         d.error = "Ce nom est déjà dans la liste."; break;
       }
       PROJECTS.unshift([d.name.trim(), "aucun dessin lu",
-        `${d.folder.trim()} · ${d.kinds.length} type${d.kinds.length > 1 ? "s" : ""}`, "première lecture en attente", true]);
+        `${d.folder.trim()} — ${d.kinds.length} type${d.kinds.length > 1 ? "s" : ""}`, "première lecture en attente", true]);
       say(`${d.name.trim()} — dossier connecté. La première lecture est en file; rien n'est écrit dans le dossier.`);
       V.dialog = null;
       V.screen = "Projets";
@@ -5589,7 +5599,7 @@ function onClick(e) {
     case "export": {
       V.exportMenu = false;
       const name = EXPORTS.find(([k]) => k === value)?.[1] || value;
-      say(`Export préparé — ${name} · ${viewOf("Unités")}.`);
+      say(`Export préparé — ${name} — ${viewOf("Unités")}.`);
       break;
     }
     default: return;
