@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>La barre du haut — où est l'atelier, où est le projet</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* Three things are wrong with the bar as drawn. Coordination and Codes do
+   not read as belonging to the project: they sit at the same level as its
+   name, separated from it by a rule that groups nothing. "Tous les projets"
+   does not read as a door, so the project does not read as having come
+   from anywhere. And Échéancier, which is the studio's week across every
+   project, sits at the far right, as far as it can be from the one word
+   that is also about every project. Six ways of saying it instead. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --card:#fff;--chrome:#141416;--chrome-2:#1e1e21;--r:12px}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:24px 28px 80px;max-width:1340px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:820px}
+section{margin-top:30px}
+section h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;max-width:900px}
+
+/* the frame, cut to the bar and the first inch of the page ----------- */
+.frame{background:var(--chrome);border-radius:12px;overflow:hidden}
+.bar{display:flex;align-items:center;gap:6px;height:40px;padding:0 12px;
+  color:rgba(255,255,255,.62);font-size:13px;white-space:nowrap}
+.bar > *{flex:0 0 auto}
+.frame svg{width:14px;height:14px;flex:0 0 auto}
+.bar{overflow:hidden}
+.sp{flex:1 1 auto !important;min-width:8px}
+.it{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:7px;cursor:pointer}
+.it:hover{background:rgba(255,255,255,.1);color:#fff}
+.it.on{background:#fff;color:#141416;font-weight:600}
+.it.proj{color:#fff;font-weight:600}
+.rule{width:1px;height:16px;background:rgba(255,255,255,.16);margin:0 4px}
+.chev{opacity:.4}
+.cnt{display:grid;place-items:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;
+  background:#fff;color:#111;font-size:11px;font-weight:600}
+.share{border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:4px 10px;color:#fff;font-size:12.5px;cursor:pointer}
+.share:hover{background:#fff;color:#111;border-color:#fff}
+.lvl{display:flex;align-items:flex-end;height:34px;padding:0 12px;gap:2px}
+.lvl button{display:flex;align-items:center;gap:6px;height:28px;margin-bottom:3px;padding:0 10px;border:0;background:none;font:inherit;font-size:12px;
+  color:rgba(255,255,255,.72);border-radius:6px;cursor:pointer}
+.lvl button[aria-current="true"]{position:relative;height:31px;margin-bottom:0;padding:0 12px;
+  border-radius:8px 8px 0 0;background:var(--card);color:var(--ink);font-weight:600;z-index:1}
+.lvl button[aria-current="true"]::before,.lvl button[aria-current="true"]::after{content:"";position:absolute;
+  bottom:0;width:8px;height:8px}
+.lvl button[aria-current="true"]::before{right:100%;background:radial-gradient(circle at 0 0,transparent 7.5px,var(--card) 8px)}
+.lvl button[aria-current="true"]::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--card) 8px)}
+.hold{padding:0 10px 10px}
+.card{background:var(--card);border-radius:var(--r);height:86px;overflow:hidden}
+.card .t{padding:11px 14px 9px;border-bottom:1px solid var(--line-2)}
+.card .t b{font-size:14px;font-weight:600}
+.card .t span{display:block;color:var(--ink-2);font-size:11.5px;margin-top:2px}
+.card .h{display:flex;align-items:center;gap:7px;height:32px;padding:0 14px;font-weight:500;color:var(--ink)}
+
+/* A — the studio end and the project end. Everything about every project
+   sits at the left, in one raised block: the door back out and the week
+   that spans them all. The project's own name follows, and its screens are
+   a segmented group attached to it, so they read as its parts. */
+[data-o="A"] .studio{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.08);
+  border-radius:9px;padding:2px}
+[data-o="A"] .seg{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.08);
+  border-radius:9px;padding:2px;margin-left:2px}
+[data-o="A"] .seg .it{padding:4px 10px;border-radius:7px}
+
+/* B — the project is a folder and its screens are inside it. The name and
+   the screens sit in one outlined block: the outline is the project, and
+   anything in it belongs to it. Nothing is separated by a rule. */
+[data-o="B"] .projbox{display:flex;align-items:center;gap:2px;border:1px solid rgba(255,255,255,.22);
+  border-radius:10px;padding:3px 3px 3px 10px;margin-left:2px}
+[data-o="B"] .projbox .nm{color:#fff;font-weight:600;margin-right:4px}
+
+/* C — a real path. The door out is a button that looks like one, the
+   chevron does the separating, and the screens are one step further in,
+   smaller, so depth is read as size. */
+[data-o="C"] .door{background:rgba(255,255,255,.1);border-radius:7px}
+[data-o="C"] .door:hover{background:#fff;color:#111}
+[data-o="C"] .deep{display:flex;align-items:center;gap:2px}
+[data-o="C"] .deep .it{font-size:12px;padding:4px 8px}
+
+/* D — two lines. The studio's line and the project's line: what is about
+   every project never shares a row with what is about this one. */
+[data-o="D"] .bar.one{height:34px;border-bottom:1px solid rgba(255,255,255,.1);font-size:12.5px}
+[data-o="D"] .bar.two{height:38px}
+
+/* E — the project's name is the title and its screens hang under it, in
+   the level row's own strip: one block of chrome holds name, screens and
+   levels, and the studio keeps the top line to itself. */
+[data-o="E"] .bar.one{height:34px;font-size:12.5px}
+[data-o="E"] .bar.two{height:36px;padding-top:2px}
+[data-o="E"] .bar.two .it.proj{font-size:15px;padding-left:0}
+
+/* F — the door is a chip with the project in it. "Tous les projets" holds
+   the open project like a folder holds a file, so where it came from is
+   drawn, not implied; the screens follow as the project's own tabs. */
+[data-o="F"] .crumbchip{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);
+  border-radius:9px;padding:3px 3px 3px 9px;cursor:pointer}
+[data-o="F"] .crumbchip:hover{background:rgba(255,255,255,.16)}
+[data-o="F"] .crumbchip .nm{background:#fff;color:#111;font-weight:600;border-radius:7px;padding:3px 9px}
+</style>
+</head>
+<body>
+<main>
+  <h1>La barre du haut — où est l'atelier, où est le projet</h1>
+  <p class="lede">Trois choses à corriger: Coordination et Codes ne se lisent pas comme des parties du projet;
+     « Tous les projets » ne se lit pas comme une porte, donc le projet ne se lit pas comme venant de quelque part;
+     et l'Échéancier, qui est la semaine de l'atelier sur tous les projets, est à l'autre bout de la barre que le
+     seul mot qui parle aussi de tous les projets. Six façons de le dire autrement.</p>
+  <div id="grid"></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n) => { const i = lucide.icons[pascal(n)];
+  return i ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+    stroke-linejoin="round">${i[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : ""; };
+
+const LEVELS = ["Bâtiment entier", "Sous-sol 00", "Niveau 1", "Niveau 2", "Niveau 3", "Toiture"];
+const levels = () => `<nav class="lvl">${LEVELS.map((l, i) =>
+  `<button aria-current="${i === 3}">${i === 0 ? svg("building-2") + " " : ""}${l}</button>`).join("")}</nav>`;
+const page = () => `<div class="hold"><div class="card">
+  <div class="t"><b>Plans — niveau 2</b><span>15 unités — 15 619 pi² nets</span></div>
+  <div class="h">${svg("bed-double")}Unités</div></div></div>`;
+
+const ech = `<span class="it">${svg("calendar-check")}Échéancier<span class="cnt">1</span></span>`;
+const share = `<span class="share">${svg("share-2")} Partager</span>`;
+const screens = (cls = "") => `<span class="it on ${cls}">${svg("git-compare")}Coordination</span>
+  <span class="it ${cls}">${svg("hash")}Codes</span>`;
+
+const BARS = {
+  A: `<div class="bar">
+    <span class="studio"><span class="it">${svg("folder")}Tous les projets</span>${ech}</span>
+    <span class="it proj">${svg("building-2")}Le Baldwin III</span>
+    <span class="seg">${screens()}</span>
+    <span class="sp"></span>${share}</div>`,
+
+  B: `<div class="bar">
+    <span class="it">${svg("folder")}Tous les projets</span>${ech}
+    ${svg("chevron-right")}
+    <span class="projbox"><span class="nm">Le Baldwin III</span>${screens()}</span>
+    <span class="sp"></span>${share}</div>`,
+
+  C: `<div class="bar">
+    <span class="it door">${svg("folder")}Tous les projets</span>${ech}
+    <span class="chev">${svg("chevron-right")}</span>
+    <span class="it proj">Le Baldwin III</span>
+    <span class="chev">${svg("chevron-right")}</span>
+    <span class="deep">${screens()}</span>
+    <span class="sp"></span>${share}</div>`,
+
+  D: `<div class="bar one">
+    <span class="it">${svg("folder")}Tous les projets</span>${ech}
+    <span class="sp"></span>${share}</div>
+   <div class="bar two">
+    <span class="it proj">${svg("building-2")}Le Baldwin III</span>
+    <span class="rule"></span>${screens()}</div>`,
+
+  E: `<div class="bar one">
+    <span class="it">${svg("folder")}Tous les projets</span>${ech}
+    <span class="sp"></span>${share}</div>
+   <div class="bar two"><span class="it proj">Le Baldwin III</span>${screens()}</div>`,
+
+  F: `<div class="bar">
+    <span class="crumbchip">${svg("folder")}Tous les projets ${svg("chevron-right")}
+      <span class="nm">Le Baldwin III</span></span>
+    ${screens()}
+    <span class="sp"></span>${ech}${share}</div>`,
+};
+
+const NOTES = [
+  ["A", "L'atelier d'un côté, le projet de l'autre",
+   "Tout ce qui parle de tous les projets tient dans un seul bloc à gauche: la porte de sortie et la semaine de l'atelier. Le nom du projet suit, et ses écrans sont un groupe segmenté accroché à lui: ils se lisent comme ses parties."],
+  ["B", "Le projet est une boîte, les écrans sont dedans",
+   "Le nom et les écrans partagent un contour. Le contour est le projet: ce qui est dedans lui appartient. Aucun filet ne sépare plus rien."],
+  ["C", "Un vrai chemin",
+   "La porte ressemble à un bouton, le chevron sépare à la place du filet, et les écrans sont un cran plus loin, plus petits: la profondeur se lit à la taille."],
+  ["D", "Deux lignes",
+   "La ligne de l'atelier et la ligne du projet. Ce qui parle de tous les projets ne partage jamais sa rangée avec ce qui parle de celui-ci."],
+  ["E", "Le projet en titre, les écrans sous lui",
+   "Le nom du projet devient un titre et ses écrans tiennent la même rangée, juste au-dessus des niveaux: un seul bloc de chrome porte nom, écrans et étages."],
+  ["F", "La porte contient le projet",
+   "« Tous les projets » tient le projet ouvert comme un dossier tient un fichier: d'où il vient est dessiné, pas sous-entendu. L'Échéancier reprend sa place à droite, avec les autres portes de sortie."],
+];
+
+grid.innerHTML = NOTES.map(([o, h, p]) => `<section data-o="${o}">
+  <h2>${h}<i>${o}</i></h2><p>${p}</p>
+  <div class="frame">${BARS[o]}${levels()}${page()}</div></section>`).join("");
+</script>
+</body>
+</html>
