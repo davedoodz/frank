@@ -502,6 +502,14 @@ a.dep:hover{box-shadow:0 0 0 2px var(--vert)}
 .notes{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:26px}
 .notes p{font-size:16.5px;position:relative;padding-left:40px}
 .notes b{display:block;margin-bottom:4px}
+/* prototype 2 up close: one wide crop over three */
+.upc{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 36px;margin-top:30px}
+.upc figure{margin:0}
+.upc .w{grid-column:1/-1}
+.upc .shot img{display:block;height:auto;aspect-ratio:41/32}
+.upc .w .shot img{aspect-ratio:1000/85}
+.upc figcaption{font-size:16.5px;position:relative;padding-left:40px;margin-top:12px;color:var(--ink-2);line-height:1.45}
+.upc figcaption b{display:block;color:var(--ink);margin-bottom:2px}
 /* Each note carries the same number as a pin on the screenshot, so the reader
    knows which part of the screen the sentence is about. */
 .mn{position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;
@@ -1042,7 +1050,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <p class="k" style="margin-top:28px">Problems it raised</p>
       <div class="sets">
         <p><svg class="pi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m16 8-2.6 5.4L8 16l2.6-5.4z"/></svg><span class="n">03</span>Navigation</p>
-        <p><svg class="pi" viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M12 4v16"/><path d="M9 20h6"/></svg><span class="n">04</span>Words</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><span class="n">04</span>Tracking</p>
         <p><svg class="pi" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg><span class="n">05</span>Room for the drawing</p>
         <p><svg class="pi" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span class="n">06</span>Reading the plan</p>
         <p><svg class="pi" viewBox="0 0 24 24"><path d="m12 3 9 4.5-9 4.5-9-4.5z"/><path d="m3 12 9 4.5 9-4.5"/><path d="m3 16.5 9 4.5 9-4.5"/></svg><span class="n">07</span>Drawing layers</p>
@@ -1057,17 +1065,18 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ prototype 2 — annotated screen -->
 <section class="s" data-sec="Process — Prototype 2">
 <div class="b">
-  <p class="k">Prototype 2 — Direction C</p>
-  <h2>One floor of the permit set, with the other trades stacked on it.</h2>
-  <div class="shot full"><img src="assets/frank/p2-wireframe-c3.jpg" alt="Prototype 2: level 5 with the unit and area table, the 2D plan, the 3D model and the comments">
-    <span class="mk" style="--x:33.3%;--y:4.7%">1</span>
-    <span class="mk" style="--x:50%;--y:33%">2</span>
-    <span class="mk" style="--x:67.7%;--y:53%">3</span>
-  </div>
-  <div class="notes">
-    <p><span class="mn">1</span><b>One floor at a time.</b>Eight levels and the roof, each its own screen, counted from the same drawings.</p>
-    <p><span class="mn">2</span><b>The other trades as layers.</b>Surveyor, architecture, landscape, electrical, drainage, distribution, ventilation, turned on over the plan.</p>
-    <p><span class="mn">3</span><b>Pick a unit once.</b>501 selected in the table is 501 on the plan and 501 on the model.</p>
+  <p class="k">Prototype 02</p>
+  <h2>The one workspace, up close.</h2>
+  <div class="rule"></div>
+  <div class="upc">
+    <figure class="w"><div class="shot"><img src="assets/frank/p2-zoom-floors.jpg" alt="Prototype 2 level bar: whole building, two basements, levels 1 to 8 and the roof, level 5 selected"></div>
+      <figcaption><span class="mn">1</span><b>Eight real floors.</b>Basement to roof, one tab per level of the permit set.</figcaption></figure>
+    <figure><div class="shot"><img src="assets/frank/p2-zoom-units.jpg" alt="Units table of level 5 with unit 501 selected"></div>
+      <figcaption><span class="mn">2</span><b>Select a unit once.</b>501 picked in the table…</figcaption></figure>
+    <figure><div class="shot"><img src="assets/frank/p2-zoom-layers.jpg" alt="The level 5 plan with unit 501 tagged and the engineers' drawings as layer tiles"></div>
+      <figcaption><span class="mn">3</span><b>The engineers' drawings as layers.</b>…is 501 on the plan, under surveyor, landscape, electrical and drainage.</figcaption></figure>
+    <figure><div class="shot"><img src="assets/frank/p2-zoom-model.jpg" alt="The SketchUp model of the building with unit 501 labelled on level 5"></div>
+      <figcaption><span class="mn">4</span><b>The SketchUp model.</b>…and 501 on the building, its windows in green.</figcaption></figure>
   </div>
 </div>
 </section>
@@ -1092,7 +1101,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <p style="margin-top:28px">So prototype 3 added little. It made what was there behave the way an architect expects.</p>
       <p class="k" style="margin-top:40px">Core feedback</p>
       <ul class="core">
-        <li><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg><b><i>01</i>Words</b><span>Say it the office’s way.</span></li>
+        <li><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><b><i>01</i>Tracking</b><span>Every note leads back to its project.</span></li>
         <li><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg><b><i>02</i>Drawings</b><span>Show one drawing, clearly.</span></li>
         <li><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg><b><i>03</i>Totals</b><span>Count the way they count.</span></li>
       </ul></div>
@@ -1112,11 +1121,12 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <div class="rule"></div>
   <div class="fb3">
     <div class="col">
-      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg>
-      <h3><i>01</i>Words</h3>
-      <p class="sum">Say it the office’s way.</p>
-      <div class="note"><p class="said">“Distribution”, “.csv” and “Client” are not our words <span class="who">GUY</span></p><p class="chg">Trade names on each sheet, “Exporter”, and “Municipalité / Ville” in Codes</p></div>
-      <div class="note"><p class="said">Green should mean progress, not urgency <span class="who">GUY</span></p><p class="chg">Red for conflicts and late items; green only for today and what is selected</p></div>
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+      <h3><i>01</i>Tracking</h3>
+      <p class="sum">Every note leads back to its project.</p>
+      <div class="note"><p class="said">The commenting system is unclear <span class="who">GUY</span></p><p class="chg">Each comment pins to its unit and sheet; « À l'interne » or « Partagée » is chosen while writing</p></div>
+      <div class="note"><p class="said">A calendar date should open its project <span class="who">GUY</span></p><p class="chg">Échéancier on every screen; each task points back to its project and article</p></div>
+      <div class="note"><p class="said">Green should mean progress, not urgency <span class="who">GUY</span></p><p class="chg">Red only for what is late; green for today and what is selected</p></div>
     </div>
     <div class="col">
       <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
@@ -1137,26 +1147,26 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ decision 04 — was 07 -->
+<!-- ============================================================ feedback 01 — tracking: comments -->
 <section class="s" data-sec="Process — Feedback 2">
 <div class="b">
-  <div class="st one">
+  <div class="st">
     <div class="st-t">
-      <div class="pnum"><b>03</b><svg class="fbi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg><span data-fb="01"><span class="k">Finding your way</span>Words</span></div>
-      <h2>In Québec, a « croisement » is a street corner.</h2>
+      <div class="pnum"><b>03</b><svg class="fbi" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><span data-fb="01"><span class="k">Tracking the work</span>Comments</span></div>
+      <h2>A note for the studio must never reach the contractor.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>The term « Distribution » is not intuitive. Avoid file words like « .csv ».</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>The screen called a clash between two drawings a « croisement ».</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Here, a « croisement » is a street corner. The words must be the office's.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>« Conflit » everywhere, with one red triangle.</dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>The commenting system is unclear.</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
+        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Guest comments and the studio's own notes sat in one list.</dd></div>
+        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>A comment is only useful if it says where it belongs, and who may read it.</dd></div>
+        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Each comment pins to its unit and sheet. « À l'interne » or « Partagée » is chosen while writing.</dd></div>
       </dl>
     </div>
     <div class="pics cmp">
-      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-words.jpg" alt="Prototype 2: « 8 avec un croisement ouvert »"></a>
-        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — « 8 avec un croisement ouvert »</figcaption></figure>
-      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-words.jpg" alt="Prototype 3: « 12 conflits », one red triangle"></a>
-        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — « 12 conflits », one red triangle</figcaption></figure>
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-comments.jpg" alt="Prototype 2: Studio notes and guest comments in one list"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Studio notes and guest comments in one list</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-comments.jpg" alt="Prototype 3: « À l'interne » or « Partagée », chosen while writing"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — « À l'interne » or « Partagée », chosen while writing</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1305,14 +1315,14 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <p class="k">Prototype 3 — Elevations</p>
   <h2>The model turns to the façade being checked.</h2>
-  <div class="shot full"><img src="assets/frank/p3-elevation.jpg" alt="Prototype 3 floor screen with the model turned to the east elevation">
-    <span class="mk" style="--x:61%;--y:19%">1</span>
-    <span class="mk" style="--x:28%;--y:57%">2</span>
-    <span class="mk" style="--x:73.6%;--y:14.3%">3</span>
+  <div class="shot full"><img src="assets/frank/p3-elevation.jpg" alt="Prototype 3, whole building: the south elevation coloured by material, beside the Matériaux table with each material's area per façade">
+    <span class="mk" style="--x:44.8%;--y:21.4%">1</span>
+    <span class="mk" style="--x:14.6%;--y:25%">2</span>
+    <span class="mk" style="--x:69.6%;--y:16.6%">3</span>
   </div>
   <div class="notes">
-    <p><span class="mn">1</span><b>3D or one façade.</b>North, East, South and West are one click each.</p>
-    <p><span class="mn">2</span><b>The plan stays beside it.</b>The unit list, the plan and the model stay on one screen.</p>
+    <p><span class="mn">1</span><b>One façade, square-on.</b>3D, Nord, Est, Sud, Ouest: one click each. Each material keeps its colour.</p>
+    <p><span class="mn">2</span><b>Counted per façade.</b>The Matériaux table gives each material's area on each side. The open side is lit.</p>
     <p><span class="mn">3</span><b>Handed to SketchUp.</b>« Ouvrir dans SketchUp » passes the view to the host program, simulated in this prototype.</p>
   </div>
 </div>
@@ -1442,31 +1452,6 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Every task flagged in green</figcaption></figure>
       <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-sched.jpg" alt="Prototype 3: Grouped by day; red only for what is late"></a>
         <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — Grouped by day; red only for what is late</figcaption></figure>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- ============================================================ decision 11 — was 09 -->
-<section class="s" data-sec="Process — Prototype 3">
-<div class="b">
-  <div class="st">
-    <div class="st-t">
-      <div class="pnum"><b>09</b><span><span class="k">Sharing and using it</span>Comments</span></div>
-      <h2>What a comment is attached to decides whether it is still true tomorrow.</h2>
-      <div class="rule"></div>
-      <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>The commenting system is unclear.</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>A shared link lets guests comment: contractor, surveyor, borough. The studio also writes notes to itself. The two must never mix.</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>What a comment hangs on decides whether it is still true after the next revision. And an internal note must not be greyed in the shared link; it must not be there at all.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Comments pin to the drawing and carry their unit and sheet. « À l'interne » or « Partagée » is chosen while writing; internal notes are not rendered in the shared link.</dd></div>
-      </dl>
-    </div>
-    <div class="pics cmp">
-      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-comments.jpg" alt="Prototype 2: Studio notes and guest comments in one list"></a>
-        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Studio notes and guest comments in one list</figcaption></figure>
-      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-comments.jpg" alt="Prototype 3: « À l'interne » or « Partagée », chosen while writing"></a>
-        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — « À l'interne » or « Partagée », chosen while writing</figcaption></figure>
     </div>
   </div>
 </div>
