@@ -810,6 +810,18 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .lmenu .mi{padding:5px 8px;cursor:pointer}
 .lmenu .mi:hover{background:var(--fill-2)}
 .lmenu .mi + .mi{border-top:1px solid var(--line-2)}
+/* The export menu hangs off the table's header, right-aligned to the
+   button that opens it so it never leaves the pane. */
+.expwrap{position:relative;display:inline-flex}
+.btnw.sm{padding:3px 7px;font-size:11.5px;gap:4px}
+.btnw.sm svg{width:13px;height:13px}
+.btnw.sm.on{border-color:var(--ink);background:var(--fill)}
+.expmenu{position:absolute;right:0;top:calc(100% + 5px);z-index:12;display:flex;flex-direction:column;
+  min-width:186px;background:var(--card);border:1px solid var(--line);border-radius:7px;overflow:hidden;
+  font-size:12px;font-weight:400;box-shadow:0 10px 24px rgba(17,17,18,.18)}
+.expmenu .mi{padding:7px 10px;cursor:pointer;white-space:nowrap}
+.expmenu .mi:hover{background:var(--fill-2)}
+.expmenu .mi + .mi{border-top:1px solid var(--line-2)}
 /* One opacity control, named, with a knob: a bar that only fills reads as
    progress, a knob reads as something to take hold of. */
 .oprow{display:flex;align-items:center;gap:8px}
@@ -1316,6 +1328,7 @@ const V = {
   xdraft: { who: [], day: null },
   layPick: "plan",     /* the thumbnail whose card is open */
   layCard: true,
+  exportMenu: false,  /* the format list on the table's header */
   layMenu: false,
 };
 
@@ -3022,7 +3035,9 @@ function headerHTML() {
              drawing they open. They live on the drawing pane now. */
           : buildingScope()
           ? `<span class="btnw" ${act("csvall")} title="Télécharger les quatre tableaux en .csv">${icon("download")}<span class="lo bar" style="width:40px"></span><span class="hi">Tout exporter en .csv</span></span>`
-          : `<span class="btnw" ${act("export")} title="Exporter ce que cet écran montre">${icon("table")}<span class="lo bar" style="width:40px"></span><span class="hi">Exporter</span></span>`}
+          /* Exporting a floor's table is an act on that table, so the
+             button sits on the table's own header, not a screen away. */
+          : ""}
       </div>
       ${metrics ? `<div class="row" style="gap:var(--gap)">${[1, 2, 3, 4].map((i) => `<div class="tile" style="flex:1">
         <div class="lo bar" style="width:38px;height:14px"></div><div class="lo bar lt" style="width:70%"></div>
@@ -3341,10 +3356,28 @@ function fqUnitHTML(q) {
     <div class="fqn">estimation : bordereau du bâtiment réparti par superficie nette — à vérifier</div></div>`;
 }
 
+/* One table, four ways out of it: the spreadsheet the broker opens, the
+   plain text another tool reads, the page that is printed, and the drawing
+   the table was measured from. Every line is named the same way — what the
+   file is, then its extension — so the list is read by its ends, not by
+   guessing which word is a format. */
+const EXPORTS = [["xlsx", "Classeur Excel (.xlsx)"], ["csv", "Tableau CSV (.csv)"],
+  ["pdf", "Document PDF (.pdf)"], ["dwg", "Dessin AutoCAD (.dwg)"]];
+
+function exportMenuHTML() {
+  return `<span class="expwrap">
+    <span class="btnw sm ${V.exportMenu ? "on" : ""}" ${act("expmenu")}
+      title="Exporter le tableau de ce niveau">${icon("download")}<span class="hi">Exporter</span>${icon("chevron-down")}</span>
+    ${V.exportMenu ? `<span class="expmenu">${EXPORTS.map(([k, label]) =>
+      `<span class="mi" ${act("export", k)}>${label}</span>`).join("")}</span>` : ""}
+  </span>`;
+}
+
 function unitListHTML(step) {
   const q = floorQuant();
   return region("list", "liste — unités et superficies",
-    `<div class="ph">${icon("table")}<span class="hi">Unités et superficies</span><span class="fqs">${q.level}</span></div>
+    `<div class="ph">${icon("table")}<span class="hi">Unités et superficies</span><span class="fqs">${q.level}</span>
+       <span style="flex:1"></span>${exportMenuHTML()}</div>
      <div class="pb" style="overflow:auto;gap:10px">
        <div class="laychips" style="flex-wrap:wrap">${q.types.map(([ty, n]) => `<span class="chip"><span class="lb">${ty} · ${n}</span></span>`).join("")}</div>
        ${fqTableHTML(q)}
@@ -4741,6 +4774,19 @@ function paintSelection() {
   window.dispatchEvent(new CustomEvent("fitte:render"));
 }
 
+/* A menu left open over the table it exports is in the way of reading it:
+   anything else clicked, or Escape, puts it away. */
+document.addEventListener("click", (e) => {
+  if (!V.exportMenu || e.target.closest?.(".expwrap")) return;
+  V.exportMenu = false;
+  render();
+}, true);
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !V.exportMenu) return;
+  V.exportMenu = false;
+  render();
+});
+
 /* Escape closes the dialog, because a dialog that can only be dismissed by
    finding the right button is a trap. */
 document.addEventListener("keydown", (e) => {
@@ -5502,7 +5548,13 @@ function onClick(e) {
     case "sketchup":
       say(`Remise à SketchUp: ${V.docs.skp} s'ouvre sur ${viewOf("Unités").toLowerCase()}. Lecture seule.`);
       break;
-    case "export": say(`Export préparé: ${screen}${CONTEXT[screen] ? ` · ${viewOf(screen)}` : ""}.`); break;
+    case "expmenu": V.exportMenu = !V.exportMenu; break;
+    case "export": {
+      V.exportMenu = false;
+      const name = EXPORTS.find(([k]) => k === value)?.[1] || value;
+      say(`Export préparé — ${name} · ${viewOf("Unités")}.`);
+      break;
+    }
     default: return;
   }
   render();
