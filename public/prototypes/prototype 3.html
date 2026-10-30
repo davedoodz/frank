@@ -2614,13 +2614,13 @@ const ARTICLES = [
     quote: "Pour les usages de la famille habitation, le nombre d'unités de stationnement ne doit pas dépasser : 1° 0,5 unité par logement;",
     measured: "22 cases", required: "52 cases au plus", state: "conforme",
     needs: "nombre de logements confirmé", page: 147,
-    fig: "classement" },
+    img: "assets/code/art-546-stationnement.png", ratio: "1920 / 819" },
   { id: "art. 395", topic: "Plantation d'arbres",
     doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
     quote: "Lors de la construction d'un nouveau bâtiment principal ou l'agrandissement d'un bâtiment principal, tout terrain doit faire l'objet d'une plantation et du maintien d'un nombre minimal d'arbres… 2° un arbre pour chaque 50 m² de terrain non construit…",
     measured: "—", required: "1 arbre par 50 m² non construits", state: "non résolu",
     needs: "superficie de terrain non construite, arbres au plan paysager", page: 122,
-    fig: "classement" },
+    img: "assets/code/art-395-arbres.png", ratio: "1920 / 819" },
   { id: "art. 32", topic: "Taux d'implantation",
     doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
     quote: "Le taux d'implantation d'un terrain doit être égal ou supérieur à un taux d'implantation minimal de 30% tout en étant égal ou inférieur au taux d'implantation maximal prescrit par secteur sur ce plan.",
@@ -2648,25 +2648,25 @@ const ARTICLES = [
     quote: "Sous réserve du paragraphe 3.3.3.3. 2), la largeur minimale d'un corridor commun est de 1100 mm.",
     measured: "1 120 mm", required: "1 100 mm", state: "conforme",
     needs: "largeur relevée au point le plus étroit, saillies comprises", page: 298,
-    fig: "corridor" },
+    img: "assets/code/art-3319-corridor.png", ratio: "1920 / 819" },
   { id: "3.3.1.18", topic: "Hauteur des garde-corps",
     doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
     quote: "Sous réserve du paragraphe 5) et de l'article 3.3.2.9., un garde-corps d'au moins 1070 mm de hauteur doit être installé : a) au pourtour des toits auxquels un accès est prévu pour d'autres fins que les travaux d'entretien;…",
     measured: "1 020 mm", required: "1 070 mm", state: "non résolu",
     needs: "hauteur des garde-corps de balcon cotée sur l'élévation", page: 302,
-    fig: "garde" },
+    img: "assets/code/art-33118-garde-corps.png", ratio: "1920 / 819" },
   { id: "3.8.3.6", topic: "Portes sans obstacles",
     doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
     quote: "Chaque baie de porte d'un parcours sans obstacles doit offrir une largeur libre d'au moins 850 mm lorsque la porte est ouverte",
     measured: "800 mm", required: "850 mm", state: "non résolu",
     needs: "largeur libre des portes de l'entrée et du corridor", page: 367,
-    fig: "porte" },
+    img: "assets/code/art-3836-porte.png", ratio: "1920 / 819" },
   { id: "3.2.2.48", topic: "Construction — groupe C, au plus 12 étages",
     doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
     quote: "Un bâtiment du groupe C peut être construit conformément au paragraphe 2), à condition : a) qu'il soit entièrement protégé par gicleurs; b) qu'il ait une hauteur de bâtiment d'au plus 12 étages;…",
     measured: "groupe C — 8 étages", required: "incombustible", state: "non résolu",
     needs: "type de construction retenu et degré des planchers", page: 231,
-    fig: "classement" },
+    img: "assets/code/art-32248-groupe-c.png", ratio: "1920 / 819" },
 ];
 
 /* Where "Lire le texte officiel" lands: the page of the official PDF where
@@ -6803,7 +6803,10 @@ function render() {
     if (live3d[i] && fresh) fresh.replaceWith(live3d[i]);
   });
 
-  if (V.dialog) document.getElementById("frame").insertAdjacentHTML("beforeend", dialogHTML());
+  /* Inside the frame, not beside it: the frame carries data-fi, data-chrome
+     and the rest, and a dialog hung outside them kept none of their rules —
+     its primary button stayed the flat grey of the low-fidelity ramp. */
+  if (V.dialog) document.querySelector("#frame > .frame").insertAdjacentHTML("beforeend", dialogHTML());
 
   if (V.toast) {
     const t = document.createElement("div");
@@ -7079,8 +7082,10 @@ function mailDialogHTML(d) {
         ${d.error ? `<div class="hi" style="font-size:11.5px;color:#b3261e">${d.error}</div>` : ""}
       </div>
       <div class="df">
-        <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">Envoyé depuis fitte. Le message reste au dossier de l'article.</span>
+        <span style="flex:1"></span>
         <span class="btnw" ${act("dlgclose")}><span class="hi">Annuler</span></span>
+        <!-- The one act of the dialog, filled with ink rather than left in
+             the grey the secondary buttons wear. -->
         <span class="btnw solid" ${act("mailsend")}>${icon("send")}<span class="hi">Envoyer</span></span>
       </div>
     </div></div>`;
