@@ -127,11 +127,6 @@ body[data-dt="240 · large"] .div h1{font-size:240px}
 body[data-dt="300 · huge"] .div h1{font-size:300px}
 
 .div .lede{margin-top:48px;color:#cfcfcf}
-/* a feedback section opens on the people who gave it: the photo fills the
-   slide under a flat ink scrim so the title stays readable */
-.div>.dph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.div:has(>.dph)::after{content:"";position:absolute;inset:0;background:rgba(17,17,17,.66)}
-.div:has(>.dph) .b{position:relative;z-index:1}
 .title .pdf{margin-top:48px;display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 20px;border:0;border-radius:999px;background:var(--ink);color:#fff;font:500 16px/1 var(--sans);cursor:pointer}
 .title .pdf:hover{background:var(--vert);color:var(--ink)}
 .title .pdf svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -898,11 +893,23 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ divider: feedback 1 -->
 <section class="s div" data-sec="Process — Feedback 1">
-<img class="dph" src="assets/frank/feedback1-users.jpg" alt="A technician at the office table, prototype 1 open on the laptop, the permit set beside it" style="object-position:50% 40%">
 <div class="b">
   <p class="big">04</p>
   <h1>Feedback 1</h1>
   <p class="lede">Process, part 2. October 26: what the technicians asked for after the first test, and the product it pointed to.</p>
+</div>
+</section>
+
+<!-- ============================================================ feedback 1: the people -->
+<section class="s" data-sec="Process — Feedback 1">
+<div class="b">
+  <p class="k">Feedback 1 — Prototype 1 test</p>
+  <h2>I put prototype&nbsp;1 in front of the technicians.</h2>
+  <div class="rule"></div>
+  <figure style="margin:28px 0 0;flex:1;min-height:0;display:flex;flex-direction:column">
+    <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/feedback1-users.jpg" alt="A technician at the office table, prototype 1 open on the laptop, the permit set beside it" style="width:100%;height:100%;object-fit:cover;object-position:50% 45%"></div>
+    <figcaption class="cap">Testing prototype 1 with a technician at the office table, the permit set beside the laptop.</figcaption>
+  </figure>
 </div>
 </section>
 
@@ -1013,7 +1020,6 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ divider: feedback 2 -->
 <section class="s div" data-sec="Process — Feedback 2">
-<img class="dph" src="assets/frank/feedback2-users.jpg" alt="A technician explaining a detail across the table, the laptop open between us" style="object-position:50% 30%">
 <div class="b">
   <p class="big">06</p>
   <h1>Feedback 2</h1>
@@ -1031,8 +1037,8 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     <div class="q"><blockquote>Both technicians focused on usability and workflow details rather than new features.</blockquote><cite>Central finding, prototype 2 testing notes</cite>
       <p style="margin-top:28px">So prototype 3 added little. It made what was there behave the way an architect expects.</p></div>
     <figure style="margin:0;display:flex;flex-direction:column;min-height:0">
-      <div class="shot" style="aspect-ratio:3/2"><img src="assets/frank/tl-feedback2.jpg" alt="Two people at the office counter, prototype 2 open on the laptop, a printed set beside it" style="object-position:50% 28%"></div>
-      <figcaption class="cap">Test of prototype 2 at the office counter, October 28, with the permit set the screen was built from.</figcaption>
+      <div class="shot" style="aspect-ratio:3/2"><img src="assets/frank/feedback2-users.jpg" alt="A technician explaining a detail across the office table, the laptop open between us" style="object-position:50% 40%"></div>
+      <figcaption class="cap">Testing prototype 2 with a technician at the office table.</figcaption>
     </figure>
   </div>
 </div>
