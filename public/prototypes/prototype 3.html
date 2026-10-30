@@ -145,6 +145,23 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 /* No tab stands on the page's corner any more: the screen switch opens
    the row, so the first level tab is inboard like every other one and the
    page keeps one silhouette at both ends. */
+/* The travelling tab of the panel's tab motion: the open tab's own shape
+   and feet, under the words, while the real tab waits transparent. */
+.tabs.lvl.gliding{position:relative}
+.tabs.lvl .tabglide{position:absolute;left:0;bottom:0;z-index:0;pointer-events:none;background:var(--card);
+  border-radius:var(--tabr) var(--tabr) 0 0;--tabc:var(--card)}
+.tabs.lvl .tabglide::before,.tabs.lvl .tabglide::after{content:"";position:absolute;bottom:0;width:var(--tabr);height:var(--tabr)}
+.tabs.lvl .tabglide::before{right:100%;background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
+.tabs.lvl .tabglide::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px)}
+.tabs.lvl.gliding button,.tabs.lvl.gliding .ms,.tabs.lvl.gliding .mseg{position:relative;z-index:1}
+.frame[data-chrome] .tabs.lvl.gliding button[aria-current="true"]{background:transparent}
+.tabs.lvl.gliding button[aria-current="true"]::before,.tabs.lvl.gliding button[aria-current="true"]::after{display:none}
+/* The switch's lit pill while it slides: under the words, the real one
+   unlit until it lands. */
+.tabs.lvl .mseg.gliding{position:relative}
+.tabs.lvl .msglide{position:absolute;left:0;z-index:0;border-radius:9px;background:rgba(255,255,255,.16);pointer-events:none}
+.tabs.lvl .mseg.gliding .ms{position:relative;z-index:1}
+.tabs.lvl .mseg.gliding .ms[aria-current="true"]{background:transparent}
 .frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.72);font-size:12.5px}
 .frame[data-chrome="black"] .tabs.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
 .frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{background:var(--card);color:var(--ink)}
@@ -4294,11 +4311,11 @@ function tabsHTML() {
     : `<span class="projtab">${V.project}</span>`;
   /* Sharing names the project it shares, so on a project screen it sits on
      the studio's line, after the project's tab, beside the person sharing. */
-  const shareTop = studio || mode !== "Two rows, no rail" ? "" : `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
-       style="flex:0 0 auto;margin-right:8px;align-self:center">${icon("share-2")}<span class="hi">Partager</span></span>`;
+  const shareLvl = studio || mode !== "Two rows, no rail" ? "" : `<span class="btnw lvlshare" ${act("share")} title="Partager le projet en lecture et commentaires"
+       style="flex:0 0 auto;margin-left:10px">${icon("share-2")}<span class="hi">Partager</span></span>`;
   const one = `<div class="tabs one ${studio ? "studio" : ""} rg ${solo("nav")}" data-rg="atelier" data-fi="${fiOf("nav")}"
        data-labels-mode="${V.nav.labels}">
-      ${back}${ech}${projTab}<span class="sp"></span>${shareTop}${me}
+      ${back}${ech}${projTab}<span class="sp"></span>${me}
     </div>`;
   if (studio) return one;
   if (!views.length && mode !== "Two rows, no rail") {
@@ -4351,7 +4368,7 @@ function tabsHTML() {
     ? `<div class="tabs lvl rg ${solo("nav")}" data-rg="vues" data-fi="${fiOf("nav")}"
          data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}" data-off="${off}">
         ${modeSeg}${views.length ? `<span class="msep"></span>${wholeBtn}
-        <div class="views">${views.map(viewBtn).join("")}</div>` : ""}</div>`
+        <div class="views">${views.map(viewBtn).join("")}</div>` : ""}${shareLvl}</div>`
     : "";
   /* A project is read by people who do not draw: the client, the urbaniste,
      the contractor. Sharing ends the project's own row, on the same line as
@@ -7661,6 +7678,12 @@ const dial = DialKit.createDialKit("Wireframe C3", {
     topBar: sel(["Current", "Dark gray", "Black", "Brand green"]),
     tabRow: sel(["Current", "Dark gray", "Black", "Brand green"]),
     pageBorder: sel(["Current", "Dark gray", "Black", "Brand green"]) },
+  /* How the open tab moves when another level is picked in the same row:
+     the white tab glides, springs, stretches across, rises out of the
+     page, or fades in. */
+  tabMotion: { _collapsed: false,
+    style: sel(["Slide", "Spring", "Stretch", "Rise", "Fade", "None"]),
+    ms: [280, 100, 700, 10] },
   /* The whole screen on a dark ramp. The drawing keeps its own paper: a
      plan is a white sheet, and inverting it would be redrawing it. */
   theme: sel(["Light", "Dark"]),
@@ -7750,6 +7773,8 @@ function applyDial(v) {
   const cc = v.chromeColors || {};
   Object.assign(document.documentElement.dataset,
     { toneTop: tone(cc.topBar), toneRow: tone(cc.tabRow), toneBand: tone(cc.pageBorder) });
+  TAB_MOTION.kind = String(v.tabMotion?.style || "none").toLowerCase();
+  TAB_MOTION.ms = v.tabMotion?.ms ?? 280;
   /* The panel names the glyph in English and title-cases what it is given,
      so the label is matched without regard to case. */
   const pick = (screen, label) => {
@@ -7770,6 +7795,100 @@ function applyDial(v) {
   render();
 }
 
+/* Moving between the tabs of the level row. The row is rewritten on every
+   render, so the tab that was open is measured as the pointer goes down,
+   and once the new row is drawn the move is played over it: a white tab
+   shape travelling from the old place to the new (slide, spring, stretch),
+   or the new tab rising out of the page or fading in. Words cross-fade
+   between dark and white so none goes white on white on the way. */
+const TAB_MOTION = { kind: "slide", ms: 280 };
+let tabFrom = null, tabFromAt = 0;
+document.addEventListener("pointerdown", (e) => {
+  const b = e.target.closest(".tabs.lvl button");
+  const cur = b?.closest(".tabs.lvl").querySelector('button[aria-current="true"]');
+  tabFrom = cur && cur !== b ? cur.getBoundingClientRect() : null;
+  tabFromAt = performance.now();
+}, true);
+window.addEventListener("fitte:render", () => {
+  const from = tabFrom;
+  tabFrom = null;
+  if (!from || TAB_MOTION.kind === "none" || performance.now() - tabFromAt > 800) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const row = document.querySelector(".tabs.lvl"), to = row?.querySelector('button[aria-current="true"]');
+  if (!to) return;
+  const t = to.getBoundingClientRect();
+  if (Math.abs(t.left - from.left) < 1) return;
+  playTabMotion(row, to, from, t);
+});
+function playTabMotion(row, to, from, t) {
+  const { kind, ms } = TAB_MOTION;
+  const ease = "cubic-bezier(.25,.8,.25,1)";
+  const ink = getComputedStyle(to).color, dim = "rgba(255,255,255,.72)";
+  const left = [...row.querySelectorAll("button")].find((b) => Math.abs(b.getBoundingClientRect().left - from.left) < 2 && b !== to);
+  if (kind === "rise" || kind === "fade") {
+    to.animate(kind === "rise" ? [{ transform: "translateY(100%)" }, { transform: "none" }] : [{ opacity: 0 }, { opacity: 1 }],
+      { duration: ms, easing: ease });
+    left?.animate(kind === "rise" ? [{ boxShadow: "inset 0 -36px 0 var(--card)", color: ink }, { boxShadow: "inset 0 0 0 var(--card)", color: dim }]
+      : [{ background: "var(--card)", color: ink }, { background: "transparent", color: dim }], { duration: ms, easing: ease });
+    return;
+  }
+  const r = row.getBoundingClientRect(), x0 = from.left - r.left, x1 = t.left - r.left;
+  const g = document.createElement("span");
+  g.className = "tabglide";
+  g.style.height = `${t.height}px`;
+  row.append(g);
+  row.classList.add("gliding");
+  const at = (x, w) => ({ transform: `translateX(${x}px)`, width: `${w}px` });
+  const lo = Math.min(x0, x1), hi = Math.max(x0 + from.width, x1 + t.width);
+  const frames = kind === "stretch" ? [at(x0, from.width), at(lo, hi - lo), at(x1, t.width)] : [at(x0, from.width), at(x1, t.width)];
+  const dur = kind === "spring" ? ms * 1.3 : kind === "stretch" ? ms * 1.2 : ms;
+  const easing = kind === "spring" ? "cubic-bezier(.34,1.5,.5,1)" : kind === "stretch" ? "cubic-bezier(.65,0,.35,1)" : ease;
+  const a = g.animate(frames, { duration: dur, easing });
+  to.animate([{ color: dim }, { color: ink }], { duration: dur, easing: "ease-in" });
+  left?.animate([{ color: ink }, { color: dim }], { duration: dur * 0.6, easing: "ease-out" });
+  const end = () => { g.remove(); row.classList.remove("gliding"); };
+  a.onfinish = end;
+  a.oncancel = end;
+}
+
+/* The Coordination / Codes switch: its lit pill slides from one screen to
+   the other, at the panel's tab-motion speed (springing when the levels
+   spring). Measured as the pointer goes down, played on the new row. */
+let msFrom = null, msFromAt = 0;
+document.addEventListener("pointerdown", (e) => {
+  const b = e.target.closest(".tabs.lvl .ms");
+  const cur = b?.closest(".mseg").querySelector('.ms[aria-current="true"]');
+  msFrom = cur && cur !== b ? cur.getBoundingClientRect() : null;
+  msFromAt = performance.now();
+}, true);
+/* A change of screen renders twice (the panel's echo, then the click's),
+   so the slide waits a frame and plays on the row that stays. */
+window.addEventListener("fitte:render", () => {
+  const from = msFrom;
+  msFrom = null;
+  if (!from || TAB_MOTION.kind === "none" || performance.now() - msFromAt > 800) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  requestAnimationFrame(() => slideSwitch(from));
+});
+function slideSwitch(from) {
+  const seg = document.querySelector(".tabs.lvl .mseg"), to = seg?.querySelector('.ms[aria-current="true"]');
+  if (!to) return;
+  const t = to.getBoundingClientRect(), s = seg.getBoundingClientRect();
+  if (Math.abs(t.left - from.left) < 1) return;
+  const pill = document.createElement("span");
+  pill.className = "msglide";
+  Object.assign(pill.style, { top: `${t.top - s.top}px`, height: `${t.height}px` });
+  seg.append(pill);
+  seg.classList.add("gliding");
+  const spring = TAB_MOTION.kind === "spring";
+  const a = pill.animate([
+    { transform: `translateX(${from.left - s.left}px)`, width: `${from.width}px` },
+    { transform: `translateX(${t.left - s.left}px)`, width: `${t.width}px` }],
+    { duration: spring ? TAB_MOTION.ms * 1.3 : TAB_MOTION.ms, easing: spring ? "cubic-bezier(.34,1.5,.5,1)" : "cubic-bezier(.25,.8,.25,1)" });
+  const end = () => { pill.remove(); seg.classList.remove("gliding"); };
+  a.onfinish = end;
+  a.oncancel = end;
+}
 dial.subscribe(applyDial);
 
 sprite();
