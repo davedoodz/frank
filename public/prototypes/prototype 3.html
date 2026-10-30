@@ -718,6 +718,15 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .model-context-note{padding:6px 10px;font-size:11px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
 /* The engineering chips keep the row under the pane header; the three
    drawings moved out of it and into the strip. */
+/* The floor's mix: one bar, one chip per type, the net area at the end. */
+.fqmix{display:flex;flex-direction:column;gap:6px}
+.fqmix .mixbar{display:flex;height:7px;border-radius:4px;overflow:hidden;background:var(--fill-2)}
+.fqmix .mixbar span{display:block;height:100%}
+.fqmix .mixrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.fqmix .chip{padding:1px 8px 1px 6px;font-size:11px;white-space:nowrap;gap:5px}
+.fqmix .chip .sw{width:8px;height:8px;border-radius:2px;flex:0 0 8px}
+.fqmix .mixnet{font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.fqmix .mixnet b{color:var(--ink);font-weight:600}
 .laychips{display:flex;gap:4px;margin-right:6px;flex:0 0 auto}
 .laychips .chip{padding:1px 8px 1px 6px;font-size:11px;cursor:pointer;white-space:nowrap;
   display:inline-flex;align-items:center;gap:4px}
@@ -3317,7 +3326,13 @@ function floorQuant() {
   const unitShare = (q) => (unit ? q * unit[6] / BUILDING_NET : 0);
   return {
     level: viewOf("Unités"), unit, u: unit ? unitNo(unit) : null,
-    types: types.map((ty) => [ty, ofType(ty).length]),
+    /* A count answers "how many 4½"; the share answers "what kind of floor
+       is this", which is the question a mix is read for. Both, plus the net
+       area the type actually occupies. */
+    types: types.map((ty) => [ty, ofType(ty).length, floor.length ? ofType(ty).length / floor.length : 0,
+      ofType(ty).reduce((s, r) => s + r[6], 0)]),
+    count: floor.length,
+    net,
     /* An open crossing rides on the number, as it did on the card. */
     rows: floor.map((r) => ({
       cells: [`${unitNo(r)}${r[7] ? `<span class="xdot" title="${r[1]}"></span>` : ""}`, r[5],
@@ -3331,6 +3346,23 @@ function floorQuant() {
     windows: QTABS["Fenêtres"].rows.map((r) => [r[0], fqNum(unitShare(r[3]), 1)]),
     materials: QTABS["Matériaux"].rows.map((r) => [r[0], fqNum(unitShare(r[2]), 1)]),
   };
+}
+
+/* The mix of a floor, read in one line: a bar in the typology colours the
+   plan already uses, then one chip per type with its count and its share.
+   The floor's net area stands beside it because every percentage on the
+   row is a share of it. */
+function fqMixHTML(q) {
+  return `<div class="fqmix">
+    <div class="mixbar">${q.types.map(([ty, , share]) =>
+      `<span style="width:${(share * 100).toFixed(1)}%;background:${TYPO_INK[ty]}" title="${ty} — ${Math.round(share * 100)} %"></span>`).join("")}</div>
+    <div class="mixrow">
+      ${q.types.map(([ty, count, share]) => `<span class="chip"><span class="sw" style="background:${TYPO_INK[ty]}"></span><span
+        class="lb">${ty} · ${count} · ${Math.round(share * 100)} %</span></span>`).join("")}
+      <span style="flex:1"></span>
+      <span class="mixnet"><b>${fqNum(q.net)}</b> pi² nets · ${q.count} unités</span>
+    </div>
+  </div>`;
 }
 
 const FQ_TYPE = ["t", "t", "n", "n", "n"];
@@ -3379,7 +3411,7 @@ function unitListHTML(step) {
     `<div class="ph">${icon("table")}<span class="hi">Unités et superficies</span><span class="fqs">${q.level}</span>
        <span style="flex:1"></span>${exportMenuHTML()}</div>
      <div class="pb" style="overflow:auto;gap:10px">
-       <div class="laychips" style="flex-wrap:wrap">${q.types.map(([ty, n]) => `<span class="chip"><span class="lb">${ty} · ${n}</span></span>`).join("")}</div>
+       ${fqMixHTML(q)}
        ${fqTableHTML(q)}
        ${fqUnitHTML(q)}
      </div>`, step);
