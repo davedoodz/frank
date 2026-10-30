@@ -219,9 +219,6 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs .crumb:hover{color:var(--ink)}
 .tabs .crumb.ech{padding:0 8px;height:24px;border-radius:7px;margin-left:2px}
 .tabs .crumb.ech:hover{background:var(--fill-2)}
-.tabs .crumb.ech .late{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;
-  padding:0 4px;border-radius:8px;background:#fff;color:#111;box-shadow:inset 0 0 0 1px var(--line);
-  font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}
 /* The schedule is the one door out of every screen, so it reads at full
    strength rather than as a dimmed crumb; open, it is lit like a tab. */
 .tabs .crumb.ech{color:var(--ink);font-weight:500}
@@ -297,10 +294,12 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    air, 1 of border), so its radius is the field's 8 less 4. */
 .fpath.sharelink{cursor:default;height:34px;border-radius:8px;padding:3px 3px 3px 10px;gap:7px;font-size:12px}
 .fpath.sharelink:hover{background:var(--fill-2);border-color:var(--line-2)}
-.btnw.done{border-color:#2f7a4d;color:#2f7a4d}
-.btnw.done svg{color:#2f7a4d}
-.lcrumbs.done,.lcrumbs.done .c{color:#2f7a4d}
-.fpath.sharelink .copy.done{background:#2f7a4d;border-color:#2f7a4d;color:#fff}
+/* « Copié »: the button goes solid black with white words and check — a
+   change of state, not a colour of its own. */
+.btnw.done,.btnw.done:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.btnw.done svg{color:#fff}
+.lcrumbs.done,.lcrumbs.done .c{color:var(--ink)}
+.fpath.sharelink .copy.done{background:var(--ink);border-color:var(--ink);color:#fff}
 .fpath.sharelink .copy.done .lu{color:#fff}
 .fpath.sharelink .copy{height:26px;border-radius:4px;padding:0 10px;cursor:pointer;flex:0 0 auto;
   background:var(--ink);border-color:var(--ink);color:#fff}
@@ -566,16 +565,14 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .cal .day:hover{background:var(--fill-2)}
 .cal .day.dim{color:var(--ink-3);background:var(--fill-2);opacity:.65}
 .cal .day.on{background:var(--fill);box-shadow:0 0 0 1px var(--ink) inset}
-.cal .day.today .n{background:var(--ink);color:var(--card);border-radius:3px;padding:0 4px}
+.cal .day.today .n{background:var(--vert);color:var(--vert-ink);border-radius:3px;padding:0 4px}
 .cal .day .n{font-size:11.5px;font-weight:600;align-self:flex-start}
 .cal .day .lbl{font-size:10.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cal .dots{display:flex;gap:3px;align-items:center}
 .cal .dots em{font-size:10px;font-style:normal;color:var(--ink-3)}
-.pdot{width:6px;height:6px;border-radius:50%;background:var(--ink);display:inline-block}
-.pdot[data-prio="moyenne"]{background:var(--ink-2)}
-.pdot[data-prio="basse"]{background:var(--card);border:1px solid var(--ink-3)}
-.pdot[data-done="true"]{background:var(--card);border:1px solid var(--line);opacity:.8}
-.cal .day.late .n{text-decoration:underline;text-underline-offset:2px}
+/* A day is marked only by what has to pass before the rest. */
+.pflag{display:inline-flex;align-items:center}
+.pflag svg.lu{width:11px;height:11px;color:#c0362c}
 /* Twelve small months at once: the year is for seeing where the work
    piles up, not for reading titles. */
 .year{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -588,7 +585,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .week .wcol{background:var(--card);display:flex;flex-direction:column;cursor:pointer}
 .week .wcol.on{background:var(--fill)}
 .week .wh{padding:5px 6px;border-bottom:1px solid var(--line-2);font-size:11px;font-weight:600}
-.week .wcol.today .wh{background:var(--ink);color:var(--card)}
+.week .wcol.today .wh{background:var(--vert);color:var(--vert-ink)}
 .week .wb{padding:5px;display:flex;flex-direction:column;gap:4px}
 .wtask{border:1px solid var(--line-2);border-radius:5px;
   padding:4px 5px;font-size:11px;display:flex;flex-direction:column;gap:1px;background:var(--card)}
@@ -610,8 +607,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .tday{display:flex;align-items:baseline;gap:6px;padding:12px 6px 5px;border-bottom:1px solid var(--line)}
 .tday b{font-size:12px;font-weight:600;color:var(--ink)}
 .tday > span:last-child{font-size:11px;color:var(--ink-3)}
-.tday.late b{color:#b3261e}
-.tday .tbadge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--ink);color:var(--card)}
+.tday .tbadge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--vert);color:var(--vert-ink)}
 .tnone{padding:12px 6px;font-size:12px;color:var(--ink-3)}
 .task{display:flex;align-items:center;gap:10px;padding:7px 6px;border-bottom:1px solid var(--line-2);background:var(--card);cursor:pointer}
 .task:hover{background:var(--fill-2)}
@@ -623,14 +619,21 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .task .tdates{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .task .tmeta em{font-style:normal;color:#b3261e;font-weight:500}
 .task.done .ttl{text-decoration:line-through;color:var(--ink-3)}
-/* Priority as one bar of three: haute red, moyenne orange, basse yellow. */
-.tbars{display:inline-flex;gap:2px;align-items:flex-end;flex:0 0 auto;width:28px;justify-content:flex-end}
-.tbars b{width:3px;border-radius:1px;background:var(--line)}
-.tbars b:nth-child(1){height:6px}.tbars b:nth-child(2){height:9px}.tbars b:nth-child(3){height:12px}
-.tbars[data-p="haute"] b{background:#e5484d}
-.tbars[data-p="moyenne"] b:nth-child(-n+2){background:#f5922a}
-.tbars[data-p="basse"] b:nth-child(1){background:#f2c94c}
-.task.done .tbars b{background:var(--line)!important}
+/* The flag is the mark and the button: solid red when the task passes
+   before the rest, a hollow outline the rest of the time — shown on the
+   row under the pointer, so an ordinary row carries nothing at all. */
+.tflag{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px;
+  border-radius:50%;cursor:pointer;opacity:0}
+.tflag svg{width:14px;height:14px;color:var(--ink-3)}
+.tflag.on{opacity:1}
+.tflag.on svg{color:#c0362c}
+.task:hover .tflag,.tflag:focus-visible{opacity:1}
+.tflag:hover{background:var(--fill)}
+.task.done .tflag{opacity:0}
+.task.done .tflag.on svg{color:var(--ink-3)}
+/* The same flag in the task's own form, where it is a word. */
+.tfchip svg{width:13px;height:13px}
+.chip.tfchip.on{background:#c0362c;border-color:#c0362c}
 /* The tick is the one control that must be hittable without aiming, so it
    is a real 15 px box with a pointer target around it. */
 .task .tick{flex:0 0 auto;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--ink-3);
@@ -986,8 +989,6 @@ body.elev .mtools{display:none}
 .frame[data-chrome="black"] .tabs .crumb.ech{color:rgba(255,255,255,.92)}
 .frame[data-chrome="black"] .tabs .crumb.ech:hover{background:rgba(255,255,255,.1);color:#fff}
 .frame[data-chrome="black"] .tabs .crumb.ech.cur{background:#fff;color:#111}
-.frame[data-chrome="black"] .tabs .crumb.ech .late{box-shadow:none}
-.frame[data-chrome="black"] .tabs .crumb.ech.cur .late{background:#111;color:#fff}
 /* The index, when it is the page being read, is lit the way the schedule is. */
 .tabs .crumb.cur{background:var(--fill);color:var(--ink);font-weight:500}
 .frame[data-chrome="black"] .tabs .crumb.cur{background:#fff;color:#111}
@@ -1951,8 +1952,16 @@ body.splitting .frame[data-shell="inset"] .gut[data-gut="plan"].live::before{wid
 .frame[data-shell="inset"] .gut[data-gut="cal"]:not(.fold)::before{left:50%;width:1px;margin-left:-1px;background:transparent}
 .frame[data-shell="inset"] .gut[data-gut="cal"]:not(.fold):hover::before,
 body.splitting .frame[data-shell="inset"] .gut[data-gut="cal"].live::before{width:2px;margin-left:-2px;background:var(--ink)}
-/* The period the calendar shows, centred over it. */
-.calmonth{text-align:center;font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 10px}
+/* The row over the calendar: its scale on the left, flush with the grid
+   below and the pane head above; the period centred with the arrows that
+   step it on either side of the words. */
+.calmonth{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 10px}
+.calmonth .tseg.cal{justify-self:start;margin:0}
+.calmonth .cnav{display:flex;align-items:center;gap:10px}
+.calmonth .ct{min-width:150px;text-align:center}
+.calmonth .calarr{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;color:var(--ink-2);cursor:pointer}
+.calmonth .calarr:hover{background:var(--fill);color:var(--ink)}
+.calmonth .calarr .lu{width:15px;height:15px}
 /* In the white card a folded pane's strip meets its neighbour directly:
    the edge beside it takes no room (its grid track is 0 too), so no white
    sliver opens between the strip and the next pane. A strip with a pane on
@@ -2071,7 +2080,7 @@ const V = {
      and the draft that composer writes into before the task exists. The
      archive is folded until it is asked for. */
   taskEdit: null,
-  taskDraft: { title: "", day: "2026-11-14", prio: "moyenne", phase: "Permis", who: [] },
+  taskDraft: { title: "", day: "2026-11-14", prio: "normale", phase: "Permis", who: [] },
   /* What the screen is counting. "Niveau" is one floor: the unit list, the
      two drawings and the right column. "Bâtiment" is all eight: the work
      area becomes the four quantity tables, and the level strip is dimmed
@@ -2182,6 +2191,10 @@ const V = {
 };
 
 const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+/* A raised task needs a filled flag: the sprite's symbols declare
+   fill="none" on themselves, which no inherited fill can override, so the
+   solid one is its own drawing. */
+const FLAG_SOLID = `<svg class="lu" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V4" fill="none" stroke-linecap="round"/></svg>`;
 /* The office's mark, traced from its file to three shapes so it holds at
    any size; drawn in the office green. */
 const OFFICE_MARK = `<svg class="omark" viewBox="0 0 1342 1341" aria-hidden="true"><g fill="currentColor"><path d="M0 0H145V1340H0Z"/><path d="M168 0H618V1340H283V341L572 667V454Z"/><path d="M752 0H1342V1320L797 708V960L1035 1229H752Z"/></g></svg>`;
@@ -2189,6 +2202,7 @@ const OFFICE_MARK = `<svg class="omark" viewBox="0 0 1342 1341" aria-hidden="tru
    a hidden sprite and referenced by id afterwards. */
 function sprite() {
   const names = ["home", "folder", "image", "layout-grid", "layers", "table", "hash", "git-compare", "calendar-check",
+    "calendar-range", "calendar-days", "calendar",
     "file", "box", "pen-line", "chevron-right", "chevron-left", "chevron-down", "chevron-up", "search", "plus", "minus",
     "external-link", "check", "alert-triangle", "info", "clock", "list", "circle", "x", "link",
     /* the rail's alternatives, one shortlist per screen; see NAV_ICONS —
@@ -2212,7 +2226,7 @@ function sprite() {
     /* the plan's comment button */
     "message-circle-plus",
     /* a ticked task is filed by hand, and can be pulled back out */
-    "archive", "archive-restore", "undo-2",
+    "archive", "archive-restore", "undo-2", "inbox",
     /* the task editor */
     "pencil",
     /* the code question: where an article was found, and the other code */
@@ -2662,13 +2676,9 @@ const whoLabel = (t) => (t.who.length ? t.who.map((id) => person(id).label).join
 let taskSeq = 100;
 const TASKS = [
   { id: "t1", day: "2026-11-03", title: "Tableau des superficies par étage", who: ["ba"],
-    prio: "moyenne", done: true, doneAt: "2026-11-05", archived: true, phase: "Comité" },
+    prio: "normale", done: true, doneAt: "2026-11-05", archived: true, phase: "Comité" },
   { id: "t2", day: "2026-11-09", title: "Élévations avec matériaux au comité", who: ["gr", "al"],
-    prio: "moyenne", done: true, doneAt: "2026-11-10", archived: true, phase: "Comité" },
-  /* One item left behind on purpose: the screen has to say what late looks
-     like, otherwise the counter above the list is never read. */
-  { id: "t15", day: "2026-11-11", title: "Coupe de la cage d'escalier à reprendre", who: ["ba", "gr"],
-    prio: "haute", done: false, phase: "Permis", code: "3.4.4.1" },
+    prio: "normale", done: true, doneAt: "2026-11-10", archived: true, phase: "Comité" },
   { id: "t3", day: "2026-11-14", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: ["ba"],
     prio: "haute", done: false, phase: "Permis", code: "3.3.1.18" },
   { id: "t4", day: "2026-11-14", title: "Largeur libre des portes du parcours sans obstacles", who: ["ba"],
@@ -2676,11 +2686,11 @@ const TASKS = [
   { id: "t5", day: "2026-11-17", title: "Confirmer le type de construction pour 8 étages", who: ["gr"],
     prio: "haute", done: false, phase: "Permis", code: "3.2.1.1" },
   { id: "t6", day: "2026-11-20", title: "Recompter les cases après réduction pour le métro", who: ["dl"],
-    prio: "moyenne", done: false, phase: "Permis", code: "art. 71" },
+    prio: "normale", done: false, phase: "Permis", code: "art. 71" },
   { id: "t7", day: "2026-11-24", title: "Note à l'urbaniste sur la marge avant", who: ["al"],
-    prio: "moyenne", done: false, phase: "Comité", code: "art. 22" },
+    prio: "normale", done: false, phase: "Comité", code: "art. 22" },
   { id: "t8", day: "2026-11-27", title: "Demande de dérogation mineure rédigée", who: ["al"],
-    prio: "basse", done: false, phase: "Comité" },
+    prio: "normale", done: false, phase: "Comité" },
   { id: "t9", day: "2026-12-04", title: "Plans d'émission pour permis", who: ["ba", "dl"],
     prio: "haute", done: false, phase: "Permis" },
   { id: "t10", day: "2026-12-08", title: "Calculs de conformité joints au dépôt", who: ["gr"],
@@ -2688,13 +2698,15 @@ const TASKS = [
   { id: "t11", day: "2026-12-15", title: "Dépôt de la demande de permis", who: ["al"],
     prio: "haute", done: false, phase: "Permis" },
   { id: "t12", day: "2027-01-19", title: "Réponse de l'urbaniste attendue", who: ["al"],
-    prio: "moyenne", done: false, phase: "Permis" },
+    prio: "normale", done: false, phase: "Permis" },
   { id: "t13", day: "2027-02-09", title: "Relevé d'implantation", who: ["dl"],
-    prio: "basse", done: false, phase: "Site" },
+    prio: "normale", done: false, phase: "Site" },
   { id: "t14", day: "2026-10-27", title: "Mix de typologies arrêté", who: ["al"],
-    prio: "basse", done: true, doneAt: "2026-10-27", archived: true, phase: "Programme" },
+    prio: "normale", done: true, doneAt: "2026-10-27", archived: true, phase: "Programme" },
 ];
-const PRIO = { haute: 3, moyenne: 2, basse: 1 };
+/* Two levels, because the only use of a priority is deciding what to do
+   first: a task passes before the rest, or it is the rest. */
+const PRIO = { haute: 2, normale: 1 };
 const PHASES = ["Permis", "Comité", "Site", "Programme", "Chantier"];
 
 
@@ -4048,6 +4060,7 @@ const MONTHS_AB = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août
 const DOW = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
 /* The three scales the calendar can be drawn at, in the order they widen. */
 const CAL_SCALES = ["Semaine", "Mois", "Année"];
+const CAL_SCALE_ICONS = { Semaine: "calendar-range", Mois: "calendar-days", Année: "calendar" };
 const iso = (d) => d.toISOString().slice(0, 10);
 const dOf = (s) => new Date(s + "T00:00:00Z");
 const shift = (s, n) => { const d = dOf(s); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
@@ -4058,7 +4071,6 @@ const fmtDay = (s) => { const d = dOf(s); return `${d.getUTCDate()} ${MONTHS_AB[
    written one to two weeks before they fell due, never after today. */
 TASKS.forEach((t, i) => { t.createdAt ||= shift(t.day < TODAY ? t.day : TODAY, -(6 + (i * 5) % 11)); });
 const tasksOn = (s) => TASKS.filter((t) => t.day === s);
-const lateCount = () => TASKS.filter((t) => !t.done && t.day < TODAY).length;
 
 function calTitle() {
   const d = dOf(V.day), v = V.scale;
@@ -4070,19 +4082,23 @@ function calTitle() {
   return `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
-/* One day cell, at every scale: the number, a dot per task coloured by
-   priority, and the open count once there is no room for dots. */
+/* One day cell, at every scale: the number, and a red flag for each task
+   that has to pass before the rest. Nothing else — a dot per task said
+   only that the day was busy, and the titles under them turned the month
+   into fine print. A day with nothing urgent carries nothing; what it
+   does hold is read by choosing the day. */
 function dayCell(s, dim, big) {
-  const ts = tasksOn(s), open = ts.filter((t) => !t.done);
-  const cls = [s === V.day ? "on" : "", dim ? "dim" : "", s === TODAY ? "today" : "",
-    open.some((t) => t.day < TODAY) ? "late" : ""].join(" ");
-  return `<div class="day ${cls}" ${act("calday", s)} title="${fmtDay(s)} — ${ts.length} élément${ts.length > 1 ? "s" : ""}">
+  const ts = tasksOn(s);
+  const hot = ts.filter((t) => t.prio === "haute" && !t.done);
+  const cls = [s === V.day ? "on" : "", dim ? "dim" : "", s === TODAY ? "today" : ""].join(" ");
+  const cap = big ? 4 : 3;
+  return `<div class="day ${cls}" ${act("calday", s)} title="${fmtDay(s)} — ${ts.length} élément${ts.length > 1 ? "s" : ""}${
+    hot.length ? `, ${hot.length} à passer avant le reste` : ""}">
     <span class="lo bar" style="width:14px"></span>
     <span class="hi n">${dOf(s).getUTCDate()}</span>
-    ${ts.length ? `<span class="hi dots">${ts.slice(0, big ? 4 : 3).map((t) =>
-      `<i class="pdot" data-prio="${t.prio}" data-done="${t.done}"></i>`).join("")}${
-      ts.length > (big ? 4 : 3) ? `<em>+${ts.length - (big ? 4 : 3)}</em>` : ""}</span>` : ""}
-    ${big && ts.length ? `<span class="hi lbl">${ts[0].title}</span>` : ""}</div>`;
+    ${hot.length ? `<span class="hi dots">${hot.slice(0, cap).map(() =>
+      `<i class="pflag">${FLAG_SOLID}</i>`).join("")}${
+      hot.length > cap ? `<em>+${hot.length - cap}</em>` : ""}</span>` : ""}</div>`;
 }
 
 function monthGrid(y, m, big) {
@@ -4120,9 +4136,9 @@ function calendarHTML() {
       return `<div class="wcol ${s === V.day ? "on" : ""} ${s === TODAY ? "today" : ""}" ${act("calday", s)}>
         <div class="wh"><span class="lo bar" style="width:30px"></span>
           <span class="hi">${name} ${dOf(s).getUTCDate()}</span></div>
-        <div class="wb">${ts.map((t) => `<div class="wtask" data-prio="${t.prio}" ${act("task", t.id)}>
+        <div class="wb">${ts.map((t) => `<div class="wtask" ${act("task", t.id)}>
           <span class="lo bar" style="width:80%"></span>
-          <span class="hi">${t.title}</span>
+          <span class="hi">${t.prio === "haute" && !t.done ? `<i class="pflag">${FLAG_SOLID}</i> ` : ""}${t.title}</span>
           <span class="hi who">${whoLabel(t)}</span></div>`).join("")}</div></div>`;
     }).join("")}</div>`;
   }
@@ -4166,8 +4182,8 @@ function taskForm(t, isNew) {
       placeholder="Que faut-il faire?">
     <div class="row" style="gap:6px;flex-wrap:wrap">
       <input class="tin day" type="date" data-tfield="day" value="${t.day}">
-      ${["haute", "moyenne", "basse"].map((p) =>
-        `<span class="chip ${t.prio === p ? "on" : ""}" ${act("tprio", p)}>${p}</span>`).join("")}
+      <span class="chip tfchip ${t.prio === "haute" ? "on" : ""}" ${act("tprio", t.prio === "haute" ? "normale" : "haute")}
+        role="button" aria-pressed="${t.prio === "haute"}">${t.prio === "haute" ? FLAG_SOLID : icon("flag")}À passer avant le reste</span>
     </div>
     <div class="row" style="gap:3px;flex-wrap:wrap">
       ${PHASES.map((p) => `<span class="chip ${t.phase === p ? "on" : ""}" ${act("tphase", p)}>${p}</span>`).join("")}
@@ -4185,20 +4201,24 @@ function taskForm(t, isNew) {
 }
 
 /* Option E of taches-liste.html: a segmented switch with its counts picks
-   which tasks; the agenda files them under their day. « Ouvertes » reads as
-   the agenda of what is left, « Historique » as a journal. A late day is red,
-   today wears its badge, the priority is three bars at the right like a
-   column of figures. A tick checks the box and strikes the task through,
+   which tasks; the agenda files them under their day. Two tabs only, from
+   taches-filtre-libelles.html F: « Actives » is everything not yet filed,
+   ticked ones included, « Archivées » the journal, with the same icon as
+   the « Archiver » button that sends a task there. Nothing is shown as late.
+   Today wears its badge in the brand green, and the right of each row
+   holds the flag that raises it above the rest. A tick checks the box and strikes the task through,
    where it is; only then does « Archiver » appear, and archiving files it
-   under « Historique ». Ticking it there reopens it. */
+   under « Archivées ». Ticking it there reopens it. */
 const TASK_FILTERS = [
-  ["open", "Ouvertes", (t) => !t.archived, "circle"],
-  ["late", "En retard", (t) => !t.done && t.day < TODAY, "alert-triangle"],
-  ["hist", "Historique", (t) => t.archived, "history"],
+  ["open", "Actives", (t) => !t.archived, "inbox"],
+  ["hist", "Archivées", (t) => t.archived, "archive"],
 ];
 const WEEKDAY = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 const dayLabel = (s) => `${WEEKDAY[dOf(s).getUTCDay()]} ${fmtDay(s)}`;
-const prioBars = (t) => `<span class="tbars" data-p="${t.prio}" title="Priorité ${t.prio}"><b></b><b></b><b></b></span>`;
+/* The mark is also the control: the flag says a task passes before the
+   rest, and clicking it is how it gets there or leaves. */
+const prioFlag = (t) => `<span class="tflag ${t.prio === "haute" ? "on" : ""}" ${act("tflag", t.id)} role="button"
+  aria-pressed="${t.prio === "haute"}" title="${t.prio === "haute" ? "Ne plus faire passer avant le reste" : "Faire passer avant le reste"}">${t.prio === "haute" ? FLAG_SOLID : icon("flag")}</span>`;
 function taskListHTML() {
   const f = TASK_FILTERS.find(([k]) => k === V.taskFilter) || TASK_FILTERS[0];
   const journal = f[0] === "hist";
@@ -4211,18 +4231,17 @@ function taskListHTML() {
       data-task="${t.id}" ${act("task", t.id)}>
     <span class="tick dot ${t.done ? "on" : ""}" ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — elle reste ici, barrée"}">${t.done ? icon("check") : ""}</span>
     <span class="tw"><span class="ttl">${t.title}</span>
-      <span class="tmeta">${t.phase}${t.code ? ` — <code>${t.code}</code>` : ""}${t.caught ? ` — relevé ${t.caught}` : ""}${
-        !t.done && t.day < TODAY ? ` — <em>en retard</em>` : ""}</span>
+      <span class="tmeta">${t.phase}${t.code ? ` — <code>${t.code}</code>` : ""}${t.caught ? ` — relevé ${t.caught}` : ""}</span>
       <span class="tdates">créée le ${fmtDay(t.createdAt)}${t.done && t.doneAt ? ` · cochée le ${fmtDay(t.doneAt)}` : ""}${
         t.archived ? ` · échéance ${fmtDay(t.day)}` : ""}</span></span>
     ${t.done ? "" : `<span class="tact" ${act("tedit", t.id)} title="Modifier">${icon("pencil")}</span>`}
-    ${t.done && !t.archived ? `<span class="tfile" ${act("taskfile", t.id)} title="Ranger dans l'historique">${icon("archive")}Archiver</span>` : ""}
+    ${t.done && !t.archived ? `<span class="tfile" ${act("taskfile", t.id)} title="Ranger dans « Archivées »">${icon("archive")}Archiver</span>` : ""}
     ${avatars(t)}
-    ${prioBars(t)}
+    ${prioFlag(t)}
   </div>`);
   const group = (d) => {
     const dl = list.filter((t) => dayOf(t) === d);
-    const cls = !journal && d === TODAY ? "today" : !journal && d < TODAY ? "late" : "";
+    const cls = !journal && d === TODAY ? "today" : "";
     return `<div class="tday ${cls}" data-tday="${d}"><b>${dayLabel(d)}</b>${cls === "today" ? `<span class="tbadge">aujourd'hui</span>` : ""}<span>${dl.length} tâche${dl.length > 1 ? "s" : ""}</span></div>
       ${dl.map(line).join("")}`;
   };
@@ -4423,7 +4442,6 @@ function tabsHTML() {
     <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`;
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
-  const late = lateCount();
   const idxOn = V.screen === "Projets";
   /* The office's mark stands where the folder was: the way home is the
      office's own sign, and the strip gains nothing to read. */
@@ -4435,8 +4453,7 @@ function tabsHTML() {
   const echOn = V.screen === "Échéancier";
   const ech = `<span class="crumb ech hi ${echOn ? "cur" : ""}" data-screen="Échéancier" aria-current="${echOn}"
       style="flex:0 0 auto"
-      title="Échéancier de l'atelier — ce qui est dû, tous les projets">${icon("calendar-check")}Échéancier${late
-        ? `<span class="late">${late}</span>` : ""}</span>`;
+      title="Échéancier de l'atelier — ce qui est dû, tous les projets">${icon("calendar-check")}Échéancier</span>`;
   /* The first row is the studio's, and it is the same row on every screen:
      every project, the schedule across them, the person signed in. The
      screen being read is lit in it — the index, the schedule — and on a
@@ -4551,7 +4568,7 @@ function headerHTML() {
   const bq = buildingScope() ? buildingQuant() : null;
   const title = { "Projets": ["Projets", ""],
     "Codes": ["Codes et règlements", ""],
-    "Échéancier": ["Échéancier", `${TASKS.filter((t) => !t.done).length} tâches ouvertes — ${lateCount()} en retard`],
+    "Échéancier": ["Échéancier", `${TASKS.filter((t) => !t.done).length} tâches à faire`],
     "Unités": buildingScope()
       ? [`${V.project} — bâtiment entier`,
         `${LEVELS.length} niveaux — ${bq.count} unités — ${fqNum(bq.net)} pi² nets`]
@@ -4776,18 +4793,18 @@ function contentHTML() {
       ${folded("cal") ? foldStripHTML("cal", "le calendrier") : `<div class="pane" style="flex:${V.split[splitKey("cal")] ? `0 0 ${V.split[splitKey("cal")]}px` : "1.25"}">
         <div class="ph">${icon("calendar-check")}<span class="lo bar" style="width:70px"></span>
           <span class="hi">Calendrier</span><span style="flex:1"></span>
-          ${CAL_SCALES.map((s) => `<span class="chip ${V.scale === s ? "on" : ""}" ${act("calscale", s)}
-            title="Dessiner le calendrier par ${s.toLowerCase()}"><span class="hi">${s}</span></span>`).join("")}
-          <span class="btnw" ${act("calmove", "-1")} title="Avant">${icon("chevron-left")}</span>
-          <span class="btnw" ${act("calmove", "1")} title="Après">${icon("chevron-right")}</span>
           <span class="btnw" ${act("calday", TODAY)}><span class="hi">Aujourd'hui</span></span></div>
-        <div class="pb"><div class="calmonth">${calTitle()}</div>${calendarHTML()}</div></div>`}
+        <div class="pb"><div class="calmonth">
+          <span class="tseg cal">${CAL_SCALES.map((s) => `<span class="${V.scale === s ? "on" : ""}" ${act("calscale", s)}
+            title="Dessiner le calendrier par ${s.toLowerCase()}">${icon(CAL_SCALE_ICONS[s])}${s}</span>`).join("")}</span>
+          <span class="cnav"><span class="calarr" ${act("calmove", "-1")} title="Avant">${icon("chevron-left")}</span>
+          <span class="ct">${calTitle()}</span>
+          <span class="calarr" ${act("calmove", "1")} title="Après">${icon("chevron-right")}</span></span></div>${calendarHTML()}</div></div>`}
       ${gutter({ size: "cal", grab: "prev", prev: "cal", next: "todo",
         lprev: "le calendrier", lnext: "la liste" })}
       ${folded("todo") ? foldStripHTML("todo", "la liste") : `<div class="pane" style="flex:1">
         <div class="ph">${icon("list-checks")}<span class="hi" style="font-weight:600">À faire</span>
           <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${TASKS.filter((t) => !t.done).length} ouvertes</span>
-          ${lateCount() ? `<span class="ibadge hi" ${act("tfilter", "late")} title="Voir les tâches en retard">${icon("alert-triangle")}${lateCount()} en retard</span>` : ""}
           <span style="flex:1"></span>
           <span class="btnw" ${act("tnew")}>${icon("plus")}<span class="hi">Ajouter une tâche</span></span></div>
         <div class="pb">${taskListHTML()}</div></div>`}
@@ -6958,6 +6975,7 @@ function mailDialogHTML(d) {
       <div class="db">
         ${fld("from", "De", "l'adresse du bureau", true)}
         ${fld("to", "À", "destinataire", true)}
+        ${fld("cc", "Cc", "copie à — adresses séparées par une virgule", true)}
         ${fld("subject", "Objet", "ce dont il est question")}
         <label class="fld"><span class="hi" style="font-size:11.5px;color:var(--ink-2)">Message</span>
           <textarea data-field="body" class="mailbody" rows="11">${d.body || ""}</textarea></label>
@@ -7373,7 +7391,7 @@ function onClick(e) {
       const [artId, who] = value.split("|");
       const a = ARTICLES.find((x) => x.id === artId);
       V.dialog = { kind: "mail", art: artId, contact: who, from: V.mailFrom,
-        to: CONTACTS[who].mail, subject: `[${V.project}] ${a.id} — ${a.topic}`,
+        to: CONTACTS[who].mail, cc: "", subject: `[${V.project}] ${a.id} — ${a.topic}`,
         body: `${articleText(a)}\n\n`, files: [], local: [] };
       break;
     }
@@ -7393,12 +7411,12 @@ function onClick(e) {
          was actually sent, so it is typed once and never again. */
       V.mailFrom = d.from.trim() || V.mailFrom;
       const count = d.files.length + d.local.length;
-      (V.mails[d.contact] ||= []).push({ when: "aujourd'hui", subject: d.subject.trim(),
+      (V.mails[d.contact] ||= []).push({ when: "aujourd'hui", subject: d.subject.trim(), cc: (d.cc || "").trim(),
         body: d.body, files: [...d.files, ...d.local.map((f) => f.name)], art: d.art });
       CONTACTS[d.contact].last = "aujourd'hui";
       CONTACTS[d.contact].waited = 0;
       V.dialog = null;
-      say(`Courriel envoyé à ${d.to.trim()}${count
+      say(`Courriel envoyé à ${d.to.trim()}${(d.cc || "").trim() ? `, copie à ${d.cc.trim()}` : ""}${count
         ? ` avec ${count} pièce${count > 1 ? "s" : ""} jointe${count > 1 ? "s" : ""}`
         : ""}. Il reste au dossier de l'article.`);
       break;
@@ -7476,6 +7494,15 @@ function onClick(e) {
       if (t) { t.archived = true; say(`Archivée: ${t.title}. Elle est dans « Historique ».`); }
       break;
     }
+    /* The flag on a row: raising a task, or letting it back down, without
+       opening its form. The month follows, since it reads the same field. */
+    case "tflag": {
+      const t = TASKS.find((x) => x.id === value);
+      if (!t) break;
+      t.prio = t.prio === "haute" ? "normale" : "haute";
+      say(t.prio === "haute" ? `À passer avant le reste: ${t.title}` : `${t.title} repasse avec le reste.`);
+      break;
+    }
     case "tfilter": V.taskFilter = value; break;
     /* The editor -------------------------------------------------------
        One form serves the new task and the existing one. "new" writes into
@@ -7484,7 +7511,7 @@ function onClick(e) {
        chip click. */
     case "tnew":
       readTaskForm();
-      V.taskDraft = { title: "", day: V.day, prio: "moyenne", phase: "Permis", who: [] };
+      V.taskDraft = { title: "", day: V.day, prio: "normale", phase: "Permis", who: [] };
       V.taskEdit = "new";
       break;
     case "tedit": readTaskForm(); V.taskEdit = V.taskEdit === value ? null : value; break;
