@@ -646,7 +646,15 @@ body.elev .mtools{display:none}
   gap:0;padding:0;overflow:hidden;box-shadow:0 1px 2px rgba(17,17,18,.04),0 10px 26px rgba(17,17,18,.045)}
 .frame[data-shell="inset"] .pane{border:0;border-radius:0;background:none}
 .frame[data-shell="inset"] .work > div > .pane,
-.frame[data-shell="inset"] .work > .pane{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.frame[data-shell="inset"] .work > .pane{border-right:1px solid var(--line)}
+/* The card's own edge closes the panes: no rule runs along its foot, and
+   the last pane draws no right edge, so the seams run down into the card's
+   border and the header rules run out to it. */
+.frame[data-shell="inset"] .work > div > .pane:not(:has(~ .pane)),
+.frame[data-shell="inset"] .work > .pane:not(:has(~ .pane)){border-right:0}
+/* The screen's title block sits above the panes: its rule is the line the
+   pane headers hang from, not the card's foot, so it keeps it. */
+.frame[data-shell="inset"] .work > div > .pane{border-bottom:1px solid var(--line)}
 .frame[data-shell="inset"] .pane.sheet,.frame[data-shell="inset"] .pane.drawer{background:var(--card);
   border:1px solid rgba(17,17,18,.07);box-shadow:0 10px 26px rgba(17,17,18,.06)}
 
@@ -821,9 +829,18 @@ body.elev .mtools{display:none}
    by the picture and the badge; the word stays a word. */
 .ltile .pic{opacity:.45}
 .ltile:hover{background:var(--fill-2)}
+/* The discipline glyph: a white disc in the middle of the thumbnail,
+   sitting under the badge, never catching the pointer. */
+.ltile .lglyph{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px 0 0 -19px;z-index:2;
+  display:flex;align-items:center;justify-content:center;pointer-events:none;
+  border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--line-2);color:var(--ink)}
+.ltile .lglyph .lu{width:20px;height:20px}
+.ltile.on .lglyph{background:rgba(255,255,255,.75)}
 .ltile:hover .pic{opacity:.8}
 .ltile.on .pic{opacity:1}
-.ltile.on .nm{color:#2f3a05;font-weight:600}
+/* Colour only: a bolder weight is wider, so a two-line name such as
+   "Drainage (Plomb. & Méc.)" broke onto a third line and the tile grew. */
+.ltile.on .nm{color:#2f3a05}
 /* The selected drawing is ink with its name reversed out: a grey wash is
    lost against the strip at this size. */
 .ltile.sel{background:var(--ink);border-color:var(--ink)}
@@ -857,7 +874,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 
 /* The card belongs to the thumbnail it is opened from, so it is measured
    to that tile's height rather than parked at a corner. */
-.lcard{position:absolute;z-index:8;width:248px;padding:9px 10px;display:flex;
+.lcard{position:fixed;z-index:80;width:248px;padding:9px 10px;display:flex;
   flex-direction:column;gap:7px;font-size:11.5px;background:var(--card);
   border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.10)}
 .lcard .hd{display:flex;align-items:baseline;gap:8px}
@@ -1000,10 +1017,12 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   color:var(--ink-2);cursor:pointer;flex:0 0 26px}
 .zb:hover{background:var(--fill);color:var(--ink)}
 .zb svg{width:14px;height:14px}
-.mtools{position:absolute;left:10px;top:10px;z-index:7;display:flex;gap:4px;padding:4px;
-  background:#fff;border:1px solid var(--line);border-radius:12px}
-.mtools .zb{width:52px;height:52px;flex:0 0 52px;border-radius:8px;color:var(--ink-3)}
-.mtools .zb svg{width:28px;height:28px}
+/* The orbit / move switch, at 60 % of its first size: a tool in the corner,
+   not a toolbar over the building. */
+.mtools{position:absolute;left:10px;top:10px;z-index:7;display:flex;gap:2px;padding:2px;
+  background:#fff;border:1px solid var(--line);border-radius:7px}
+.mtools .zb{width:31px;height:31px;flex:0 0 31px;border-radius:5px;color:var(--ink-3)}
+.mtools .zb svg{width:17px;height:17px}
 /* The tool in use is the one solid thing in the corner. */
 .mtools .zb.on,.mtools .zb.on:hover{background:#111;color:#fff}
 [data-fi="low"] .mtools{display:none}
@@ -1159,7 +1178,11 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
    a soft edge spreading into the gap hides the one place the pointer has
    to land to move that edge. The border alone says where the pane stops. */
 .pane.drawing{border:1px solid #b4b4b7;border-radius:9px}
-.frame[data-shell="inset"] .pane.drawing{border:1px solid #b4b4b7;border-radius:9px;background:#fff}
+.frame[data-shell="inset"] .pane.drawing{border:0;border-radius:0;background:#fff}
+/* In the white card the drawings run edge to edge: the view fills the whole
+   rectangle out to the seams and the card's foot, square at every corner,
+   with no frame of its own inside the card's. The rule between the two
+   drawings is the strip's, not theirs. */
 .frame[data-chrome="black"] .pane.drawing{border-color:rgba(255,255,255,.22)}
 /* The sheet's own box is sized in script to fit this one, so 0–1 on the
    drawing stays 0–1 on the element the overlays are drawn in. */
@@ -1297,12 +1320,38 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .gut::before{content:"";position:absolute;top:6px;bottom:6px;left:50%;margin-left:-1px;width:2px;
   border-radius:1px;background:var(--line-2);transition:background .12s}
 .gut:hover::before,body.splitting .gut.live::before{background:var(--ink)}
+/* Beside a pane that draws its own right border, that border is the one
+   line on the seam: the strip draws nothing of its own at rest, and under
+   the pointer it lays the ink exactly over that border (the strip starts
+   3 px left of the pane's edge, so the border sits 2 px into it). */
+.gut:not([data-gut="plan"])::before{top:0;bottom:0;left:2px;margin-left:0;width:1px;border-radius:0;background:transparent}
+.gut:not([data-gut="plan"]):hover::before,body.splitting .gut.live:not([data-gut="plan"])::before{width:2px;margin-left:-1px;background:var(--ink)}
+/* The pane headers' rules read as one line across the screen: each strip
+   carries the rule over its own gap, at the height the headers draw it
+   (38 px header, rule on its last pixel). It reaches 4 px past the strip on
+   the right, where the next pane's header begins inside its own border. */
+/* Only between two panes whose own header (or drawing's header) carries
+   the rule at that height: elsewhere, as beside the codes list's taller
+   header, the bridge would be a stub. */
+:is(:has(> .ph), :has(.pane.drawing > .ph)) + .gut:not(.fold):is(:has(+ * > .ph), :has(+ * .pane.drawing > .ph))::after{content:"";position:absolute;top:37px;height:1px;left:0;right:-4px;background:var(--line-2);pointer-events:none}
+/* A drawing pane carries a 1 px border its neighbours do not, so its header
+   is a pixel shorter to put its rule on the same line as theirs. */
+.frame:not([data-shell="inset"]) .pane.drawing > .ph{height:37px}
 /* Between the two drawings the strip carries a full-height rule instead of
    a short hairline. Two plans side by side are two readings of the same
    building, and the eye needs to be told where one stops: the panes' own
    pale borders are not enough across that much white. */
 .gut[data-gut="plan"]::before{top:0;bottom:0;width:1px;margin-left:0;background:var(--line)}
 .gut[data-gut="plan"]:hover::before{width:2px;margin-left:-1px}
+/* In the white card the two drawings meet with nothing between them: the
+   rule is the plan's own right border, and the strip takes no room in the
+   row (its 10 px of grip hang over both drawings, centred on that border).
+   At rest it draws nothing; under the pointer its ink lies on the border. */
+.frame[data-shell="inset"] .pane.drawing:has(+ .gut[data-gut="plan"]){border-right:1px solid var(--line)}
+.frame[data-shell="inset"] .gut[data-gut="plan"]:not(.fold){margin:0 -5px}
+.frame[data-shell="inset"] .gut[data-gut="plan"]:not(.fold)::before{left:50%;width:1px;margin-left:-1px;background:transparent}
+.frame[data-shell="inset"] .gut[data-gut="plan"]:not(.fold):hover::before,
+body.splitting .frame[data-shell="inset"] .gut[data-gut="plan"].live::before{width:2px;margin-left:-2px;background:var(--ink)}
 .gut.fold{cursor:default}
 /* The tab is the whole control once a pane is folded, so it is sized to be
    seen from across the screen and hit without aiming: a 24 × 54 bar in
@@ -1529,6 +1578,8 @@ function sprite() {
     "share-2", "eye", "message-square",
     /* the opacity line on each drawing's card */
     "blend",
+    /* each drawing's discipline, centred on its thumbnail; see LAYGLYPH */
+    "map", "drafting-compass", "trees", "zap", "waves", "droplet", "fan",
     /* the margin: posting a note, keeping one for the studio */
     "lock", "map-pin", "send", "users", "trash-2",
     /* a ticked task is filed by hand, and can be pulled back out */
@@ -1697,7 +1748,7 @@ const ENG_LABELS = { electrical: "Électricité", drainage: "Drainage",
    and on the strip their names alone do not say so — "Distribution" could
    be anybody's. The trade is written on the thumbnail, not only in the
    card. */
-const ENG_TRADE = { drainage: "Méc.", distribution: "Méc.", ventilation: "Méc." };
+const ENG_TRADE = { drainage: "Plomb. & Méc.", distribution: "Plomb. & Méc.", ventilation: "Plomb. & Méc." };
 /* What a consultant's drawing is called on the server. The asset pipeline
    names its files by discipline and index (electrical-5.pdf); nobody in an
    office ever types that. The sheet number, the discipline and the floor
@@ -2254,9 +2305,14 @@ function morphBadge(k) {
   });
 }
 
+/* The discipline, large in the middle of the thumbnail: at strip size the
+   engineering sheets are pale grids that look alike, so the glyph names the
+   drawing before the picture does. */
+const LAYGLYPH = { arp: "map", plan: "drafting-compass", pay: "trees", electrical: "zap",
+  drainage: "waves", distribution: "droplet", ventilation: "fan" };
 const layTile = (k) => `<div class="ltile ${V.lay[k].on ? "on" : ""} ${V.layPick === k ? "sel" : ""}"
   data-ltile="${k}" ${act("lpick", k)} title="${LAYDOC[k].disc} — ${LAYDOC[k].date()}">
-  <span class="wrap"><span class="pic" style="background-image:url(${LAYDOC[k].thumb()})"></span>${layBadge(k)}</span>
+  <span class="wrap"><span class="pic" style="background-image:url(${LAYDOC[k].thumb()})"></span><span class="lglyph">${icon(LAYGLYPH[k])}</span>${layBadge(k)}</span>
   <span class="nm">${LAYDOC[k].short}</span></div>`;
 
 const layStripHTML = () => `<div class="lstrip hi" data-lstrip>
@@ -2664,7 +2720,11 @@ function rowsOf(screen) {
 const selIndex = (screen) => {
   const n = rowsOf(screen).length;
   if (!n) return -1;
-  return Math.min(V.sel[screen] === undefined ? 0 : V.sel[screen], n - 1);
+  /* -1 is a floor with nothing chosen on it, not a missing value: asking
+     for a level is asking to see the level, and picking its first unit for
+     the reader answers a question nobody put. */
+  const want = V.sel[screen] === undefined ? 0 : V.sel[screen];
+  return want < 0 ? -1 : Math.min(want, n - 1);
 };
 const selRow = (screen) => rowsOf(screen)[selIndex(screen)];
 const settleKey = () => `${V.screen} — ${(selRow(V.screen) || [""])[0]}`;
@@ -3362,8 +3422,7 @@ function headerHTML() {
       ? [`${V.project} — bâtiment entier`,
         `${sup.length} niveaux — ${sup.reduce((n, r) => n + r[1], 0)} unités — `
         + `${sup.reduce((n, r) => n + r[2], 0).toLocaleString("fr-CA")} pi² nets`]
-      : [`Plans — ${viewOf("Unités").toLowerCase()}`,
-        `${rowsOf("Unités").length} unités — ${rowsOf("Unités").filter((r) => /croisement/.test(r[1])).length} avec un croisement ouvert`],
+      : [`Plans — ${viewOf("Unités").toLowerCase()}`, ""],
   }[V.screen] || [V.screen, ""];
   const metrics = V.header.layout === "Title + metrics";
   const bare = V.header.layout === "Title only";
@@ -3375,7 +3434,7 @@ function headerHTML() {
           <div class="lo bar" style="width:170px;height:13px"></div>
           <div class="lo bar lt" style="width:260px;height:8px"></div>
           <div class="hi" style="font-size:16px;font-weight:600">${title[0]}</div>
-          <div class="hi" style="font-size:12px;color:var(--ink-2)">${title[1]}</div>
+          ${title[1] ? `<div class="hi" style="font-size:12px;color:var(--ink-2)">${title[1]}</div>` : ""}
         </div>
         ${bare ? "" : SCREENS[V.screen].home
           ? `<span class="btnw solid" ${act("newproject")} title="Démarrer un projet">${icon("plus")}<span class="lo bar" style="width:52px"></span><span class="hi">Nouveau projet</span></span>`
@@ -4612,31 +4671,36 @@ document.addEventListener("keydown", (e) => {
 });
 
 
-/* The document card hangs off the thumbnail it belongs to: written into
-   the markup without a position, then measured to that tile's height.
-   Measuring after the fact is the only way to follow a tile that moves
-   when the pile is reordered. */
-/* Each card stands beside the thumbnail it belongs to. The kept card is
-   placed first and keeps its place; a hovered card that would land on top
-   of it is pushed clear, above or below, whichever side it came from. */
+/* Each card stands right beside the thumbnail it belongs to, on the strip's
+   right — over the model's pane if need be, since the drawing on the left is
+   what the card adjusts and must stay in view. Its top is level with the
+   tile's top, measured after render so it follows a tile the pile reordered.
+   Fixed to the viewport, so no pane's overflow crops it. The kept card is
+   placed first; a hovered card that would land on it is pushed clear,
+   below or above, on the side its own tile is. */
 function placeLayCard() {
-  /* The cards stack from the top of the pane, beside the strip, in the
-     order they were asked for: the kept one first, the hovered one under
-     it. Hanging each card off its own thumbnail looked tidier one at a
-     time, but two cards then had to be pushed apart, and pushing one could
-     put it back onto the other. A single column cannot overlap. */
   const cards = [...document.querySelectorAll("[data-lcard]")]
     .sort((x, y) => (x.hasAttribute("data-peek") ? 1 : 0) - (y.hasAttribute("data-peek") ? 1 : 0));
-  const pad = 12;
-  let top = pad;
+  const pad = 8, gap = 8;
+  const placed = [];
   for (const card of cards) {
     const zone = card.parentElement, strip = zone.querySelector("[data-lstrip]");
-    if (!strip) { card.style.display = "none"; continue; }
-    const z = zone.getBoundingClientRect();
+    const tile = zone.querySelector(`[data-ltile="${card.dataset.anchor}"]`);
+    if (!strip || !tile) { card.style.display = "none"; continue; }
     card.style.display = "";
-    card.style.right = `${z.right - strip.getBoundingClientRect().left + 8}px`;
+    const z = zone.getBoundingClientRect(), t = tile.getBoundingClientRect();
+    const h = card.offsetHeight, max = Math.max(z.top + pad, z.bottom - h - pad);
+    const clamp = (v) => Math.min(Math.max(v, z.top + pad), max);
+    let top = clamp(t.top);
+    for (const p of placed) {
+      if (top < p.top + p.h + gap && top + h + gap > p.top) {
+        top = t.top >= p.top ? clamp(p.top + p.h + gap) : clamp(p.top - h - gap);
+      }
+    }
+    card.style.right = "";
+    card.style.left = `${strip.getBoundingClientRect().right + 8}px`;
     card.style.top = `${top}px`;
-    top += card.offsetHeight + 8;
+    placed.push({ top, h });
   }
 }
 
@@ -5632,8 +5696,11 @@ function onClick(e) {
   switch (el.dataset.act) {
     case "view":
       V.view[screen] = Number(value);
-      /* A new view is a new set of rows, so the old row number means nothing. */
-      V.sel[screen] = 0;
+      /* A new view is a new set of rows, so the old row number means
+         nothing — and on the units screen nothing is chosen in its place:
+         the floor itself is what was asked for, and the model shows the
+         whole building with that floor lit. */
+      V.sel[screen] = screen === "Unités" ? -1 : 0;
       /* Asking for a floor is asking to read a floor: the building-wide
          count steps aside. */
       if (screen === "Unités") V.scope = "Niveau";

@@ -80,6 +80,8 @@ export function createBuildingSelection({ model, camera, controls, canvas, sourc
   let selectionKey = null;
   let mappedContours = null;
   let flight = null;
+  // Off while the viewer shows an elevation: no hover, no click, no tag.
+  let enabled = true;
   let pointerStart = null;
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
@@ -248,8 +250,13 @@ ${unitAtGlsl}` + shader.fragmentShader;
     floorUniforms.fitteFloorMax.value = (level === 9 ? 12.36 : ELEVATIONS[level] || 0) - sourceOffset.y;
     label(selection);
     placeSelPill();
-    if (changed && frame) frameWindows();
-    if (changed && frame && (level === -1 || level === 0 || level === 9)) window.fitteModel?.reset();
+    /* A unit is flown to; a floor is stood back from. With nothing chosen
+       on the level the camera returns to the whole building, where a lit
+       band means something — a floor tint read from six inches off one
+       façade is just a brighter wall. */
+    if (!changed || !frame) return;
+    if (selected.length) frameWindows();
+    else window.fitteModel?.reset();
   }
   // One raycast answers both hover and click. The first surface hit names
   // a floor by its height and, from the second floor up, always a unit:
@@ -316,8 +323,9 @@ ${unitAtGlsl}` + shader.fragmentShader;
   function placeSelPill() {
     const host = canvas.parentElement;
     const name = window.fitteSelection?.unit;
-    // While the pointer names the same unit, one tag is enough.
-    if (!host || !name || !selected.length || hover?.unit === name) {
+    // While the pointer names the same unit, one tag is enough. An
+    // elevation is read for its materials, not its units: no tag.
+    if (!enabled || !host || !name || !selected.length || hover?.unit === name) {
       if (selPill) selPill.hidden = true;
       return;
     }
@@ -375,6 +383,7 @@ ${unitAtGlsl}` + shader.fragmentShader;
   }
 
   canvas.addEventListener("pointerdown", (event) => {
+    if (!enabled) return;
     pointerStart = { x: event.clientX, y: event.clientY, button: event.button };
     flight = null;
     setHover(null);
@@ -385,7 +394,7 @@ ${unitAtGlsl}` + shader.fragmentShader;
   canvas.addEventListener("pointerleave", () => { cancelAnimationFrame(hoverFrame); setHover(null); });
   canvas.addEventListener("pointermove", (event) => {
     // No hover while orbiting or on touch: the pill would chase the drag.
-    if (event.buttons || event.pointerType === "touch") return;
+    if (!enabled || event.buttons || event.pointerType === "touch") return;
     const { clientX, clientY } = event;
     cancelAnimationFrame(hoverFrame);
     hoverFrame = requestAnimationFrame(() => setHover(hitAt(clientX, clientY), clientX, clientY));
@@ -402,8 +411,66 @@ ${unitAtGlsl}` + shader.fragmentShader;
     setHover(hit, event.clientX, event.clientY);
   });
 
+  /* A unit's glazing, counted the way a window schedule counts it. The
+     export models each pane separately; panes of one opening touch, so
+     panes on the same face less than 8 cm apart are one window. Measured
+     on level 5: window panes start 0.37 above the slab and are 0.77 high
+     (6'-5"); patio-door panes start 0.25 above it and are 0.90 high
+     (7'-6"). An opening at least 0.85 high and starting under 0.30 is a
+     patio door. */
+  const PANE_GAP = 0.03;
+  const DOOR_HEIGHT = 0.85;
+  const SILL_FROM_FLOOR = 0.3;
+  function unitWindows(unit) {
+    mapWindows();
+    const items = byUnit.get(String(unit));
+    if (!items) return null;
+    const faceOf = (item) => {
+      const size = item.box.getSize(new THREE.Vector3());
+      const alongX = size.x >= size.z;
+      // The pane is a plane: its thin axis is its normal; which way it
+      // faces is the side of the unit it is on.
+      if (alongX) return item.normal.z > 0 ? "sud" : "nord";
+      return item.normal.x > 0 ? "est" : "ouest";
+    };
+    const panes = items.map((item) => ({ item, face: faceOf(item), box: item.box }));
+    const parent = panes.map((_, i) => i);
+    const root = (i) => (parent[i] === i ? i : (parent[i] = root(parent[i])));
+    panes.forEach((a, i) => panes.forEach((b, j) => {
+      if (j <= i || a.face !== b.face) return;
+      const near = a.box.clone().expandByScalar(PANE_GAP).intersectsBox(b.box);
+      if (near) parent[root(i)] = root(j);
+    }));
+    const groups = new Map();
+    panes.forEach((pane, i) => {
+      const key = root(i);
+      if (!groups.has(key)) groups.set(key, { face: pane.face, box: new THREE.Box3(), area: 0 });
+      const g = groups.get(key);
+      g.box.union(pane.box);
+      const s = pane.box.getSize(new THREE.Vector3());
+      g.area += Math.max(s.x, s.z) * s.y;
+    });
+    const faces = {};
+    for (const g of groups.values()) {
+      const floor = (ELEVATIONS[Number(String(unit).slice(0, -2)) - 1] ?? 0) - sourceOffset.y;
+      const door = g.box.max.y - g.box.min.y > DOOR_HEIGHT && g.box.min.y - floor < SILL_FROM_FLOOR;
+      const f = (faces[g.face] ||= { face: g.face, windows: 0, doors: 0, glass: 0 });
+      if (door) f.doors += 1; else f.windows += 1;
+      f.glass += g.area;
+    }
+    return Object.values(faces);
+  }
+
   return {
     sync,
+    unitWindows,
+    setEnabled(on) {
+      enabled = Boolean(on);
+      if (enabled) return;
+      pointerStart = null;
+      setHover(null);
+      placeSelPill();
+    },
     cancelFlight() { flight = null; },
     update(now) {
       // Damping keeps the camera moving after a release: keep the pill on
