@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Interne / partagée — icônes</title>
+<style>
+/* The two scopes a comment can have, drawn as the pin composer draws
+   them: the switch « À l'interne » / « Partagée », the placeholder under
+   it, the send button, and the mark the note keeps in the margin. One pair
+   of icons per option; the lock it replaces is first, for comparison. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;
+  --vert:#c3e05a;--vert-ink:#2f3a05;--lit:#eef3dc}
+*{box-sizing:border-box}
+body{margin:0;font:12px/1.4 Geist,"Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header{padding:20px 24px 4px;max-width:1100px}
+header h1{margin:0;font-size:16px;font-weight:600}
+header p{margin:4px 0 0;color:var(--ink-2);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:18px;padding:12px 24px 30px}
+.opt{background:#fff;border:1px solid var(--line-2);border-radius:10px;padding:14px 16px 16px}
+.opt.rec{border-color:var(--ink)}
+.opt h2{margin:0 0 3px;font-size:13px;font-weight:600}
+.opt .why{margin:0 0 12px;color:var(--ink-2);font-size:12px}
+.svg{width:14px;height:14px;flex:0 0 14px}
+.card{border:1px solid var(--ink);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:8px;max-width:330px}
+.seg{display:flex;gap:4px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;
+  border:1px solid var(--line);background:var(--fill);color:var(--ink-2);font-size:12px;cursor:pointer;user-select:none}
+.chip.on{background:#fff;border-color:var(--ink);color:var(--ink)}
+.ta{border:1px solid var(--ink);border-radius:8px;min-height:46px;padding:7px 9px;color:var(--ink-3)}
+.row{display:flex;gap:6px;align-items:center}
+.send{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:7px;background:#111;color:#fff}
+.cancel{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:7px;border:1px solid var(--line);color:var(--ink-2)}
+.notes{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-width:330px}
+.note{display:flex;align-items:flex-start;gap:8px;font-size:12px}
+.note .mk{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;
+  background:var(--fill);color:var(--ink-2);flex:0 0 20px}
+.note.sh .mk{background:var(--lit);color:var(--vert-ink)}
+.note b{font-weight:600}
+.note span{color:var(--ink-2)}
+.pair{display:flex;gap:18px;margin:0 0 12px;color:var(--ink-2)}
+.pair span{display:inline-flex;align-items:center;gap:6px}
+.pair .svg{width:18px;height:18px;flex-basis:18px;color:var(--ink)}
+.dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
+.dot.in{background:var(--ink-2)}
+.dot.sh{border:2px solid var(--vert-ink);background:var(--vert)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Interne / partagée — les icônes de la portée d'un commentaire</h1>
+  <p>Chaque option montre le sélecteur du composeur dans ses deux états, puis les deux notes dans la marge. Cliquez les pastilles pour basculer. L'option recommandée a la bordure noire.</p>
+</header>
+<div class="grid" id="grid"></div>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const svg = (n) => {
+  if (n === "dot-in") return `<i class="dot in"></i>`;
+  if (n === "dot-sh") return `<i class="dot sh"></i>`;
+  const ic = lucide.icons[n];
+  if (!ic) return `<b style="color:#b3261e">${n}?</b>`;
+  return `<svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+    ic[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+};
+/* [key, title, why, internal icon, shared icon, recommended] */
+const OPTS = [
+  ["now", "Aujourd'hui — cadenas / personnes", "Le cadenas dit « secret » plus que « au bureau »: il fait croire qu'on protège la note, alors qu'on la garde entre collègues.", "Lock", "Users"],
+  ["a", "A — Le bureau / le lien", "Dit d'où la note ne sort pas, et par où elle sort: le bureau pour l'équipe, le lien pour ceux à qui on l'a envoyé — exactement ce qu'écrit le placeholder « visible par le lien ».", "Building2", "Link", true],
+  ["b", "B — Œil barré / œil", "Parle de qui voit: personne hors du bureau, ou tout le monde avec le lien. Simple, mais l'œil barré se lit aussi « masqué ».", "EyeOff", "Eye"],
+  ["c", "C — La maison / le globe", "Chez nous ou dehors. Le globe dit « public » plus fort qu'un lien partagé ne l'est vraiment.", "House", "Globe"],
+  ["d", "D — Une personne / partager", "L'équipe comme une seule voix, puis le geste de partager, le même que le bouton « Partager » de la barre.", "UserRound", "Share2"],
+  ["e", "E — Note / conversation", "Le genre de texte plutôt que son public: une note qu'on garde, une bulle qu'on adresse à quelqu'un.", "StickyNote", "MessageCircle"],
+  ["f", "F — Pastille grise / pastille verte", "Aucun dessin: un point gris pour l'interne, le vert du projet pour ce qui est vu dehors. Le plus calme, mais il faut lire le mot.", "dot-in", "dot-sh"],
+  ["g", "G — Dossier / envoi", "Le serveur du bureau, où la note reste, et l'avion en papier, le même que le bouton « Commenter » qui l'envoie.", "FolderClosed", "Send"],
+];
+const state = Object.fromEntries(OPTS.map(([k]) => [k, "in"]));
+function paint() {
+  document.getElementById("grid").innerHTML = OPTS.map(([k, title, why, inIc, shIc, rec]) => {
+    const on = state[k];
+    return `<section class="opt ${rec ? "rec" : ""}">
+      <h2>${title}</h2><p class="why">${why}</p>
+      <div class="pair"><span>${svg(inIc)} À l'interne</span><span>${svg(shIc)} Partagée</span></div>
+      <div class="card">
+        <div class="seg">
+          <span class="chip ${on === "in" ? "on" : ""}" data-k="${k}" data-v="in">${svg(inIc)}À l'interne</span>
+          <span class="chip ${on === "sh" ? "on" : ""}" data-k="${k}" data-v="sh">${svg(shIc)}Partagée</span>
+        </div>
+        <div class="ta">${on === "in" ? "Note interne — les collaborateurs ne la verront pas" : "Épingle partagée — visible par le lien"}</div>
+        <div class="row"><span class="send">${svg(on === "in" ? inIc : "Send")}Commenter</span><span class="cancel">Annuler</span></div>
+      </div>
+      <div class="notes">
+        <div class="note"><span class="mk">${svg(inIc)}</span><div><b>Vous</b> <span>— à l'interne</span><br>Vérifier la trémie ici avant l'émission.</div></div>
+        <div class="note sh"><span class="mk">${svg(shIc)}</span><div><b>Vous (partagé)</b> <span>— partagée</span><br>Le balcon du 510 dépasse la marge.</div></div>
+      </div>
+    </section>`;
+  }).join("");
+}
+document.addEventListener("click", (e) => {
+  const c = e.target.closest(".chip[data-k]");
+  if (!c) return;
+  state[c.dataset.k] = c.dataset.v;
+  paint();
+});
+paint();
+</script>
+</body>
+</html>

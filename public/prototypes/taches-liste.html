@@ -12,7 +12,9 @@
    live: tick a task, pick a row, switch the filter. Same tasks, same
    people as the prototype. */
 :root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
-  --vert:#c3e05a;--vert-ink:#2f3a05;--lit:#eef3dc;--red:#b3261e;--mono:ui-monospace,Menlo,monospace}
+  --vert:#c3e05a;--vert-ink:#2f3a05;--lit:#eef3dc;--red:#b3261e;--mono:ui-monospace,Menlo,monospace;
+  /* priority: haute red, moyenne orange, basse yellow */
+  --p-haute:#e5484d;--p-moyenne:#f5922a;--p-basse:#f2c94c}
 *{box-sizing:border-box}
 body{margin:0;font:12px/1.4 Geist,"Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
 header{padding:20px 24px 4px;max-width:1100px}
@@ -70,17 +72,17 @@ header p{margin:4px 0 0;color:var(--ink-2);font-size:13px}
 /* priority as the typology chip: a swatch, then the word */
 .prio{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 7px;border:1px solid var(--line-2);border-radius:10px;font-size:11px;color:var(--ink-2);white-space:nowrap}
 .prio i{width:7px;height:7px;border-radius:2px;background:var(--ink-3)}
-.prio[data-p="haute"] i{background:var(--vert)}
+.prio[data-p="haute"] i{background:var(--p-haute)}
 .prio[data-p="haute"]{color:var(--ink)}
-.prio[data-p="moyenne"] i{background:#8b8c90}
-.prio[data-p="basse"] i{background:#d9d9db}
-/* priority as one bar of three */
+.prio[data-p="moyenne"] i{background:var(--p-moyenne)}
+.prio[data-p="basse"] i{background:var(--p-basse)}
+/* priority as one bar of three, the lit bars in the priority's colour */
 .bars{display:inline-flex;gap:2px;align-items:flex-end}
 .bars b{width:3px;border-radius:1px;background:var(--line)}
 .bars b:nth-child(1){height:6px}.bars b:nth-child(2){height:9px}.bars b:nth-child(3){height:12px}
-.bars[data-p="haute"] b{background:var(--ink)}
-.bars[data-p="moyenne"] b:nth-child(-n+2){background:var(--ink)}
-.bars[data-p="basse"] b:nth-child(1){background:var(--ink)}
+.bars[data-p="haute"] b{background:var(--p-haute)}
+.bars[data-p="moyenne"] b:nth-child(-n+2){background:var(--p-moyenne)}
+.bars[data-p="basse"] b:nth-child(1){background:var(--p-basse)}
 .date{white-space:nowrap}
 .date.late{color:var(--red);font-weight:600}
 .dd{width:24px;text-align:right;color:var(--ink-3)}

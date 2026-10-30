@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Partager — accès par personne, et le lien</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* Two questions from the share dialog of prototype 3.
+   1. A person's access is said once. Today the button names the right and
+      the panel it opens names it again; six ways where the right appears
+      in one place only.
+   2. The copy button inside the link field. Nested corners read as one
+      object when inner radius = outer radius − the distance between the
+      two edges (the gap plus the field's border). Six fields that keep
+      that rule, each with its numbers.
+   Each mock is the dialog's width, and works. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;--bar:#dcdcde;--red:#b3261e;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px}
+h1{margin:0;font-size:17px;font-weight:600}
+h2{margin:34px 0 0;font-size:15px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:900px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,540px);gap:26px 28px;margin-top:16px}
+.v h3{margin:0;font-size:13.5px;font-weight:600}
+.v p{margin:3px 0 8px;color:var(--ink-2);font-size:12.5px;min-height:36px}
+.card{width:540px;background:var(--card);border:1px solid var(--line-2);border-radius:12px;padding:12px 10px}
+svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.lab{font-size:11.5px;color:var(--ink-2);padding:0 8px 6px}
+
+/* a person ------------------------------------------------------------- */
+.row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;position:relative}
+.av{width:26px;height:26px;flex:0 0 26px;border-radius:50%;background:var(--fill);display:grid;place-items:center;font-size:10.5px;font-weight:600}
+.who{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.nm{font-size:12.5px;font-weight:500}
+.rl{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);font-size:12px;color:var(--ink-2);cursor:pointer;white-space:nowrap;font:inherit;font-size:12px}
+.btn svg{width:12px;height:12px;color:var(--ink-3)}
+.ico{width:26px;padding:0;justify-content:center}
+.ghost{background:none;border-color:transparent}
+.ghost:hover{background:var(--fill-2);border-color:var(--line-2)}
+.del{color:var(--red)} .del svg{color:var(--red)}
+.hov{opacity:0;transition:opacity .12s}
+.row:hover .hov,.row:focus-within .hov{opacity:1}
+
+/* segmented */
+.seg{display:inline-flex;padding:2px;border-radius:7px;background:var(--fill);font-size:11.5px}
+.seg span{padding:3px 8px;border-radius:5px;color:var(--ink-2);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.seg span[aria-current="true"]{background:var(--card);color:var(--ink);font-weight:500;outline:1px solid var(--line-2)}
+.seg svg{width:12px;height:12px}
+
+/* menu */
+.menu{position:absolute;right:8px;top:calc(100% - 2px);z-index:3;min-width:236px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px;display:flex;flex-direction:column}
+.menu .o{display:grid;grid-template-columns:16px 1fr;gap:1px 8px;padding:6px 8px;border-radius:5px;cursor:pointer}
+.menu .o:hover{background:var(--fill-2)}
+.menu .o b{font-weight:500;font-size:12px}
+.menu .o i{grid-column:2;font-style:normal;font-size:11px;color:var(--ink-3)}
+.menu .o svg{width:13px;height:13px;margin-top:2px}
+.menu hr{border:0;border-top:1px solid var(--line-2);margin:4px 2px}
+.menu .o.del b{color:var(--red)}
+
+/* check / switch */
+.sw{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2);cursor:pointer;user-select:none}
+.sw .k{width:28px;height:16px;border-radius:8px;background:var(--bar);position:relative;transition:background .15s}
+.sw .k::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .15s}
+.sw[aria-checked="true"] .k{background:var(--ink)}
+.sw[aria-checked="true"] .k::after{left:14px}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-weight:400;font-size:11px;color:var(--ink-3);text-align:center;padding:0 6px 4px}
+.tbl th:first-child{text-align:left;padding-left:8px}
+.tbl td{padding:6px;text-align:center;border-top:1px solid var(--line-2)}
+.tbl td:first-child{text-align:left}
+.radio{width:15px;height:15px;border-radius:50%;border:1.5px solid var(--line);display:inline-block;cursor:pointer;vertical-align:middle}
+.radio[aria-checked="true"]{border:4.5px solid var(--ink)}
+.confirm{display:flex;align-items:center;gap:8px;padding:6px 8px 8px 42px;font-size:12px;color:var(--ink-2)}
+
+/* the link field -------------------------------------------------------- */
+.lf{display:flex;align-items:center;gap:6px;background:var(--fill-2);border:1px solid var(--line-2);color:var(--ink-2);font-size:12px;min-width:0}
+.lf .u{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lf .cp{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--bar);color:var(--ink);font:inherit;font-size:12px;cursor:pointer;white-space:nowrap;flex:none}
+.lf .cp.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.lf .cp.quiet{background:none;border-color:transparent;color:var(--ink)}
+.lf .cp.quiet:hover{background:var(--fill)}
+.lf .cp svg{width:13px;height:13px}
+.lf .div{width:1px;align-self:stretch;background:var(--line-2)}
+.nums{margin-top:8px;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums;padding:0 2px}
+.nums b{color:var(--ink-2);font-weight:500}
+.done{color:#2f7a4d}
+</style>
+</head>
+<body>
+<main>
+  <h1>Partager — l'accès d'une personne, et le lien</h1>
+  <p class="lede">Deux points du dialogue Partager. D'abord, l'accès d'une personne est dit une seule fois: aujourd'hui le bouton nomme le droit et
+    le panneau qu'il ouvre le nomme encore. Ensuite, le bouton Copier dans le champ du lien: des coins emboîtés se lisent comme un seul objet
+    quand le rayon intérieur = rayon extérieur − la distance entre les deux bords (l'air plus le trait du champ). Chaque maquette fonctionne.</p>
+
+  <h2>1 — L'accès d'une personne, dit une seule fois</h2>
+  <div class="grid" id="acc"></div>
+
+  <h2>2 — Le bouton Copier dans le champ du lien (rayon intérieur = rayon extérieur − distance)</h2>
+  <div class="grid" id="lnk"></div>
+</main>
+
+<script>
+const ic = {
+  eye: '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  msg: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  down: '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg>',
+  dots: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>',
+  link: '<svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+  copy: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>',
+};
+const RIGHTS = [["r", "Lecture seule", "voir les plans, les quantités et les dates", "eye"], ["c", "Lecture et commentaires", "voir, et écrire une note ancrée sur une unité", "msg"]];
+const SHORT = { r: "Lecture", c: "Commentaires" };
+const PEOPLE = () => [
+  { n: "Camille Tremblay", role: "Chargée de projet", r: "c" },
+  { n: "Marc-André Gagnon", role: "Entrepreneur général", r: "c" },
+  { n: "Sophie Lavoie", role: "Urbaniste de l'arrondissement", r: "r" },
+];
+const ini = (n) => n.split(" ").map((w) => w[0]).join("");
+const person = (p, right) => `<span class="av">${ini(p.n)}</span><span class="who"><span class="nm">${p.n}</span><span class="rl">${p.role}</span></span>${right}`;
+const empty = `<div class="row" style="color:var(--ink-3);font-size:12px">Personne n'a encore été invité.</div>`;
+
+/* Each mock keeps its own people and its own open row. */
+const A = [
+  { id: "A", h: "A — Le sélecteur à la place du bouton",
+    p: "Pas de bouton qui ouvre: le choix est sur la ligne, toujours visible. Retirer est une icône qui paraît au survol.",
+    row: (p, i, s) => `<div class="row">${person(p, `<span class="seg">${RIGHTS.map(([k]) => `<span data-set="${i}|${k}" aria-current="${p.r === k}">${SHORT[k]}</span>`).join("")}</span>
+      <span class="btn ico ghost del hov" data-del="${i}" title="Retirer l'accès">${ic.x}</span>`)}</div>` },
+  { id: "B", h: "B — Le bouton ouvre un menu, pas un panneau",
+    p: "Le bouton dit le droit; le menu propose les deux, coché sur l'actuel, avec ce que chacun permet, puis Retirer sous un trait. Il se referme au choix.",
+    row: (p, i, s) => `<div class="row">${person(p, `<span class="btn" data-open="${i}">${RIGHTS.find((r) => r[0] === p.r)[1]}${ic.down}</span>`)}
+      ${s.open === i ? `<div class="menu">${RIGHTS.map(([k, l, d]) => `<div class="o" data-set="${i}|${k}">${p.r === k ? ic.check : "<span></span>"}<b>${l}</b><i>${d}</i></div>`).join("")}
+        <hr><div class="o del" data-del="${i}">${ic.trash}<b>Retirer l'accès</b></div></div>` : ""}</div>` },
+  { id: "C", h: "C — Un seul interrupteur: « Peut commenter »",
+    p: "Lire est acquis pour tout invité; la seule différence est commenter. Un interrupteur la dit, sans nommer le droit deux fois. ⋯ porte Retirer.",
+    row: (p, i, s) => `<div class="row">${person(p, `<span class="sw" data-tog="${i}" aria-checked="${p.r === "c"}"><span class="k"></span>Peut commenter</span>
+      <span class="btn ico ghost" data-open="${i}" title="Plus">${ic.dots}</span>`)}
+      ${s.open === i ? `<div class="menu" style="min-width:170px"><div class="o del" data-del="${i}">${ic.trash}<b>Retirer l'accès</b></div></div>` : ""}</div>` },
+  { id: "D", h: "D — Deux icônes, le droit en image",
+    p: "Œil et bulle: l'œil est toujours allumé, la bulle s'allume ou s'éteint. Le nom du droit est dans l'infobulle. Le plus dense.",
+    row: (p, i, s) => `<div class="row">${person(p, `<span class="seg">
+        <span aria-current="true" title="Lecture — toujours accordée" style="cursor:default">${ic.eye}</span>
+        <span data-tog="${i}" aria-current="${p.r === "c"}" title="${p.r === "c" ? "Commentaires permis — cliquer pour retirer" : "Permettre les commentaires"}">${ic.msg}</span></span>
+      <span class="btn ico ghost del hov" data-del="${i}" title="Retirer l'accès">${ic.trash}</span>`)}</div>` },
+  { id: "E", h: "E — Un tableau des droits",
+    p: "Les droits deviennent des colonnes, nommés une fois en tête; chaque personne coche la sienne. Retirer est la dernière colonne.",
+    list: (s) => `<table class="tbl"><thead><tr><th></th><th>Lecture</th><th>Commentaires</th><th></th></tr></thead><tbody>
+      ${s.people.map((p, i) => `<tr><td><div class="row" style="padding:0">${person(p, "")}</div></td>
+        ${RIGHTS.map(([k]) => `<td><span class="radio" data-set="${i}|${k}" aria-checked="${p.r === k}"></span></td>`).join("")}
+        <td><span class="btn ico ghost del" data-del="${i}" title="Retirer l'accès">${ic.x}</span></td></tr>`).join("")}</tbody></table>` },
+  { id: "F", h: "F — Le bouton devient le choix, sur place",
+    p: "Le bouton qui nomme le droit se déplie en sélecteur à la même place; il ne reste donc qu'un seul endroit qui le dit. Retirer s'ajoute à côté, le temps du choix; un clic ailleurs le replie.",
+    row: (p, i, s) => `<div class="row">${person(p, s.open === i
+      ? `<span class="seg">${RIGHTS.map(([k]) => `<span data-set="${i}|${k}" aria-current="${p.r === k}">${SHORT[k]}</span>`).join("")}</span>
+         <span class="btn del" data-del="${i}">${ic.trash}Retirer</span>`
+      : `<span class="btn" data-open="${i}">${RIGHTS.find((r) => r[0] === p.r)[1]}${ic.down}</span>`)}</div>` },
+];
+const accHost = document.getElementById("acc");
+A.forEach((m) => { m.people = PEOPLE(); m.open = null; });
+accHost.innerHTML = A.map((m) => `<section class="v"><h3>${m.h}</h3><p>${m.p}</p><div class="card" data-m="${m.id}"></div></section>`).join("");
+const paintA = (m) => {
+  accHost.querySelector(`[data-m="${m.id}"]`).innerHTML = `<div class="lab">Déjà invités</div>${m.people.length ? (m.list ? m.list(m) : m.people.map((p, i) => m.row(p, i, m)).join("")) : empty}`;
+};
+A.forEach(paintA);
+accHost.addEventListener("click", (e) => {
+  const m = A.find((x) => x.id === e.target.closest("[data-m]")?.dataset.m); if (!m) return;
+  const t = e.target.closest("[data-set],[data-del],[data-open],[data-tog]");
+  if (!t) { if (m.open !== null) { m.open = null; paintA(m); } return; }
+  if (t.dataset.set) { const [i, k] = t.dataset.set.split("|"); m.people[i].r = k; if (m.id === "B") m.open = null; }
+  else if (t.dataset.del) { m.people.splice(+t.dataset.del, 1); m.open = null; }
+  else if (t.dataset.open) m.open = m.open === +t.dataset.open ? null : +t.dataset.open;
+  else if (t.dataset.tog) { const p = m.people[+t.dataset.tog]; p.r = p.r === "c" ? "r" : "c"; }
+  paintA(m);
+});
+
+/* The link field. R = outer radius, g = gap, r = inner radius = R − g. */
+const LINK = "fitte.app/p/baldwin-iii?niveau=5";
+const L = [
+  { id: "1", h: "1 — Bouton inséré, coins concentriques",
+    p: "Le champ grandit à 34 px pour loger un bouton de 26 px avec 3 px d'air tout autour; le rayon intérieur suit l'extérieur.",
+    H: 34, R: 8, g: 3, kind: "" },
+  { id: "2", h: "2 — Bouton noir inséré",
+    p: "Même géométrie que 1, bouton plein: l'action principale du dialogue se lit au premier coup d'œil.",
+    H: 34, R: 8, g: 3, kind: "dark" },
+  { id: "3", h: "3 — Pilule dans une pilule",
+    p: "Rayons entièrement ronds: une pilule de 36 px et un bouton de 26 px. La règle tient par construction: chaque rayon vaut la demi-hauteur, 18 − 5 = 13.",
+    H: 36, R: 18, g: 4, kind: "dark", round: true },
+  { id: "4", h: "4 — Le bouton occupe le bout du champ",
+    p: "Pas d'écart: le bouton est la fin du champ, coins droits à gauche, coins du champ à droite, séparé par un trait. Rien à aligner.",
+    H: 32, R: 7, g: 0, kind: "seg" },
+  { id: "5", h: "5 — Bouton texte, sans fond",
+    p: "Le bouton n'a pas de bord: seul son survol dessine un fond, aux rayons concentriques. Le plus calme.",
+    H: 32, R: 7, g: 3, kind: "quiet" },
+  { id: "6", h: "6 — Icône seule, carrée",
+    p: "Un bouton carré de 26 px, l'icône copier, l'infobulle « Copier le lien ». Le lien garde toute la largeur.",
+    H: 34, R: 8, g: 3, kind: "icon" },
+];
+const lnkHost = document.getElementById("lnk");
+const field = (o, done) => {
+  /* The distance between the two edges is the gap plus the field's 1 px
+     border; that is what the inner radius gives back. */
+  const r = o.round ? (o.H - 2 * o.g - 2) / 2 : Math.max(o.R - o.g - 1, 0);
+  const inner = o.H - 2 - 2 * o.g;
+  const label = done ? (o.kind === "icon" ? ic.check : `${ic.check}Copié`) : o.kind === "icon" ? ic.copy : `${ic.link}Copier le lien`;
+  if (o.kind === "seg") return `<div class="lf" style="height:${o.H}px;border-radius:${o.R}px;padding-left:10px;gap:8px;overflow:hidden">${ic.link}<span class="u">${LINK}</span>
+    <span class="div"></span><span class="cp quiet ${done ? "done" : ""}" data-copy style="height:100%;border:0;border-radius:0 ${o.R - 1}px ${o.R - 1}px 0;padding:0 12px">${label}</span></div>`;
+  return `<div class="lf" style="height:${o.H}px;border-radius:${o.R}px;padding:${o.g}px ${o.g}px ${o.g}px ${o.round ? 14 : 10}px">${ic.link}<span class="u">${LINK}</span>
+    <span class="cp ${o.kind === "dark" ? "dark" : o.kind === "quiet" ? "quiet" : ""} ${done ? "done" : ""}" data-copy title="Copier le lien"
+      style="height:${inner}px;border-radius:${r}px;${o.kind === "icon" ? `width:${inner}px;padding:0` : `padding:0 ${o.round ? 12 : 10}px`}">${label}</span></div>`;
+};
+const nums = (o) => o.kind === "seg" ? `Champ <b>${o.H} px</b>, rayon <b>${o.R}</b> · bouton flush, rayon droit <b>${o.R - 1}</b> = R − bord`
+  : o.round ? `Champ <b>${o.H} px</b>, rayon <b>${o.H / 2}</b> · écart <b>${o.g}</b> + bord 1 · bouton <b>${o.H - 2 - 2 * o.g} px</b>, rayon <b>${(o.H - 2 - 2 * o.g) / 2}</b>`
+  : `Champ <b>${o.H} px</b>, rayon <b>${o.R}</b> · écart <b>${o.g}</b> + bord 1 · bouton <b>${o.H - 2 - 2 * o.g} px</b>, rayon <b>${o.R - o.g - 1}</b> = ${o.R} − ${o.g + 1}`;
+lnkHost.innerHTML = L.map((o) => `<section class="v"><h3>${o.h}</h3><p>${o.p}</p><div class="card" data-l="${o.id}">
+  <div class="lab">Le lien</div><div style="padding:0 8px" data-f>${field(o)}</div><div class="nums">${nums(o)}</div></div></section>`).join("");
+lnkHost.addEventListener("click", (e) => {
+  const c = e.target.closest("[data-copy]"); if (!c) return;
+  const card = c.closest("[data-l]"), o = L.find((x) => x.id === card.dataset.l);
+  card.querySelector("[data-f]").innerHTML = field(o, true);
+  setTimeout(() => card.querySelector("[data-f]").innerHTML = field(o), 1400);
+});
+</script>
+</body>
+</html>

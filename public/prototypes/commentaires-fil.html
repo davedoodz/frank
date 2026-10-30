@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Commentaires — le fil, résoudre, l'archive</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The comment thread of prototype 3, redrawn five ways. Every option:
+   - no connector ticks and no empty circle;
+   - the author by name, with initials in a circle, the role under it;
+   - a comment is resolved from itself, and a resolved comment goes to an
+     archive of resolved comments, from which it can be reopened.
+   Each mock is the margin's width (300 px) and works on its own copy. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --sel:#eef1f4;--green:#2f7a4d;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:940px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,330px);gap:28px 26px;margin-top:20px;align-items:start}
+.v h2{margin:0;font-size:13.5px;font-weight:600}
+.v p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:72px}
+svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.pane{width:330px;height:640px;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line-2);border-radius:10px;overflow:hidden;position:relative}
+.ph{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-bottom:1px solid var(--line-2);flex:none}
+.ph b{font-weight:600}
+.ph .n{color:var(--ink-3);font-size:12px}
+.sp{flex:1}
+.scroll{flex:1;overflow:auto;min-height:0}
+.btn{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 8px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);font-size:11.5px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.btn svg{width:12px;height:12px}
+.btn.ok{color:var(--green)}
+.btn.ok svg{color:var(--green)}
+.ghost{background:none;border-color:transparent}
+.ghost:hover{background:var(--fill-2);border-color:var(--line-2)}
+
+/* the author --------------------------------------------------------- */
+.au{display:flex;align-items:center;gap:8px;min-width:0}
+.av{width:26px;height:26px;flex:0 0 26px;border-radius:50%;background:var(--fill);display:grid;place-items:center;font-size:10.5px;font-weight:600;color:var(--ink)}
+.av.me{background:var(--ink);color:#fff}
+.av.sm{width:22px;height:22px;flex-basis:22px;font-size:9.5px}
+.au .w{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.au .nm{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.au .rl{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.when{font-size:11px;color:var(--ink-3);white-space:nowrap}
+.txt{font-size:12.5px;line-height:1.45}
+.sheet{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-3)}
+.sheet svg{width:12px;height:12px}
+.int{display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 6px;border-radius:4px;background:var(--fill);font-size:10.5px;color:var(--ink-2)}
+.int svg{width:11px;height:11px}
+.res .txt{color:var(--ink-3)}
+.resby{font-size:11px;color:var(--green);display:inline-flex;align-items:center;gap:4px}
+.resby svg{width:11px;height:11px}
+.empty{padding:16px 12px;font-size:12px;color:var(--ink-3)}
+
+/* A — flat rows ------------------------------------------------------- */
+.A .c{padding:11px 12px;border-bottom:1px solid var(--line-2);display:flex;flex-direction:column;gap:6px;cursor:pointer;position:relative}
+.A .c:hover{background:var(--fill-2)}
+.A .c.on{background:var(--sel)}
+.A .top{display:flex;align-items:flex-start;gap:8px}
+.A .acts{display:flex;gap:6px}
+.A .c:not(.on) .acts{display:none}
+.fold{display:flex;align-items:center;gap:6px;padding:10px 12px;font-size:12px;color:var(--ink-2);cursor:pointer;border-bottom:1px solid var(--line-2);background:var(--fill-2)}
+.fold svg{width:12px;height:12px}
+
+/* B — cards, tabs ----------------------------------------------------- */
+.tabs2{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line-2);flex:none}
+.tabs2 span{padding:6px 10px;font-size:12px;color:var(--ink-2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs2 span[aria-current="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.tabs2 em{font-style:normal;color:var(--ink-3);font-weight:400;margin-left:4px}
+.B .scroll{padding:10px;display:flex;flex-direction:column;gap:8px}
+.B .c{border:1px solid var(--line-2);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;position:relative;cursor:pointer}
+.B .c:hover{border-color:var(--line)}
+.B .c.on{border-color:var(--ink)}
+.B .chk{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:5px;display:grid;place-items:center;color:var(--ink-3);opacity:0;border:1px solid transparent}
+.B .c:hover .chk,.B .c.on .chk{opacity:1;border-color:var(--line-2);background:var(--card)}
+.B .chk:hover{color:var(--green);border-color:var(--green)!important}
+.B .c .top{display:flex;align-items:center;gap:8px;padding-right:30px}
+
+/* C — by sheet -------------------------------------------------------- */
+.C .grp{display:flex;align-items:center;gap:6px;padding:10px 12px 4px;font-size:11px;color:var(--ink-3)}
+.C .grp svg{width:12px;height:12px}
+.C .c{display:grid;grid-template-columns:22px 1fr;gap:3px 8px;padding:7px 12px;cursor:pointer}
+.C .c:hover{background:var(--fill-2)}
+.C .c.on{background:var(--sel)}
+.C .c .hd{display:flex;align-items:baseline;gap:6px;min-width:0}
+.C .c .hd b{font-size:12px;font-weight:600;white-space:nowrap}
+.C .c .hd i{font-style:normal;font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.C .c .txt{grid-column:2}
+.C .c .acts{grid-column:2;display:flex;gap:6px;padding-top:4px}
+.C .c:not(.on) .acts{display:none}
+.foot{flex:none;border-top:1px solid var(--line-2);padding:8px 12px;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);cursor:pointer}
+.foot:hover{background:var(--fill-2)}
+.foot svg{width:13px;height:13px}
+.sheetover{position:absolute;inset:0;background:var(--card);display:flex;flex-direction:column;z-index:2}
+
+/* D — the resolve box, a check you tick ------------------------------- */
+.D .c{display:grid;grid-template-columns:26px 1fr;gap:4px 9px;padding:11px 12px;border-bottom:1px solid var(--line-2);cursor:pointer}
+.D .c:hover{background:var(--fill-2)}
+.D .c.on{background:var(--sel)}
+.D .hd{display:flex;align-items:flex-start;gap:6px}
+.D .tick{grid-column:2;display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-2);padding-top:2px}
+.D .box{width:15px;height:15px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;background:var(--card)}
+.D .box svg{width:10px;height:10px;opacity:0;color:#fff;stroke-width:2.6}
+.D .c:hover .box{border-color:var(--ink-3)}
+.D .box.done{background:var(--green);border-color:var(--green)}
+.D .box.done svg{opacity:1}
+.D .gone{opacity:.45;transition:opacity .3s}
+.undo{position:absolute;left:12px;right:12px;bottom:46px;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;background:var(--ink);color:#fff;font-size:12px;z-index:3}
+.undo u{margin-left:auto;cursor:pointer;color:#fff}
+
+/* E — conversation, one line until opened --------------------------- */
+.E .c{padding:9px 12px;border-bottom:1px solid var(--line-2);cursor:pointer}
+.E .c:hover{background:var(--fill-2)}
+.E .line{display:flex;align-items:center;gap:8px;min-width:0}
+.E .line .s{flex:1;min-width:0;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.E .line .s b{font-weight:600}
+.E .line .s span{color:var(--ink-2)}
+.E .c.on{background:var(--sel)}
+.E .open{padding:8px 0 2px 34px;display:flex;flex-direction:column;gap:7px}
+.E .open .rl{font-size:11px;color:var(--ink-3)}
+.E .acts{display:flex;gap:6px}
+.seg{display:inline-flex;padding:2px;border-radius:7px;background:var(--fill);font-size:11.5px;margin:8px 12px 2px;align-self:flex-start;flex:none}
+.seg span{padding:3px 9px;border-radius:5px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.seg span[aria-current="true"]{background:var(--card);color:var(--ink);font-weight:500;outline:1px solid var(--line-2)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Commentaires — le fil, résoudre, l'archive</h1>
+  <p class="lede">Le fil de la marge, dessiné de cinq façons. Partout: plus de petits traits qui relient les commentaires, plus de cercle vide;
+    l'auteur par son nom, ses initiales dans un cercle, son rôle dessous. On résout un commentaire à partir de lui-même; un commentaire
+    résolu part dans l'archive des résolus, d'où on peut le rouvrir. Chaque maquette fonctionne.</p>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+const ic = {
+  check: '<svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg>',
+  file: '<svg viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>',
+  lock: '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  archive: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9M10 13h4"/></svg>',
+  undo: '<svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>',
+  pin: '<svg viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></svg>',
+  right: '<svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>',
+  down: '<svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>',
+  back: '<svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>',
+  msg: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+};
+/* The people are the share dialog's; the signed-in person is Guy Roberge.
+   Names are fictional, like every person in the prototype. */
+const PEOPLE = {
+  mg: { n: "Marc-André Gagnon", role: "Entrepreneur général" },
+  ct: { n: "Camille Tremblay", role: "Chargée de projet" },
+  gr: { n: "Guy Roberge", role: "Architecte — vous", me: true },
+  sl: { n: "Sophie Lavoie", role: "Urbaniste de l'arrondissement" },
+};
+const seed = () => [
+  { id: 1, who: "mg", when: "hier 16:20", sheet: "plan d'unités — niv. 5", txt: "Le dégagement devant la porte du 507 fait 860 mm, il en faut 900." },
+  { id: 2, who: "ct", when: "lun. 09:05", sheet: "plan d'unités — niv. 5", txt: "Le balcon du 510 dépasse la ligne d'alignement de 0,4 m." },
+  { id: 3, who: "gr", when: "mar. 08:40", sheet: "plan d'unités — niv. 5", internal: true, txt: "Rappel: le corridor est encore dessiné avec l'ancienne sortie. À reprendre avant R05." },
+  { id: 4, who: "gr", when: "à l'instant", sheet: "plan d'unités — niv. 1", txt: "Vérifier la largeur de l'entrée principale avec le relevé." },
+  { id: 5, who: "sl", when: "12 oct", sheet: "élévation est", txt: "La surface vitrée de la façade est semble dépasser le permis.", res: { by: "gr", when: "14 oct" } },
+];
+const P = (id) => PEOPLE[id];
+const ini = (n) => n.split(" ").map((w) => w[0]).join("");
+const av = (id, sm) => `<span class="av ${P(id).me ? "me" : ""} ${sm ? "sm" : ""}">${ini(P(id).n)}</span>`;
+const author = (c) => `<span class="au">${av(c.who)}<span class="w"><span class="nm">${P(c.who).n}</span><span class="rl">${P(c.who).role}</span></span></span>`;
+const meta = (c) => `<span class="sheet">${ic.file}${c.sheet}</span>${c.internal ? `<span class="int">${ic.lock}À l'interne</span>` : ""}`;
+const resLine = (c) => `<span class="resby">${ic.check}Résolu par ${P(c.res.by).n} · ${c.res.when}</span>`;
+const open = (s) => s.list.filter((c) => !c.res);
+const done = (s) => s.list.filter((c) => c.res);
+const resolveBtn = (c) => `<span class="btn ok" data-res="${c.id}">${ic.check}Résoudre</span>`;
+const reopenBtn = (c) => `<span class="btn" data-reo="${c.id}">${ic.undo}Rouvrir</span>`;
+const seeBtn = `<span class="btn ghost">${ic.pin}Voir sur le plan</span>`;
+
+const M = [
+  { id: "A", h: "A — Lignes plates, résolus repliés en bas",
+    p: "Plus de cartes: une ligne par commentaire, séparée d'un trait. Un clic sélectionne et montre Résoudre. Les résolus se rangent sous « Résolus (n) », replié au bas du fil — c'est l'archive.",
+    html(s) {
+      const row = (c) => `<div class="c ${s.sel === c.id ? "on" : ""} ${c.res ? "res" : ""}" data-sel="${c.id}">
+        <div class="top">${author(c)}<span class="sp"></span><span class="when">${c.when}</span></div>
+        <div class="txt">${c.txt}</div><div style="display:flex;gap:8px;align-items:center">${meta(c)}</div>
+        ${c.res ? resLine(c) : ""}
+        <div class="acts">${c.res ? reopenBtn(c) : resolveBtn(c)}${seeBtn}</div></div>`;
+      return `<div class="ph">${ic.msg}<b>Commentaires</b><span class="n">${open(s).length} ouverts</span></div>
+        <div class="scroll">${open(s).map(row).join("") || `<div class="empty">Aucun commentaire ouvert.</div>`}
+          <div class="fold" data-fold>${s.fold ? ic.down : ic.right}${ic.archive}Résolus (${done(s).length})</div>
+          ${s.fold ? done(s).map(row).join("") || `<div class="empty">Rien n'a encore été résolu.</div>` : ""}</div>`;
+    } },
+  { id: "B", h: "B — Cartes sans traits, onglets Ouverts / Résolus",
+    p: "Les cartes restent, sans les traits. Au survol, une case ✓ en haut à droite résout. L'archive est l'onglet Résolus; une carte y porte qui l'a résolue et Rouvrir.",
+    html(s) {
+      const tab = s.tab || "o", list = tab === "o" ? open(s) : done(s);
+      const card = (c) => `<div class="c ${s.sel === c.id ? "on" : ""} ${c.res ? "res" : ""}" data-sel="${c.id}">
+        ${c.res ? "" : `<span class="chk" data-res="${c.id}" title="Résoudre">${ic.check}</span>`}
+        <div class="top">${author(c)}</div>
+        <div class="txt">${c.txt}</div>
+        <div style="display:flex;gap:8px;align-items:center">${meta(c)}<span class="sp"></span><span class="when">${c.when}</span></div>
+        ${c.res ? `<div style="display:flex;align-items:center;gap:8px">${resLine(c)}<span class="sp"></span>${reopenBtn(c)}</div>` : ""}</div>`;
+      return `<div class="ph">${ic.msg}<b>Commentaires</b></div>
+        <div class="tabs2"><span data-tab="o" aria-current="${tab === "o"}">Ouverts<em>${open(s).length}</em></span><span data-tab="r" aria-current="${tab === "r"}">Résolus<em>${done(s).length}</em></span></div>
+        <div class="scroll">${list.map(card).join("") || `<div class="empty">${tab === "o" ? "Aucun commentaire ouvert." : "Rien n'a encore été résolu."}</div>`}</div>`;
+    } },
+  { id: "C", h: "C — Rangés par feuille, l'archive au pied du volet",
+    p: "Les commentaires se groupent sous leur feuille, plus serrés: petite pastille d'initiales, nom, rôle sur la même ligne. Un clic ouvre Résoudre. « Archive des résolus » au pied ouvre la liste par-dessus le volet.",
+    html(s) {
+      const sheets = [...new Set(open(s).map((c) => c.sheet))];
+      const row = (c) => `<div class="c ${s.sel === c.id ? "on" : ""}" data-sel="${c.id}">${av(c.who, true)}
+        <div class="hd"><b>${P(c.who).n}</b><i>${P(c.who).role}</i><span class="when">${c.when}</span></div>
+        <div class="txt">${c.txt}${c.internal ? ` <span class="int">${ic.lock}interne</span>` : ""}</div>
+        <div class="acts">${resolveBtn(c)}${seeBtn}</div></div>`;
+      const arch = s.arch ? `<div class="sheetover"><div class="ph"><span class="btn ghost" data-arch style="padding:0 4px">${ic.back}</span><b>Archive des résolus</b><span class="n">${done(s).length}</span></div>
+        <div class="scroll">${done(s).map((c) => `<div class="c res" style="display:grid;grid-template-columns:22px 1fr;gap:3px 8px;padding:9px 12px;border-bottom:1px solid var(--line-2)">${av(c.who, true)}
+          <div class="hd"><b>${P(c.who).n}</b><i>${c.sheet}</i></div><div class="txt">${c.txt}</div>
+          <div style="grid-column:2;display:flex;align-items:center;gap:8px">${resLine(c)}<span class="sp"></span>${reopenBtn(c)}</div></div>`).join("") || `<div class="empty">Rien n'a encore été résolu.</div>`}</div></div>` : "";
+      return `<div class="ph">${ic.msg}<b>Commentaires</b><span class="n">${open(s).length} ouverts</span></div>
+        <div class="scroll">${sheets.map((sh) => `<div class="grp">${ic.file}${sh}</div>${open(s).filter((c) => c.sheet === sh).map(row).join("")}`).join("") || `<div class="empty">Aucun commentaire ouvert.</div>`}</div>
+        <div class="foot" data-arch>${ic.archive}Archive des résolus<span class="sp"></span><span class="n" style="color:var(--ink-3)">${done(s).length}</span>${ic.right}</div>${arch}`;
+    } },
+  { id: "D", h: "D — Une case à cocher, avec annulation",
+    p: "Chaque commentaire porte une case « Résoudre ». Cochée, la ligne pâlit puis part dans l'archive; une barre propose Annuler pendant quelques secondes. L'archive s'ouvre du pied du volet.",
+    html(s) {
+      const row = (c) => `<div class="c ${s.sel === c.id ? "on" : ""} ${s.going === c.id ? "gone" : ""}" data-sel="${c.id}">${av(c.who)}
+        <div class="hd"><span class="au"><span class="w"><span class="nm">${P(c.who).n}</span><span class="rl">${P(c.who).role}</span></span></span><span class="sp"></span><span class="when">${c.when}</span></div>
+        <div class="txt" style="grid-column:2">${c.txt}</div>
+        <div style="grid-column:2;display:flex;gap:8px;align-items:center">${meta(c)}</div>
+        <div class="tick" data-tick="${c.id}"><span class="box ${s.going === c.id ? "done" : ""}">${ic.check}</span>Résoudre</div></div>`;
+      const arch = s.arch ? `<div class="sheetover"><div class="ph"><span class="btn ghost" data-arch style="padding:0 4px">${ic.back}</span><b>Archive des résolus</b><span class="n">${done(s).length}</span></div>
+        <div class="scroll">${done(s).map((c) => `<div class="c res" style="cursor:default">${av(c.who)}
+          <div class="hd"><span class="au"><span class="w"><span class="nm">${P(c.who).n}</span><span class="rl">${c.sheet}</span></span></span></div>
+          <div class="txt" style="grid-column:2">${c.txt}</div>
+          <div style="grid-column:2;display:flex;align-items:center;gap:8px">${resLine(c)}<span class="sp"></span>${reopenBtn(c)}</div></div>`).join("") || `<div class="empty">Rien n'a encore été résolu.</div>`}</div></div>` : "";
+      return `<div class="ph">${ic.msg}<b>Commentaires</b><span class="n">${open(s).length} ouverts</span></div>
+        <div class="scroll">${open(s).map(row).join("") || `<div class="empty">Aucun commentaire ouvert.</div>`}</div>
+        ${s.undo ? `<div class="undo">${ic.check}Résolu — dans l'archive<u data-undo="${s.undo}">Annuler</u></div>` : ""}
+        <div class="foot" data-arch>${ic.archive}Archive des résolus<span class="sp"></span><span class="n" style="color:var(--ink-3)">${done(s).length}</span>${ic.right}</div>${arch}`;
+    } },
+  { id: "E", h: "E — Une ligne par commentaire, ouverte au clic",
+    p: "Le plus dense: initiales, nom et début du texte sur une ligne. Un clic l'ouvre — rôle, texte entier, feuille, Résoudre. Un sélecteur Ouverts / Résolus en tête bascule vers l'archive.",
+    html(s) {
+      const view = s.tab || "o", list = view === "o" ? open(s) : done(s);
+      const row = (c) => `<div class="c ${s.sel === c.id ? "on" : ""} ${c.res ? "res" : ""}" data-sel="${c.id}">
+        <div class="line">${av(c.who)}<span class="s"><b>${P(c.who).n}</b> <span>${s.sel === c.id ? "" : `— ${c.txt}`}</span></span><span class="when">${c.when}</span></div>
+        ${s.sel === c.id ? `<div class="open"><span class="rl">${P(c.who).role}</span><div class="txt">${c.txt}</div>
+          <div style="display:flex;gap:8px;align-items:center">${meta(c)}</div>${c.res ? resLine(c) : ""}
+          <div class="acts">${c.res ? reopenBtn(c) : resolveBtn(c)}${seeBtn}</div></div>` : ""}</div>`;
+      return `<div class="ph">${ic.msg}<b>Commentaires</b></div>
+        <div class="seg"><span data-tab="o" aria-current="${view === "o"}">Ouverts ${open(s).length}</span><span data-tab="r" aria-current="${view === "r"}">Résolus ${done(s).length}</span></div>
+        <div class="scroll" style="margin-top:6px;border-top:1px solid var(--line-2)">${list.map(row).join("") || `<div class="empty">${view === "o" ? "Aucun commentaire ouvert." : "Rien n'a encore été résolu."}</div>`}</div>`;
+    } },
+];
+
+const grid = document.getElementById("grid");
+M.forEach((m) => { m.list = seed(); m.sel = 1; });
+grid.innerHTML = M.map((m) => `<section class="v"><h2>${m.h}</h2><p>${m.p}</p><div class="pane ${m.id}" data-m="${m.id}"></div></section>`).join("");
+const paint = (m) => { grid.querySelector(`[data-m="${m.id}"]`).innerHTML = m.html(m); };
+M.forEach(paint);
+const resolve = (m, id) => { const c = m.list.find((x) => x.id === id); c.res = { by: "gr", when: "à l'instant" }; if (m.sel === id) m.sel = null; };
+grid.addEventListener("click", (e) => {
+  const m = M.find((x) => x.id === e.target.closest("[data-m]")?.dataset.m); if (!m) return;
+  const t = e.target.closest("[data-res],[data-reo],[data-fold],[data-tab],[data-arch],[data-tick],[data-undo],[data-sel]");
+  if (!t) return;
+  if (t.dataset.res) resolve(m, +t.dataset.res);
+  else if (t.dataset.reo) { const c = m.list.find((x) => x.id === +t.dataset.reo); delete c.res; m.sel = c.id; }
+  else if (t.hasAttribute("data-fold")) m.fold = !m.fold;
+  else if (t.dataset.tab) { m.tab = t.dataset.tab; m.sel = null; }
+  else if (t.hasAttribute("data-arch")) m.arch = !m.arch;
+  else if (t.dataset.tick) {
+    /* D: the tick shows, the row fades, then it leaves for the archive;
+       Annuler brings it back for a few seconds after. */
+    const id = +t.dataset.tick; m.going = id; paint(m);
+    clearTimeout(m.t1); clearTimeout(m.t2);
+    m.t1 = setTimeout(() => { resolve(m, id); m.going = null; m.undo = id; paint(m);
+      m.t2 = setTimeout(() => { m.undo = null; paint(m); }, 4000); }, 450);
+    return;
+  }
+  else if (t.dataset.undo) { const c = m.list.find((x) => x.id === +t.dataset.undo); delete c.res; m.undo = null; clearTimeout(m.t2); }
+  else if (t.dataset.sel) m.sel = m.sel === +t.dataset.sel && m.id === "E" ? null : +t.dataset.sel;
+  paint(m);
+});
+</script>
+</body>
+</html>

@@ -600,6 +600,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .tseg > span{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:5px;font-size:11.5px;
   font-weight:500;color:var(--ink-2);cursor:pointer}
 .tseg > span.on{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+.tseg .lu{width:12px;height:12px;margin-right:-1px}
+.tseg > span:not(.on) .lu{color:var(--ink-3)}
+.task .tfile{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;flex:0 0 auto;
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-size:11px;cursor:pointer}
+.task .tfile:hover{border-color:var(--ink-2);color:var(--ink)}
+.task .tfile .lu{width:12px;height:12px}
 .tseg i{font-style:normal;font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .tday{display:flex;align-items:baseline;gap:6px;padding:12px 6px 5px;border-bottom:1px solid var(--line)}
 .tday b{font-size:12px;font-weight:600;color:var(--ink)}
@@ -614,6 +620,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .task .ttl{font-size:12.5px;color:var(--ink)}
 .task .tmeta{font-size:11px;color:var(--ink-3)}
 .task .tmeta code{font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+.task .tdates{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .task .tmeta em{font-style:normal;color:#b3261e;font-weight:500}
 .task.done .ttl{text-decoration:line-through;color:var(--ink-3)}
 /* Priority as one bar of three: haute red, moyenne orange, basse yellow. */
@@ -1620,6 +1627,9 @@ body:has([data-skppop]) .lcard{visibility:hidden}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ncard .anch .lu{width:12px;height:12px;flex:0 0 12px}
 .ncard .nact{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+/* The margin's comment has its point on the plan: the chip holds it in brand green. */
+.ncard .nact .chip.pinned{background:var(--vert);border-color:var(--vert);color:var(--vert-ink)}
+.ncard .nact .chip.pinned .lb,.ncard .nact .chip.pinned .lu{color:var(--vert-ink)}
 /* Deleting is the one act a comment cannot take back: it turns red under the cursor. */
 .ncard .nact .chip.del:hover{background:#b3261e;border-color:#b3261e;color:#fff}
 .ncard .nact .chip.del:hover .lb,.ncard .nact .chip.del:hover .lu{color:#fff}
@@ -2079,6 +2089,13 @@ const V = {
   pending: null,        // a point put down, waiting for its sentence
   draft: "",
   mdraft: "",           /* the comment being written in the margin */
+  /* The margin composer keeps its own scope and its own point: choosing
+     À l'interne there does not change the bubble on the plan, and the
+     point it pins waits for the margin's Commenter instead of opening a
+     second box. */
+  mScope: "equipe",
+  mAnchor: null,
+  pinFor: "",           // "margin" when the margin armed the pin
   /* Which copy button has just answered, by key; cleared after a moment. */
   copied: "",
   selPin: null,
@@ -2645,9 +2662,9 @@ const whoLabel = (t) => (t.who.length ? t.who.map((id) => person(id).label).join
 let taskSeq = 100;
 const TASKS = [
   { id: "t1", day: "2026-11-03", title: "Tableau des superficies par étage", who: ["ba"],
-    prio: "moyenne", done: true, doneAt: "2026-11-05", phase: "Comité" },
+    prio: "moyenne", done: true, doneAt: "2026-11-05", archived: true, phase: "Comité" },
   { id: "t2", day: "2026-11-09", title: "Élévations avec matériaux au comité", who: ["gr", "al"],
-    prio: "moyenne", done: true, doneAt: "2026-11-10", phase: "Comité" },
+    prio: "moyenne", done: true, doneAt: "2026-11-10", archived: true, phase: "Comité" },
   /* One item left behind on purpose: the screen has to say what late looks
      like, otherwise the counter above the list is never read. */
   { id: "t15", day: "2026-11-11", title: "Coupe de la cage d'escalier à reprendre", who: ["ba", "gr"],
@@ -2675,7 +2692,7 @@ const TASKS = [
   { id: "t13", day: "2027-02-09", title: "Relevé d'implantation", who: ["dl"],
     prio: "basse", done: false, phase: "Site" },
   { id: "t14", day: "2026-10-27", title: "Mix de typologies arrêté", who: ["al"],
-    prio: "basse", done: true, doneAt: "2026-10-27", phase: "Programme" },
+    prio: "basse", done: true, doneAt: "2026-10-27", archived: true, phase: "Programme" },
 ];
 const PRIO = { haute: 3, moyenne: 2, basse: 1 };
 const PHASES = ["Permis", "Comité", "Site", "Programme", "Chantier"];
@@ -4037,6 +4054,9 @@ const shift = (s, n) => { const d = dOf(s); d.setUTCDate(d.getUTCDate() + n); re
 /* Monday as the first column, which is how a site week is read here. */
 const monday = (s) => shift(s, -((dOf(s).getUTCDay() + 6) % 7));
 const fmtDay = (s) => { const d = dOf(s); return `${d.getUTCDate()} ${MONTHS_AB[d.getUTCMonth()]}`; };
+/* Each task keeps the day it was written down. The fixture's tasks were
+   written one to two weeks before they fell due, never after today. */
+TASKS.forEach((t, i) => { t.createdAt ||= shift(t.day < TODAY ? t.day : TODAY, -(6 + (i * 5) % 11)); });
 const tasksOn = (s) => TASKS.filter((t) => t.day === s);
 const lateCount = () => TASKS.filter((t) => !t.done && t.day < TODAY).length;
 
@@ -4166,34 +4186,37 @@ function taskForm(t, isNew) {
 
 /* Option E of taches-liste.html: a segmented switch with its counts picks
    which tasks; the agenda files them under their day. « Ouvertes » reads as
-   the agenda of what is left, « Faites » as a journal. A late day is red,
+   the agenda of what is left, « Historique » as a journal. A late day is red,
    today wears its badge, the priority is three bars at the right like a
-   column of figures. A tick moves a task to « Faites »; ticking it there
-   reopens it. */
+   column of figures. A tick checks the box and strikes the task through,
+   where it is; only then does « Archiver » appear, and archiving files it
+   under « Historique ». Ticking it there reopens it. */
 const TASK_FILTERS = [
-  ["open", "Ouvertes", (t) => !t.done],
-  ["late", "En retard", (t) => !t.done && t.day < TODAY],
-  ["week", "Cette semaine", (t) => !t.done && t.day >= monday(TODAY) && t.day <= shift(monday(TODAY), 6)],
-  ["done", "Faites", (t) => t.done],
+  ["open", "Ouvertes", (t) => !t.archived, "circle"],
+  ["late", "En retard", (t) => !t.done && t.day < TODAY, "alert-triangle"],
+  ["hist", "Historique", (t) => t.archived, "history"],
 ];
 const WEEKDAY = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
 const dayLabel = (s) => `${WEEKDAY[dOf(s).getUTCDay()]} ${fmtDay(s)}`;
 const prioBars = (t) => `<span class="tbars" data-p="${t.prio}" title="Priorité ${t.prio}"><b></b><b></b><b></b></span>`;
 function taskListHTML() {
   const f = TASK_FILTERS.find(([k]) => k === V.taskFilter) || TASK_FILTERS[0];
-  const journal = f[0] === "done";
+  const journal = f[0] === "hist";
   const dayOf = (t) => (journal ? t.doneAt || t.day : t.day);
   const list = TASKS.filter(f[2]).sort((a, b) => (journal ? dayOf(b).localeCompare(dayOf(a)) : a.day.localeCompare(b.day))
     || PRIO[b.prio] - PRIO[a.prio]);
   const days = [...new Set(list.map(dayOf))];
-  const seg = `<span class="tseg">${TASK_FILTERS.map(([k, nm, fn]) => `<span class="${k === f[0] ? "on" : ""}" ${act("tfilter", k)}>${nm}<i>${TASKS.filter(fn).length}</i></span>`).join("")}</span>`;
+  const seg = `<span class="tseg">${TASK_FILTERS.map(([k, nm, fn, ic]) => `<span class="${k === f[0] ? "on" : ""}" ${act("tfilter", k)}>${icon(ic)}${nm}<i>${TASKS.filter(fn).length}</i></span>`).join("")}</span>`;
   const line = (t) => (V.taskEdit === t.id ? taskForm(t, false) : `<div class="task ${t.done ? "done" : ""} ${V.task === t.id ? "on" : ""}"
       data-task="${t.id}" ${act("task", t.id)}>
-    <span class="tick dot ${t.done ? "on" : ""}" ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — elle passe sous « Faites »"}">${t.done ? icon("check") : ""}</span>
+    <span class="tick dot ${t.done ? "on" : ""}" ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — elle reste ici, barrée"}">${t.done ? icon("check") : ""}</span>
     <span class="tw"><span class="ttl">${t.title}</span>
       <span class="tmeta">${t.phase}${t.code ? ` — <code>${t.code}</code>` : ""}${t.caught ? ` — relevé ${t.caught}` : ""}${
-        !t.done && t.day < TODAY ? ` — <em>en retard</em>` : ""}</span></span>
+        !t.done && t.day < TODAY ? ` — <em>en retard</em>` : ""}</span>
+      <span class="tdates">créée le ${fmtDay(t.createdAt)}${t.done && t.doneAt ? ` · cochée le ${fmtDay(t.doneAt)}` : ""}${
+        t.archived ? ` · échéance ${fmtDay(t.day)}` : ""}</span></span>
     ${t.done ? "" : `<span class="tact" ${act("tedit", t.id)} title="Modifier">${icon("pencil")}</span>`}
+    ${t.done && !t.archived ? `<span class="tfile" ${act("taskfile", t.id)} title="Ranger dans l'historique">${icon("archive")}Archiver</span>` : ""}
     ${avatars(t)}
     ${prioBars(t)}
   </div>`);
@@ -4205,7 +4228,7 @@ function taskListHTML() {
   };
   return `<div class="tlist">${seg}
     ${V.taskEdit === "new" ? taskForm(V.taskDraft, true) : ""}
-    ${days.map(group).join("") || `<div class="tnone">${journal ? "Rien n'est encore fait." : "Aucune tâche."}</div>`}
+    ${days.map(group).join("") || `<div class="tnone">${journal ? "Rien n'est encore archivé." : "Aucune tâche."}</div>`}
   </div>`;
 }
 
@@ -5401,7 +5424,9 @@ function pinMarkHTML() {
   const list = pinsOnSheet();
   const pending = V.pending && V.pending.surface === "plan" && V.pending.level === paneLevel()
     ? [{ ...V.pending, id: 0, scope: V.pinScope, txt: "" }] : [];
-  return [...list, ...pending].map((p, i) => `<div class="npin ${p.scope === "equipe" ? "team" : ""}
+  const held = V.mAnchor && V.mAnchor.level === paneLevel()
+    ? [{ ...V.mAnchor, id: 0, scope: V.mScope, txt: "" }] : [];
+  return [...list, ...held, ...pending].map((p, i) => `<div class="npin ${p.scope === "equipe" ? "team" : ""}
       ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}"
       style="left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%;transform:scale(${(1 / z).toFixed(3)})"
       ${p.id ? act("note", p.id) : ""}>
@@ -5423,7 +5448,7 @@ function pinBubbleHTML() {
       <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("globe")}<span class="lb">Partagée</span></span>
     </div>
     <textarea class="nnew" data-pindraft rows="3"
-      placeholder="${team ? "Note interne — les collaborateurs ne la verront pas" : "Note publique — visible par le lien partagé"}">${V.draft.replace(/</g, "&lt;")}</textarea>
+      placeholder="${team ? "Note interne pour le bureau seulement" : "Note publique — visible par le lien partagé"}">${V.draft.replace(/</g, "&lt;")}</textarea>
     <div class="row" style="gap:6px;align-items:center">
       <span class="btnw solid pingo ${V.draft.trim() ? "" : "wait"}" ${act("pinpost")} title="Commenter (⌘↵)">${icon("send")}<span class="hi">Commenter</span></span>
       <span class="btnw" ${act("pincancel")}><span class="hi">Annuler</span></span>
@@ -5444,7 +5469,7 @@ function pinArmHTML() {
 
 function marginHTML() {
   const list = pinsVisible();
-  const team = V.pinScope === "equipe";
+  const team = V.mScope === "equipe";
   const tabOn = V.noteTab === "r" ? "r" : "o";
   const open = list.filter((p) => !p.res), done = list.filter((p) => p.res);
   /* A card without connector or scope tile: who wrote it, by name with
@@ -5474,13 +5499,15 @@ function marginHTML() {
      be measured against. */
   const composer = `<div class="ncard new ${team ? "team" : ""}">
         <div class="row nscope">
-          <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("house")}<span class="lb">À l'interne</span></span>
-          <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("globe")}<span class="lb">Partagée</span></span>
+          <span class="chip ${team ? "on" : ""}" ${act("mscope", "equipe")}>${icon("house")}<span class="lb">À l'interne</span></span>
+          <span class="chip ${team ? "" : "on"}" ${act("mscope", "partage")}>${icon("globe")}<span class="lb">Partagée</span></span>
         </div>
         <textarea class="hi nnew" data-mdraft rows="3"
-          placeholder="${team ? "Commentaire interne — les collaborateurs ne le verront pas" : "Commentaire partagé — visible par le lien"}">${V.mdraft.replace(/</g, "&lt;")}</textarea>
+          placeholder="${team ? "Note interne pour le bureau seulement" : "Commentaire partagé — visible par le lien"}">${V.mdraft.replace(/</g, "&lt;")}</textarea>
         <div class="nact">
-          <span class="chip ${V.pinMode ? "on" : ""}" ${act("markpin")} title="Armer l'épingle, puis cliquer un point du plan">${icon("map-pin")}<span class="lb">${V.pinMode ? "Cliquez le plan" : "Épingler au plan"}</span></span>
+          ${V.mAnchor
+            ? `<span class="chip pinned" ${act("markpin")} title="Épinglé: ${pinAnchor(V.mAnchor)} — cliquer pour retirer l'épingle">${icon("map-pin")}<span class="lb">Épinglé au plan</span></span>`
+            : `<span class="chip ${V.pinMode && V.pinFor === "margin" ? "on" : ""}" ${act("markpin")} title="Armer l'épingle, puis cliquer un point du plan">${icon("map-pin")}<span class="lb">${V.pinMode && V.pinFor === "margin" ? "Cliquez le plan" : "Épingler au plan"}</span></span>`}
           <span style="flex:1"></span>
           <span class="btnw solid go ${V.mdraft.trim() ? "" : "wait"}" ${act("postnote")}>${icon("send")}<span class="hi">Commenter</span></span>
         </div></div>`;
@@ -6425,6 +6452,14 @@ function dropPinAt(e, el) {
     x, y, zone: unitAt(x, y) };
   V.selPin = null;
   V.pinMode = false;
+  /* Armed from the margin: the point belongs to the comment already being
+     written there, so it is held for that composer and no bubble opens. */
+  if (V.pinFor === "margin") {
+    V.mAnchor = V.pending; V.pending = null; V.pinFor = "";
+    render();
+    document.querySelector("[data-mdraft]")?.focus();
+    return true;
+  }
   render();
   document.querySelector("[data-pindraft]")?.focus();
   return true;
@@ -7425,15 +7460,20 @@ function onClick(e) {
     }
     case "task": { V.task = V.task === value ? null : value; const t = TASKS.find((x) => x.id === value);
       if (t && !t.done) V.day = t.day; break; }
-    /* A tick moves the task to « Faites », the journal of what was done,
-       with the day it was closed on; ticking it there reopens it. */
+    /* Ticking is not filing: the task stays on its day, struck through,
+       and offers « Archiver ». Unticking reopens it, out of the archive. */
     case "tasktick": {
       const t = TASKS.find((x) => x.id === value);
       if (!t) break;
       t.done = !t.done;
-      if (t.done) { t.doneAt = TODAY; say(`Faite: ${t.title}. Elle est sous « Faites ».`); }
-      else { delete t.doneAt; V.day = t.day; say(`Rouverte: ${t.title}`); }
+      if (t.done) { t.doneAt = TODAY; say(`Faite: ${t.title}. Archiver pour la ranger.`); }
+      else { delete t.doneAt; delete t.archived; V.day = t.day; say(`Rouverte: ${t.title}`); }
       if (V.taskEdit === t.id) V.taskEdit = null;
+      break;
+    }
+    case "taskfile": {
+      const t = TASKS.find((x) => x.id === value);
+      if (t) { t.archived = true; say(`Archivée: ${t.title}. Elle est dans « Historique ».`); }
       break;
     }
     case "tfilter": V.taskFilter = value; break;
@@ -7467,7 +7507,7 @@ function onClick(e) {
       if (!t) break;
       if (!t.title.trim()) { say("Il faut un titre."); break; }
       if (V.taskEdit === "new") {
-        TASKS.push({ ...t, id: `t${++taskSeq}`, title: t.title.trim(), done: false });
+        TASKS.push({ ...t, id: `t${++taskSeq}`, title: t.title.trim(), done: false, createdAt: TODAY });
         say(`Ajoutée: ${t.title.trim()}`);
       } else say(`Modifiée: ${t.title.trim()}`);
       V.day = t.day;
@@ -7499,26 +7539,30 @@ function onClick(e) {
     case "pinscope": V.pinScope = value; break;
     /* Arming the pin: the next click on a drawing puts the point down, and
        nothing else on the screen changes meaning in the meantime. */
-    case "pinmode": V.pinMode = !V.pinMode; V.pending = null; break;
+    case "pinmode": V.pinMode = !V.pinMode; V.pinFor = ""; V.pending = null; break;
+    case "mscope": V.mScope = value; break;
     /* The sentence already written travels with the pin: arming carries
        the margin's draft into the bubble that will take the point. */
+    /* Pinning from the margin: arm, click the plan, and the point is held
+       for the margin's comment; clicking the green chip takes it back off. */
     case "markpin":
-      V.pinMode = !V.pinMode;
+      if (V.mAnchor) { V.mAnchor = null; V.pinMode = false; V.pinFor = ""; break; }
+      V.pinMode = !(V.pinMode && V.pinFor === "margin");
+      V.pinFor = V.pinMode ? "margin" : "";
       V.pending = null;
-      if (V.pinMode) { V.draft = V.mdraft; V.mdraft = ""; } else { V.mdraft = V.draft; V.draft = ""; }
       break;
     /* A comment about the project, with no point on a drawing. */
     case "postnote": {
       const txt = V.mdraft.trim();
       if (!txt) { document.querySelector("[data-mdraft]")?.focus(); return; }
-      V.pins.push({ id: nextPinId(), scope: V.pinScope,
-        who: V.pinScope === "equipe" ? "Vous" : "Vous (partagé)", when: "à l'instant", txt });
+      V.pins.push({ id: nextPinId(), scope: V.mScope,
+        who: V.mScope === "equipe" ? "Vous" : "Vous (partagé)", when: "à l'instant", txt, ...(V.mAnchor || {}) });
       V.selPin = V.pins[V.pins.length - 1].id;
-      V.mdraft = "";
+      V.mdraft = ""; V.mAnchor = null;
       savePins();
       break;
     }
-    case "pincancel": V.pending = null; V.draft = ""; V.pinMode = false; break;
+    case "pincancel": V.pending = null; V.draft = ""; V.pinMode = false; V.pinFor = ""; break;
     case "pinpost": postPin(); return;
     /* Resolving files a comment under « Résolus » and takes its pin off
        the drawings; reopening puts both back. */
@@ -7607,7 +7651,7 @@ function onClick(e) {
       const field = document.querySelector("[data-xdate]");
       const day = (field && field.value) || V.xdraft.day || dayPlus(3);
       TASKS.push({ id: `t${++taskSeq}`, day, title: `${c[0]} — ${c[1]} (unité ${c[3]})`,
-        who: [...V.xdraft.who], prio: "haute", done: false, phase: "Chantier",
+        who: [...V.xdraft.who], prio: "haute", done: false, phase: "Chantier", createdAt: TODAY,
         src: c[0], caught: V.caught[c[0]] });
       say(`Tâche créée pour ${c[0]}, échéance ${fmtDay(day)}.`);
       break;
