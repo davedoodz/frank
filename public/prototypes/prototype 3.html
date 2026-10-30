@@ -668,7 +668,8 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 /* The eye leads its façade's name: hidden eye is grey, the open one white
    on the lit heading. */
 .fmx th.fh{padding-top:1px;line-height:1.25}
-.fmx th.fh svg{display:block;width:13px;height:13px;color:var(--ink-3);margin:0 0 1px auto}
+.fmx th.fh .feye{display:block;height:14px}
+.fmx th.fh svg{display:block;width:13px;height:13px;margin:0 0 1px auto}
 .fmx th.fh:hover svg{color:var(--ink)}
 .fmx th.fh.fon svg{color:#fff}
 .fmx .fnm{cursor:pointer}
@@ -678,7 +679,11 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .fmx th.fh:hover .fhl{text-decoration-color:var(--ink-3)}
 .fmx th.fh.fon{background:#111;color:#fff;border-radius:5px 5px 0 0}
 .fmx td.fcol{background:var(--fill-2)}
-.fmx tbody tr.on td.fcol{background:#e3ebc8;font-weight:600}
+/* The shown material's row is written in its own colour — the one the
+   model paints it with — not in the green of a chosen unit. */
+.fmx tbody tr.on td{background:color-mix(in srgb,var(--mc) 16%,#fff);font-weight:600}
+.fmx tbody tr.on td.fcol{background:color-mix(in srgb,var(--mc) 30%,#fff)}
+.fmx tbody tr.on .fnm{box-shadow:inset 3px 0 0 var(--mc)}
 .fmx td.fnil{color:var(--ink-3)}
 .fmx td.n{cursor:pointer}
 .fmx td.fnil{cursor:default}
@@ -3227,14 +3232,14 @@ function goIssue(id) {
   V.marginTab = "conf";
   if (V.screen !== "Unités") { V.screen = "Unités"; dial.setValue("screen", FR_SCREEN[V.screen]); }
   if (it.kind === "mat") {
+    V.matShow = it.n;
     /* The façades are counted on the whole building only. */
     V.scope = "Bâtiment";
     V.bTab = "m";
     render();
     const face = it.faces[0];
     if (face) {
-      V.facade = { face, focus: it.n };
-      V.matOpen = { ...V.matOpen, [`mat|${it.n}`]: true };
+      V.facade = { face };
     }
     paintFacades();
     document.querySelector(face ? "[data-facades] tr.fopen" : "[data-facades] > .fqn:last-child")
@@ -4783,32 +4788,36 @@ function facadeTablesHTML() {
      material under a square foot is not drawn and is not listed. */
   const nums = [...new Set(FACADES.flatMap((face) => data[face].filter((r) => r.ft2 >= 1).map((r) => r.n)))].sort((a, b) => a - b);
   const total = FACADES.reduce((s, face) => s + facTotal(face), 0);
+  /* One material is shown at a time: its row carries its own colour, its
+     sheet is open under it, and the model paints it in full colour with
+     the rest of the building greyed — on the 3D view as on an elevation. */
   const body = nums.map((n) => {
     const c = fm.category(n);
-    const sheet = V.matOpen?.[`mat|${n}`];
+    const shown = V.matShow === n;
     const sum = FACADES.reduce((s, face) => s + at(face, n), 0);
     const cells = FACADES.map((face) => {
       const v = at(face, n);
       const lit = open?.face === face;
       return `<td class="n ${lit ? "fcol" : ""} ${v ? "" : "fnil"}" ${v ? act("facmat", `${face}|${n}`) : ""}
-        title="${v ? `${c.name} sur la façade ${face} — ${fqNum(v)} pi², ${fqPct(v, facTotal(face))} de la façade` : `${c.name} ne paraît pas sur la façade ${face}`}">${v ? fqNum(v) : "—"}</td>`;
+        title="${v ? `${c.name} sur la façade ${face} — ${fqNum(v)} pi², ${fqPct(v, facTotal(face))} de la façade — voir cette élévation` : `${c.name} ne paraît pas sur la façade ${face}`}">${v ? fqNum(v) : "—"}</td>`;
     }).join("");
-    return `<tr class="${open && open.focus === n ? "on" : ""} ${sheet ? "fopen" : ""}">
-      <td class="fnm" ${act("matinfo", `mat|${n}`)} role="button" aria-expanded="${Boolean(sheet)}"
-        title="${sheet ? "Masquer la fiche" : `${c.note} — voir la fiche du produit`}"><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}${c.check
+    return `<tr class="${shown ? "on fopen" : ""}" style="--mc:${c.color}">
+      <td class="fnm" ${act("mat", n)} role="button" aria-pressed="${shown}"
+        title="${shown ? `Masquer ${c.name} sur la maquette` : `${c.note} — montrer sur la maquette`}"><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}${c.check
         ? `<span class="fwarn" title="${c.check}">${icon("alert-triangle")}</span>` : ""}</td>
       ${cells}<td class="n fsum">${fqNum(sum)}</td></tr>
-      ${sheet ? `<tr class="fsheet"><td colspan="6">${materialSheetHTML(c)}</td></tr>` : ""}`;
+      ${shown ? `<tr class="fsheet"><td colspan="6">${materialSheetHTML(c)}</td></tr>` : ""}`;
   }).join("");
-  /* The façade headings are the doors of the table: the eye says the
-     elevation is on screen, the crossed eye that the model is. The same
-     eye as the drawing strip, so one glyph means one thing. */
+  /* The façade headings are the doors of the table: nothing is drawn while
+     the model is on screen, and the open elevation's heading is written
+     white on ink with the eye that says it is the one being looked at. */
   const heads = FACADES.map((face) => {
     const on = open?.face === face;
     return `<th class="n fh ${on ? "fon" : ""}" ${act("facade", face)} aria-pressed="${on}"
-      title="${on ? `Masquer l'élévation ${face} et revenir à la maquette` : `Afficher l'élévation ${face}`}">${icon(on ? "eye" : "eye-off")}<span class="fhl">${face[0].toUpperCase()}${face.slice(1)}</span></th>`;
+      title="${on ? `Masquer l'élévation ${face} et revenir à la maquette` : `Afficher l'élévation ${face}`}"><span class="feye">${on ? icon("eye") : ""}</span><span class="fhl">${face[0].toUpperCase()}${face.slice(1)}</span></th>`;
   }).join("");
   const foot = FACADES.map((face) => `<td class="n ${open?.face === face ? "fcol" : ""}">${fqNum(facTotal(face))}</td>`).join("");
+  const shownCat = V.matShow ? fm.category(V.matShow) : null;
   return `<div class="fq-fac" data-facades>${head}
     <table class="tbl ftbl fmx">
       <thead><tr><th>Matériau</th>${heads}<th class="n fsum">Total</th></tr></thead>
@@ -4816,7 +4825,8 @@ function facadeTablesHTML() {
       <tfoot><tr><td>Total pi²</td>${foot}<td class="n fsum">${fqNum(total)}</td></tr></tfoot>
     </table>
     <div class="fqn">${open ? `Élévation ${open.face} ouverte — ${fqNum(facTotal(open.face))} pi², ${fqPct(facTotal(open.face), total)} de l'enveloppe`
-      : "Maquette 3D — un en-tête de façade ouvre son élévation"}</div></div>`;
+      : shownCat ? `${shownCat.name} en couleur sur la maquette — le reste du bâtiment est en gris`
+      : "Maquette 3D — un matériau se montre, un en-tête de façade ouvre son élévation"}</div></div>`;
 }
 
 /* A material's sheet, opened under its row: the legend's swatch, then what
@@ -4864,7 +4874,9 @@ function elevNavHTML() {
    switch over the model can always be left from that switch. */
 function syncElevation() {
   const open = V.facade && (V.facade.plain || document.querySelector("[data-facades]"));
-  window.fitteElevation = open ? { face: V.facade.face, focus: V.facade.focus || 0, plain: Boolean(V.facade.plain) } : null;
+  window.fitteElevation = open ? { face: V.facade.face, focus: V.matShow || 0, plain: Boolean(V.facade.plain) } : null;
+  /* With no elevation open the same material is painted on the 3D model. */
+  window.fitteMaterialFocus = V.matShow || 0;
   // An elevation only moves and zooms: there is no drag tool to choose.
   document.body.classList.toggle("elev", Boolean(open));
 }
@@ -4883,7 +4895,7 @@ document.addEventListener("keydown", (e) => {
 });
 function stepElevation(d) {
   const i = ELEV_ORDER.indexOf(V.facade?.face || "sud");
-  V.facade = { face: ELEV_ORDER[(i + d + 4) % 4], focus: 0, plain: V.facade ? V.facade.plain : true };
+  V.facade = { face: ELEV_ORDER[(i + d + 4) % 4], plain: V.facade ? V.facade.plain : true };
   paintFacades();
 }
 
@@ -6573,8 +6585,9 @@ function render() {
 function paintSelection() {
   /* Choosing a unit is looking at the building again: the elevation
      closes and the model goes back to the unit. */
-  if (V.facade) {
+  if (V.facade || V.matShow) {
     V.facade = null;
+    V.matShow = 0;
     document.querySelector("[data-facades]")?.replaceWith(document.createRange().createContextualFragment(facadeTablesHTML()));
     syncElevation();
   }
@@ -7045,23 +7058,27 @@ function onClick(e) {
     /* The switch over the model: the model itself, or one façade with its
        own textures. */
     case "elev":
-      V.facade = value ? { face: value, focus: 0, plain: true } : null;
+      V.facade = value ? { face: value, plain: true } : null;
       paintFacades();
       return;
     /* A façade's elevation, opened from its table; the open one closes. */
     case "facade":
-      V.facade = V.facade?.face === value ? null : { face: value, focus: 0 };
+      V.facade = V.facade?.face === value ? null : { face: value };
       paintFacades();
       return;
-    /* A material's sheet opens under its row; the elevation is left as is. */
-    case "matinfo":
-      V.matOpen = { ...V.matOpen, [value]: !V.matOpen?.[value] };
+    /* A material is shown on whatever the pane is looking at — the 3D
+       model, or the open elevation. Clicking it again gives the building
+       back its colours. */
+    case "mat":
+      V.matShow = V.matShow === Number(value) ? 0 : Number(value);
       paintFacades();
       return;
+    /* A figure is its material on that façade: the elevation opens and the
+       material is the one in colour on it. */
     case "facmat": {
-      const [face, n] = value.split("|");
-      const focus = Number(n);
-      V.facade = V.facade?.face === face && V.facade.focus === focus ? { face, focus: 0 } : { face, focus };
+      const [face, num] = value.split("|");
+      V.matShow = Number(num);
+      V.facade = { face };
       paintFacades();
       return;
     }

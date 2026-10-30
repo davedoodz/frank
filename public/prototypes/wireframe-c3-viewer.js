@@ -223,6 +223,10 @@ let persp;
 let orthoCamera;
 let elevation = null;
 let elevationKey = "";
+// A material shown on the 3D model, by its legend number: the building is
+// painted in the legend's colours with that one alone in full colour, the
+// camera stays where it is and the building can still be turned.
+let matFocus = 0;
 let buildingBox;
 let facadeAreas = null;
 const savedMaterials = new Map();
@@ -373,7 +377,30 @@ function setElevation(next) {
     buildingSelection?.sync({ frame: false });
   }
   renderer.domElement.dataset.elevation = elevation?.face || "";
+  // Leaving an elevation gives the model back to the material shown on it,
+  // if one is: the elevation's own focus took precedence while it was open.
+  if (!elevation && matFocus) applyMatFocus();
   window.dispatchEvent(new CustomEvent("fitte:model-zoom", { detail: readZoom() }));
+}
+
+// The building in legend colours with one material in full colour, on the
+// 3D view. An open elevation already paints itself, so it wins; when it
+// closes, setElevation hands the model back here.
+function applyMatFocus() {
+  if (!model) return;
+  const on = matFocus > 0;
+  elevationUniforms.fitteFocus.value = on ? matFocus : 0;
+  paintElevation(on);
+  showProps(!on);
+  // The unit tint and a painted material would fight over the same meshes.
+  buildingSelection?.setEnabled(!on);
+  if (!on) buildingSelection?.sync({ frame: false });
+}
+function setMaterialFocus(next) {
+  const n = Number(next) || 0;
+  if (n === matFocus) return;
+  matFocus = n;
+  if (!elevation) applyMatFocus();
 }
 
 // Every façade drawn once off screen with each material's number for a
@@ -964,7 +991,8 @@ async function mountBuildingViewer() {
 
   if (model) {
     setElevation(window.fitteElevation);
-    if (!elevation) buildingSelection?.sync();
+    setMaterialFocus(window.fitteMaterialFocus);
+    if (!elevation && !matFocus) buildingSelection?.sync();
     setStatus(host, "ready", "");
     return;
   }
@@ -984,7 +1012,8 @@ async function mountBuildingViewer() {
     }
     if (currentHost) setStatus(currentHost, "ready", "");
     setElevation(window.fitteElevation);
-    if (!elevation) buildingSelection?.sync();
+    setMaterialFocus(window.fitteMaterialFocus);
+    if (!elevation && !matFocus) buildingSelection?.sync();
   } catch (error) {
     console.error("Building model failed to load", error);
     const currentHost = document.querySelector("[data-building-model]") || host;
