@@ -1,31 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { AUTH_COOKIE, isValidToken } from "@/lib/auth";
 
-export async function middleware(request: NextRequest) {
-  const { pathname, search } = request.nextUrl;
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isPrototypeTwoLanding =
+    process.env.FITTE_PROTOTYPE === "2" &&
+    (pathname === "/prototypes/index.html" || pathname === "/prototypes/");
 
-  if (pathname === "/login") return NextResponse.next();
-
-  const ok = await isValidToken(request.cookies.get(AUTH_COOKIE)?.value);
-  if (ok) {
-    const isPrototypeTwoLanding =
-      process.env.FITTE_PROTOTYPE === "2" &&
-      (pathname === "/prototypes/index.html" || pathname === "/prototypes/");
-
-    if (isPrototypeTwoLanding) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/prototypes/prototype2.html";
-      return NextResponse.rewrite(url);
-    }
-
-    return NextResponse.next();
-  }
+  if (!isPrototypeTwoLanding) return NextResponse.next();
 
   const url = request.nextUrl.clone();
-  url.pathname = "/login";
-  url.search = "";
-  if (pathname !== "/") url.searchParams.set("next", `${pathname}${search}`);
-  return NextResponse.redirect(url);
+  url.pathname = "/prototypes/prototype2.html";
+  return NextResponse.rewrite(url);
 }
 
 export const config = {
