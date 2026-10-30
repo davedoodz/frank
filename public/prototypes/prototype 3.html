@@ -291,10 +291,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .mailbody{border:1px solid var(--line-2);border-radius:6px;padding:8px 9px;font:inherit;font-size:12px;
   line-height:1.45;color:var(--ink);background:var(--card);resize:vertical;min-height:150px}
 .mailbody:focus{outline:1px solid var(--ink);outline-offset:1px}
-/* The drop zone: one dashed line, the system picker behind a click, and
+/* The drop zone: one quiet outline, the system picker behind a click, and
    the whole dialog accepting the drop so the aim does not have to be exact. */
 .maildrop{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px;
-  border:1px dashed var(--line);border-radius:6px;color:var(--ink-2);font-size:12px;cursor:pointer}
+  border:1px solid var(--line);border-radius:6px;color:var(--ink-2);font-size:12px;cursor:pointer}
 .maildrop:hover{background:var(--fill)}
 .maildrop.over{border-color:#8ba00f;background:#eef1e0;color:var(--ink)}
 .maildrop u{text-underline-offset:2px}
@@ -520,7 +520,7 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .tedit .chip{cursor:pointer;font-size:11px}
 .plan{position:relative;flex:1;background:repeating-linear-gradient(0deg,var(--fill-2) 0 15px,transparent 15px 16px),
   repeating-linear-gradient(90deg,var(--fill-2) 0 15px,transparent 15px 16px);
-  border:1px dashed var(--line);border-radius:var(--r);display:grid;place-items:center;color:var(--ink-3);font-size:11.5px}
+  border:1px solid var(--line);border-radius:var(--r);display:grid;place-items:center;color:var(--ink-3);font-size:11.5px}
 /* A card with no drawing behind it shows the picture glyph, not a sentence
    describing a picture. */
 .plan.ghost{color:var(--line-2)}
@@ -541,7 +541,7 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 [data-fi="high"] .plan.ghost.cover{background:url(assets/baldwin-cover.png) center 42%/cover no-repeat;
   border-style:solid}
 [data-fi="high"] .plan.ghost.cover svg{display:none}
-.pnew .newbox{aspect-ratio:16 / 9;border:1px dashed var(--line-2);border-radius:var(--r);background:var(--fill-2);
+.pnew .newbox{aspect-ratio:16 / 9;border:1px solid var(--line-2);border-radius:var(--r);background:var(--fill-2);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:12px}
 .state{display:inline-flex;align-items:center;gap:5px}
 /* the home fills the width it is given, whatever the window is */
@@ -858,7 +858,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .lcard .hd .x svg{width:14px;height:14px}
 /* The card on loan is lighter than the one that was asked for, so which of
    the two the pointer is responsible for is never in doubt. */
-.lcard[data-peek]{border-style:dashed;box-shadow:0 4px 14px rgba(17,17,18,.10)}
+.lcard[data-peek]{border-color:var(--line-2);box-shadow:0 4px 14px rgba(17,17,18,.10)}
 .lcard[data-peek] .hd .x{display:none}
 .lcard .fn{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--ink-2);
   word-break:break-all}
@@ -1003,7 +1003,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 /* ---------------------------------------------------------- the margin
    Notes live beside the drawings, never on top of them: the margin takes
    its own column. A studio note is a different object from a shared pin —
-   square, slate, dashed, locked — so nobody has to read a legend to tell
+   square, slate, locked — so nobody has to read a legend to tell
    them apart, and nothing is tinted to mean private. */
 .pane.margin .pb{gap:8px;overflow:auto}
 .nscope{gap:5px;align-items:center}
@@ -1011,7 +1011,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   padding:7px 9px;cursor:pointer}
 .ncard:hover{background:var(--fill-2)}
 .ncard.on{border-color:var(--ink)}
-.ncard.team{background:#eef2f4;border-color:#c6d4dc;border-style:dashed}
+.ncard.team{background:#eef2f4;border-color:#c6d4dc}
 .ncard.team.on{border-color:#2f4858}
 .ncard .tie{position:absolute;left:-9px;top:14px;width:8px;height:1px;background:var(--line)}
 .ncard .who{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
@@ -1049,11 +1049,10 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .npin .ndg{position:absolute;left:-14px;bottom:-3px;width:28px;height:28px;color:var(--ink);
   filter:drop-shadow(0 2px 4px rgba(17,17,18,.3))}
 .npin .ndg svg{width:28px;height:28px;fill:#fff;stroke:currentColor;stroke-width:1.8}
-/* An internal note is still a pin: same green drop, same number, dashed
-   outline. The lock that used to sit here read as a locked drawing rather
-   than a note kept inside the office, and it broke the one shape the eye
-   learns to look for on a sheet. */
-.npin.team .nd{border-style:dashed}
+/* An internal note is still a pin: same drop, same number, in the slate
+   the internal cards are written on. Colour carries the scope, the way it
+   does in the margin; the shape stays the one the eye looks for. */
+.npin.team .nd{background:#dbe4e9;color:#2f4858;border-color:#2f4858}
 .npin.on .nd{background:var(--ink);color:#fff;border-color:var(--ink);border-style:solid}
 
 .npin .nl{position:absolute;left:15px;top:-13px;background:#fff;border:1px solid var(--line);
@@ -1061,7 +1060,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(17,17,18,.16)}
 .npin:hover .nl{border-color:var(--ink-2)}
 .npin.on .nl{background:var(--ink);color:#fff;border-color:var(--ink)}
-.npin.team .nl{border-style:dashed}
+.npin.team .nl{border-color:#c6d4dc}
 /* The sentence is typed on the drawing, hung off the pin that anchors it. */
 .pbub{position:absolute;left:0;top:0;width:258px;background:var(--card);border:1px solid var(--ink);
   border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:6px;cursor:default;
@@ -1083,7 +1082,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
    cursor is the pin itself, and the 2D pane is ringed so it is plain which
    surface will take it. The model is not one of them. */
 [data-pin="on"] .zone[data-zone="plan"] .vp,
-[data-pin="on"] .zone[data-zone="plan"] .vp *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='-3 -3 30 30' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='5'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3Cg stroke='%23111' stroke-width='2'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3C/svg%3E") 12 26, crosshair}
+[data-pin="on"] .zone[data-zone="plan"] .vp *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='-3 -3 30 30' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='5'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3Cg stroke='%23111' stroke-width='2'%3E%3Cpath fill='%23fff' d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3C/svg%3E") 12 26, crosshair}
 [data-pin="on"] .zone[data-zone="plan"]{box-shadow:inset 0 0 0 2px #8ba00f}
 /* The sheet is held still while a pin is being placed: a unit that lights
    and names itself under the pointer is an invitation to click it, and the
@@ -1213,7 +1212,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 
 /* region tagging ------------------------------------------------------ */
 .rg{position:relative}
-[data-labels="true"] .rg{outline:1px dashed #b9b9ff;outline-offset:-1px}
+[data-labels="true"] .rg{outline:1px solid #b9b9ff;outline-offset:-1px}
 [data-labels="true"] .pane.rg,[data-labels="true"] .rail.rg,[data-labels="true"] .tabs.rg{padding-top:14px}  /* room for the tag */
 [data-labels="true"] .rg::after{content:attr(data-rg);position:absolute;top:0;left:0;z-index:4;
   background:#4b4bd6;color:#fff;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
@@ -1244,7 +1243,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;color:var(--ink-2)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:13px;height:13px;border-radius:3px;background:var(--bar);display:inline-block}
-.legend i.dash{background:none;border:1px dashed #b9b9ff}
+.legend i.dash{background:none;border:1px solid #b9b9ff}
 /* --------------------------------------------------- the pane dividers
    The edge between two panes is a thing you can take hold of. At rest it
    is empty space the width of the gap, so the layout looks the same as
@@ -2680,7 +2679,7 @@ const FIGS = {
     ${[34, 236].map((x) => `<rect x="${x}" y="34" width="30" height="52" fill="var(--fill)"
       stroke="var(--ink)" stroke-width="1"/>
       ${[0, 1, 2, 3].map((k) => `<path d="M${x} ${44 + k * 11} h30" stroke="var(--ink)" stroke-width=".7"/>`).join("")}`).join("")}
-    <path d="M70 60 h160" stroke="var(--ink-2)" stroke-dasharray="4 3" stroke-width="1"/>
+    <path d="M70 60 h160" stroke="var(--ink-2)" stroke-width="1"/>
     <text x="150" y="56" text-anchor="middle" font-size="11" fill="var(--ink-2)">distance de parcours</text>
     <text x="20" y="16" font-size="10" fill="var(--ink-3)">étage type</text>
     <text x="20" y="112" font-size="11" font-weight="600" fill="var(--ink)">${a.measured} dessinées — ${a.required} exigées</text></svg>`,
@@ -2696,7 +2695,7 @@ const FIGS = {
     <text x="20" y="114" font-size="10" fill="var(--ink-3)">dénivellation supérieure à 1 800 mm</text></svg>`,
   porte: (a) => `<svg viewBox="0 0 300 120" style="width:100%;height:auto">
     <path d="M40 92 h60 M200 92 h60" stroke="var(--ink)" stroke-width="3"/>
-    <path d="M100 92 a72 72 0 0 1 72 -72" stroke="var(--ink-2)" stroke-dasharray="4 3" fill="none" stroke-width="1"/>
+    <path d="M100 92 a72 72 0 0 1 72 -72" stroke="var(--ink-2)" fill="none" stroke-width="1"/>
     <path d="M100 92 v-72" stroke="var(--ink)" stroke-width="1.6"/>
     <path d="M100 104 h100 m-96 -4 l-4 4 4 4 m92 -8 l4 4 -4 4" stroke="var(--ink)" fill="none" stroke-width="1"/>
     <text x="150" y="26" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${a.measured}</text>
