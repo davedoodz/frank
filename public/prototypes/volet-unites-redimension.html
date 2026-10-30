@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Unités et superficies — redimensionner sans rien couper</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The units pane is dragged narrower and its table is cut at the edge:
+   "Part" goes, then half of "m²", then the figures themselves. Five ways
+   to never cut a value. One slider drives every pane, or drag any pane's
+   right edge. The header row adapts the same way in all five: "Exporter"
+   keeps its icon only, then the level drops to the line below. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#f1f1f2;--fill-2:#f6f6f7;--card:#fff;--green:#c3e05a;--sel:#eef3dc;
+  --t3:#c9767a;--t4:#5f95c9;--t5:#6aa86a}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header.top{padding:20px 24px 6px;max-width:1100px}
+header.top h1{margin:0;font-size:16px;font-weight:600}
+header.top p{margin:4px 0 0;color:var(--ink-2)}
+.ctl{display:flex;align-items:center;gap:10px;padding:10px 24px 0;font-size:12px;color:var(--ink-2)}
+.ctl input{width:320px}
+.ctl b{color:var(--ink);font-variant-numeric:tabular-nums;min-width:44px}
+.grid{display:flex;flex-wrap:wrap;gap:26px 22px;padding:16px 24px 40px;align-items:flex-start}
+.demo{width:440px}
+.demo h2{margin:0;font-size:13px;font-weight:600}
+.demo .why{margin:2px 0 8px;font-size:11.5px;color:var(--ink-2);min-height:62px}
+.demo.bug{outline:1px dashed #d34;outline-offset:6px;border-radius:6px}
+.stage{position:relative;height:640px;display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.plan2d{flex:1;background:#fff url("assets/plan-niveau-5.jpg") 20% 30%/700px auto no-repeat;border-left:1px solid var(--line)}
+
+/* the pane */
+.pane{position:relative;flex:0 0 auto;container-type:inline-size;overflow:hidden;display:flex;flex-direction:column;background:#fff}
+.grip{position:absolute;right:-4px;top:0;bottom:0;width:8px;cursor:col-resize;z-index:5}
+.grip:hover::after,.grip.on::after{content:"";position:absolute;left:3px;top:0;bottom:0;width:2px;background:var(--ink)}
+.phd{display:flex;align-items:center;gap:8px;min-height:38px;padding:5px 8px 5px 10px;border-bottom:1px solid var(--line-2);white-space:nowrap;min-width:0}
+.phd svg{width:15px;height:15px;flex:0 0 15px}
+/* the title wraps rather than ending in "…": a cut word is cropped information too */
+.phd .t{font-weight:500;white-space:normal;line-height:1.2;min-width:0}
+.phd .lv{color:var(--ink-3);font-size:12px}
+.phd .exp{margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 8px;border:1px solid var(--line);border-radius:6px;font-size:12px;flex:0 0 auto}
+.phd .exp svg{width:13px;height:13px;flex-basis:13px}
+@container (max-width: 330px){ .phd .exp .lb{display:none} .phd .exp{padding:0 6px} }
+@container (max-width: 270px){ .phd .lv{display:none} }
+.pbody{padding:8px 8px 10px;overflow:auto;flex:1;min-height:0}
+.mix{display:flex;height:5px;border-radius:3px;overflow:hidden;margin-bottom:6px}
+.mix i{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 6px;border:1px solid var(--line-2);border-radius:10px;font-size:11px;white-space:nowrap}
+.chip i{width:7px;height:7px;border-radius:2px}
+.chip span{color:var(--ink-3)}
+.sum{font-size:11.5px;color:var(--ink-2);margin-bottom:8px}
+.sum b{color:var(--ink)}
+
+table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+th{font-weight:400;color:var(--ink-3);text-align:left;font-size:11px;padding:4px 6px;white-space:nowrap}
+td{padding:6px;border-top:1px solid var(--line-2);white-space:nowrap}
+th.n,td.n{text-align:right}
+tr.sel td{background:var(--sel);font-weight:600}
+tr.tot td{font-weight:600}
+.ty{display:inline-flex;align-items:center;gap:4px;height:19px;padding:0 6px;border:1px solid var(--line);border-radius:10px;font-size:11px}
+.ty i{width:7px;height:7px;border-radius:2px}
+.dot::after{content:" ●";font-size:8px;vertical-align:1px}
+
+/* A — the pane will not go narrower than its table */
+/* (width clamped in script; the grip shows a stop) */
+.stop{position:absolute;top:50%;right:6px;transform:translateY(-50%);font-size:10.5px;color:#fff;background:var(--ink);border-radius:4px;padding:2px 6px;z-index:6;display:none}
+.at-min .stop{display:block}
+
+/* B — columns leave whole, least needed first; the header says how many */
+.vB .more{display:none;margin-left:6px;font-size:10.5px;color:var(--ink-2);border:1px solid var(--line);border-radius:9px;padding:0 6px}
+@container (max-width: 330px){ .vB .c-part{display:none} .vB .more{display:inline-block} }
+@container (max-width: 270px){ .vB .c-m2{display:none} }
+@container (max-width: 200px){ .vB .c-type{display:none} }
+
+/* C — rows fold onto two lines: unit and type above, figures below */
+@container (max-width: 330px){
+  .vC table,.vC tbody,.vC tr,.vC td{display:block}
+  .vC thead{display:none}
+  .vC tr{display:grid;grid-template-columns:1fr auto;column-gap:8px;padding:6px 4px;border-top:1px solid var(--line-2)}
+  .vC td{border:0;padding:0}
+  .vC td.c-unit{grid-column:1}
+  .vC td.c-type{grid-column:2;justify-self:end}
+  .vC td.n{grid-column:1/3;display:inline;text-align:left;color:var(--ink-2);font-size:11.5px}
+  .vC .figs{grid-column:1/3;display:flex;gap:10px;color:var(--ink-2);font-size:11.5px;margin-top:2px}
+  .vC td.c-net,.vC td.c-m2,.vC td.c-part{display:none}
+  .vC tr.tot{grid-template-columns:1fr}
+}
+.vC .figs{display:none}
+@container (max-width: 330px){ .vC .figs{display:flex} }
+.vC .figs span:empty{display:none}
+
+/* D — the table scrolls sideways; the unit column stays, a shade marks what is past the edge */
+.vD .tw{position:relative;overflow-x:auto}
+.vD .tw table{width:auto;min-width:100%}
+.vD .c-unit{position:sticky;left:0;background:#fff;z-index:1}
+.vD tr.sel .c-unit{background:var(--sel)}
+.vD .shade{position:absolute;right:0;top:0;bottom:0;width:22px;pointer-events:none;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(17,17,18,.10));display:none}
+.vD .tw.cut .shade{display:block}
+
+/* E — three widths and nothing between: full, compact, folded */
+.vE .c-m2,.vE .c-part{display:table-cell}
+.vE .pane.compact .c-m2,.vE .pane.compact .c-part{display:none}
+.vE .pane.folded .pbody,.vE .pane.folded .phd .lv,.vE .pane.folded .phd .exp,.vE .pane.folded .phd .t{display:none}
+.vE .pane.folded .phd{justify-content:center;padding:0}
+.vE .pane.folded .rail{display:flex}
+.rail{display:none;flex:1;align-items:flex-start;justify-content:center;padding-top:12px}
+.rail span{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:500;font-size:12px;white-space:nowrap}
+.snapmarks{display:flex;gap:6px;margin-top:6px;font-size:11px;color:var(--ink-3)}
+.snapmarks span{border:1px solid var(--line-2);border-radius:9px;padding:0 7px}
+.snapmarks span.on{border-color:var(--ink);color:var(--ink)}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Unités et superficies — redimensionner sans rien couper</h1>
+  <p>Glissez le curseur, ou le bord droit de n'importe quel volet. Le premier volet montre le problème: la table est coupée au bord.</p>
+</header>
+<div class="ctl">Largeur du volet <input id="w" type="range" min="120" max="400" value="250"><b id="wv">250 px</b></div>
+<div class="grid" id="grid"></div>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+  lucide.icons[n][2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+const T = { "3½": "var(--t3)", "4½": "var(--t4)", "5½": "var(--t5)" };
+const ROWS = [
+  ["401", "5½", "1 275", "118,5", "8 %", 1], ["402", "5½", "1 496", "139,0", "10 %"], ["403", "3½", "760", "70,6", "5 %"],
+  ["404", "4½", "1 152", "107,0", "7 %", 1], ["405", "4½", "1 221", "113,4", "8 %"], ["406", "4½", "1 106", "102,8", "7 %"],
+  ["407", "3½", "707", "65,7", "5 %"], ["408", "4½", "970", "90,1", "6 %", 1], ["409", "4½", "958", "89,0", "6 %"],
+  ["410", "5½", "1 466", "136,2", "9 %"], ["411", "5½", "1 345", "125,0", "9 %"], ["412", "3½", "740", "68,7", "5 %"],
+  ["413", "3½", "708", "65,8", "5 %"], ["414", "3½", "716", "66,5", "5 %", 0, 1], ["415", "4½", "999", "92,8", "6 %"],
+];
+const TOT = [["Net", "15 619", "1 451", "100 %"], ["Circulation", "2 756", "256", "15 %"], ["Brut", "18 375", "1 707", ""]];
+
+const tableHTML = (figs) => `<table><thead><tr><th class="c-unit">Unité</th><th class="c-type">Type</th>
+  <th class="n c-net">Net pi²</th><th class="n c-m2">m²</th><th class="n c-part">Part</th></tr></thead><tbody>
+  ${ROWS.map(([u, t, n, m, p, dot, sel]) => `<tr class="${sel ? "sel" : ""}"><td class="c-unit ${dot ? "dot" : ""}">${u}</td>
+    <td class="c-type"><span class="ty"><i style="background:${T[t]}"></i>${t}</span></td>
+    <td class="n c-net">${n}</td><td class="n c-m2">${m}</td><td class="n c-part">${p}</td>
+    ${figs ? `<td class="figs"><span>${n} pi²</span><span>${m} m²</span><span>${p}</span></td>` : ""}</tr>`).join("")}
+  ${TOT.map(([l, n, m, p]) => `<tr class="tot"><td class="c-unit">${l}</td><td class="c-type"></td>
+    <td class="n c-net">${n}</td><td class="n c-m2">${m}</td><td class="n c-part">${p}</td>
+    ${figs ? `<td class="figs"><span>${n} pi²</span><span>${m} m²</span><span>${p}</span></td>` : ""}</tr>`).join("")}
+  </tbody></table>`;
+
+const paneHTML = (S) => `<div class="pane" data-pane>
+  <div class="phd">${svg("Table")}<span class="t">Unités et superficies</span><span class="lv">Niveau 4</span>
+    ${S.id === "B" ? `<span class="more" data-more></span>` : ""}
+    <span class="exp">${svg("Download")}<span class="lb">Exporter</span></span></div>
+  <div class="rail"><span>Unités et superficies</span></div>
+  <div class="pbody">
+    <div class="mix"><i style="flex:33;background:var(--t3)"></i><i style="flex:40;background:var(--t4)"></i><i style="flex:27;background:var(--t5)"></i></div>
+    <div class="chips"><span class="chip"><i style="background:var(--t3)"></i>3½ 33 %<span>5</span></span>
+      <span class="chip"><i style="background:var(--t4)"></i>4½ 40 %<span>6</span></span>
+      <span class="chip"><i style="background:var(--t5)"></i>5½ 27 %<span>4</span></span></div>
+    <div class="sum"><b>15 619</b> pi² nets sur 15 unités</div>
+    ${S.id === "D" ? `<div class="tw">${tableHTML(false)}<i class="shade"></i></div>` : tableHTML(S.id === "C")}
+  </div>
+  <i class="stop">butée</i>
+  <div class="grip" data-grip></div></div>`;
+
+const STRATS = [
+  { id: "bug", title: "Aujourd'hui — coupé au bord", why: "La table garde sa largeur et le volet la rogne: « Part » disparaît, puis la moitié de « m² », puis les chiffres eux-mêmes." ,
+    fit: (w) => w },
+  { id: "A", title: "A — Butée à la largeur de la table", why: "Le volet ne descend pas sous la largeur de son contenu. Arrivé là, le bord s'arrête et le dit; plus étroit, on replie le volet. Rien ne change de forme.",
+    fit: (w, pane) => {
+      const t = pane.querySelector("table");
+      t.style.width = "auto";
+      const need = t.offsetWidth + 16;
+      t.style.width = "";
+      return Math.max(w, need);
+    } },
+  { id: "B", title: "B — Les colonnes partent entières", why: "« Part » part d'abord (elle se recalcule), puis « m² » (le pi² reste), puis le type. Une pastille « +2 » dans l'entête dit ce qui est caché. Jamais une colonne à moitié.",
+    fit: (w) => Math.max(w, 150) },
+  { id: "C", title: "C — Chaque ligne sur deux lignes", why: "Sous une largeur, la table devient une liste: unité et type en haut, pi², m² et part en dessous. Tout reste, la liste est plus haute.",
+    fit: (w) => Math.max(w, 170) },
+  { id: "D", title: "D — Défilement latéral, unité fixe", why: "La table glisse de côté sous le doigt; la colonne Unité reste en place et une ombre au bord dit qu'il y a plus à droite. Rien n'est perdu, il faut faire défiler.",
+    fit: (w) => w },
+  { id: "E", title: "E — Trois largeurs, rien entre", why: "Le bord se cale sur trois largeurs: complète, compacte (sans m² ni part), repliée en bandeau vertical. Le volet n'a jamais une largeur où la table ne tient pas.",
+    fit: (w) => (w < 150 ? 36 : w < 290 ? 230 : 360), snap: true },
+];
+
+const panes = [];
+function mount(S) {
+  const sec = document.createElement("section");
+  sec.className = `demo v${S.id} ${S.id === "bug" ? "bug" : ""}`;
+  sec.innerHTML = `<h2>${S.title}</h2><p class="why">${S.why}</p>
+    <div class="stage">${paneHTML(S)}<div class="plan2d"></div></div>
+    ${S.snap ? `<div class="snapmarks"><span data-s="36">repliée</span><span data-s="230">compacte</span><span data-s="360">complète</span></div>` : ""}`;
+  document.getElementById("grid").append(sec);
+  const pane = sec.querySelector("[data-pane]");
+  const set = (w) => {
+    if (S.id === "A") pane.style.width = "400px";        // measure the table at ease first
+    const f = Math.min(400, S.fit(w, pane));
+    pane.style.width = `${f}px`;
+    pane.classList.toggle("at-min", S.id === "A" && f > w);
+    if (S.snap) {
+      pane.classList.toggle("folded", f === 36);
+      pane.classList.toggle("compact", f === 230);
+      sec.querySelectorAll("[data-s]").forEach((s) => s.classList.toggle("on", +s.dataset.s === f));
+    }
+    if (S.id === "B") {
+      const hidden = [...pane.querySelectorAll("thead th")].filter((th) => getComputedStyle(th).display === "none").length;
+      const m = pane.querySelector("[data-more]");
+      m.textContent = hidden ? `+${hidden}` : "";
+      m.title = hidden ? `${hidden} colonne${hidden > 1 ? "s" : ""} masquée${hidden > 1 ? "s" : ""} — élargir pour voir` : "";
+      m.style.display = hidden ? "inline-block" : "none";
+    }
+    if (S.id === "D") {
+      const tw = pane.querySelector(".tw");
+      tw.classList.toggle("cut", tw.scrollWidth > tw.clientWidth + 1 && tw.scrollLeft + tw.clientWidth < tw.scrollWidth - 1);
+    }
+  };
+  if (S.id === "D") pane.querySelector(".tw").addEventListener("scroll", () => set(pane.offsetWidth));
+  /* drag the pane's own edge */
+  const grip = pane.querySelector("[data-grip]");
+  grip.addEventListener("pointerdown", (e) => {
+    e.preventDefault(); grip.classList.add("on");
+    const x0 = e.clientX, w0 = pane.offsetWidth;
+    const mv = (ev) => set(Math.max(36, w0 + ev.clientX - x0));
+    const up = () => { grip.classList.remove("on"); removeEventListener("pointermove", mv); removeEventListener("pointerup", up); };
+    addEventListener("pointermove", mv); addEventListener("pointerup", up);
+  });
+  panes.push(set);
+}
+STRATS.forEach(mount);
+const w = document.getElementById("w"), wv = document.getElementById("wv");
+const all = () => { wv.textContent = `${w.value} px`; panes.forEach((s) => s(+w.value)); };
+w.addEventListener("input", all);
+all();
+</script>
+</body>
+</html>

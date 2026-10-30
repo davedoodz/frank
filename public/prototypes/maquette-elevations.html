@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Maquette 3D — les quatre élévations</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script type="importmap">
+{"imports":{
+  "three":"./vendor/three/build/three.module.js",
+  "three/addons/":"./vendor/three/examples/jsm/"
+}}
+</script>
+<script src="wireframe-c3-materials.js"></script>
+<script type="module" src="wireframe-c3-viewer.js"></script>
+<style>
+/* The real model, the real viewer: one façade at a time, seen square in an
+   orthographic camera, with its own textures (the site's trees and cars
+   are hidden so the wall reads). The pane says which façade it is. Two
+   ways of asking for one; switch between them above the pane. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#f1f1f2;--fill-2:#f6f6f7;--card:#fff;--paper:#fff;--mono:ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+.wrap{display:flex;gap:28px;padding:20px 24px 40px;align-items:flex-start}
+.side{width:300px}
+.side h1{margin:0;font-size:16px;font-weight:600}
+.side p{margin:6px 0 0;color:var(--ink-2);font-size:12.5px}
+.vsw{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.vsw button{font:inherit;text-align:left;border:1px solid var(--line);background:#fff;border-radius:7px;padding:8px 10px;cursor:pointer}
+.vsw button b{display:block;font-weight:600}
+.vsw button span{color:var(--ink-2);font-size:12px}
+.vsw button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.keys{margin-top:14px;font-size:12px;color:var(--ink-2)}
+.keys kbd{font:inherit;font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:#fff}
+
+/* the 3D pane, as on prototype 3 */
+.pane{position:relative;width:616px;height:843px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;
+  display:flex;flex-direction:column}
+.phd{display:flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 12px;border-bottom:1px solid var(--line-2);font-weight:500;flex:0 0 auto}
+.phd svg{width:15px;height:15px}
+.phd .btnw{margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 9px;border:1px solid var(--line);border-radius:6px;font-weight:400;font-size:12px;color:var(--ink-2)}
+.zone{position:relative;flex:1;min-height:0;display:flex}
+.model3d{position:relative;flex:1;min-height:0;overflow:hidden}
+.model3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;touch-action:none;transition:opacity .18s ease}
+.model3d[data-state="ready"] .model3d-canvas{opacity:1}
+.model3d-status{position:absolute;left:50%;bottom:60px;z-index:2;transform:translateX(-50%);border:1px solid rgba(17,17,18,.12);
+  border-radius:999px;background:rgba(255,255,255,.9);padding:5px 9px;color:var(--ink-2);font-size:11px;white-space:nowrap}
+.model3d[data-state="ready"] .model3d-status{visibility:hidden}
+
+.zb{width:31px;height:31px;flex:0 0 31px;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);cursor:pointer;border:0;background:none;padding:0;font:inherit}
+.zb:hover{background:var(--fill);color:var(--ink)}
+.zb svg{width:17px;height:17px}
+.mtools{position:absolute;left:10px;top:10px;z-index:7;display:flex;gap:2px;padding:2px;background:#fff;border:1px solid var(--line);border-radius:7px}
+.mtools .zb.on{background:#111;color:#fff}
+body.elev .mtools{display:none}
+.north{position:absolute;right:10px;top:10px;z-index:5;width:34px;height:50px;pointer-events:none;overflow:visible}
+.north polygon{fill:#fff;stroke:var(--ink);stroke-width:1.7}
+.north line{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
+.north text{fill:var(--ink);font-size:17px;font-weight:500;text-anchor:middle}
+.axes{position:absolute;left:10px;bottom:50px;z-index:5;width:62px;height:62px;pointer-events:none}
+.axes line{stroke-width:1.8;stroke-linecap:round}
+.axes line[data-ax="x"]{stroke:#d24b3e}.axes line[data-ax="y"]{stroke:#4f9b45}.axes line[data-ax="z"]{stroke:#3a6fb0}
+.axes text{font-family:var(--mono);font-size:7px;text-anchor:middle;dominant-baseline:middle}
+.axes text[data-axt="x"]{fill:#d24b3e}.axes text[data-axt="y"]{fill:#4f9b45}.axes text[data-axt="z"]{fill:#3a6fb0}
+.axes circle{fill:var(--ink-3)}
+body.elev .axes{display:none}
+.mini{position:absolute;right:10px;bottom:10px;z-index:5;width:132px;user-select:none}
+.mini .mi{position:relative;display:block}
+.mini canvas[data-mini3d]{display:block;width:100%;height:84px}
+.zpill{position:absolute;bottom:10px;left:10px;z-index:7;display:flex;align-items:center;height:34px;padding:0 2px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.zpill .zb{width:30px;height:30px;flex:0 0 30px;color:var(--ink)}
+.zpill .zb svg{width:16px;height:16px}
+.zread{min-width:46px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
+
+/* The name of the façade on screen: the one thing an elevation must say. */
+.elabel{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:8;display:none;align-items:center;gap:4px;
+  height:36px;padding:0 4px 0 6px;background:#fff;border:1px solid var(--ink);border-radius:9px;white-space:nowrap}
+body.elev .elabel{display:flex}
+.elabel .mk{width:22px;height:22px}
+.elabel .nm{font-size:13.5px;font-weight:600;padding:0 4px}
+.elabel .sub{font-size:11.5px;color:var(--ink-3);padding-right:4px}
+.elabel .sep{width:1px;height:20px;background:var(--line-2);margin:0 2px}
+.elabel .zb{width:28px;height:28px;flex-basis:28px;color:var(--ink)}
+.elabel .zb svg{width:16px;height:16px}
+
+/* A — a segmented switch, top left where the drag tools sit */
+.seg{position:absolute;left:10px;top:10px;z-index:8;display:none;gap:2px;padding:2px;background:#fff;border:1px solid var(--line);border-radius:8px}
+body[data-v="A"] .seg{display:flex}
+body[data-v="A"].elev .seg{top:10px}
+.seg button{height:31px;min-width:31px;padding:0 9px;border:0;border-radius:6px;background:none;font:inherit;font-size:12.5px;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;gap:5px}
+.seg button svg{width:16px;height:16px}
+.seg button:hover{background:var(--fill);color:var(--ink)}
+.seg button[aria-pressed="true"]{background:#111;color:#fff}
+.seg .div{width:1px;background:var(--line-2);margin:5px 2px}
+body[data-v="A"] .mtools{left:auto;right:56px}
+body[data-v="A"] .elabel,body[data-v="B"] .elabel{top:56px}
+
+/* B — the north mark is the way in: a compass of four façades */
+.cbtn{position:absolute;right:52px;top:12px;z-index:8;display:none;align-items:center;gap:5px;height:32px;padding:0 9px;background:#fff;
+  border:1px solid var(--line);border-radius:8px;font-size:12.5px;color:var(--ink);cursor:pointer}
+.cbtn svg{width:16px;height:16px}
+.cbtn:hover,.cbtn[aria-expanded="true"]{border-color:var(--ink)}
+body[data-v="B"] .cbtn{display:inline-flex}
+.compass{position:absolute;right:10px;top:52px;z-index:9;width:200px;height:200px;background:#fff;border:1px solid var(--line);
+  border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.10);display:none}
+.compass.open{display:block}
+.compass button{position:absolute;display:flex;flex-direction:column;align-items:center;gap:0;width:56px;padding:4px 0;border:1px solid var(--line);
+  border-radius:8px;background:#fff;font:inherit;cursor:pointer;line-height:1.1}
+.compass button b{font-size:12.5px;font-weight:600}
+.compass button span{font-size:10.5px;color:var(--ink-3)}
+.compass button:hover{border-color:var(--ink)}
+.compass button[aria-pressed="true"]{background:#111;color:#fff;border-color:#111}
+.compass button[aria-pressed="true"] span{color:#cfcfd2}
+.compass [data-face="nord"]{left:72px;top:8px}
+.compass [data-face="sud"]{left:72px;bottom:8px}
+.compass [data-face="ouest"]{left:8px;top:79px}
+.compass [data-face="est"]{right:8px;top:79px}
+.compass .c3d{left:auto!important;right:6px;top:6px!important;width:auto;padding:2px 7px;font-size:11.5px}
+</style>
+</head>
+<body data-v="A">
+<div class="wrap">
+  <div class="side">
+    <h1>Maquette 3D — les quatre élévations</h1>
+    <p>La vraie maquette, une façade à la fois, vue de face sans perspective. Le nom de la façade est toujours affiché en haut du volet, avec la lettre qu'elle porte sur les feuilles d'élévation.</p>
+    <div class="vsw" id="vsw">
+      <button data-v="A" aria-pressed="true"><b>A — Bascule en haut à gauche</b><span>3D · Nord · Est · Sud · Ouest, toujours visibles. Un clic.</span></button>
+      <button data-v="B" aria-pressed="false"><b>B — Boussole</b><span>Un bouton « Élévations » ouvre une boussole autour de l'emprise du bâtiment: on clique le côté qu'on veut voir.</span></button>
+    </div>
+    <p class="keys">Dans une élévation: <kbd>←</kbd> <kbd>→</kbd> passent à la façade voisine (on fait le tour du bâtiment), <kbd>Échap</kbd> revient en 3D.</p>
+  </div>
+
+  <div class="pane">
+    <div class="phd"><span data-ic="box"></span>Maquette 3D<span class="btnw"><span data-ic="external-link"></span>Ouvrir dans SketchUp</span></div>
+    <div class="zone" data-zone="model">
+      <div class="model3d" data-building-model data-state="loading" aria-busy="true">
+        <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
+      </div>
+      <div class="npins" data-npins></div>
+
+      <div class="mtools"><button class="zb on" title="Orbiter"><span data-ic="rotate-3d"></span></button><button class="zb" title="Déplacer"><span data-ic="move"></span></button></div>
+
+      <div class="seg" role="group" aria-label="Vue">
+        <button data-face="" aria-pressed="true" title="Maquette 3D"><span data-ic="box"></span>3D</button>
+        <i class="div"></i>
+        <button data-face="nord" title="Élévation nord">Nord</button>
+        <button data-face="est" title="Élévation est">Est</button>
+        <button data-face="sud" title="Élévation sud">Sud</button>
+        <button data-face="ouest" title="Élévation ouest">Ouest</button>
+      </div>
+
+      <button class="cbtn" data-compass aria-expanded="false"><span data-ic="compass"></span>Élévations</button>
+      <div class="compass" data-compass-pop>
+        <button class="c3d" data-face="">3D</button>
+        <button data-face="nord"><b>Nord</b><span>C</span></button>
+        <button data-face="est"><b>Est</b><span>B</span></button>
+        <button data-face="sud"><b>Sud</b><span>A</span></button>
+        <button data-face="ouest"><b>Ouest</b><span>D</span></button>
+      </div>
+
+      <div class="elabel" data-elabel>
+        <button class="zb" data-step="-1" title="Façade précédente (←)"><span data-ic="chevron-left"></span></button>
+        <svg class="mk" viewBox="-12 -12 24 24" data-mk></svg>
+        <span class="nm" data-enm>Élévation nord</span><span class="sub" data-esub></span>
+        <button class="zb" data-step="1" title="Façade suivante (→)"><span data-ic="chevron-right"></span></button>
+        <i class="sep"></i>
+        <button class="zb" data-face="" title="Revenir en 3D (Échap)"><span data-ic="x"></span></button>
+      </div>
+
+      <svg class="north" data-north3d viewBox="-22 -32 44 64" aria-label="Nord">
+        <polygon data-nring points=""></polygon><line data-nneedle x1="0" y1="0" x2="0" y2="-14"></line><text data-nlabel x="0" y="-21">N</text>
+      </svg>
+      <svg class="axes" data-axes viewBox="-26 -26 52 52" aria-hidden="true">
+        <line data-ax="x" x1="0" y1="0" x2="0" y2="0"></line><text data-axt="x" x="0" y="0">X</text>
+        <line data-ax="y" x1="0" y1="0" x2="0" y2="0"></line><text data-axt="y" x="0" y="0">Y</text>
+        <line data-ax="z" x1="0" y1="0" x2="0" y2="0"></line><text data-axt="z" x="0" y="0">Z</text>
+        <circle cx="0" cy="0" r="1.6"></circle>
+      </svg>
+      <div class="mini" data-mini="model"><span class="mi" data-mi><canvas data-mini3d></canvas></span></div>
+      <div class="zpill"><button class="zb" data-z="-"><span data-ic="minus"></span></button><span class="zread" data-mread>—</span><button class="zb" data-z="+"><span data-ic="plus"></span></button></div>
+    </div>
+  </div>
+</div>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n) => {
+  const node = lucide.icons[pascal(n)];
+  return node ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+    node[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : "";
+};
+document.querySelectorAll("[data-ic]").forEach((s) => { s.outerHTML = svg(s.dataset.ic); });
+
+/* The façades in the order you meet them walking round the building
+   clockwise seen from above, and the letter each carries on the sheets
+   (the viewer's corner plan draws the same letter). */
+const ORDER = ["nord", "est", "sud", "ouest"];
+const FACE = {
+  nord: { nm: "Élévation nord", from: "vue du nord", letter: "C", turn: 90 },
+  est: { nm: "Élévation est", from: "vue de l'est", letter: "B", turn: 180 },
+  sud: { nm: "Élévation sud", from: "vue du sud", letter: "A", turn: 270 },
+  ouest: { nm: "Élévation ouest", from: "vue de l'ouest", letter: "D", turn: 0 },
+};
+let face = "";
+
+function show(next) {
+  face = next || "";
+  window.fitteElevation = face ? { face, focus: 0, plain: true } : null;
+  document.body.classList.toggle("elev", Boolean(face));
+  document.querySelectorAll("[data-face]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.face === face)));
+  if (face) {
+    const f = FACE[face];
+    document.querySelector("[data-enm]").textContent = f.nm;
+    document.querySelector("[data-esub]").textContent = `${f.from} — ${f.letter}`;
+    document.querySelector("[data-mk]").innerHTML = `
+      <polygon points="-4.5,-10.5 11,0 -4.5,10.5" transform="rotate(${f.turn})" fill="#111" stroke="#111" stroke-width=".8" stroke-linejoin="round"/>
+      <circle r="7.4" fill="#fff" stroke="#111" stroke-width="1"/>
+      <text y="3.1" text-anchor="middle" font-size="8.6" font-family="Inter, system-ui, sans-serif" fill="#111">${f.letter}</text>`;
+  }
+  window.dispatchEvent(new Event("fitte:render"));
+}
+const step = (d) => show(ORDER[(ORDER.indexOf(face || "sud") + d + 4) % 4]);
+
+document.addEventListener("click", (e) => {
+  const st = e.target.closest("[data-step]");
+  if (st) { step(+st.dataset.step); return; }
+  const b = e.target.closest("[data-face]");
+  if (b) { show(b.dataset.face); closeCompass(); return; }
+  const c = e.target.closest("[data-compass]");
+  if (c) { const open = c.getAttribute("aria-expanded") !== "true"; c.setAttribute("aria-expanded", String(open));
+    document.querySelector("[data-compass-pop]").classList.toggle("open", open); return; }
+  if (!e.target.closest("[data-compass-pop]")) closeCompass();
+  const z = e.target.closest("[data-z]");
+  if (z && window.fitteModel) { const cur = window.fitteModel.readZoom(); window.fitteModel.writeZoom(z.dataset.z === "+" ? cur * 1.25 : cur / 1.25); }
+});
+function closeCompass() {
+  document.querySelector("[data-compass]").setAttribute("aria-expanded", "false");
+  document.querySelector("[data-compass-pop]").classList.remove("open");
+}
+window.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.("input,textarea")) return;
+  if (e.key === "Escape") { if (face) show(""); closeCompass(); }
+  else if (face && e.key === "ArrowRight") step(1);
+  else if (face && e.key === "ArrowLeft") step(-1);
+});
+window.addEventListener("fitte:model-zoom", (e) => {
+  const v = e.detail; document.querySelector("[data-mread]").textContent = Number.isFinite(v) ? `${Math.round(v)}%` : "—";
+});
+document.getElementById("vsw").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  document.body.dataset.v = b.dataset.v;
+  document.querySelectorAll("#vsw button").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+  closeCompass();
+});
+</script>
+</body>
+</html>

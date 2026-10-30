@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Icônes des calques — variantes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The layer strip of prototype 3, copied as is, then ten ways of giving
+   each drawing its own glyph. Same tiles, same badges, same states in every
+   column: Arpenteur selected, three drawings on the sheet, three aside. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#f1f1f2;--fill-2:#f6f6f7;--card:#fff;--paper:#fff;--green:#c3e05a;--green-ink:#2f3a05}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header{padding:20px 24px 8px}
+header h1{margin:0;font-size:16px;font-weight:600}
+header p{margin:4px 0 0;color:var(--ink-2);max-width:900px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;color:var(--ink-2);font-size:12px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend svg{width:14px;height:14px}
+.grid{display:flex;gap:18px;padding:16px 24px 40px;overflow-x:auto;align-items:flex-start}
+.col{flex:0 0 168px}
+.col h2{margin:0 0 2px;font-size:13px;font-weight:600}
+.col .why{margin:0 0 10px;font-size:11.5px;color:var(--ink-2);min-height:48px}
+.strip{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px}
+
+/* --- the tile, as in prototype 3 --- */
+.lpile{display:flex;flex-direction:column;gap:4px}
+.ltile{position:relative;border:1px solid transparent;border-radius:6px;padding:4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;user-select:none}
+.ltile .wrap{position:relative;width:100%}
+.ltile .pic{display:block;width:100%;aspect-ratio:1.18;border:1px solid var(--line-2);
+  border-radius:4px;background:#fff center/contain no-repeat}
+.ltile .nm{font-size:11px;font-weight:500;line-height:1.2;color:var(--ink);text-align:center}
+.ltile .pic{opacity:.45}
+.ltile:hover{background:var(--fill-2)}
+.ltile.on .pic{opacity:1}
+.ltile.on .nm{color:var(--green-ink);font-weight:600}
+.ltile.sel{background:var(--ink);border-color:var(--ink)}
+.ltile.sel .nm{color:#fff}
+.ltile.sel .pic{border-color:var(--ink)}
+.lbadge{position:absolute;right:3px;top:3px;width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;gap:1px;z-index:3;
+  background:var(--ink);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.lbadge svg{width:12px;height:12px}
+.lbadge.on{width:auto;min-width:40px;border-radius:12px;padding:0 7px 0 4px;background:var(--green);color:var(--green-ink)}
+.lbadge .rk{font-size:12.5px;font-weight:650;line-height:1}
+.lbadge .bars{display:flex;flex-direction:column;gap:2px;width:14px}
+.lbadge .bars i{display:block;height:2.5px;border-radius:1px;background:currentColor;opacity:.35}
+.lbadge .bars i.me{opacity:1}
+
+/* the glyph, shared */
+.gi{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.gi svg{width:100%;height:100%}
+
+/* A — beside the name */
+.vA .nmrow{display:flex;align-items:center;justify-content:center;gap:5px}
+.vA .gi{width:13px;height:13px;color:var(--ink-2)}
+.vA .sel .gi{color:#fff}
+.vA .on .gi{color:var(--green-ink)}
+
+/* B — above the name, bare, a little larger */
+.vB .gi{width:16px;height:16px;color:var(--ink-2);margin-top:1px}
+.vB .sel .gi{color:#fff}
+.vB .on .gi{color:var(--green-ink)}
+
+/* C — on the drawing, top left, bare glyph with a white halo */
+.vC .gi{position:absolute;left:5px;top:5px;width:16px;height:16px;color:var(--ink);z-index:2;
+  filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff)}
+
+/* D — on the drawing, top left, white disc */
+.vD .gi{position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;z-index:2;
+  background:#fff;border:1px solid var(--line);color:var(--ink);padding:5px}
+
+/* E — on the drawing, bottom left, ink square */
+.vE .gi{position:absolute;left:4px;bottom:4px;width:22px;height:22px;border-radius:5px;z-index:2;
+  background:var(--ink);color:#fff;padding:4px}
+.vE .sel .gi{background:#fff;color:var(--ink)}
+
+/* F — centred watermark over a dimmed drawing */
+.vF .gi{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px 0 0 -19px;z-index:2;
+  border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--line-2);color:var(--ink);padding:9px}
+.vF .on .gi{background:rgba(255,255,255,.75)}
+
+/* G — beside the name, in a tinted pill of its discipline */
+.vG .nmrow{display:flex;align-items:center;justify-content:center;gap:5px}
+.vG .gi{width:18px;height:18px;border-radius:5px;padding:3px;color:#fff}
+.vG .ltile:not(.on):not(.sel) .gi{opacity:.55}
+
+/* H — a tab on the left edge of the drawing */
+.vH .gi{position:absolute;left:-1px;top:8px;width:20px;height:24px;z-index:2;
+  border-radius:0 5px 5px 0;background:#fff;border:1px solid var(--line);border-left:0;color:var(--ink);padding:3px 3px 3px 2px}
+
+/* I — caption bar across the foot of the drawing: glyph and name together */
+.vI .wrap .cap{position:absolute;left:1px;right:1px;bottom:1px;height:22px;z-index:2;
+  display:flex;align-items:center;gap:5px;padding:0 6px;border-radius:0 0 3px 3px;
+  background:rgba(255,255,255,.94);border-top:1px solid var(--line-2);font-size:11px;font-weight:600;
+  white-space:nowrap;overflow:hidden}
+.vI .cap .gi{width:13px;height:13px}
+.vI .on .cap{background:var(--green);color:var(--green-ink);border-top-color:transparent}
+.vI .sel .cap{background:var(--ink);color:#fff;border-top-color:transparent}
+.vI .nm{display:none}
+
+/* J — large outline glyph bleeding off the bottom-right corner */
+.vJ .wrap{overflow:hidden;border-radius:4px}
+.vJ .gi{position:absolute;right:-8px;bottom:-10px;width:46px;height:46px;z-index:2;color:var(--ink);opacity:.16}
+.vJ .gi svg{stroke-width:1.6}
+.vJ .on .gi{opacity:.22}
+</style>
+</head>
+<body>
+<header>
+  <h1>Icônes des calques — dix variantes</h1>
+  <p>The same strip ten times: Arpenteur selected, Architecte, Électricité and Ventilation on the sheet, the others aside. Only the glyph changes. A–B and G sit with the name; C–F, H and J sit on the drawing; I puts glyph and name together on the drawing.</p>
+  <div class="legend" id="legend"></div>
+</header>
+<div class="grid" id="grid"></div>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const LAYERS = [
+  { k: "arp", nm: "Arpenteur", img: "assets/arp-site.png", icon: "Map", tint: "#7a6a4f", state: "sel" },
+  { k: "plan", nm: "Architecte", img: "assets/plan-niveau-5.jpg", icon: "DraftingCompass", tint: "#1b1b1b", state: "on", rank: 1 },
+  { k: "pay", nm: "Paysage", img: "assets/paysage.png", icon: "Trees", tint: "#4f7a3a", state: "off" },
+  { k: "electrical", nm: "Électricité", img: "assets/engineering/electrical-5.jpg", icon: "Zap", tint: "#b8860b", state: "on", rank: 2 },
+  { k: "drainage", nm: "Drainage (Méc.)", img: "assets/engineering/drainage-5.jpg", icon: "Waves", tint: "#3b6e8f", state: "off" },
+  { k: "distribution", nm: "Distribution (Méc.)", img: "assets/engineering/distribution-5.jpg", icon: "Droplet", tint: "#2f7fd6", state: "off" },
+  { k: "ventilation", nm: "Ventilation (Méc.)", img: "assets/engineering/ventilation-5.jpg", icon: "Fan", tint: "#5c6f7d", state: "on", rank: 3 },
+];
+const ON = LAYERS.filter((l) => l.state === "on").length;
+
+function svg(name) {
+  const node = lucide.icons[name];
+  const inner = node[2].map(([tag, attrs]) =>
+    `<${tag} ${Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("");
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+}
+const glyph = (l, style = "") => `<span class="gi" style="${style}" title="${l.nm}">${svg(l.icon)}</span>`;
+const badge = (l) => l.state === "on"
+  ? `<span class="lbadge on"><span class="bars">${Array.from({ length: ON }, (_, i) => `<i class="${i + 1 === l.rank ? "me" : ""}"></i>`).join("")}</span><b class="rk">${l.rank}</b></span>`
+  : `<span class="lbadge">${svg("Plus")}</span>`;
+
+const VARIANTS = [
+  { id: "A", title: "A — à côté du nom", why: "Petit glyphe gris avant le nom. Le dessin reste intact; le mot et le signe se lisent ensemble.",
+    tile: (l) => [`${pic(l)}`, `<div class="nmrow">${glyph(l)}<span class="nm">${l.nm}</span></div>`] },
+  { id: "B", title: "B — au-dessus du nom", why: "Glyphe 16 px seul sur sa ligne, sous le dessin. Plus visible que A, coûte une ligne.",
+    tile: (l) => [pic(l), glyph(l), `<span class="nm">${l.nm}</span>`] },
+  { id: "C", title: "C — sur le dessin, nu", why: "Coin haut gauche, sans forme, avec un halo blanc pour se détacher des traits.",
+    tile: (l) => [pic(l, glyph(l)), `<span class="nm">${l.nm}</span>`] },
+  { id: "D", title: "D — pastille blanche", why: "Même coin, dans un disque blanc 24 px qui répond au badge à droite.",
+    tile: (l) => [pic(l, glyph(l)), `<span class="nm">${l.nm}</span>`] },
+  { id: "E", title: "E — carré encre, bas gauche", why: "Carré noir plein en bas: loin du badge, lisible sur n'importe quel dessin. Inversé sur la tuile choisie.",
+    tile: (l) => [pic(l, glyph(l)), `<span class="nm">${l.nm}</span>`] },
+  { id: "F", title: "F — au centre, grand", why: "Disque 38 px au milieu du dessin. Le signe passe avant l'image: on reconnaît la discipline de loin.",
+    tile: (l) => [pic(l, glyph(l)), `<span class="nm">${l.nm}</span>`] },
+  { id: "G", title: "G — pastille teintée", why: "Glyphe blanc dans une pastille de la couleur de la discipline, à côté du nom. Plus bruyant; teintes à valider.",
+    tile: (l) => [pic(l), `<div class="nmrow">${glyph(l, `background:${l.tint}`)}<span class="nm">${l.nm}</span></div>`] },
+  { id: "H", title: "H — onglet au bord", why: "Petit onglet blanc collé au bord gauche du dessin, comme un intercalaire de classeur.",
+    tile: (l) => [pic(l, glyph(l)), `<span class="nm">${l.nm}</span>`] },
+  { id: "I", title: "I — bandeau sur le dessin", why: "Glyphe et nom ensemble dans un bandeau en pied d'image; l'état (vert, noir) colore le bandeau. Gagne la hauteur du nom.",
+    tile: (l) => [pic(l, `<div class="cap">${glyph(l)}<span>${l.nm.replace(" (Méc.)", "")}</span></div>`), `<span class="nm">${l.nm}</span>`] },
+  { id: "J", title: "J — filigrane", why: "Grand glyphe au trait, très pâle, qui déborde du coin bas droit. Ambiance plutôt que repère.",
+    tile: (l) => [pic(l, glyph(l)), `<span class="nm">${l.nm}</span>`] },
+];
+function pic(l, extra = "") {
+  return `<div class="wrap"><span class="pic" style="background-image:url('${l.img}')"></span>${badge(l)}${extra}</div>`;
+}
+document.getElementById("legend").innerHTML = LAYERS.map((l) => `<span>${svg(l.icon)}${l.nm}</span>`).join("");
+document.getElementById("grid").innerHTML = VARIANTS.map((v) => `<section class="col v${v.id}" id="${v.id}">
+  <h2>${v.title}</h2><p class="why">${v.why}</p>
+  <div class="strip"><div class="lpile">${LAYERS.map((l) => `<div class="ltile ${l.state === "off" ? "" : l.state === "sel" ? "sel" : "on"}">${v.tile(l).join("")}</div>`).join("")}</div></div>
+</section>`).join("");
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Typologies — comment dire « voir ceci »</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The floor's mix (the bar and the three chips) says how much of each
+   type there is, but not where. Each option below is a way to say "show me
+   these on the plan", in words and icon, on the mix as it is on the
+   prototype. Every one is live: click it and the units of that type are
+   filled over the sheet, which itself is never tinted. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#f1f1f2;--fill-2:#f6f6f7;--card:#fff;--hi:#c3e05a}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header{padding:20px 24px 4px;max-width:1100px}
+header h1{margin:0;font-size:16px;font-weight:600}
+header p{margin:4px 0 0;color:var(--ink-2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:18px;padding:14px 24px 40px}
+.opt{border:1px solid var(--line-2);border-radius:8px;background:#fff;padding:12px 14px 14px}
+.opt.rec{border-color:var(--ink)}
+.opt h3{margin:0;font-size:13px;font-weight:600}
+.opt h3 i{font-style:normal;font-weight:500;font-size:11px;color:var(--ink-2);margin-left:6px}
+.opt .why{margin:2px 0 10px;font-size:11.5px;color:var(--ink-2);min-height:32px}
+.svg{width:14px;height:14px;flex:0 0 14px}
+
+/* the mix, as on the prototype */
+.mix{border:1px solid var(--line-2);border-radius:6px;padding:10px 10px 8px}
+.mixbar{display:flex;height:6px;border-radius:3px;overflow:hidden}
+.mixrow{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border:1px solid var(--line);border-radius:12px;
+  background:var(--fill-2);font-size:12px;white-space:nowrap;user-select:none}
+.chip .sw{width:9px;height:9px;border-radius:2px}
+.chip .pc{color:var(--ink)}
+.chip .ct{color:var(--ink-3)}
+.net{font-size:12px;color:var(--ink-2);margin-top:6px}
+.net b{color:var(--ink)}
+/* what the options add */
+.go{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border:1px solid var(--line);border-radius:6px;
+  background:#fff;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.go:hover{border-color:var(--ink)}
+.go.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.go.ic{padding:0;width:24px;justify-content:center}
+.chip.tap{cursor:pointer}
+.chip.tap:hover{border-color:var(--ink)}
+.chip.on{background:#fff;border-color:var(--ink);font-weight:500}
+.chip .eye{color:var(--ink-3);margin-left:2px}
+.chip.on .eye{color:var(--ink)}
+.chip .eye .svg{width:13px;height:13px;flex-basis:13px}
+.hint{font-size:11px;color:var(--ink-3);margin-left:auto}
+
+/* the sheet below, with the units of the types asked for filled over it */
+.sheet{position:relative;height:150px;margin-top:10px;border:1px solid var(--line-2);border-radius:6px;overflow:hidden;
+  background:#fff url("assets/plan-niveau-5.jpg") 30% 40%/620px auto no-repeat}
+.sheet svg{position:absolute;inset:0;width:100%;height:100%}
+.sheet rect{opacity:0;transition:opacity .18s}
+.sheet rect.on{opacity:.38}
+</style>
+</head>
+<body>
+<header>
+  <h1>Typologies — comment dire « voir ceci sur le plan »</h1>
+  <p>Le mélange dit combien de 3½, 4½ et 5½ il y a, pas où. Six façons de dire « montre-les-moi », chacune cliquable: les unités du type s'allument sur le plan. L'option recommandée a la bordure noire.</p>
+</header>
+<div class="grid" id="grid"></div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const svg = (n) => `<svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+  lucide.icons[n][2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+
+const TYPES = [["3½", "#d97a7a", 33, 5], ["4½", "#5b9bd5", 40, 6], ["5½", "#63b86b", 27, 4]];
+/* Sample unit boxes on the sheet, by type (0–1 of the sheet). */
+const BOXES = {
+  "3½": [[.12, .18, .1, .2], [.48, .55, .1, .2], [.7, .2, .09, .18]],
+  "4½": [[.24, .18, .11, .22], [.36, .55, .11, .22], [.6, .55, .1, .22], [.82, .2, .1, .2]],
+  "5½": [[.12, .55, .12, .25], [.6, .18, .09, .2]],
+};
+
+/* Each option: how the mix row is drawn, and whether one control shows
+   every type at once (`all`) or each chip shows its own. */
+const OPTS = [
+  { id: "A", rec: true, title: "Œil sur chaque pastille",
+    why: "La pastille elle-même est l'interrupteur; l'œil dit qu'on peut la voir. Un type à la fois, ou plusieurs.",
+    chips: "eye" },
+  { id: "B", title: "« Voir sur le plan »",
+    why: "Les mots exacts de ce qui arrive. Un bouton pour les trois types d'un coup.",
+    all: { ic: "Eye", t: "Voir sur le plan" } },
+  { id: "C", title: "« Visualiser »",
+    why: "Un seul mot, l'icône d'un œil dans un cadre: « regarde dans le dessin ».",
+    all: { ic: "ScanEye", t: "Visualiser" } },
+  { id: "D", title: "« Colorer le plan »",
+    why: "Dit ce que fait le bouton au dessin: les unités prennent la couleur de leur pastille.",
+    all: { ic: "PaintBucket", t: "Colorer le plan" } },
+  { id: "E", title: "« Surligner »",
+    why: "Le geste du surligneur: on marque sans changer le dessin. Bien compris des architectes.",
+    all: { ic: "Highlighter", t: "Surligner" } },
+  { id: "F", title: "Pastilles cliquables, mot discret",
+    why: "Rien d'ajouté sur la pastille; une ligne grise « cliquez une typologie pour la voir » l'apprend une fois.",
+    chips: "plain", hint: "Cliquez une typologie pour la voir" },
+];
+const S = Object.fromEntries(OPTS.map((o) => [o.id, new Set()]));
+
+function mixHTML(o) {
+  const on = S[o.id];
+  const chip = ([ty, col, pc, ct]) => {
+    const tap = Boolean(o.chips);
+    return `<span class="chip ${tap ? "tap" : ""} ${tap && on.has(ty) ? "on" : ""}" ${tap ? `data-t="${ty}"` : ""}
+      title="${tap ? `${on.has(ty) ? "Masquer" : "Voir"} les ${ty} sur le plan` : `${ct} unités de ${ty}`}">
+      <span class="sw" style="background:${col}"></span><b>${ty}</b><span class="pc">${pc} %</span><span class="ct">${ct}</span>
+      ${o.chips === "eye" ? `<span class="eye">${svg(on.has(ty) ? "Eye" : "EyeOff")}</span>` : ""}</span>`;
+  };
+  const allOn = on.size === TYPES.length;
+  return `<div class="mix">
+    <div class="mixbar">${TYPES.map(([, col, pc]) => `<span style="width:${pc}%;background:${col}"></span>`).join("")}</div>
+    <div class="mixrow">${TYPES.map(chip).join("")}
+      ${o.all ? `<span class="go ${allOn ? "on" : ""}" data-all>${svg(o.all.ic)}${o.all.t}</span>` : ""}</div>
+    <div class="net"><b>15 619</b> pi² nets sur 15 unités${o.hint ? `<span class="hint" style="float:right">${o.hint}</span>` : ""}</div>
+  </div>`;
+}
+function sheetHTML(o) {
+  const on = S[o.id];
+  return `<div class="sheet"><svg viewBox="0 0 1 1" preserveAspectRatio="none">${TYPES.map(([ty, col]) =>
+    BOXES[ty].map(([x, y, w, h]) => `<rect class="${on.has(ty) ? "on" : ""}" x="${x}" y="${y}" width="${w}" height="${h}" fill="${col}"/>`).join("")).join("")}</svg></div>`;
+}
+function paint() {
+  document.getElementById("grid").innerHTML = OPTS.map((o) => `<div class="opt ${o.rec ? "rec" : ""}" data-o="${o.id}">
+    <h3>${o.id} — ${o.title}${o.rec ? "<i>recommandée</i>" : ""}</h3><div class="why">${o.why}</div>
+    ${mixHTML(o)}${sheetHTML(o)}</div>`).join("");
+}
+document.addEventListener("click", (e) => {
+  const opt = e.target.closest("[data-o]");
+  if (!opt) return;
+  const on = S[opt.dataset.o];
+  const chip = e.target.closest("[data-t]");
+  if (chip) { on.has(chip.dataset.t) ? on.delete(chip.dataset.t) : on.add(chip.dataset.t); paint(); return; }
+  if (e.target.closest("[data-all]")) {
+    if (on.size === TYPES.length) on.clear(); else TYPES.forEach(([ty]) => on.add(ty));
+    paint();
+  }
+});
+paint();
+</script>
+</body>
+</html>

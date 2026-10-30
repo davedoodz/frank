@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Niveau actif sur la maquette — six traitements</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<script type="importmap">
+{"imports":{
+  "three":"./vendor/three/build/three.module.js",
+  "three/addons/":"./vendor/three/examples/jsm/"
+}}
+</script>
+<link rel="stylesheet" href="niveaux-3d-banc.css">
+<style>
+/* Every mark stops short of what it points at: a leader ends at the edge of
+   its dot, never through it. */
+svg line,svg polyline,svg path{fill:none;stroke-linecap:round}
+svg text{font-family:var(--mono);font-size:10px;fill:var(--ink-2)}
+.sel{color:var(--sel)}
+.lead{stroke:var(--sel);stroke-width:1.4}
+.dot{fill:var(--sel);stroke:#fff;stroke-width:1.5}
+.ghost{fill:#fff;stroke:var(--ink-3);stroke-width:1}
+.stub{stroke:var(--ink-3);stroke-width:1}
+.name{fill:var(--sel);font-weight:500}
+.pill rect{fill:#fff;stroke:var(--line);stroke-width:1}
+.pill text{font-family:var(--sans);font-size:11.5px;font-weight:600;fill:var(--ink)}
+.cut{stroke:var(--sel);stroke-width:1.8}
+.cut-ghost{stroke:var(--ink-3);stroke-width:.8;stroke-dasharray:2 3}
+.badge circle{fill:var(--ink)}
+.badge text{fill:#fff;font-family:var(--sans);font-size:10.5px;font-weight:600}
+.num{fill:var(--ink-3);font-size:9px}
+.flag rect{fill:var(--vert)}
+.flag text{fill:var(--vert-ink);font-family:var(--sans);font-size:11px;font-weight:600}
+.cap{stroke:var(--sel);stroke-width:1.4}
+.brk{stroke:var(--sel);stroke-width:1.4}
+.brk-ghost{stroke:var(--ink-3);stroke-width:1}
+.off rect{fill:#fff;stroke:var(--line)}
+.off text{fill:var(--sel)}
+/* Text inside a filled shape needs no halo. */
+svg.halo .pill text,svg.halo .badge text,svg.halo .flag text,svg.halo .off text{stroke:none}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Niveau actif sur la maquette</h1>
+  <p>Suite de la variante F de <a href="niveaux-3d-variantes.html">la première série</a> : seul le niveau sélectionné est nommé, ancré sur le bord réel du bâtiment. Six traitements différents. « Autres niveaux » choisit ce qui reste visible des autres dalles : rien, une trace discrète, ou la trace seulement quand le pointeur est sur la maquette (cachée pendant l'orbite).</p>
+</header>
+<div class="bar" id="bar"></div>
+<main class="grid" id="grid"></main>
+
+<script type="module">
+import { B, LEVELS, NAMES, SHORT, anchorAt, anchors, frontOutline, cull, textWidth, mountBench } from "./niveaux-3d-banc.js";
+
+const others = () => B.opts.others === "show" || (B.opts.others === "hover" && B.hover && !B.dragging);
+const inFrame = (a, m = 6) => !a.behind && a.y > m && a.y < B.H - m;
+// When the building's edge is past the left of the frame, the frame is the
+// edge the eye sees: the mark holds there instead of leaving with it.
+const held = (a) => ({ ...a, x: Math.min(Math.max(a.x, 3), B.W - 3) });
+const sel = () => held(anchorAt(B.selected));
+const rest = () => anchors().filter((a) => a.level !== B.selected && inFrame(a)).map(held);
+
+// The selected level above or below the frame still says where it went.
+function offFrame(a) {
+  if (inFrame(a, 0)) return "";
+  const up = a.behind ? false : a.y <= 0;
+  const label = `${up ? "↑" : "↓"} ${NAMES(a.level)}`, w = textWidth(label) + 12;
+  const y = up ? 8 : B.H - 26;
+  return `<g class="off"><rect x="10" y="${y}" width="${w}" height="18" rx="9"/>
+    <text x="16" y="${y + 12.5}">${label}</text></g>`;
+}
+
+const VARIANTS = [
+  { id: "F1", name: "Trait et point, corrigé",
+    say: "La variante F, réparée : le trait <b>s'arrête au bord du point</b> au lieu de le traverser. Quand le bord du bâtiment est trop près de la marge pour un trait, le nom passe au-dessus du point, sans trait.",
+    paint() {
+      const a = sel(), r = 3.2;
+      let out = others() ? rest().map((o) => `<circle class="ghost" cx="${o.x}" cy="${o.y}" r="2"/>`).join("") : "";
+      if (!inFrame(a)) return out + offFrame(a);
+      const label = NAMES(a.level), end = a.x - r - 2;
+      out += end - 10 >= textWidth(label) + 6
+        ? `<line class="lead" x1="10" y1="${a.y}" x2="${end}" y2="${a.y}"/><text class="name" x="10" y="${a.y - 5}">${label}</text>`
+        : `<text class="name" x="${Math.max(4, a.x - textWidth(label) / 2)}" y="${a.y - 8}">${label}</text>`;
+      return out + `<circle class="dot" cx="${a.x}" cy="${a.y}" r="${r}"/>`;
+    } },
+
+  { id: "F2", name: "Pastille blanche",
+    say: "Le nom dans une <b>pastille blanche</b>, la même que l'étiquette d'unité au survol, posée juste à l'extérieur du bord avec un trait court. Se lit sur n'importe quelle façade sans halo. Les autres niveaux : de petites encoches grises sur le bord.",
+    paint() {
+      const a = sel(), r = 3;
+      let out = others() ? rest().map((o) => `<line class="stub" x1="${o.x - 9}" y1="${o.y}" x2="${o.x - 3}" y2="${o.y}"/>`).join("") : "";
+      if (!inFrame(a)) return out + offFrame(a);
+      const label = NAMES(a.level), pw = label.length * 6.6 + 16, ph = 20;
+      const gap = 14, px = a.x - r - gap - pw;
+      if (px >= 4) {
+        out += `<line class="lead" x1="${px + pw}" y1="${a.y}" x2="${a.x - r - 1.5}" y2="${a.y}"/>
+          <g class="pill"><rect x="${px}" y="${a.y - ph / 2}" width="${pw}" height="${ph}" rx="6"/>
+          <text x="${px + pw / 2}" y="${a.y + 4}" text-anchor="middle">${label}</text></g>`;
+      } else {
+        // No room on the left: the pill stands above the point on a stem.
+        const x = Math.max(4, a.x - pw / 2), y = a.y - r - 10 - ph;
+        out += `<line class="lead" x1="${a.x}" y1="${y + ph}" x2="${a.x}" y2="${a.y - r - 1.5}"/>
+          <g class="pill"><rect x="${x}" y="${y}" width="${pw}" height="${ph}" rx="6"/>
+          <text x="${x + pw / 2}" y="${y + 14}" text-anchor="middle">${label}</text></g>`;
+      }
+      return out + `<circle class="dot" cx="${a.x}" cy="${a.y}" r="${r}"/>`;
+    } },
+
+  { id: "F3", name: "Coupe sur la façade",
+    say: "Le niveau est tracé <b>sur le bâtiment lui-même</b> : l'arête de la dalle, sur toutes les façades visibles, comme un trait de coupe. Le nom se tient au bout gauche. Aucun renvoi, aucun point. Les autres niveaux : leurs arêtes en pointillé très fin.",
+    paint() {
+      const seg = (s, cls) => s.map(([p, q]) => `<line class="${cls}" x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}"/>`).join("");
+      let out = others() ? LEVELS.filter((l) => l !== B.selected).map((l) => seg(frontOutline(l), "cut-ghost")).join("") : "";
+      const a = sel();
+      const edges = frontOutline(B.selected);
+      if (!inFrame(a) || !edges.length) return out + offFrame(a);
+      const left = edges.flat().reduce((m, p) => p.x < m.x ? p : m);
+      const label = NAMES(a.level);
+      return out + seg(edges, "cut")
+        + `<text class="name" x="${Math.max(4, left.x - textWidth(label) - 8)}" y="${left.y + 3.5}">${label}</text>`;
+    } },
+
+  { id: "F4", name: "Pastille numérotée",
+    say: "Un <b>disque noir numéroté</b> sur le bord, le nom en gris à côté : le chiffre se lit d'un coup d'œil, même petit. Les autres niveaux : leur seul chiffre, gris et sans disque, en colonne le long du bord — une échelle qui ne dit rien de plus que nécessaire.",
+    paint() {
+      const a = sel(), R = 9;
+      let out = "";
+      if (others()) out += cull(rest().map((o) => ({ ...o })), 12).filter((o) => Math.abs(o.y - a.y) > 14)
+        .map((o) => `<text class="num" x="${o.x - R - 2}" y="${o.y + 3}" text-anchor="middle">${SHORT(o.level)}</text>`).join("");
+      if (!inFrame(a)) return out + offFrame(a);
+      const cx = a.x - R - 2, label = NAMES(a.level);
+      const tx = cx - R - 6;
+      return out + (tx - textWidth(label) >= 4 ? `<text class="name" x="${tx}" y="${a.y + 3.5}" text-anchor="end">${label}</text>` : "")
+        + `<g class="badge"><circle cx="${cx}" cy="${a.y}" r="${R}"/><text x="${cx}" y="${a.y + 3.8}" text-anchor="middle">${SHORT(a.level)}</text></g>`;
+    } },
+
+  { id: "F5", name: "Onglet au bord du panneau",
+    say: "Un <b>onglet vert</b> collé au bord gauche du panneau, toujours au même endroit horizontalement ; seule sa hauteur suit la dalle. Un trait fin le relie au bâtiment et finit par une butée. Les autres niveaux : des crans gris sur le bord du panneau, comme une règle.",
+    paint() {
+      const a = sel();
+      let out = others() ? rest().map((o) => `<line class="stub" x1="0" y1="${o.y}" x2="7" y2="${o.y}"/>`).join("") : "";
+      if (!inFrame(a)) return out + offFrame(a);
+      const label = NAMES(a.level), fw = label.length * 6.4 + 18, fh = 20;
+      out += `<g class="flag"><rect x="-6" y="${a.y - fh / 2}" width="${fw + 6}" height="${fh}" rx="5"/>
+        <text x="9" y="${a.y + 4}">${label}</text></g>`;
+      if (a.x - 3 > fw + 10) out += `<line class="lead" x1="${fw + 2}" y1="${a.y}" x2="${a.x - 3}" y2="${a.y}"/>
+        <line class="cap" x1="${a.x - 3}" y1="${a.y - 4}" x2="${a.x - 3}" y2="${a.y + 4}"/>`;
+      return out;
+    } },
+
+  { id: "F6", name: "Crochet d'étage",
+    say: "Un étage est une hauteur, pas une ligne : un <b>crochet</b> sur le bord couvre la dalle jusqu'à la suivante, le nom à côté, au milieu de l'étage. Les autres niveaux : de simples crans à chaque dalle, qui donnent la mesure des étages voisins.",
+    paint() {
+      const a = sel();
+      const off = 8;
+      let out = others() ? rest().map((o) => `<line class="brk-ghost" x1="${o.x - off - 4}" y1="${o.y}" x2="${o.x - off + 2}" y2="${o.y}"/>`).join("") : "";
+      if (!inFrame(a)) return out + offFrame(a);
+      const top = a.level < 9 ? held(anchorAt(a.level + 1)) : { x: a.x, y: a.y - 16 };
+      const bx = Math.min(a.x, top.x) - off;
+      const label = NAMES(a.level), mid = (a.y + top.y) / 2;
+      out += `<path class="brk" d="M${a.x - 2},${a.y} H${bx} V${top.y} H${top.x - 2}"/>`;
+      const tx = bx - 6;
+      return out + (tx - textWidth(label) >= 4
+        ? `<text class="name" x="${tx}" y="${mid + 3.5}" text-anchor="end">${label}</text>`
+        : `<text class="name" x="${Math.max(4, bx)}" y="${top.y - 6}">${label}</text>`);
+    } },
+];
+
+mountBench({
+  variants: VARIANTS, margin: 260, fit: 0.78,
+  options: [{ key: "others", label: "Autres niveaux", value: "hide",
+    choices: [["hide", "Masqués"], ["show", "Discrets"], ["hover", "Au survol"]] }],
+});
+</script>
+</body>
+</html>

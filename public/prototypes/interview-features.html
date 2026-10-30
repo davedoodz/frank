@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>What Guy and Benoît asked for</title>
 <link rel="stylesheet" href="vendor/geist/geist.css">
+<script>
+if (new URLSearchParams(location.search).get("embed") === "1") {
+  document.documentElement.dataset.embedded = "true";
+}
+</script>
 <style>
 :root{
   --ink:#131313; --ink-2:#575757; --ink-3:#8e8e8e;
@@ -90,6 +95,21 @@ dd.look{color:var(--ink)}
 .rail a:hover{border-color:var(--line-2);color:var(--ink)}
 .rail svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;
   stroke-linecap:round;stroke-linejoin:round}
+.rail .docs-link{gap:9px;padding:6px 10px 6px 7px;border-radius:12px;border-color:#c4c7c5;
+  background:#fff;color:#202124;box-shadow:0 1px 2px rgba(60,64,67,.12)}
+.rail .docs-link:hover{border-color:#0b57d0;background:#f8fafd;color:#202124}
+.rail .docs-icon{width:22px;height:22px;flex:0 0 22px;stroke:none}
+.rail .docs-icon .doc-body{fill:#4285f4}
+.rail .docs-icon .doc-fold{fill:#a8c7fa}
+.rail .docs-icon .doc-lines{fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round}
+.docs-copy{font-weight:550}.docs-brand{font-size:11px;font-weight:600;color:#0b57d0}
+.rail .external-icon{width:14px;height:14px;stroke:#5f6368}
+html[data-embedded="true"] .wrap{max-width:none;padding:28px 28px 72px}
+html[data-embedded="true"] .rail{justify-content:flex-end;margin-bottom:22px}
+html[data-embedded="true"] .rail>a:first-child{display:none}
+@media(max-width:640px){
+  html[data-embedded="true"] .wrap{padding:22px 16px 56px}
+}
 </style>
 </head>
 <body>
@@ -100,10 +120,16 @@ dd.look{color:var(--ink)}
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
     Back to the prototypes
   </a>
-  <a href="https://docs.google.com/document/d/15q07ueqG374PNpKiemFzhmYMHLMKdSaA1K31OJOB91E/edit?tab=t.nbxprq7k3t4w"
-     target="_blank" rel="noopener">
-    Raw interview notes · Google Docs
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+  <a class="docs-link" href="https://docs.google.com/document/d/15q07ueqG374PNpKiemFzhmYMHLMKdSaA1K31OJOB91E/edit?tab=t.nbxprq7k3t4w"
+     target="_blank" rel="noopener" aria-label="Open raw interview notes in Google Docs">
+    <svg class="docs-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path class="doc-body" d="M6.5 2h7.2L19 7.3V21a1 1 0 0 1-1 1H6.5A1.5 1.5 0 0 1 5 20.5v-17A1.5 1.5 0 0 1 6.5 2Z"/>
+      <path class="doc-fold" d="M13.7 2 19 7.3h-4.3a1 1 0 0 1-1-1Z"/>
+      <path class="doc-lines" d="M8.5 12h7M8.5 15h7M8.5 18h5"/>
+    </svg>
+    <span class="docs-copy">Raw interview notes</span>
+    <span class="docs-brand">Google Docs</span>
+    <svg class="external-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
   </a>
 </div>
 

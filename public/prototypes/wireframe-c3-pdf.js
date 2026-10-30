@@ -2,8 +2,8 @@ import * as pdfjs from "./vendor/pdfjs/pdf.min.mjs";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "./vendor/pdfjs/pdf.worker.min.mjs";
 
-// Render only the visible part at device-pixel resolution. A 600% zoom must
-// not stretch a fixed bitmap or allocate a canvas six times the whole sheet.
+// Render only the visible part at device-pixel resolution. A 1000% zoom must
+// not stretch a fixed bitmap or allocate a canvas ten times the whole sheet.
 const documents = new Map();
 const tiles = new Map();
 const failures = new Set();
@@ -12,7 +12,7 @@ let signature = "";
 let timer;
 let busy = false;
 
-function requestFor(canvas, viewport) {
+function requestFor(canvas, viewport, turn = 0) {
   const rect = canvas.parentElement.getBoundingClientRect();
   const left = Math.max(rect.left, viewport.left);
   const top = Math.max(rect.top, viewport.top);
@@ -20,14 +20,23 @@ function requestFor(canvas, viewport) {
   const bottom = Math.min(rect.bottom, viewport.bottom);
   if (right <= left || bottom <= top || rect.width < 1 || rect.height < 1) return null;
   const dpr = window.devicePixelRatio || 1;
-  const width = Math.ceil(rect.width * dpr);
-  const height = Math.ceil(rect.height * dpr);
-  const turned = canvas.dataset.pdfTurn === "180";
+  /* The plan can be turned by quarter turns: the box on screen is then the
+     sheet on its side, so the visible part is read back into the sheet's
+     own axes before it is cut into tiles. */
+  const side = turn === 90 || turn === 270;
+  const lw = side ? rect.height : rect.width, lh = side ? rect.width : rect.height;
+  const local = (sx, sy) => turn === 90 ? [sy - rect.top, rect.right - sx]
+    : turn === 180 ? [rect.right - sx, rect.bottom - sy]
+    : turn === 270 ? [rect.bottom - sy, sx - rect.left]
+    : [sx - rect.left, sy - rect.top];
+  const pts = [local(left, top), local(right, bottom)];
+  let vx0 = Math.min(pts[0][0], pts[1][0]), vx1 = Math.max(pts[0][0], pts[1][0]);
+  let vy0 = Math.min(pts[0][1], pts[1][1]), vy1 = Math.max(pts[0][1], pts[1][1]);
   // Source coordinates run backwards inside the surveyor's rotated sheet.
-  const x0 = (turned ? rect.right - right : left - rect.left) * dpr;
-  const y0 = (turned ? rect.bottom - bottom : top - rect.top) * dpr;
-  const x1 = (turned ? rect.right - left : right - rect.left) * dpr;
-  const y1 = (turned ? rect.bottom - top : bottom - rect.top) * dpr;
+  if (canvas.dataset.pdfTurn === "180") [vx0, vx1, vy0, vy1] = [lw - vx1, lw - vx0, lh - vy1, lh - vy0];
+  const width = Math.ceil(lw * dpr);
+  const height = Math.ceil(lh * dpr);
+  const x0 = vx0 * dpr, y0 = vy0 * dpr, x1 = vx1 * dpr, y1 = vy1 * dpr;
   const x = Math.max(0, Math.floor((x0 - 128) / 256) * 256);
   const y = Math.max(0, Math.floor((y0 - 128) / 256) * 256);
   const w = Math.min(width, Math.ceil((x1 + 128) / 256) * 256) - x;
@@ -127,7 +136,7 @@ function schedule() {
   if (viewport) {
     const bounds = viewport.getBoundingClientRect();
     for (const canvas of viewport.querySelectorAll("canvas[data-pdf-url]")) {
-      const request = requestFor(canvas, bounds);
+      const request = requestFor(canvas, bounds, Number(viewport.dataset.turn || 0));
       if (!request) continue;
       next.set(request.slot, request);
       const bitmap = tiles.get(request.key);

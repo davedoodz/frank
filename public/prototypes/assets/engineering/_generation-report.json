@@ -1,0 +1,349 @@
+{
+  "totalOutputBytes": 102542296,
+  "sheets": [
+    {
+      "sheet": "electrical-0",
+      "code": "E-300",
+      "sourcePage": 5,
+      "pdfBytes": 676579,
+      "jpgBytes": 296742,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "electrical-1",
+      "code": "E-301",
+      "sourcePage": 6,
+      "pdfBytes": 1168731,
+      "jpgBytes": 380338,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "electrical-2",
+      "code": "E-302",
+      "sourcePage": 7,
+      "pdfBytes": 2061811,
+      "jpgBytes": 250434,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "electrical-3",
+      "code": "E-303",
+      "sourcePage": 8,
+      "pdfBytes": 2145742,
+      "jpgBytes": 249298,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "electrical-4",
+      "code": "E-304",
+      "sourcePage": 9,
+      "pdfBytes": 982481,
+      "jpgBytes": 239461,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "electrical-5",
+      "code": "E-305",
+      "sourcePage": 10,
+      "pdfBytes": 8384008,
+      "jpgBytes": 237700,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "electrical-6",
+      "code": "E-306",
+      "sourcePage": 11,
+      "pdfBytes": 2156754,
+      "jpgBytes": 249289,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "electrical-7",
+      "code": "E-307",
+      "sourcePage": 12,
+      "pdfBytes": 2275053,
+      "jpgBytes": 246695,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "electrical-8",
+      "code": "E-308",
+      "sourcePage": 13,
+      "pdfBytes": 2040251,
+      "jpgBytes": 241972,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "electrical-roof",
+      "code": "E-309",
+      "sourcePage": 14,
+      "pdfBytes": 586384,
+      "jpgBytes": 188194,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-00",
+      "code": "M199",
+      "sourcePage": 3,
+      "pdfBytes": 305069,
+      "jpgBytes": 270023,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-0",
+      "code": "M200",
+      "sourcePage": 4,
+      "pdfBytes": 440115,
+      "jpgBytes": 345713,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-1",
+      "code": "M201",
+      "sourcePage": 5,
+      "pdfBytes": 1132910,
+      "jpgBytes": 379878,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-2",
+      "code": "M202",
+      "sourcePage": 6,
+      "pdfBytes": 1956524,
+      "jpgBytes": 233884,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-3",
+      "code": "M203",
+      "sourcePage": 7,
+      "pdfBytes": 2032590,
+      "jpgBytes": 226428,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-4",
+      "code": "M204",
+      "sourcePage": 8,
+      "pdfBytes": 2026560,
+      "jpgBytes": 226135,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-5",
+      "code": "M205",
+      "sourcePage": 9,
+      "pdfBytes": 8273379,
+      "jpgBytes": 216718,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-6",
+      "code": "M206",
+      "sourcePage": 10,
+      "pdfBytes": 2041728,
+      "jpgBytes": 228227,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-7",
+      "code": "M207",
+      "sourcePage": 11,
+      "pdfBytes": 2174580,
+      "jpgBytes": 229057,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-8",
+      "code": "M208",
+      "sourcePage": 12,
+      "pdfBytes": 2628477,
+      "jpgBytes": 297408,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "drainage-roof",
+      "code": "M209",
+      "sourcePage": 13,
+      "pdfBytes": 917709,
+      "jpgBytes": 216381,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-00",
+      "code": "M299",
+      "sourcePage": 15,
+      "pdfBytes": 246621,
+      "jpgBytes": 203462,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-0",
+      "code": "M300",
+      "sourcePage": 16,
+      "pdfBytes": 505048,
+      "jpgBytes": 342894,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-1",
+      "code": "M301",
+      "sourcePage": 17,
+      "pdfBytes": 989270,
+      "jpgBytes": 369483,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-2",
+      "code": "M302",
+      "sourcePage": 18,
+      "pdfBytes": 1946170,
+      "jpgBytes": 223239,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-3",
+      "code": "M303",
+      "sourcePage": 19,
+      "pdfBytes": 2030761,
+      "jpgBytes": 221351,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-4",
+      "code": "M304",
+      "sourcePage": 20,
+      "pdfBytes": 2022668,
+      "jpgBytes": 220668,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-5",
+      "code": "M305",
+      "sourcePage": 21,
+      "pdfBytes": 8268071,
+      "jpgBytes": 211256,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-6",
+      "code": "M306",
+      "sourcePage": 22,
+      "pdfBytes": 2034159,
+      "jpgBytes": 223054,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-7",
+      "code": "M307",
+      "sourcePage": 23,
+      "pdfBytes": 2163683,
+      "jpgBytes": 221993,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-8",
+      "code": "M308",
+      "sourcePage": 24,
+      "pdfBytes": 1948955,
+      "jpgBytes": 223013,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "distribution-roof",
+      "code": "M309",
+      "sourcePage": 25,
+      "pdfBytes": 334446,
+      "jpgBytes": 145500,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-00",
+      "code": "M399",
+      "sourcePage": 26,
+      "pdfBytes": 234680,
+      "jpgBytes": 213583,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-0",
+      "code": "M400",
+      "sourcePage": 27,
+      "pdfBytes": 421267,
+      "jpgBytes": 294958,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-1",
+      "code": "M401",
+      "sourcePage": 28,
+      "pdfBytes": 1048268,
+      "jpgBytes": 355302,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-2",
+      "code": "M402",
+      "sourcePage": 29,
+      "pdfBytes": 2034712,
+      "jpgBytes": 230296,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-3",
+      "code": "M403",
+      "sourcePage": 30,
+      "pdfBytes": 2118299,
+      "jpgBytes": 228034,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-4",
+      "code": "M404",
+      "sourcePage": 31,
+      "pdfBytes": 2097644,
+      "jpgBytes": 224358,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-5",
+      "code": "M405",
+      "sourcePage": 32,
+      "pdfBytes": 8340801,
+      "jpgBytes": 214827,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-6",
+      "code": "M406",
+      "sourcePage": 33,
+      "pdfBytes": 2127950,
+      "jpgBytes": 229576,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-7",
+      "code": "M407",
+      "sourcePage": 34,
+      "pdfBytes": 2245739,
+      "jpgBytes": 225512,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-8",
+      "code": "M408",
+      "sourcePage": 35,
+      "pdfBytes": 1991218,
+      "jpgBytes": 222068,
+      "rendering": "original-pdf-content"
+    },
+    {
+      "sheet": "ventilation-roof",
+      "code": "M409",
+      "sourcePage": 36,
+      "pdfBytes": 347836,
+      "jpgBytes": 142193,
+      "rendering": "original-pdf-content"
+    }
+  ]
+}

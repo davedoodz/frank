@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Maquette 3D — le fichier et ses versions</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script type="importmap">
+{"imports":{
+  "three":"./vendor/three/build/three.module.js",
+  "three/addons/":"./vendor/three/examples/jsm/"
+}}
+</script>
+<script src="wireframe-c3-materials.js"></script>
+<script type="module" src="wireframe-c3-viewer.js"></script>
+<style>
+/* The 3D pane says which SketchUp file it is reading, the way the plan's
+   card says which drawing: the name, the revision, the date. From there the
+   file can be opened in SketchUp, changed for another one in the project's
+   model folder, or set back to an earlier version. Two places for it;
+   switch between them beside the pane. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#f1f1f2;--fill-2:#f6f6f7;--card:#fff;--paper:#fff;--mono:ui-monospace,Menlo,monospace;--skp:#1f5fa8}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+.wrap{display:flex;gap:28px;padding:20px 24px 40px;align-items:flex-start}
+.side{width:300px}
+.side h1{margin:0;font-size:16px;font-weight:600}
+.side p{margin:6px 0 0;color:var(--ink-2);font-size:12.5px}
+.vsw{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.vsw button{font:inherit;text-align:left;border:1px solid var(--line);background:#fff;border-radius:7px;padding:8px 10px;cursor:pointer}
+.vsw button b{display:block;font-weight:600}
+.vsw button span{color:var(--ink-2);font-size:12px}
+.vsw button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.say{margin-top:14px;font-size:12px;color:var(--ink-2);min-height:34px}
+
+/* the 3D pane, as on prototype 3 */
+.pane{position:relative;width:616px;height:843px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;
+  display:flex;flex-direction:column}
+.phd{display:flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 12px;border-bottom:1px solid var(--line-2);font-weight:500;flex:0 0 auto}
+.phd > svg{width:15px;height:15px;flex:0 0 15px}
+.phd .ttl{white-space:nowrap}
+.btnw{margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 9px;border:1px solid var(--line);border-radius:6px;
+  font-weight:400;font-size:12px;color:var(--ink-2);cursor:pointer;white-space:nowrap;flex:0 0 auto;background:#fff;font-family:inherit}
+.btnw svg{width:13px;height:13px}
+.btnw:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.zone{position:relative;flex:1;min-height:0;display:flex}
+.model3d{position:relative;flex:1;min-height:0;overflow:hidden}
+.model3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;touch-action:none;transition:opacity .18s ease}
+.model3d[data-state="ready"] .model3d-canvas{opacity:1}
+.model3d-status{position:absolute;left:50%;bottom:60px;z-index:2;transform:translateX(-50%);border:1px solid rgba(17,17,18,.12);
+  border-radius:999px;background:rgba(255,255,255,.9);padding:5px 9px;color:var(--ink-2);font-size:11px;white-space:nowrap}
+.model3d[data-state="ready"] .model3d-status{visibility:hidden}
+.zb{width:31px;height:31px;flex:0 0 31px;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);cursor:pointer;border:0;background:none;padding:0;font:inherit}
+.zb:hover{background:var(--fill);color:var(--ink)}
+.zb svg{width:17px;height:17px}
+.mtools{position:absolute;right:56px;top:10px;z-index:7;display:flex;gap:2px;padding:2px;background:#fff;border:1px solid var(--line);border-radius:7px}
+.mtools .zb.on{background:#111;color:#fff}
+body.elev .mtools{display:none}
+.north{position:absolute;right:10px;top:10px;z-index:5;width:34px;height:50px;pointer-events:none;overflow:visible}
+.north polygon{fill:#fff;stroke:var(--ink);stroke-width:1.7}
+.north line{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
+.north text{fill:var(--ink);font-size:17px;font-weight:500;text-anchor:middle}
+.axes{position:absolute;left:10px;bottom:50px;z-index:5;width:62px;height:62px;pointer-events:none}
+.axes line{stroke-width:1.8;stroke-linecap:round}
+.axes line[data-ax="x"]{stroke:#d24b3e}.axes line[data-ax="y"]{stroke:#4f9b45}.axes line[data-ax="z"]{stroke:#3a6fb0}
+.axes text{font-family:var(--mono);font-size:7px;text-anchor:middle;dominant-baseline:middle}
+.axes text[data-axt="x"]{fill:#d24b3e}.axes text[data-axt="y"]{fill:#4f9b45}.axes text[data-axt="z"]{fill:#3a6fb0}
+.axes circle{fill:var(--ink-3)}
+body.elev .axes{display:none}
+.mini{position:absolute;right:10px;bottom:10px;z-index:5;width:132px;user-select:none}
+.mini .mi{position:relative;display:block}
+.mini canvas[data-mini3d]{display:block;width:100%;height:84px}
+.zpill{position:absolute;bottom:10px;left:10px;z-index:7;display:flex;align-items:center;height:34px;padding:0 2px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.zpill .zb{width:30px;height:30px;flex:0 0 30px;color:var(--ink)}
+.zpill .zb svg{width:16px;height:16px}
+.zread{min-width:46px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
+.seg{position:absolute;left:10px;top:10px;z-index:8;display:flex;gap:2px;padding:2px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.seg button{height:31px;min-width:31px;padding:0 9px;border:0;border-radius:6px;background:none;font:inherit;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+.seg button:hover{background:var(--fill);color:var(--ink)}
+.seg button[aria-pressed="true"]{background:#111;color:#fff}
+.seg .div{width:1px;background:var(--line-2);margin:5px 2px}
+
+/* The file glyph, as on the plan's card: a page with its kind on a band.
+   SketchUp's band is its own blue, so a model never reads as a drawing. */
+.fglyph{width:24px;height:28px;flex:0 0 24px;color:var(--ink-3);overflow:visible}
+.fglyph .band{fill:var(--ink)}
+.fglyph.skp .band{fill:var(--skp)}
+.fglyph text{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:7.4px;fill:#fff;letter-spacing:.03em}
+
+/* A — the file named in the pane's header, after the pane's own name. */
+.fchip{display:none;align-items:center;gap:6px;min-width:0;height:28px;padding:0 6px 0 4px;margin-left:2px;border:1px solid transparent;
+  border-radius:6px;background:none;font:inherit;color:var(--ink);cursor:pointer}
+body[data-v="A"] .fchip{display:inline-flex}
+.fchip:hover,.fchip[aria-expanded="true"]{border-color:var(--line);background:var(--fill-2)}
+.fchip .fglyph{width:17px;height:20px;flex:0 0 17px}
+.fchip b{font-family:var(--mono);font-size:11px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fchip .old{font-size:11px;font-weight:500;color:#9a5b00;white-space:nowrap}
+.fchip > svg:last-child{width:13px;height:13px;flex:0 0 13px;color:var(--ink-3)}
+.fpop{position:absolute;left:96px;top:36px;z-index:30;width:340px;display:none}
+body[data-v="A"] .fpop.open{display:block}
+
+/* B — the same document card as the plan's, docked in the pane. */
+.fcard{position:absolute;left:10px;top:52px;z-index:9;width:316px;display:none}
+body[data-v="B"] .fcard{display:block}
+
+/* The document card, one for both places. */
+.doc{background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.10);
+  padding:9px 10px;display:flex;flex-direction:column;gap:7px;font-size:11.5px}
+.doc .hd{display:flex;align-items:center;gap:8px}
+.doc .hd .fglyph{width:19px;height:22px;flex:0 0 19px}
+.doc .hd .nm{flex:1;min-width:0;display:flex;flex-direction:column}
+.doc .hd b{font-family:var(--mono);font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc .hd .meta{color:var(--ink-3);font-size:10.5px}
+.doc .hd .meta .old{color:#9a5b00}
+.doc .hd.swapped{animation:fnswap .9s ease}
+@keyframes fnswap{0%{background:#e9f5c8}100%{background:transparent}}
+.doc .path{font-family:var(--mono);font-size:10px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.docbtn{display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;border:1px solid var(--line-2);border-radius:5px;
+  padding:4px 8px;font:inherit;font-size:11.5px;background:#fff;color:var(--ink)}
+.docbtn svg{width:13px;height:13px}
+.docbtn:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.lmenu{display:flex;flex-direction:column;border:1px solid var(--line-2);border-radius:5px;overflow:hidden}
+.lmenu .mi{padding:5px 8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.lmenu .mi:hover{background:var(--fill-2)}
+.lmenu .mi + .mi,.lmenu .lpast + .mi{border-top:1px solid var(--line-2)}
+.lmenu .mi svg{width:12px;height:12px;flex:0 0 12px;color:var(--ink-3)}
+.lmenu .mi.open{background:var(--fill-2)}
+.lmenu .mi.open > svg{transform:rotate(180deg)}
+.lmenu .mi.back{font-weight:500}
+.lpast{display:flex;flex-direction:column;border-top:1px solid var(--line-2);background:var(--fill-2)}
+.lpast .dir{padding:5px 9px 4px;font-family:var(--mono);font-size:10px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lpast .pd{display:grid;grid-template-columns:auto 1fr;column-gap:8px;row-gap:1px;padding:6px 8px 6px 9px;cursor:pointer}
+.lpast .dir + .pd{border-top:1px solid var(--line)}
+.lpast .pd + .pd{border-top:1px solid var(--line)}
+.lpast .pd:hover{background:var(--fill)}
+.lpast .pd.cur{cursor:default;background:none}
+.lpast .fglyph{grid-row:span 2;align-self:center}
+.lpast .pf{font-family:var(--mono);font-size:10.5px;color:var(--ink);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lpast .pdt{font-size:10.5px;color:var(--ink-3)}
+
+/* The swap, as on the plan: the old model is wiped from the top and the
+   new one shows behind a moving line. */
+.swapfx{position:absolute;inset:0;pointer-events:none;z-index:4;background:var(--card);animation:swapveil .85s cubic-bezier(.4,0,.2,1) forwards}
+.swapfx::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--ink);animation:swapline .85s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes swapveil{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(100% 0 0 0)}}
+@keyframes swapline{0%{top:0;opacity:.9}100%{top:100%;opacity:0}}
+@media (prefers-reduced-motion: reduce){.swapfx,.swapfx::after,.doc .hd.swapped{animation-duration:.01s}}
+</style>
+</head>
+<body data-v="A">
+<div class="wrap">
+  <div class="side">
+    <h1>Maquette 3D — le fichier et ses versions</h1>
+    <p>Le volet dit quel fichier SketchUp il lit, comme la carte du plan dit quel dessin: le nom, la révision, la date. De là, on ouvre le fichier dans SketchUp, on le change pour un autre du dossier Maquette, ou on revient à une version précédente.</p>
+    <div class="vsw" id="vsw">
+      <button data-v="A" aria-pressed="true"><b>A — Dans l'en-tête du volet</b><span>Le nom du fichier suit « Maquette 3D ». Un clic ouvre la carte du document. Rien ne couvre la maquette.</span></button>
+      <button data-v="B" aria-pressed="false"><b>B — Carte dans le volet</b><span>La même carte que celle du plan 2D, posée sur la maquette sous la bascule des vues.</span></button>
+    </div>
+    <p class="say" data-say aria-live="polite"></p>
+  </div>
+
+  <div class="pane">
+    <div class="phd"><span data-ic="box"></span><span class="ttl">Maquette 3D</span>
+      <button class="fchip" data-fchip aria-expanded="false" aria-haspopup="dialog"></button>
+      <button class="btnw" data-act="sketchup"><span data-ic="external-link"></span>Ouvrir dans SketchUp</button></div>
+    <div class="fpop" data-fpop></div>
+    <div class="zone" data-zone="model">
+      <div class="model3d" data-building-model data-state="loading" aria-busy="true">
+        <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
+      </div>
+      <div class="npins" data-npins></div>
+
+      <div class="seg" role="group" aria-label="Vue">
+        <button data-face="" aria-pressed="true" title="Maquette 3D">3D</button>
+        <i class="div"></i>
+        <button data-face="nord" title="Élévation nord">Nord</button>
+        <button data-face="est" title="Élévation est">Est</button>
+        <button data-face="sud" title="Élévation sud">Sud</button>
+        <button data-face="ouest" title="Élévation ouest">Ouest</button>
+      </div>
+      <div class="mtools"><button class="zb on" title="Orbiter"><span data-ic="rotate-3d"></span></button><button class="zb" title="Déplacer"><span data-ic="move"></span></button></div>
+      <div class="fcard" data-fcard></div>
+
+      <svg class="north" data-north3d viewBox="-22 -32 44 64" aria-label="Nord">
+        <polygon data-nring points=""></polygon><line data-nneedle x1="0" y1="0" x2="0" y2="-14"></line><text data-nlabel x="0" y="-21">N</text>
+      </svg>
+      <svg class="axes" data-axes viewBox="-26 -26 52 52" aria-hidden="true">
+        <line data-ax="x" x1="0" y1="0" x2="0" y2="0"></line><text data-axt="x" x="0" y="0">X</text>
+        <line data-ax="y" x1="0" y1="0" x2="0" y2="0"></line><text data-axt="y" x="0" y="0">Y</text>
+        <line data-ax="z" x1="0" y1="0" x2="0" y2="0"></line><text data-axt="z" x="0" y="0">Z</text>
+        <circle cx="0" cy="0" r="1.6"></circle>
+      </svg>
+      <div class="mini" data-mini="model"><span class="mi" data-mi><canvas data-mini3d></canvas></span></div>
+      <div class="zpill"><button class="zb" data-z="-"><span data-ic="minus"></span></button><span class="zread" data-mread>—</span><button class="zb" data-z="+"><span data-ic="plus"></span></button></div>
+    </div>
+  </div>
+</div>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n) => {
+  const node = lucide.icons[pascal(n)];
+  return node ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+    node[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : "";
+};
+document.querySelectorAll("[data-ic]").forEach((s) => { s.outerHTML = svg(s.dataset.ic); });
+
+/* The project's model folder and what is in it. Sample files for the
+   prototype, named the way an office's folder really reads: the issued
+   revision first, then the coordination, permit and massing models it
+   replaced, and two side studies that were never issued. */
+const DIR = "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Maquette\\";
+const VERSIONS = [
+  { file: "BAL3_MAQUETTE_R07_2026-10-24.skp", rev: "R07", date: "24 oct 2026", note: "émise", size: "186 Mo" },
+  { file: "COORD_MAQUETTE_R06_2026-09-30.skp", rev: "R06", date: "30 sept 2026", note: "coordination", size: "181 Mo" },
+  { file: "PERMIS_MAQUETTE_R05_2026-08-29.skp", rev: "R05", date: "29 août 2026", note: "émise pour permis", size: "174 Mo" },
+  { file: "VOLUMETRIE_OPT2_R03_2026-06-12.skp", rev: "R03", date: "12 juin 2026", note: "volumétrie option 2", size: "62 Mo" },
+];
+const OTHERS = [
+  { file: "ETUDE_TOITURE-TERRASSE_2026-10-02.skp", date: "2 oct 2026", note: "étude", size: "38 Mo" },
+  { file: "SITE_CONTEXTE-URBAIN_2026-04-18.skp", date: "18 avr 2026", note: "contexte", size: "97 Mo" },
+];
+const S = { cur: VERSIONS[0], open: false, hist: false, dir: false, swapped: false };
+
+const extOf = (f) => f.split(".").pop().toLowerCase();
+const glyph = (file) => {
+  const ext = extOf(file);
+  return `<svg class="fglyph ${ext}" viewBox="0 0 26 30" aria-hidden="true">
+    <path d="M6.5 1h11l6.5 6.5v20.5a1 1 0 0 1-1 1h-16.5a1 1 0 0 1-1-1v-26a1 1 0 0 1 1-1z" fill="var(--card)" stroke="currentColor" stroke-width="1.2"/>
+    <path d="M17.5 1v6.5h6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+    <rect class="band" x="0" y="14" width="21" height="10" rx="1.6"/>
+    <text x="10.5" y="21.6" text-anchor="middle">${ext.toUpperCase()}</text></svg>`;
+};
+const isOld = () => S.cur !== VERSIONS[0];
+const metaOf = (d) => [d.rev, d.date, d.size].filter(Boolean).join(" · ");
+const row = (d, i, label) => `<span class="pd ${d === S.cur ? "cur" : ""}" ${d === S.cur ? "" : `data-pick="${i}"`}
+  title="${d === S.cur ? "Affichée" : `Remplacer par ${d.file}`}">${glyph(d.file)}<span class="pf">${d.file}</span>
+  <span class="pdt">${label(d)}</span></span>`;
+const ALL = [...VERSIONS, ...OTHERS];
+
+/* The card: which file, where it lives, and what can be done with it. */
+function docHTML(withMenu) {
+  const d = S.cur;
+  const past = VERSIONS.filter((v) => v !== d);
+  return `<div class="doc">
+    <div class="hd ${S.swapped ? "swapped" : ""}">${glyph(d.file)}<span class="nm"><b title="${d.file}">${d.file}</b>
+      <span class="meta">${metaOf(d)}${isOld() ? ` · <span class="old">version antérieure</span>` : ""}</span></span></div>
+    <span class="path" title="${DIR}">${DIR}</span>
+    ${withMenu ? `<button class="docbtn" data-menu>${svg("file")}Maquette ${svg("chevron-down")}</button>` : ""}
+    ${!withMenu || S.open ? `<div class="lmenu">
+      ${isOld() ? `<span class="mi back" data-pick="0">Revenir à la version émise (${VERSIONS[0].rev})</span>` : ""}
+      <span class="mi" data-act="sketchup">Ouvrir dans SketchUp</span>
+      <span class="mi ${S.dir ? "open" : ""}" data-dir aria-expanded="${S.dir}">Changer la maquette…${svg("chevron-down")}</span>
+      ${S.dir ? `<div class="lpast"><span class="dir" title="${DIR}">${DIR}</span>
+        ${ALL.map((v, i) => row(v, i, (x) => x === S.cur ? "affichée" : `${x.date} — ${x.note}`)).join("")}</div>` : ""}
+      <span class="mi ${S.hist ? "open" : ""}" data-hist aria-expanded="${S.hist}">
+        ${isOld() ? "Voir les autres versions" : "Voir les versions précédentes"} (${past.length})${svg("chevron-down")}</span>
+      ${S.hist ? `<div class="lpast">${past.map((v) => row(v, ALL.indexOf(v),
+        (x) => `${x.rev} · ${x.date} — ${x.note}`)).join("")}</div>` : ""}
+    </div>` : ""}
+  </div>`;
+}
+
+function paint() {
+  const d = S.cur;
+  const chip = document.querySelector("[data-fchip]");
+  chip.innerHTML = `${glyph(d.file)}<b>${d.file}</b>${isOld() ? `<span class="old">${d.rev}</span>` : ""}${svg("chevron-down")}`;
+  chip.title = `${DIR}${d.file}`;
+  chip.setAttribute("aria-expanded", String(S.open));
+  const pop = document.querySelector("[data-fpop]");
+  pop.classList.toggle("open", S.open);
+  /* In A the card is the popover, so its menu is always open. In B the
+     card stays on the model and folds its menu like the plan's card. */
+  pop.innerHTML = document.body.dataset.v === "A" && S.open ? docHTML(false) : "";
+  document.querySelector("[data-fcard]").innerHTML = document.body.dataset.v === "B" ? docHTML(true) : "";
+  S.swapped = false;
+}
+
+const say = (t) => { document.querySelector("[data-say]").textContent = t; };
+
+/* Picking a file lays it in the pane in place of the current one: the name
+   and date change, and the model is redrawn from the top so the swap is
+   seen, not just read. */
+function pick(i) {
+  const next = ALL[i];
+  if (!next || next === S.cur) return;
+  S.cur = next; S.hist = false; S.dir = false; S.swapped = true;
+  if (document.body.dataset.v === "A") S.open = false;
+  paint();
+  const m = document.querySelector("[data-building-model]");
+  const fx = document.createElement("div");
+  fx.className = "swapfx";
+  m.append(fx);
+  fx.addEventListener("animationend", () => fx.remove(), { once: true });
+  say(next === VERSIONS[0] ? `Version émise ${next.rev} rechargée.`
+    : `${next.file} affichée. La maquette émise reste ${VERSIONS[0].file}.`);
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.closest("[data-fchip]")) { S.open = !S.open; paint(); return; }
+  if (t.closest("[data-menu]")) { S.open = !S.open; S.hist = false; S.dir = false; paint(); return; }
+  if (t.closest("[data-hist]")) { S.hist = !S.hist; S.dir = false; paint(); return; }
+  if (t.closest("[data-dir]")) { S.dir = !S.dir; S.hist = false; paint(); return; }
+  const p = t.closest("[data-pick]");
+  if (p) { pick(Number(p.dataset.pick)); return; }
+  if (t.closest('[data-act="sketchup"]')) { say(`Remise à SketchUp: ${S.cur.file} s'ouvre. Lecture seule.`); return; }
+  // A click outside the popover closes it.
+  if (document.body.dataset.v === "A" && S.open && !t.closest("[data-fpop]")) { S.open = false; paint(); }
+  const f = t.closest("[data-face]");
+  if (f) {
+    const face = f.dataset.face;
+    window.fitteElevation = face ? { face, focus: 0, plain: true } : null;
+    document.body.classList.toggle("elev", Boolean(face));
+    document.querySelectorAll("[data-face]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.face === face)));
+    window.dispatchEvent(new Event("fitte:render"));
+    return;
+  }
+  const z = t.closest("[data-z]");
+  if (z && window.fitteModel) { const cur = window.fitteModel.readZoom(); window.fitteModel.writeZoom(z.dataset.z === "+" ? cur * 1.25 : cur / 1.25); }
+});
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && S.open) { S.open = false; paint(); }
+});
+window.addEventListener("fitte:model-zoom", (e) => {
+  const v = e.detail; document.querySelector("[data-mread]").textContent = Number.isFinite(v) ? `${Math.round(v)}%` : "—";
+});
+document.getElementById("vsw").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  document.body.dataset.v = b.dataset.v;
+  document.querySelectorAll("#vsw button").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+  S.open = false; S.hist = false; S.dir = false;
+  paint();
+});
+paint();
+</script>
+</body>
+</html>

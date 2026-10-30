@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Épingle — où poser le champ de saisie</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The bug: on a narrow 2D pane the composer cannot fit beside the pin, is
+   clamped back inside the pane, and lands on the pin it is about. Six
+   placements, each live: click anywhere on a drawing to drop the pin
+   there. The panes are as narrow as the one in the screenshot. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#f1f1f2;--fill-2:#f6f6f7;--card:#fff;--mono:ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header{padding:20px 24px 6px;max-width:1100px}
+header h1{margin:0;font-size:16px;font-weight:600}
+header p{margin:4px 0 0;color:var(--ink-2)}
+.bar{display:flex;gap:6px;padding:10px 24px 0}
+.bar button{font:inherit;font-size:11.5px;border:1px solid var(--line);background:#fff;border-radius:5px;padding:3px 9px;cursor:pointer}
+.bar button[aria-pressed="true"],.bar button:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:22px;padding:14px 24px 40px}
+.demo h2{margin:0;font-size:13px;font-weight:600}
+.demo .why{margin:2px 0 8px;font-size:11.5px;color:var(--ink-2);min-height:46px}
+.demo.bug{outline:1px dashed #d34;outline-offset:6px;border-radius:6px}
+
+.pane{position:relative;width:380px;height:440px;border:1px solid var(--line);border-radius:8px;overflow:hidden;
+  background:#fff url("assets/plan-niveau-5.jpg") 30% 40%/900px auto no-repeat;cursor:crosshair}
+
+/* the pin: white inside, as on the prototype */
+.pin{position:absolute;width:28px;height:28px;margin:-28px 0 0 -14px;color:var(--ink);pointer-events:none;z-index:3;
+  filter:drop-shadow(0 2px 4px rgba(17,17,18,.3))}
+.pin svg{width:28px;height:28px;fill:#fff;stroke:currentColor;stroke-width:1.8}
+.pin.hidden{outline:2px solid #d34;outline-offset:2px;border-radius:50%}
+
+/* the composer, as on the prototype */
+.pbub{position:absolute;width:286px;background:var(--card);border:1px solid var(--ink);border-radius:9px;padding:8px;
+  display:flex;flex-direction:column;gap:6px;box-shadow:0 10px 26px rgba(17,17,18,.22);z-index:2;cursor:default}
+.pbub .row{display:flex;align-items:center;gap:4px}
+.chip{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border:1px solid var(--line);border-radius:11px;
+  font-size:11.5px;white-space:nowrap;color:var(--ink-2)}
+.chip.on{border-color:var(--ink);color:var(--ink)}
+.chip svg{width:12px;height:12px}
+.zn{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-left:auto;line-height:1.15;text-align:right}
+.nnew{width:100%;height:58px;border:1px solid var(--line-2);border-radius:6px;padding:6px 7px;font:inherit;font-size:12.5px;
+  color:var(--ink-3);background:#fff}
+.btn{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border:1px solid var(--line);border-radius:5px;font-size:12px}
+.btn.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn svg{width:13px;height:13px}
+.kb{margin-left:auto;font-size:10px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:1px 5px}
+
+/* the tail: a small diamond on the side facing the pin */
+.tail{position:absolute;width:12px;height:12px;background:var(--card);border:1px solid var(--ink);transform:rotate(45deg);z-index:-1}
+.tail.l{left:-7px;border-top:0;border-right:0}
+.tail.r{right:-7px;border-bottom:0;border-left:0}
+.tail.t{top:-7px;border-bottom:0;border-right:0}
+.tail.b{bottom:-7px;border-top:0;border-left:0}
+
+/* docked: a band across the foot of the pane */
+.pbub.dock{left:8px!important;right:8px;width:auto;bottom:8px;top:auto!important}
+/* the pin is in the bottom band: the band moves to the head of the pane */
+.pbub.dock.up{top:8px!important;bottom:auto}
+.lead{position:absolute;inset:0;pointer-events:none;z-index:1}
+.lead line{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3}
+.lead circle{fill:var(--ink)}
+/* compact: one line until it is typed in */
+.pbub.compact{width:230px;padding:5px 5px 5px 9px;flex-direction:row;align-items:center;gap:6px;border-radius:18px}
+.pbub.compact .ph{flex:1;color:var(--ink-3);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbub.compact .go{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center}
+.pbub.compact .go svg{width:13px;height:13px}
+.pbub.compact svg.lk{width:13px;height:13px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Épingle — six façons de placer le champ de saisie</h1>
+  <p>Cliquez n'importe où sur un plan pour y poser l'épingle. Les boutons placent l'épingle aux endroits difficiles pour toutes les variantes à la fois. Contour rouge: l'épingle est cachée.</p>
+</header>
+<div class="bar" id="bar"></div>
+<div class="grid" id="grid"></div>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const svg = (n, cls = "") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+  lucide.icons[n][2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+const PAD = 10, GAP = 14;          // pane margin; air between pin and box
+const PIN = { w: 28, h: 28 };      // the tip is the anchor; the head sits above it
+
+const fullHTML = () => `<div class="row">
+    <span class="chip on">${svg("Lock")}À l'interne</span><span class="chip">${svg("Users")}Partagée</span>
+    <span class="zn">arpenteur<br>niv. 6 — 607</span></div>
+  <div class="nnew">Note interne — l'invité ne la verra pas</div>
+  <div class="row"><span class="btn solid">${svg("Lock")}Épingler</span><span class="btn">Annuler</span><span class="kb">⌘↵</span></div>`;
+const compactHTML = () => `${svg("Lock", "lk")}<span class="ph">Note interne…</span><span class="go">${svg("ArrowUp")}</span>`;
+
+/* The pin's own box, from its tip: the composer must never cross it. */
+const pinBox = (x, y) => ({ l: x - PIN.w / 2, r: x + PIN.w / 2, t: y - PIN.h, b: y });
+const hits = (a, b) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
+const clampX = (v, w, W) => Math.max(PAD, Math.min(v, W - w - PAD));
+const clampY = (v, h, H) => Math.max(PAD, Math.min(v, H - h - PAD));
+
+/* Each placement returns {left, top, tail, tailAt} for the box, given the
+   pin tip (x, y), the pane (W, H) and the box (w, h). */
+const SIDE = {
+  r: (x, y, W, H, w, h) => ({ left: x + PIN.w / 2 + GAP - 4, top: clampY(y - PIN.h / 2 - 22, h, H), tail: "l" }),
+  l: (x, y, W, H, w, h) => ({ left: x - PIN.w / 2 - GAP + 4 - w, top: clampY(y - PIN.h / 2 - 22, h, H), tail: "r" }),
+  b: (x, y, W, H, w, h) => ({ left: clampX(x - w / 2, w, W), top: y + GAP, tail: "t" }),
+  t: (x, y, W, H, w, h) => ({ left: clampX(x - w / 2, w, W), top: y - PIN.h - GAP - h, tail: "b" }),
+};
+const fits = (p, W, H, w, h) => p.left >= PAD && p.left + w <= W - PAD && p.top >= PAD && p.top + h <= H - PAD;
+
+const STRATS = [
+  { id: "bug", title: "Aujourd'hui — le bug", why: "À droite si possible, sinon à gauche, puis ramené dans le volet. Sur un volet étroit, ni l'un ni l'autre n'a la place et la boîte recouvre l'épingle.",
+    place(x, y, W, H, w, h) {
+      const max = W - w - PAD;
+      const left = x + 18 > max ? x - 18 - w : x + 18;
+      return { left: Math.max(PAD, Math.min(left, max)), top: Math.max(PAD, Math.min(y - 14, H - h - PAD)) };
+    } },
+  { id: "A", title: "A — Dessous, puis dessus", why: "Centrée sous la pointe, une flèche vers le haut. S'il n'y a pas la place, au-dessus de la tête. Lit comme une bulle de commentaire; tient dans un volet étroit.",
+    place(x, y, W, H, w, h) {
+      const b = SIDE.b(x, y, W, H, w, h);
+      return fits(b, W, H, w, h) ? b : SIDE.t(x, y, W, H, w, h);
+    } },
+  { id: "B", title: "B — Au-dessus, puis dessous", why: "Même chose, ordre inverse: la boîte se lit au-dessus de l'épingle, comme une étiquette. Le plan sous la pointe reste visible pendant qu'on écrit.",
+    place(x, y, W, H, w, h) {
+      const t = SIDE.t(x, y, W, H, w, h);
+      return fits(t, W, H, w, h) ? t : SIDE.b(x, y, W, H, w, h);
+    } },
+  { id: "C", title: "C — Le côté qui a la place", why: "Essaie droite, gauche, dessous, dessus, et prend le premier qui tient en entier. Si aucun ne tient, celui qui cache le moins — jamais l'épingle.",
+    place(x, y, W, H, w, h) {
+      const order = ["r", "l", "b", "t"].map((s) => SIDE[s](x, y, W, H, w, h));
+      const ok = order.find((p) => fits(p, W, H, w, h));
+      if (ok) return ok;
+      /* none fits whole: clamp each and keep the first that leaves the pin clear */
+      for (const p of order) {
+        const q = { ...p, left: clampX(p.left, w, W), top: clampY(p.top, h, H) };
+        if (!hits({ l: q.left, r: q.left + w, t: q.top, b: q.top + h }, pinBox(x, y))) return q;
+      }
+      return order[2];
+    } },
+  { id: "D", title: "D — Ancré au pied du volet", why: "La saisie est toujours au même endroit, en bas du volet, reliée à l'épingle par un trait pointillé. Rien ne bouge; le trait dit à quoi elle se rapporte.",
+    dock: true,
+    place() { return {}; } },
+  { id: "E", title: "E — Compacte, puis dépliée", why: "D'abord une seule ligne à côté de l'épingle — assez étroite pour tenir à droite ou à gauche. Les choix (portée, Annuler) apparaissent quand on tape.",
+    compact: true,
+    place(x, y, W, H, w, h) {
+      const r = { left: x + PIN.w / 2 + 6, top: clampY(y - PIN.h / 2 - h / 2, h, H), tail: "l" };
+      if (fits(r, W, H, w, h)) return r;
+      const l = { left: x - PIN.w / 2 - 6 - w, top: r.top, tail: "r" };
+      if (fits(l, W, H, w, h)) return l;
+      const b = SIDE.b(x, y, W, H, w, h);
+      return fits(b, W, H, w, h) ? b : SIDE.t(x, y, W, H, w, h);
+    } },
+  { id: "F", title: "F — Le plan se déplace", why: "La boîte garde sa place à droite; si elle n'y tient pas, le plan glisse pour faire de la place à l'épingle. Montré ici par le décalage de l'épingle et du fond.",
+    pan: true,
+    place(x, y, W, H, w, h) { return SIDE.r(x, y, W, H, w, h); } },
+];
+
+const CASES = [
+  ["Centre", 0.5, 0.5], ["Bord droit", 0.9, 0.45], ["Bord gauche", 0.08, 0.45],
+  ["Haut", 0.55, 0.12], ["Bas", 0.5, 0.93], ["Coin bas droit", 0.9, 0.92], ["Cas de la capture", 0.62, 0.18],
+];
+
+const demos = [];
+function mount(S) {
+  const sec = document.createElement("section");
+  sec.className = `demo ${S.id === "bug" ? "bug" : ""}`;
+  sec.innerHTML = `<h2>${S.title}</h2><p class="why">${S.why}</p><div class="pane"></div>`;
+  document.getElementById("grid").append(sec);
+  const pane = sec.querySelector(".pane");
+  const draw = (fx, fy) => {
+    pane.innerHTML = "";
+    const W = pane.clientWidth, H = pane.clientHeight;
+    let x = fx * W, y = fy * H;
+    const bub = document.createElement("div");
+    bub.className = `pbub ${S.dock ? "dock" : ""} ${S.compact ? "compact" : ""}`;
+    bub.innerHTML = S.compact ? compactHTML() : fullHTML();
+    pane.append(bub);
+    const w = bub.offsetWidth, h = bub.offsetHeight;
+    /* F: if the box does not fit on the right, slide the drawing left
+       (and up or down) by just enough, pin and all. */
+    if (S.pan) {
+      const p = SIDE.r(x, y, W, H, w, h);
+      const dx = Math.min(0, W - PAD - (p.left + w)), dy = y - PIN.h < PAD ? PAD - (y - PIN.h) : 0;
+      const dx2 = Math.max(dx, PAD + PIN.w / 2 - x);
+      x += dx2; y += dy;
+      pane.style.backgroundPosition = `calc(30% + ${dx2}px) calc(40% + ${dy}px)`;
+    } else pane.style.backgroundPosition = "";
+    const pin = document.createElement("div");
+    pin.className = "pin"; pin.innerHTML = svg("MapPin");
+    pin.style.left = `${x}px`; pin.style.top = `${y}px`;
+    pane.append(pin);
+    if (S.dock) {
+      const up = y > H - 8 - h - GAP;
+      bub.classList.toggle("up", up);
+      const by = up ? 8 + h : H - 8 - h;
+      pane.insertAdjacentHTML("beforeend", `<svg class="lead" width="${W}" height="${H}"><line x1="${x}" y1="${up ? y - PIN.h : y + 2}" x2="${x < 30 ? 30 : Math.min(x, W - 30)}" y2="${by}"/><circle cx="${x}" cy="${y}" r="2.5"/></svg>`);
+    } else {
+      const p = S.place(x, y, W, H, w, h);
+      bub.style.left = `${p.left}px`; bub.style.top = `${p.top}px`;
+      if (p.tail) {
+        const t = document.createElement("i");
+        t.className = `tail ${p.tail}`;
+        if (p.tail === "l" || p.tail === "r") t.style.top = `${Math.max(10, Math.min(y - PIN.h / 2 - p.top - 6, h - 22))}px`;
+        else t.style.left = `${Math.max(10, Math.min(x - p.left - 6, w - 22))}px`;
+        bub.append(t);
+      }
+    }
+    const br = bub.getBoundingClientRect(), pr = pane.getBoundingClientRect();
+    const covered = hits({ l: br.left - pr.left, r: br.right - pr.left, t: br.top - pr.top, b: br.bottom - pr.top }, pinBox(x, y));
+    pin.classList.toggle("hidden", covered);
+    sec.dataset.covered = covered;
+  };
+  pane.addEventListener("click", (e) => {
+    if (e.target.closest(".pbub")) return;
+    const r = pane.getBoundingClientRect();
+    draw((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+  });
+  demos.push(draw);
+}
+STRATS.forEach(mount);
+const bar = document.getElementById("bar");
+bar.innerHTML = CASES.map(([n], i) => `<button data-i="${i}" aria-pressed="${i === 6}">${n}</button>`).join("");
+bar.onclick = (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  bar.querySelectorAll("button").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+  const [, fx, fy] = CASES[+b.dataset.i];
+  demos.forEach((d) => d(fx, fy));
+};
+demos.forEach((d) => d(CASES[6][1], CASES[6][2]));
+</script>
+</body>
+</html>

@@ -7,7 +7,19 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/login") return NextResponse.next();
 
   const ok = await isValidToken(request.cookies.get(AUTH_COOKIE)?.value);
-  if (ok) return NextResponse.next();
+  if (ok) {
+    const isPrototypeTwoLanding =
+      process.env.FITTE_PROTOTYPE === "2" &&
+      (pathname === "/prototypes/index.html" || pathname === "/prototypes/");
+
+    if (isPrototypeTwoLanding) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/prototypes/prototype2.html";
+      return NextResponse.rewrite(url);
+    }
+
+    return NextResponse.next();
+  }
 
   const url = request.nextUrl.clone();
   url.pathname = "/login";

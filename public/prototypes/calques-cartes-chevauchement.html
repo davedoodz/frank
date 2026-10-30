@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Cartes de calque — chevauchement</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The bug: a drawing's card is kept open (clicked), and the drawing just
+   above it is hovered. The hovered card wants the same top as its tile,
+   the kept card is already there, and the only way to push the hovered
+   card clear is upward — past the top of the pane. Clamped, it lands on
+   the kept card. Five ways out, each one live: click a tile to keep its
+   card, hover another to peek. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#f1f1f2;--fill-2:#f6f6f7;--card:#fff;--green:#c3e05a;--green-ink:#2f3a05;--model:#e9e8e3}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header{padding:20px 24px 6px;max-width:1200px}
+header h1{margin:0;font-size:16px;font-weight:600}
+header p{margin:4px 0 0;color:var(--ink-2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(600px,1fr));gap:18px;padding:14px 24px 40px}
+.demo h2{margin:0;font-size:13px;font-weight:600}
+.demo .why{margin:2px 0 8px;font-size:11.5px;color:var(--ink-2);min-height:46px}
+.demo .ctl{display:flex;gap:6px;margin-bottom:8px}
+.demo .ctl button{font:inherit;font-size:11px;border:1px solid var(--line);background:#fff;border-radius:5px;padding:3px 8px;cursor:pointer}
+.demo .ctl button:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.demo.bug{outline:1px dashed #d34;outline-offset:6px;border-radius:6px}
+
+/* The pane: the strip on the left, the model's pane behind the cards. */
+.pane{position:relative;height:620px;border:1px solid var(--line);border-radius:8px;overflow:hidden;
+  display:grid;grid-template-columns:96px 1fr;background:#fff}
+.strip{border-right:1px solid var(--line-2);padding:6px;display:flex;flex-direction:column;gap:4px;background:#fff}
+.model{background:linear-gradient(var(--model),var(--model))}
+.ltile{position:relative;border:1px solid transparent;border-radius:6px;padding:4px;cursor:default;
+  display:flex;flex-direction:column;align-items:center;gap:3px;user-select:none}
+.ltile:hover{background:var(--fill-2)}
+.ltile.sel{background:var(--ink)}
+.ltile.sel .nm{color:#fff}
+.ltile .wrap{position:relative;width:100%}
+.ltile .pic{display:block;width:100%;aspect-ratio:1.18;border:1px solid var(--line-2);border-radius:4px;
+  background:#fff center/contain no-repeat;opacity:.55}
+.ltile .gl{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;
+  background:rgba(255,255,255,.92);border:1px solid var(--line-2);display:flex;align-items:center;justify-content:center}
+.ltile .gl svg{width:16px;height:16px}
+.ltile .nm{font-size:10.5px;font-weight:500;line-height:1.2;text-align:center}
+
+/* The card, as in prototype 3. */
+.lcard{position:absolute;z-index:5;width:232px;padding:9px 10px;display:flex;flex-direction:column;gap:7px;
+  font-size:11.5px;background:var(--card);border:1px solid var(--line);border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.10);transition:top .16s ease,left .16s ease,opacity .12s}
+.lcard.peek{border-color:var(--line-2);box-shadow:0 4px 14px rgba(17,17,18,.10);z-index:6}
+.lcard .hd{display:flex;align-items:baseline;gap:8px}
+.lcard .hd b{font-size:12.5px;font-weight:600}
+.lcard .hd .dt{margin-left:auto;color:var(--ink-3);font-size:10.5px;white-space:nowrap}
+.lcard .fn{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lcard .doc{border:1px solid var(--line-2);border-radius:5px;padding:4px 8px;text-align:center}
+.lcard .op{display:flex;align-items:center;gap:8px;color:var(--ink-2)}
+.lcard .op i{flex:1;height:3px;background:var(--line-2);border-radius:2px;position:relative}
+.lcard .op i::before{content:"";position:absolute;inset:0 45% 0 0;background:var(--ink);border-radius:2px}
+.lcard .op span{font-variant-numeric:tabular-nums}
+/* collapsed: the header row only */
+.lcard.mini > :not(.hd){display:none}
+/* chip: one line */
+.lchip{position:absolute;z-index:6;display:flex;align-items:center;gap:8px;height:28px;padding:0 10px;
+  background:var(--card);border:1px solid var(--line-2);border-radius:14px;font-size:11.5px;white-space:nowrap;
+  box-shadow:0 4px 14px rgba(17,17,18,.10);transition:top .16s ease}
+.lchip b{font-weight:600}.lchip span{color:var(--ink-3)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Cartes de calque — le chevauchement, et cinq façons d'en sortir</h1>
+  <p>Cliquez une vignette pour garder sa carte, survolez-en une autre pour l'aperçu. « Rejouer le cas » reproduit le bug : Architecte gardée, Arpenteur survolé.</p>
+</header>
+<div class="grid" id="grid"></div>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const LAYERS = [
+  { k: "arp", nm: "Arpenteur", disc: "Arpentage", dt: "7 oct 2026", fn: "BAL3_IMPLANTATION_2026-10-07.dwg", img: "assets/arp-site.png", ic: "Map" },
+  { k: "plan", nm: "Architecte", disc: "Architecture", dt: "24 oct 2026", fn: "A-209_PLAN_NIVEAU_5.dwg", img: "assets/plan-niveau-5.jpg", ic: "DraftingCompass" },
+  { k: "electrical", nm: "Électricité", disc: "Électricité", dt: "E-305 — p.10", fn: "BAL3_E-305_ELECTRICITE_NIVEAU_5.pdf", img: "assets/engineering/electrical-5.jpg", ic: "Zap" },
+  { k: "drainage", nm: "Drainage (Plomb. & Méc.)", disc: "Drainage", dt: "M-205 — p.9", fn: "BAL3_M-205_DRAINAGE_NIVEAU_5.pdf", img: "assets/engineering/drainage-5.jpg", ic: "Waves" },
+  { k: "distribution", nm: "Distribution (Plomb. & Méc.)", disc: "Distribution", dt: "M-206 — p.11", fn: "BAL3_M-206_DISTRIBUTION_NIVEAU_5.pdf", img: "assets/engineering/distribution-5.jpg", ic: "Droplet" },
+  { k: "ventilation", nm: "Ventilation (Plomb. & Méc.)", disc: "Ventilation", dt: "M-207 — p.12", fn: "BAL3_M-207_VENTILATION_NIVEAU_5.pdf", img: "assets/engineering/ventilation-5.jpg", ic: "Fan" },
+];
+const svg = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+  lucide.icons[n][2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+const L = Object.fromEntries(LAYERS.map((l) => [l.k, l]));
+const PAD = 8, GAP = 8, LEFT = 104;
+
+const cardHTML = (k, cls = "") => `<div class="lcard ${cls}" data-card="${k}">
+  <div class="hd"><b>${L[k].disc}</b><span class="dt">${L[k].dt}</span></div>
+  <div class="fn">${L[k].fn}</div><div class="doc">Document</div>
+  <div class="op">Opacité <i></i><span>55%</span></div></div>`;
+
+/* Each strategy gets the pane, the kept key, the peeked key and each
+   tile's top, and lays out what it wants. Returns nothing; it writes the
+   overlay itself. */
+const STRATS = [
+  { id: "bug", title: "Aujourd'hui — le bug", why: "Carte gardée posée en premier; l'aperçu est repoussé vers le haut, bute contre le haut du volet et retombe sur la carte gardée.",
+    lay(o) {
+      const placed = [];
+      for (const [k, peek] of o.order()) {
+        const h = o.h(k);
+        let top = o.clamp(o.tileTop(k), h);
+        for (const p of placed) if (top < p.top + p.h + GAP && top + h + GAP > p.top)
+          top = o.tileTop(k) >= p.top ? o.clamp(p.top + p.h + GAP, h) : o.clamp(p.top - h - GAP, h);
+        o.put(k, peek, top, LEFT); placed.push({ top, h });
+      }
+    } },
+  { id: "A", title: "A — Empiler dans l'ordre des vignettes", why: "Les cartes s'empilent dans l'ordre de la pile, chacune au plus près de sa vignette. La gardée descend pour faire place à celle du dessus. Ne peut pas chevaucher.",
+    lay(o) { o.stack(o.cards(), (k, peek, top) => o.put(k, peek, top, LEFT)); } },
+  { id: "B", title: "B — L'aperçu remplace", why: "Une seule carte à la fois: le survol prend la place, la gardée revient quand le pointeur s'en va. Le plus calme; on ne compare pas deux cartes.",
+    lay(o) {
+      const k = o.peek || o.kept; if (!k) return;
+      o.put(k, !!o.peek, o.clamp(o.tileTop(k), o.h(k)), LEFT);
+    } },
+  { id: "C", title: "C — Deuxième colonne", why: "Si l'aperçu tomberait sur la gardée, il s'ouvre à sa droite, à la hauteur de sa vignette. Les deux restent alignées; coûte de la largeur sur la maquette.",
+    lay(o) {
+      if (o.kept) o.put(o.kept, false, o.clamp(o.tileTop(o.kept), o.h(o.kept)), LEFT);
+      if (o.peek) {
+        const top = o.clamp(o.tileTop(o.peek), o.h(o.peek));
+        const kt = o.kept && o.clamp(o.tileTop(o.kept), o.h(o.kept));
+        const hit = o.kept && top < kt + o.h(o.kept) + GAP && top + o.h(o.peek) + GAP > kt;
+        o.put(o.peek, true, top, hit ? LEFT + 232 + GAP : LEFT);
+      }
+    } },
+  { id: "D", title: "D — Gardée repliée", why: "Pendant le survol, la carte gardée se replie à sa ligne de titre; on empile comme en A. Peu de mouvement, la gardée reste repérable.",
+    lay(o) {
+      o.stack(o.cards(), (k, peek, top) => o.put(k, peek, top, LEFT, !peek && o.peek ? "mini" : ""),
+        (k) => (o.peek && k === o.kept ? 32 : o.h(k)));
+    } },
+  { id: "E", title: "E — Aperçu en pastille", why: "Le survol n'ouvre qu'une pastille d'une ligne (nom, date) à la vignette; la carte complète vient au clic. Assez petite pour se glisser entre.",
+    lay(o) {
+      if (o.kept) o.put(o.kept, false, o.clamp(o.tileTop(o.kept), o.h(o.kept)), LEFT);
+      if (!o.peek) return;
+      let top = o.clamp(o.tileTop(o.peek) + 4, 28);
+      if (o.kept) {
+        const kt = o.clamp(o.tileTop(o.kept), o.h(o.kept)), kb = kt + o.h(o.kept);
+        if (top < kb + GAP && top + 28 + GAP > kt) top = o.tileTop(o.peek) < kt ? Math.max(PAD, kt - 28 - GAP) : kb + GAP;
+        if (top < kb + GAP && top + 28 + GAP > kt) top = kb + GAP;
+      }
+      o.chip(o.peek, top);
+    } },
+];
+
+function mount(S) {
+  const sec = document.createElement("section");
+  sec.className = `demo ${S.id === "bug" ? "bug" : ""}`;
+  sec.innerHTML = `<h2>${S.title}</h2><p class="why">${S.why}</p>
+    <div class="ctl"><button data-replay>Rejouer le cas</button><button data-reset>Vider</button></div>
+    <div class="pane"><div class="strip">${LAYERS.map((l) => `<div class="ltile" data-k="${l.k}">
+      <span class="wrap"><span class="pic" style="background-image:url('${l.img}')"></span><span class="gl">${svg(l.ic)}</span></span>
+      <span class="nm">${l.nm}</span></div>`).join("")}</div><div class="model"></div></div>`;
+  document.getElementById("grid").append(sec);
+  const pane = sec.querySelector(".pane");
+  const st = { kept: null, peek: null };
+  const heights = {};
+  const o = {
+    get kept() { return st.kept; }, get peek() { return st.peek && st.peek !== st.kept ? st.peek : null; },
+    tileTop: (k) => pane.querySelector(`[data-k="${k}"]`).offsetTop,
+    h: (k) => heights[k] || 128,
+    clamp: (v, h) => Math.min(Math.max(v, PAD), pane.clientHeight - h - PAD),
+    order: () => [o.kept && [o.kept, false], o.peek && [o.peek, true]].filter(Boolean),
+    cards: () => o.order().sort((a, b) => o.tileTop(a[0]) - o.tileTop(b[0])),
+    /* top-down in tile order, then lifted as a block if the last runs off */
+    stack(list, put, hOf = o.h) {
+      const tops = []; let y = PAD;
+      for (const [k] of list) { const t = Math.max(o.tileTop(k), y); tops.push(t); y = t + hOf(k) + GAP; }
+      const over = y - GAP - (pane.clientHeight - PAD);
+      list.forEach(([k, peek], i) => put(k, peek, Math.max(PAD, tops[i] - Math.max(0, over)), i));
+    },
+    put(k, peek, top, left, cls = "") {
+      pane.insertAdjacentHTML("beforeend", cardHTML(k, `${peek ? "peek" : ""} ${cls}`));
+      const el = pane.lastElementChild; el.style.top = `${top}px`; el.style.left = `${left}px`;
+      if (!cls) heights[k] = el.offsetHeight;
+    },
+    chip(k, top) {
+      pane.insertAdjacentHTML("beforeend", `<div class="lchip"><b>${L[k].disc}</b><span>${L[k].dt}</span></div>`);
+      const el = pane.lastElementChild; el.style.top = `${top}px`; el.style.left = `${LEFT}px`;
+    },
+  };
+  const draw = () => {
+    pane.querySelectorAll(".lcard,.lchip").forEach((e) => e.remove());
+    pane.querySelectorAll(".ltile").forEach((t) => t.classList.toggle("sel", t.dataset.k === st.kept));
+    S.lay(o);
+  };
+  pane.addEventListener("click", (e) => {
+    const t = e.target.closest(".ltile"); if (!t) return;
+    st.kept = st.kept === t.dataset.k ? null : t.dataset.k; st.peek = null; draw();
+  });
+  pane.addEventListener("pointerover", (e) => {
+    const t = e.target.closest(".ltile"); const k = t ? t.dataset.k : null;
+    if (e.target.closest(".lcard,.lchip")) return;
+    if (k !== st.peek) { st.peek = k; draw(); }
+  });
+  pane.addEventListener("pointerleave", () => { st.peek = null; draw(); });
+  sec.querySelector("[data-replay]").onclick = () => { st.kept = "plan"; st.peek = "arp"; draw(); };
+  sec.querySelector("[data-reset]").onclick = () => { st.kept = null; st.peek = null; draw(); };
+  /* measure each card once so every strategy knows the real heights */
+  LAYERS.forEach((l) => { o.put(l.k, false, -999, -999); });
+  pane.querySelectorAll(".lcard").forEach((e) => e.remove());
+  st.kept = "plan"; st.peek = "arp"; draw();
+}
+STRATS.forEach(mount);
+</script>
+</body>
+</html>

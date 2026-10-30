@@ -1007,10 +1007,10 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 /* No border of its own: the pane around it now states the edge, and two
    boxes one inside the other state it twice. */
 .model3d{position:relative;flex:1;min-height:0;overflow:hidden;
-  background:#f1f3f4 url(assets/skp-facade.jpg) center/contain no-repeat}
+  background:transparent url(assets/skp-facade.jpg) center/contain no-repeat}
 .model3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;
   opacity:0;touch-action:none;transition:opacity .18s ease}
-.model3d[data-state="ready"]{background:#f1f3f4}
+.model3d[data-state="ready"]{background:transparent}
 .model3d[data-state="ready"] .model3d-canvas{opacity:1}
 .model3d-status{position:absolute;left:50%;bottom:12px;z-index:2;transform:translateX(-50%);
   border:1px solid rgba(17,17,18,.12);border-radius:999px;background:rgba(255,255,255,.9);
@@ -1135,6 +1135,9 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .gut.fold.fold-s .gfold{margin-left:5px}
 .gut.fold.fold-e{align-items:flex-end}
 .gut.fold.fold-e .gfold{margin-right:5px}
+/* With the drawing and the notes both folded, two tabs land on the same
+   edge at the same height. The drawing's tab sits one row lower. */
+.gut.fold[data-gut="plan"] .gfold{transform:translateY(44px)}
 /* Two tabs on one edge sit one above the other, not side by side: the
    strip is ten pixels wide and they would overlap the drawings. */
 .gut .gfold + .gfold{margin-top:6px}
@@ -1153,6 +1156,7 @@ svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
 <script src="vendor/lucide/lucide.min.js"></script>
 <script src="vendor/dialkit/browser.global.js"></script>
 <script src="assets/engineering/sheets.js"></script>
+<script src="wireframe-c3-circulation.js"></script>
 <script>
 /* ---------------------------------------------------------------- state */
 
@@ -2154,7 +2158,7 @@ function unitMarkHTML() {
     return `<polygon class="${on ? "on" : "hit"}" points="${poly.map(([x, y]) => `${x},${y}`).join(" ")}"
       style="stroke-width:${(1.6 / zs).toFixed(3)}px" data-act="row" data-value="${i}"></polygon>`;
   }).join("");
-  return `<svg class="umark" viewBox="0 0 1 1" preserveAspectRatio="none">${parts}</svg>`;
+  return `<svg class="umark" viewBox="0 0 1 1" preserveAspectRatio="none">${circulationMarkHTML()}${parts}</svg>`;
 }
 
 
@@ -3295,7 +3299,7 @@ function fqTableHTML(q) {
     ${r.cells.map((c, j) => cell(c, j)).join("")}</tr>`).join("");
   return `<div class="fqt">
     <table class="tbl"><thead><tr>${["Unité", "Type", "Net pi²", "m²", "Part"].map((h, j) => cell(h, j, "th")).join("")}</tr></thead>
-      <tbody>${body}</tbody><tfoot>${q.foot.map((r) => `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("")}</tfoot></table>
+      <tbody>${body}</tbody><tfoot>${q.foot.map((r) => r[0] === "Circulation" ? circulationRowHTML(r, cell) : `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("")}</tfoot></table>
     <div class="fqn">net : étiquettes du plan · circulation : 15 %, comme le tableau du bâtiment</div></div>`;
 }
 
@@ -4373,7 +4377,9 @@ function wireViewport() {
     e.preventDefault();
     stopGlide();
     const r = el.getBoundingClientRect();
-    zoomTo(V.zoom * Math.exp(-e.deltaY * 0.0016), e.clientX - r.left, e.clientY - r.top, r, layoutSheet(el));
+    /* A mouse wheel zooms the other way from a trackpad, as in the 3D pane. */
+    const dir = window.fitteIsMouseWheel?.(e) ? 1 : -1;
+    zoomTo(V.zoom * Math.exp(dir * e.deltaY * 0.0016), e.clientX - r.left, e.clientY - r.top, r, layoutSheet(el));
     paint();
   };
   el.ondblclick = (e) => {
@@ -5047,6 +5053,7 @@ function onClick(e) {
   const screen = V.screen;
 
   switch (el.dataset.act) {
+    case "circulation": selectCirculation(); return;
     case "view":
       V.view[screen] = Number(value);
       /* A new view is a new set of rows, so the old row number means nothing. */

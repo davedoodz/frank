@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Niveaux — l'onglet qui tient à la page</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The level being read is a tab of the white page under it, the way a
+   folder's tab is the folder: the page grows up into the black bar where
+   the level is named. Five ways of drawing that join. Clicking a level in
+   any of them moves the tab in all five. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill-2:#f6f6f7;
+  --vert:#c3e05a;--vert-ink:#2f3a05;--chrome:#141416;--chrome-2:#1e1e21;--red:#b3261e;--r:10px}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px;max-width:1240px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:760px}
+.v{margin-top:30px}
+.v h2{margin:0;font-size:14px;font-weight:600}
+.v p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;max-width:780px}
+
+/* the frame, as on prototype 3 under the black chrome ---------------- */
+.frame{background:var(--chrome);border-radius:12px;padding:0 7px 7px;overflow:hidden}
+.top{display:flex;align-items:center;gap:6px;height:40px;padding:0 6px;color:rgba(255,255,255,.72);font-size:13.5px}
+.top .crumb{color:rgba(255,255,255,.58);font-size:13px;display:flex;align-items:center;gap:6px;padding:4px 6px}
+.top .proj{color:#fff;font-size:13px;padding:4px 8px}
+.top .cur{background:#fff;color:#141416;font-weight:600;border-radius:6px;padding:4px 10px;display:flex;align-items:center;gap:6px}
+.top .tab{padding:4px 8px;display:flex;align-items:center;gap:6px}
+.top .sp{flex:1}
+.top .ech{color:rgba(255,255,255,.92);font-size:13px;display:flex;align-items:center;gap:6px}
+.top .ech i{font-style:normal;background:#fff;color:#111;border-radius:9px;min-width:17px;height:17px;display:grid;place-items:center;font-size:11px;font-weight:600}
+.top .share{border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:3px 9px;color:#fff;font-size:12px}
+.top svg{width:14px;height:14px}
+
+/* the level row ------------------------------------------------------ */
+.lvl{position:relative;display:flex;align-items:flex-end;height:34px;padding:0 6px;gap:2px}
+.lvl button{position:relative;height:28px;margin-bottom:3px;padding:0 10px;border:0;background:none;font:inherit;font-size:12.5px;
+  color:rgba(255,255,255,.72);border-radius:6px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
+.lvl button svg{width:14px;height:14px}
+.lvl .div{width:1px;height:16px;background:rgba(255,255,255,.16);margin:0 6px 9px}
+
+/* the page under it --------------------------------------------------- */
+.page{position:relative;background:#fff;border-radius:var(--r);height:150px;overflow:hidden}
+.page .t{display:flex;align-items:center;gap:10px;padding:12px 14px 10px;border-bottom:1px solid var(--line-2)}
+.page .t b{font-size:15px;font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px 0 7px;border-radius:11px;background:var(--red);color:#fff;font-size:12px;font-weight:500}
+.badge svg{width:13px;height:13px}
+.heads{display:flex;height:38px;border-bottom:1px solid var(--line-2)}
+.heads span{display:flex;align-items:center;gap:7px;padding:0 12px;font-weight:500;border-right:1px solid var(--line-2)}
+.heads span:nth-child(1){width:38px;justify-content:center;padding:0}
+.heads span:nth-child(2){flex:0 0 36%}
+.heads span:nth-child(3){flex:1}
+.heads span:nth-child(4){flex:0 0 18%;border-right:0}
+.heads svg{width:14px;height:14px;color:var(--ink-2)}
+.body{display:flex;height:100%}
+.body i{flex:1;border-right:1px solid var(--line-2)}
+.body i:first-child{flex:0 0 38px}
+.body i:nth-child(2){flex:0 0 36%}
+.body i:last-child{flex:0 0 18%;border-right:0}
+
+/* The tab's two flared feet: a small concave corner on each side, where
+   the page curves up into the tab. Drawn as a masked square of the tab's
+   colour, so it is a shape, not a shading. */
+.foot::before,.foot::after{content:"";position:absolute;bottom:0;width:var(--f,8px);height:var(--f,8px);background:var(--tabc,#fff)}
+.foot::before{right:100%;-webkit-mask:radial-gradient(circle at 0 0,transparent calc(var(--f,8px) - .5px),#000 var(--f,8px));
+  mask:radial-gradient(circle at 0 0,transparent calc(var(--f,8px) - .5px),#000 var(--f,8px))}
+.foot::after{left:100%;-webkit-mask:radial-gradient(circle at 100% 0,transparent calc(var(--f,8px) - .5px),#000 var(--f,8px));
+  mask:radial-gradient(circle at 100% 0,transparent calc(var(--f,8px) - .5px),#000 var(--f,8px))}
+
+/* A — the page's own white grows up into the tab. The level reads black on
+   white like the open view one row up, and a green bar across the tab's top
+   keeps the office green on the one thing it marks. */
+[data-v="A"] .lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 12px;border-radius:8px 8px 0 0;
+  background:#fff;color:var(--ink);font-weight:600;box-shadow:inset 0 3px 0 var(--vert);--tabc:#fff}
+[data-v="A"] .page{border-top-left-radius:var(--r)}
+
+/* B — the tab is green and so is a band across the page's head: the green
+   is not a pill on the level any more but the colour of the floor being
+   read, carried down into the page it filters. */
+[data-v="B"] .lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 12px;border-radius:8px 8px 0 0;
+  background:var(--vert);color:var(--vert-ink);font-weight:600;--tabc:var(--vert)}
+[data-v="B"] .page::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--vert)}
+[data-v="B"] .page .t{padding-top:15px}
+
+/* C — the plain folder: a white tab, no green at all. The join to the page
+   is the whole mark. Quietest; the level is told only by being the tab. */
+[data-v="C"] .lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 12px;border-radius:8px 8px 0 0;
+  background:#fff;color:var(--ink);font-weight:600;--tabc:#fff}
+
+/* D — a white tab holding the green pill. The pill stays exactly as it is
+   today; the tab around it makes it belong to the page. */
+[data-v="D"] .lvl button[aria-current="true"]{height:34px;margin-bottom:0;padding:0 5px;border-radius:9px 9px 0 0;background:#fff;
+  color:var(--ink);--tabc:#fff;--f:9px}
+[data-v="D"] .lvl button[aria-current="true"] span{display:flex;align-items:center;height:24px;padding:0 9px;border-radius:6px;
+  background:var(--vert);color:var(--vert-ink);font-weight:600}
+
+/* E — a cut tab, sloped sides like a paper folder's, white, with a green
+   dot before the level. The slopes read "folder" before anything else. */
+[data-v="E"] .lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 18px;border-radius:0;background:#fff;
+  color:var(--ink);font-weight:600;clip-path:polygon(9px 0,calc(100% - 9px) 0,100% 100%,0 100%);margin-left:-6px;margin-right:-6px;z-index:1}
+[data-v="E"] .lvl button[aria-current="true"]::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--vert);
+  box-shadow:0 0 0 1px rgba(47,58,5,.35)}
+[data-v="E"] .lvl button[aria-current="true"]:hover{background:#fff;color:var(--ink)}
+
+/* A tab lit in any variant stays lit under the pointer. */
+[data-v] .lvl button[aria-current="true"]:hover{color:inherit}
+[data-v="A"] .lvl button[aria-current="true"]:hover,[data-v="C"] .lvl button[aria-current="true"]:hover,
+[data-v="D"] .lvl button[aria-current="true"]:hover{background:#fff;color:var(--ink)}
+[data-v="B"] .lvl button[aria-current="true"]:hover{background:var(--vert);color:var(--vert-ink)}
+/* The page's top-left corner squares off when the tab stands on it. */
+.frame[data-at="0"] .page{border-top-left-radius:0}
+</style>
+</head>
+<body>
+<main>
+  <h1>Niveaux — l'onglet qui tient à la page</h1>
+  <p class="lede">Le niveau lu n'est plus une pastille verte posée dans la barre: c'est l'onglet de la page blanche en dessous, comme celui d'une chemise. Cinq façons de dessiner la jonction. Cliquer un niveau dans n'importe laquelle déplace l'onglet dans les cinq.</p>
+  <div data-variants></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n) => {
+  const node = lucide.icons[pascal(n)];
+  return node ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+    node[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : "";
+};
+const LEVELS = ["Bâtiment entier", "Sous-sol 00", "Sous-sol 0", "Niveau 1", "Niveau 2", "Niveau 3", "Niveau 4",
+  "Niveau 5", "Niveau 6", "Niveau 7", "Niveau 8", "Toiture"];
+const VARIANTS = [
+  ["A", "A — Onglet blanc, filet vert", "La page monte dans la barre. Le niveau se lit noir sur blanc, comme la vue ouverte au-dessus; un filet vert en haut de l'onglet garde le vert sur la seule chose qu'il marque."],
+  ["B", "B — Onglet vert, bande verte", "L'onglet est vert et une bande verte traverse le haut de la page: le vert devient la couleur de l'étage lu, portée jusque dans la page qu'il filtre."],
+  ["C", "C — Chemise simple", "Onglet blanc, aucun vert. La jonction à la page est toute la marque. Le plus calme."],
+  ["D", "D — La pastille dans l'onglet", "La pastille verte d'aujourd'hui, inchangée, dans un onglet blanc qui la rattache à la page."],
+  ["E", "E — Onglet coupé", "Côtés en biais comme une chemise de papier, blanc, un point vert devant le niveau. Se lit « dossier » avant tout."],
+];
+let at = LEVELS.indexOf("Niveau 5");
+
+const topBar = `<div class="top">
+  <span class="crumb">${svg("folder")}Tous les projets</span><span class="proj">Le Baldwin III</span>
+  <span class="cur">${svg("git-compare")}Coordination</span><span class="tab">${svg("hash")}Codes</span>
+  <span class="sp"></span><span class="ech">${svg("calendar-check")}Échéancier <i>1</i></span><span class="share">Partager</span></div>`;
+
+function frame(v) {
+  const lvls = LEVELS.map((l, i) => {
+    const on = i === at;
+    const inner = l === "Bâtiment entier" ? `${svg("building-2")}<span>${l}</span>` : `<span>${l}</span>`;
+    return `${i === 1 ? `<i class="div"></i>` : ""}<button data-at="${i}" aria-current="${on}" class="${on && v !== "E" ? "foot" : ""}">${inner}</button>`;
+  }).join("");
+  const title = at === 0 ? "Bâtiment entier" : `Plans — ${LEVELS[at].toLowerCase()}`;
+  return `<div class="frame" data-v="${v}" data-at="${at}">${topBar}<nav class="lvl">${lvls}</nav>
+    <div class="page"><div class="t"><b>${title}</b><span class="badge">${svg("alert-triangle")}19 problèmes</span></div>
+      <div class="heads"><span>${svg("table")}</span><span>${svg("file")}Plan 2D</span><span>${svg("box")}Maquette 3D</span><span>${svg("message-square")}Commentaires</span></div>
+      <div class="body"><i></i><i></i><i></i><i></i></div></div></div>`;
+}
+function paint() {
+  document.querySelector("[data-variants]").innerHTML = VARIANTS.map(([v, h, p]) =>
+    `<section class="v"><h2>${h}</h2><p>${p}</p>${frame(v)}</section>`).join("");
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-at]");
+  if (b && b.tagName === "BUTTON") { at = Number(b.dataset.at); paint(); }
+});
+paint();
+</script>
+</body>
+</html>

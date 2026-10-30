@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Niveaux sur la maquette — six façons de les tenir pendant l'orbite</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<script type="importmap">
+{"imports":{
+  "three":"./vendor/three/build/three.module.js",
+  "three/addons/":"./vendor/three/examples/jsm/"
+}}
+</script>
+<link rel="stylesheet" href="niveaux-3d-banc.css">
+<style>
+/* The label language the live pane already uses, so only placement differs. */
+svg line,svg polyline{stroke:var(--ink-2);stroke-width:1;stroke-dasharray:3 3;fill:none}
+svg text{fill:var(--ink-2);font-size:10px;font-family:var(--mono)}
+svg .on line,svg .on polyline{stroke:var(--sel);stroke-dasharray:none;stroke-width:1.4}
+svg .on text{fill:var(--sel);font-weight:500}
+svg .rule{stroke:var(--line);stroke-dasharray:none}
+svg .tick{stroke:var(--ink-2);stroke-dasharray:none}
+svg .on .tick{stroke:var(--sel)}
+svg .tag rect{fill:#fff;stroke:var(--line);stroke-width:1}
+svg .tag text{fill:var(--ink);font-size:10px;font-weight:500}
+svg .on.tag rect{stroke:var(--sel)}
+svg .on.tag text{fill:var(--sel)}
+svg .dot{fill:#fff;stroke:var(--ink-2);stroke-width:1}
+svg .on .dot{fill:var(--sel);stroke:var(--sel)}
+svg .edge text{fill:var(--ink-3)}
+/* B–F keep their names legible over the façade; A stays as the pane draws it. */
+svg.halo .tag text{stroke:none}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Niveaux sur la maquette</h1>
+  <p>Six façons de placer les repères de niveau pendant l'orbite. Les six vues partagent une seule caméra : faites tourner n'importe laquelle, les autres suivent. A reproduit le comportement actuel de Wireframe C3. Suite : <a href="niveaux-3d-actif.html">le niveau actif seul, six traitements</a>.</p>
+</header>
+<div class="bar" id="bar"></div>
+<main class="grid" id="grid"></main>
+
+<script type="module">
+import { B, LEVELS, NAMES, SHORT, proj, slab, cull, stickyVertex, ease, anchors, mountBench } from "./niveaux-3d-banc.js";
+
+const VARIANTS = [
+  { id: "A", name: "Actuel — coin le plus à gauche", halo: false,
+    say: "Coin de la <b>boîte englobante</b> le plus à gauche, recalculé à chaque image et pour chaque niveau. Le coin choisi change en cours d'orbite : les règles sautent, pointent parfois dans le vide, et se chevauchent en vue plongeante.",
+    paint() {
+      const rows = [];
+      for (const level of LEVELS) {
+        let best = null;
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+          const s = proj(sx * B.planHalf.x, slab(level), sz * B.planHalf.z);
+          if (s.behind) continue;
+          if (!best || s.x < best.x) best = s;
+        }
+        if (!best || best.y < 6 || best.y > B.H - 6) continue;
+        rows.push({ level, ...best });
+      }
+      return rows.map(({ level, x, y }) => {
+        const end = Math.max(72, Math.min(x, B.W - 12));
+        return `<g class="${level === B.selected ? "on" : ""}"><line x1="10" y1="${y}" x2="${end}" y2="${y}"/>
+          <text x="10" y="${y - 5}">${NAMES(level)}</text></g>`;
+      }).join("");
+    } },
+
+  { id: "B", name: "Silhouette continue",
+    say: "Même dessin que A, mais ancré sur le <b>bord réel</b> de la silhouette, pas sur un coin de boîte. Quand un autre angle devient le bord, la hauteur <b>glisse</b> d'un angle à l'autre au lieu de sauter ; chevauchements retirés. Le plus proche de l'actuel, sans ses à-coups.",
+    paint() {
+      const rows = cull(anchors().filter((r) => !r.behind && r.y > 6 && r.y < B.H - 6));
+      return rows.map(({ level, x, y }) => {
+        const end = Math.max(72, Math.min(x, B.W - 12));
+        return `<g class="${level === B.selected ? "on" : ""}"><line x1="10" y1="${y}" x2="${end}" y2="${y}"/>
+          <text x="10" y="${y - 5}">${NAMES(level)}</text></g>`;
+      }).join("");
+    } },
+
+  { id: "C", name: "Règle d'élévation fixe",
+    say: "Une règle verticale <b>immobile</b> au bord du panneau. Seules les graduations glissent, à la hauteur de chaque dalle sur le bord du bâtiment : jamais de saut. Les niveaux hors cadre se rangent au bord avec une flèche. Lecture moins directe : rien ne touche la façade.",
+    paint() {
+      const X = 70;
+      const rows = anchors();
+      const top = Math.max(14, Math.min(...rows.map((r) => r.y)));
+      const bottom = Math.min(B.H - 14, Math.max(...rows.map((r) => r.y)));
+      const inside = cull(rows.filter((r) => !r.behind && r.y >= 14 && r.y <= B.H - 14));
+      const above = rows.filter((r) => r.y < 14).length, below = rows.filter((r) => r.y > B.H - 14).length;
+      return `<line class="rule" x1="${X}" y1="${top}" x2="${X}" y2="${bottom}"/>`
+        + inside.map(({ level, y }) => `<g class="${level === B.selected ? "on" : ""}">
+          <line class="tick" x1="${X - 4}" y1="${y}" x2="${X + 4}" y2="${y}"/>
+          <text x="${X - 8}" y="${y + 3.5}" text-anchor="end">${NAMES(level)}</text></g>`).join("")
+        + (above ? `<g class="edge"><text x="${X - 8}" y="12" text-anchor="end">↑ ${above} niv.</text></g>` : "")
+        + (below ? `<g class="edge"><text x="${X - 8}" y="${B.H - 5}" text-anchor="end">↓ ${below} niv.</text></g>` : "");
+    } },
+
+  { id: "D", name: "Étiquettes sur l'arête avant",
+    say: "Une petite étiquette <b>posée sur l'angle du bâtiment le plus proche</b>, à chaque dalle. Elle tourne avec la maquette comme un repère peint sur le béton. Très spatial ; l'angle avant change quand on passe de l'autre côté, avec un léger glissement.",
+    state: {},
+    paint() {
+      const p = stickyVertex(this.state, (q) => Math.hypot(q.x - B.camera.position.x, q.z - B.camera.position.z), 1.2);
+      const rows = cull(LEVELS.map((level) => {
+        const s = proj(p.x, slab(level), p.z);
+        return { level, behind: s.behind, ...ease(this.state, level, s, 0.45) };
+      }).filter((r) => !r.behind && r.y > 8 && r.y < B.H - 8 && r.x > 8 && r.x < B.W - 8), 16);
+      return rows.map(({ level, x, y }) => {
+        const label = SHORT(level), w = label.length * 6.2 + 10;
+        return `<g class="tag ${level === B.selected ? "on" : ""}">
+          <rect x="${x - w - 6}" y="${y - 8}" width="${w}" height="15" rx="4"/>
+          <text x="${x - w / 2 - 6}" y="${y + 3.2}" text-anchor="middle">${label}</text>
+          <line class="tick" x1="${x - 6}" y1="${y}" x2="${x}" y2="${y}"/></g>`;
+      }).join("");
+    } },
+
+  { id: "E", name: "Liste fixe, renvois mobiles",
+    say: "Les noms restent <b>immobiles</b>, en colonne régulière ; seuls les traits de renvoi suivent les dalles sur la silhouette. Le texte ne bouge jamais, donc il se lit pendant l'orbite. Les renvois se croisent un peu quand on regarde de très haut ou de très bas.",
+    paint() {
+      const marks = anchors();
+      const step = 20, top = 22;
+      return [...LEVELS].reverse().map((level, i) => {
+        const a = marks.find((r) => r.level === level);
+        const ty = top + i * step, x0 = 70;
+        const visible = !a.behind && a.y > 0 && a.y < B.H;
+        const ax = Math.max(x0 + 16, Math.min(a.x, B.W - 12));
+        return `<g class="${level === B.selected ? "on" : ""}">
+          <text x="10" y="${ty + 3.5}">${NAMES(level)}</text>
+          ${visible ? `<polyline points="${x0},${ty} ${x0 + 8},${ty} ${ax},${a.y}"/>` : ""}</g>`;
+      }).join("");
+    } },
+
+  { id: "F", name: "Niveau actif seul",
+    say: "Seul le <b>niveau sélectionné</b> porte un nom et un trait ; les autres dalles sont de simples points sur la silhouette. Le minimum à l'écran et rien à superposer. Il faut le sélecteur de niveau, ou le survol, pour nommer les autres.",
+    paint() {
+      const marks = anchors().filter((r) => !r.behind && r.y > 4 && r.y < B.H - 4);
+      return marks.map(({ level, x, y }) => level === B.selected
+        ? `<g class="on"><line x1="10" y1="${y}" x2="${Math.max(72, Math.min(x, B.W - 12))}" y2="${y}"/>
+            <text x="10" y="${y - 5}">${NAMES(level)}</text><circle class="dot" cx="${x}" cy="${y}" r="2.6"/></g>`
+        : `<g><circle class="dot" cx="${x}" cy="${y}" r="2.2"/></g>`).join("");
+    } },
+];
+
+mountBench({ variants: VARIANTS, fit: 0.56 });
+</script>
+</body>
+</html>

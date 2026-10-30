@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- DialKit 2.0.2 (MIT, Josh Puckett), vendored vanilla build: vendor/dialkit -->
 <link rel="stylesheet" href="vendor/dialkit/styles.css">
+<link rel="stylesheet" href="notes-drawer.css">
 
 <style>
 /* Geist Pixel, self-hosted from geist@1.8.2 — five shapes, one weight each */
@@ -162,11 +163,13 @@ a{color:inherit;text-decoration:none}
   <footer class="sign"><img src="assets/lafond.png" alt="Lafond Architecte"></footer>
 </div>
 
-<a class="notes-pill" href="interview-features.html"
+<a class="notes-pill" href="interview-features.html" data-notes-drawer
+   aria-haspopup="dialog" aria-expanded="false"
    title="What Guy and Benoît asked for">
   <span class="faces"><img src="assets/personas/guy-duo.svg" alt="Guy"><img src="assets/personas/benoit-duo.svg" alt="Benoît"></span>
   <span>User notes</span>
 </a>
+<script src="notes-drawer.js"></script>
 
 <script src="vendor/dialkit/browser.global.js"></script>
 <script>

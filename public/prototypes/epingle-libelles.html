@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Épingle — mots et icônes des deux boutons</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* Two buttons say "Épingler" today: the one on the plan that starts a note,
+   and the one in the box that saves it. Each is shown here with other words
+   and icons, side by side, at the sizes they have on the prototype. The box
+   is shown at its full width (286 px) and at the narrow plan pane's
+   (200 px), since a long label has to survive the narrow one. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#f1f1f2;--fill-2:#f6f6f7;--card:#fff;--hi:#c3e05a;--mono:ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header{padding:20px 24px 4px;max-width:1100px}
+header h1{margin:0;font-size:16px;font-weight:600}
+header p{margin:4px 0 0;color:var(--ink-2)}
+h2.sec{margin:22px 24px 2px;font-size:14px;font-weight:600}
+p.sec{margin:0 24px 6px;color:var(--ink-2);font-size:12px;max-width:820px}
+.bar{display:flex;gap:6px;padding:6px 24px 0;align-items:center;font-size:11.5px;color:var(--ink-2)}
+.bar button{font:inherit;font-size:11.5px;border:1px solid var(--line);background:#fff;border-radius:5px;padding:3px 9px;cursor:pointer}
+.bar button[aria-pressed="true"],.bar button:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px;padding:12px 24px 10px}
+.opt{border:1px solid var(--line-2);border-radius:8px;background:#fff;padding:12px 14px 14px}
+.opt.rec{border-color:var(--ink)}
+.opt h3{margin:0;font-size:13px;font-weight:600}
+.opt h3 i{font-style:normal;font-weight:500;font-size:11px;color:var(--ink-2);margin-left:6px}
+.opt .why{margin:2px 0 10px;font-size:11.5px;color:var(--ink-2);min-height:32px}
+.svg{width:16px;height:16px;flex:0 0 16px}
+
+/* the plan's corner: the button at rest, then once pressed */
+.stage{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.stage .lab{font-size:10.5px;color:var(--ink-3);margin-bottom:4px}
+.plan{position:relative;width:230px;height:64px;border:1px solid var(--line);border-radius:6px;overflow:hidden;
+  background:#fff url("assets/plan-niveau-5.jpg") 30% 40%/700px auto no-repeat}
+.pill{position:absolute;left:10px;top:12px;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px 0 11px;
+  border:1px solid var(--line);border-radius:17px;background:#fff;font-size:13px;font-weight:500;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(17,17,18,.10);cursor:pointer}
+.pill.icon{padding:0;width:32px;justify-content:center}
+.pill.on{background:var(--hi);border-color:#a9c43f}
+
+/* the box: scope, field, the saving button and Annuler */
+.box{width:286px;border:1px solid var(--ink);border-radius:9px;background:#fff;padding:8px;display:flex;flex-direction:column;gap:6px;
+  box-shadow:0 10px 26px rgba(17,17,18,.16)}
+.box.narrow{width:200px}
+.row{display:flex;align-items:center;gap:4px;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border:1px solid var(--line);border-radius:12px;font-size:11.5px;white-space:nowrap}
+.chip .svg{width:13px;height:13px;flex-basis:13px}
+.chip.on{border-color:var(--ink);font-weight:500}
+.zn{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-3);text-align:right;line-height:1.15;white-space:nowrap}
+.nnew{height:46px;border:1px solid var(--line-2);border-radius:6px;padding:6px 7px;font-size:12.5px;color:var(--ink-3);overflow:hidden}
+.btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border:1px solid var(--line);border-radius:6px;
+  font-size:12.5px;font-weight:500;white-space:nowrap;cursor:pointer;min-width:0}
+.btn .svg{width:15px;height:15px;flex-basis:15px}
+.btn.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.solid.cut{overflow:hidden}
+.btn.solid.cut span{overflow:hidden;text-overflow:ellipsis}
+.kb{margin-left:auto;font-size:10.5px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:0 4px;white-space:nowrap}
+.flag{font-size:10.5px;color:#b3261e;margin-top:4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Épingle — les mots et les icônes des deux boutons</h1>
+  <p>Aujourd'hui les deux disent « Épingler ». Six choix pour chacun; ils peuvent être différents. L'option recommandée a la bordure noire.</p>
+</header>
+
+<h2 class="sec">1 — Le bouton du plan, qui commence une note</h2>
+<p class="sec">En haut à gauche du plan 2D. À gauche, au repos; à droite, une fois pressé (« Cliquez un point du plan », comme aujourd'hui).</p>
+<div class="grid" id="start"></div>
+
+<h2 class="sec">2 — Le bouton de la boîte, qui enregistre la note</h2>
+<p class="sec">Dans la boîte sous l'épingle, à côté d'« Annuler ». Montré à 286 px et à 200 px, la largeur de la boîte dans le volet étroit.</p>
+<div class="bar">Portée de la note :
+  <button data-scope="interne" aria-pressed="true">À l'interne</button>
+  <button data-scope="partage" aria-pressed="false">Partagée</button>
+</div>
+<div class="grid" id="save"></div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const svg = (n) => `<svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+  lucide.icons[n][2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+
+/* The button on the plan. `icon` alone means no words. */
+const START = [
+  { id: "A", rec: true, ic: "MessageSquarePlus", t: "Laisser un commentaire",
+    why: "Le même mot que l'onglet « Commentaires » de la marge: on sait où la note ira. Le « + » dit qu'on en ajoute une." },
+  { id: "B", ic: "MessageCirclePlus", t: "Commenter",
+    why: "Un verbe, court; tient même si le volet est étroit." },
+  { id: "C", ic: "MapPinPlus", t: "Ajouter une épingle",
+    why: "Dit l'objet qu'on pose sur le plan; l'icône est l'épingle elle-même avec un « + »." },
+  { id: "D", ic: "MapPin", t: "Épingler une note",
+    why: "Garde le mot d'aujourd'hui et dit ce qui est épinglé." },
+  { id: "E", ic: "StickyNote", t: "Note",
+    why: "Le plus court; se lit comme un outil de la barre, à la manière de Figma ou Bluebeam." },
+  { id: "F", ic: "MapPinPlus", t: "", icon: true,
+    why: "Icône seule, le nom au survol. Le moins de place; demande d'apprendre l'icône." },
+];
+const SAVE = [
+  { id: "A", ic: "Send", t: "Laisser un commentaire",
+    why: "La phrase entière. Coupée même à pleine largeur: elle va mieux sur le bouton du plan." },
+  { id: "B", ic: "Send", t: "Commenter",
+    why: "Le verbe de l'onglet. Tient à pleine largeur; à 200 px il perd ses dernières lettres." },
+  { id: "C", rec: true, scope: true, t: "Publier",
+    why: "L'icône suit la portée: cadenas à l'interne, deux personnes si partagée. Dit qui la verra au moment d'envoyer." },
+  { id: "D", ic: "MapPin", t: "Épingler",
+    why: "Le mot d'aujourd'hui, mais l'icône de l'épingle au lieu du cadenas: le cadenas se lisait comme « verrouiller »." },
+  { id: "E", ic: "Check", t: "Enregistrer",
+    why: "Le plus neutre; ne dit pas où va la note." },
+  { id: "F", ic: "CornerDownLeft", t: "Envoyer",
+    why: "L'icône rappelle la touche ⌘↵ à côté; le raccourci et le bouton se lisent ensemble." },
+];
+
+let scope = "interne";
+
+function startHTML(o) {
+  const inner = o.icon ? svg(o.ic) : `${svg(o.ic)}${o.t}`;
+  return `<div class="opt ${o.rec ? "rec" : ""}"><h3>${o.id} — ${o.icon ? "icône seule" : `« ${o.t} »`}${o.rec ? "<i>recommandée</i>" : ""}</h3>
+    <div class="why">${o.why}</div>
+    <div class="stage">
+      <div><div class="lab">au repos</div><div class="plan"><span class="pill ${o.icon ? "icon" : ""}" title="${o.icon ? "Ajouter une épingle" : ""}">${inner}</span></div></div>
+      <div><div class="lab">pressé</div><div class="plan"><span class="pill on">${svg(o.ic)}Cliquez un point du plan</span></div></div>
+    </div></div>`;
+}
+
+function boxHTML(o, narrow) {
+  const team = scope === "interne";
+  const ic = o.scope ? (team ? "Lock" : "Users") : o.ic;
+  return `<div class="box ${narrow ? "narrow" : ""}">
+    <div class="row">
+      <span class="chip ${team ? "on" : ""}">${svg("Lock")}${narrow ? "" : "À l'interne"}</span>
+      <span class="chip ${team ? "" : "on"}">${svg("Users")}${narrow ? "" : "Partagée"}</span>
+      <span class="zn">plan d'unités<br>niv. 5 — 512</span></div>
+    <div class="nnew">${team ? "Note interne — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}</div>
+    <div class="row"><span class="btn solid cut">${svg(ic)}<span>${o.t}</span></span><span class="btn">Annuler</span>${narrow ? "" : `<span class="kb">⌘↵</span>`}</div>
+  </div>`;
+}
+
+function saveHTML(o) {
+  return `<div class="opt ${o.rec ? "rec" : ""}" data-save="${o.id}"><h3>${o.id} — « ${o.t} »${o.rec ? "<i>recommandée</i>" : ""}</h3>
+    <div class="why">${o.why}</div>
+    <div class="stage" style="flex-direction:column;gap:10px">${boxHTML(o, false)}${boxHTML(o, true)}</div>
+    <div class="flag" data-flag></div></div>`;
+}
+
+function paint() {
+  document.getElementById("start").innerHTML = START.map(startHTML).join("");
+  document.getElementById("save").innerHTML = SAVE.map(saveHTML).join("");
+  /* Say so where the narrow box cuts the label, rather than leave it to the eye. */
+  document.querySelectorAll("[data-save]").forEach((opt) => {
+    const s = opt.querySelector(".box.narrow .btn.solid span");
+    if (s && s.scrollWidth > s.clientWidth + 1) opt.querySelector("[data-flag]").textContent = "Coupé dans la boîte étroite.";
+  });
+}
+document.querySelectorAll("[data-scope]").forEach((b) => b.addEventListener("click", () => {
+  scope = b.dataset.scope;
+  document.querySelectorAll("[data-scope]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  paint();
+}));
+paint();
+</script>
+</body>
+</html>

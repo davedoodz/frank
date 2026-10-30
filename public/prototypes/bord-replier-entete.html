@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Replier depuis l'en-tête — et le bouton qui reste pour déplier</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* Option D of bord-replier-survol.html, kept: the fold button sits at the
+   right end of the pane's header, like a window's close button, and
+   nothing lands on the drawing. What it lacked: once folded, the strip
+   gave no sign it could be opened. Here the button stays, on the strip,
+   in the place the eye last saw it, turned to point the other way. Four
+   ways of drawing that pair. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:840px}
+.opts{margin-top:10px;display:flex;gap:16px;font-size:12.5px;color:var(--ink-2)}
+.opts label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 28px;margin-top:20px;max-width:1200px}
+.v h2{margin:0;font-size:14px;font-weight:600}
+.v p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:36px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cap{font-size:11px;color:var(--ink-3);margin:0 0 4px}
+
+/* two panes inside the white frame, as on prototype 3 ----------------- */
+.mock{position:relative;display:flex;height:400px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pane{position:relative;display:flex;flex-direction:column;min-width:0;background:#fff}
+.pane.list{flex:0 0 170px;border-right:1px solid var(--line-2)}
+.pane.plan{flex:1}
+.ph{display:flex;align-items:center;gap:7px;height:38px;flex:0 0 38px;padding:0 6px 0 10px;border-bottom:1px solid var(--line-2);font-weight:500;white-space:nowrap}
+.ph > svg{width:15px;height:15px;flex:0 0 15px;color:var(--ink-2)}
+.ph .nm{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rows{padding:6px 10px;display:flex;flex-direction:column}
+.rows span{display:flex;justify-content:space-between;height:27px;align-items:center;border-bottom:1px solid var(--line-2);font-variant-numeric:tabular-nums;font-size:12.5px}
+.rows span b{font-weight:500}
+.rows span.on{background:#eef3dc;margin:0 -10px;padding:0 10px}
+.sheet{flex:1;margin:10px;border:1px solid var(--line);display:block}
+.sheet line{stroke:#c9c9cc;stroke-width:1}
+
+/* the button, as D: 26 × 24, grey wash, ink under the pointer --------- */
+.fb{margin-left:auto;flex:0 0 26px;width:26px;height:24px;border:0;border-radius:6px;padding:0;display:grid;place-items:center;
+  background:var(--fill);color:var(--ink);cursor:pointer;font:inherit}
+.fb svg{width:15px;height:15px}
+.fb:hover{background:var(--ink);color:#fff}
+
+/* the folded strip ----------------------------------------------------- */
+.fstrip{display:none;flex:0 0 38px;width:38px;flex-direction:column;align-items:center;border-right:1px solid var(--line-2);background:#fff}
+.fstrip .ph{width:100%;justify-content:center;padding:0}
+.fstrip .t{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:500;white-space:nowrap}
+.fstrip .fb{margin:0}
+.mock.folded .pane.list{display:none}
+.mock.folded .fstrip{display:flex}
+
+/* A — The pair, at rest. The fold button is always in the header, grey;
+   folded, the same grey button heads the strip, turned to open, where the
+   pane's icon was. The icon moves down to sit before the title. The whole
+   strip also opens it. */
+[data-v="A"] .fstrip{cursor:pointer}
+[data-v="A"] .fstrip .ico{width:15px;height:15px;color:var(--ink-2);margin:12px 0 8px}
+[data-v="A"] .fstrip:hover{background:var(--fill-2)}
+[data-v="A"] .fstrip:hover .fb{background:var(--ink);color:#fff}
+
+/* B — Shown on demand, kept when it matters. In the open pane the button
+   appears only while the header (or the edge) is under the pointer, as in
+   D. Folded, it is the way back, so it never hides. */
+[data-v="B"] .pane.list .fb{opacity:0;transition:opacity .12s}
+[data-v="B"] .pane.list .ph:hover .fb,[data-v="B"].show .pane.list .fb{opacity:1}
+[data-v="B"] .fstrip{cursor:pointer}
+[data-v="B"] .fstrip .t{padding-top:12px}
+[data-v="B"] .fstrip:hover{background:var(--fill-2)}
+[data-v="B"] .fstrip:hover .fb{background:var(--ink);color:#fff}
+
+/* C — With the word. Under the pointer the header's button grows into
+   "Replier"; folded, the strip's button carries "Déplier" read upward,
+   above a rule and the pane's title. Nothing is left to be guessed. */
+[data-v="C"] .pane.list .fb{width:auto;flex:0 0 auto;padding:0 6px;gap:5px;display:flex;align-items:center}
+[data-v="C"] .pane.list .fb span{display:none;font-size:11.5px;font-weight:500}
+[data-v="C"] .pane.list .ph:hover .nm,[data-v="C"].show .pane.list .nm{display:none}
+[data-v="C"] .pane.list .ph:hover .fb span,[data-v="C"].show .pane.list .fb span{display:inline}
+[data-v="C"] .fstrip .ph{border-bottom:0;height:auto;flex:0 0 auto;padding-top:7px}
+[data-v="C"] .fstrip .fb{width:26px;height:auto;flex-direction:column;display:flex;align-items:center;gap:5px;padding:6px 0 8px}
+[data-v="C"] .fstrip .fb span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:11.5px;font-weight:500}
+[data-v="C"] .fstrip .rule{width:22px;height:1px;background:var(--line-2);margin:10px 0 10px}
+[data-v="C"] .fstrip .ico{width:15px;height:15px;color:var(--ink-2);margin-bottom:8px}
+
+/* D — Ink when folded. Open, the button is the quiet grey of D; folded it
+   is the one solid mark in the strip, the strongest thing at the top of
+   the screen's edge, and a label beside it names the action on hover. */
+[data-v="D"] .fstrip .fb{background:var(--ink);color:#fff;margin-top:0}
+[data-v="D"] .fstrip .fb:hover{background:#000}
+[data-v="D"] .fstrip .ph{position:relative}
+[data-v="D"] .fstrip .tip{position:absolute;left:34px;top:7px;z-index:5;height:24px;display:flex;align-items:center;padding:0 8px;border-radius:6px;
+  background:var(--ink);color:#fff;font-size:11.5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
+[data-v="D"] .fstrip .ph:hover .tip,[data-v="D"].show .fstrip .tip{opacity:1}
+[data-v="D"] .fstrip .ico{width:15px;height:15px;color:var(--ink-2);margin:12px 0 8px}
+[data-v="D"] .fstrip{cursor:default}
+</style>
+</head>
+<body>
+<main>
+  <h1>Replier depuis l'en-tête — et le bouton qui reste pour déplier</h1>
+  <p class="lede">L'option D gardée: le bouton au bout de l'en-tête, rien sur le dessin. Ce qui manquait: une fois replié, rien ne disait qu'on pouvait rouvrir. Ici, le bouton reste sur la bande, à l'endroit où l'œil l'a vu, tourné dans l'autre sens. Chaque option montre le volet ouvert et le volet replié; les deux fonctionnent.</p>
+  <div class="opts"><label><input type="checkbox" data-show checked> Montrer l'état de survol en permanence</label></div>
+  <div class="grid" data-grid></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n, cls = "") => {
+  const node = lucide.icons[pascal(n)];
+  return node ? `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+    node[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : "";
+};
+const V = [
+  ["A", "A — La paire, toujours là", "Le bouton est toujours dans l'en-tête, gris. Replié, le même bouton gris coiffe la bande, tourné pour ouvrir, à la place de l'icône du volet; l'icône descend devant le titre."],
+  ["B", "B — Au survol, sauf quand il est le seul chemin", "Ouvert, le bouton n'apparaît qu'au survol de l'en-tête, comme en D. Replié, il est le chemin du retour: il ne se cache jamais."],
+  ["C", "C — Avec le mot", "Au survol, le bouton de l'en-tête dit « Replier ». Replié, celui de la bande dit « Déplier », lu vers le haut, au-dessus d'un filet et du titre."],
+  ["D", "D — À l'encre une fois replié", "Ouvert, le gris discret de D. Replié, le bouton est la seule marque pleine de la bande; au survol, une étiquette « Déplier la liste » le nomme."],
+];
+const rows = [["501", "1 275", true], ["502", "1 496"], ["503", "760"], ["504", "1 152"], ["505", "1 221"], ["506", "1 106"],
+  ["507", "707"], ["508", "970"], ["509", "958"], ["510", "1 466"], ["511", "1 345"]];
+const sheet = `<svg class="sheet" viewBox="0 0 100 100" preserveAspectRatio="none">${
+  [16, 38, 60, 82].map((x) => `<line x1="${x}" y1="6" x2="${x}" y2="94" vector-effect="non-scaling-stroke"/>`).join("")}${
+  [14, 38, 62, 86].map((y) => `<line x1="6" y1="${y}" x2="94" y2="${y}" vector-effect="non-scaling-stroke"/>`).join("")}</svg>`;
+const T = "Unités et superficies";
+function strip(v) {
+  const open = svg("panel-left-open");
+  if (v === "A") return `<div class="fstrip" data-unfold title="Déplier la liste"><div class="ph"><button class="fb" data-unfold>${open}</button></div>${svg("table", "ico")}<span class="t">${T}</span></div>`;
+  if (v === "B") return `<div class="fstrip" data-unfold title="Déplier la liste"><div class="ph"><button class="fb" data-unfold>${open}</button></div><span class="t">${T}</span></div>`;
+  if (v === "C") return `<div class="fstrip"><div class="ph"><button class="fb" data-unfold title="Déplier la liste">${open}<span>Déplier</span></button></div><i class="rule"></i>${svg("table", "ico")}<span class="t">${T}</span></div>`;
+  return `<div class="fstrip"><div class="ph"><button class="fb" data-unfold title="Déplier la liste">${open}</button><span class="tip">Déplier la liste</span></div>${svg("table", "ico")}<span class="t">${T}</span></div>`;
+}
+function mock(v, folded) {
+  const word = v === "C" ? `<span>Replier</span>` : "";
+  return `<div class="mock show ${folded ? "folded" : ""}" data-v="${v}">
+    ${strip(v)}
+    <section class="pane list"><div class="ph">${svg("table")}<span class="nm">${T}</span>
+      <button class="fb" data-fold title="Replier la liste">${svg("panel-left-close")}${word}</button></div>
+      <div class="rows">${rows.map(([u, a, on]) => `<span class="${on ? "on" : ""}"><b>${u}</b>${a}</span>`).join("")}</div></section>
+    <section class="pane plan"><div class="ph">${svg("file")}Plan 2D</div>${sheet}</section></div>`;
+}
+document.querySelector("[data-grid]").innerHTML = V.map(([v, h, p]) => `<section class="v"><h2>${h}</h2><p>${p}</p>
+  <div class="pair"><div><p class="cap">ouvert</p>${mock(v, false)}</div><div><p class="cap">replié</p>${mock(v, true)}</div></div></section>`).join("");
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-fold]")) { e.target.closest(".mock").classList.add("folded"); return; }
+  if (e.target.closest("[data-unfold]")) e.target.closest(".mock").classList.remove("folded");
+});
+document.querySelector("[data-show]").addEventListener("change", (e) => {
+  document.querySelectorAll(".mock").forEach((m) => m.classList.toggle("show", e.target.checked));
+});
+</script>
+</body>
+</html>

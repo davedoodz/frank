@@ -26,6 +26,7 @@ let overview;
 let overviewCamera;
 let cameraMark;
 let markRadius;
+let markSize = 0;
 // Half the footprint, used to frame the roof plan in the corner.
 let planHalf;
 // Everything that belongs to the corner view only is on layer 1, which the
@@ -98,9 +99,12 @@ function fitModel(host) {
   overviewCamera.far = radius * 8;
   overviewCamera.updateProjectionMatrix();
   // The marker is read as "the eye is over there": it keeps a fixed radius
-  // outside the massing whatever the real distance, so in the plan it sits
-  // on the side the live camera is looking from.
-  markRadius = radius * 0.98;
+  // just outside the footprint's corners whatever the real distance, so in
+  // the plan it sits on the side the live camera is looking from. The corner
+  // view is framed to hold that whole circle (see renderOverview), so the
+  // marker is never cropped on its way round.
+  markRadius = Math.hypot(planHalf.x, planHalf.z);
+  markSize = radius * 0.055 * 2.1;   // the ring's outer edge
   cameraMark.scale.setScalar(radius * 0.055);
   resize(host);
 }
@@ -185,6 +189,27 @@ const FACE_MARK = {
   nord: { letter: "C", turn: 90 },
   ouest: { letter: "D", turn: 0 },
 };
+// The corner view's box is wider than the footprint drawn in it, by a
+// different amount on each axis. Its inset from the pane is set so the
+// building itself, not the box, sits the same distance from the pane's right
+// edge as from its bottom: the larger of the two slacks plus MINI_INSET.
+// The inset is 0, so the box may touch the pane's corner but never pass it:
+// nothing in its margin (the camera's ball, the elevation marker) is cut.
+const MINI_INSET = 0;
+function seatOverview(canvas, width, height) {
+  const box = canvas.closest(".mini");
+  if (!box || !planHalf) return;
+  const unit = (overviewCamera.right - overviewCamera.left) / width;
+  // planHalf carries an 8% margin; the visible edge is the footprint itself.
+  const slackX = width / 2 - planHalf.x / 1.08 / unit;
+  const slackZ = height / 2 - planHalf.z / 1.08 / unit;
+  const gap = MINI_INSET + Math.max(slackX, slackZ, 0);
+  const right = `${Math.round(gap - Math.max(slackX, 0))}px`;
+  const bottom = `${Math.round(gap - Math.max(slackZ, 0))}px`;
+  if (box.style.right !== right) box.style.right = right;
+  if (box.style.bottom !== bottom) box.style.bottom = bottom;
+}
+
 // Room kept round the footprint in an elevation, in pixels of the corner
 // view, so the marker sits outside the building and inside the frame.
 const MARK_PAD = 24;
@@ -306,17 +331,29 @@ function frameElevation(reset) {
   controls.update();
 }
 
+// A plain elevation keeps the model's own textures and only hides the site
+// props (trees, cars, people); the default paints each legend material.
+function showProps(on) {
+  const fm = legend();
+  if (!fm) return;
+  model.traverse((mesh) => {
+    if (mesh.isMesh && fm.isProp((mesh.userData.fitteMaterial || mesh.material).name)) mesh.visible = on;
+  });
+}
+
 function setElevation(next) {
-  const key = next?.face ? `${next.face}:${next.focus || 0}` : "";
+  const key = next?.face ? `${next.face}:${next.focus || 0}:${next.plain ? "plain" : "legend"}` : "";
   if (key === elevationKey || !model) return;
   const faceChanged = (next?.face || "") !== (elevation?.face || "");
   elevationKey = key;
-  elevation = next?.face && FACES[next.face] ? { face: next.face, focus: Number(next.focus) || 0 } : null;
+  elevation = next?.face && FACES[next.face]
+    ? { face: next.face, focus: Number(next.focus) || 0, plain: Boolean(next.plain) } : null;
   elevationUniforms.fitteFocus.value = elevation?.focus || 0;
   if (elevation) {
     buildingSelection?.cancelFlight();
     buildingSelection?.setEnabled(false);
-    paintElevation(true);
+    paintElevation(!elevation.plain);
+    showProps(!elevation.plain);
     camera = orthoCamera;
     controls.object = orthoCamera;
     // An elevation is looked at, not walked around: moving and zooming
@@ -326,6 +363,7 @@ function setElevation(next) {
     if (faceChanged) frameElevation(true);
   } else {
     paintElevation(false);
+    showProps(true);
     camera = persp;
     controls.object = persp;
     controls.enableRotate = true;
@@ -679,6 +717,14 @@ function createRenderer() {
     // corner view says where the building is being looked at from.
     const back = camera.position.clone().sub(controls.target).normalize();
     cameraMark.position.copy(controls.target).add(back.multiplyScalar(markRadius || 1));
+    // When the target has flown off the centre (a unit picked near an
+    // edge), the circle shifts with it; the marker is held inside the
+    // corner view's frame rather than slid out of it.
+    if (overviewCamera.right > markSize) {
+      const hx = overviewCamera.right - markSize, hz = overviewCamera.top - markSize;
+      cameraMark.position.x = THREE.MathUtils.clamp(cameraMark.position.x, -hx, hx);
+      cameraMark.position.z = THREE.MathUtils.clamp(cameraMark.position.z, -hz, hz);
+    }
     cameraMark.lookAt(controls.target);
     sight.geometry.setFromPoints([controls.target.clone(), cameraMark.position.clone()]);
     renderOverview();
@@ -720,14 +766,18 @@ function renderOverview() {
     overviewKey = key;
     overview.setSize(width, height, false);
     // The footprint is fitted inside the frame without stretching: one
-    // scale for both axes, whichever of the two is the tighter.
-    const scale = Math.max(planHalf.x / (width / 2 - pad), planHalf.z / (height / 2 - pad));
+    // scale for both axes, whichever of the two is the tighter. In plan the
+    // frame also holds the marker's whole orbit, ring included.
+    const reach = elevation ? 0 : markRadius + markSize;
+    const scale = Math.max(Math.max(planHalf.x, reach) / (width / 2 - pad),
+      Math.max(planHalf.z, reach) / (height / 2 - pad));
     overviewCamera.left = -scale * width / 2;
     overviewCamera.right = scale * width / 2;
     overviewCamera.top = scale * height / 2;
     overviewCamera.bottom = -scale * height / 2;
     overviewCamera.updateProjectionMatrix();
   }
+  seatOverview(canvas, width, height);
   // In an elevation the façade's marker says where the building is seen
   // from; the live camera's ball and line would say it a second time.
   cameraMark.visible = !elevation;
@@ -749,8 +799,12 @@ function paintElevationMark(canvas, width, height) {
     mark.style.cssText = "position:absolute;width:24px;height:24px;pointer-events:none;line-height:0";
     mark.dataset.face = elevation.face;
     mark.setAttribute("aria-label", `Élévation ${face.letter}`);
-    mark.innerHTML = `<svg viewBox="-12 -12 24 24" width="24" height="24" aria-hidden="true">
-      <polygon points="-4.5,-10.5 11,0 -4.5,10.5" transform="rotate(${face.turn})" fill="#111" stroke="#111" stroke-width=".8" stroke-linejoin="round"/>
+    // The triangle turns to face the building, then is pushed along that
+    // line and sized from the circle's centre by --em-off (px) and --em-scale,
+    // which the page's panel sets. overflow:visible lets a large or far
+    // triangle reach past the 24 px box instead of being clipped by it.
+    mark.innerHTML = `<svg viewBox="-12 -12 24 24" width="24" height="24" overflow="visible" aria-hidden="true">
+      <g transform="rotate(${face.turn})"><polygon class="emarrow" points="-4.5,-10.5 11,0 -4.5,10.5" fill="#111" stroke="#111" stroke-width=".8" stroke-linejoin="round"/></g>
       <circle r="7.4" fill="#fff" stroke="#111" stroke-width="1"/>
       <text y="3.1" text-anchor="middle" font-size="8.6" font-family="Inter, system-ui, sans-serif" fill="#111">${face.letter}</text>
     </svg>`;

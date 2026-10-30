@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Bord d'un volet — le survol qui propose de replier</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* Hovering the edge between two panes offers to fold the one beside it.
+   Today that offer is a black bar with a white chevron over the drawing;
+   the strip a folded pane leaves is quiet: white, a hairline, the header's
+   icon on the header's rule, the title read upward. Five offers drawn from
+   that strip's words. In each, the edge still drags; the offer folds. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --vert:#c3e05a;--vert-ink:#2f3a05}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:820px}
+.opts{margin-top:10px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.opts label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(520px,1fr));gap:26px 28px;margin-top:20px}
+.v h2{margin:0;font-size:14px;font-weight:600}
+.v p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:36px}
+
+/* the two panes, as on prototype 3 inside the white frame ------------- */
+.mock{position:relative;display:flex;height:430px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pane{position:relative;display:flex;flex-direction:column;min-width:0;background:#fff}
+.pane.list{flex:0 0 250px;border-right:1px solid var(--line-2)}
+.pane.plan{flex:1}
+.ph{display:flex;align-items:center;gap:7px;height:38px;flex:0 0 38px;padding:0 10px 0 12px;border-bottom:1px solid var(--line-2);font-weight:500;white-space:nowrap}
+.ph svg{width:15px;height:15px;flex:0 0 15px;color:var(--ink-2)}
+.ph .sub{color:var(--ink-3);font-weight:400}
+.rows{padding:6px 12px;display:flex;flex-direction:column}
+.rows span{display:flex;justify-content:space-between;height:27px;align-items:center;border-bottom:1px solid var(--line-2);font-variant-numeric:tabular-nums;font-size:12.5px}
+.rows span b{font-weight:500}
+.rows span.on{background:#eef3dc;margin:0 -12px;padding:0 12px}
+.sheet{flex:1;margin:12px;border:1px solid var(--line);display:block}
+.sheet line{stroke:#c9c9cc;stroke-width:1}
+
+/* the folded strip, as on prototype 3 */
+.fstrip{display:none;flex:0 0 38px;width:38px;flex-direction:column;border-right:1px solid var(--line-2);cursor:pointer;background:#fff}
+.fstrip .ph{justify-content:center;padding:0}
+.fstrip:hover{background:var(--fill-2)}
+.fstrip:hover .ph svg{color:var(--ink)}
+.fstrip .t{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:500;padding:12px 0 0;align-self:center;white-space:nowrap}
+.mock.folded .pane.list{display:none}
+.mock.folded .fstrip{display:flex}
+.mock.folded .gut{display:none}
+
+/* the edge: a strip laid over the seam, 10 px wide, that drags */
+.gut{position:absolute;top:0;bottom:0;left:245px;width:10px;z-index:5;cursor:col-resize}
+.gut::before{content:"";position:absolute;top:0;bottom:0;left:4px;width:1px;background:transparent;transition:background .12s}
+.gut .fold{position:absolute;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .12s, background .12s, color .12s;
+  border:0;font:inherit;padding:0;background:none;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
+.gut .fold svg{width:15px;height:15px}
+.gut:hover .fold,.show .gut .fold{opacity:1;pointer-events:auto}
+
+/* A — On the header's rule. The line turns ink and a small white button
+   sits where the folded strip will put its icon: on the header row, on the
+   seam. The offer is made where the strip will answer it. */
+[data-v="A"] .gut:hover::before,[data-v="A"].show .gut::before{background:var(--ink)}
+[data-v="A"] .gut .fold{top:7px;left:-8px;width:26px;height:24px;border:1px solid var(--line);border-radius:6px;background:#fff}
+[data-v="A"] .gut .fold:hover{border-color:var(--ink);background:var(--ink);color:#fff}
+
+/* B — The quiet tab. The same tab as today, at the middle of the seam,
+   but white with a hairline and a grey chevron: it reads as part of the
+   frame, and fills with ink only under the pointer. */
+[data-v="B"] .gut:hover::before,[data-v="B"].show .gut::before{background:var(--ink)}
+[data-v="B"] .gut .fold{top:50%;left:-5px;width:20px;height:44px;margin-top:-22px;border:1px solid var(--line);border-radius:6px;background:#fff}
+[data-v="B"] .gut .fold svg{width:14px;height:14px;stroke-width:2.2}
+[data-v="B"] .gut .fold:hover{border-color:var(--ink);background:var(--ink);color:#fff}
+
+/* C — Named, upward. The tab carries the word, written the way the strip
+   writes its title: "Replier" read upward, under a chevron, on the header
+   rule. It says what will happen in the voice of what will be left. */
+[data-v="C"] .gut:hover::before,[data-v="C"].show .gut::before{background:var(--ink)}
+[data-v="C"] .gut .fold{top:7px;left:-7px;width:24px;flex-direction:column;justify-content:flex-start;gap:6px;padding:5px 0 8px;
+  border:1px solid var(--line);border-radius:6px;background:#fff;font-size:11.5px;font-weight:500;color:var(--ink)}
+[data-v="C"] .gut .fold span{writing-mode:vertical-rl;transform:rotate(180deg)}
+[data-v="C"] .gut .fold svg{width:13px;height:13px;color:var(--ink-2)}
+[data-v="C"] .gut .fold:hover{border-color:var(--ink);background:var(--ink);color:#fff}
+[data-v="C"] .gut .fold:hover svg{color:#fff}
+
+/* D — In the header. The edge lights the pane's own header: a fold
+   button appears at the right end of it, the way a window keeps its close
+   button in its title. Nothing lands on the drawing. */
+[data-v="D"] .gut:hover::before,[data-v="D"].show .gut::before{background:var(--ink)}
+[data-v="D"] .gut .fold{top:7px;left:-36px;width:26px;height:24px;border-radius:6px;background:var(--fill);color:var(--ink)}
+[data-v="D"] .gut .fold:hover{background:var(--ink);color:#fff}
+[data-v="D"] .pane.list .ph .sub{transition:opacity .12s}
+[data-v="D"]:has(.gut:hover) .pane.list .ph .sub,[data-v="D"].show .pane.list .ph .sub{opacity:0}
+
+/* E — The strip, shown before it is chosen. Hovering the edge lays a
+   ghost of the strip on the pane's left side, icon and title included,
+   and greys what will go: the offer is the result. A click anywhere on
+   the ghost folds. */
+[data-v="E"] .gut:hover::before,[data-v="E"].show .gut::before{background:var(--ink)}
+[data-v="E"] .gut .fold{top:7px;left:-8px;width:26px;height:24px;border:1px solid var(--ink);border-radius:6px;background:var(--ink);color:#fff}
+[data-v="E"] .ghost{position:absolute;top:0;bottom:0;left:0;width:250px;z-index:4;pointer-events:none;opacity:0;transition:opacity .15s;display:flex}
+[data-v="E"] .ghost .g{flex:0 0 38px;display:flex;flex-direction:column;background:#fff;border-right:1px solid var(--ink)}
+[data-v="E"] .ghost .g .ph{justify-content:center;padding:0}
+[data-v="E"] .ghost .g .ph svg{color:var(--ink)}
+[data-v="E"] .ghost .g .t{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:500;padding:12px 0 0;align-self:center}
+[data-v="E"] .ghost .wash{flex:1;background:rgba(255,255,255,.72)}
+[data-v="E"]:has(.gut .fold:hover) .ghost,[data-v="E"].show .ghost{opacity:1}
+.ghost{display:none}
+[data-v="E"] .ghost{display:flex}
+
+.hint{position:absolute;right:10px;bottom:8px;font-size:11px;color:var(--ink-3);z-index:6}
+.mock.folded .hint{display:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Bord d'un volet — le survol qui propose de replier</h1>
+  <p class="lede">Survoler le bord entre deux volets propose de replier celui d'à côté. Aujourd'hui: une barre noire et un chevron blanc posés sur le dessin. Ici, cinq propositions tirées de la bande repliée: du blanc, un filet, l'icône de l'en-tête sur sa ligne, le titre lu vers le haut. Dans chacune, le bord se glisse encore; le bouton replie. Cliquer la bande déplie.</p>
+  <div class="opts"><label><input type="checkbox" data-show checked> Montrer l'état de survol en permanence</label></div>
+  <div class="grid" data-grid></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n) => {
+  const node = lucide.icons[pascal(n)];
+  return node ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+    node[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : "";
+};
+const V = [
+  ["A", "A — Sur la ligne de l'en-tête", "Le bord passe à l'encre et un petit bouton blanc se pose sur la rangée d'en-tête, là où la bande mettra son icône.", "panel-left-close", ""],
+  ["B", "B — L'onglet discret", "Le même onglet qu'aujourd'hui, au milieu du bord, mais blanc, un filet, un chevron gris. Noir seulement sous le pointeur.", "chevron-left", ""],
+  ["C", "C — Nommé, vers le haut", "L'onglet porte le mot « Replier », écrit comme la bande écrit son titre, sur la ligne de l'en-tête.", "chevron-left", "<span>Replier</span>"],
+  ["D", "D — Dans l'en-tête", "Le bord allume l'en-tête du volet: un bouton apparaît au bout, comme le bouton de fermeture d'une fenêtre. Rien sur le dessin.", "panel-left-close", ""],
+  ["E", "E — La bande, avant de choisir", "Survoler le bouton montre la bande qui restera, icône et titre, et pâlit ce qui part. La proposition est le résultat.", "panel-left-close", ""],
+];
+const rows = [["501", "1 275", true], ["502", "1 496"], ["503", "760"], ["504", "1 152"], ["505", "1 221"], ["506", "1 106"],
+  ["507", "707"], ["508", "970"], ["509", "958"], ["510", "1 466"], ["511", "1 345"], ["512", "740"]];
+const sheet = `<svg class="sheet" viewBox="0 0 100 100" preserveAspectRatio="none">${
+  [12, 30, 48, 66, 84].map((x) => `<line x1="${x}" y1="6" x2="${x}" y2="94" vector-effect="non-scaling-stroke"/>`).join("")}${
+  [14, 38, 62, 86].map((y) => `<line x1="6" y1="${y}" x2="94" y2="${y}" vector-effect="non-scaling-stroke"/>`).join("")}</svg>`;
+function mock([v, , , ic, word]) {
+  return `<div class="mock show" data-v="${v}">
+    <div class="fstrip" data-unfold title="Déplier la liste"><div class="ph">${svg("table")}</div><span class="t">Unités et superficies</span></div>
+    <section class="pane list"><div class="ph">${svg("table")}Unités et superficies <span class="sub">Niveau 5</span></div>
+      <div class="rows">${rows.map(([u, a, on]) => `<span class="${on ? "on" : ""}"><b>${u}</b>${a}</span>`).join("")}</div></section>
+    <div class="gut" title="Glisser pour déplacer le bord"><button class="fold" data-fold title="Replier la liste">${svg(ic)}${word}</button></div>
+    <div class="ghost"><div class="g"><div class="ph">${svg("table")}</div><span class="t">Unités et superficies</span></div><div class="wash"></div></div>
+    <section class="pane plan"><div class="ph">${svg("file")}Plan 2D</div>${sheet}</section>
+    <span class="hint">cliquer le bouton pour replier</span>
+  </div>`;
+}
+document.querySelector("[data-grid]").innerHTML = V.map((x) => `<section class="v"><h2>${x[1]}</h2><p>${x[2]}</p>${mock(x)}</section>`).join("");
+document.addEventListener("click", (e) => {
+  const f = e.target.closest("[data-fold]");
+  if (f) { f.closest(".mock").classList.add("folded"); return; }
+  const u = e.target.closest("[data-unfold]");
+  if (u) u.closest(".mock").classList.remove("folded");
+});
+document.querySelector("[data-show]").addEventListener("change", (e) => {
+  document.querySelectorAll(".mock").forEach((m) => m.classList.toggle("show", e.target.checked));
+});
+</script>
+</body>
+</html>

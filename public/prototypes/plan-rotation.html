@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Plan 2D — rotation par quarts de tour</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* Turning the sheet: the drawing, every layer laid on it, the pins and the
+   north mark all turn together, by quarter turns, from a control sitting
+   beside the zoom pill. One click puts north back at the top. Two ways of
+   drawing that control; both are live. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#f1f1f2;--fill-2:#f6f6f7;--card:#fff;--green:#c3e05a;--green-ink:#2f3a05}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header{padding:20px 24px 6px;max-width:1100px}
+header h1{margin:0;font-size:16px;font-weight:600}
+header p{margin:4px 0 0;color:var(--ink-2)}
+.grid{display:flex;flex-wrap:wrap;gap:24px;padding:14px 24px 40px}
+.demo{width:520px}
+.demo h2{margin:0;font-size:13px;font-weight:600}
+.demo .why{margin:2px 0 10px;font-size:11.5px;color:var(--ink-2);min-height:48px}
+
+/* the 2D pane, as on the prototype */
+.pane{position:relative;height:620px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.phd{display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-bottom:1px solid var(--line-2);font-weight:500}
+.phd svg{width:15px;height:15px}
+.vp{position:absolute;left:0;right:0;top:38px;bottom:0;overflow:hidden}
+/* The sheet: drawing, layers and pins in one box, turned as one. */
+.sheet{position:absolute;left:50%;top:50%;width:440px;aspect-ratio:2000/1675;
+  transition:transform .32s cubic-bezier(.2,.7,.3,1)}
+.sheet img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.sheet img.lay{mix-blend-mode:multiply;opacity:.55}
+/* pins stay upright: each one is turned back by the sheet's angle */
+.pin{position:absolute;width:0;height:0}
+.pin span{position:absolute;left:-11px;bottom:1px;width:22px;height:22px;border-radius:50% 50% 50% 2px;
+  transform:rotate(-45deg);background:var(--green);color:var(--green-ink);border:1.5px solid var(--green-ink);
+  display:grid;place-items:center;font-size:11px;font-weight:700}
+.pin span i{transform:rotate(45deg);font-style:normal}
+.pin .up{position:absolute;left:0;bottom:0;transition:transform .32s cubic-bezier(.2,.7,.3,1);transform-origin:0 0}
+
+/* north, top right */
+.north{position:absolute;right:30px;top:50px;width:34px;height:50px;z-index:5;overflow:visible}
+.north circle{fill:#fff;stroke:var(--ink);stroke-width:1.7}
+.north line{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
+.north text{fill:var(--ink);font-size:17px;font-weight:500;text-anchor:middle}
+/* the needle turns; the letter rides round the ring and stays upright */
+.north [data-needle]{transition:transform .32s cubic-bezier(.2,.7,.3,1);transform-origin:17px 33px;transform-box:view-box}
+
+/* the bottom-left controls: zoom pill as on the prototype, rotation beside it */
+.ctrls{position:absolute;left:10px;bottom:10px;z-index:7;display:flex;gap:6px;align-items:center}
+.zpill{display:flex;align-items:center;height:34px;padding:0 2px;background:#fff;border:1px solid var(--line);
+  border-radius:8px;user-select:none}
+.zb{width:30px;height:30px;flex:0 0 30px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  color:var(--ink);cursor:pointer;border:0;background:none;padding:0}
+.zb:hover{background:var(--fill)}
+.zb svg{width:16px;height:16px}
+.zread{min-width:46px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;text-align:center}
+.zb[disabled]{color:var(--ink-3);cursor:default;background:none}
+
+/* A — one button; once turned, the angle and a "north up" button appear in it */
+.rpill .ang{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;padding:0 4px 0 1px;
+  display:none}
+.rpill .sep{width:1px;height:18px;background:var(--line-2);margin:0 2px;display:none}
+.rpill .reset{display:none}
+.rpill.turned .ang,.rpill.turned .sep,.rpill.turned .reset{display:flex}
+.rpill.turned{border-color:var(--ink)}
+
+/* B — the zoom pill's grammar: turn left, angle, turn right; the angle resets */
+.bpill .ang{min-width:40px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;text-align:center;
+  border-radius:6px;height:30px;line-height:30px;cursor:default}
+.bpill.turned .ang{cursor:pointer}
+.bpill.turned .ang:hover{background:var(--fill)}
+.bpill.turned{border-color:var(--ink)}
+
+/* tooltip, small and plain */
+[data-tip]{position:relative}
+[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  white-space:nowrap;background:var(--ink);color:#fff;font-size:11px;font-weight:500;padding:3px 7px;border-radius:5px;pointer-events:none}
+.keys{margin-top:8px;font-size:11.5px;color:var(--ink-2)}
+.keys kbd{font:inherit;font-size:10.5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:#fff}
+</style>
+</head>
+<body>
+<header>
+  <h1>Plan 2D — tourner le dessin par quarts de tour</h1>
+  <p>Le dessin, tous les calques posés dessus, les épingles et le nord tournent ensemble. Les épingles restent droites. Un clic remet le nord en haut.</p>
+</header>
+<div class="grid" id="grid"></div>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const svg = (n) => {
+  const node = lucide.icons[n];
+  if (!node) return "";
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+    node[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+};
+const PINS = [[0.3, 0.42, 1], [0.58, 0.3, 2], [0.2, 0.7, 3]];
+
+const VARIANTS = [
+  { id: "A", title: "A — Un bouton, qui se déplie une fois tourné",
+    why: "Au repos, un seul bouton avec l'icône de rotation: chaque clic tourne de 90° vers la droite. Dès que le dessin n'est plus droit, le bouton montre l'angle et un second bouton « nord en haut » pour revenir d'un clic.",
+    ctl: () => `<div class="zpill rpill" data-rot>
+      <button class="zb" data-cw data-tip="Tourner de 90°">${svg("RotateCw")}</button>
+      <span class="ang" data-ang>0°</span><span class="sep"></span>
+      <button class="zb reset" data-reset data-tip="Nord en haut">${svg("Undo2")}</button></div>` },
+  { id: "B", title: "B — Comme le zoom: ↺ angle ↻",
+    why: "La même pastille que le zoom: tourner à gauche, l'angle, tourner à droite. Cliquer l'angle remet le nord en haut, comme cliquer le pourcentage remet le dessin à la taille du volet.",
+    ctl: () => `<div class="zpill bpill" data-rot>
+      <button class="zb" data-ccw data-tip="Tourner de 90° à gauche">${svg("RotateCcw")}</button>
+      <span class="ang" data-ang data-reset>0°</span>
+      <button class="zb" data-cw data-tip="Tourner de 90° à droite">${svg("RotateCw")}</button></div>` },
+];
+
+function mount(Vt) {
+  const sec = document.createElement("section");
+  sec.className = "demo";
+  sec.innerHTML = `<h2>${Vt.title}</h2><p class="why">${Vt.why}</p>
+  <div class="pane">
+    <div class="phd">${svg("File")}Plan 2D</div>
+    <div class="vp">
+      <div class="sheet" data-sheet>
+        <img src="assets/plan-niveau-5.jpg" alt="">
+        <img class="lay" src="assets/engineering/electrical-5.jpg" alt="">
+        ${PINS.map(([x, y, n]) => `<div class="pin" style="left:${x * 100}%;top:${y * 100}%"><div class="up" data-up><span><i>${n}</i></span></div></div>`).join("")}
+      </div>
+    </div>
+    <svg class="north" data-north viewBox="0 0 34 50"><text data-nl x="17" y="14">N</text><circle cx="17" cy="33" r="13"/><line data-needle x1="17" y1="33" x2="17" y2="22"/></svg>
+    <div class="ctrls">
+      <div class="zpill"><button class="zb">${svg("Minus")}</button><span class="zread">100%</span><button class="zb">${svg("Plus")}</button></div>
+      ${Vt.ctl()}
+    </div>
+  </div>
+  <p class="keys">Raccourcis: <kbd>R</kbd> tourne à droite, <kbd>⇧R</kbd> à gauche, <kbd>⇧N</kbd> nord en haut — sur le volet survolé.</p>`;
+  document.getElementById("grid").append(sec);
+  /* The angle is kept unwrapped (…, -90, 0, 90, 180, 270, 360, …) so each
+     quarter turn animates the short way; it is shown modulo 360. */
+  let turn = 0;
+  const pane = sec.querySelector(".pane");
+  const sheet = sec.querySelector("[data-sheet]"), vp = sec.querySelector(".vp");
+  const rot = sec.querySelector("[data-rot]");
+  const paint = () => {
+    const a = ((turn % 360) + 360) % 360;
+    /* On its side the sheet is fitted to the pane's height instead. */
+    const side = a === 90 || a === 270;
+    const sw = sheet.offsetWidth, sh = sheet.offsetHeight;
+    const fit = side ? Math.min(vp.clientWidth / sh, vp.clientHeight / sw) : Math.min(vp.clientWidth / sw, vp.clientHeight / sh);
+    sheet.style.transform = `translate(-50%,-50%) rotate(${turn}deg) scale(${(fit * 0.94).toFixed(3)})`;
+    sheet.querySelectorAll("[data-up]").forEach((p) => { p.style.transform = `rotate(${-turn}deg) scale(${(1 / fit / 0.94).toFixed(3)})`; });
+    sec.querySelector("[data-needle]").style.transform = `rotate(${turn}deg)`;
+    const nl = sec.querySelector("[data-nl]"), rad = (a * Math.PI) / 180;
+    nl.setAttribute("x", (17 + Math.sin(rad) * 22).toFixed(1));
+    nl.setAttribute("y", (33 - Math.cos(rad) * 22 + 6).toFixed(1));
+    sec.querySelector("[data-ang]").textContent = `${a}°`;
+    rot.classList.toggle("turned", a !== 0);
+  };
+  const by = (d) => { turn += d; paint(); };
+  /* Back to north up the short way round: 270 goes forward to 360, not back. */
+  const reset = () => { const a = ((turn % 360) + 360) % 360; if (!a) return; turn += a > 180 ? 360 - a : -a; paint(); };
+  rot.addEventListener("click", (e) => {
+    if (e.target.closest("[data-cw]")) by(90);
+    else if (e.target.closest("[data-ccw]")) by(-90);
+    else if (e.target.closest("[data-reset]")) reset();
+  });
+  let hover = false;
+  pane.addEventListener("pointerenter", () => { hover = true; });
+  pane.addEventListener("pointerleave", () => { hover = false; });
+  window.addEventListener("keydown", (e) => {
+    if (!hover || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === "r") by(90);
+    else if (e.key === "R") by(-90);
+    else if (e.key === "N") reset();
+  });
+  requestAnimationFrame(paint);
+  sec.api = { by, reset, get angle() { return ((turn % 360) + 360) % 360; } };
+  return sec;
+}
+window.demos = VARIANTS.map(mount);
+</script>
+</body>
+</html>

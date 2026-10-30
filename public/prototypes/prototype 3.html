@@ -139,11 +139,16 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
   background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tabc) 8px)}
 .tabs.lvl button[aria-current="true"]::after{left:100%;
   background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tabc) 8px)}
-/* The first tab keeps the row's left padding like every other one, so the
-   card can round both of its top corners the same way. A tab standing on
-   the corner itself forced that corner square, and a page rounded at one
-   end and cut at the other reads as two sheets: the flared foot already
-   carries the join, and it does it 9px in without touching the corner. */
+/* When the first tab is the one open, it stands on the page's corner: its
+   left side runs straight down into the page's left side as one edge, so
+   there is no foot there and the page's own top-left corner is square —
+   the tab's rounded top is the corner. */
+.tabs.lvl > button:first-child[aria-current="true"],
+.tabs.lvl > .views:first-child > button:first-child[aria-current="true"]{margin-left:-9px}
+.tabs.lvl > button:first-child[aria-current="true"]::before,
+.tabs.lvl > .views:first-child > button:first-child[aria-current="true"]::before{display:none}
+.body:has(.tabs.lvl > button:first-child[aria-current="true"]) .work,
+.body:has(.tabs.lvl > .views:first-child > button:first-child[aria-current="true"]) .work{border-top-left-radius:0}
 .frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.72);font-size:12.5px}
 .frame[data-chrome="black"] .tabs.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
 .frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{background:var(--card);color:var(--ink)}

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype 02 user testing notes</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<script>
+if (new URLSearchParams(location.search).get("embed") === "1") {
+  document.documentElement.dataset.embedded = "true";
+}
+</script>
+<style>
+:root{
+  --ink:#131313;--ink-2:#575757;--ink-3:#8e8e8e;
+  --paper:#fff;--paper-2:#f7f7f5;--line:#e7e7e3;--line-2:#d6d6d0;
+  --accent:#c0d739;--accent-dk:#5c6b0b;--accent-soft:#f3f7df;
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper-2);color:var(--ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}.wrap{max-width:1040px;margin:0 auto;padding:56px 28px 96px}
+.rail{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
+.rail a{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2);text-decoration:none;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;transition:border-color .15s,color .15s}
+.rail a:hover{border-color:var(--line-2);color:var(--ink)}
+.rail a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.rail svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rail .docs-link{gap:9px;padding:6px 10px 6px 7px;border-radius:12px;border-color:#c4c7c5;
+  background:#fff;color:#202124;box-shadow:0 1px 2px rgba(60,64,67,.12)}
+.rail .docs-link:hover{border-color:#0b57d0;background:#f8fafd;color:#202124}
+.rail .docs-icon{width:22px;height:22px;flex:0 0 22px;stroke:none}
+.rail .docs-icon .doc-body{fill:#4285f4}
+.rail .docs-icon .doc-fold{fill:#a8c7fa}
+.rail .docs-icon .doc-lines{fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round}
+.docs-copy{font-weight:550}.docs-brand{font-size:11px;font-weight:600;color:#0b57d0}
+.rail .external-icon{width:14px;height:14px;stroke:#5f6368}
+header.top{margin-bottom:34px}.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-size:34px;font-weight:600;letter-spacing:-.025em;line-height:1.1;margin-top:10px;text-wrap:balance}
+.lede{font-size:15px;color:var(--ink-2);margin-top:12px;max-width:66ch;text-wrap:pretty}
+.legend{display:flex;gap:10px;align-items:center;margin-top:22px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.who{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:2px 9px;white-space:nowrap;background:#f4f4f5;color:var(--ink-2)}
+.who svg{width:13px;height:13px;stroke-width:2}.who.both{border-color:var(--ink);background:var(--ink);color:#fff}
+.insight{margin-top:26px;padding:18px 20px;border:1px solid #dfe9a4;border-radius:10px;background:var(--accent-soft)}
+.insight .kicker{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dk)}
+.insight p{font-size:15px;line-height:1.55;margin-top:7px;max-width:78ch;text-wrap:pretty}
+.focus{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-top:12px;border:1px solid #dfe9a4;border-radius:8px;overflow:hidden;background:#dfe9a4}
+.focus li{list-style:none;background:#fbfdef;padding:10px 12px;font-size:12px;color:var(--ink-2)}
+.focus b{display:block;color:var(--ink);font-size:12.5px;margin-bottom:2px}
+h2.theme{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:40px 0 12px;display:flex;align-items:center;gap:8px}
+h2.theme svg{width:15px;height:15px;stroke-width:1.8;color:var(--ink-2)}
+.feat{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:10px}
+.feat .hd{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.feat h3{font-size:15.5px;font-weight:600;letter-spacing:-.01em;flex:1;line-height:1.3;text-wrap:balance}
+.feedback{display:grid;gap:6px;padding-left:0}.feedback li{list-style:none;position:relative;padding-left:16px;color:var(--ink-2);font-size:13.5px;text-wrap:pretty}
+.feedback li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+/* every feedback point is a checklist item; the dot bullet stays as the no-script fallback */
+.feedback.checks li{padding-left:0}
+.feedback.checks li::before{display:none}
+.feedback label{display:flex;align-items:flex-start;gap:9px;cursor:pointer}
+.feedback input{flex:0 0 auto;width:15px;height:15px;margin-top:3px;accent-color:var(--ink);cursor:pointer}
+.feedback input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.feedback li.is-done span,.feedback li.is-done b{color:var(--ink-3)}
+.feedback li.is-done span{text-decoration:line-through;text-decoration-color:var(--line-2)}
+.feedback b{color:var(--ink);font-weight:550}.source{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink-3)}
+@media(max-width:760px){.focus{grid-template-columns:1fr 1fr}.wrap{padding:32px 18px 72px}.rail{align-items:flex-start;flex-direction:column}.rail a:last-child{align-self:flex-start}}
+@media(max-width:480px){.focus{grid-template-columns:1fr}h1{font-size:29px}.feat .hd{flex-wrap:wrap}.feat h3{flex-basis:100%}}
+html[data-embedded="true"] .wrap{max-width:none;padding:28px 28px 72px}
+html[data-embedded="true"] .rail{justify-content:flex-end;flex-direction:row;margin-bottom:22px}
+html[data-embedded="true"] .rail>a:first-child{display:none}
+@media(max-width:640px){
+  html[data-embedded="true"] .wrap{padding:22px 16px 56px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="rail" aria-label="Prototype navigation">
+    <a href="index.html">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      Back to Prototype 02
+    </a>
+    <a class="docs-link" href="https://docs.google.com/document/d/15q07ueqG374PNpKiemFzhmYMHLMKdSaA1K31OJOB91E/edit?tab=t.wbqjkvnvp9y0" target="_blank" rel="noopener" aria-label="Open raw interview notes in Google Docs">
+      <svg class="docs-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path class="doc-body" d="M6.5 2h7.2L19 7.3V21a1 1 0 0 1-1 1H6.5A1.5 1.5 0 0 1 5 20.5v-17A1.5 1.5 0 0 1 6.5 2Z"/>
+        <path class="doc-fold" d="M13.7 2 19 7.3h-4.3a1 1 0 0 1-1-1Z"/>
+        <path class="doc-lines" d="M8.5 12h7M8.5 15h7M8.5 18h5"/>
+      </svg>
+      <span class="docs-copy">Raw interview notes</span>
+      <span class="docs-brand">Google Docs</span>
+      <svg class="external-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+    </a>
+  </nav>
+
+  <header class="top">
+    <div class="eyebrow">Prototype 02 · User testing · Wednesday, October 28</div>
+    <h1>What Benoît and Guy noticed</h1>
+    <p class="lede">The second test focused on the coordination workspace already on screen. These notes preserve what each technician found unclear, what information was missing, and which parts of the drawing workflow need refinement.</p>
+    <div class="legend">
+      <span class="who ben"><i data-lucide="pen-line"></i>Benoît · 2D specialist</span>
+      <span class="who guy"><i data-lucide="box"></i>Guy · 3D specialist</span>
+      <span class="who both"><i data-lucide="users"></i>Cross-interview finding</span>
+    </div>
+    <section class="insight" aria-labelledby="central-insight">
+      <div class="kicker" id="central-insight">Central insight</div>
+      <p>Both technicians focused on usability and workflow details rather than asking for entirely new features. The prototype’s value depends on making existing architectural tasks faster, clearer and easier to navigate.</p>
+      <ul class="focus" aria-label="Key design improvements">
+        <li><b>Controls</b>Make actions discoverable and explain unfamiliar interactions.</li>
+        <li><b>Calculations</b>Show practical totals and breakdowns architects use.</li>
+        <li><b>Drawings</b>Improve zoom, resizing, opacity and version history.</li>
+        <li><b>Terminology</b>Use familiar architectural language.</li>
+        <li><b>Regulations</b>Make codes and municipal workflows easier to retrieve.</li>
+        <li><b>Tracking</b>Clarify comments, priorities and calendar information.</li>
+      </ul>
+    </section>
+  </header>
+
+  <h2 class="theme"><i data-lucide="mouse-pointer-2"></i>Navigation and discoverability</h2>
+
+  <article class="feat">
+    <div class="hd"><h3>Make controls explain themselves</h3><span class="who ben"><i data-lucide="pen-line"></i>Benoît</span></div>
+    <ul class="feedback">
+      <li>Closing pop-up bubbles with the <b>×</b> is not obvious.</li>
+      <li>Add tutorials or contextual hints for new users.</li>
+      <li>The error button hides the problem instead of making it visible.</li>
+    </ul>
+  </article>
+
+  <article class="feat">
+    <div class="hd"><h3>Make the drawing viewport easier to control</h3><span class="who ben"><i data-lucide="pen-line"></i>Benoît</span></div>
+    <ul class="feedback">
+      <li>The mouse-wheel direction for zooming into floor plans feels inverted.</li>
+      <li>Allow users to resize the viewing panels.</li>
+      <li>Increase the maximum zoom level.</li>
+    </ul>
+  </article>
+
+  <article class="feat">
+    <div class="hd"><h3>Use language the office already uses</h3><span class="who guy"><i data-lucide="box"></i>Guy</span></div>
+    <ul class="feedback">
+      <li>The commenting system is unclear.</li>
+      <li>The term <b>Distribution</b> is not intuitive.</li>
+      <li>Avoid technical file terminology such as <b>.csv</b>, which users may not understand.</li>
+    </ul>
+  </article>
+
+  <h2 class="theme"><i data-lucide="layers"></i>Drawing navigation and versions</h2>
+
+  <article class="feat">
+    <div class="hd"><h3>Make previous drawing versions usable</h3><span class="who guy"><i data-lucide="box"></i>Guy</span></div>
+    <ul class="feedback"><li>Fix the functionality for viewing previous drawing versions.</li></ul>
+  </article>
+
+  <article class="feat">
+    <div class="hd"><h3>Clarify opacity and start from the drawing</h3><span class="who guy"><i data-lucide="box"></i>Guy</span></div>
+    <ul class="feedback">
+      <li>Opacity controls are unclear.</li>
+      <li>Set drawing opacity to <b>100%</b> by default.</li>
+    </ul>
+  </article>
+
+  <h2 class="theme"><i data-lucide="calculator"></i>Calculations and documentation</h2>
+
+  <article class="feat">
+    <div class="hd"><h3>Show the unit mix and the project total</h3><span class="who ben"><i data-lucide="pen-line"></i>Benoît</span></div>
+    <ul class="feedback">
+      <li>Show the percentage breakdown of unit types: <b>3½, 4½ and 5½</b>.</li>
+      <li>Display the total net area across all units in square feet.</li>
+    </ul>
+  </article>
+
+  <article class="feat">
+    <div class="hd"><h3>Make quantities practical, not merely complete</h3><span class="who ben"><i data-lucide="pen-line"></i>Benoît</span></div>
+    <ul class="feedback">
+      <li>Total material quantities are less useful than material quantities <b>per façade</b>.</li>
+      <li>Investigate why window quantities display decimals such as <b>0.3</b>.</li>
+    </ul>
+  </article>
+
+  <article class="feat">
+    <div class="hd"><h3>Find a unit or article, then export what is useful</h3><span class="who ben"><i data-lucide="pen-line"></i>Benoît</span></div>
+    <ul class="feedback">
+      <li>Add a smart search bar that opens a specific unit or retrieves the relevant building-code articles.</li>
+      <li>Allow users to export data tables as PDFs.</li>
+    </ul>
+  </article>
+
+  <h2 class="theme"><i data-lucide="scale"></i>Codes and municipal workflow</h2>
+
+  <article class="feat">
+    <div class="hd"><h3>Organize regulations around how they are reviewed</h3><span class="who guy"><i data-lucide="box"></i>Guy</span></div>
+    <ul class="feedback">
+      <li>Organize building codes in chronological order.</li>
+      <li>In Codes &amp; Regulations, replace <b>Client</b> with <b>Municipalité / Ville</b> where appropriate.</li>
+    </ul>
+  </article>
+
+  <article class="feat">
+    <div class="hd"><h3>Keep municipal referrals visible</h3><span class="who guy"><i data-lucide="box"></i>Guy</span></div>
+    <ul class="feedback"><li>Account for referrals between municipal departments, particularly to the Director of Urban Planning Services.</li></ul>
+  </article>
+
+  <h2 class="theme"><i data-lucide="calendar-check"></i>Project tracking</h2>
+
+  <article class="feat">
+    <div class="hd"><h3>Use comments as the project’s shared unit of follow-up</h3><span class="who ben"><i data-lucide="pen-line"></i>Benoît</span></div>
+    <ul class="feedback"><li>Replace <b>Tâche</b> with <b>Commentaire</b> in the Échéancier interface.</li></ul>
+  </article>
+
+  <article class="feat">
+    <div class="hd"><h3>Make the calendar lead back to the project</h3><span class="who guy"><i data-lucide="box"></i>Guy</span></div>
+    <ul class="feedback"><li>Clicking a calendar date should display the corresponding project information.</li></ul>
+  </article>
+
+  <article class="feat">
+    <div class="hd"><h3>Reserve green for progress, not urgency</h3><span class="who guy"><i data-lucide="box"></i>Guy</span></div>
+    <ul class="feedback"><li>Use red and orange for priority indicators rather than green.</li></ul>
+    <div class="source">Source: Prototype 02 user testing notes · October 28, 2026</div>
+  </article>
+</div>
+<script>
+(() => {
+  const KEY = "fitte.interview-features-2.checks.v1";
+  let done;
+  try { done = new Set(JSON.parse(localStorage.getItem(KEY)) || []); } catch { done = new Set(); }
+
+  for (const ul of document.querySelectorAll(".feedback")) ul.classList.add("checks");
+  for (const li of document.querySelectorAll(".feedback li")) {
+    const id = li.textContent.replace(/\s+/g, " ").trim();
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = done.has(id);
+    const text = document.createElement("span");
+    text.append(...li.childNodes);
+    const label = document.createElement("label");
+    label.append(box, text);
+    li.append(label);
+    li.classList.toggle("is-done", box.checked);
+    box.addEventListener("change", () => {
+      if (box.checked) done.add(id); else done.delete(id);
+      li.classList.toggle("is-done", box.checked);
+      localStorage.setItem(KEY, JSON.stringify([...done]));
+    });
+  }
+})();
+</script>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
