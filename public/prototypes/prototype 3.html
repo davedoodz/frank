@@ -139,19 +139,11 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
   background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tabc) 8px)}
 .tabs.lvl button[aria-current="true"]::after{left:100%;
   background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tabc) 8px)}
-/* A tab standing on the card's corner squares that corner off: a rounded
-   corner under a tab reads as two sheets, not one. The tab then has to sit
-   on the card's own left edge — inset by the row's padding it would leave a
-   sliver of chrome over a squared corner, which reads as a chip out of the
-   page — so the row loses its left padding, and the tab loses its left
-   radius and its left foot: there is nothing on that side to curve into.
-   The card is a sibling of the sheet the levels now sit on, not of the
-   level row itself, so the corner is squared from there. */
-.tabs.lvl[data-head="true"]{padding-left:0}
-.tabs.lvl[data-head="true"] button[aria-current="true"]{border-radius:0 8px 0 0}
-.tabs.lvl[data-head="true"] button[aria-current="true"]::before{display:none}
-.tabs.lvl[data-head="true"] + .work,
-.projsheet:has(.tabs.lvl[data-head="true"]) + .work{border-top-left-radius:0}
+/* The first tab keeps the row's left padding like every other one, so the
+   card can round both of its top corners the same way. A tab standing on
+   the corner itself forced that corner square, and a page rounded at one
+   end and cut at the other reads as two sheets: the flared foot already
+   carries the join, and it does it 9px in without touching the corner. */
 .frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.72);font-size:12.5px}
 .frame[data-chrome="black"] .tabs.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
 .frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{background:var(--card);color:var(--ink)}
@@ -3921,8 +3913,7 @@ function tabsHTML() {
     : "";
   const row2 = mode === "Two rows, no rail" && views.length
     ? `<div class="tabs lvl rg ${solo("nav")}" data-rg="vues" data-fi="${fiOf("nav")}"
-         data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}" data-off="${off}"
-         data-head="${off || !wholeBtn}">
+         data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}" data-off="${off}">
         ${wholeBtn}
         <div class="views">${views.map(viewBtn).join("")}</div></div>`
     : "";
