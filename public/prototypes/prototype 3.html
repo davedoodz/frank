@@ -4617,7 +4617,12 @@ function wireViewport() {
     e.preventDefault();
     stopGlide();
     const r = el.getBoundingClientRect();
-    zoomTo(V.zoom * Math.exp(-e.deltaY * 0.0016), e.clientX - r.left, e.clientY - r.top, r, layoutSheet(el));
+    /* One direction for every device. Guessing the device from the shape of
+       the deltas got it wrong often enough that the same gesture zoomed both
+       ways within one stroke, which is worse than any convention: a trackpad
+       sends a stream of small deltas and a single large one is enough to flip
+       the sign mid-swipe. Two fingers down, the drawing goes away. */
+    zoomTo(V.zoom * Math.exp(e.deltaY * 0.0016), e.clientX - r.left, e.clientY - r.top, r, layoutSheet(el));
     paint();
   };
   el.ondblclick = (e) => {
