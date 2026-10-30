@@ -337,7 +337,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .nedit svg{width:13px;height:13px}
 /* A disagreement between two drawings, marked where it happens. Red is
    not decoration here: it is the one thing on the sheet that is wrong. */
-.xmark{position:absolute;z-index:6;transform:translate(-50%,-50%);display:inline-flex;align-items:center;
+.xmark{position:absolute;z-index:16;transform:translate(-50%,-50%);display:inline-flex;align-items:center;
   border:1px solid #b3261e;background:rgba(255,255,255,.95);color:#b3261e;font-weight:600;
   line-height:1.2;white-space:nowrap;cursor:pointer;font-variant-numeric:tabular-nums;
   box-shadow:0 1px 3px rgba(17,17,18,.18)}
@@ -691,7 +691,7 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .pane[data-pdf] > .ph::after{order:9;color:var(--ink-3);font-size:10.5px;
   white-space:nowrap;flex:0 0 auto}
 @container (max-width:620px){ .pane[data-pdf] > .ph::after{display:none} }
-/* Inline z-index from the pile's order; 1 to 3, under the typology fills
+/* Inline z-index from the pile's order; 1 to 7, under the typology fills
    and the unit outlines, which always stay on top of every drawing. */
 /* A drawing on tracing paper darkens what is under it; it does not hide
    it. Multiplying is that: the white of each sheet drops out and only the
@@ -825,7 +825,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 /* North and the corner view stand clear of the strip, not under it. */
 .zone[data-zone="plan"] .north,.zone[data-zone="plan"] .mini{right:154px}
 /* One typology, one colour, laid on the unit it belongs to. */
-.plan .utagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;overflow:visible}
+.plan .utagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:14;pointer-events:none;overflow:visible}
 .plan .utagsvg polygon{opacity:.45;mix-blend-mode:multiply}
 /* The 2D pane is a window onto a sheet that is larger than it: the drawing
    and everything laid over it move and scale together inside .vp, so a
@@ -908,8 +908,8 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
    over the model the viewer places it in pixels. The box has no size: the
    dot and the label hang off it, so the anchor stays exactly on the point
    whatever the label says. */
-.npin{position:absolute;width:0;height:0;transform-origin:0 100%;cursor:pointer;z-index:6}
-.npins{position:absolute;inset:0;z-index:6;pointer-events:none}
+.npin{position:absolute;width:0;height:0;transform-origin:0 100%;cursor:pointer;z-index:16}
+.npins{position:absolute;inset:0;z-index:16;pointer-events:none}
 .npins .npin{pointer-events:auto}
 .npin .nd{position:absolute;left:-11px;bottom:1px;width:22px;height:22px;border-radius:50% 50% 50% 2px;
   transform:rotate(-45deg);background:#c3e05a;color:#2f3a05;border:1.5px solid #2f3a05;display:grid;
@@ -981,7 +981,9 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   border:0;background-color:#fff}
 /* The selected unit, drawn over the sheet and never into it: a thin outline
    and a light wash, both in the one accent the screen already uses. */
-.umark{position:absolute;inset:0;width:100%;height:100%;z-index:5;overflow:visible}
+/* Above every drawing in the pile, whatever its order: the outlines are
+   read against the sheet, not filed into it. */
+.umark{position:absolute;inset:0;width:100%;height:100%;z-index:15;overflow:visible}
 .umark polygon.hit{fill:transparent;pointer-events:auto;cursor:pointer}
 /* The sheet answers the pointer the way the model does: the unit under it
    lights before any click, so a plan can be read by sweeping it. Lighter
