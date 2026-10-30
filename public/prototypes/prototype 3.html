@@ -453,11 +453,20 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .clh{font-size:11.5px;color:var(--ink-3);padding-top:2px}
 .coderow{display:grid;grid-template-columns:258px 1fr;gap:0;align-items:stretch;
   border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
-.coderow:hover{border-color:var(--line)}
-/* An outline, not an inset shadow: a child's own background paints over a
-   parent's inset shadow, so the left edge of the selected row disappeared
-   behind the thumbnail's fill. */
-.coderow.on{border-color:var(--ink);outline:1px solid var(--ink);outline-offset:-1px}
+/* Under the pointer the card greys; chosen, it turns black and its words,
+   buttons and pin turn over with it. No dark contour either way. The
+   schematic keeps its own light ground so the drawing is never inverted. */
+.coderow{transition:background-color .12s,border-color .12s}
+.coderow:hover{background:var(--fill);border-color:var(--fill)}
+.coderow.on{background:var(--ink);border-color:var(--ink)}
+.coderow.on > .tx{--ink:#fff;--ink-2:rgba(255,255,255,.78);--ink-3:rgba(255,255,255,.55);
+  --line:rgba(255,255,255,.28);--line-2:rgba(255,255,255,.18);--card:transparent;--fill:rgba(255,255,255,.1);--fill-2:rgba(255,255,255,.1);color:#fff}
+.coderow.on > .draw{border-right-color:var(--ink)}
+.coderow.on .btnw{background:transparent;border-color:rgba(255,255,255,.28);color:#fff}
+.coderow.on .btnw:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5)}
+.coderow.on .btnw.done{background:#fff;border-color:#fff;color:var(--ink)}
+.coderow.on .btnw.done svg{color:var(--ink)}
+.coderow.on .artpin:hover{background:rgba(255,255,255,.12)}
 .coderow > .draw{padding:10px;background:var(--fill-2);border-right:1px solid var(--line-2);
   display:grid;place-items:center}
 .coderow > .draw img{width:100%;height:auto;display:block;mix-blend-mode:multiply}
@@ -474,13 +483,24 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .nedit svg{width:13px;height:13px}
 /* A disagreement between two drawings, marked where it happens. Red is
    not decoration here: it is the one thing on the sheet that is wrong. */
-.xmark{position:absolute;z-index:16;transform:translate(-50%,-50%);display:inline-flex;align-items:center;
-  border:1px solid #b3261e;background:rgba(255,255,255,.95);color:#b3261e;font-weight:600;
-  line-height:1.2;white-space:nowrap;cursor:pointer;font-variant-numeric:tabular-nums;
+/* The mark is drawn once, at one size, and the sheet's scale is undone on
+   it in paintSheet: typesetting a 1.75 px font at 600 % lost the metrics
+   and the digits fell out of the pill. Its height is fixed and both
+   children are centred in it; the number is nudged by the small gap
+   between a digit's ink and its line box, so the glyph — not the box —
+   lines up with the triangle at any magnification. */
+.xmark{position:absolute;z-index:16;transform-origin:50% 50%;display:inline-flex;align-items:center;gap:4px;
+  height:19px;padding:0 7px 0 6px;border-radius:999px;
+  border:1px solid #b3261e;background:rgba(255,255,255,.95);color:#b3261e;font-weight:600;font-size:10.5px;
+  line-height:1;white-space:nowrap;cursor:pointer;font-variant-numeric:tabular-nums;
   box-shadow:0 1px 3px rgba(17,17,18,.18)}
-.xmark:hover{background:#b3261e;color:#fff}
+.xmark svg.lu{width:11px;height:11px;flex:0 0 11px;display:block}
+.xmark b{display:block;font-weight:600;transform:translateY(-.03em)}
+/* Under the pointer it fills: the contour would only repeat the fill it
+   sits on, so it goes with it. */
+.xmark:hover{background:#b3261e;color:#fff;border-color:transparent}
 .xmark.has{border-color:#4c7a2f;color:#3d6b22;background:rgba(255,255,255,.95)}
-.xmark.has:hover{background:#3d6b22;color:#fff}
+.xmark.has:hover{background:#3d6b22;color:#fff;border-color:transparent}
 [data-fi="low"] .xmark b{display:none}
 /* Its card sits in the pane, not on the sheet: it must not move or grow
    with the drawing it is talking about. */
@@ -524,6 +544,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .clarity[data-c="moyen"]{--cl:#b58900}
 .clarity[data-c="obscur"]{--cl:#b3261e}
 .clarity svg{width:12px;height:12px;color:var(--ink-3)}
+/* An article's pin: grey outline at rest, the project green once pinned. */
+.artpin{display:grid;place-items:center;width:26px;height:26px;border-radius:6px;color:var(--ink-3);cursor:pointer;flex:0 0 auto;align-self:center}
+.artpin:hover{background:var(--fill);color:var(--ink-2)}
+.artpin .lu{width:15px;height:15px;fill:none}
+.artpin.on{color:var(--vert-ink)}
+.artpin.on .lu{fill:var(--vert);stroke:var(--vert-ink)}
 .claritymenu{position:absolute;top:calc(100% + 4px);right:0;z-index:7;min-width:168px;
   background:var(--card);border:1px solid var(--line);border-radius:6px;
   display:flex;flex-direction:column;overflow:hidden}
@@ -565,7 +591,13 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .cal .day:hover{background:var(--fill-2)}
 .cal .day.dim{color:var(--ink-3);background:var(--fill-2);opacity:.65}
 .cal .day.on{background:var(--fill);box-shadow:0 0 0 1px var(--ink) inset}
-.cal .day.today .n{background:var(--vert);color:var(--vert-ink);border-radius:3px;padding:0 4px}
+/* Today is the whole cell in green, not a chip around its number. */
+.cal .day.today{background:var(--vert);color:var(--vert-ink)}
+.cal .day.today.on{box-shadow:0 0 0 1px var(--vert-ink) inset}
+.cal .day.today .n{color:var(--vert-ink)}
+.cal .day.today .lbl{color:var(--vert-ink)}
+/* « Aujourd'hui » lights green while the calendar stands on today. */
+.btnw.today.on,.btnw.today:active{background:var(--vert);border-color:var(--vert);color:var(--vert-ink)}
 .cal .day .n{font-size:11.5px;font-weight:600;align-self:flex-start}
 .cal .day .lbl{font-size:10.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cal .dots{display:flex;gap:3px;align-items:center}
@@ -585,7 +617,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .week .wcol{background:var(--card);display:flex;flex-direction:column;cursor:pointer}
 .week .wcol.on{background:var(--fill)}
 .week .wh{padding:5px 6px;border-bottom:1px solid var(--line-2);font-size:11px;font-weight:600}
-.week .wcol.today .wh{background:var(--vert);color:var(--vert-ink)}
+/* Today is the whole green column, head and body; its cards stay white. */
+.week .wcol.today{background:var(--vert)}
+.week .wcol.today .wh{background:var(--vert);color:var(--vert-ink);border-bottom-color:rgba(47,58,5,.18)}
 .week .wb{padding:5px;display:flex;flex-direction:column;gap:4px}
 .wtask{border:1px solid var(--line-2);border-radius:5px;
   padding:4px 5px;font-size:11px;display:flex;flex-direction:column;gap:1px;background:var(--card)}
@@ -639,7 +673,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .task .tick{flex:0 0 auto;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--ink-3);
   background:var(--card);display:inline-flex;align-items:center;justify-content:center;color:#fff}
 .task:hover .tick{border-color:var(--ink-2)}
-.task .tick.on{background:var(--ink);border-color:var(--ink)}
+.task .tick.on{background:var(--vert);border-color:var(--vert-ink);color:var(--vert-ink)}
 .task .tick .lu{width:10px;height:10px;stroke-width:3}
 .task .tact{display:flex;align-items:center;color:var(--ink-3);opacity:0;padding:2px}
 .task:hover .tact,.task.on .tact{opacity:1}
@@ -835,8 +869,26 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .igrp svg{width:13px;height:13px}
 .igrp i{font-style:normal;font-weight:400;color:var(--ink-3)}
 .icard{display:flex;flex-direction:column;gap:3px;padding:8px 9px;border:1px solid var(--line);border-radius:7px;background:var(--card);cursor:pointer}
-.icard:hover{border-color:var(--ink)}
-.icard.on{border-color:#b3261e;box-shadow:inset 3px 0 0 #b3261e}
+/* Fills, not contours, as everywhere on this page: grey under the pointer.
+   The chosen conflict wears one of the panel's « Conflict Selected »
+   treatments. */
+.icard{transition:background-color .12s,border-color .12s}
+.icard:hover{background:var(--fill);border-color:var(--fill)}
+/* Black: the same chosen state as the Codes cards. */
+:root[data-conf-sel="black"] .icard.on{background:var(--ink);border-color:var(--ink);color:#fff}
+:root[data-conf-sel="black"] .icard.on .who svg{color:#ff8a80}
+:root[data-conf-sel="black"] .icard.on .when,:root[data-conf-sel="black"] .icard.on .anch{color:rgba(255,255,255,.6)}
+/* Red: the conflict's own colour, as the « Conflits » tab wears it. */
+:root[data-conf-sel="red"] .icard.on{background:#b3261e;border-color:#b3261e;color:#fff}
+:root[data-conf-sel="red"] .icard.on .who svg{color:#fff}
+:root[data-conf-sel="red"] .icard.on .when,:root[data-conf-sel="red"] .icard.on .anch{color:rgba(255,255,255,.72)}
+/* Tint: a pale red ground, the words unchanged. */
+:root[data-conf-sel="tint"] .icard.on{background:#fbeae8;border-color:#fbeae8}
+/* Grey: the hover fill, held — quietest. */
+:root[data-conf-sel="grey"] .icard.on{background:#e4e4e6;border-color:#e4e4e6}
+/* Code tag: the card stays white; only its code turns into a red tag. */
+:root[data-conf-sel="tag"] .icard.on{background:var(--fill-2);border-color:var(--fill-2)}
+:root[data-conf-sel="tag"] .icard.on .who b{background:#b3261e;color:#fff;border-radius:4px;padding:0 5px}
 .icard .who{display:flex;align-items:center;gap:5px;font-size:12px}
 .icard .who svg{width:13px;height:13px;color:#b3261e;flex:0 0 auto}
 .icard .when{margin-left:auto;font-size:11px;color:var(--ink-3);white-space:nowrap}
@@ -2067,10 +2119,12 @@ const V = {
      screen can honestly carry, since nobody outside the firm decides how
      hard a sentence is to interpret. Seeded with what the studio already
      thinks; changed with a click on the row. */
-  clarity: { "art. 9": "moyen", "3.2.3.1": "obscur", "A-19.1": "obscur", "art. 71": "obscur",
+  clarity: { "art. 9": "moyen", "3.2.3.1": "obscur", "art. 71": "obscur",
     "art. 134": "moyen", "art. 43": "clair", "art. 22": "moyen", "3.3.1.9": "clair",
     "3.4.2.1": "clair", "3.3.1.18": "clair", "3.8.1.3": "moyen", "3.2.1.1": "obscur" },
   clarityOn: null,
+  /* Codes articles pinned to the top of their list, first pinned first. */
+  artPins: [],
   /* Échéancier: the day the calendar is centred on, the scale it is drawn
      at — chosen on the calendar itself — and which task is open. */
   day: "2026-11-14",
@@ -2216,10 +2270,12 @@ function sprite() {
     /* the opacity line on each drawing's card */
     "blend",
     /* each drawing's discipline, before its name; see LAYGLYPH and ADD_FOLDER */
+    /* the two bodies of rules: the building code, the zoning bylaw */
+    "hard-hat", "land-plot",
     "map", "drafting-compass", "trees", "zap", "waves", "droplet", "fan",
     "columns-3", "flame", "route", "plus",
     /* the margin: posting a note, keeping one for the studio */
-    "lock", "map-pin", "send", "users", "trash-2",
+    "lock", "map-pin", "pin", "send", "users", "trash-2",
     /* the scope of a note: the house keeps it in the office, the globe
        sends it out with the link */
     "house",
@@ -2508,9 +2564,9 @@ const ARTICLES = [
     needs: "grille des usages et normes de la zone",
     url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
     img: "assets/code/art-9-hauteur.png", ratio: "1649 / 954" },
-  /* The Québec code and the enabling law come right after the height, before
-     the borough's own dimensions: they are the two the project is read
-     against first, and the comité asks about them first. */
+  /* The Québec code comes right after the height, before the borough's own
+     dimensions: it is what the project is read against first, and the
+     comité asks about it first. */
   { id: "3.2.3.1", topic: "Baies non protégées",
     doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
     quote: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
@@ -2518,14 +2574,6 @@ const ARTICLES = [
     needs: "distance limitative mesurée, surface de la façade de rayonnement",
     url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
     img: "assets/code/art-3231-baies.png", ratio: "1642 / 958" },
-  { id: "A-19.1", topic: "Cadre légal du zonage",
-    doc: "Loi sur l'aménagement et l'urbanisme", place: "Québec", edition: "texte consolidé",
-    quote: "La loi habilite la municipalité à régir, par règlement, l'usage du sol et l'implantation des bâtiments sur son territoire.",
-    measured: "—", required: "cadre habilitant", state: "pour référence",
-    needs: "aucun chiffre: la règle applicable vient du règlement de l'arrondissement",
-    /* Nothing to measure, so no drawing to show: the chain of authority is
-       the article, and it is traced in the card itself. */
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1", chain: true },
   { id: "art. 71", topic: "Stationnement",
     doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
     quote: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
@@ -3678,21 +3726,6 @@ function hostButton(kind) {
    A provision is only readable next to the number the drawings produced, so
    the card carries both, plus the sentence and the page it comes from. The
    link is a real link: the regulation is read where it is published. */
-/* The chain of authority for the one article that has no number: the law
-   enables the bylaw, the bylaw carries the article that is measured. */
-const chainSVG = () => `<svg viewBox="0 0 300 96" style="width:100%;height:auto">
-  ${[["Loi", "A-19.1"], ["Règlement", "01-277"], ["Article", "art. 9, 22"]].map(([t, n], i) => {
-    const x = 6 + i * 98;
-    return `<rect x="${x}" y="24" width="84" height="44" rx="5" fill="var(--card)"
-        stroke="var(--ink)" stroke-width="${i === 0 ? 1.4 : .9}"/>
-      <text x="${x + 42}" y="44" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${t}</text>
-      <text x="${x + 42}" y="59" text-anchor="middle" font-size="10"
-        font-family="ui-monospace,Menlo,monospace" fill="var(--ink-2)">${n}</text>
-      ${i < 2 ? `<path d="M${x + 88} 46 h6 m-2.5 -3 l3 3 -3 3" stroke="var(--ink)" fill="none" stroke-width="1"/>` : ""}`;
-  }).join("")}
-  <text x="6" y="88" font-size="10" font-family="ui-monospace,Menlo,monospace" fill="var(--ink-3)">habilite</text>
-</svg>`;
-
 /* Schematics for the provisions that have no exported sheet behind them.
    They are drawn from the two numbers the provision compares, in the same
    line weight as the rest of the screen. None of them is a plan, and none
@@ -3745,16 +3778,18 @@ const FIGS = {
 const codeFig = (a) => a.img
   ? `<img src="${a.img}" alt="${a.topic} — ${a.measured} mesuré, ${a.required} exigé"
        loading="lazy" style="aspect-ratio:${a.ratio}">`
-  : (FIGS[a.fig] ? FIGS[a.fig](a) : chainSVG());
+  : FIGS[a.fig](a);
 
-/* No filter strip: the three bodies of rules are short enough to be read
+/* No filter strip: the two bodies of rules are short enough to be read
    in one scroll, and a strip that hides two of them hides the fact that a
    provision in one is answered by a dimension in another. They are
    sections inside the list instead. The Québec code comes first: it is
    what the building is judged against, and the borough's dimensions only
    decide what is allowed on the lot. */
-const CODE_GROUPS = [["Code de construction", "Code du Québec"],
-  ["Loi sur", "Loi-cadre"], ["Règlement", "Règlement d'urbanisme"]];
+const CODE_GROUPS = [["Code de construction", "Code de construction"], ["Règlement", "Règlement de zonage"]];
+/* Each body of rules is told apart in its tab before it is read: the site
+   helmet for the building code, the divided lot for the zoning bylaw. */
+const CODE_GLYPH = { "Code de construction": "hard-hat", "Règlement de zonage": "land-plot" };
 
 /* The code is written to be argued over, so the one judgement this screen
    can honestly carry is the office's own reading of it: three steps, one
@@ -3831,17 +3866,16 @@ const codeGroups = () => CODE_GROUPS
 /* Where each code is read: the office's copy in its document database, page
    by page, then the official site, which can be newer than the copy. */
 const CODE_READ = {
-  "Code du Québec": { docs: ["Code de construction du Québec — chapitre I, CNB 2020 modifié.pdf", "Guide de l'utilisateur — CNB 2020, partie 3.pdf"],
+  "Code de construction": { docs: ["Code de construction du Québec — chapitre I, CNB 2020 modifié.pdf", "Guide de l'utilisateur — CNB 2020, partie 3.pdf"],
     sites: ["legisquebec.gouv.qc.ca", "nrc-cnrc.gc.ca"] },
-  "Loi-cadre": { docs: ["Loi sur l'aménagement et l'urbanisme — A-19.1.pdf"], sites: ["legisquebec.gouv.qc.ca", "quebec.ca"] },
-  "Règlement d'urbanisme": { docs: ["Règlement d'urbanisme 01-277 — consolidé.pdf", "Notes d'interprétation du bureau — arrondissement.docx"],
+  "Règlement de zonage": { docs: ["Règlement d'urbanisme 01-277 — consolidé.pdf", "Notes d'interprétation du bureau — arrondissement.docx"],
     sites: ["montreal.ca"] },
 };
 /* The index: what each article is found by (its words and the words people
    use for them), why it bears on this project, and where it was read. An
    article the project does not follow carries its own text. */
 const CODE_INDEX = {
-  "Code du Québec": [
+  "Code de construction": [
     { id: "3.8.1.3", page: 612, k: "porte largeur fauteuil roulant accessible accessibilite handicap universel obstacle entree rampe 850", why: "Relevé: 800 mm à la porte d'entrée, 50 mm sous l'exigence." },
     { id: "3.3.4.4", page: 471, k: "porte largeur logement corridor entree 810", why: "S'applique aux 104 portes de logement sur les corridors communs." },
     { id: "3.4.2.1", page: 498, k: "issue issues sortie sorties evacuation escalier etage combien nombre incendie", why: "Chaque étage est desservi par 2 issues." },
@@ -3858,23 +3892,7 @@ const CODE_INDEX = {
       k: "fenetre fenetres baie baies facade limite voisin proche distance limitative biais calcul", why: "La façade est est en biais sur la limite: la surface permise peut monter.",
       needs: "angle de la façade est sur le plan d'implantation" },
   ],
-  "Loi-cadre": [
-    { id: "A-19.1", page: 1, k: "zonage cadre loi municipalite reglement pouvoir usage", why: "C'est d'elle que vient le règlement de l'arrondissement." },
-    { id: "art. 145.1", page: 88, k: "derogation mineure depasser exception ecart permettre accorder hauteur marge conseil", why: "Seule voie courte pour un petit écart, comme les 30 cm de marge arrière." },
-    { id: "art. 145.36", page: 97, sec: "Projets particuliers", topic: "Projet particulier (PPCMOI)", fig: "classement",
-      quote: "Le conseil peut autoriser un projet particulier qui déroge au règlement, à certaines conditions, par résolution.",
-      k: "ppcmoi projet particulier depasser exception hauteur densite usage deroger", why: "La voie pour l'étage de trop, qu'une dérogation mineure ne couvre pas.",
-      needs: "l'écart demandé et les conditions de la résolution" },
-    { id: "art. 123", page: 61, sec: "Approbation", topic: "Approbation référendaire", fig: "classement",
-      quote: "Certaines modifications au règlement de zonage sont soumises à l'approbation des personnes habiles à voter.",
-      k: "referendum referendaire voisins opposer opposition citoyens vote consultation", why: "Un projet particulier sur la hauteur peut y être soumis.",
-      needs: "si la disposition visée est susceptible d'approbation référendaire" },
-    { id: "Guide MAMH", from: "web", site: "quebec.ca", sec: "Guide municipal", topic: "Ce qu'une dérogation mineure ne peut pas viser", fig: "classement",
-      quote: "Une dérogation mineure ne peut porter ni sur l'usage ni sur la densité d'occupation du sol; elle vise un écart de faible portée.",
-      k: "derogation mineure depasser exception ecart hauteur densite usage limite", why: "Un étage entier n'est pas un écart de faible portée.",
-      needs: "aucun chiffre: guide d'interprétation" },
-  ],
-  "Règlement d'urbanisme": [
+  "Règlement de zonage": [
     { id: "art. 9", page: 14, k: "hauteur etage etages maximale maximum haut grille zone depasser", why: "6 étages dessinés, 5 prescrits à la grille." },
     { id: "art. 22", page: 29, k: "marge recul arriere limite terrain fond cour distance", why: "2,70 m dessinés pour 3,00 m exigés." },
     { id: "art. 43", page: 41, k: "implantation taux sol emprise couverture terrain densite", why: "48,2 % pour 55 % permis." },
@@ -3943,7 +3961,7 @@ const codeFound = (label, q) => { const c = codeQ(); return codeSearch(label, q,
 function codeAskBarHTML(label) {
   const c = codeQ();
   return `<label class="cask ${c.q ? "has" : ""}">${icon("search")}
-    <input data-codeq value="${c.q.replace(/"/g, "&quot;")}" placeholder="Poser une question ${label === "Loi-cadre" ? "à la Loi-cadre" : `au ${label}`} — ex. « ${{ "Code du Québec": "largeur de porte fauteuil roulant", "Loi-cadre": "peut-on dépasser la hauteur", "Règlement d'urbanisme": "combien de cases pour les logements" }[label]} »" autocomplete="off" spellcheck="false">
+    <input data-codeq value="${c.q.replace(/"/g, "&quot;")}" placeholder="Poser une question ou chercher un article" autocomplete="off" spellcheck="false">
     <span class="x" ${act("codeqclear")} title="Effacer">${icon("x")}</span></label>`;
 }
 function codeAskHTML(label) {
@@ -3953,7 +3971,7 @@ function codeAskHTML(label) {
   const step = (k, name, detail, done) => `<span class="s ${c.from[k] ? "" : "off"}" ${act("codeqsrc", k)} title="${c.from[k] ? "Ne plus chercher ici" : "Chercher ici"}">
     ${!c.from[k] ? icon(k === "web" ? "globe" : "file-text") : done ? `<span class="ok">${icon("check")}</span>` : `<span class="run"></span>`}<b>${name}</b>${detail}</span>`;
   const rows = codeFound(label, c.asked);
-  const ofCode = label === "Loi-cadre" ? "de la Loi-cadre" : `du ${label}`;
+  const ofCode = `du ${label}`;
   const views = viewsOf("Codes");
   /* Another code that answers better is named, never mixed in. */
   const here = rows[0]?.n || 0;
@@ -4035,7 +4053,8 @@ function codeRow(a) {
       <div class="row" style="align-items:baseline">
         <span class="hi tag">${a.id}</span>
         <span class="hi" style="font-weight:600;font-size:13px;flex:1">${a.topic}</span>
-        ${clarityChip(a.id)}
+        <span class="artpin ${V.artPins.includes(a.id) ? "on" : ""}" ${act("artpin", a.id)}
+          title="${V.artPins.includes(a.id) ? "Désépingler" : "Épingler en haut de la liste"}">${icon("pin")}</span>
       </div>
       <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
       <div class="hi src">${a.doc} — ${a.place} — ${a.edition}</div>
@@ -4411,8 +4430,8 @@ function navHTML() {
 const CONTEXT = {
   "Unités": LEVEL_VIEWS,
   /* A body of rules is a tab the way a floor is: the page under it holds
-     one code, read whole, instead of three codes each squeezed into a
-     third of the width. The three are always offered, even when one has
+     one code, read whole, instead of two codes each squeezed into half
+     the width. Both are always offered, even when one has
      no article followed yet, so the strip does not change shape as
      articles are added. */
   "Codes": CODE_GROUPS.map(([, label]) => label),
@@ -4439,7 +4458,7 @@ function tabsHTML() {
   const views = CONTEXT[V.screen] || [];
   /* Under "Bâtiment entier" no level is the one being read, so none is lit. */
   const viewBtn = (t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen) && !buildingScope()}">
-    <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`;
+    ${V.screen === "Codes" ? icon(CODE_GLYPH[t]) : ""}<span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`;
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
   const idxOn = V.screen === "Projets";
@@ -4770,7 +4789,9 @@ function contentHTML() {
        page names it, so the list under it needs no heading of its own. */
     "Codes": () => {
       const label = viewOf("Codes");
-      const rows = codeGroups().find(([name]) => name === label)?.[1] || [];
+      /* Pinned articles lead the list, in the order they were pinned. */
+      const all = codeGroups().find(([name]) => name === label)?.[1] || [];
+      const rows = [...V.artPins.map((id) => all.find((a) => a.id === id)).filter(Boolean), ...all.filter((a) => !V.artPins.includes(a.id))];
       return `<div class="col" style="flex:1;gap:var(--gap)">
         <div class="pane" style="flex:0 0 auto">
           <div class="ph">${icon("hash")}<span class="lo bar" style="width:90px"></span>
@@ -4793,7 +4814,7 @@ function contentHTML() {
       ${folded("cal") ? foldStripHTML("cal", "le calendrier") : `<div class="pane" style="flex:${V.split[splitKey("cal")] ? `0 0 ${V.split[splitKey("cal")]}px` : "1.25"}">
         <div class="ph">${icon("calendar-check")}<span class="lo bar" style="width:70px"></span>
           <span class="hi">Calendrier</span><span style="flex:1"></span>
-          <span class="btnw" ${act("calday", TODAY)}><span class="hi">Aujourd'hui</span></span></div>
+          <span class="btnw today ${V.day === TODAY ? "on" : ""}" ${act("calday", TODAY)}><span class="hi">Aujourd'hui</span></span></div>
         <div class="pb"><div class="calmonth">
           <span class="tseg cal">${CAL_SCALES.map((s) => `<span class="${V.scale === s ? "on" : ""}" ${act("calscale", s)}
             title="Dessiner le calendrier par ${s.toLowerCase()}">${icon(CAL_SCALE_ICONS[s])}${s}</span>`).join("")}</span>
@@ -5924,9 +5945,10 @@ function paintSheet() {
   el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / V.zoom * 100).toFixed(3)}px`; });
   /* Pins and conflict marks stay upright and pin-sized whatever the sheet does. */
   el.querySelectorAll(".plan .npin").forEach((p) => { p.style.transform = `rotate(${-ang}deg) scale(${(1 / kz).toFixed(3)})`; });
-  el.querySelectorAll(".plan .xmark").forEach((m) => { m.style.transform = `translate(-50%,-50%) rotate(${-ang}deg)`; });
+  el.querySelectorAll(".plan .xmark").forEach((m) => {
+    m.style.transform = `translate(-50%,-50%) rotate(${-ang}deg) scale(${(1 / kz).toFixed(4)})`;
+  });
   placePlanPills();
-  paintConflictMarks();
   if (V.pending) placePinBubble();
   window.dispatchEvent(new Event("fitte:plan-paint"));
   /* The corner rectangle is the same state read small; painted here so it
@@ -6427,29 +6449,10 @@ function placePinBubble() {
   tail.style.left = `${Math.max(10, Math.min(w - 22, px - left - 6)).toFixed(0)}px`;
 }
 
-function paintConflictMarks() {
-  const el = vpEl();
-  const plan = el && el.querySelector(".plan");
-  if (!plan) return;
-  const z = V.zoom / 100;
-  plan.querySelectorAll(".xmark").forEach((m) => {
-    m.style.fontSize = `${(10.5 / z).toFixed(2)}px`;
-    m.style.padding = `${(2 / z).toFixed(2)}px ${(6 / z).toFixed(2)}px`;
-    m.style.borderRadius = `${(999 / z).toFixed(2)}px`;
-    m.style.borderWidth = `${(1 / z).toFixed(2)}px`;
-    m.style.gap = `${(4 / z).toFixed(2)}px`;
-    m.querySelectorAll("svg").forEach((g) => {
-      g.style.width = `${(11 / z).toFixed(2)}px`;
-      g.style.height = `${(11 / z).toFixed(2)}px`;
-    });
-  });
-}
-
 function setPlanHover(poly) {
   if (poly === planHover) return;
   planHover = poly;
   placePlanPills();
-  paintConflictMarks();
   if (V.pending) placePinBubble();
 }
 
@@ -6839,7 +6842,6 @@ function paintSelection() {
     plan.querySelectorAll(".umark").forEach((n) => n.remove());
     plan.insertAdjacentHTML("beforeend", unitMarkHTML());
     placePlanPills();
-  paintConflictMarks();
   if (V.pending) placePinBubble();
   }
   /* The decision panel is drawn again, so its field is wired again; the
@@ -7093,7 +7095,7 @@ function shareDialogHTML(d) {
    is short on purpose — it is what a residential project in this borough
    is actually read against, not the whole code. */
 const CODE_SOURCES = [
-  { name: "Code de construction du Québec, chapitre I — Bâtiment", short: "Code du Québec",
+  { name: "Code de construction du Québec, chapitre I — Bâtiment", short: "Code de construction",
     place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
     url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
     arts: {
@@ -7117,7 +7119,7 @@ const CODE_SOURCES = [
           needs: "aires de plancher par pièce et dimensions des fenêtres", fig: "classement" },
       ],
     } },
-  { name: "Règlement d'urbanisme de l'arrondissement", short: "Règlement d'urbanisme",
+  { name: "Règlement d'urbanisme de l'arrondissement", short: "Règlement de zonage",
     place: "Arrondissement", edition: "version à jour consultée le 2 novembre 2026",
     url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
     arts: {
@@ -7130,16 +7132,6 @@ const CODE_SOURCES = [
         { id: "art. 86", topic: "Unités de stationnement pour vélos", required: "1 par logement",
           quote: "Au moins une unité de stationnement pour vélo doit être aménagée par logement.",
           needs: "nombre de supports dessinés au sous-sol et à l'extérieur", fig: "issues" },
-      ],
-    } },
-  { name: "Loi sur l'aménagement et l'urbanisme", short: "Loi-cadre",
-    place: "Québec", edition: "RLRQ c. A-19.1, à jour",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/lc/A-19.1",
-    arts: {
-      "Dérogations": [
-        { id: "art. 145.1", topic: "Dérogation mineure", required: "résolution du conseil",
-          quote: "Le conseil d'une municipalité peut accorder une dérogation mineure aux dispositions du règlement de zonage.",
-          needs: "l'écart demandé, en chiffres, et la raison écrite", fig: "classement" },
       ],
     } },
 ];
@@ -7344,6 +7336,14 @@ function onClick(e) {
     /* The office's reading of a provision, changed where it is shown. It is
        never a statement about compliance: the screen measures drawings, it
        does not interpret the law. */
+    /* Pinning lifts an article to the top of its list; unpinning lets it
+       fall back to its place. */
+    case "artpin": {
+      const i = V.artPins.indexOf(value);
+      if (i < 0) { V.artPins.push(value); say(`${value} épinglé en haut de la liste.`); }
+      else { V.artPins.splice(i, 1); say(`${value} désépinglé.`); }
+      break;
+    }
     case "clarityopen": V.clarityOn = V.clarityOn === value ? null : value; break;
     case "clarity": {
       const [id, k] = value.split("|");
@@ -7945,6 +7945,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   /* What « Commenter » on the plan does under the pointer. Outline is how
      it was; the others change it without a dark contour. */
   commentHover: sel(["Grey fill", "Lift shadow", "Ink fill", "Green tint", "Bare (no border)", "Outline (before)"]),
+  /* How the chosen conflict in the right column stands out — a fill each,
+     no contour and no red bar down its left side. */
+  conflictSelected: sel(["Black fill", "Red fill", "Red tint", "Grey fill", "Red code tag"]),
   /* The whole screen on a dark ramp. The drawing keeps its own paper: a
      plan is a white sheet, and inverting it would be redrawing it. */
   theme: sel(["Light", "Dark"]),
@@ -8038,6 +8041,7 @@ function applyDial(v) {
   TAB_MOTION.ms = v.tabMotion?.ms ?? 280;
   document.documentElement.dataset.foldIcon = v.foldedIcons === "Turned with text" ? "turn" : "upright";
   document.documentElement.dataset.pinHover = String(v.commentHover || "Grey fill").split(" ")[0].toLowerCase();
+  document.documentElement.dataset.confSel = { "Black fill": "black", "Red fill": "red", "Red tint": "tint", "Grey fill": "grey", "Red code tag": "tag" }[v.conflictSelected] || "black";
   /* The panel names the glyph in English and title-cases what it is given,
      so the label is matched without regard to case. */
   const pick = (screen, label) => {
