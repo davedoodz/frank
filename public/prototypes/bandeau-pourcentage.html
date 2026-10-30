@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Le bandeau — le pourcentage sur la barre</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The filter is settled: it lives in the Type column head, like a
+   spreadsheet. What is open is the bar. Today the bar is 7px of colour and
+   the figures sit under it in three chips, so the same fact is drawn twice.
+   Five ways of putting the share on the band it belongs to. In every one
+   the filter still works and "Voir sur le plan" is still one click: the
+   bar may carry the figures, but it must not swallow the button. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#ededed;--fill-2:#f6f6f7;--page:#fafafa;--card:#fff;--wash:rgba(17,17,18,.055);
+  --t3:#e0736e;--t4:#5b9bd5;--t5:#5cb46e}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.45 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--page)}
+main{padding:24px 28px 80px;max-width:1400px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:860px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:26px;margin-top:24px}
+section > h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section > h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section > p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:4em}
+
+.pane{background:var(--card);border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.ph{display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;border-bottom:1px solid var(--line-2);
+  font-weight:500}
+.ph .n{margin-left:auto;color:var(--ink-3);font-size:12px}
+.mix{padding:11px 12px 12px;border-bottom:1px solid var(--line-2)}
+.sum{margin-top:9px;font-size:12.5px;color:var(--ink-2)}
+.sum b{color:var(--ink);font-weight:600}
+.sum .cut{color:var(--ink-3)}
+.plan{display:inline-flex;align-items:center;gap:7px;margin-top:10px;border:1px solid var(--line);
+  border-radius:8px;padding:5px 11px;font-size:12.5px;cursor:pointer;background:var(--card)}
+.plan:hover{background:var(--fill-2)}
+.plan svg{width:14px;height:14px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:5px 12px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+th{color:var(--ink-3);font-weight:500;font-size:11.5px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+.sw{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+.thf{display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:var(--ink-3)}
+.thf:hover{color:var(--ink)}
+.thf svg{width:12px;height:12px}
+.wrap{position:relative}
+.menu{position:absolute;z-index:5;margin-top:4px;background:var(--card);border:1px solid var(--line);
+  border-radius:9px;padding:4px;min-width:180px;box-shadow:0 10px 26px rgba(17,17,18,.16)}
+.menu .mi{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;
+  font-size:12.5px;color:var(--ink)}
+.menu .mi:hover{background:var(--fill-2)}
+.menu .ck{width:13px}
+.menu .q{margin-left:auto;color:var(--ink-3)}
+
+/* the bar, common parts -------------------------------------------- */
+.bar{display:flex;gap:2px;width:100%}
+.bar .seg{position:relative;display:flex;align-items:center;justify-content:center;
+  transition:flex-basis .25s cubic-bezier(.3,0,.2,1),opacity .14s ease;overflow:hidden;cursor:pointer}
+.bar .seg[data-dim="true"]{opacity:.26}
+.bar .seg b{font-weight:600}
+.bar .seg{white-space:nowrap}
+
+/* A — the figure rides inside the band. The bar grows to 24px and carries
+   the type and its share in white; nothing is repeated under it. */
+[data-v="A"] .bar{height:26px;border-radius:6px;overflow:hidden;gap:1px}
+[data-v="A"] .seg{color:#fff;font-size:11.5px;gap:5px;letter-spacing:-.01em}
+[data-v="A"] .seg small{opacity:.75}
+
+/* B — the figures stand above the band, each over its own share, and the
+   bar stays the thin rule it is. Reading down: the number, then the
+   colour it measures. */
+[data-v="B"] .heads{display:flex;gap:2px;margin-bottom:5px}
+[data-v="B"] .hd{display:flex;align-items:baseline;gap:4px;font-size:11.5px;overflow:hidden;
+  transition:flex-basis .25s cubic-bezier(.3,0,.2,1)}
+[data-v="B"] .hd b{font-weight:600}
+[data-v="B"] .hd span{color:var(--ink-3)}
+[data-v="B"] .hd[data-dim="true"]{opacity:.35}
+[data-v="B"] .bar{height:8px;border-radius:5px;overflow:hidden}
+
+/* C — the band is the type and the number is in it, but the name stays
+   outside, under the colour it belongs to: the bar carries the share, the
+   caption carries the word. */
+[data-v="C"] .bar{height:20px;border-radius:5px;overflow:hidden;gap:1px}
+[data-v="C"] .seg{color:#fff;font-size:11px;font-weight:600}
+[data-v="C"] .caps{display:flex;gap:2px;margin-top:4px}
+[data-v="C"] .cap{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-2);overflow:hidden;
+  transition:flex-basis .25s cubic-bezier(.3,0,.2,1)}
+[data-v="C"] .cap[data-dim="true"]{opacity:.35}
+
+/* D — the chosen band speaks. At rest the bar is quiet and the shares sit
+   in it in white; the moment a type is filtered, its band keeps its figure
+   and the others give theirs up, so the bar says what is being read. */
+[data-v="D"] .bar{height:22px;border-radius:6px;overflow:hidden;gap:1px}
+[data-v="D"] .seg{color:#fff;font-size:11px;font-weight:600}
+[data-v="D"] .seg[data-dim="true"] b{display:none}
+
+/* E — the bar is the control and says so. Each band is a button at 28px
+   with its type, its share and its count; the chosen one keeps a dark
+   edge. No chips, no legend, no second place to click. */
+[data-v="E"] .bar{height:30px;border-radius:7px;overflow:hidden;gap:2px}
+[data-v="E"] .seg{color:#fff;font-size:11.5px;gap:6px;border-radius:5px}
+[data-v="E"] .seg small{opacity:.78}
+[data-v="E"] .seg[aria-pressed="true"]{box-shadow:inset 0 0 0 2px rgba(17,17,18,.85)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Le bandeau — le pourcentage sur la barre</h1>
+  <p class="lede">Le filtre est réglé: il vit dans l'en-tête de la colonne Type. Reste la barre. Aujourd'hui elle
+     fait 7 px de couleur et les chiffres sont répétés dessous en trois pastilles. Cinq façons de porter la part
+     sur la bande qu'elle mesure. Dans les cinq, le filtre marche et « Voir sur le plan » reste à un clic: la
+     barre peut porter les chiffres, elle ne doit pas avaler le bouton.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+const UNITS = [["501","5½",1275],["502","5½",1496],["503","3½",760],["504","4½",1152],["505","4½",1221],
+  ["506","4½",1106],["507","3½",707],["508","4½",970],["509","4½",958],["510","5½",1466],["511","5½",1345],
+  ["512","3½",740],["513","3½",708],["514","3½",716],["515","4½",999]];
+const TYPES = ["3½", "4½", "5½"];
+const INK = { "3½": "var(--t3)", "4½": "var(--t4)", "5½": "var(--t5)" };
+const nb = (n) => n.toLocaleString("fr-CA").replace(/\u202f|\u00a0/g, " ");
+const of = (t) => UNITS.filter((u) => u[1] === t);
+const net = (rows) => rows.reduce((s, u) => s + u[2], 0);
+const TOTAL = net(UNITS);
+const pc = (t) => Math.round(net(of(t)) / TOTAL * 100);
+
+const sel = { A: null, B: null, C: null, D: null, E: null };
+let openMenu = null;
+const shown = (v) => (sel[v] ? of(sel[v]) : UNITS);
+const dim = (v, t) => Boolean(sel[v]) && sel[v] !== t;
+
+const icon = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const EYE = icon(`<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>`);
+const FILT = icon(`<path d="M3 6h18M7 12h10M11 18h2"/>`);
+
+/* The bar, drawn once and dressed by the variant. Every band is a button
+   as well as a measure: a reader who aims at a colour expects it to act. */
+const barHTML = (v) => `<div class="bar">${TYPES.map((t) => {
+  const on = sel[v] === t;
+  const inner = v === "A" ? `<b>${t}</b> ${pc(t)} %<small>${of(t).length}</small>`
+    : v === "E" ? `<b>${t}</b> ${pc(t)} %<small>${of(t).length}</small>`
+    : v === "B" ? "" : `<b>${pc(t)} %</b>`;
+  return `<span class="seg" data-pick="${v}:${t}" aria-pressed="${on}" data-dim="${dim(v, t)}"
+    style="flex:${net(of(t))} 0 0;background:${INK[t]}" title="${t} — ${pc(t)} %">${inner}</span>`;
+}).join("")}</div>`;
+
+const headsHTML = (v) => `<div class="heads">${TYPES.map((t) => `
+  <span class="hd" data-pick="${v}:${t}" data-dim="${dim(v, t)}" style="flex:${net(of(t))} 0 0">
+    <b>${pc(t)} %</b><span>${t}</span></span>`).join("")}</div>`;
+
+const capsHTML = (v) => `<div class="caps">${TYPES.map((t) => `
+  <span class="cap" data-pick="${v}:${t}" data-dim="${dim(v, t)}" style="flex:${net(of(t))} 0 0">
+    <i class="sw" style="background:${INK[t]};margin:0"></i>${t}<span style="color:var(--ink-3)">${of(t).length}</span>
+  </span>`).join("")}</div>`;
+
+const sumHTML = (v) => {
+  const rows = shown(v);
+  return `<div class="sum"><b>${nb(net(rows))}</b> pi² nets sur ${rows.length} unités
+    ${rows.length === UNITS.length ? "" : `<span class="cut">— ${UNITS.length - rows.length} masquées sur ${UNITS.length}</span>`}
+  </div>
+  <span class="plan" data-plan="${v}">${EYE}Voir ${sel[v] ? `les ${sel[v]}` : "tout"} sur le plan</span>`;
+};
+
+const menuHTML = (v) => `<div class="menu">
+  <div class="mi" data-pick="${v}:*"><span class="ck">${sel[v] ? "" : "✓"}</span>Toutes les typologies
+    <span class="q">${UNITS.length}</span></div>
+  ${TYPES.map((t) => `<div class="mi" data-pick="${v}:${t}"><span class="ck">${sel[v] === t ? "✓" : ""}</span>
+    <i class="sw" style="background:${INK[t]};margin:0"></i>${t}<span class="q">${of(t).length}</span></div>`).join("")}
+</div>`;
+
+const tableHTML = (v) => `<table><thead><tr><th>Unité</th>
+  <th><span class="wrap"><span class="thf" data-menu="${v}">Type ${FILT}</span>
+    ${openMenu === v ? menuHTML(v) : ""}</span></th>
+  <th class="n">Net pi²</th></tr></thead><tbody>
+  ${shown(v).map(([n, t, a]) => `<tr><td>${n}</td>
+    <td><i class="sw" style="background:${INK[t]}"></i>${t}</td><td class="n">${nb(a)}</td></tr>`).join("")}
+</tbody></table>`;
+
+const VARIANTS = [
+  ["A", "Le chiffre dans la bande",
+   "La barre passe à 26 px et porte le type, sa part et son compte en blanc. Rien n'est répété dessous: une seule place pour un seul fait.",
+   (v) => `${barHTML(v)}${sumHTML(v)}`],
+  ["B", "Les chiffres au-dessus",
+   "Chaque part est écrite au-dessus de la bande qu'elle mesure, et la barre reste le filet fin qu'elle est. On lit de haut en bas: le nombre, puis la couleur qu'il mesure.",
+   (v) => `${headsHTML(v)}${barHTML(v)}${sumHTML(v)}`],
+  ["C", "La part dedans, le nom dessous",
+   "La bande porte le pourcentage; le nom du type reste dehors, sous la couleur à laquelle il appartient. La barre porte la part, la légende porte le mot.",
+   (v) => `${barHTML(v)}${capsHTML(v)}${sumHTML(v)}`],
+  ["D", "Seule la bande lue parle",
+   "Au repos les trois parts sont dans la barre; dès qu'un type est filtré, lui seul garde son chiffre et les autres cèdent le leur. La barre dit ce qu'on lit.",
+   (v) => `${barHTML(v)}${sumHTML(v)}`],
+  ["E", "La barre est la commande",
+   "Chaque bande est un bouton de 30 px avec son type, sa part et son compte; la bande choisie garde un liseré sombre. Ni pastille, ni légende, ni deuxième endroit où cliquer.",
+   (v) => `${barHTML(v)}${sumHTML(v)}`],
+];
+
+function paint() {
+  grid.innerHTML = VARIANTS.map(([v, h, p, mix]) => `<section data-v="${v}">
+    <h2>${h}<i>${v}</i></h2><p>${p}</p>
+    <div class="pane"><div class="ph">Unités et superficies<span class="n">niveau 5</span></div>
+      <div class="mix">${mix(v)}</div>${tableHTML(v)}</div></section>`).join("");
+}
+
+document.addEventListener("click", (e) => {
+  const pl = e.target.closest("[data-plan]");
+  if (pl) { pl.animate([{ background: "#c3e05a" }, { background: "#fff" }], 420); return; }
+  const m = e.target.closest("[data-menu]");
+  if (m) { openMenu = openMenu === m.dataset.menu ? null : m.dataset.menu; paint(); return; }
+  const p = e.target.closest("[data-pick]");
+  if (!p) { if (openMenu) { openMenu = null; paint(); } return; }
+  const [v, t] = p.dataset.pick.split(":");
+  sel[v] = t === "*" || sel[v] === t ? null : t;
+  openMenu = null;
+  paint();
+});
+paint();
+</script>
+</body>
+</html>
