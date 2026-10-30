@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Problem section · five-slide directions</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"Geist Pixel Square";src:url("assets/GeistPixel-Square.woff2") format("woff2");font-display:swap}
+:root{--ink:#111;--ink-2:#555;--ink-3:#8f8f8f;--line:#e4e4e0;--vert:#c3e05a;--vert-dark:#2f3a05;--bg:#f7f7f5;
+  --sans:"Geist",system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;--pixel:"Geist Pixel Square",var(--mono)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;padding:56px 48px 120px}
+.k{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+header{max-width:1100px}
+h1{font-size:40px;font-weight:600;letter-spacing:-.03em;line-height:1.1;margin-top:10px}
+.rule{width:64px;height:5px;background:var(--vert);margin-top:18px}
+header p{font-size:16px;line-height:1.55;color:var(--ink-2);margin-top:18px;max-width:820px}
+.dir{margin-top:56px;padding-top:24px;border-top:1px solid var(--ink)}
+.dir.today{border-top-color:var(--line)}
+.dh{display:grid;grid-template-columns:300px 1fr;gap:32px;align-items:start}
+.dh h2{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-top:8px}
+.dh .rec{display:inline-block;margin-left:10px;vertical-align:4px;font-family:var(--pixel);font-size:11px;letter-spacing:.09em;text-transform:uppercase;background:var(--vert);color:var(--vert-dark);padding:3px 7px;border-radius:3px}
+.dh .idea{font-size:16px;line-height:1.55;color:var(--ink-2);margin-top:10px}
+.moves{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;font-size:14px;line-height:1.5;color:var(--ink-2)}
+.moves b{display:block;font-family:var(--pixel);font-weight:400;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.moves li{list-style:none;padding-left:14px;position:relative}
+.moves li::before{content:"";position:absolute;left:0;top:.62em;width:6px;height:1px;background:var(--ink-3)}
+.row{display:flex;flex-wrap:wrap;gap:16px;margin-top:24px}
+.th{position:relative;width:272px;height:170px;border:0;padding:0;font:inherit;border-radius:4px;overflow:hidden;box-shadow:0 0 0 1px var(--line);background:#fff;cursor:zoom-in;flex:none}
+.th:hover{box-shadow:0 0 0 2px var(--ink)}
+.th iframe{width:1600px;height:1000px;border:0;transform:scale(.17);transform-origin:0 0;pointer-events:none}
+.th .n{position:absolute;left:6px;bottom:6px;font-family:var(--pixel);font-size:11px;letter-spacing:.06em;background:#fff;padding:2px 5px;border-radius:3px;box-shadow:0 0 0 1px var(--line)}
+.th .tag{position:absolute;right:6px;bottom:6px;font-family:var(--pixel);font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:#fff;padding:2px 5px;border-radius:3px}
+.th .tag.new{background:var(--vert);color:var(--vert-dark)}
+#lb{position:fixed;inset:0;background:rgba(17,17,17,.86);display:none;place-items:center;z-index:10}
+#lb.on{display:grid}
+#lb .fr{position:relative;overflow:hidden;border-radius:6px;background:#fff}
+#lb iframe{width:1600px;height:1000px;border:0;transform-origin:0 0;display:block}
+#lb .bar{position:fixed;left:0;right:0;bottom:22px;text-align:center;color:#ddd;font-size:14px}
+#lb .bar span{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;margin:0 12px;color:#aaa}
+</style>
+</head>
+<body>
+<header>
+  <p class="k">Case study · Problem section</p>
+  <h1>Ten slides down to five: three directions</h1>
+  <div class="rule"></div>
+  <p>Each direction is five slides at most, the divider included. Every slide is drawn with the deck's own styles. Your photos come first, and your edits are kept, from the divider renamed « Problem » to the order you set in the grid view. The twenty asks now have their own slide after prototype 1, so this section no longer needs the table. Click a slide to see it large; ← and → step through the row, Esc closes.</p>
+</header>
+
+<section class="dir today" id="today">
+  <div class="dh">
+    <div><p class="k">Today</p><h2>Ten slides, in your order</h2></div>
+    <p class="idea">The section as it stands in your browser, with your edits applied.</p>
+  </div>
+  <div class="row"></div>
+</section>
+
+<section class="dir" id="A">
+  <div class="dh">
+    <div><p class="k">Direction A</p><h2>People first<span class="rec">Recommended</span></h2>
+      <p class="idea">Who they are, how they work, what breaks, what it costs, what to answer. Each technician carries his own quote, so the research stays attached to a face.</p></div>
+    <ul class="moves">
+      <li><b>Kept</b><ul><li>All four photos</li><li>Drift diagram and the three numbers</li><li>The three questions</li></ul></li>
+      <li><b>Merged</b><ul><li>The two rules move under Guy and Benoît as quotes</li><li>« The setting » and « done by hand » become captions</li><li>Drift and cost on one slide</li></ul></li>
+      <li><b>Dropped</b><ul><li>Twenty asks table (now after prototype 1)</li><li>The empty office image slot</li></ul></li>
+    </ul>
+  </div>
+  <div class="row"></div>
+</section>
+
+<section class="dir" id="B">
+  <div class="dh">
+    <div><p class="k">Direction B</p><h2>Evidence first</h2>
+      <p class="idea">One wall of photos sets the scene at once. Then the failure, the cost, and a closing slide that pairs the three questions with the two rules.</p></div>
+    <ul class="moves">
+      <li><b>Kept</b><ul><li>All four photos, on one slide</li><li>The three numbers</li><li>Both quotes and both rules</li></ul></li>
+      <li><b>Merged</b><ul><li>People and tools into one photo row</li><li>« Done by hand » becomes the chores slide with the drift</li><li>Questions and rules on one slide</li></ul></li>
+      <li><b>Dropped</b><ul><li>Twenty asks table</li><li>The empty office image slot</li></ul></li>
+    </ul>
+  </div>
+  <div class="row"></div>
+</section>
+
+<section class="dir" id="C">
+  <div class="dh">
+    <div><p class="k">Direction C</p><h2>Fewest words</h2>
+      <p class="idea">Large images, one idea per slide. The paperwork photo opens the section on the divider itself. The rules wait for the trade-offs, where they are acted on.</p></div>
+    <ul class="moves">
+      <li><b>Kept</b><ul><li>All four photos, larger</li><li>The three numbers</li><li>The three questions</li></ul></li>
+      <li><b>Merged</b><ul><li>Paperwork photo on the divider</li><li>« The setting » and the drift on the screens photo</li></ul></li>
+      <li><b>Dropped</b><ul><li>Twenty asks table</li><li>The two rules (they reappear in the trade-offs)</li><li>« Done by hand » chores</li></ul></li>
+    </ul>
+  </div>
+  <div class="row"></div>
+</section>
+
+<div id="lb"><div class="fr"><iframe title="Slide, large"></iframe></div><div class="bar"></div></div>
+
+<!-- slide drafts: each <template> is one slide; data-dir and data-tag say where it goes -->
+<template data-dir="A" data-tag="kept" data-sec="div">
+  <div class="b"><p class="big">01</p><h1>Problem</h1><div class="rule"></div>
+  <p class="lede">The office's knowledge is in its drawings. Nothing else can read them.</p></div>
+</template>
+<template data-dir="A" data-tag="merged">
+  <div class="b">
+    <p class="k">Interviews · October 26</p>
+    <h2>Two technicians, two halves of the same building.</h2>
+    <div class="rule"></div>
+    <div class="cols c2" style="margin-top:40px;flex:1;min-height:0">
+      <div style="display:flex;flex-direction:column;gap:18px;min-height:0">
+        <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/guy.jpg" alt="Guy at the office" style="object-position:58% 50%"></div>
+        <div><h3>Guy · 3D, codes, city approvals</h3><div class="q" style="margin-top:12px"><blockquote style="font-size:22px">“Never fake a verdict. Name what is missing.”</blockquote></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;min-height:0">
+        <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/benoit.jpg" alt="Benoît at his desk" style="object-position:50% 55%"></div>
+        <div><h3>Benoît · 2D drawings, execution</h3><div class="q" style="margin-top:12px"><blockquote style="font-size:22px">“Read the numbers already written on the sheet.”</blockquote></div></div>
+      </div>
+    </div>
+  </div>
+</template>
+<template data-dir="A" data-tag="merged">
+  <div class="b">
+    <p class="k">How the office works</p>
+    <h2>The plans hold the truth. Every revision, someone reads them again.</h2>
+    <div class="rule"></div>
+    <div class="cols c2" style="margin-top:40px;flex:1;min-height:0">
+      <div style="display:flex;flex-direction:column;gap:18px;min-height:0">
+        <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/paperwork.jpg" alt="A desk covered in printed sheets, handwritten notes and red markups" style="object-position:55% 60%"></div>
+        <div class="persona"><div><h3>Paper</h3><p>The unit schedule is measured unit by unit, quantities are counted when asked, and the ten-page code study is rewritten each revision.</p></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;min-height:0">
+        <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/software.jpg" alt="Two screens: AutoCAD on the left, SketchUp on the right" style="object-position:48% 42%"></div>
+        <div class="persona"><div><h3>AutoCAD and SketchUp</h3><p>Benoît draws the plans in AutoCAD. Guy builds the massing in SketchUp. Nothing links the two files.</p></div></div>
+      </div>
+    </div>
+  </div>
+</template>
+<template data-dir="A" data-tag="merged">
+  <div class="b">
+    <p class="k">The failure, and why it matters</p>
+    <h2>The two files drift apart. Finding it late is what costs.</h2>
+    <div class="rule"></div>
+    <div class="drift" style="margin-top:48px">
+      <div class="f"><svg class="logo" viewBox="0 0 24 24" role="img" aria-label="autocad"><path fill="#E51050" d="M3.8672 1.0527v.0157L0 3.3848v17.914l3.8965-2.332h18.3398V2.3301c0-.702-.5773-1.2774-1.2793-1.2774H3.8672zm7.5058 4.0098h3.3008l2.9844 9.9512h-2.5879l-.5683-2.1895h-2.9844l-.5703 2.1621h-2.416l2.8417-9.9238zm11.8633.0273v14.877H4.172l-2.0684 1.2383v.4648c0 .702.5793 1.2774 1.2813 1.2774H24V5.0898h-.7637zM12.9668 6.6816l-.9941 4.3243h2.0468l-1.0527-4.3243z"/></svg><span class="k">AutoCAD · Benoît</span><h3>Plans</h3><p>Units, walls, windows, dimensions. Revised every week.</p></div>
+      <div class="gap"><span>NO LINK</span></div>
+      <div class="f"><svg class="logo" viewBox="0 0 24 24" role="img" aria-label="sketchup"><path fill="#005F9E" d="M.968 9.027l7.717 4.428-.006 1.32-4.39-2.518-2.763 1.57 7.148 4.12.005 1.27-7.658-4.405c.02.516.488 2.106 1.383 3.337.91 1.247 1.946 1.776 1.946 1.776L11.428 24V11.849L.975 5.846zm22.064-3.8L15.22.723S13.982 0 12.008 0C9.952 0 8.76.746 8.76.746l-7.236 4.14 11.009 6.328V24l7.245-4.136s1.295-.715 2.279-2.414c.867-1.496.975-2.943.975-2.943zM11.251 7.308s1.615-.298 2.98.49l2.171 1.25s.003 1.097.003 2.736c0 1.313-1.112 2.674-1.112 2.674l.002-4.816zm6.402 10.562l-2.358 1.353v-1.269l1.835-1.05c1.748-1.26 2.037-3.117 2.037-3.761l-.007-5.705-5.006-2.881s-.76-.499-2.129-.499c-1.367 0-2.113.461-2.113.461L8.154 5.53l-1.11-.641L9.473 3.5s.95-.527 2.544-.527c1.462 0 2.6.571 2.6.571L20.27 6.81l-.007 6.226c.04.957-.406 3.296-2.61 4.835z"/></svg><span class="k">SketchUp · Guy</span><h3>Massing</h3><p>Façades and volumes, retraced from the plans when someone remembers.</p></div>
+    </div>
+    <div class="nums c3" style="display:grid;margin-top:56px">
+      <div><b>30 cm</b><span>A rear setback this short, noticed after submission, costs a resubmission to the city.</span></div>
+      <div><b>7 in 10</b><span>Client changes that are small cost cuts. Some arrive after the city submission.</span></div>
+      <div><b>10 pages</b><span>Of code analysis, redone when a change touches glazing, area or unit count.</span></div>
+    </div>
+  </div>
+</template>
+<template data-dir="A" data-tag="merged">
+  <div class="b" style="justify-content:center">
+    <p class="k">The problem, framed</p>
+    <h2 style="font-size:64px;max-width:1300px">Give the office an early answer to three questions, from the drawings it already makes.</h2>
+    <div class="rule"></div>
+    <div class="cols c3" style="margin-top:64px">
+      <div class="item bar-top"><span class="n">01</span><h3 style="font-size:30px">What changed?</h3></div>
+      <div class="item bar-top"><span class="n">02</span><h3 style="font-size:30px">Do the drawings still agree?</h3></div>
+      <div class="item bar-top"><span class="n">03</span><h3 style="font-size:30px">Does it matter now?</h3></div>
+    </div>
+    <p class="lede" style="margin-top:48px;font-size:21px">Two rules from the interviews: <b>count, never draw</b>, and <b>measure, then hand over</b>.</p>
+  </div>
+</template>
+
+<template data-dir="B" data-tag="kept" data-sec="div">
+  <div class="b"><p class="big">01</p><h1>Problem</h1><div class="rule"></div>
+  <p class="lede">The office's knowledge is in its drawings. Nothing else can read them.</p></div>
+</template>
+<template data-dir="B" data-tag="merged">
+  <div class="b">
+    <p class="k">Interviews · October 26</p>
+    <h2>Two technicians, a stack of paper, and two programs that never talk.</h2>
+    <div class="rule"></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:44px;flex:1;min-height:0">
+      <div style="display:flex;flex-direction:column;gap:14px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/guy.jpg" alt="Guy at the office" style="object-position:58% 50%"></div><div><h3>Guy</h3><p style="font-size:16px">3D massing, codes, city approvals.</p></div></div>
+      <div style="display:flex;flex-direction:column;gap:14px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/benoit.jpg" alt="Benoît at his desk" style="object-position:50% 55%"></div><div><h3>Benoît</h3><p style="font-size:16px">2D drawings and execution.</p></div></div>
+      <div style="display:flex;flex-direction:column;gap:14px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/paperwork.jpg" alt="A desk covered in printed sheets and red markups" style="object-position:55% 60%"></div><div><h3>Paper</h3><p style="font-size:16px">Notes, changes and the schedule, marked up by hand.</p></div></div>
+      <div style="display:flex;flex-direction:column;gap:14px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/software.jpg" alt="AutoCAD and SketchUp on two screens" style="object-position:48% 42%"></div><div><h3>AutoCAD and SketchUp</h3><p style="font-size:16px">2D sheets and the 3D model, never linked.</p></div></div>
+    </div>
+  </div>
+</template>
+<template data-dir="B" data-tag="merged">
+  <div class="b">
+    <p class="k">What is done by hand</p>
+    <h2>The plans hold the truth, and the two files drift apart.</h2>
+    <div class="rule"></div>
+    <div class="cols c3" style="margin-top:48px">
+      <div class="item bar-top"><span class="n">UNIT SCHEDULE</span><h3>Measured unit by unit</h3><p>Each unit traced with a polyline, floor by floor, and typed into a table.</p></div>
+      <div class="item bar-top"><span class="n">QUANTITIES</span><h3>Counted when asked</h3><p>Windows, brick, metal and glass measured off the sheets on request.</p></div>
+      <div class="item bar-top"><span class="n">CODE STUDY</span><h3>About ten pages, rewritten</h3><p>For each project and each major revision.</p></div>
+    </div>
+    <div class="drift" style="margin-top:56px">
+      <div class="f"><svg class="logo" viewBox="0 0 24 24" role="img" aria-label="autocad"><path fill="#E51050" d="M3.8672 1.0527v.0157L0 3.3848v17.914l3.8965-2.332h18.3398V2.3301c0-.702-.5773-1.2774-1.2793-1.2774H3.8672zm7.5058 4.0098h3.3008l2.9844 9.9512h-2.5879l-.5683-2.1895h-2.9844l-.5703 2.1621h-2.416l2.8417-9.9238zm11.8633.0273v14.877H4.172l-2.0684 1.2383v.4648c0 .702.5793 1.2774 1.2813 1.2774H24V5.0898h-.7637zM12.9668 6.6816l-.9941 4.3243h2.0468l-1.0527-4.3243z"/></svg><span class="k">AutoCAD · Benoît</span><h3>Plans</h3><p>Revised every week.</p></div>
+      <div class="gap"><span>NO LINK</span></div>
+      <div class="f"><svg class="logo" viewBox="0 0 24 24" role="img" aria-label="sketchup"><path fill="#005F9E" d="M.968 9.027l7.717 4.428-.006 1.32-4.39-2.518-2.763 1.57 7.148 4.12.005 1.27-7.658-4.405c.02.516.488 2.106 1.383 3.337.91 1.247 1.946 1.776 1.946 1.776L11.428 24V11.849L.975 5.846zm22.064-3.8L15.22.723S13.982 0 12.008 0C9.952 0 8.76.746 8.76.746l-7.236 4.14 11.009 6.328V24l7.245-4.136s1.295-.715 2.279-2.414c.867-1.496.975-2.943.975-2.943zM11.251 7.308s1.615-.298 2.98.49l2.171 1.25s.003 1.097.003 2.736c0 1.313-1.112 2.674-1.112 2.674l.002-4.816zm6.402 10.562l-2.358 1.353v-1.269l1.835-1.05c1.748-1.26 2.037-3.117 2.037-3.761l-.007-5.705-5.006-2.881s-.76-.499-2.129-.499c-1.367 0-2.113.461-2.113.461L8.154 5.53l-1.11-.641L9.473 3.5s.95-.527 2.544-.527c1.462 0 2.6.571 2.6.571L20.27 6.81l-.007 6.226c.04.957-.406 3.296-2.61 4.835z"/></svg><span class="k">SketchUp · Guy</span><h3>Massing</h3><p>Retraced when someone remembers.</p></div>
+    </div>
+  </div>
+</template>
+<template data-dir="B" data-tag="kept">
+  <div class="b">
+    <p class="k">Why it matters</p>
+    <h2>The difference is not expensive. Finding it late is.</h2>
+    <div class="rule"></div>
+    <div class="nums c3" style="display:grid">
+      <div><b>30 cm</b><span>A rear setback this short, noticed after submission, costs a resubmission to the city.</span></div>
+      <div><b>7 in 10</b><span>Client changes that are small cost cuts. Some arrive after the city submission.</span></div>
+      <div><b>10 pages</b><span>Of code analysis, redone when a change touches glazing, area or unit count.</span></div>
+    </div>
+    <p class="lede mt" style="max-width:1200px">A window that grows on the east façade changes the area of unprotected openings on that face. If that is found during permit drawings, the façade, the units behind it and the presentation model all move.</p>
+  </div>
+</template>
+<template data-dir="B" data-tag="merged">
+  <div class="b">
+    <p class="k">The problem, framed</p>
+    <h2>Three questions to answer early, and two rules for answering them.</h2>
+    <div class="rule"></div>
+    <div class="cols c2" style="margin-top:56px;gap:80px">
+      <div>
+        <div class="item bar-top"><span class="n">01</span><h3 style="font-size:28px">What changed?</h3></div>
+        <div class="item bar-top" style="margin-top:28px"><span class="n">02</span><h3 style="font-size:28px">Do the drawings still agree?</h3></div>
+        <div class="item bar-top" style="margin-top:28px"><span class="n">03</span><h3 style="font-size:28px">Does it matter now?</h3></div>
+      </div>
+      <div>
+        <div class="q"><blockquote style="font-size:24px">“Read the numbers already written on the sheet.”</blockquote><cite>Benoît</cite><p style="margin-top:14px"><b>Count, never draw.</b></p></div>
+        <div class="q" style="margin-top:36px"><blockquote style="font-size:24px">“Never fake a verdict. Name what is missing.”</blockquote><cite>Guy</cite><p style="margin-top:14px"><b>Measure, then hand over.</b></p></div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template data-dir="C" data-tag="merged" data-sec="div">
+  <div class="b">
+    <div style="display:grid;grid-template-columns:1fr 560px;gap:64px;align-items:center;flex:1">
+      <div><p class="big">01</p><h1 style="font-size:200px">Problem</h1><div class="rule"></div>
+      <p class="lede">The office's knowledge is in its drawings. Nothing else can read them.</p></div>
+      <div class="shot" style="height:700px;box-shadow:none"><img src="assets/frank/paperwork.jpg" alt="A desk covered in printed sheets, handwritten notes and red markups" style="object-position:55% 60%"></div>
+    </div>
+  </div>
+</template>
+<template data-dir="C" data-tag="kept">
+  <div class="b">
+    <p class="k">Interviews · October 26</p>
+    <h2>Two technicians, two halves of the same building.</h2>
+    <div class="rule"></div>
+    <div class="cols c2" style="margin-top:48px;flex:1;min-height:0">
+      <div style="display:flex;flex-direction:column;gap:22px;min-height:0">
+        <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/guy.jpg" alt="Guy at the office" style="object-position:58% 50%"></div>
+        <div class="persona"><div><h3>Guy</h3><p>3D massing, building codes, city approvals. Thinks in rules and in what the city will ask.</p></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:22px;min-height:0">
+        <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/benoit.jpg" alt="Benoît at his desk" style="object-position:50% 55%"></div>
+        <div class="persona"><div><h3>Benoît</h3><p>2D drawings and execution. Thinks in counts, sheets and what must line up floor to floor.</p></div></div>
+      </div>
+    </div>
+  </div>
+</template>
+<template data-dir="C" data-tag="merged">
+  <div class="b">
+    <div class="cols c5-7" style="margin-top:0;flex:1;align-items:center">
+      <div>
+        <p class="k">The setting</p>
+        <h2>A building is drawn twice, by two people, in two programs.</h2>
+        <div class="rule"></div>
+        <p class="lede" style="font-size:21px">The two files drift apart, and nobody is told. A window moves in the plan; the model still shows the old one.</p>
+      </div>
+      <div class="shot" style="height:700px"><img src="assets/frank/software.jpg" alt="Two screens: AutoCAD on the left, SketchUp on the right" style="object-position:48% 42%"></div>
+    </div>
+  </div>
+</template>
+<template data-dir="C" data-tag="kept">
+  <div class="b">
+    <p class="k">Why it matters</p>
+    <h2>The difference is not expensive. Finding it late is.</h2>
+    <div class="rule"></div>
+    <div class="nums c3" style="display:grid">
+      <div><b>30 cm</b><span>A rear setback this short, noticed after submission, costs a resubmission to the city.</span></div>
+      <div><b>7 in 10</b><span>Client changes that are small cost cuts. Some arrive after the city submission.</span></div>
+      <div><b>10 pages</b><span>Of code analysis, redone when a change touches glazing, area or unit count.</span></div>
+    </div>
+    <p class="lede mt" style="max-width:1200px">A window that grows on the east façade changes the area of unprotected openings on that face. If that is found during permit drawings, the façade, the units behind it and the presentation model all move.</p>
+  </div>
+</template>
+<template data-dir="C" data-tag="kept">
+  <div class="b" style="justify-content:center">
+    <p class="k">The problem, framed</p>
+    <h2 style="font-size:64px;max-width:1300px">Give the office an early answer to three questions, from the drawings it already makes.</h2>
+    <div class="rule"></div>
+    <div class="cols c3" style="margin-top:72px">
+      <div class="item bar-top"><span class="n">01</span><h3 style="font-size:30px">What changed?</h3></div>
+      <div class="item bar-top"><span class="n">02</span><h3 style="font-size:30px">Do the drawings still agree?</h3></div>
+      <div class="item bar-top"><span class="n">03</span><h3 style="font-size:30px">Does it matter now?</h3></div>
+    </div>
+  </div>
+</template>
+
+<script>
+/* Every slide is drawn inside its own frame with the deck's stylesheet, read
+   from the deck file itself, so a draft here looks exactly like a slide there.
+   « Today » takes the Problem slides from the deck, in the order and with the
+   text edits saved in this browser by the deck's edit mode and grid view. */
+(async () => {
+  const deckHTML = await (await fetch("frank-case-study.html", { cache: "no-store" })).text();
+  const deck = new DOMParser().parseFromString(deckHTML, "text/html");
+  const css = [...deck.querySelectorAll("style")].map((s) => s.textContent).join("\n");
+  const fonts = [...deck.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.outerHTML).join("");
+  const dial = JSON.parse(localStorage.getItem("dialkit:frank-deck-r1") || "{}").values || {};
+  const dt = dial.dividerTitle || "240 · large";
+  const doc = (cls, inner) => `<!doctype html><html><head><base href="${location.href}">${fonts}<style>${css}</style>` +
+    `<style>.s{width:1600px;height:1000px}</style></head><body data-dt="${dt}"><section class="${cls}">${inner}</section></body></html>`;
+
+  /* today: ids exactly as the deck computes them, then the saved order and edits */
+  const src = [...deck.querySelectorAll("#track > .s")];
+  const seen = {};
+  src.forEach((sl) => {
+    const t = (sel) => sl.querySelector(sel)?.textContent.replace(/\s+/g, " ").trim() || "";
+    const base = `${t(".k")} | ${t("h1, h2")}`;
+    seen[base] = (seen[base] || 0) + 1;
+    sl.dataset.edk = seen[base] > 1 ? `${base} (${seen[base]})` : base;
+  });
+  const order = JSON.parse(localStorage.getItem("frank-deck-order-v2") || "null");
+  const edits = JSON.parse(localStorage.getItem("frank-deck-edits-v2") || "{}");
+  let problem = src.filter((sl) => sl.dataset.sec === "User Problem");
+  if (order) {
+    const pos = new Map(order.map((o, i) => [o.id, i]));
+    problem = src.filter((sl) => {
+      const o = order.find((x) => x.id === sl.dataset.edk);
+      return (o ? o.sec : sl.dataset.sec) === "User Problem";
+    }).sort((a, b) => (pos.get(a.dataset.edk) ?? 1e9) - (pos.get(b.dataset.edk) ?? 1e9));
+  }
+  const SKIP = ".foot, .trk, script, style, svg";
+  const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+  problem.forEach((sl) => {
+    let n = 0;
+    sl.querySelectorAll(".b *").forEach((el) => {
+      if (el.closest(SKIP) || !ownText(el) || el.parentElement.closest("[data-k]")) return;
+      el.dataset.k = `${sl.dataset.edk}#${++n}`;
+      const e = edits[el.dataset.k];
+      if (!e) return;
+      if (e.html != null) el.innerHTML = e.html;
+      if (e.gone) el.remove();
+    });
+  });
+
+  const rows = { today: [], A: [], B: [], C: [] };
+  problem.forEach((sl) => rows.today.push({ html: doc(sl.className, sl.innerHTML), tag: "" }));
+  document.querySelectorAll("template[data-dir]").forEach((t) => {
+    const cls = t.dataset.sec === "div" ? "s div" : "s";
+    rows[t.dataset.dir].push({ html: doc(cls, t.innerHTML), tag: t.dataset.tag });
+  });
+
+  Object.entries(rows).forEach(([id, list]) => {
+    const row = document.querySelector(`#${id} .row`);
+    list.forEach((it, i) => {
+      const th = document.createElement("button");
+      th.type = "button"; th.className = "th";
+      th.setAttribute("aria-label", `Slide ${i + 1}, ${id === "today" ? "today" : `direction ${id}`}`);
+      const f = document.createElement("iframe");
+      f.setAttribute("tabindex", "-1"); f.loading = "lazy"; f.srcdoc = it.html;
+      th.append(f);
+      th.insertAdjacentHTML("beforeend", `<span class="n">${String(i + 1).padStart(2, "0")}</span>` +
+        (it.tag ? `<span class="tag${it.tag === "merged" ? " new" : ""}">${it.tag}</span>` : ""));
+      th.addEventListener("click", () => open(id, i));
+      row.append(th);
+    });
+  });
+
+  /* large view */
+  const lb = document.getElementById("lb"), fr = lb.querySelector("iframe"), bar = lb.querySelector(".bar");
+  let at = null;
+  const size = () => {
+    const k = Math.min(innerWidth * 0.9 / 1600, (innerHeight - 90) / 1000);
+    fr.style.transform = `scale(${k})`;
+    lb.querySelector(".fr").style.cssText = `width:${1600 * k}px;height:${1000 * k}px`;
+  };
+  function open(id, i) {
+    at = { id, i };
+    fr.srcdoc = rows[id][i].html;
+    const name = id === "today" ? "Today" : `Direction ${id}`;
+    bar.innerHTML = `${name}<span>${String(i + 1).padStart(2, "0")} / ${String(rows[id].length).padStart(2, "0")}</span>← → to step · Esc to close`;
+    size(); lb.classList.add("on");
+  }
+  addEventListener("resize", () => at && size());
+  lb.addEventListener("click", (e) => { if (e.target === lb) { lb.classList.remove("on"); at = null; } });
+  addEventListener("keydown", (e) => {
+    if (!at) return;
+    if (e.key === "Escape") { lb.classList.remove("on"); at = null; }
+    const n = rows[at.id].length;
+    if (e.key === "ArrowRight") open(at.id, (at.i + 1) % n);
+    if (e.key === "ArrowLeft") open(at.id, (at.i - 1 + n) % n);
+  });
+})();
+</script>
+</body>

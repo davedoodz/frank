@@ -99,6 +99,16 @@ p b,.lede b{color:var(--ink);font-weight:600}
 .title .sign img{height:44px}
 .title .foot,.end .foot{display:none}
 
+/* the closing slide is the deck inverted: black ground, the same tokens
+   flipped, so every rule written against --ink keeps working */
+/* #111 written out: the --ink redefined on the same element would resolve first */
+.s.end{background:#111111;
+  --ink:#f6f6f4; --ink-2:#b6b6b2; --ink-3:#8c8c88;
+  --line:#303030; --fill:#1b1b1b; --fill-2:#262626}
+.s.end .b{color:var(--ink)}
+/* on the green hover fill the label has to go dark again */
+.s.end .links a:hover{color:#111111}
+
 /* section dividers: the whole slide is one black block, the title set big,
    bold and green at the left, so it is plain which part of the talk begins */
 .s.div{background:var(--ink)}
@@ -173,11 +183,11 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .read .pair i{font-style:normal;color:var(--red);font-weight:600}
 .read .won{background:var(--vert)}
 .read .won .k{color:var(--vert-dark)}
-.why{display:flex;flex-direction:column;gap:22px}
-.why>div{display:grid;grid-template-columns:28px 128px 1fr;gap:14px;align-items:baseline;padding-top:18px;border-top:1px solid var(--line)}
-.why .pi{align-self:center}
-.why b{font-size:38px;font-weight:600;letter-spacing:-.04em;line-height:1}
-.why span{font-size:15px;line-height:1.45;color:var(--ink-2)}
+.rp{display:flex;flex-direction:column;gap:18px}
+.rp>div{display:grid;grid-template-columns:30px 1fr;column-gap:14px;row-gap:6px;padding-top:16px;border-top:1px solid var(--line)}
+.rp .pi{grid-row:1/3;margin-top:8px;width:24px;height:24px}
+.rp b{font-size:38px;font-weight:600;letter-spacing:-.04em;line-height:1}
+.rp span{font-size:15px;line-height:1.45;color:var(--ink-2)}
 .qs{margin-top:36px;gap:36px;flex:1;min-height:0}
 .qs>div{display:flex;flex-direction:column;min-height:0}
 .qs .qn{display:flex;align-items:center;gap:10px}
@@ -215,8 +225,26 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .dec .won .k{color:var(--vert-dark)}
 .dec .won{position:relative}
 .dec .won::before{content:"";position:absolute;left:-1px;top:-1px;width:120px;height:4px;background:var(--vert)}
-.why{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:44px}
-.why p{font-size:19px}
+
+/* Trade-offs: every sentence sits under a zoomed piece of the prototype it is
+   about. Left is what came before (or what was given up), right what shipped. */
+.tx{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:40px;flex:1;min-height:0}
+.tx.c3{grid-template-columns:repeat(3,1fr);gap:36px}
+.tx>figure{margin:0;display:flex;flex-direction:column;min-height:0}
+.zm{position:relative;flex:1;min-height:0;border-radius:8px;background:var(--fill);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px;overflow:hidden}
+.zm img{max-width:100%;max-height:100%;min-height:0;object-fit:contain;border-radius:6px;background:#fff;box-shadow:0 0 0 1px var(--line)}
+.zm.full{padding:0}
+.zm.full img{width:100%;height:100%;max-height:none;object-fit:cover;object-position:center;border-radius:0;box-shadow:none}
+.zm .src{position:absolute;left:12px;top:12px;z-index:1;font-family:var(--pixel);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);background:#fff;padding:4px 8px;border-radius:4px;box-shadow:0 0 0 1px var(--line)}
+.tx figcaption{padding-top:16px;margin-top:18px;border-top:1px solid var(--ink);position:relative}
+.tx figcaption .k{display:block;margin-bottom:8px}
+.tx figcaption p{font-size:20px;line-height:1.45;color:var(--ink)}
+.tx .won figcaption .k{color:var(--vert-dark)}
+.tx .won figcaption::before{content:"";position:absolute;left:0;top:-2px;width:120px;height:4px;background:var(--vert)}
+.tx .stack{display:flex;flex-direction:column;gap:10px;flex:1;min-height:0}
+.tx .stack .zm{padding:18px}
+.zm .to{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);flex:none}
+.cost{margin-top:26px;font-size:19px}
 
 /* tables */
 table{border-collapse:collapse;width:100%;margin-top:44px;font-size:18px}
@@ -423,7 +451,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ 01 title -->
 <section class="s title" data-sec="">
 <div class="b">
-  <p class="k">Case study · October 2026</p>
+  <p class="k">Case study — October 2026</p>
   <h1 style="margin-top:22px">Frank</h1>
   <p class="byline">David Lafond</p>
   <div class="rule"></div>
@@ -453,7 +481,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
     <div>
-      <p class="k">The firm · since 1989</p>
+      <p class="k">The firm — since 1989</p>
       <h2>I learned the trade in my father's office.</h2>
       <div class="rule"></div>
       <p class="lede" style="font-size:21px">He founded the firm in 1989 in the Italian neighbourhood of East Montreal, and it has worked mostly on residential buildings since. He was my first mentor in architecture: I worked and interned at his office as an apprentice, saw how it runs, and learned the business of construction in Quebec.</p>
@@ -479,26 +507,6 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/office-5328.jpg" alt="Hand sketches of a wall detail on lined paper beside a printed rendering and a scale ruler" style="object-position:50% 50%"></div>
       <div class="persona"><div><h3>Sketch first</h3><p>Details are worked out by hand on paper, then drawn in AutoCAD and SketchUp. Most of the work is still manual.</p></div></div>
     </div>
-  </div>
-</div>
-</section>
-
-<!-- ============================================================ 02 before Frank -->
-<section class="s" data-sec="Background">
-<div class="b">
-  <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
-    <div>
-      <p class="k">Before Frank</p>
-      <h2>Trained in architecture first.</h2>
-      <div class="rule"></div>
-      <p class="lede" style="font-size:22px">My MIT SA+P application portfolio, M.Arch / M.CP, 2024. The drawings Frank reads are the drawings I was trained to make.</p>
-      <div class="links">
-        <a href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener">Harvard / MIT portfolio <span class="mono">davidlafond.xyz/work/harvard-mit</span>
-          <svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
-      </div>
-    </div>
-    <a class="book" href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener" aria-label="Open the Harvard / MIT portfolio">
-      <img src="assets/frank/mit-portfolio-book.png" alt="Book cover: David Khanh Lafond, MIT SA+P application, M.Arch / M.CP 2024"></a>
   </div>
 </div>
 </section>
@@ -536,7 +544,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ timeline -->
 <section class="s" data-sec="Overview">
 <div class="b">
-  <p class="k">Timeline · October 23–30, 2026</p>
+  <p class="k">Timeline — October 23–30, 2026</p>
   <h2>Eight days from the first call to this case study.</h2>
   <div class="rule"></div>
   <div class="tlc">
@@ -577,7 +585,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ problem 1: the setting -->
 <section class="s" data-sec="User Problem">
 <div class="b">
-  <p class="k">The setting · Interviews, October 26</p>
+  <p class="k">The setting — Interviews, October 26</p>
   <h2>A building is drawn twice, by two people, in two programs.</h2>
   <div class="rule"></div>
   <div class="cols c4" style="margin-top:40px;gap:28px;flex:1;min-height:0">
@@ -601,8 +609,8 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     <div><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><div><h3>Code study</h3><p>About ten pages, rewritten for each project and each major revision.</p></div></div>
   </div>
   <div class="cols" style="grid-template-columns:1.45fr 1fr;gap:32px;margin-top:30px;flex:1;min-height:0">
-    <figure class="pf"><div class="shot"><img src="assets/frank/intv-counting.jpg" alt="Interview notes: unit count, window schedule and material quantities, each with what is done today and what the tool should do"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4M2 10h4M2 14h4M2 18h4"/><path d="M21.38 5.62a1 1 0 0 0-3-3l-5.01 5.01a2 2 0 0 0-.5.86l-.84 2.87a.5.5 0 0 0 .62.62l2.87-.84a2 2 0 0 0 .86-.5z"/></svg><span class="mono">Interview notes · Oct 26</span>What Benoît counts by hand today, card by card.</p></figure>
-    <figure class="pf"><div class="shot"><img src="assets/frank/crop-p3-units.jpg" alt="Prototype 3 area table for level 5: units, types, net square feet, square meters and share"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">Prototype 3</span>The unit table, read from the plan instead of typed.</p></figure>
+    <figure class="pf"><div class="shot"><img src="assets/frank/intv-counting.jpg" alt="Interview notes: unit count, window schedule and material quantities, each with what is done today and what the tool should do"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4M2 10h4M2 14h4M2 18h4"/><path d="M21.38 5.62a1 1 0 0 0-3-3l-5.01 5.01a2 2 0 0 0-.5.86l-.84 2.87a.5.5 0 0 0 .62.62l2.87-.84a2 2 0 0 0 .86-.5z"/></svg><span class="mono">Interview notes — Oct 26</span>What Benoît counts by hand today, card by card.</p></figure>
+    <figure class="pf"><div class="shot"><img src="assets/frank/crop-p3-units.jpg" alt="Prototype 3 area table for level 5: units, types, net square feet, square meters and share"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">V3</span>The unit table, read from the plan instead of typed.</p></figure>
   </div>
 </div>
 </section>
@@ -619,8 +627,8 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <div class="won"><span class="k"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></svg>What they told me</span><p>SketchUp gives renders, views and the massing. Remodelling is long. When the model is out of date, a wrong window is fixed in Photoshop.</p></div>
     </div>
     <div style="display:flex;flex-direction:column;gap:18px;min-height:0">
-      <figure class="pf"><div class="shot"><img src="assets/frank/p1-b-sync.jpg" alt="Prototype 1 B: the AutoCAD plan beside the SketchUp model, a 240 mm window gap flagged on unit 9" style="aspect-ratio:16/8.4"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">Prototype 1 B</span>Plan and model side by side, every gap flagged.</p></figure>
-      <figure class="pf"><div class="shot"><img src="assets/frank/intv-2d3d.jpg" alt="Interview note: 2D plan against the 3D model, the two drift apart and nobody is told"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4M2 10h4M2 14h4M2 18h4"/><path d="M21.38 5.62a1 1 0 0 0-3-3l-5.01 5.01a2 2 0 0 0-.5.86l-.84 2.87a.5.5 0 0 0 .62.62l2.87-.84a2 2 0 0 0 .86-.5z"/></svg><span class="mono">Interview notes · Oct 26</span>How I first wrote the problem down.</p></figure>
+      <figure class="pf"><div class="shot"><img src="assets/frank/p1-b-sync.jpg" alt="Prototype 1 B: the AutoCAD plan beside the SketchUp model, a 240 mm window gap flagged on unit 9" style="aspect-ratio:16/8.4"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">V1 B</span>Plan and model side by side, every gap flagged.</p></figure>
+      <figure class="pf"><div class="shot"><img src="assets/frank/intv-2d3d.jpg" alt="Interview note: 2D plan against the 3D model, the two drift apart and nobody is told"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4M2 10h4M2 14h4M2 18h4"/><path d="M21.38 5.62a1 1 0 0 0-3-3l-5.01 5.01a2 2 0 0 0-.5.86l-.84 2.87a.5.5 0 0 0 .62.62l2.87-.84a2 2 0 0 0 .86-.5z"/></svg><span class="mono">Interview notes — Oct 26</span>How I first wrote the problem down.</p></figure>
     </div>
   </div>
 </div>
@@ -633,13 +641,13 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <h2>The drawings change every week. Nobody can say why a year later.</h2>
   <div class="rule"></div>
   <div class="cols c5-7" style="margin-top:36px;gap:48px;flex:1;min-height:0">
-    <div class="why">
+    <div class="rp">
       <p class="lede" style="font-size:19px;margin:0">The client, the developer, the engineers and the city call to move a wall or cut a unit. The edit goes into the plan. The reason stays in a phone call.</p>
       <div><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></svg><b>30 cm</b><span>A rear setback this short, noticed after submission, costs a resubmission, and a search for who asked.</span></div>
       <div><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><b>7 in 10</b><span>Client changes that are small cost cuts, asked for by phone or email.</span></div>
       <div><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><b>10 pages</b><span>Of code study, redone when a change touches glazing, area or unit count.</span></div>
     </div>
-    <figure class="pf"><div class="shot"><img src="assets/frank/intv-changes.jpg" alt="Interview notes, changes and the reason behind them: why was this changed, what changed between two revisions, the knock-on effect of a change" style="object-position:top left"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4M2 10h4M2 14h4M2 18h4"/><path d="M21.38 5.62a1 1 0 0 0-3-3l-5.01 5.01a2 2 0 0 0-.5.86l-.84 2.87a.5.5 0 0 0 .62.62l2.87-.84a2 2 0 0 0 .86-.5z"/></svg><span class="mono">Interview notes · Oct 26</span>Both technicians, high priority: « Two years later nobody remembers who asked or why. »</p></figure>
+    <figure class="pf"><div class="shot"><img src="assets/frank/intv-changes.jpg" alt="Interview notes, changes and the reason behind them: why was this changed, what changed between two revisions, the knock-on effect of a change" style="object-position:top left"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4M2 10h4M2 14h4M2 18h4"/><path d="M21.38 5.62a1 1 0 0 0-3-3l-5.01 5.01a2 2 0 0 0-.5.86l-.84 2.87a.5.5 0 0 0 .62.62l2.87-.84a2 2 0 0 0 .86-.5z"/></svg><span class="mono">Interview notes — Oct 26</span>Both technicians, high priority: « Two years later nobody remembers who asked or why. »</p></figure>
   </div>
 </div>
 </section>
@@ -651,15 +659,15 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <h2 style="font-size:52px;max-width:1250px">Give the office a memory of every change, kept with the drawings it already makes.</h2>
   <div class="rule"></div>
   <div class="cols c3 qs">
-    <div><p class="qn"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></svg><span class="n">01</span></p><h3>What changed?</h3><figure class="pf"><div class="shot"><img src="assets/frank/crop-p1-change.jpg" alt="Prototype 1 gap card: window F-05-09, 1800 mm in the plan against 1560 mm in the model, since revision R03"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">Prototype 1</span>Each gap names the revision it appeared in.</p></figure></div>
-    <div><p class="qn"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="n">02</span></p><h3>Who asked for it, and why?</h3><figure class="pf"><div class="shot"><img src="assets/frank/crop-p3-comments.jpg" alt="Prototype 3 comments: each names its author, role, unit, sheet and time"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">Prototype 3</span>Every comment names who, the unit and the sheet.</p></figure></div>
-    <div><p class="qn"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg><span class="n">03</span></p><h3>Do the drawings still agree?</h3><figure class="pf"><div class="shot"><img src="assets/frank/crop-p3-conflicts.jpg" alt="Prototype 3 conflicts list: overlaps between the architecture and the drainage and distribution drawings, per unit"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">Prototype 3</span>Overlaps between the drawings, listed per unit.</p></figure></div>
+    <div><p class="qn"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></svg><span class="n">01</span></p><h3>What changed?</h3><figure class="pf"><div class="shot"><img src="assets/frank/crop-p1-change.jpg" alt="Prototype 1 gap card: window F-05-09, 1800 mm in the plan against 1560 mm in the model, since revision R03"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">V1</span>Each gap names the revision it appeared in.</p></figure></div>
+    <div><p class="qn"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="n">02</span></p><h3>Who asked for it, and why?</h3><figure class="pf"><div class="shot"><img src="assets/frank/crop-p3-comments.jpg" alt="Prototype 3 comments: each names its author, role, unit, sheet and time"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">V3</span>Every comment names who, the unit and the sheet.</p></figure></div>
+    <div><p class="qn"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg><span class="n">03</span></p><h3>Do the drawings still agree?</h3><figure class="pf"><div class="shot"><img src="assets/frank/crop-p3-conflicts.jpg" alt="Prototype 3 conflicts list: overlaps between the architecture and the drainage and distribution drawings, per unit"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">V3</span>Overlaps between the drawings, listed per unit.</p></figure></div>
   </div>
 </div>
 </section>
 
 <!-- ============================================================ 10 divider: process -->
-<section class="s div" data-sec="Process · Ideation">
+<section class="s div" data-sec="Process — Ideation">
 <div class="b">
   <p class="big">04</p>
   <h1>Ideation</h1>
@@ -668,11 +676,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ ideation 1: flows with AI, sorted in Figma -->
-<section class="s" data-sec="Process · Ideation">
+<section class="s" data-sec="Process — Ideation">
 <div class="b">
   <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
     <div>
-      <p class="k">Ideation · October 24–26</p>
+      <p class="k">Ideation — October 24–26</p>
       <h2>I generated the flows with AI, then chose on a board.</h2>
       <div class="rule"></div>
       <p class="lede" style="font-size:21px">I wrote user flows as text with ChatGPT and Claude, then turned each flow into generated screens. I plotted every screen on one Figma board, one section per day, one row per flow.</p>
@@ -689,9 +697,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ ideation 2: flows to code -->
-<section class="s" data-sec="Process · Ideation">
+<section class="s" data-sec="Process — Ideation">
 <div class="b">
-  <p class="k">Ideation · from board to code</p>
+  <p class="k">Ideation — from board to code</p>
   <h2>The flows that held up went into Claude Code.</h2>
   <div class="rule"></div>
   <p class="lede" style="font-size:21px;max-width:1000px">Generated screens show a flow but can't be used. The flows marked green I built in Claude Code as desktop prototypes, with real clicks, so the technicians could try them on their own drawings.</p>
@@ -709,9 +717,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ ideation 3: prototype 1 core flow -->
-<section class="s" data-sec="Process · Ideation">
+<section class="s" data-sec="Process — Ideation">
 <div class="b">
-  <p class="k">Ideation · the core flow</p>
+  <p class="k">Ideation — the core flow</p>
   <h2>Prototype&nbsp;1 followed one flow, from a new revision to a new baseline.</h2>
   <div class="rule"></div>
   <div class="flow">
@@ -731,13 +739,13 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <h2>Each problem got its own page of live options, on the real screen and the real drawings.</h2>
   <div class="rule"></div>
   <p class="lede" style="font-size:21px">When a detail had more than one good answer, I built every answer into a copy of the working prototype, side by side, and chose by using them. About a hundred such pages, A to J, then only the winner stayed.</p>
-  <div class="chaps"><div><h3>Prototype 1 · A and B</h3><div class="set"><span class="k">Which product</span><p><span class="n">01</span>Direction</p></div><div class="set"><span class="k">What the city asks</span><p><span class="n">02</span>Codes</p></div></div><div><h3>Prototype 2 · C</h3><div class="set"><span class="k">Finding your way</span><p><span class="n">03</span>Navigation</p><p><span class="n">04</span>Words</p></div><div class="set"><span class="k">Seeing the drawing</span><p><span class="n">05</span>Room for the drawing</p><p><span class="n">06</span>Reading the plan</p><p><span class="n">07</span>Drawing layers</p><p><span class="n">08</span>3D model</p></div></div><div><h3>Prototype 3 · Frank</h3><div class="set"><span class="k">The work around the drawing</span><p><span class="n">09</span>Quantities</p><p><span class="n">10</span>Schedule</p></div><div class="set"><span class="k">Sharing and using it</span><p><span class="n">11</span>Comments</p><p><span class="n">12</span>Panes</p></div></div></div>
+  <div class="chaps"><div><h3>Prototype 1 — A and B</h3><div class="set"><span class="k">Which product</span><p><span class="n">01</span>Direction</p></div><div class="set"><span class="k">What the city asks</span><p><span class="n">02</span>Codes</p></div></div><div><h3>Prototype 2 — C</h3><div class="set"><span class="k">Finding your way</span><p><span class="n">03</span>Navigation</p><p><span class="n">04</span>Words</p></div><div class="set"><span class="k">Seeing the drawing</span><p><span class="n">05</span>Room for the drawing</p><p><span class="n">06</span>Reading the plan</p><p><span class="n">07</span>Drawing layers</p><p><span class="n">08</span>3D model</p></div></div><div><h3>Prototype 3 — Frank</h3><div class="set"><span class="k">The work around the drawing</span><p><span class="n">09</span>Quantities</p><p><span class="n">10</span>Schedule</p></div><div class="set"><span class="k">Sharing and using it</span><p><span class="n">11</span>Comments</p><p><span class="n">12</span>Panes</p></div></div></div>
   <div class="links mt" style="margin-top:24px"><a href="archive.html" target="_blank" rel="noopener">Every page, day by day <span class="mono">/prototypes/archive.html</span><svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
 </div>
 </section>
 
 <!-- ============================================================ divider: prototype 1 -->
-<section class="s div" data-sec="Process · Prototype 1">
+<section class="s div" data-sec="Process — Prototype 1">
 <div class="b">
   <p class="big">05</p>
   <h1>Prototype 1</h1>
@@ -746,25 +754,25 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ 12 reframes 1+2 -->
-<section class="s" data-sec="Process · Prototype 1">
+<section class="s" data-sec="Process — Prototype 1">
 <div class="b">
   <p class="k">Reframes 1 and 2</p>
   <h2>I moved the product away from design and toward the work nobody wants to redo.</h2>
   <div class="rule"></div>
   <div class="cols c2" style="margin-top:60px">
-    <div class="item bar-top"><span class="n">REFRAME 1 · OCT 24</span><h3>Not a design tool</h3>
+    <div class="item bar-top"><span class="n">REFRAME 1 — OCT 24</span><h3>Not a design tool</h3>
       <p>Designing is the part architects enjoy and trust themselves with. The pain is in the repetitive reading of drawings: schedules, counts, checks. That is where software earns trust.</p></div>
-    <div class="item bar-top"><span class="n">REFRAME 2 · OCT 25</span><h3>Not a detail library</h3>
+    <div class="item bar-top"><span class="n">REFRAME 2 — OCT 25</span><h3>Not a detail library</h3>
       <p>My first direction was a library of construction details. I dropped it after looking at where the office's knowledge lives: in 2D unit plans. The unit schedule is the document rebuilt most often by hand.</p></div>
   </div>
   <div class="tags" style="margin-top:56px"><span>Construction detail library</span><span>→</span><span class="on">Unit plans and the schedule</span><span>→</span><span>Plans against the model</span></div>
 </div>
 </section>
 
-<!-- ============================================================ prototype 1 · live -->
-<section class="s" data-sec="Process · Prototype 1">
+<!-- ============================================================ prototype 1 — live -->
+<section class="s" data-sec="Process — Prototype 1">
 <div class="b">
-  <p class="k">Prototype 1 · A and B · October 25</p>
+  <p class="k">Prototype 1 — A and B — October 25</p>
   <h2>Two directions, put in front of the users side by side.</h2>
   <div class="rule"></div>
   <div class="chap-o">
@@ -779,12 +787,12 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ prototype 1 · what they asked for -->
-<section class="s" data-sec="Process · Prototype 1">
+<!-- ============================================================ prototype 1 — what they asked for -->
+<section class="s" data-sec="Process — Prototype 1">
 <div class="b">
   <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
     <div>
-      <p class="k">Feedback 1 · October 26</p>
+      <p class="k">Feedback 1 — October 26</p>
       <h2>After prototype&nbsp;1, they asked for twenty things.</h2>
       <div class="rule"></div>
       <p class="lede" style="font-size:21px">I wrote down every ask in plain words: what they do by hand today, what the tool should do instead, and what that looks like on screen. Then I ranked them with Guy and Benoît: 9 high, 9 medium, 2 low.</p>
@@ -795,8 +803,8 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ decision 01 · was 01 -->
-<section class="s" data-sec="Process · Prototype 1">
+<!-- ============================================================ decision 01 — was 01 -->
+<section class="s" data-sec="Process — Prototype 1">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -804,24 +812,24 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>Not an overview of the project. The checks that repeat every revision.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Measures each unit with polylines, floor by floor, and types it into a table. Every revision, again.</q><cite>Benoît · interview, Oct 26</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Measures each unit with polylines, floor by floor, and types it into a table. Every revision, again.</q><cite>Benoît — interview, Oct 26</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Prototype 1 showed two ideas: coordination as its own page (A), or as a layer on each unit (B). Neither started from what the technicians redo.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Drawing the same content three ways, then ten hierarchies of one screen, the strongest version led with the checks that repeat each revision, not with the project.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Option C, « what repeats », became the line every later prototype grew from: wireframe C, then C3, then prototype 3.</dd></div>
       </dl>
     </div>
     <div class="pics">
-      <figure class="pic"><a href="plateforme-b.html" target="_blank" rel="noopener"><img src="assets/frank/x/plateforme-b.jpg" alt="B · coordination is a layer of the unit"></a>
-        <figcaption><a href="plateforme-b.html" target="_blank" rel="noopener">plateforme-b.html</a> · B · coordination is a layer of the unit</figcaption></figure>
-      <figure class="pic"><a href="plateforme-c.html" target="_blank" rel="noopener"><img src="assets/frank/x/plateforme-c.jpg" alt="C · what repeats, kept"></a>
-        <figcaption><a href="plateforme-c.html" target="_blank" rel="noopener">plateforme-c.html</a> · C · what repeats, kept</figcaption></figure>
+      <figure class="pic"><a href="plateforme-b.html" target="_blank" rel="noopener"><img src="assets/frank/x/plateforme-b.jpg" alt="B — coordination is a layer of the unit"></a>
+        <figcaption><a href="plateforme-b.html" target="_blank" rel="noopener">plateforme-b.html</a> — B — coordination is a layer of the unit</figcaption></figure>
+      <figure class="pic"><a href="plateforme-c.html" target="_blank" rel="noopener"><img src="assets/frank/x/plateforme-c.jpg" alt="C — what repeats, kept"></a>
+        <figcaption><a href="plateforme-c.html" target="_blank" rel="noopener">plateforme-c.html</a> — C — what repeats, kept</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
-<!-- ============================================================ decision 02 · was 05 -->
-<section class="s" data-sec="Process · Prototype 1">
+<!-- ============================================================ decision 02 — was 05 -->
+<section class="s" data-sec="Process — Prototype 1">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -829,7 +837,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>Finding the article was easy. Applying it to this project was the work.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Finding the article is easy. Understanding what it means for this project is the slow part.</q><cite>Guy · interview, Oct 26</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Finding the article is easy. Understanding what it means for this project is the slow part.</q><cite>Guy — interview, Oct 26</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Seven rules from three bodies of law sat in one list, split by a grey caps line that was lost on scroll.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Across 48 presentations, the card had to show the measurement against the requirement, and what is missing, before anyone reads the quote. Each source needed its own place.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>One card per article: a small drawing of the rule, the quote, the edition, and « manque pour conclure ». Each body of rules has its own tab; the official text opens at the article.</dd></div>
@@ -837,16 +845,16 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="zonage-visualisations.html" target="_blank" rel="noopener"><img src="assets/frank/x/zonage-visualisations.jpg" alt="Six ways to read the same seven rules"></a>
-        <figcaption><a href="zonage-visualisations.html" target="_blank" rel="noopener">zonage-visualisations.html</a> · Six ways to read the same seven rules</figcaption></figure>
+        <figcaption><a href="zonage-visualisations.html" target="_blank" rel="noopener">zonage-visualisations.html</a> — Six ways to read the same seven rules</figcaption></figure>
       <figure class="pic"><a href="zonage-fiches.html" target="_blank" rel="noopener"><img src="assets/frank/x/zonage-fiches.jpg" alt="Ten anatomies of the article card"></a>
-        <figcaption><a href="zonage-fiches.html" target="_blank" rel="noopener">zonage-fiches.html</a> · Ten anatomies of the article card</figcaption></figure>
+        <figcaption><a href="zonage-fiches.html" target="_blank" rel="noopener">zonage-fiches.html</a> — Ten anatomies of the article card</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
 <!-- ============================================================ divider: prototype 2 -->
-<section class="s div" data-sec="Process · Prototype 2">
+<section class="s div" data-sec="Process — Prototype 2">
 <div class="b">
   <p class="big">06</p>
   <h1>Prototype 2</h1>
@@ -855,7 +863,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ 17 reframe 3 -->
-<section class="s" data-sec="Process · Prototype 2">
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
   <p class="k">Reframe 3</p>
   <h2>I cut the platform down to one story: the drawings disagree, and Frank shows where.</h2>
@@ -873,10 +881,10 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ prototype 2 · live -->
-<section class="s" data-sec="Process · Prototype 2">
+<!-- ============================================================ prototype 2 — live -->
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
-  <p class="k">Prototype 2 · C · October 27</p>
+  <p class="k">Prototype 2 — C — October 27</p>
   <h2>One coordination workspace: units, plan, model and comments on one floor.</h2>
   <div class="rule"></div>
   <div class="chap-o">
@@ -892,9 +900,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ 19 test round 2 -->
-<section class="s" data-sec="Process · Prototype 2">
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
-  <p class="k">Test round · October 28</p>
+  <p class="k">Test round — October 28</p>
   <h2>They did not ask for more. They asked for the same, easier.</h2>
   <div class="rule"></div>
   <div class="cols c5-7" style="margin-top:56px">
@@ -906,7 +914,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ 20 feedback to change -->
-<section class="s" data-sec="Process · Prototype 2">
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
   <p class="k">From feedback to change</p>
   <h2>Every note from the test has a change in prototype 3.</h2>
@@ -924,8 +932,8 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ decision 03 · was 02 -->
-<section class="s" data-sec="Process · Prototype 2">
+<!-- ============================================================ decision 03 — was 02 -->
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -933,7 +941,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>Nobody found the top buttons. The contrast was the problem, not the size.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Closing pop-up bubbles with the × is not obvious. Add hints for new users.</q><cite>Benoît · test of prototype 2, Oct 28</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Closing pop-up bubbles with the × is not obvious. Add hints for new users.</q><cite>Benoît — test of prototype 2, Oct 28</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>In the test, people did not find the buttons at the top of the screen.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Measured on the real screen: 12.5 px light grey on white, 2.8:1 contrast, under the 4.5:1 threshold. The targets were big enough. They did not look like buttons.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Black chrome, a green project strip, and the level being read became the white page's own folder tab.</dd></div>
@@ -941,16 +949,16 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="lisibilite.html" target="_blank" rel="noopener"><img src="assets/frank/x/lisibilite.jpg" alt="Six legibility fixes, contrast measured in the page"></a>
-        <figcaption><a href="lisibilite.html" target="_blank" rel="noopener">lisibilite.html</a> · Six legibility fixes, contrast measured in the page</figcaption></figure>
+        <figcaption><a href="lisibilite.html" target="_blank" rel="noopener">lisibilite.html</a> — Six legibility fixes, contrast measured in the page</figcaption></figure>
       <figure class="pic"><a href="niveaux-onglet-dossier.html" target="_blank" rel="noopener"><img src="assets/frank/x/niveaux-onglet-dossier.jpg" alt="The level as a folder tab of the page, five ways"></a>
-        <figcaption><a href="niveaux-onglet-dossier.html" target="_blank" rel="noopener">niveaux-onglet-dossier.html</a> · The level as a folder tab of the page, five ways</figcaption></figure>
+        <figcaption><a href="niveaux-onglet-dossier.html" target="_blank" rel="noopener">niveaux-onglet-dossier.html</a> — The level as a folder tab of the page, five ways</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
-<!-- ============================================================ decision 04 · was 07 -->
-<section class="s" data-sec="Process · Prototype 2">
+<!-- ============================================================ decision 04 — was 07 -->
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
   <div class="st one">
     <div class="st-t">
@@ -958,7 +966,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>In Québec, a « croisement » is a street corner.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>The term « Distribution » is not intuitive. Avoid file words like « .csv ».</q><cite>Guy · test of prototype 2, Oct 28</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>The term « Distribution » is not intuitive. Avoid file words like « .csv ».</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>The interface called a place where two drawings disagree a « croisement ».</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Read in the office's language, a « croisement » is a street intersection. Words are interface: each candidate had to be read in place, not in a list.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>« Conflit », chosen from six candidates tried in the header badge, the marker card and the page title. One warning triangle and one red, everywhere.</dd></div>
@@ -966,14 +974,14 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="calques-mots.html" target="_blank" rel="noopener"><img src="assets/frank/x/calques-mots.jpg" alt="Six names for what does not agree, in place"></a>
-        <figcaption><a href="calques-mots.html" target="_blank" rel="noopener">calques-mots.html</a> · Six names for what does not agree, in place</figcaption></figure>
+        <figcaption><a href="calques-mots.html" target="_blank" rel="noopener">calques-mots.html</a> — Six names for what does not agree, in place</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
-<!-- ============================================================ decision 05 · was 03 -->
-<section class="s" data-sec="Process · Prototype 2">
+<!-- ============================================================ decision 05 — was 03 -->
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -981,7 +989,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>The drawing being read filled a fifth of the screen.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Allow users to resize the viewing panels. Increase the maximum zoom.</q><cite>Benoît · test of prototype 2, Oct 28</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Allow users to resize the viewing panels. Increase the maximum zoom.</q><cite>Benoît — test of prototype 2, Oct 28</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>A list, two drawings and an inspector shared one white card. The plan being read got about a fifth of it.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Ten live gestures, each with the drawing's share measured in place: more room only helps if the way back stays in sight.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Zoom became a small « − 100 % + » pill in the free corner, the whole sheet sits in a corner map, and any pane folds into a strip that keeps its name.</dd></div>
@@ -989,16 +997,16 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="wireframe-c3-espace.html" target="_blank" rel="noopener"><img src="assets/frank/x/wireframe-c3-espace.jpg" alt="Ten gestures, the drawing's share measured live"></a>
-        <figcaption><a href="wireframe-c3-espace.html" target="_blank" rel="noopener">wireframe-c3-espace.html</a> · Ten gestures, the drawing's share measured live</figcaption></figure>
+        <figcaption><a href="wireframe-c3-espace.html" target="_blank" rel="noopener">wireframe-c3-espace.html</a> — Ten gestures, the drawing's share measured live</figcaption></figure>
       <figure class="pic"><a href="zoom-plat.html" target="_blank" rel="noopener"><img src="assets/frank/x/zoom-plat.jpg" alt="Six flat zoom controls and a corner map"></a>
-        <figcaption><a href="zoom-plat.html" target="_blank" rel="noopener">zoom-plat.html</a> · Six flat zoom controls and a corner map</figcaption></figure>
+        <figcaption><a href="zoom-plat.html" target="_blank" rel="noopener">zoom-plat.html</a> — Six flat zoom controls and a corner map</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
-<!-- ============================================================ decision 06 · was 04 -->
-<section class="s" data-sec="Process · Prototype 2">
+<!-- ============================================================ decision 06 — was 04 -->
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
   <div class="st one">
     <div class="st-t">
@@ -1006,7 +1014,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>At 320 pixels wide, the plan was decoration, not evidence.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>The mouse-wheel direction for zooming into floor plans feels inverted.</q><cite>Benoît · test of prototype 2, Oct 28</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>The mouse-wheel direction for zooming into floor plans feels inverted.</q><cite>Benoît — test of prototype 2, Oct 28</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>A 204-foot floor in a 320 px pane: no dimension, room name or unit number could be read.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Six solutions tried on the real sheet A-209: only the framing and the scale have to change. The drawing itself never needs touching.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Choosing a unit frames it. Sheets render sharp to 1000 %, unit numbers stay crisp, and mouse and trackpad each zoom the way their owner expects.</dd></div>
@@ -1014,14 +1022,14 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="plan-lisibilite.html" target="_blank" rel="noopener"><img src="assets/frank/x/plan-lisibilite.jpg" alt="Six solutions, each shown on the real floor sheet"></a>
-        <figcaption><a href="plan-lisibilite.html" target="_blank" rel="noopener">plan-lisibilite.html</a> · Six solutions, each shown on the real floor sheet</figcaption></figure>
+        <figcaption><a href="plan-lisibilite.html" target="_blank" rel="noopener">plan-lisibilite.html</a> — Six solutions, each shown on the real floor sheet</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
-<!-- ============================================================ decision 07 · was 06 -->
-<section class="s" data-sec="Process · Prototype 2">
+<!-- ============================================================ decision 07 — was 06 -->
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -1029,7 +1037,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>Seven drawings per floor. Most of the time you need one.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Opacity controls are unclear. Start every drawing at 100 %.</q><cite>Guy · test of prototype 2, Oct 28</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Opacity controls are unclear. Start every drawing at 100 %.</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Seven drawings per floor, in a 272 px rail that took almost a full column from the plan.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Several drawings matter together only to see where they contradict, which Benoît did by overlaying them in his head. The rest of the time, you read one.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>A strip of thumbnails beside the plan. A green badge lays a drawing on the sheet, and once two are on, the plan marks their conflicts in red.</dd></div>
@@ -1037,16 +1045,16 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="calques-compact.html" target="_blank" rel="noopener"><img src="assets/frank/x/calques-compact.jpg" alt="Eight ways to keep the layers and give width back"></a>
-        <figcaption><a href="calques-compact.html" target="_blank" rel="noopener">calques-compact.html</a> · Eight ways to keep the layers and give width back</figcaption></figure>
+        <figcaption><a href="calques-compact.html" target="_blank" rel="noopener">calques-compact.html</a> — Eight ways to keep the layers and give width back</figcaption></figure>
       <figure class="pic"><a href="layer-icons-variantes.html" target="_blank" rel="noopener"><img src="assets/frank/x/layer-icons-variantes.jpg" alt="Ten glyph treatments, F kept"></a>
-        <figcaption><a href="layer-icons-variantes.html" target="_blank" rel="noopener">layer-icons-variantes.html</a> · Ten glyph treatments, F kept</figcaption></figure>
+        <figcaption><a href="layer-icons-variantes.html" target="_blank" rel="noopener">layer-icons-variantes.html</a> — Ten glyph treatments, F kept</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
-<!-- ============================================================ decision 08 · was 11 -->
-<section class="s" data-sec="Process · Prototype 2">
+<!-- ============================================================ decision 08 — was 11 -->
+<section class="s" data-sec="Process — Prototype 2">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -1054,24 +1062,24 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>Labels on a turning building jumped by up to 577 pixels.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Let the client turn the building. Useful in meetings, not during production.</q><cite>Guy · interview, Oct 26</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Let the client turn the building. Useful in meetings, not during production.</q><cite>Guy — interview, Oct 26</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Level labels on the 3D model jumped while it orbited: up to 577 px in a slow scripted orbit.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Six placements, then six treatments of the active level alone, all on one shared camera: the level tabs already name the floor. The model's job is to select and to show façades, not to label.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Labels removed. Hover lights the unit a click will select. A 3D · Nord · Est · Sud · Ouest switch shows each façade square-on.</dd></div>
+        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Labels removed. Hover lights the unit a click will select. A 3D — Nord — Est — Sud — Ouest switch shows each façade square-on.</dd></div>
       </dl>
     </div>
     <div class="pics">
       <figure class="pic"><a href="niveaux-3d-variantes.html" target="_blank" rel="noopener"><img src="assets/frank/x/niveaux-3d-variantes.jpg" alt="Six label placements on one shared camera"></a>
-        <figcaption><a href="niveaux-3d-variantes.html" target="_blank" rel="noopener">niveaux-3d-variantes.html</a> · Six label placements on one shared camera</figcaption></figure>
+        <figcaption><a href="niveaux-3d-variantes.html" target="_blank" rel="noopener">niveaux-3d-variantes.html</a> — Six label placements on one shared camera</figcaption></figure>
       <figure class="pic"><a href="maquette-elevations.html" target="_blank" rel="noopener"><img src="assets/frank/x/maquette-elevations.jpg" alt="The four elevations, A kept"></a>
-        <figcaption><a href="maquette-elevations.html" target="_blank" rel="noopener">maquette-elevations.html</a> · The four elevations, A kept</figcaption></figure>
+        <figcaption><a href="maquette-elevations.html" target="_blank" rel="noopener">maquette-elevations.html</a> — The four elevations, A kept</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
 <!-- ============================================================ divider: prototype 3 -->
-<section class="s div" data-sec="Process · Prototype 3">
+<section class="s div" data-sec="Process — Prototype 3">
 <div class="b">
   <p class="big">07</p>
   <h1>Prototype 3</h1>
@@ -1079,10 +1087,10 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ prototype 3 · frank -->
-<section class="s" data-sec="Process · Prototype 3">
+<!-- ============================================================ prototype 3 — frank -->
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b">
-  <p class="k">Prototype 3 · Frank · October 29</p>
+  <p class="k">Prototype 3 — Frank — October 29</p>
   <h2>Frank: every note from the second test, answered on the same screen.</h2>
   <div class="rule"></div>
   <div class="chap-o">
@@ -1097,10 +1105,10 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ p3 · projects -->
-<section class="s" data-sec="Process · Prototype 3">
+<!-- ============================================================ p3 — projects -->
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b" style="padding-top:72px">
-  <p class="k">Prototype 3 · Projects</p>
+  <p class="k">Prototype 3 — Projects</p>
   <h2 style="font-size:44px">A project starts from the drawings the office already has.</h2>
   <div class="shot full"><img src="assets/frank/p3-projets.jpg" alt="Prototype 3 project list: Le Baldwin III and a new-project card">
     <span class="mk" style="--x:17%;--y:31%">1</span>
@@ -1116,9 +1124,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ 30 the floor -->
-<section class="s" data-sec="Process · Prototype 3">
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b" style="padding-top:72px">
-  <p class="k">Prototype 3 · The floor</p>
+  <p class="k">Prototype 3 — The floor</p>
   <h2 style="font-size:44px">The area table, the plan, the model and the comments, all on one unit.</h2>
   <div class="shot full"><img src="assets/frank/p3-niveau.jpg" alt="Prototype 3 floor screen">
     <span class="mk" style="--x:17.5%;--y:44%">1</span>
@@ -1133,10 +1141,10 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ p3 · whole building -->
-<section class="s" data-sec="Process · Prototype 3">
+<!-- ============================================================ p3 — whole building -->
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b" style="padding-top:72px">
-  <p class="k">Prototype 3 · The whole building</p>
+  <p class="k">Prototype 3 — The whole building</p>
   <h2 style="font-size:44px">Every floor at once: the unit mix the developer prices from.</h2>
   <div class="shot full"><img src="assets/frank/p3-batiment.jpg" alt="Prototype 3 whole-building view: unit types per floor beside the full building model">
     <span class="mk" style="--x:24%;--y:45%">1</span>
@@ -1151,10 +1159,10 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ p3 · elevations -->
-<section class="s" data-sec="Process · Prototype 3">
+<!-- ============================================================ p3 — elevations -->
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b" style="padding-top:72px">
-  <p class="k">Prototype 3 · Elevations</p>
+  <p class="k">Prototype 3 — Elevations</p>
   <h2 style="font-size:44px">The model turns to the façade being checked.</h2>
   <div class="shot full"><img src="assets/frank/p3-elevation.jpg" alt="Prototype 3 floor screen with the model turned to the east elevation">
     <span class="mk" style="--x:61%;--y:19%">1</span>
@@ -1170,9 +1178,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ 31 conflicts -->
-<section class="s" data-sec="Process · Prototype 3">
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b" style="padding-top:72px">
-  <p class="k">Prototype 3 · Conflicts</p>
+  <p class="k">Prototype 3 — Conflicts</p>
   <h2 style="font-size:44px">One click from a conflict to the two drawings that cause it.</h2>
   <div class="shot full"><img src="assets/frank/p3-conflits.jpg" alt="Prototype 3 conflicts">
     <span class="mk" style="--x:90%;--y:40%">1</span>
@@ -1188,9 +1196,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ 32 codes -->
-<section class="s" data-sec="Process · Prototype 3">
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b" style="padding-top:72px">
-  <p class="k">Prototype 3 · Codes</p>
+  <p class="k">Prototype 3 — Codes</p>
   <h2 style="font-size:44px">The code study as a living list, read in the office's words.</h2>
   <div class="shot full"><img src="assets/frank/p3-codes.jpg" alt="Prototype 3 codes">
     <span class="mk" style="--x:50%;--y:22%">1</span>
@@ -1206,9 +1214,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </section>
 
 <!-- ============================================================ 33 échéancier -->
-<section class="s" data-sec="Process · Prototype 3">
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b" style="padding-top:72px">
-  <p class="k">Prototype 3 · Échéancier</p>
+  <p class="k">Prototype 3 — Échéancier</p>
   <h2 style="font-size:44px">Deadlines that lead back to the project.</h2>
   <div class="shot full"><img src="assets/frank/p3-echeancier.jpg" alt="Prototype 3 schedule">
     <span class="mk" style="--x:95.8%;--y:23.4%">1</span>
@@ -1223,8 +1231,8 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ decision 09 · was 08 -->
-<section class="s" data-sec="Process · Prototype 3">
+<!-- ============================================================ decision 09 — was 08 -->
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -1232,7 +1240,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>Quantities lived on another screen, and every unit was listed twice.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Show the 3½ / 4½ / 5½ mix and the total net area. Quantities per façade beat totals.</q><cite>Benoît · test of prototype 2, Oct 28</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Show the 3½ / 4½ / 5½ mix and the total net area. Quantities per façade beat totals.</q><cite>Benoît — test of prototype 2, Oct 28</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Quantities sat on a separate overview screen. On a floor, the pane listed the fifteen units twice: once for areas, once for openings.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>The list of units already is the table of quantities. Six ways to write each unit once showed a switch was enough.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>The unit list is the area table: net ft², m², share, then net, circulation and gross, with the mix bar above and a Superficies / Ouvertures switch. Materials get a table per façade.</dd></div>
@@ -1240,16 +1248,16 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="quantites.html" target="_blank" rel="noopener"><img src="assets/frank/x/quantites.jpg" alt="Six places for quantities inside the Units screen"></a>
-        <figcaption><a href="quantites.html" target="_blank" rel="noopener">quantites.html</a> · Six places for quantities inside the Units screen</figcaption></figure>
+        <figcaption><a href="quantites.html" target="_blank" rel="noopener">quantites.html</a> — Six places for quantities inside the Units screen</figcaption></figure>
       <figure class="pic"><a href="unites-ouvertures-niveau.html" target="_blank" rel="noopener"><img src="assets/frank/x/unites-ouvertures-niveau.jpg" alt="Six ways to write each unit once"></a>
-        <figcaption><a href="unites-ouvertures-niveau.html" target="_blank" rel="noopener">unites-ouvertures-niveau.html</a> · Six ways to write each unit once</figcaption></figure>
+        <figcaption><a href="unites-ouvertures-niveau.html" target="_blank" rel="noopener">unites-ouvertures-niveau.html</a> — Six ways to write each unit once</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
-<!-- ============================================================ decision 10 · was 10 -->
-<section class="s" data-sec="Process · Prototype 3">
+<!-- ============================================================ decision 10 — was 10 -->
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -1257,7 +1265,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>A week of work crosses four projects. The schedule cannot live inside one.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Clicking a calendar date should show the project information. Use red and orange for priority, not green.</q><cite>Guy · test of prototype 2, Oct 28</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Clicking a calendar date should show the project information. Use red and orange for priority, not green.</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Échéancier sat among one project's tabs, and its month grid only answered « when is it due ».</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Six calendars judged on four questions: what is due, what is late, what is mine, how long until filing. And a week of work crosses four projects, so the schedule cannot live inside one.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Échéancier sits top right on every screen: a calendar and one to-do list grouped by day. Each task belongs to one of four people and points at its article. Red only for what is late.</dd></div>
@@ -1265,16 +1273,16 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="calendrier.html" target="_blank" rel="noopener"><img src="assets/frank/x/calendrier.jpg" alt="Six calendars, judged on four questions"></a>
-        <figcaption><a href="calendrier.html" target="_blank" rel="noopener">calendrier.html</a> · Six calendars, judged on four questions</figcaption></figure>
+        <figcaption><a href="calendrier.html" target="_blank" rel="noopener">calendrier.html</a> — Six calendars, judged on four questions</figcaption></figure>
       <figure class="pic"><a href="navigation-carnet.html" target="_blank" rel="noopener"><img src="assets/frank/x/navigation-carnet.jpg" alt="Where the schedule and the history live"></a>
-        <figcaption><a href="navigation-carnet.html" target="_blank" rel="noopener">navigation-carnet.html</a> · Where the schedule and the history live</figcaption></figure>
+        <figcaption><a href="navigation-carnet.html" target="_blank" rel="noopener">navigation-carnet.html</a> — Where the schedule and the history live</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
-<!-- ============================================================ decision 11 · was 09 -->
-<section class="s" data-sec="Process · Prototype 3">
+<!-- ============================================================ decision 11 — was 09 -->
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -1282,7 +1290,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>What a comment is attached to decides whether it is still true tomorrow.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>The commenting system is unclear.</q><cite>Guy · test of prototype 2, Oct 28</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>The commenting system is unclear.</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>A shared link lets guests comment: contractor, surveyor, borough. The studio also writes notes to itself. The two must never mix.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>What a comment hangs on decides whether it is still true after the next revision. And an internal note must not be greyed in the shared link; it must not be there at all.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Comments pin to the drawing and carry their unit and sheet. « À l'interne » or « Partagée » is chosen while writing; internal notes are not rendered in the shared link.</dd></div>
@@ -1290,16 +1298,16 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="commentaires.html" target="_blank" rel="noopener"><img src="assets/frank/x/commentaires.jpg" alt="Six things a guest comment can hang on"></a>
-        <figcaption><a href="commentaires.html" target="_blank" rel="noopener">commentaires.html</a> · Six things a guest comment can hang on</figcaption></figure>
+        <figcaption><a href="commentaires.html" target="_blank" rel="noopener">commentaires.html</a> — Six things a guest comment can hang on</figcaption></figure>
       <figure class="pic"><a href="epingles.html" target="_blank" rel="noopener"><img src="assets/frank/x/epingles.jpg" alt="Internal and shared notes on the same drawing"></a>
-        <figcaption><a href="epingles.html" target="_blank" rel="noopener">epingles.html</a> · Internal and shared notes on the same drawing</figcaption></figure>
+        <figcaption><a href="epingles.html" target="_blank" rel="noopener">epingles.html</a> — Internal and shared notes on the same drawing</figcaption></figure>
     </div>
   </div>
 </div>
 </section>
 
-<!-- ============================================================ decision 12 · was 12 -->
-<section class="s" data-sec="Process · Prototype 3">
+<!-- ============================================================ decision 12 — was 12 -->
+<section class="s" data-sec="Process — Prototype 3">
 <div class="b">
   <div class="st">
     <div class="st-t">
@@ -1307,7 +1315,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <h2>Make a pane narrow, and its table was cut at the edge.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Allow users to resize the viewing panels.</q><cite>Benoît · test of prototype 2, Oct 28</cite></dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Allow users to resize the viewing panels.</q><cite>Benoît — test of prototype 2, Oct 28</cite></dd></div>
         <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Once panes resized, dragging the units pane narrower cropped the share column, then half of m², then the figures.</dd></div>
         <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Resizing must never crop a number. And once a pane was folded, nothing said it could be reopened.</dd></div>
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>A pane stops at the width its table needs, with a « butée » tag. Narrower, it folds into a strip that keeps its icon, its title and the button that reopens it.</dd></div>
@@ -1315,9 +1323,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     </div>
     <div class="pics">
       <figure class="pic"><a href="volet-unites-redimension.html" target="_blank" rel="noopener"><img src="assets/frank/x/volet-unites-redimension.jpg" alt="Five ways to resize without cropping, A kept"></a>
-        <figcaption><a href="volet-unites-redimension.html" target="_blank" rel="noopener">volet-unites-redimension.html</a> · Five ways to resize without cropping, A kept</figcaption></figure>
+        <figcaption><a href="volet-unites-redimension.html" target="_blank" rel="noopener">volet-unites-redimension.html</a> — Five ways to resize without cropping, A kept</figcaption></figure>
       <figure class="pic"><a href="bord-replier-entete.html" target="_blank" rel="noopener"><img src="assets/frank/x/bord-replier-entete.jpg" alt="Folding from the header, and the way back"></a>
-        <figcaption><a href="bord-replier-entete.html" target="_blank" rel="noopener">bord-replier-entete.html</a> · Folding from the header, and the way back</figcaption></figure>
+        <figcaption><a href="bord-replier-entete.html" target="_blank" rel="noopener">bord-replier-entete.html</a> — Folding from the header, and the way back</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1335,84 +1343,112 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ 23 simulate -->
 <section class="s" data-sec="Trade-offs">
 <div class="b">
-  <p class="k">Trade-off 1 · Integration</p>
+  <p class="k">Trade-off 1 — Integration</p>
   <h2>Simulate AutoCAD and SketchUp. Make every handoff real.</h2>
   <div class="rule"></div>
-  <div class="dec">
-    <div><span class="k">Instead of</span><p>Building native plug-ins for AutoCAD LT and SketchUp 2015, on Windows, in one week.</p></div>
-    <div class="won"><span class="k">I chose</span><p>A web app on the real drawings, with high-fidelity host screens whose buttons open the real web page for the same unit.</p></div>
+  <div class="tx">
+    <figure>
+      <div class="zm"><span class="src">Prototype 1 — Oct 25</span><img src="assets/frank/to/t1-p1-sync.jpg" alt="Prototype 1: a sync status card, three AutoCAD plans and one SketchUp model shown as connected"></div>
+      <figcaption><span class="k">Instead of</span><p>A live link to the files. Making it real means native plug-ins, in one week.</p></figcaption>
+    </figure>
+    <figure class="won">
+      <div class="zm"><span class="src">Prototype 3 — Oct 29</span><img style="width:100%" src="assets/frank/to/t1-p3-header.jpg" alt="Prototype 3: the Plan 2D pane header with its Ouvrir dans AutoCAD button"><span class="to">↓ click</span><img style="width:100%" src="assets/frank/to/t1-p3-toast.jpg" alt="The message after the click: the sheet opens in AutoCAD on the same unit"></div>
+      <figcaption><span class="k">I chose</span><p>A web app on the real drawings. One button hands the same unit back to AutoCAD.</p></figcaption>
+    </figure>
   </div>
-  <div class="why">
-    <p><b>Why.</b> The question was whether the flow helps, not whether a plug-in can be written. A week of plug-in work would have left nothing to test.</p>
-    <p><b>Cost.</b> No live connection to the drawings. Each simulated screen says so on screen. Native plug-ins are the next engineering task.</p>
-  </div>
+  <p class="cost"><b>Cost.</b> No live connection yet, and every simulated screen says so. Plug-ins are the next engineering task.</p>
 </div>
 </section>
 
 <!-- ============================================================ 24 propose, never sync -->
 <section class="s" data-sec="Trade-offs">
 <div class="b">
-  <p class="k">Trade-off 2 · Trust</p>
+  <p class="k">Trade-off 2 — Trust</p>
   <h2>Frank proposes changes. A person applies them in the drawing.</h2>
   <div class="rule"></div>
-  <div class="dec">
-    <div><span class="k">Instead of</span><p>Two-way sync between the database and the drawings, so a number fixed in Frank updates the DWG.</p></div>
-    <div class="won"><span class="k">I chose</span><p>Frank never writes to a drawing. A change becomes a proposed update, applied by a technician inside AutoCAD.</p></div>
+  <div class="tx">
+    <figure>
+      <div class="zm"><span class="src">Prototype 1 — Oct 25</span><img src="assets/frank/to/t2-p1-fix.jpg" alt="Prototype 1: buttons to correct the 2D plan or the 3D model in one click"></div>
+      <figcaption><span class="k">Instead of</span><p>One click that rewrites the plan or the model.</p></figcaption>
+    </figure>
+    <figure class="won">
+      <div class="zm"><span class="src">Prototype 3 — Oct 29</span><img src="assets/frank/to/t2-p3-note.jpg" alt="Prototype 3: a note pinned to the plan, the change to make before R05, with its source"></div>
+      <figcaption><span class="k">I chose</span><p>Frank keeps the note and its source. A technician makes the change in AutoCAD.</p></figcaption>
+    </figure>
   </div>
-  <div class="why">
-    <p><b>Why.</b> Loose 2D linework is not a database. Invisible sync is a promise the product cannot keep, and one broken plan would end the office's trust.</p>
-    <p><b>Cost.</b> One extra step for every change. Each value shows its source file and date, so the step is quick to check.</p>
-  </div>
+  <p class="cost"><b>Cost.</b> One extra step per change. One broken plan would have cost the office's trust.</p>
 </div>
 </section>
 
 <!-- ============================================================ 25 no verdict -->
 <section class="s" data-sec="Trade-offs">
 <div class="b">
-  <p class="k">Trade-off 3 · Codes</p>
+  <p class="k">Trade-off 3 — Codes</p>
   <h2>An early warning, never a verdict.</h2>
   <div class="rule"></div>
-  <div class="dec">
-    <div><span class="k">Instead of</span><p>A code checker that says pass or fail, the feature that demos best.</p></div>
-    <div class="won"><span class="k">I chose</span><p>Each article shows the quote, the measured value, what is required, and what is missing to conclude. The words are “to check” and “missing input”, never “compliant”.</p></div>
+  <div class="tx" style="grid-template-columns:5fr 7fr">
+    <figure>
+      <div class="zm"><span class="src">Prototype 3 — Article 3.2.3.1</span><img src="assets/frank/to/t3-p3-measure.jpg" alt="Prototype 3: a schematic of the façade, 74,2 m² of openings drawn against 68,5 m² allowed"></div>
+      <figcaption><span class="k">Frank measures</span><p>The openings drawn against the openings allowed.</p></figcaption>
+    </figure>
+    <figure class="won">
+      <div class="zm"><span class="src">Prototype 3 — Article 3.2.3.1</span><img src="assets/frank/to/t3-p3-missing.jpg" alt="Prototype 3: the article quote, its code edition, and the line « manque pour conclure »"></div>
+      <figcaption><span class="k">And names what is missing</span><p>Limiting distance and façade area. Only the architect can conclude.</p></figcaption>
+    </figure>
   </div>
-  <div class="why">
-    <p><b>Why.</b> The answer depends on facts drawings do not hold: limiting distance, code edition, sprinklers. Only the architect or the city can conclude.</p>
-    <p><b>Cost.</b> Less impressive in a demo. In return, it is something an architect can put their name next to.</p>
-  </div>
+  <p class="cost"><b>Instead of</b> pass or fail, the feature that demos best. <b>Cost.</b> A weaker demo, but an answer an architect can sign.</p>
 </div>
 </section>
 
 <!-- ============================================================ 26 plans as drawn -->
 <section class="s" data-sec="Trade-offs">
 <div class="b">
-  <p class="k">Trade-off 4 · The drawing comes first</p>
+  <p class="k">Trade-off 4 — The drawing comes first</p>
   <h2>The plan is shown as drawn. Frank only adds a layer on top.</h2>
   <div class="rule"></div>
-  <div class="cols c2" style="margin-top:56px;gap:80px">
-    <div class="item bar-top"><span class="n">PLANS</span><h3>Never tinted, filtered or redrawn</h3>
-      <p>Selections, unit types and conflicts are overlays. The engineers' PDFs keep their own fonts and line styles and stay sharp at 1000 %. A technician must be able to trust that what is on screen is the sheet.</p></div>
-    <div class="item bar-top"><span class="n">MODEL</span><h3>Massing only, no invented interiors</h3>
-      <p>The office has no interior model. Clicking the building selects the unit whose plan outline is nearest, and the 3D view never pretends to know a unit's rooms.</p></div>
+  <div class="tx">
+    <figure>
+      <div class="zm full"><span class="src">Prototype 1 — Oct 25</span><img src="assets/frank/to/t4-p1-plan.jpg" alt="Prototype 1: the floor plan filled in pink, blue and green by unit type"></div>
+      <figcaption><span class="k">Instead of</span><p>A plan painted over by unit type.</p></figcaption>
+    </figure>
+    <figure class="won">
+      <div class="zm full"><span class="src">Prototype 3 — Oct 29</span><img src="assets/frank/to/t4-p3-plan.jpg" alt="Prototype 3: the sheet as drawn, with only unit 501 outlined and three comment pins"></div>
+      <figcaption><span class="k">I chose</span><p>The sheet as drawn, sharp at any zoom. Frank adds an outline and pins.</p></figcaption>
+    </figure>
   </div>
-  <p class="lede mt" style="font-size:21px">Cost: no attractive AI-generated views. Gain: nothing on screen the office would have to un-believe.</p>
+  <p class="cost"><b>Cost.</b> No attractive AI-generated views. Nothing on screen the office would have to un-believe.</p>
 </div>
 </section>
 
 <!-- ============================================================ 27 subtraction -->
 <section class="s" data-sec="Trade-offs">
 <div class="b">
-  <p class="k">Trade-off 5 · Subtraction</p>
+  <p class="k">Trade-off 5 — Subtraction</p>
   <h2>Much of prototype 3 is what I took out.</h2>
   <div class="rule"></div>
-  <table>
-    <tr><th>Removed</th><th>Why</th></tr>
-    <tr><td>The right icon rail with four inspector tabs</td><td>Too small to hit and rarely used. The margin became a full column.</td></tr>
-    <tr><td>Level labels floating on the 3D model</td><td>They jumped up to 577 px while orbiting. The level tabs already name the floor.</td></tr>
-    <tr><td>Four grey footnotes under the tables</td><td>They explained how each number was made. That belongs in the export, not on the working screen.</td></tr>
-    <tr><td>A siren icon, a triangle and a red bar for problems</td><td>One warning triangle, one red, everywhere.</td></tr>
-    <tr><td>A fourth pane for quantities</td><td>The unit list became the area table. One less place to look.</td></tr>
-  </table>
+  <div class="tx c3">
+    <figure>
+      <div class="stack">
+        <div class="zm full"><span class="src">Prototype 2 — Oct 27</span><img src="assets/frank/to/t5-p2-model.jpg" alt="Prototype 2: a unit label floating on the 3D model"></div>
+        <div class="zm full"><span class="src">Prototype 3 — Oct 29</span><img src="assets/frank/to/t5-p3-model.jpg" alt="Prototype 3: the same model, no floating label"></div>
+      </div>
+      <figcaption><span class="k">Labels on the model</span><p>They jumped while orbiting. The tabs already name the floor.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="stack">
+        <div class="zm"><span class="src">Prototype 2</span><img src="assets/frank/to/t5-p2-table.jpg" alt="Prototype 2: the area table totals with a grey footnote under them"></div>
+        <div class="zm"><span class="src">Prototype 3</span><img src="assets/frank/to/t5-p3-table.jpg" alt="Prototype 3: the same totals, no footnote"></div>
+      </div>
+      <figcaption><span class="k">Footnotes under tables</span><p>How a number is made belongs in the export.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="stack">
+        <div class="zm"><span class="src">Prototype 2</span><img src="assets/frank/to/t5-p2-qty.jpg" alt="Prototype 2: a separate pane listing the windows of unit 501"></div>
+        <div class="zm"><span class="src">Prototype 3</span><img src="assets/frank/to/t5-p3-tabs.jpg" alt="Prototype 3: the unit table with Superficies and Ouvertures tabs"></div>
+      </div>
+      <figcaption><span class="k">A pane for quantities</span><p>It became a tab of the unit table. One less place to look.</p></figcaption>
+    </figure>
+  </div>
 </div>
 </section>
 
@@ -1422,10 +1458,19 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <p class="k">Scope</p>
   <h2>What I chose not to build this week.</h2>
   <div class="rule"></div>
-  <div class="cols c3" style="margin-top:60px">
-    <div class="item bar-top"><span class="n">CUT TO A MOCKUP</span><h3>Revision impact</h3><p>It needs two clean revisions and a reliable extractor first. Showing it working would have been a fake.</p></div>
-    <div class="item bar-top"><span class="n">DEMOTED</span><h3>Office DNA</h3><p>Searching past layouts was built and works. It is a second product. It does not explain the first.</p></div>
-    <div class="item bar-top"><span class="n">LEFT OUT</span><h3>Accounts, mobile, editing</h3><p>Two testers on one office's desktops. Anything else would have been built for nobody.</p></div>
+  <div class="tx c3">
+    <figure>
+      <div class="zm"><span class="src">Prototype 1 — Oct 25</span><img src="assets/frank/to/t6-p1-impact.jpg" alt="Prototype 1: south façade openings, 68,5 m² in R03 and 74,2 m² in R04, and the four inputs still missing"></div>
+      <figcaption><span class="k">Cut to a mockup — Revision impact</span><p>It needs two clean revisions first. Working, it would have been a fake.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="zm full"><span class="src">Office DNA</span><img src="assets/frank/to/t6-dna.jpg" alt="Office DNA: a past unit 508 found as a close match, its plan and area" style="object-position:50% 30%"></div>
+      <figcaption><span class="k">Demoted — Office DNA</span><p>Built and working. A second product; it does not explain the first.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="zm"><span class="src">Prototype 3 — Oct 29</span><img style="max-width:62%" src="assets/frank/to/t6-p3-user.jpg" alt="Prototype 3: one fixed user, Guy Roberge, in the header"></div>
+      <figcaption><span class="k">Left out — Accounts, mobile, editing</span><p>Two testers on one office's desktops.</p></figcaption>
+    </figure>
   </div>
 </div>
 </section>
@@ -1462,7 +1507,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ the archive: every page, day by day -->
 <section class="s" data-sec="Outcome">
 <div class="b">
-  <p class="k">The archive · 114 pages, 5 days</p>
+  <p class="k">The archive — 114 pages, 5 days</p>
   <h2>Every decision has a record I can go back to.</h2>
   <div class="rule"></div>
   <p class="lede" style="font-size:21px;max-width:1040px">Each page I built is kept in the order I made it: the options I compared, each component in its different states, and the one I chose. The project now has a history of every decision and of what drove it.</p>
@@ -1509,6 +1554,25 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
+<!-- ============================================================ 02 before Frank -->
+<section class="s" data-sec="Background">
+<div class="b">
+  <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
+    <div>
+      <p class="k">Before Frank</p>
+      <h2>Trained in architecture first.</h2>
+      <div class="rule"></div>
+      <p class="lede" style="font-size:22px">My MIT SA+P application portfolio, M.Arch / M.CP, 2024. The drawings Frank reads are the drawings I was trained to make.</p>
+      <div class="links">
+        <a href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener">Harvard / MIT portfolio <span class="mono">davidlafond.xyz/work/harvard-mit</span>
+          <svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+      </div>
+    </div>
+    <a class="book" href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener" aria-label="Open the Harvard / MIT portfolio">
+      <img src="assets/frank/mit-portfolio-book.png" alt="Book cover: David Khanh Lafond, MIT SA+P application, M.Arch / M.CP 2024"></a>
+  </div>
+</div>
+</section>
 <!-- ============================================================ 37 end -->
 <section class="s title end" data-sec="">
 <div class="b">
@@ -1517,14 +1581,15 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <p class="byline">David Lafond</p>
   <div class="rule"></div>
   <div class="links" style="align-items:center;margin-top:56px">
-    <a href="https://cafitte-prototype1.vercel.app/prototypes/index.html" target="_blank" rel="noopener">Prototype 1 <span class="mono">cafitte-prototype1.vercel.app</span></a>
-    <a href="https://cafitte-prototype2.vercel.app/prototypes/index.html" target="_blank" rel="noopener">Prototype 2 <span class="mono">cafitte-prototype2.vercel.app</span></a>
-    <a href="prototype%203.html" target="_blank" rel="noopener">Prototype 3 <span class="mono">/prototypes/prototype 3.html</span></a>
-    <a href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener">Harvard / MIT portfolio <span class="mono">davidlafond.xyz</span></a>
+    <a href="https://cafitte-prototype1.vercel.app/prototypes/index.html" target="_blank" rel="noopener">Frank Prototype 1 <span class="mono">cafitte-prototype1.vercel.app</span></a>
+    <a href="https://cafitte-prototype2.vercel.app/prototypes/index.html" target="_blank" rel="noopener">Frank Prototype 2 <span class="mono">cafitte-prototype2.vercel.app</span></a>
+    <a href="prototype%203.html" target="_blank" rel="noopener">Frank Prototype 3 <span class="mono">/prototypes/prototype 3.html</span></a>
+    <a href="https://davidlafond.xyz/work/harvard-mit" target="_blank" rel="noopener">Harvard / MIT Architecture portfolio <span class="mono">davidlafond.xyz</span></a>
   </div>
   <div class="sign"><img src="assets/lafond.png" alt="Lafond Architecte"></div>
 </div>
 </section>
+
 
 </div>
 </main>
@@ -1589,15 +1654,15 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   const pad = (n) => String(n).padStart(2, "0");
 
   const SECTIONS = ["Background", "Overview", "User Problem", "Process", "Trade-offs", "Outcome"];
-  const secOf = (s) => (s.dataset.sec || "").split(" · ")[0];
-  /* The line of sections. A section whose slides carry a sub-label (« Process ·
+  const secOf = (s) => (s.dataset.sec || "").split(" — ")[0];
+  /* The line of sections. A section whose slides carry a sub-label (« Process —
      Prototype 1 ») is split into one group per sub-label; a slide without one
      (the divider, an intro) joins the group after it. A section emptied in the
      grid view drops out. */
   const groups = SECTIONS.flatMap((n) => {
     const idx = slides.flatMap((s, j) => (secOf(s) === n ? [j] : []));
     if (!idx.length) return [];
-    const sub = (j) => (slides[j].dataset.sec || "").split(" · ")[1] || "";
+    const sub = (j) => (slides[j].dataset.sec || "").split(" — ")[1] || "";
     if (!idx.some(sub)) return [{ name: n, idx }];
     const out = [];
     let wait = [];
@@ -2008,6 +2073,22 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   /* subscribed last: the first call is immediate, and the grid needs everything above */
   dial.subscribe((v) => { setEditing(!!v.editText); document.body.dataset.lh = v.linkHover; setGrid(!!v.gridView); document.body.style.setProperty("--book-s", v.bookScale); document.body.dataset.dt = v.dividerTitle; });
 })();
+</script>
+<script>
+/* Section titles: the first letter's side bearing grows with the 240px type, so
+   the glyph sat right of the logo. Pull each title left by its own first
+   letter's bearing, in em, so it holds at every DialKit title size. */
+document.fonts.ready.then(() => {
+  const ctx = document.createElement("canvas").getContext("2d");
+  document.querySelectorAll(".div h1").forEach((h) => {
+    const c = h.textContent.trim()[0];
+    if (!c) return;
+    const cs = getComputedStyle(h);
+    ctx.font = `${cs.fontWeight} 1000px ${cs.fontFamily}`;
+    const lsb = -ctx.measureText(c).actualBoundingBoxLeft / 1000;
+    h.style.marginLeft = `${-lsb}em`;
+  });
+});
 </script>
 <script>
 /* Download as PDF: load every frame first, name the file, then print to PDF */

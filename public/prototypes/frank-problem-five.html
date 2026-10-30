@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Problem section · five pages, four ways</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"Geist Pixel Square";src:url("assets/GeistPixel-Square.woff2") format("woff2");font-display:swap}
+:root{--ink:#111;--ink-2:#555;--ink-3:#8f8f8f;--line:#e4e4e0;--vert:#c3e05a;--vert-dark:#2f3a05;--bg:#f7f7f5;
+  --sans:"Geist",system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,monospace;--pixel:"Geist Pixel Square",var(--mono)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;padding:56px 48px 120px}
+.k{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+header{max-width:1100px}
+h1{font-size:40px;font-weight:600;letter-spacing:-.03em;line-height:1.1;margin-top:10px}
+.rule{width:64px;height:5px;background:var(--vert);margin-top:18px}
+header p{font-size:16px;line-height:1.55;color:var(--ink-2);margin-top:18px;max-width:860px}
+.dir{margin-top:56px;padding-top:24px;border-top:1px solid var(--ink)}
+.dir.today{border-top-color:var(--line)}
+.dh{display:grid;grid-template-columns:320px 1fr;gap:32px;align-items:start}
+.dh h2{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-top:8px}
+.dh .rec{display:inline-block;margin-left:10px;vertical-align:4px;font-family:var(--pixel);font-size:11px;letter-spacing:.09em;text-transform:uppercase;background:var(--vert);color:var(--vert-dark);padding:3px 7px;border-radius:3px}
+.dh .idea{font-size:16px;line-height:1.55;color:var(--ink-2);margin-top:10px}
+.moves{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;font-size:14px;line-height:1.5;color:var(--ink-2)}
+.moves b{display:block;font-family:var(--pixel);font-weight:400;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.moves li{list-style:none;padding-left:14px;position:relative}
+.moves li::before{content:"";position:absolute;left:0;top:.62em;width:6px;height:1px;background:var(--ink-3)}
+.row{display:flex;flex-wrap:wrap;gap:16px;margin-top:24px}
+.th{position:relative;width:240px;height:150px;border:0;padding:0;font:inherit;border-radius:4px;overflow:hidden;box-shadow:0 0 0 1px var(--line);background:#fff;cursor:zoom-in;flex:none}
+.th:hover{box-shadow:0 0 0 2px var(--ink)}
+.th.title{width:120px;opacity:.55}
+.th iframe{width:1600px;height:1000px;border:0;transform:scale(.15);transform-origin:0 0;pointer-events:none}
+.th .n{position:absolute;left:6px;bottom:6px;font-family:var(--pixel);font-size:11px;letter-spacing:.06em;background:#fff;padding:2px 5px;border-radius:3px;box-shadow:0 0 0 1px var(--line)}
+.th .tag{position:absolute;right:6px;bottom:6px;font-family:var(--pixel);font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:#fff;padding:2px 5px;border-radius:3px}
+.th .tag.merged{background:var(--vert);color:var(--vert-dark)}
+.th .tag.new{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+#lb{position:fixed;inset:0;background:rgba(17,17,17,.86);display:none;place-items:center;z-index:10}
+#lb.on{display:grid}
+#lb .fr{position:relative;overflow:hidden;border-radius:6px;background:#fff}
+#lb iframe{width:1600px;height:1000px;border:0;transform-origin:0 0;display:block}
+#lb .bar{position:fixed;left:0;right:0;bottom:22px;text-align:center;color:#ddd;font-size:14px}
+#lb .bar span{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;margin:0 12px;color:#aaa}
+</style>
+</head>
+<body>
+<header>
+  <p class="k">Case study · User Problem</p>
+  <h1>Eleven pages down to five: four ways</h1>
+  <div class="rule"></div>
+  <p>Each direction is the section divider plus five pages. Every page is drawn with the deck's own stylesheet, read live from <code>frank-case-study.html</code>. Two cuts are common to all four: the twenty-asks table (the « Feedback 1 » page after prototype&nbsp;1 already tells it) and the two rules as their own page (trade-offs 3 and 4 already act on them). The empty office image slot goes too. Click a page to see it large; ← and → step through the row, Esc closes.</p>
+</header>
+
+<section class="dir today" id="today">
+  <div class="dh">
+    <div><p class="k">Today</p><h2>Eleven pages, in your order</h2></div>
+    <p class="idea">The section as it stands in this browser, with your saved order and text edits applied.</p>
+  </div>
+  <div class="row"></div>
+</section>
+
+<section class="dir" id="A">
+  <div class="dh">
+    <div><p class="k">Direction A</p><h2>The reframe<span class="rec">Recommended</span></h2>
+      <p class="idea">Tells what happened, in order: the office, the work, the wrong guess, the real problem, the question. The wrong guess is the strongest beat in the section, so it gets a full page.</p></div>
+    <ul class="moves">
+      <li><b>Kept</b><ul><li>« Done by hand » with Guy's quote</li><li>The three numbers</li><li>The three questions</li></ul></li>
+      <li><b>Merged</b><ul><li>Setting, people and tools: one page, four photos</li><li>Drift and « the model is for pictures »</li><li>Real problem and why it matters</li></ul></li>
+      <li><b>Dropped</b><ul><li>Twenty asks table</li><li>Two rules page</li><li>Empty image slot</li></ul></li>
+    </ul>
+  </div>
+  <div class="row"></div>
+</section>
+
+<section class="dir" id="B">
+  <div class="dh">
+    <div><p class="k">Direction B</p><h2>Answer first</h2>
+      <p class="idea">Opens on the framed problem, then proves it. For a reader who skims: the point is on page one, and each later page backs one part of it.</p></div>
+    <ul class="moves">
+      <li><b>Kept</b><ul><li>The framed problem, moved to the front</li><li>The three numbers</li></ul></li>
+      <li><b>Merged</b><ul><li>People and tools: four photos</li><li>The weekly change and the chores it causes</li><li>Drift and « for pictures » as the closing turn</li></ul></li>
+      <li><b>Dropped</b><ul><li>Twenty asks table</li><li>Two rules page</li><li>Guy's quote on the code study</li></ul></li>
+    </ul>
+  </div>
+  <div class="row"></div>
+</section>
+
+<section class="dir" id="C">
+  <div class="dh">
+    <div><p class="k">Direction C</p><h2>One change, followed</h2>
+      <p class="idea">One client request goes through the office, page by page: the call, the plan edit, the work redone, the question months later. The problem is shown happening, not described.</p></div>
+    <ul class="moves">
+      <li><b>Kept</b><ul><li>The three questions</li><li>The three numbers</li></ul></li>
+      <li><b>Merged</b><ul><li>The call with Guy and Benoît's photos</li><li>Drift folded into the plan edit</li><li>Chores with the paperwork photo</li></ul></li>
+      <li><b>Dropped</b><ul><li>« My first read » as a page</li><li>Twenty asks table, two rules page</li><li>Software photo</li></ul></li>
+    </ul>
+  </div>
+  <div class="row"></div>
+</section>
+
+<section class="dir" id="D">
+  <div class="dh">
+    <div><p class="k">Direction D</p><h2>Fewest words</h2>
+      <p class="idea">Large images, one sentence each. For presenting live, where you say the rest out loud.</p></div>
+    <ul class="moves">
+      <li><b>Kept</b><ul><li>All four photos, larger</li><li>Drift diagram</li><li>The framed problem</li></ul></li>
+      <li><b>Merged</b><ul><li>Three numbers on one plain page</li><li>« For pictures » as the drift caption</li></ul></li>
+      <li><b>Dropped</b><ul><li>« Done by hand » chores</li><li>Calls / change / cost columns</li><li>Twenty asks table, two rules page</li></ul></li>
+    </ul>
+  </div>
+  <div class="row"></div>
+</section>
+
+<div id="lb"><div class="fr"><iframe title="Page, large"></iframe></div><div class="bar"></div></div>
+
+<!-- Page drafts. Each <template> is one page; data-dir and data-tag say where it goes.
+     data-sec="div" is the section divider. <div data-clone="sel"> is replaced by the
+     deck's own element, so the drift diagram and its logos stay one copy. -->
+
+<!-- ======================================================= A · the reframe -->
+<template data-dir="A" data-tag="title" data-sec="div">
+<div class="b"><p class="big">03</p><h1>User Problem</h1><p class="lede">The office's knowledge is in its drawings. Nothing else can read them.</p></div>
+</template>
+<template data-dir="A" data-tag="merged">
+<div class="b">
+  <p class="k">The setting · Interviews, October 26</p>
+  <h2>A building is drawn twice, by two people, in two programs.</h2>
+  <div class="rule"></div>
+  <div class="cols c4" style="margin-top:40px;gap:28px;flex:1;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/guy.jpg" alt="Guy at the office" style="object-position:58% 50%"></div><div><h3>Guy</h3><p style="font-size:16px">SketchUp massing, building codes, city approvals.</p></div></div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/benoit.jpg" alt="Benoît at his desk" style="object-position:50% 55%"></div><div><h3>Benoît</h3><p style="font-size:16px">AutoCAD plans. The 2D sheets are the source of truth.</p></div></div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/software.jpg" alt="AutoCAD and SketchUp on two screens" style="object-position:48% 42%"></div><div><h3>Two programs</h3><p style="font-size:16px">AutoCAD and SketchUp. Nothing links them.</p></div></div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/paperwork.jpg" alt="Printed sheets with red markups" style="object-position:55% 60%"></div><div><h3>Paper</h3><p style="font-size:16px">Notes, changes and the schedule, marked up by hand.</p></div></div>
+  </div>
+</div>
+</template>
+<template data-dir="A" data-tag="kept">
+<div class="b">
+  <p class="k">What is done by hand</p>
+  <h2>The plans hold the truth. Every revision, someone reads them again.</h2>
+  <div class="rule"></div>
+  <div class="cols c3" style="margin-top:64px">
+    <div class="item bar-top"><span class="n">UNIT SCHEDULE</span><h3>Measured unit by unit</h3><p>Each unit is traced with a polyline, floor by floor, and typed into a table. The developer prices from it. The notary registers from it.</p></div>
+    <div class="item bar-top"><span class="n">QUANTITIES</span><h3>Counted when asked</h3><p>Windows per floor and brick, metal and glass per façade are measured off the sheets whenever someone needs them.</p></div>
+    <div class="item bar-top"><span class="n">CODE STUDY</span><h3>About ten pages, rewritten</h3><p>The building-code analysis is rewritten for each project and each major revision.</p></div>
+  </div>
+  <div class="q mt" style="max-width:1100px">
+    <blockquote>“Finding the article is easy. Understanding what it means for this project is the slow part.”</blockquote>
+    <cite>Guy, 3D, codes and city approvals · interview notes, paraphrased</cite>
+  </div>
+</div>
+</template>
+<template data-dir="A" data-tag="merged">
+<div class="b">
+  <div class="cols c5-7" style="margin-top:0;flex:1;align-items:center">
+    <div>
+      <p class="k">My first read</p>
+      <h2 style="font-size:50px">I designed for sync. The model is for pictures.</h2>
+      <div class="rule"></div>
+      <div class="dec" style="grid-template-columns:1fr;margin-top:36px">
+        <div style="padding:22px 0 0"><span class="k">What I assumed</span><p style="font-size:20px">Two files drift apart. A window moves in the plan, so the 3D must be remodelled. Prototype&nbsp;1&nbsp;B flagged every gap.</p></div>
+        <div class="won" style="padding:22px 0 0;border-left:0;border-top:1px solid var(--line);margin-top:22px"><span class="k">What they told me</span><p style="font-size:20px">SketchUp gives renders and the massing. When the model is out of date, a wrong window is fixed in Photoshop.</p></div>
+      </div>
+    </div>
+    <div class="shot"><img src="assets/frank/p1-b-sync.jpg" alt="Prototype 1 B: the AutoCAD plan beside the SketchUp model, a window gap flagged"></div>
+  </div>
+</div>
+</template>
+<template data-dir="A" data-tag="merged">
+<div class="b">
+  <p class="k">The real problem</p>
+  <h2>The drawings change every week. Nobody can say why a year later.</h2>
+  <div class="rule"></div>
+  <p class="lede" style="max-width:1150px">The client, the developer, the engineers and the city call to move a wall or cut a unit. The edit goes into the plan. The reason stays in a phone call.</p>
+  <div class="nums c3" style="display:grid;margin-top:56px">
+    <div><b>30 cm</b><span>A rear setback this short, noticed after submission, costs a resubmission. Then someone has to find which revision moved it, and who asked.</span></div>
+    <div><b>7 in 10</b><span>Client changes that are small cost cuts. They arrive by phone or email, and the reason rarely travels with the plan.</span></div>
+    <div><b>10 pages</b><span>Of code analysis, redone when a change touches glazing, area or unit count, without a note of what triggered it.</span></div>
+  </div>
+</div>
+</template>
+<template data-dir="A" data-tag="kept">
+<div class="b" style="justify-content:center">
+  <p class="k">The problem, framed</p>
+  <h2 style="font-size:64px;max-width:1300px">Give the office a memory of every change, kept with the drawings it already makes.</h2>
+  <div class="rule"></div>
+  <div class="cols c3" style="margin-top:72px">
+    <div class="item bar-top"><span class="n">01</span><h3 style="font-size:30px">What changed?</h3></div>
+    <div class="item bar-top"><span class="n">02</span><h3 style="font-size:30px">Who asked for it, and why?</h3></div>
+    <div class="item bar-top"><span class="n">03</span><h3 style="font-size:30px">Do the drawings still agree?</h3></div>
+  </div>
+</div>
+</template>
+
+<!-- ======================================================= B · answer first -->
+<template data-dir="B" data-tag="title" data-sec="div">
+<div class="b"><p class="big">03</p><h1>User Problem</h1><p class="lede">The office's knowledge is in its drawings. Nothing else can read them.</p></div>
+</template>
+<template data-dir="B" data-tag="kept">
+<div class="b" style="justify-content:center">
+  <p class="k">The problem</p>
+  <h2 style="font-size:64px;max-width:1300px">The office needs a memory of every change, kept with the drawings it already makes.</h2>
+  <div class="rule"></div>
+  <div class="cols c3" style="margin-top:72px">
+    <div class="item bar-top"><span class="n">01</span><h3 style="font-size:30px">What changed?</h3></div>
+    <div class="item bar-top"><span class="n">02</span><h3 style="font-size:30px">Who asked for it, and why?</h3></div>
+    <div class="item bar-top"><span class="n">03</span><h3 style="font-size:30px">Do the drawings still agree?</h3></div>
+  </div>
+</div>
+</template>
+<template data-dir="B" data-tag="merged">
+<div class="b">
+  <p class="k">Who · Interviews, October 26</p>
+  <h2>Two technicians, two programs, and a desk of paper.</h2>
+  <div class="rule"></div>
+  <div class="cols c4" style="margin-top:40px;gap:28px;flex:1;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/guy.jpg" alt="Guy at the office" style="object-position:58% 50%"></div><div><h3>Guy</h3><p style="font-size:16px">3D massing, codes, city approvals. Thinks in rules.</p></div></div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/benoit.jpg" alt="Benoît at his desk" style="object-position:50% 55%"></div><div><h3>Benoît</h3><p style="font-size:16px">2D drawings. Thinks in counts, sheets and floors.</p></div></div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/software.jpg" alt="AutoCAD and SketchUp on two screens" style="object-position:48% 42%"></div><div><h3>AutoCAD and SketchUp</h3><p style="font-size:16px">Plans in one, the model in the other.</p></div></div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/paperwork.jpg" alt="Printed sheets with red markups" style="object-position:55% 60%"></div><div><h3>Paper</h3><p style="font-size:16px">Every change and comment, marked up by hand.</p></div></div>
+  </div>
+</div>
+</template>
+<template data-dir="B" data-tag="merged">
+<div class="b">
+  <p class="k">Every week</p>
+  <h2>A call moves a wall. Everything counted from the plan is redone by hand.</h2>
+  <div class="rule"></div>
+  <div class="cols c3" style="margin-top:64px">
+    <div class="item bar-top"><span class="n">THE CALL</span><h3>Small requests, all week</h3><p>The client, the developer, the engineers and the city call or write to move a wall, cut a unit or widen a window.</p></div>
+    <div class="item bar-top"><span class="n">THE REWORK</span><h3>Read again, by hand</h3><p>The unit schedule is retraced, the quantities recounted, and the ten-page code study rewritten.</p></div>
+    <div class="item bar-top"><span class="n">THE REASON</span><h3>Made, then forgotten</h3><p>The edit goes into the plan. Why it was made stays in a phone call, an email or someone's head.</p></div>
+  </div>
+</div>
+</template>
+<template data-dir="B" data-tag="kept">
+<div class="b">
+  <p class="k">Why it matters</p>
+  <h2>A change is cheap. Not knowing why it was made is not.</h2>
+  <div class="rule"></div>
+  <div class="nums c3" style="display:grid">
+    <div><b>30 cm</b><span>A rear setback this short, noticed after submission, costs a resubmission. Then someone has to find which revision moved it, and who asked.</span></div>
+    <div><b>7 in 10</b><span>Client changes that are small cost cuts. They arrive by phone or email, and the reason rarely travels with the plan.</span></div>
+    <div><b>10 pages</b><span>Of code analysis, redone when a change touches glazing, area or unit count, without a note of what triggered it.</span></div>
+  </div>
+  <p class="lede mt" style="max-width:1200px">When a client asks months later why a unit lost four square meters, the answer is in a call nobody wrote down.</p>
+</div>
+</template>
+<template data-dir="B" data-tag="merged">
+<div class="b">
+  <p class="k">What it is not</p>
+  <h2>Not two files drifting apart. The model is for pictures.</h2>
+  <div class="rule"></div>
+  <div data-clone=".drift"></div>
+  <p class="lede mt" style="max-width:1200px;font-size:21px">I first designed for sync. They told me a wrong window in the model is fixed in Photoshop. What they need is the record, not the link.</p>
+</div>
+</template>
+
+<!-- ======================================================= C · one change, followed -->
+<template data-dir="C" data-tag="title" data-sec="div">
+<div class="b"><p class="big">03</p><h1>User Problem</h1><p class="lede">The office's knowledge is in its drawings. Nothing else can read them.</p></div>
+</template>
+<template data-dir="C" data-tag="new">
+<div class="b">
+  <div class="cols c5-7" style="margin-top:0;flex:1;align-items:stretch">
+    <div style="display:flex;flex-direction:column">
+      <p class="k">One change · 1 · The call</p>
+      <h2>A client calls. Make the unit a little smaller.</h2>
+      <div class="rule"></div>
+      <p class="lede" style="font-size:21px">Seven client changes in ten are small cost cuts like this one. They arrive by phone or email. Two people take them in: Benoît for the plans, Guy for the model, the codes and the city.</p>
+    </div>
+    <div class="cols c2" style="margin-top:0;gap:22px;min-height:0">
+      <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/benoit.jpg" alt="Benoît at his desk" style="object-position:50% 55%"></div><h3>Benoît · AutoCAD</h3></div>
+      <div style="display:flex;flex-direction:column;gap:16px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/guy.jpg" alt="Guy at the office" style="object-position:58% 50%"></div><h3>Guy · SketchUp, codes</h3></div>
+    </div>
+  </div>
+</div>
+</template>
+<template data-dir="C" data-tag="merged">
+<div class="b">
+  <p class="k">One change · 2 · The plan</p>
+  <h2>Benoît moves the wall in AutoCAD. Nothing else hears about it.</h2>
+  <div class="rule"></div>
+  <div data-clone=".drift"></div>
+  <p class="lede mt" style="max-width:1200px">I first read that gap as the problem. It is not: the model is for pictures, and a stale window is fixed in Photoshop. The gap that hurts is everything counted from the plan.</p>
+</div>
+</template>
+<template data-dir="C" data-tag="merged">
+<div class="b">
+  <div class="cols c7-5" style="margin-top:0;flex:1;align-items:stretch">
+    <div style="display:flex;flex-direction:column">
+      <p class="k">One change · 3 · The rework</p>
+      <h2>Then the plans are read again, by hand.</h2>
+      <div class="rule"></div>
+      <div style="display:flex;flex-direction:column;gap:26px;margin-top:44px">
+        <div class="item bar-top"><span class="n">UNIT SCHEDULE</span><p>Each unit retraced with a polyline and typed into the table the developer prices from.</p></div>
+        <div class="item bar-top"><span class="n">QUANTITIES</span><p>Windows per floor and materials per façade, measured off the sheets again.</p></div>
+        <div class="item bar-top"><span class="n">CODE STUDY</span><p>About ten pages, rewritten when the change touches glazing, area or unit count.</p></div>
+      </div>
+    </div>
+    <div class="shot"><img src="assets/frank/paperwork.jpg" alt="Printed sheets with handwritten notes and red markups" style="object-position:55% 60%"></div>
+  </div>
+</div>
+</template>
+<template data-dir="C" data-tag="merged">
+<div class="b">
+  <p class="k">One change · 4 · Months later</p>
+  <h2>“Why did this unit lose four square meters?” Nobody can say.</h2>
+  <div class="rule"></div>
+  <p class="lede" style="max-width:1150px">The answer is in a call nobody wrote down. The office rebuilds the reason from memory, or makes the change twice.</p>
+  <div class="nums c3" style="display:grid;margin-top:56px">
+    <div><b>30 cm</b><span>A rear setback this short, noticed after submission, costs a resubmission, and a search for who moved it.</span></div>
+    <div><b>7 in 10</b><span>Client changes that are small cost cuts. The reason rarely travels with the plan.</span></div>
+    <div><b>10 pages</b><span>Of code analysis, redone without a note of what triggered it.</span></div>
+  </div>
+</div>
+</template>
+<template data-dir="C" data-tag="kept">
+<div class="b" style="justify-content:center">
+  <p class="k">The problem, framed</p>
+  <h2 style="font-size:64px;max-width:1300px">Give the office a memory of every change, kept with the drawings it already makes.</h2>
+  <div class="rule"></div>
+  <div class="cols c3" style="margin-top:72px">
+    <div class="item bar-top"><span class="n">01</span><h3 style="font-size:30px">What changed?</h3></div>
+    <div class="item bar-top"><span class="n">02</span><h3 style="font-size:30px">Who asked for it, and why?</h3></div>
+    <div class="item bar-top"><span class="n">03</span><h3 style="font-size:30px">Do the drawings still agree?</h3></div>
+  </div>
+</div>
+</template>
+
+<!-- ======================================================= D · fewest words -->
+<template data-dir="D" data-tag="title" data-sec="div">
+<div class="b"><p class="big">03</p><h1>User Problem</h1><p class="lede">The office's knowledge is in its drawings. Nothing else can read them.</p></div>
+</template>
+<template data-dir="D" data-tag="merged">
+<div class="b">
+  <p class="k">The setting</p>
+  <h2 style="font-size:46px">Two people draw the same building.</h2>
+  <div class="cols c2" style="margin-top:36px;gap:28px;flex:1;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:14px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/benoit.jpg" alt="Benoît at his desk" style="object-position:50% 55%"></div><h3>Benoît · plans in AutoCAD</h3></div>
+    <div style="display:flex;flex-direction:column;gap:14px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/guy.jpg" alt="Guy at the office" style="object-position:58% 50%"></div><h3>Guy · model, codes and the city in SketchUp</h3></div>
+  </div>
+</div>
+</template>
+<template data-dir="D" data-tag="merged">
+<div class="b">
+  <p class="k">How it runs today</p>
+  <h2 style="font-size:46px">The project lives on paper and in two programs.</h2>
+  <div class="cols c2" style="margin-top:36px;gap:28px;flex:1;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:14px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/paperwork.jpg" alt="Printed sheets with red markups" style="object-position:55% 60%"></div><h3>Changes, marked up by hand</h3></div>
+    <div style="display:flex;flex-direction:column;gap:14px;min-height:0"><div class="shot" style="flex:1;min-height:0"><img src="assets/frank/software.jpg" alt="AutoCAD and SketchUp on two screens" style="object-position:48% 42%"></div><h3>AutoCAD and SketchUp, unlinked</h3></div>
+  </div>
+</div>
+</template>
+<template data-dir="D" data-tag="merged">
+<div class="b" style="justify-content:center">
+  <p class="k">My first read</p>
+  <h2 style="font-size:46px">I thought the files drift apart. The model is for pictures.</h2>
+  <div data-clone=".drift"></div>
+</div>
+</template>
+<template data-dir="D" data-tag="merged">
+<div class="b" style="justify-content:center">
+  <p class="k">The real problem</p>
+  <h2 style="font-size:46px">The drawings change every week. Nobody can say why a year later.</h2>
+  <div class="nums c3" style="display:grid;margin-top:80px">
+    <div><b>30 cm</b><span>Setback caught late: one resubmission.</span></div>
+    <div><b>7 in 10</b><span>Changes are cost cuts, asked by phone.</span></div>
+    <div><b>10 pages</b><span>Of code study, redone each time.</span></div>
+  </div>
+</div>
+</template>
+<template data-dir="D" data-tag="kept">
+<div class="b" style="justify-content:center">
+  <p class="k">The problem, framed</p>
+  <h2 style="font-size:72px;max-width:1300px">Give the office a memory of every change, kept with the drawings it already makes.</h2>
+</div>
+</template>
+
+<script>
+/* Every page is drawn in its own frame with the deck's stylesheet, read from the
+   deck file itself, so a draft here looks exactly like a page there.
+   « Today » takes the User Problem pages from the deck, in the order and with
+   the text edits saved in this browser by the deck's edit mode and grid view. */
+(async () => {
+  const deckHTML = await (await fetch("frank-case-study.html", { cache: "no-store" })).text();
+  const deck = new DOMParser().parseFromString(deckHTML, "text/html");
+  const css = [...deck.querySelectorAll("style")].map((s) => s.textContent).join("\n");
+  const fonts = [...deck.querySelectorAll('link[rel="stylesheet"]')].map((l) => l.outerHTML).join("");
+  const dial = JSON.parse(localStorage.getItem("dialkit:frank-deck-r1") || "{}").values || {};
+  const dt = dial.dividerTitle || "240 · large";
+  const doc = (cls, inner) => `<!doctype html><html><head><base href="${location.href}">${fonts}<style>${css}</style>` +
+    `<style>.s{width:1600px;height:1000px}</style></head><body data-dt="${dt}"><section class="${cls}">${inner}</section></body></html>`;
+
+  /* today: ids exactly as the deck computes them, then the saved order and edits */
+  const src = [...deck.querySelectorAll("#track > .s")];
+  const seen = {};
+  src.forEach((sl) => {
+    const t = (sel) => sl.querySelector(sel)?.textContent.replace(/\s+/g, " ").trim() || "";
+    const base = `${t(".k")} | ${t("h1, h2")}`;
+    seen[base] = (seen[base] || 0) + 1;
+    sl.dataset.edk = seen[base] > 1 ? `${base} (${seen[base]})` : base;
+  });
+  const order = JSON.parse(localStorage.getItem("frank-deck-order-v2") || "null");
+  const edits = JSON.parse(localStorage.getItem("frank-deck-edits-v2") || "{}");
+  const SEC = "User Problem";
+  let problem = src.filter((sl) => sl.dataset.sec === SEC);
+  if (order) {
+    const pos = new Map(order.map((o, i) => [o.id, i]));
+    problem = src.filter((sl) => {
+      const o = order.find((x) => x.id === sl.dataset.edk);
+      return (o ? o.sec : sl.dataset.sec) === SEC;
+    }).sort((a, b) => (pos.get(a.dataset.edk) ?? 1e9) - (pos.get(b.dataset.edk) ?? 1e9));
+  }
+  const SKIP = ".foot, .trk, script, style, svg";
+  const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+  problem.forEach((sl) => {
+    let n = 0;
+    sl.querySelectorAll(".b *").forEach((el) => {
+      if (el.closest(SKIP) || !ownText(el) || el.parentElement.closest("[data-k]")) return;
+      el.dataset.k = `${sl.dataset.edk}#${++n}`;
+      const e = edits[el.dataset.k];
+      if (!e) return;
+      if (e.html != null) el.innerHTML = e.html;
+      if (e.gone) el.remove();
+    });
+  });
+
+  const rows = { today: [], A: [], B: [], C: [], D: [] };
+  problem.forEach((sl) => rows.today.push({ html: doc(sl.className, sl.innerHTML), tag: sl.classList.contains("div") ? "title" : "" }));
+  document.querySelectorAll("template[data-dir]").forEach((t) => {
+    const frag = t.content.cloneNode(true);
+    frag.querySelectorAll("[data-clone]").forEach((el) => {
+      const from = deck.querySelector(el.dataset.clone);
+      if (from) el.replaceWith(from.cloneNode(true));
+    });
+    const box = document.createElement("div");
+    box.append(frag);
+    rows[t.dataset.dir].push({ html: doc(t.dataset.sec === "div" ? "s div" : "s", box.innerHTML), tag: t.dataset.tag });
+  });
+
+  Object.entries(rows).forEach(([id, list]) => {
+    const row = document.querySelector(`#${id} .row`);
+    let page = 0;
+    list.forEach((it, i) => {
+      const th = document.createElement("button");
+      th.type = "button";
+      th.className = it.tag === "title" ? "th title" : "th";
+      const label = it.tag === "title" ? "title" : String(++page).padStart(2, "0");
+      th.setAttribute("aria-label", `${it.tag === "title" ? "Title page" : `Page ${label}`}, ${id === "today" ? "today" : `direction ${id}`}`);
+      const f = document.createElement("iframe");
+      f.setAttribute("tabindex", "-1"); f.loading = "lazy"; f.srcdoc = it.html;
+      th.append(f);
+      th.insertAdjacentHTML("beforeend", `<span class="n">${label}</span>` +
+        (it.tag && it.tag !== "title" ? `<span class="tag ${it.tag}">${it.tag}</span>` : ""));
+      th.addEventListener("click", () => open(id, i));
+      row.append(th);
+    });
+  });
+
+  /* large view */
+  const lb = document.getElementById("lb"), fr = lb.querySelector("iframe"), bar = lb.querySelector(".bar");
+  let at = null;
+  const size = () => {
+    const k = Math.min(innerWidth * 0.9 / 1600, (innerHeight - 90) / 1000);
+    fr.style.transform = `scale(${k})`;
+    lb.querySelector(".fr").style.cssText = `width:${1600 * k}px;height:${1000 * k}px`;
+  };
+  function open(id, i) {
+    at = { id, i };
+    fr.srcdoc = rows[id][i].html;
+    const name = id === "today" ? "Today" : `Direction ${id}`;
+    bar.innerHTML = `${name}<span>${String(i + 1).padStart(2, "0")} / ${String(rows[id].length).padStart(2, "0")}</span>← → to step · Esc to close`;
+    size(); lb.classList.add("on");
+  }
+  addEventListener("resize", () => at && size());
+  lb.addEventListener("click", (e) => { if (e.target === lb) { lb.classList.remove("on"); at = null; } });
+  addEventListener("keydown", (e) => {
+    if (!at) return;
+    if (e.key === "Escape") { lb.classList.remove("on"); at = null; }
+    const n = rows[at.id].length;
+    if (e.key === "ArrowRight") open(at.id, (at.i + 1) % n);
+    if (e.key === "ArrowLeft") open(at.id, (at.i - 1 + n) % n);
+  });
+})();
+</script>
+</body>
+</html>
