@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Prototype 3</title>
 <link rel="stylesheet" href="vendor/geist/geist.css">
-<link rel="stylesheet" href="vendor/dialkit/styles.css">
 <script type="importmap">
 {"imports":{
   "three":"./vendor/three/build/three.module.js",
@@ -461,9 +460,9 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .coderow{display:grid;grid-template-columns:258px 1fr;gap:0;align-items:stretch;
   border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
 /* Under the pointer the card takes the lightest grey; chosen, a firmer grey
-   (dialkit « Article Selected » can still turn it black, its words, buttons,
-   pin and linework over with it). No dark contour either way. The
-   schematic has no ground of its own: it sits on the card's fill. */
+   or black fill turns its words, buttons, pin and linework over with it.
+   No dark contour either way. The schematic has no ground of its own: it
+   sits on the card's fill. */
 .coderow{transition:background-color .12s,border-color .12s}
 .coderow:hover{background:var(--fill-2);border-color:var(--fill-2)}
 .coderow.on{background:var(--fill);border-color:var(--fill)}
@@ -2109,7 +2108,6 @@ svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
 </div>
 
 <script src="vendor/lucide/lucide.min.js"></script>
-<script src="vendor/dialkit/browser.global.js"></script>
 <script src="assets/engineering/sheets.js"></script>
 <script src="wireframe-c3-circulation.js"></script>
 <script src="wireframe-c3-materials.js"></script>
@@ -8006,134 +8004,66 @@ function onClick(e) {
   render();
 }
 
-/* -------------------------------------------------------------- the dial */
+/* ------------------------------------------------ production view */
 
-const FI = { type: "select", options: ["inherit", "low", "high"], default: "inherit" };
-/* The panel names a screen in English; the prototype knows it in French. */
+/* The authoring panel is intentionally absent from the deployed prototype.
+   This state freezes its approved values while preserving the interaction
+   paths that change screens, typologies, and plan layers. */
 const SCREEN_FR = { Projects: "Projets", Units: "Unités", Codes: "Codes", Schedule: "Échéancier" };
 const FR_SCREEN = Object.fromEntries(Object.entries(SCREEN_FR).map(([en, fr]) => [fr, en]));
 
-const sel = (options) => ({ type: "select", options, default: options[0] });
-
-const dial = DialKit.createDialKit("Wireframe C3", {
-  /* The panel is the tool, not the product: it stays in English while the
-     screen it drives is in French. SCREEN_FR maps the two. */
-  screen: sel(Object.keys(SCREEN_FR)),
-  fidelity: sel(["high", "low"]),
-  /* The region tags are a debugging overlay, not a default state: the panel
-     opens on the screen as it is meant to be read. */
+const productionView = () => ({
+  screen: "Projects",
+  fidelity: "high",
   regionLabels: false,
   journeySteps: true,
-  density: sel(["comfortable", "compact"]),
-  /* Opening another file — a drawing on the plan, a model in the 3D — is
-     the one moment a pane changes under the eye, and heavy files take a
-     moment to read. Ten ways each to show the reading and the arrival,
-     and how long the reading takes, in seconds. */
-  fileSwap: { _collapsed: false,
-    plan: sel(["Dim + top bar", "Veil + spinner", "Status pill", "Paced plotter", "Raster bands", "Tiles",
-      "Blur to sharp", "Title block first", "Paced side wipe", "Progress ring", "Instant"]),
-    planSeconds: [1.4, 0.3, 4, 0.1],
-    model: sel(["Dim + top bar", "Veil + spinner", "Status pill", "Untextured first", "Blur to sharp", "Silhouette",
-      "Fade through paper", "Rise up", "Settle in", "Progress ring", "Instant"]),
-    modelSeconds: [2.2, 0.3, 5, 0.1] },
-  /* The elevation marker in the 3D corner view: the triangle's size, in %
-     of the drawn one; its length alone, base to tip, in % (the base stays,
-     the tip comes in or goes out); and how far it is pushed out from the
-     circle's centre along the way it points, in px (negative tucks it
-     under the circle). */
-  elevationMark: { _collapsed: false,
-    arrowScale: [100, 40, 200, 5],
-    arrowLength: [100, 30, 250, 5],
-    arrowOffset: [0, -8, 12, 0.5] },
-  shell: sel(["Inset card", "Flat"]),
-  /* The dark bar: the chrome stops imitating paper, so the drawing is the
-     only white thing on the screen. Green marks the level, white marks the
-     open view. The grey chrome is kept beside it for comparison. */
-  chrome: sel(["Black", "Light"]),
-  /* The three fills of the dark chrome, each on its own: the top bar, the
-     tab row under it, the border round the page. */
-  chromeColors: { _collapsed: false,
-    topBar: sel(["Current", "Dark gray", "Black", "Brand green"]),
-    tabRow: sel(["Current", "Dark gray", "Black", "Brand green"]),
-    pageBorder: sel(["Current", "Dark gray", "Black", "Brand green"]) },
-  /* How the open tab moves when another level is picked in the same row:
-     the white tab glides, springs, stretches across, rises out of the
-     page, or fades in. */
-  tabMotion: { _collapsed: false,
-    style: sel(["Slide", "Spring", "Stretch", "Rise", "Fade", "None"]),
-    ms: [280, 100, 700, 10] },
-  /* A folded pane writes its name up the strip; its icon can stand upright
-     or lie on its side with the words, a quarter-turn counterclockwise. */
-  foldedIcons: sel(["Upright", "Turned with text"]),
-  /* What « Commenter » on the plan does under the pointer. Outline is how
-     it was; the others change it without a dark contour. */
-  commentHover: sel(["Grey fill", "Lift shadow", "Ink fill", "Green tint", "Bare (no border)", "Outline (before)"]),
-  /* The chosen article card in Codes: a firmer grey, or the black card. */
-  articleSelected: sel(["Grey fill", "Black fill"]),
-  /* The whole screen on a dark ramp. The drawing keeps its own paper: a
-     plan is a white sheet, and inverting it would be redrawing it. */
-  theme: sel(["Light", "Dark"]),
-  homeLayout: sel(["Card grid", "Table of projects", "List + preview", "Recent, then all", "Start first"]),
-  isolate: sel(["none", "nav", "header", "list", "content", "inspector"]),
-  /* One shortlist per screen, so the rail can be judged against what the
-     screen actually holds rather than against a default grid of squares. */
-  railIcons: { _collapsed: false,
-    units: sel(NAV_ICONS["Unités"].map(([l]) => l)),
-    codes: sel(NAV_ICONS["Codes"].map(([l]) => l)),
-    schedule: sel(NAV_ICONS["Échéancier"].map(([l]) => l)) },
-  /* No typology fill is laid on the sheet until one is asked for. */
-  typologies: { _collapsed: false, "3½": false, "4½": false, "5½": false },
-  layers: { _collapsed: false,
+  density: "comfortable",
+  fileSwap: { plan: "Dim + top bar", planSeconds: 1.4, model: "Dim + top bar", modelSeconds: 2.2 },
+  elevationMark: { arrowScale: 100, arrowLength: 100, arrowOffset: 0 },
+  shell: "Inset card",
+  chrome: "Black",
+  chromeColors: { topBar: "Current", tabRow: "Current", pageBorder: "Current" },
+  tabMotion: { style: "Slide", ms: 280 },
+  foldedIcons: "Upright",
+  commentHover: "Grey fill",
+  articleSelected: "Grey fill",
+  theme: "Light",
+  homeLayout: "Card grid",
+  isolate: "none",
+  railIcons: { units: "Compare", codes: "Number", schedule: "Calendar" },
+  typologies: { "3½": false, "4½": false, "5½": false },
+  layers: {
     surveyor: false,
-    surveyorOpacity: [100, 0, 100, 5],
+    surveyorOpacity: 100,
     landscaping: false,
-    landscapingOpacity: [100, 0, 100, 5],
-    align: { _collapsed: true,
-      surveyorScale: [100, 60, 160, 1],
-      surveyorX: [0, -40, 40, .5],
-      surveyorY: [0, -40, 40, .5],
-      landscapingScale: [100, 60, 160, 1],
-      landscapingX: [0, -40, 40, .5],
-      landscapingY: [0, -40, 40, .5] } },
-  nav: { _collapsed: true, fidelity: FI,
-    layout: sel(["Two rows, no rail", "Icon rail + tabs", "Top bar only", "Wide rail with labels",
-      "Wide rail with sections", "Rail with labels under icons", "Rail only, no tabs",
-      "Tabs only, no rail", "Rail + view menu", "Rail + breadcrumb"]),
-    icons: sel(["Rail only", "Tabs only", "Rail and tabs", "None"]),
-    labels: sel(["Full label", "Hover only", "Short code", "Numbered", "Uppercase", "Hidden"]),
-    tabStyle: sel(["Plain", "Underline", "Pills", "Segmented", "Top accent", "Boxed"]),
-    tabAlign: sel(["Left", "Centred", "Spread"]) },
-  header: { _collapsed: true, fidelity: FI, layout: sel(["Title + actions", "Title only", "Title + metrics"]) },
-  list: { _collapsed: true, fidelity: FI, layout: sel(["Card grid", "Vertical list", "Filter bar only", "Hidden"]) },
-  content: { _collapsed: true, fidelity: FI, layout: sel(["Two panes", "Single pane + inset", "Stacked"]) },
-  inspector: { _collapsed: true, fidelity: FI, layout: sel(["Right panel", "Bottom sheet", "Overlay drawer", "Hidden"]) },
-/* The id carries the saved panel. It is bumped whenever a default changes,
-   because a panel saved before it would keep reopening on the old one — the
-   dark bar and the card grid would never be seen by anyone who had already
-   opened the file. r3: dark chrome and unit cards by default. r4: the
-   Coordination tab and its glyph, which a saved panel would otherwise pin
-   back to Layers. r5: the footer strip is gone, so its group must not
-   reappear from a saved panel. r6: the Codes glyph is a number sign, and
-   a panel saved on "Scale" would name an option that no longer exists.
-   r7: the document-swap animation, which a saved panel would not carry. */
-}, { id: "wireframe-c3-r7", persist: true });
+    landscapingOpacity: 100,
+    align: {
+      surveyorScale: 100,
+      surveyorX: 0,
+      surveyorY: 0,
+      landscapingScale: 100,
+      landscapingX: 0,
+      landscapingY: 0,
+    },
+  },
+  nav: { fidelity: "inherit", layout: "Two rows, no rail", icons: "Rail only", labels: "Full label", tabStyle: "Plain", tabAlign: "Left" },
+  header: { fidelity: "inherit", layout: "Title + actions" },
+  list: { fidelity: "inherit", layout: "Card grid" },
+  content: { fidelity: "inherit", layout: "Two panes" },
+  inspector: { fidelity: "inherit", layout: "Right panel" },
+});
 
-DialKit.createDialRoot({ position: "top-right", theme: "light" });
-/* Every drawing opens at full opacity. A panel saved before that holds the
-   two consultants' sheets at 55 %: they are raised once, here, rather than
-   by a new panel id, which would also drop every other saved setting. */
-if (!localStorage.getItem("wireframe-c3-op100")) {
-  dial.setValue("layers.surveyorOpacity", 100);
-  dial.setValue("layers.landscapingOpacity", 100);
-  localStorage.setItem("wireframe-c3-op100", "1");
-}
-/* The screen opens on the architecture alone: a panel saved with the
-   surveyor's or the landscaper's sheet shown is set back once. */
-if (!localStorage.getItem("wireframe-c3-arch-only")) {
-  dial.setValue("layers.surveyor", false);
-  dial.setValue("layers.landscaping", false);
-  localStorage.setItem("wireframe-c3-arch-only", "1");
-}
+const dial = {
+  values: productionView(),
+  setValue(path, value) {
+    const keys = path.split(".");
+    const last = keys.pop();
+    let target = this.values;
+    for (const key of keys) target = target[key];
+    target[last] = value;
+    applyDial(this.values);
+  },
+};
 
 function applyDial(v) {
   V.screen = SCREEN_FR[v.screen] || V.screen;
@@ -8290,7 +8220,6 @@ function slideSwitch(from) {
   a.onfinish = end;
   a.oncancel = end;
 }
-dial.subscribe(applyDial);
 
 sprite();
 /* The notes outlive the tab: they are read back before the first paint, and
