@@ -292,14 +292,18 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .listrow{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:5px}
 .listrow.on{background:var(--fill)}
 .listrow .dot{width:8px;height:8px;border-radius:50%;background:var(--bar);flex:0 0 8px}
-/* The link carries its own copy button: the field is what is copied. */
-.fpath.sharelink{cursor:default;padding-right:4px}
-.fpath.sharelink .btnw{height:24px;cursor:pointer;flex:0 0 auto}
+/* The link carries its own copy button: the field is what is copied. The
+   corners nest: the button sits 4px inside the field's outer edge (3 of
+   air, 1 of border), so its radius is the field's 8 less 4. */
+.fpath.sharelink{cursor:default;height:34px;border-radius:8px;padding:3px 3px 3px 10px;gap:7px;font-size:12px}
+.fpath.sharelink:hover{background:var(--fill-2);border-color:var(--line-2)}
+.fpath.sharelink .copy{height:26px;border-radius:4px;padding:0 10px;cursor:pointer;flex:0 0 auto;
+  background:var(--ink);border-color:var(--ink);color:#fff}
+.fpath.sharelink .copy .lu{width:13px;height:13px;color:#fff}
 /* An invited person: initials, name over role, and their access as the
    one control. The controls open under the row, inside the dialog's
    scroll, so nothing is clipped. */
-.sperson{border-radius:6px}
-.sperson.open{background:var(--fill-2)}
+.sperson{border-radius:6px;position:relative}
 .sperson .avatar{width:26px;height:26px;flex:0 0 26px;border-radius:50%;background:var(--fill);color:var(--ink);
   display:grid;place-items:center;font-size:10.5px;font-weight:600;letter-spacing:.02em}
 .sperson .who{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
@@ -307,12 +311,18 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .sperson .rl{font-size:11.5px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sperson .acc{cursor:pointer;flex:0 0 auto}
 .sperson .acc .lu{width:12px;height:12px;color:var(--ink-3)}
-.sperson .accrow{display:flex;align-items:center;gap:8px;padding:0 8px 8px 42px}
-.accseg{display:inline-flex;padding:2px;border-radius:7px;background:var(--fill);font-size:11.5px}
-.accseg span{padding:3px 8px;border-radius:5px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
-.accseg span[aria-current="true"]{background:var(--card);color:var(--ink);font-weight:500}
-.sperson .accdel{cursor:pointer;color:#b3261e}
-.sperson .accdel .lu{width:12px;height:12px}
+/* The access menu: both rights with what each allows, the current one
+   ticked, removal under a rule. It opens upward, over the rights above,
+   so the dialog's scroll never hides it. */
+.accmenu{position:absolute;right:8px;bottom:calc(100% - 4px);z-index:3;width:260px;background:var(--card);
+  border:1px solid var(--line);border-radius:8px;padding:4px;display:flex;flex-direction:column}
+.accmenu .o{display:grid;grid-template-columns:14px 1fr;gap:1px 8px;padding:6px 8px;border-radius:4px;cursor:pointer}
+.accmenu .o:hover{background:var(--fill-2)}
+.accmenu .o b{font-weight:500;font-size:12px;color:var(--ink)}
+.accmenu .o i{grid-column:2;font-style:normal;font-size:11px;color:var(--ink-3)}
+.accmenu .o .lu{width:13px;height:13px;margin-top:2px;color:var(--ink)}
+.accmenu hr{border:0;border-top:1px solid var(--line-2);margin:4px 2px}
+.accmenu .o.del b,.accmenu .o.del .lu{color:#b3261e}
 
 /* Anything that does something says so under the cursor, and anything that
    cannot act yet is visibly out of reach rather than silently inert. */
@@ -636,6 +646,8 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 /* the projects page: one ratio for every project, so the rows line up */
 .pcard{cursor:pointer}
 .pcard .thumb{aspect-ratio:16 / 9;flex:0 0 auto;position:relative}
+.pcard .ppath{font-family:var(--mono,ui-monospace,SFMono-Regular,Menlo,monospace);font-size:10.5px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pcard .thumb.mark{display:flex;align-items:center;justify-content:center;border:1px solid var(--line-2);
   border-radius:var(--r);overflow:hidden;background:var(--tint);color:var(--mark)}
 .pcard .thumb.mark span{font-size:20px;font-weight:600;letter-spacing:.04em}
@@ -1175,8 +1187,9 @@ body.elev .mtools{display:none}
    thumbnail shows only the drawing. */
 .ltile .lglyph{display:inline-flex;vertical-align:-2px;margin-right:4px;color:inherit;pointer-events:none}
 .ltile .lglyph .lu{width:13px;height:13px}
-/* « Ajouter un dessin »: pinned to the foot of the strip, so it stays in
-   reach when the pile scrolls, one line tall. */
+/* « Ajouter »: the strip holds only drawings, so the word « dessin » is
+   said by everything above it; the tooltip keeps the full name. Pinned to
+   the foot of the strip, in reach when the pile scrolls, one line tall. */
 .ladd{position:sticky;bottom:-8px;margin:auto -7px -8px;padding:8px 7px;background:var(--paper);border-top:1px solid var(--line-2);z-index:2}
 .ladd span{display:flex;align-items:center;justify-content:center;gap:5px;min-height:28px;padding:4px 6px;
   border:1px solid var(--line);border-radius:6px;background:var(--card);font-size:11.5px;font-weight:500;
@@ -1609,7 +1622,7 @@ body:has([data-skppop]) .lcard{visibility:hidden}
    cursor is the pin itself, and the 2D pane is ringed so it is plain which
    surface will take it. The model is not one of them. */
 [data-pin="on"] .zone[data-zone="plan"] .vp,
-[data-pin="on"] .zone[data-zone="plan"] .vp *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='-3 -3 30 30' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='5'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3Cg stroke='%23111' stroke-width='2'%3E%3Cpath fill='%23fff' d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3C/svg%3E") 12 26, crosshair}
+[data-pin="on"] .zone[data-zone="plan"] .vp *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='-3 -3 30 30' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='5'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3Cg stroke='%23111' stroke-width='2'%3E%3Cpath fill='%23c3e05a' d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3C/svg%3E") 12 26, crosshair}
 [data-pin="on"] .zone[data-zone="plan"]{box-shadow:inset 0 0 0 2px #8ba00f}
 /* The sheet is held still while a pin is being placed: a unit that lights
    and names itself under the pointer is an invitation to click it, and the
@@ -1623,7 +1636,16 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .pinarm{position:absolute;left:12px;top:12px;z-index:9;display:inline-flex;align-items:center;gap:6px;
   padding:5px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);
   font-size:12px;color:var(--ink);cursor:pointer;box-shadow:0 2px 6px rgba(17,17,18,.12);user-select:none}
-.pinarm:hover{border-color:var(--ink)}
+/* Under the pointer the button changes without a dark contour; the panel's
+   « Comment Hover » picks how. */
+.pinarm{transition:background-color .12s,box-shadow .12s,color .12s,border-color .12s}
+:root[data-pin-hover="outline"] .pinarm:not(.on):hover{border-color:var(--ink)}
+:root[data-pin-hover="grey"] .pinarm:not(.on):hover{background:#f1f1f2}
+:root[data-pin-hover="lift"] .pinarm:not(.on):hover{box-shadow:0 4px 14px rgba(17,17,18,.18)}
+:root[data-pin-hover="ink"] .pinarm:not(.on):hover{background:#141416;border-color:#141416;color:#fff}
+:root[data-pin-hover="green"] .pinarm:not(.on):hover{background:#eef3dc;border-color:#d6e3a6;color:#2f3a05}
+:root[data-pin-hover="bare"] .pinarm:not(.on){border-color:transparent}
+:root[data-pin-hover="bare"] .pinarm:not(.on):hover{background:#f1f1f2}
 .pinarm svg{width:14px;height:14px}
 .pinarm.on{background:#c3e05a;border-color:#2f3a05;color:#2f3a05;font-weight:500}
 [data-fi="low"] .pinarm{display:none}
@@ -1741,6 +1763,12 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 /* Ready to be saved: the project's green, the same one the selected level
    wears, so the one colour means "this is live" everywhere. */
 [data-fi="high"] .btnw.solid.go{background:#8ba00f;border-color:#8ba00f;color:#fff}
+/* The pin's own send: the green the armed « Commenter » and the pin
+   cursor wear, so the pin is green from arming to posting. */
+[data-fi="high"] .btnw.solid.pingo{background:#c3e05a;border-color:#c3e05a;color:#2f3a05}
+/* Nothing written yet: the send button waits in grey, and takes its full
+   colour with the first character. */
+[data-fi] .btnw.solid.wait{background:var(--fill);border-color:var(--fill);color:var(--ink-3);cursor:default}
 [data-fi="high"] .listrow.on{background:#eef1e0}
 [data-fi="high"] .listrow .dot{background:#8ba00f}
 
@@ -2827,7 +2855,7 @@ const layTile = (k) => `<div class="ltile ${V.lay[k].on ? "on" : ""} ${V.layPick
 const layStripHTML = () => `<div class="lstrip hi" data-lstrip>
   <div class="lpile" data-lpile>${layKeys().map(layTile).join("")}</div>
   ${addedHere().map(addedTile).join("")}
-  <div class="ladd"><span class="${V.docs.addOpen ? "open" : ""}" ${act("laddopen")} aria-expanded="${V.docs.addOpen}">${icon("plus")}Ajouter un dessin</span></div></div>`;
+  <div class="ladd"><span class="${V.docs.addOpen ? "open" : ""}" ${act("laddopen")} aria-expanded="${V.docs.addOpen}" title="Ajouter un dessin">${icon("plus")}Ajouter</span></div></div>`;
 
 /* Adding a drawing. The card reads the project's Dessins folder for the
    level, by discipline; what is already on the pile stays listed, greyed,
@@ -4159,8 +4187,13 @@ const tabIcons = () => V.nav.layout === "Two rows, no rail"
 
 /* One real project, the one every drawing in assets/ belongs to:
    Le Baldwin III, boulevard Saint-Jean, Dollard-des-Ormeaux. */
+/* A project is a folder on the office's server before it is anything on
+   screen: the card says where it lives and when it was opened, which is
+   what tells two projects of the same building apart. The file last read
+   belongs to the pane that reads it, not to the index. */
 const PROJECTS = [
-  ["Le Baldwin III", `${ALL_UNITS.length} unités — 8 niveaux`, "BAL3_Étage_Type R04 — 24 Oct", "6 écarts", 1],
+  ["Le Baldwin III", `${ALL_UNITS.length} unités — 8 niveaux`,
+    "\\\\serveur-bureau\\Projets\\2026\\BAL3", "6 écarts", 1, "3 février 2026"],
 ];
 
 /* The state is the one word on a card allowed colour: a project with
@@ -4183,7 +4216,8 @@ const pcard = (p, i = 0) => `<div class="tile pcard" ${act("open", p[0])} title=
     <span>${initials(p[0])}</span></div>
   <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
   <div><span class="lo bar lt" style="width:72%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
-  <div><span class="lo bar lt" style="width:60%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">${p[2]} — ${pstate(p)}</span></div>
+  <div><span class="lo bar lt" style="width:60%"></span><span class="hi ppath" style="font-size:11.5px;color:var(--ink-3)" title="${p[2]}">${p[2]}</span></div>
+  <div><span class="lo bar lt" style="width:48%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">Ouvert le ${p[5]} — ${pstate(p)}</span></div>
 </div>`;
 
 /* The tile takes the thumbnail's shape, so it sits in the row instead of
@@ -4200,9 +4234,9 @@ const pnew = () => `<div class="tile pnew" ${act("newproject")} title="Démarrer
    thing to do here is start another. */
 const shownProjects = () => PROJECTS;
 
-const ptable = () => `<table class="tbl"><thead><tr>${["Projet", "Taille", "Dernière lecture", "Ouvrir"].map((h) =>
+const ptable = () => `<table class="tbl"><thead><tr>${["Projet", "Taille", "Dossier au serveur", "Ouvert le", "Ouvrir"].map((h) =>
     `<th><span class="lo bar lt" style="width:60%"></span><span class="hi">${h}</span></th>`).join("")}</tr></thead>
-  <tbody>${shownProjects().map((p) => `<tr ${act("open", p[0])} title="Ouvrir ${p[0]}">${p.slice(0, 4).map((c) =>
+  <tbody>${shownProjects().map((p) => `<tr ${act("open", p[0])} title="Ouvrir ${p[0]}">${[p[0], p[1], p[2], p[5], p[3]].map((c) =>
     `<td><span class="lo bar lt" style="width:${c.length > 12 ? 86 : 54}%"></span><span class="hi">${c}</span></td>`).join("")}</tr>`).join("")}</tbody></table>`;
 
 const plist = (sel) => shownProjects().map((p, i) => `<div class="listrow ${p[0] === V.project ? "on" : ""}"
@@ -5323,7 +5357,7 @@ function pinBubbleHTML() {
     <textarea class="nnew" data-pindraft rows="3"
       placeholder="${team ? "Note interne — les collaborateurs ne la verront pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
     <div class="row" style="gap:6px;align-items:center">
-      <span class="btnw solid" ${act("pinpost")} title="Commenter (⌘↵)">${icon("send")}<span class="hi">Commenter</span></span>
+      <span class="btnw solid pingo ${V.draft.trim() ? "" : "wait"}" ${act("pinpost")} title="Commenter (⌘↵)">${icon("send")}<span class="hi">Commenter</span></span>
       <span class="btnw" ${act("pincancel")}><span class="hi">Annuler</span></span>
     </div>
   </div>`;
@@ -5368,7 +5402,7 @@ function marginHTML() {
         <div class="nact">
           <span class="chip ${V.pinMode ? "on" : ""}" ${act("markpin")} title="Armer l'épingle, puis cliquer un point du plan">${icon("map-pin")}<span class="lb">${V.pinMode ? "Cliquez le plan" : "Épingler au plan"}</span></span>
           <span style="flex:1"></span>
-          <span class="btnw solid go" ${act("postnote")}>${icon(team ? "lock" : "send")}<span class="hi">Commenter</span></span>
+          <span class="btnw solid go ${V.mdraft.trim() ? "" : "wait"}" ${act("postnote")}>${icon(team ? "lock" : "send")}<span class="hi">Commenter</span></span>
         </div></div>`;
   /* Two lists in one margin: what people said, and what is wrong. The
      conflicts carry the alarm so they are not read as one more comment. */
@@ -6583,7 +6617,7 @@ function render() {
   pushModelPins();
   const mdraft = document.querySelector("[data-mdraft]");
   if (mdraft) {
-    mdraft.oninput = (e) => { V.mdraft = e.target.value; };
+    mdraft.oninput = (e) => { V.mdraft = e.target.value; armSend("postnote", V.mdraft); };
     mdraft.onkeydown = (e) => {
       if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
       e.preventDefault();
@@ -6592,7 +6626,7 @@ function render() {
   }
   const draft = document.querySelector("[data-pindraft]");
   if (draft) {
-    draft.oninput = (e) => { V.draft = e.target.value; };
+    draft.oninput = (e) => { V.draft = e.target.value; armSend("pinpost", V.draft); };
     draft.onkeydown = (e) => {
       if (e.key === "Escape") { V.pending = null; V.draft = ""; render(); return; }
       if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
@@ -6898,7 +6932,7 @@ function shareDialogHTML(d) {
         <div class="hi" style="font-size:11.5px;color:var(--ink-2)">Le lien ouvre le projet là où il est ouvert ici: le niveau et l'unité sont dans l'adresse. Un invité ne dessine rien et n'écrit dans aucun fichier.</div>
         <div class="fpath sharelink" title="${link}">
           ${icon("link")}<span class="hi" style="flex:1;overflow:hidden;text-overflow:ellipsis">${link}</span>
-          <span class="btnw solid" ${act("sharecopy", link)}>${icon("link")}<span class="hi">Copier le lien</span></span></div>
+          <span class="btnw copy" ${act("sharecopy", link)}>${icon("link")}<span class="hi">Copier le lien</span></span></div>
         <div class="hi" style="font-size:11.5px;color:var(--ink-2);padding-top:2px">Droit accordé par le lien</div>
         <div class="col" style="gap:4px">${SHARE_RIGHTS.map(([l, n, g]) => right(l, n, g)).join("")}</div>
         <div class="hi" style="font-size:11.5px;color:var(--ink-2);padding-top:2px">Déjà invités</div>
@@ -6906,11 +6940,11 @@ function shareDialogHTML(d) {
           <div class="listrow">
             <span class="avatar">${p.name.split(" ").map((w) => w[0]).join("").toUpperCase()}</span>
             <span class="who"><span class="nm">${p.name}</span><span class="rl">${p.role}</span></span>
-            <span class="btnw acc" ${act("sharepedit", i)} aria-expanded="${d.edit === i}" title="Modifier l'accès de ${p.name}">${p.right}${icon(d.edit === i ? "chevron-up" : "chevron-down")}</span></div>
-          ${d.edit === i ? `<div class="accrow">
-            <span class="accseg">${SHARE_RIGHTS.map(([l]) => `<span ${act("sharepright", `${i}|${l}`)} aria-current="${p.right === l}">${l}</span>`).join("")}</span>
-            <span style="flex:1"></span>
-            <span class="btnw accdel" ${act("sharepremove", i)}>${icon("trash-2")}Retirer l'accès</span></div>` : ""}
+            <span class="btnw acc" ${act("sharepedit", i)} aria-expanded="${d.edit === i}" title="Modifier l'accès de ${p.name}" aria-haspopup="menu">${p.right}${icon("chevron-down")}</span></div>
+          ${d.edit === i ? `<div class="accmenu" role="menu">
+            ${SHARE_RIGHTS.map(([l, n]) => `<div class="o" role="menuitemradio" aria-checked="${p.right === l}" ${act("sharepright", `${i}|${l}`)}>
+              ${p.right === l ? icon("check") : "<span></span>"}<b>${l}</b><i>${n}</i></div>`).join("")}
+            <hr><div class="o del" role="menuitem" ${act("sharepremove", i)}>${icon("trash-2")}<b>Retirer l'accès</b></div></div>` : ""}
         </div>`).join("") : `<div class="listrow" style="font-size:12px;color:var(--ink-3)">Personne n'a encore été invité.</div>`}</div>
       </div>
       <div class="df">
@@ -7586,7 +7620,11 @@ function onClick(e) {
     case "newproject":
       V.dialog = { name: "", folder: "", kinds: ["Dessins DXF"], error: "" };
       break;
-    case "dlgstop": return;
+    /* A click elsewhere in the dialog closes an open access menu. */
+    case "dlgstop":
+      if (V.dialog?.edit == null) return;
+      V.dialog = { ...V.dialog, edit: null };
+      break;
     case "dlgclose": V.dialog = null; break;
     case "dlgfolder": V.dialog.folder = value; V.dialog.error = ""; break;
     case "dlgkind": {
@@ -7635,6 +7673,7 @@ function onClick(e) {
       const [i, right] = value.split("|");
       const p = SHARE_PEOPLE[Number(i)];
       if (p && p.right !== right) { p.right = right; say(`${p.name}: ${right.toLowerCase()}.`); }
+      V.dialog = { ...V.dialog, edit: null };
       break;
     }
     case "sharepremove": {
@@ -7749,6 +7788,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   /* A folded pane writes its name up the strip; its icon can stand upright
      or lie on its side with the words, a quarter-turn counterclockwise. */
   foldedIcons: sel(["Upright", "Turned with text"]),
+  /* What « Commenter » on the plan does under the pointer. Outline is how
+     it was; the others change it without a dark contour. */
+  commentHover: sel(["Grey fill", "Lift shadow", "Ink fill", "Green tint", "Bare (no border)", "Outline (before)"]),
   /* The whole screen on a dark ramp. The drawing keeps its own paper: a
      plan is a white sheet, and inverting it would be redrawing it. */
   theme: sel(["Light", "Dark"]),
@@ -7841,6 +7883,7 @@ function applyDial(v) {
   TAB_MOTION.kind = String(v.tabMotion?.style || "none").toLowerCase();
   TAB_MOTION.ms = v.tabMotion?.ms ?? 280;
   document.documentElement.dataset.foldIcon = v.foldedIcons === "Turned with text" ? "turn" : "upright";
+  document.documentElement.dataset.pinHover = String(v.commentHover || "Grey fill").split(" ")[0].toLowerCase();
   /* The panel names the glyph in English and title-cases what it is given,
      so the label is matched without regard to case. */
   const pick = (screen, label) => {
@@ -7859,6 +7902,12 @@ function applyDial(v) {
     scale: al.landscapingScale, x: al.landscapingX, y: al.landscapingY };
   ["nav", "header", "list", "content", "inspector"].forEach((r) => { V[r] = v[r]; });
   render();
+}
+
+/* The send button follows its draft as it is typed, without a render that
+   would take the caret out of the field. */
+function armSend(action, text) {
+  document.querySelector(`[data-act="${action}"]`)?.classList.toggle("wait", !text.trim());
 }
 
 /* Moving between the tabs of the level row. The row is rewritten on every
