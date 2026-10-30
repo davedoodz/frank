@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Render one plan PDF into a public Supabase tile pyramid.
+"""Render one high-resolution plan source into a public Supabase tile pyramid.
 
-The source PDF is uploaded to the private ``drawing-originals`` bucket. The
-viewer reads only the public ``drawing-tiles`` files: a small preview, a
-manifest, and 512 px WebP tiles at progressively sharper levels.
+PDF and raster sources are supported. Prefer the unflattened vector PDF or the
+highest-resolution WebP; the output cannot recover detail absent from source.
+The viewer reads only the public ``drawing-tiles`` files: a preview, manifest,
+and 512 px lossless WebP tiles at progressively sharper levels.
 
 Usage:
   python3 scripts/import/supabase-tiles.py \
@@ -16,18 +17,17 @@ Required in .env.local (never commit these):
 from __future__ import annotations
 
 import argparse
-from concurrent.futures import ThreadPoolExecutor
+import hashlib
 import io
 import json
 import math
 import os
-import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Iterator
 from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
-
 import fitz  # PyMuPDF
 from PIL import Image
 
@@ -96,12 +96,15 @@ def level_widths(max_width: int) -> list[int]:
     return widths
 
 
+def webp_bytes(image: Image.Image, *, lossless: bool) -> bytes:
+    output = io.BytesIO()
+    image.convert("RGB").save(output, "WEBP", lossless=lossless, quality=WEBP_QUALITY, method=6)
+    return output.getvalue()
+
+
 def tile_bytes(page: fitz.Page, clip: fitz.Rect, scale: float) -> bytes:
     pixmap = page.get_pixmap(matrix=fitz.Matrix(scale, scale), clip=clip, alpha=False)
-    image = Image.open(io.BytesIO(pixmap.tobytes("png"))).convert("RGB")
-    output = io.BytesIO()
-    image.save(output, "WEBP", quality=WEBP_QUALITY, method=6)
-    return output.getvalue()
+    return webp_bytes(Image.open(io.BytesIO(pixmap.tobytes("png"))), lossless=True)
 
 
 def tile_jobs(page: fitz.Page, width: int) -> Iterator[tuple[int, int, bytes]]:
@@ -117,48 +120,83 @@ def tile_jobs(page: fitz.Page, width: int) -> Iterator[tuple[int, int, bytes]]:
             yield column, row, tile_bytes(page, clip, scale)
 
 
+def raster_tile_jobs(image: Image.Image, width: int) -> Iterator[tuple[int, int, bytes]]:
+    scale = width / image.width
+    height = math.ceil(image.height * scale)
+    columns = math.ceil(width / TILE_SIZE)
+    rows = math.ceil(height / TILE_SIZE)
+    for row in range(rows):
+        for column in range(columns):
+            x0, y0 = column * TILE_SIZE, row * TILE_SIZE
+            x1, y1 = min(width, x0 + TILE_SIZE), min(height, y0 + TILE_SIZE)
+            crop = image.crop((x0 / scale, y0 / scale, x1 / scale, y1 / scale))
+            tile = crop.resize((x1 - x0, y1 - y0), Image.Resampling.LANCZOS)
+            yield column, row, webp_bytes(tile, lossless=True)
+
+
 def preview_bytes(page: fitz.Page) -> bytes:
     scale = PREVIEW_WIDTH / page.rect.width
     pixmap = page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
-    image = Image.open(io.BytesIO(pixmap.tobytes("png"))).convert("RGB")
-    output = io.BytesIO()
-    image.save(output, "WEBP", quality=WEBP_QUALITY, method=6)
-    return output.getvalue()
+    return webp_bytes(Image.open(io.BytesIO(pixmap.tobytes("png"))), lossless=False)
+
+
+def raster_preview_bytes(image: Image.Image) -> bytes:
+    height = math.ceil(image.height * PREVIEW_WIDTH / image.width)
+    return webp_bytes(image.resize((PREVIEW_WIDTH, height), Image.Resampling.LANCZOS), lossless=False)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source", type=Path, help="single-page, cropped plan PDF")
+    parser.add_argument("source", type=Path, help="single-page PDF or high-resolution raster plan")
     parser.add_argument("drawing", help="stable drawing slug, for example plan-niveau-5")
     parser.add_argument("--supabase-url", help="public Supabase project URL; otherwise read NEXT_PUBLIC_SUPABASE_URL")
     parser.add_argument("--max-width", type=int, default=MAX_WIDTH)
     args = parser.parse_args()
-
     source = args.source.resolve()
-    if source.suffix.lower() != ".pdf":
-        raise SystemExit("Source must be a cropped, single-page PDF.")
+
+    suffix = source.suffix.lower()
+    if suffix not in {".pdf", ".webp", ".png", ".jpg", ".jpeg"}:
+        raise SystemExit("Source must be a single-page PDF or high-resolution raster plan.")
     if not source.is_file():
-        raise SystemExit(f"Missing source PDF: {source}")
+        raise SystemExit(f"Missing source drawing: {source}")
 
     env = load_env(ENV_PATH)
     supabase_url = args.supabase_url or env_value("NEXT_PUBLIC_SUPABASE_URL", env)
     service_role_key = env_value("SUPABASE_SERVICE_ROLE_KEY", env)
 
-    document = fitz.open(source)
-    if document.page_count != 1:
-        raise SystemExit("Source must contain exactly one page. Crop it before generating tiles.")
-    page = document[0]
-    max_width = max(768, args.max_width)
-    source_path = public_path(args.drawing, "source.pdf")
-    tile_root = public_path(args.drawing)
+    document = None
+    if suffix == ".pdf":
+        document = fitz.open(source)
+        if document.page_count != 1:
+            raise SystemExit("Source PDF must contain exactly one page. Crop it before generating tiles.")
+        page = document[0]
+        source_width, source_height = page.rect.width, page.rect.height
+        preview = preview_bytes(page)
+        jobs_for = tile_jobs
+        render_source = page
+        content_type = "application/pdf"
+    else:
+        raster = Image.open(source).convert("RGB")
+        source_width, source_height = raster.size
+        preview = raster_preview_bytes(raster)
+        jobs_for = raster_tile_jobs
+        render_source = raster
+        content_type = "image/webp" if suffix == ".webp" else f"image/{suffix[1:]}"
 
-    upload(supabase_url, service_role_key, ORIGINAL_BUCKET, source_path, source.read_bytes(), "application/pdf", "31536000")
-    upload(supabase_url, service_role_key, TILE_BUCKET, public_path(args.drawing, "preview.webp"), preview_bytes(page), "image/webp", "31536000")
+    max_width = max(768, args.max_width) if suffix == ".pdf" else min(max(768, args.max_width), math.ceil(source_width))
+    source_bytes = source.read_bytes()
+    tile_version = hashlib.sha256(source_bytes + f":{max_width}".encode()).hexdigest()[:16]
+    source_path = public_path(args.drawing, f"source{suffix}")
+    tile_root = public_path(args.drawing)
+    versioned_tile_root = public_path(args.drawing, "v", tile_version)
+
+    upload(supabase_url, service_role_key, ORIGINAL_BUCKET, source_path, source_bytes, content_type, "31536000")
+    upload(supabase_url, service_role_key, TILE_BUCKET, f"{versioned_tile_root}/preview.webp", preview, "image/webp", "31536000")
 
     levels = []
-    with ThreadPoolExecutor(max_workers=16) as workers:
+    with ThreadPoolExecutor(max_workers=4) as workers:
         for level, width in enumerate(level_widths(max_width)):
-            height = math.ceil(page.rect.height * width / page.rect.width)
+            height = math.ceil(source_height * width / source_width)
             columns, rows = math.ceil(width / TILE_SIZE), math.ceil(height / TILE_SIZE)
             levels.append({"level": level, "width": width, "height": height, "columns": columns, "rows": rows})
             jobs = (
@@ -166,19 +204,20 @@ def main() -> None:
                     supabase_url,
                     service_role_key,
                     TILE_BUCKET,
-                    public_path(args.drawing, str(level), f"{column}_{row}.webp"),
+                    f"{versioned_tile_root}/{level}/{column}_{row}.webp",
                     body,
                     "image/webp",
                     "31536000",
                 )
-                for column, row, body in tile_jobs(page, width)
+                for column, row, body in jobs_for(render_source, width)
             )
             list(workers.map(lambda job: upload(*job), jobs))
             print(f"uploaded level {level}: {columns} × {rows} tiles")
 
     manifest = {
-        "version": 1,
+        "version": tile_version,
         "drawing": args.drawing,
+        "tilePath": f"v/{tile_version}",
         "tileSize": TILE_SIZE,
         "preview": "preview.webp",
         "levels": levels,
@@ -192,7 +231,8 @@ def main() -> None:
         "application/json",
         "300",
     )
-    document.close()
+    if document:
+        document.close()
     print(f"uploaded {tile_root}/manifest.json")
 
 

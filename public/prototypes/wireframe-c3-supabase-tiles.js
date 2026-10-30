@@ -25,7 +25,7 @@ async function manifestFor(pdfUrl) {
     const drawing = drawingName(pdfUrl);
     if (!settings?.tileBaseUrl || !drawing) return null;
     const url = `${settings.tileBaseUrl}/baldwin-iii/${encodeURIComponent(drawing)}/manifest.json`;
-    const response = await fetch(url, { cache: "force-cache" });
+    const response = await fetch(url, { cache: "no-cache" });
     if (!response.ok) return null;
     return { ...(await response.json()), baseUrl: url.slice(0, url.lastIndexOf("/")) };
   })();
@@ -54,16 +54,31 @@ function visibleTiles(plan, manifest, viewport, turn) {
   const logicalWidth = side ? rect.height : rect.width;
   const dpr = window.devicePixelRatio || 1;
   const targetWidth = logicalWidth * dpr;
-  const level = manifest.levels.find((entry) => entry.width >= targetWidth) || manifest.levels.at(-1);
+  const zoom = Number(plan.style.transform.match(/scale\(([\d.]+)\)/)?.[1] || 1);
+  const level = zoom > 2
+    ? manifest.levels.at(-1)
+    : manifest.levels.find((entry) => entry.width >= targetWidth) || manifest.levels.at(-1);
   if (!level) return null;
 
-  const [p0x, p0y] = localPoint(turn, rect, left, top);
-  const [p1x, p1y] = localPoint(turn, rect, right, bottom);
-  const x0 = Math.max(0, Math.min(p0x, p1x) / logicalWidth * level.width);
-  const x1 = Math.min(level.width, Math.max(p0x, p1x) / logicalWidth * level.width);
-  const logicalHeight = side ? rect.width : rect.height;
-  const y0 = Math.max(0, Math.min(p0y, p1y) / logicalHeight * level.height);
-  const y1 = Math.min(level.height, Math.max(p0y, p1y) / logicalHeight * level.height);
+  let x0, x1, y0, y1;
+  const baseWidth = Number(plan.dataset.tileBaseWidth);
+  const baseHeight = Number(plan.dataset.tileBaseHeight);
+  const panX = Number(plan.dataset.tilePanX);
+  const panY = Number(plan.dataset.tilePanY);
+  if (turn === 0 && baseWidth && baseHeight && Number.isFinite(panX) && Number.isFinite(panY)) {
+    x0 = Math.max(0, -panX / (baseWidth * zoom) * level.width);
+    x1 = Math.min(level.width, (viewport.width - panX) / (baseWidth * zoom) * level.width);
+    y0 = Math.max(0, -panY / (baseHeight * zoom) * level.height);
+    y1 = Math.min(level.height, (viewport.height - panY) / (baseHeight * zoom) * level.height);
+  } else {
+    const [p0x, p0y] = localPoint(turn, rect, left, top);
+    const [p1x, p1y] = localPoint(turn, rect, right, bottom);
+    x0 = Math.max(0, Math.min(p0x, p1x) / logicalWidth * level.width);
+    x1 = Math.min(level.width, Math.max(p0x, p1x) / logicalWidth * level.width);
+    const logicalHeight = side ? rect.width : rect.height;
+    y0 = Math.max(0, Math.min(p0y, p1y) / logicalHeight * level.height);
+    y1 = Math.min(level.height, Math.max(p0y, p1y) / logicalHeight * level.height);
+  }
   const overscan = manifest.tileSize;
   const firstColumn = Math.max(0, Math.floor((x0 - overscan) / manifest.tileSize));
   const lastColumn = Math.min(level.columns - 1, Math.floor((x1 + overscan) / manifest.tileSize));
@@ -76,17 +91,44 @@ function visibleTiles(plan, manifest, viewport, turn) {
   return { level, tiles };
 }
 
-function tileLayer(plan) {
-  let layer = plan.querySelector(":scope > .supabase-tiles");
-  if (layer) return layer;
-  layer = document.createElement("div");
-  layer.className = "supabase-tiles";
-  plan.append(layer);
+function tileLayer(plan, viewport, turn) {
+  if (turn !== 0) {
+    let layer = plan.querySelector(":scope > .supabase-tiles");
+    if (!layer) {
+      layer = document.createElement("div");
+      layer.className = "supabase-tiles";
+      plan.append(layer);
+    }
+    return layer;
+  }
+
+  let layer = viewport.querySelector(":scope > .supabase-tiles-portal");
+  if (!layer) {
+    layer = document.createElement("div");
+    layer.className = "supabase-tiles-portal";
+    viewport.append(layer);
+  }
+  if (layer.dataset.drawing !== plan.dataset.planPdf) {
+    layer.replaceChildren();
+    layer.dataset.drawing = plan.dataset.planPdf;
+  }
   return layer;
 }
 
-function paint(plan, manifest, request) {
-  const layer = tileLayer(plan);
+function revealTiles(plan, layer) {
+  const images = [...layer.querySelectorAll("img[data-tile]")];
+  if (!images.length || images.some((image) => !image.complete || image.naturalWidth === 0)) return;
+  plan.dataset.supabaseTiles = "ready";
+  const canvas = plan.querySelector("canvas[data-sheetpdf]");
+  if (!canvas) return;
+  canvas.dataset.supabaseTiles = "ready";
+  canvas.dataset.pdfState = "ready";
+  canvas.style.visibility = "hidden";
+}
+
+function paint(plan, viewport, turn, manifest, request) {
+  if (!plan.isConnected || !viewport.isConnected || !request.tiles.length) return;
+  const layer = tileLayer(plan, viewport, turn);
   const wanted = new Set();
   for (const { column, row } of request.tiles) {
     const key = `${request.level.level}/${column}_${row}`;
@@ -97,24 +139,30 @@ function paint(plan, manifest, request) {
     image.decoding = "async";
     image.alt = "";
     image.dataset.tile = key;
-    image.src = `${manifest.baseUrl}/${request.level.level}/${column}_${row}.webp`;
-    Object.assign(image.style, {
-      left: `${column * manifest.tileSize / request.level.width * 100}%`,
-      top: `${row * manifest.tileSize / request.level.height * 100}%`,
-      width: `${Math.min(manifest.tileSize, request.level.width - column * manifest.tileSize) / request.level.width * 100}%`,
-      height: `${Math.min(manifest.tileSize, request.level.height - row * manifest.tileSize) / request.level.height * 100}%`,
-    });
-    layer.append(image);
+    const tilePath = manifest.tilePath ? `/${manifest.tilePath}` : "";
+    image.src = `${manifest.baseUrl}${tilePath}/${request.level.level}/${column}_${row}.webp`;
+    image.addEventListener("load", () => revealTiles(plan, layer), { once: true });
+    if (layer.classList.contains("supabase-tiles-portal")) {
+      const planRect = plan.getBoundingClientRect();
+      const viewportRect = viewport.getBoundingClientRect();
+      const left = planRect.left - viewportRect.left + column * manifest.tileSize / request.level.width * planRect.width;
+      const top = planRect.top - viewportRect.top + row * manifest.tileSize / request.level.height * planRect.height;
+      const width = Math.min(manifest.tileSize, request.level.width - column * manifest.tileSize) / request.level.width * planRect.width;
+      const height = Math.min(manifest.tileSize, request.level.height - row * manifest.tileSize) / request.level.height * planRect.height;
+      Object.assign(image.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` });
+    } else {
+      Object.assign(image.style, {
+        left: `${column * manifest.tileSize / request.level.width * 100}%`,
+        top: `${row * manifest.tileSize / request.level.height * 100}%`,
+        width: `${Math.min(manifest.tileSize, request.level.width - column * manifest.tileSize) / request.level.width * 100}%`,
+        height: `${Math.min(manifest.tileSize, request.level.height - row * manifest.tileSize) / request.level.height * 100}%`,
+      });
+    }
   }
   for (const image of layer.querySelectorAll("img[data-tile]")) {
     if (!wanted.has(image.dataset.tile)) image.remove();
   }
-  const canvas = plan.querySelector("canvas[data-sheetpdf]");
-  if (canvas) {
-    canvas.dataset.supabaseTiles = "ready";
-    canvas.dataset.pdfState = "ready";
-    canvas.style.visibility = "hidden";
-  }
+  revealTiles(plan, layer);
 }
 
 async function schedule() {
@@ -126,7 +174,7 @@ async function schedule() {
     const manifest = await manifestFor(plan.dataset.planPdf);
     if (!manifest) continue;
     const request = visibleTiles(plan, manifest, bounds, turn);
-    if (request) paint(plan, manifest, request);
+    if (request?.tiles.length) paint(plan, viewport, turn, manifest, request);
   }
 }
 
@@ -134,7 +182,6 @@ function queue() {
   clearTimeout(timer);
   timer = setTimeout(() => void schedule(), 80);
 }
-
 window.addEventListener("fitte:plan-paint", queue);
 window.addEventListener("fitte:render", () => queueMicrotask(queue));
 window.addEventListener("resize", queue);

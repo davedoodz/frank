@@ -1200,6 +1200,7 @@ body.elev .mtools{display:none}
 [data-fi="high"] .plan.align[data-img="plan"]::before{content:"";position:absolute;inset:0;
   background:var(--plan,none) center/contain no-repeat;z-index:var(--planz,1);opacity:var(--planop,1);
   mix-blend-mode:multiply}
+[data-fi="high"] .plan.align[data-img="plan"][data-supabase-tiles="ready"]::before{opacity:0}
 /* Vectors over the picture, not instead of it: a pass takes a few seconds
    on a permit sheet, and the pane must never be empty while it runs. The
    canvas is transparent until the sheet lands on it, then it covers the
@@ -1209,6 +1210,9 @@ body.elev .mtools{display:none}
 .plan canvas.sheetpdf[data-ready="1"]{background:#fff}
 .plan .supabase-tiles{position:absolute;inset:0;z-index:var(--planz,1);overflow:hidden;pointer-events:none;mix-blend-mode:multiply}
 .plan .supabase-tiles img{position:absolute;display:block;max-width:none}
+.vp{position:relative}
+.supabase-tiles-portal{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none;mix-blend-mode:multiply}
+.supabase-tiles-portal img{position:absolute;display:block;max-width:none}
 /* While the pass runs the pane says so in its own title bar, at the end of
    the row: the file strip that used to carry it is gone. It is a transient
    note, so it gives way before anything else — under a pane wide enough to
@@ -5973,9 +5977,15 @@ function paintSheet() {
      frame's own pan and zoom. While it turns, the eased frame instead. */
   const RA = ROT_ANIM;
   const ang = RA ? RA.a : V.rot, kz = RA ? RA.k : V.zoom / 100;
-  if (plan) plan.style.transform = RA
-    ? `translate(${real.width / 2}px,${real.height / 2}px) rotate(${ang}deg) scale(${kz}) translate(${-RA.fx * base.w}px,${-RA.fy * base.h}px)`
-    : `translate(${real.width / 2}px,${real.height / 2}px) rotate(${ang}deg) translate(${V.pan.x - box.width / 2}px,${V.pan.y - box.height / 2}px) scale(${kz})`;
+  if (plan) {
+    plan.style.transform = RA
+      ? `translate(${real.width / 2}px,${real.height / 2}px) rotate(${ang}deg) scale(${kz}) translate(${-RA.fx * base.w}px,${-RA.fy * base.h}px)`
+      : `translate(${real.width / 2}px,${real.height / 2}px) rotate(${ang}deg) translate(${V.pan.x - box.width / 2}px,${V.pan.y - box.height / 2}px) scale(${kz})`;
+    plan.dataset.tileBaseWidth = String(base.w);
+    plan.dataset.tileBaseHeight = String(base.h);
+    plan.dataset.tilePanX = String(V.pan.x);
+    plan.dataset.tilePanY = String(V.pan.y);
+  }
   /* North turns with the sheet: the needle swings, the letter rides round
      the ring and stays upright. */
   const nd = ((ang % 360) + 360) % 360, rad = (nd * Math.PI) / 180;
