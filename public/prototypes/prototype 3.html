@@ -1499,6 +1499,11 @@ const viewIndexOfLevel = (level) => LEVEL_VIEWS.indexOf(levelView(level));
 const ENG_DISCIPLINES = ["electrical", "drainage", "distribution", "ventilation"];
 const ENG_LABELS = { electrical: "Électricité", drainage: "Drainage",
   distribution: "Distribution", ventilation: "Ventilation" };
+/* Three of the four sheets come from the same consultant's mechanical set,
+   and on the strip their names alone do not say so — "Distribution" could
+   be anybody's. The trade is written on the thumbnail, not only in the
+   card. */
+const ENG_TRADE = { drainage: "Méc.", distribution: "Méc.", ventilation: "Méc." };
 /* What a consultant's drawing is called on the server. The asset pipeline
    names its files by discipline and index (electrical-5.pdf); nobody in an
    office ever types that. The sheet number, the discipline and the floor
@@ -1955,7 +1960,16 @@ const ENG_SET = new Set(ENG_DISCIPLINES);
 const layKeys = () => {
   const lv = paneLevel();
   const nonres = isNonresLevel(lv);
-  return V.layOrder.filter((k) => ENG_SET.has(k) ? !!engSheet(k, lv) : k === "plan" || !nonres);
+  return V.layOrder.filter((k) => {
+    if (ENG_SET.has(k)) return !!engSheet(k, lv);
+    if (k === "plan") return true;
+    /* The landscaping sheet draws the ground around the building: the
+       walks, the plantings, the ramp. Laid under a fifth-floor plan it is
+       a picture of a place that floor does not touch, so it exists on the
+       ground floor only. */
+    if (k === "pay") return lv === 1;
+    return !nonres;
+  });
 };
 /* Front first. The number shown on a badge is this index plus one, so 1
    is always the sheet drawn over the others. */
@@ -1979,7 +1993,8 @@ const LAYDOC = {
      the sheet itself — its number, its page, its file. No date is invented
      for them: the set carries none. */
   ...Object.fromEntries(ENG_DISCIPLINES.map((d) => [d, {
-    short: ENG_LABELS[d], disc: ENG_LABELS[d], app: "Acrobat", act: "pdfview",
+    short: ENG_TRADE[d] ? `${ENG_LABELS[d]} (${ENG_TRADE[d]})` : ENG_LABELS[d],
+    disc: ENG_LABELS[d], app: "Acrobat", act: "pdfview",
     thumb: () => engSheet(d, paneLevel())?.img || "",
     file: () => engFileName(d, paneLevel()),
     date: () => { const s = engSheet(d, paneLevel()); return s ? `${engCode(s)} · p.${s.page}` : ""; },
@@ -3569,7 +3584,11 @@ const pinAnchor = (p) => (p.surface === "model"
   : `${SHEET_NAME[p.sheet] || "plan"} · niv. ${p.level}${p.zone ? ` · ${p.zone}` : ""}`);
 /* Which sheet was on screen when the point was put down: the floor plan
    alone, or one of the two consultants' sheets laid over it. */
-const currentSheetKey = () => (V.lay.arp.on ? "arp" : V.lay.pay.on ? "pay" : "plan");
+const currentSheetKey = () => {
+  const keys = layKeys();
+  return V.lay.arp.on && keys.includes("arp") ? "arp"
+    : V.lay.pay.on && keys.includes("pay") ? "pay" : "plan";
+};
 
 /* The pins drawn on the 2D sheet. They live inside the transformed box with
    the unit outlines, so they pan and zoom with the drawing; their size is
