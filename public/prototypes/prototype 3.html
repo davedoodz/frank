@@ -593,34 +593,44 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .wtask{border:1px solid var(--line-2);border-radius:5px;
   padding:4px 5px;font-size:11px;display:flex;flex-direction:column;gap:1px;background:var(--card)}
 .wtask .who{font-size:10px;color:var(--ink-3)}
-/* A task row reads left to right as: done, what, how urgent, when. */
-.task{display:flex;align-items:center;gap:8px;padding:6px 7px;border:1px solid var(--line-2);
-  border-radius:var(--r);background:var(--card);cursor:pointer}
-.task:hover{border-color:var(--line)}
-.task.on{box-shadow:0 0 0 1px var(--ink) inset;border-color:var(--ink)}
-/* A ticked line stays readable: it is still being looked at, and it only
-   leaves the list when someone files it. */
-.task.done{opacity:.72}
-.task.done .ttl{text-decoration:line-through}
-.task .pr{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);
-  border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;white-space:nowrap}
-.task .pr[data-prio="haute"]{background:var(--vert);color:var(--vert-ink);border-color:var(--vert)}
-.task .pr[data-prio="moyenne"]{color:var(--ink)}
-.task .dte{font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;
-  min-width:52px;text-align:right}
+/* The task list, option E: rows on hairlines, no cards. Done, what (title,
+   then phase and article in grey), the pencil on hover, who, priority. */
+.tlist{display:flex;flex-direction:column}
+.tseg{display:inline-flex;gap:2px;padding:2px;border-radius:7px;background:var(--fill);align-self:flex-start;margin-bottom:6px}
+.tseg > span{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:5px;font-size:11.5px;
+  font-weight:500;color:var(--ink-2);cursor:pointer}
+.tseg > span.on{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+.tseg i{font-style:normal;font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.tday{display:flex;align-items:baseline;gap:6px;padding:12px 6px 5px;border-bottom:1px solid var(--line)}
+.tday b{font-size:12px;font-weight:600;color:var(--ink)}
+.tday > span:last-child{font-size:11px;color:var(--ink-3)}
+.tday.late b{color:#b3261e}
+.tday .tbadge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--ink);color:var(--card)}
+.tnone{padding:12px 6px;font-size:12px;color:var(--ink-3)}
+.task{display:flex;align-items:center;gap:10px;padding:7px 6px;border-bottom:1px solid var(--line-2);background:var(--card);cursor:pointer}
+.task:hover{background:var(--fill-2)}
+.task.on{background:#eef3dc}
+.task .tw{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.task .ttl{font-size:12.5px;color:var(--ink)}
+.task .tmeta{font-size:11px;color:var(--ink-3)}
+.task .tmeta code{font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+.task .tmeta em{font-style:normal;color:#b3261e;font-weight:500}
+.task.done .ttl{text-decoration:line-through;color:var(--ink-3)}
+/* Priority as one bar of three: haute red, moyenne orange, basse yellow. */
+.tbars{display:inline-flex;gap:2px;align-items:flex-end;flex:0 0 auto;width:28px;justify-content:flex-end}
+.tbars b{width:3px;border-radius:1px;background:var(--line)}
+.tbars b:nth-child(1){height:6px}.tbars b:nth-child(2){height:9px}.tbars b:nth-child(3){height:12px}
+.tbars[data-p="haute"] b{background:#e5484d}
+.tbars[data-p="moyenne"] b:nth-child(-n+2){background:#f5922a}
+.tbars[data-p="basse"] b:nth-child(1){background:#f2c94c}
+.task.done .tbars b{background:var(--line)!important}
 /* The tick is the one control that must be hittable without aiming, so it
    is a real 15 px box with a pointer target around it. */
-.task .tick{flex:0 0 auto;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--line);
+.task .tick{flex:0 0 auto;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--ink-3);
   background:var(--card);display:inline-flex;align-items:center;justify-content:center;color:#fff}
 .task:hover .tick{border-color:var(--ink-2)}
 .task .tick.on{background:var(--ink);border-color:var(--ink)}
 .task .tick .lu{width:10px;height:10px;stroke-width:3}
-.task .file{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;
-  border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-size:11px;cursor:pointer;flex:0 0 auto}
-.task .file:hover{border-color:var(--ink-2);color:var(--ink)}
-.task .file svg{width:12px;height:12px}
-[data-fi="high"] .task .file.hi{display:inline-flex}
-.task .file .hi{display:inline}
 .task .tact{display:flex;align-items:center;color:var(--ink-3);opacity:0;padding:2px}
 .task:hover .tact,.task.on .tact{opacity:1}
 .task .tact:hover{color:var(--ink)}
@@ -2052,7 +2062,6 @@ const V = {
      archive is folded until it is asked for. */
   taskEdit: null,
   taskDraft: { title: "", day: "2026-11-14", prio: "moyenne", phase: "Permis", who: [] },
-  taskArch: false,
   /* What the screen is counting. "Niveau" is one floor: the unit list, the
      two drawings and the right column. "Bâtiment" is all eight: the work
      area becomes the four quantity tables, and the level strip is dimmed
@@ -4155,60 +4164,48 @@ function taskForm(t, isNew) {
     </div></div>`;
 }
 
+/* Option E of taches-liste.html: a segmented switch with its counts picks
+   which tasks; the agenda files them under their day. « Ouvertes » reads as
+   the agenda of what is left, « Faites » as a journal. A late day is red,
+   today wears its badge, the priority is three bars at the right like a
+   column of figures. A tick moves a task to « Faites »; ticking it there
+   reopens it. */
+const TASK_FILTERS = [
+  ["open", "Ouvertes", (t) => !t.done],
+  ["late", "En retard", (t) => !t.done && t.day < TODAY],
+  ["week", "Cette semaine", (t) => !t.done && t.day >= monday(TODAY) && t.day <= shift(monday(TODAY), 6)],
+  ["done", "Faites", (t) => t.done],
+];
+const WEEKDAY = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+const dayLabel = (s) => `${WEEKDAY[dOf(s).getUTCDay()]} ${fmtDay(s)}`;
+const prioBars = (t) => `<span class="tbars" data-p="${t.prio}" title="Priorité ${t.prio}"><b></b><b></b><b></b></span>`;
 function taskListHTML() {
-  /* On the list: everything not filed away, ticked or not. The archive is
-     what someone has deliberately put away. */
-  const live = TASKS.filter((t) => !t.archived)
-    .sort((a, b) => a.day.localeCompare(b.day) || PRIO[b.prio] - PRIO[a.prio]);
-  const here = live.filter((t) => t.day === V.day);
-  const rest = live.filter((t) => t.day !== V.day);
-  const archive = TASKS.filter((t) => t.archived)
-    .sort((a, b) => (b.doneAt || b.day).localeCompare(a.doneAt || a.day));
-  const line = (t) => (V.taskEdit === t.id ? taskForm(t, false) : `<div class="task ${t.done ? "done" : ""}
-      ${V.task === t.id ? "on" : ""} ${!t.done && t.day < TODAY ? "late" : ""}"
+  const f = TASK_FILTERS.find(([k]) => k === V.taskFilter) || TASK_FILTERS[0];
+  const journal = f[0] === "done";
+  const dayOf = (t) => (journal ? t.doneAt || t.day : t.day);
+  const list = TASKS.filter(f[2]).sort((a, b) => (journal ? dayOf(b).localeCompare(dayOf(a)) : a.day.localeCompare(b.day))
+    || PRIO[b.prio] - PRIO[a.prio]);
+  const days = [...new Set(list.map(dayOf))];
+  const seg = `<span class="tseg">${TASK_FILTERS.map(([k, nm, fn]) => `<span class="${k === f[0] ? "on" : ""}" ${act("tfilter", k)}>${nm}<i>${TASKS.filter(fn).length}</i></span>`).join("")}</span>`;
+  const line = (t) => (V.taskEdit === t.id ? taskForm(t, false) : `<div class="task ${t.done ? "done" : ""} ${V.task === t.id ? "on" : ""}"
       data-task="${t.id}" ${act("task", t.id)}>
-    <span class="tick dot ${t.done ? "on" : ""}"
-      ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — elle reste ici, barrée"}">${t.done ? icon("check") : ""}</span>
-    <span class="col" style="flex:1;gap:2px;min-width:0">
-      <span class="lo bar" style="width:70%"></span>
-      <span class="hi ttl" style="font-size:12.5px">${t.title}</span>
-      <span class="lo bar" style="width:40%"></span>
-      <span class="hi" style="font-size:11px;color:var(--ink-3)">${whoLabel(t)} — ${t.phase}${
-        t.code ? ` — ${t.code}` : ""}${t.caught ? ` — relevé ${t.caught}` : ""}${
-        !t.done && t.day < TODAY ? " — en retard" : ""}</span>
-    </span>
+    <span class="tick dot ${t.done ? "on" : ""}" ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — elle passe sous « Faites »"}">${t.done ? icon("check") : ""}</span>
+    <span class="tw"><span class="ttl">${t.title}</span>
+      <span class="tmeta">${t.phase}${t.code ? ` — <code>${t.code}</code>` : ""}${t.caught ? ` — relevé ${t.caught}` : ""}${
+        !t.done && t.day < TODAY ? ` — <em>en retard</em>` : ""}</span></span>
+    ${t.done ? "" : `<span class="tact" ${act("tedit", t.id)} title="Modifier">${icon("pencil")}</span>`}
     ${avatars(t)}
-    ${t.done ? `<span class="hi file" ${act(t.archived ? "taskunfile" : "taskfile", t.id)}
-      title="${t.archived ? "Ressortir de l'archive" : "Ranger dans l'archive"}">${icon(t.archived ? "archive-restore" : "archive")}<span
-      class="hi">${t.archived ? "Ressortir" : "Archiver"}</span></span>`
-      : `<span class="hi pr" data-prio="${t.prio}">${t.prio}</span>`}
-    <span class="hi dte">${fmtDay(t.done ? t.doneAt || t.day : t.day)}</span>
-    ${t.done ? "" : `<span class="hi tact" ${act("tedit", t.id)} title="Modifier">${icon("pencil")}</span>`}
+    ${prioBars(t)}
   </div>`);
-  return `<div class="col" style="gap:7px">
-    <div class="row" style="gap:6px">
-      <span class="chip on"><span class="lo bar" style="width:40px"></span>
-        <span class="hi">${fmtDay(V.day)}</span></span>
-      <span class="chip"><span class="lo bar" style="width:40px"></span>
-        <span class="hi">${lateCount()} en retard</span></span>
-      <span style="flex:1"></span>
-      <span class="btnw" ${act("tnew")}>${icon("plus")}<span class="hi">Ajouter une tâche</span></span>
-    </div>
+  const group = (d) => {
+    const dl = list.filter((t) => dayOf(t) === d);
+    const cls = !journal && d === TODAY ? "today" : !journal && d < TODAY ? "late" : "";
+    return `<div class="tday ${cls}" data-tday="${d}"><b>${dayLabel(d)}</b>${cls === "today" ? `<span class="tbadge">aujourd'hui</span>` : ""}<span>${dl.length} tâche${dl.length > 1 ? "s" : ""}</span></div>
+      ${dl.map(line).join("")}`;
+  };
+  return `<div class="tlist">${seg}
     ${V.taskEdit === "new" ? taskForm(V.taskDraft, true) : ""}
-    ${archive.length ? `<div class="row arch" ${act("tarch")} style="gap:8px;margin-top:2px;cursor:pointer">
-      <span class="lo bar" style="width:70px"></span>
-      <span class="hi" style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;
-        display:flex;align-items:center;gap:4px">${icon(V.taskArch ? "chevron-down" : "chevron-right")}Archive — ${archive.length}</span>
-      <span style="flex:1;border-top:1px solid var(--line-2)"></span></div>
-      ${V.taskArch ? archive.map(line).join("") : ""}` : ""}
-    ${here.length ? here.map(line).join("")
-      : `<div class="tile"><span class="lo bar" style="width:60%"></span>
-          <span class="hi" style="font-size:12px;color:var(--ink-2)">Rien ce jour-là.</span></div>`}
-    <div class="row" style="gap:8px;margin-top:2px">
-      <span class="lo bar" style="width:70px"></span>
-      <span class="hi" style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em">La suite</span>
-      <span style="flex:1;border-top:1px solid var(--line-2)"></span></div>
-    ${rest.map(line).join("")}
+    ${days.map(group).join("") || `<div class="tnone">${journal ? "Rien n'est encore fait." : "Aucune tâche."}</div>`}
   </div>`;
 }
 
@@ -4765,10 +4762,11 @@ function contentHTML() {
       ${gutter({ size: "cal", grab: "prev", prev: "cal", next: "todo",
         lprev: "le calendrier", lnext: "la liste" })}
       ${folded("todo") ? foldStripHTML("todo", "la liste") : `<div class="pane" style="flex:1">
-        <div class="ph">${icon("list-checks")}<span class="lo bar" style="width:60px"></span>
-          <span class="hi">À faire</span><span style="flex:1"></span>
-          <span class="chip"><span class="lo bar" style="width:40px"></span>
-            <span class="hi">${TASKS.filter((t) => !t.done).length} ouvertes</span></span></div>
+        <div class="ph">${icon("list-checks")}<span class="hi" style="font-weight:600">À faire</span>
+          <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${TASKS.filter((t) => !t.done).length} ouvertes</span>
+          ${lateCount() ? `<span class="ibadge hi" ${act("tfilter", "late")} title="Voir les tâches en retard">${icon("alert-triangle")}${lateCount()} en retard</span>` : ""}
+          <span style="flex:1"></span>
+          <span class="btnw" ${act("tnew")}>${icon("plus")}<span class="hi">Ajouter une tâche</span></span></div>
         <div class="pb">${taskListHTML()}</div></div>`}
     </div>`,
   }[V.screen]();
@@ -7300,7 +7298,7 @@ function onClick(e) {
       say(`${id} — ${CLARITY_LABEL[k].toLowerCase()}, lecture de l'atelier.`);
       break;
     }
-        /* The article and every note written against it, as text: the mail to
+    /* The article and every note written against it, as text: the mail to
        the borough is written by pasting, not by retyping a number. */
     case "copyarticle": {
       const a = ARTICLES.find((x) => x.id === value);
@@ -7427,36 +7425,18 @@ function onClick(e) {
     }
     case "task": { V.task = V.task === value ? null : value; const t = TASKS.find((x) => x.id === value);
       if (t && !t.done) V.day = t.day; break; }
-    /* Ticking is not filing. A ticked task stays where it was, struck
-       through, until someone says it can go: the day's list has to show
-       what was finished today, and a line that vanishes under the cursor
-       is a line nobody can check. */
+    /* A tick moves the task to « Faites », the journal of what was done,
+       with the day it was closed on; ticking it there reopens it. */
     case "tasktick": {
       const t = TASKS.find((x) => x.id === value);
       if (!t) break;
       t.done = !t.done;
-      if (t.done) { t.doneAt = TODAY; say(`Faite: ${t.title}. Archiver pour la ranger.`); }
-      else { delete t.doneAt; delete t.archived; V.day = t.day; say(`Rouverte: ${t.title}`); }
+      if (t.done) { t.doneAt = TODAY; say(`Faite: ${t.title}. Elle est sous « Faites ».`); }
+      else { delete t.doneAt; V.day = t.day; say(`Rouverte: ${t.title}`); }
       if (V.taskEdit === t.id) V.taskEdit = null;
       break;
     }
-    case "taskfile": {
-      const t = TASKS.find((x) => x.id === value);
-      if (!t) break;
-      t.archived = true;
-      say(`Archivée: ${t.title}. Elle reste dans l'archive, en haut de la liste.`);
-      break;
-    }
-    /* Out of the archive and back onto its day, still ticked: pulling a
-       task out is not the same as saying it was never done. */
-    case "taskunfile": {
-      const t = TASKS.find((x) => x.id === value);
-      if (!t) break;
-      delete t.archived;
-      V.day = t.doneAt || t.day;
-      say(`Ressortie: ${t.title}`);
-      break;
-    }
+    case "tfilter": V.taskFilter = value; break;
     /* The editor -------------------------------------------------------
        One form serves the new task and the existing one. "new" writes into
        V.taskDraft, an id writes into that task, and in both cases the open
@@ -7503,7 +7483,6 @@ function onClick(e) {
       V.task = null;
       break;
     }
-    case "tarch": V.taskArch = !V.taskArch; break;
     /* Folding a pane forgets the width it was dragged to: coming back to
        a pane is coming back to the layout it was designed with, unless the
        edge is moved again. */
