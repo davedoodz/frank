@@ -613,7 +613,12 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .cal.big .day{min-height:76px}
 .cal .day:hover{background:var(--fill-2)}
 .cal .day.dim{color:var(--ink-3);background:var(--fill-2);opacity:.65}
-.cal .day.on{background:var(--fill);box-shadow:0 0 0 1px var(--ink) inset}
+.cal .day.on{background:var(--fill)}
+/* « + Tâche » at the foot of the chosen day only — one action at a time. */
+.cal .day .dadd{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;
+  border-radius:5px;background:var(--card);border:1px solid var(--line-2);font-size:11px;font-weight:500;color:var(--ink);white-space:nowrap}
+.cal .day .dadd .lu{width:12px;height:12px}
+.cal .day .dadd:hover{background:var(--ink);border-color:var(--ink);color:#fff}
 /* Today is the whole cell in the pale green of the page's highlights, the
    same ground a chosen row wears — not a chip around its number. */
 .cal .day.today{background:#eef3dc}
@@ -1243,6 +1248,13 @@ body.elev .mtools{display:none}
 .fqmix .mixbar span{display:flex;align-items:center;justify-content:space-between;gap:6px;
   min-width:0;overflow:hidden;padding:0 7px;color:#fff;font-size:11.5px;font-weight:600;white-space:nowrap}
 .fqmix .mixbar span small{font-size:11px;font-weight:500;opacity:.8;font-variant-numeric:tabular-nums}
+/* The bar is the switch: each band lays its own type on the plan, alone or
+   with the others, on every level. Once one is laid, the bands not on the
+   plan fade, so the bar reads as the plan's key. */
+.fqmix .mixbar.pick span{cursor:pointer}
+.fqmix .mixbar.pick span:hover{filter:brightness(.92)}
+.fqmix .mixbar.some span:not(.on){opacity:.35}
+.fqmix .mixbar.some span:not(.on):hover{opacity:.6}
 .fqmix .mixrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 /* The type column repeats the bands above it, so a row's type reads in the
    same colour as its share of the floor. */
@@ -1251,12 +1263,6 @@ body.elev .mtools{display:none}
 .fqt tr.on .tpill{border-color:var(--ink-3);color:var(--ink);font-weight:600}
 .fqmix .mixnet{font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .fqmix .mixnet b{color:var(--ink);font-weight:600}
-/* Where the mix is: one button lays every type's colour on the plan. */
-.fqmix .mixsee{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;
-  border:1px solid var(--line);border-radius:6px;background:var(--card);font-size:11.5px;font-weight:500;cursor:pointer;white-space:nowrap}
-.fqmix .mixsee svg{width:13px;height:13px}
-.fqmix .mixsee:hover{border-color:var(--ink)}
-.fqmix .mixsee.on{background:#111;color:#fff;border-color:#111}
 .laychips{display:flex;gap:4px;margin-right:6px;flex:0 0 auto}
 .laychips .chip{padding:1px 8px 1px 6px;font-size:11px;cursor:pointer;white-space:nowrap;
   display:inline-flex;align-items:center;gap:4px}
@@ -1697,7 +1703,7 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .ncard .resl{display:flex;align-items:center;gap:8px}
 .ncard .resby{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#2f7a4d;margin-right:auto}
 .ncard .resby .lu{width:11px;height:11px}
-/* Ouverts / Résolus: the archive is the second tab. */
+/* Actifs / Résolus: the archive is the second tab. */
 .ntabs{display:flex;gap:2px;border-bottom:1px solid var(--line-2);margin:2px -2px 0}
 .ntabs .ntab{padding:6px 10px;font-size:12px;color:var(--ink-2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .ntabs .ntab[aria-current="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
@@ -4258,7 +4264,8 @@ function calTitle() {
    that has to pass before the rest. Nothing else — a dot per task said
    only that the day was busy, and the titles under them turned the month
    into fine print. A day with nothing urgent carries nothing; what it
-   does hold is read by choosing the day. */
+   does hold is read by choosing the day. The chosen day, at month scale,
+   also offers « + Tâche »: the list's form, already dated to it. */
 function dayCell(s, dim, big) {
   const ts = tasksOn(s);
   const hot = ts.filter((t) => t.prio === "haute" && !t.done);
@@ -4270,7 +4277,8 @@ function dayCell(s, dim, big) {
     <span class="hi n">${dOf(s).getUTCDate()}</span>
     ${hot.length ? `<span class="hi dots">${hot.slice(0, cap).map(() =>
       `<i class="pflag">${FLAG_SOLID}</i>`).join("")}${
-      hot.length > cap ? `<em>+${hot.length - cap}</em>` : ""}</span>` : ""}</div>`;
+      hot.length > cap ? `<em>+${hot.length - cap}</em>` : ""}</span>` : ""}
+    ${big && !dim && s === V.day ? `<span class="hi dadd" ${act("tnew")} title="Ajouter une tâche le ${fmtDay(s)}">${icon("plus")}Tâche</span>` : ""}</div>`;
 }
 
 function monthGrid(y, m, big) {
@@ -5065,19 +5073,13 @@ function fqMixHTML(q, onPlan = true) {
   if (!q.count) return `<div class="fqmix"><div class="mixrow">
     <span class="mixnet">Aucune unité résidentielle à ce niveau</span></div></div>`;
   return `<div class="fqmix">
-    <div class="mixbar">${q.types.map(([ty, count, share]) =>
-      `<span style="flex:${(share * 1000).toFixed(0)} 0 0;background:${TYPO_INK[ty]}"
-        title="${count} unités de ${ty} — ${Math.round(share * 100)} % des pi² nets">${ty}<small>${Math.round(share * 100)} %</small></span>`).join("")}</div>
+    <div class="mixbar ${onPlan ? "pick" : ""} ${typosOn().length ? "some" : ""}">${q.types.map(([ty, count, share]) =>
+      `<span class="${V.typo[ty] ? "on" : ""}" style="flex:${(share * 1000).toFixed(0)} 0 0;background:${TYPO_INK[ty]}"
+        ${onPlan ? `${act("typo", ty)} aria-pressed="${!!V.typo[ty]}"` : ""}
+        title="${count} unités de ${ty} — ${Math.round(share * 100)} % des pi² nets${onPlan ? (V.typo[ty] ? " — retirer du plan" : " — voir sur le plan") : ""}">${ty}<small>${Math.round(share * 100)} %</small></span>`).join("")}</div>
     <div class="mixrow">
       <span class="mixnet"><b>${fqNum(q.net)}</b> pi² nets sur ${q.count} unités</span>
     </div>
-    ${(() => {
-      /* The mix says how many; this says where: every unit of the level
-         filled on the plan in its type's colour, the three types at once. */
-      const all = TYPOS.every((t) => V.typo[t]);
-      return onPlan ? `<span class="mixsee ${all ? "on" : ""}" ${act("typoall")} aria-pressed="${all}"
-        title="${all ? "Retirer les typologies du plan" : "Colorer chaque unité du plan selon sa typologie"}">${icon("eye")}Voir sur le plan</span>` : "";
-    })()}
   </div>`;
 }
 
@@ -5720,9 +5722,9 @@ function marginHTML() {
       <span class="mtabs">${tab("notes", "message-square", "Commentaires", open.length)}${tab("conf", "alert-triangle", "Conflits", nIssues)}</span></div>
     <div class="pb nmargin">
       ${V.marginTab === "conf" ? issuesListHTML() : `${composer}
-      <div class="ntabs">${subtab("o", "Ouverts", open.length)}${subtab("r", "Résolus", done.length)}</div>
+      <div class="ntabs">${subtab("o", "Actifs", open.length)}${subtab("r", "Résolus", done.length)}</div>
       ${shown.length ? shown.map(card).join("")
-        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">${tabOn === "o" ? "Aucun commentaire ouvert." : "Rien n'a encore été résolu."}</div>`}`}
+        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">${tabOn === "o" ? "Aucun commentaire actif." : "Rien n'a encore été résolu."}</div>`}`}
     </div>`;
   return `<section class="pane rg margin" data-rg="marge" data-fi="${fiOf("inspector")}"
     data-region="margin">${inner}</section>`;
@@ -6009,6 +6011,36 @@ function fitUnit(glide = true) {
      building seen from the side, which they are not. */
   if (!glide) { V.zoom = to.zoom; V.pan = to.pan; paintSheet(); return; }
   glideTo(to);
+}
+
+/* Choosing a comment shows its point: the drawing it sits on is unfolded,
+   the plan turns to its level, and once drawn the sheet slides to the pin
+   if the zoom had left it outside the pane. The zoom itself is kept. */
+function revealPin(p) {
+  if (p.surface === "model") { delete V.fold[splitKey("model")]; return; }
+  if (p.surface !== "plan") return;
+  delete V.fold[splitKey("plan")];
+  if (p.level !== paneLevel()) {
+    V.view["Unités"] = viewIndexOfLevel(p.level);
+    V.sel["Unités"] = -1;
+    V.scope = "Niveau";
+    if (isNonresLevel(p.level)) { V.zoom = 100; V.pan = { x: 0, y: 0 }; }
+  }
+  requestAnimationFrame(() => {
+    const el = vpEl(), mark = document.querySelector(`.zone[data-zone="plan"] .npin[data-value="${p.id}"]`);
+    if (!el || !mark) return;
+    const r = vpBox(el), m = mark.getBoundingClientRect(), b = el.getBoundingClientRect();
+    if (m.left > b.left + 24 && m.right < b.right - 24 && m.top > b.top + 40 && m.bottom < b.bottom - 24) return;
+    if (rotA()) return;   // a turned sheet is framed by its own turn, not by this
+    const base = layoutSheet(el), z = V.zoom / 100;
+    const from = { zoom: V.zoom, pan: { x: V.pan.x, y: V.pan.y } };
+    V.pan.x = r.width / 2 - p.x * base.w * z;
+    V.pan.y = r.height / 2 - p.y * base.h * z;
+    clampPan(r, V.zoom, base);
+    const to = { zoom: V.zoom, pan: { x: V.pan.x, y: V.pan.y } };
+    V.zoom = from.zoom; V.pan = from.pan;
+    glideTo(to);
+  });
 }
 
 /* Bidirectional selection: the 3D viewer raycasts a window, finds which
@@ -7549,13 +7581,11 @@ function onClick(e) {
          the screen: nothing should stay lit on a drawing no longer shown. */
       if (V.scope === "Bâtiment") TYPOS.forEach((ty) => { if (V.typo[ty]) dial.setValue(`typologies.${ty}`, false); });
       break;
-    /* The typologies are dials (the fidelity panel owns them), so the
-       button goes through the dial and lets applyDial write V. */
-    case "typoall": {
-      const on = !TYPOS.every((t) => V.typo[t]);
-      TYPOS.forEach((t) => dial.setValue(`typologies.${t}`, on));
+    /* The typologies are dials (the fidelity panel owns them), so a band
+       of the mix goes through the dial and lets applyDial write V. */
+    case "typo":
+      dial.setValue(`typologies.${value}`, !V.typo[value]);
       return;
-    }
     /* Four files would be four clicks; the four tables in one file are read
        as one sheet with four blocks, which is how a quantity take-off is
        passed around anyway. */
@@ -7810,9 +7840,13 @@ function onClick(e) {
       break;
     }
     case "notetab": V.noteTab = value; break;
-    case "note":
-      V.selPin = V.selPin === Number(value) ? null : Number(value);
+    case "note": {
+      const id = Number(value);
+      V.selPin = V.selPin === id ? null : id;
+      const pin = V.selPin && V.pins.find((x) => x.id === id);
+      if (pin) revealPin(pin);
       break;
+    }
     case "notedel":
       V.pins = V.pins.filter((p) => p.id !== Number(value));
       V.selPin = null;
