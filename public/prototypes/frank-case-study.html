@@ -228,6 +228,12 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .q{border-left:4px solid var(--vert);padding:4px 0 4px 26px}
 .q blockquote{font-size:28px;line-height:1.35;letter-spacing:-.015em;color:var(--ink);font-weight:500;text-wrap:pretty}
 .q cite{display:block;font-style:normal;margin-top:14px;font-size:16px;color:var(--ink-3)}
+/* the three core notes from a test: an icon, the theme, what was asked */
+.core{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:16px}
+.core li{display:grid;grid-template-columns:40px 1fr;column-gap:14px;align-items:start}
+.core svg{grid-row:span 2;width:40px;height:40px;padding:9px;border-radius:10px;background:var(--fill);fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.core b{font-size:18px;font-weight:600;color:var(--ink);line-height:1.25}
+.core span{font-size:16px;line-height:1.4;color:var(--ink-2)}
 
 /* "Instead of … I chose …" */
 .dec{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:56px}
@@ -409,10 +415,19 @@ tr.hl td{background:var(--vert-pale)}
 a.dep{transition:box-shadow .16s ease}
 a.dep:hover{box-shadow:0 0 0 2px var(--vert)}
 .chap-side>p:first-child{font-size:17px}
-.sets{display:flex;flex-direction:column;gap:14px;margin-top:12px}
-.set .k{display:block;margin-bottom:4px;color:var(--ink)}
-.set p{font-size:17px;padding:5px 0}
-.set .n,.chaps .n{font-family:var(--pixel);font-size:13px;color:var(--vert-dark);letter-spacing:.09em;margin-right:12px}
+/* The problems a prototype raised: one flat list with an icon per problem.
+   The group eyebrows are gone — the icon carries the kind, the number carries
+   the order, and the reader is not asked to hold two taxonomies at once. */
+.sets{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;margin-top:12px}
+.sets p{display:grid;grid-template-columns:20px 26px 1fr;align-items:center;gap:0 10px;font-size:17px;padding:6px 0}
+.sets .pi{width:19px;height:19px;color:var(--ink-3)}
+.sets .n,.chaps .n{font-family:var(--pixel);font-size:13px;color:var(--vert-dark);letter-spacing:.09em}
+/* The delta line: what the previous prototype was, and what this one became. */
+.delta{display:grid;grid-template-columns:1fr 20px 1fr;align-items:start;gap:14px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.delta b{display:block;font-family:var(--pixel);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:400;margin-bottom:5px}
+.delta span{font-size:16px;line-height:1.4;color:var(--ink-2)}
+.delta .on span{color:var(--ink)}
+.delta .ar{width:18px;height:18px;align-self:center;color:var(--ink-3);fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .chap-side .links{margin-top:26px}
 .chap-side .links a{white-space:nowrap;font-size:18px}
 .chap-side .links a .mono{font-size:13px}
@@ -873,7 +888,10 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     <div class="chap-side">
       <p>A asked whether one project overview makes information and revisions easier to find. B asked whether connecting the AutoCAD plans to the SketchUp model cuts manual coordination. The interviews on October 26 chose B, but not for the sync. What they wanted from it was a record of every change and who asked for it.</p>
       <p class="k" style="margin-top:28px">Problems it raised</p>
-      <div class="sets"><div class="set"><span class="k">Which product</span><p><span class="n">01</span>Direction</p></div><div class="set"><span class="k">What the city asks</span><p><span class="n">02</span>Codes</p></div></div>
+      <div class="sets">
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22V12"/><path d="m21 3-9 9-9-9"/></svg><span class="n">01</span>Direction</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="n">02</span>Codes</p>
+      </div>
       <div class="links"><a href="https://cafitte-prototype1.vercel.app/prototypes/index.html" target="_blank" rel="noopener">Open prototype 1 <span class="mono">cafitte-prototype1.vercel.app</span><svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
     </div>
   </div>
@@ -998,9 +1016,21 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <div class="chap-o">
     <a class="live shotl" href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/chap-p2-app.jpg" alt="Prototype 2 as deployed: level 5 with the units table, the 2D plan and its drawing layers, the 3D model and the comments"></a>
     <div class="chap-side">
-      <p>C is direction B built on the real permit set of a 104-unit building: eight floors, the SketchUp model and the engineers’ drawings as layers. Selecting a unit anywhere selects it everywhere. The test on October 28 raised how the screen is read, not what it lacks.</p>
+      <p>Direction B, rebuilt on the real permit set of a 104-unit building. Selecting a unit anywhere selects it everywhere.</p>
+      <div class="delta">
+        <div><b>Prototype 1</b><span>Two drawn directions, one invented floor, side by side on the screen.</span></div>
+        <svg class="ar" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        <div class="on"><b>Prototype 2</b><span>One workspace: eight real floors, the SketchUp model, the engineers' drawings as layers.</span></div>
+      </div>
       <p class="k" style="margin-top:28px">Problems it raised</p>
-      <div class="sets"><div class="set"><span class="k">Finding your way</span><p><span class="n">03</span>Navigation</p><p><span class="n">04</span>Words</p></div><div class="set"><span class="k">Seeing the drawing</span><p><span class="n">05</span>Room for the drawing</p><p><span class="n">06</span>Reading the plan</p><p><span class="n">07</span>Drawing layers</p><p><span class="n">08</span>3D model</p></div></div>
+      <div class="sets">
+        <p><svg class="pi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m16 8-2.6 5.4L8 16l2.6-5.4z"/></svg><span class="n">03</span>Navigation</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M12 4v16"/><path d="M9 20h6"/></svg><span class="n">04</span>Words</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg><span class="n">05</span>Room for the drawing</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span class="n">06</span>Reading the plan</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="m12 3 9 4.5-9 4.5-9-4.5z"/><path d="m3 12 9 4.5 9-4.5"/><path d="m3 16.5 9 4.5 9-4.5"/></svg><span class="n">07</span>Drawing layers</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span class="n">08</span>3D model</p>
+      </div>
       <div class="links"><a href="https://cafitte-prototype2.vercel.app/prototypes/index.html" target="_blank" rel="noopener">Open prototype 2 <span class="mono">cafitte-prototype2.vercel.app</span><svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
     </div>
   </div>
@@ -1042,7 +1072,13 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <div class="rule"></div>
   <div class="cols c5-7" style="margin-top:56px">
     <div class="q"><blockquote>Both technicians focused on usability and workflow details rather than new features.</blockquote><cite>Central finding, prototype 2 testing notes</cite>
-      <p style="margin-top:28px">So prototype 3 added little. It made what was there behave the way an architect expects.</p></div>
+      <p style="margin-top:28px">So prototype 3 added little. It made what was there behave the way an architect expects.</p>
+      <p class="k" style="margin-top:40px">Core feedback</p>
+      <ul class="core">
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg><b>Drawings</b><span>Zoom further, resize the panes, reach earlier versions.</span></li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg><b>Totals</b><span>Count per façade, and show the unit mix and the net area.</span></li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg><b>Words</b><span>Use the office’s terms, not the software’s.</span></li>
+      </ul></div>
     <figure style="margin:0;display:flex;flex-direction:column;min-height:0">
       <div class="shot" style="aspect-ratio:3/2"><img src="assets/frank/feedback2-users.jpg" alt="A technician explaining a detail across the office table, the laptop open between us" style="object-position:50% 40%"></div>
       <figcaption class="cap">Testing prototype 2 with a technician at the office table.</figcaption>
@@ -1090,7 +1126,12 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     <div class="chap-side">
       <p>Frank keeps C’s single floor and fixes how it is used day to day: quantities where the units are, a schedule across projects, comments that know who can read them, and panes that never crop a number.</p>
       <p class="k" style="margin-top:28px">Problems it raised</p>
-      <div class="sets"><div class="set"><span class="k">The work around the drawing</span><p><span class="n">09</span>Quantities</p><p><span class="n">10</span>Schedule</p></div><div class="set"><span class="k">Sharing and using it</span><p><span class="n">11</span>Comments</p><p><span class="n">12</span>Panes</p></div></div>
+      <div class="sets">
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="M3 4h18v16H3z"/><path d="M3 9h18"/><path d="M3 14.5h18"/><path d="M10 9v11"/></svg><span class="n">09</span>Quantities</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg><span class="n">10</span>Schedule</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="n">11</span>Comments</p>
+        <p><svg class="pi" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/><path d="M15 4v16"/></svg><span class="n">12</span>Panes</p>
+      </div>
       <div class="links"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Open Frank <span class="mono">hey-its-frank.vercel.app</span><svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
     </div>
   </div>
