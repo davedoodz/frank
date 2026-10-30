@@ -3582,6 +3582,10 @@ function goIssue(id) {
       ?.scrollIntoView({ block: "center", inline: "nearest" });
     return;
   }
+  /* A conflict is read on the drawings: the model folds to its strip so the
+     sheet takes the width. The strip reopens it. */
+  V.fold[splitKey("model")] = true;
+  delete V.split[splitKey("model")];
   const c = CROSSINGS.find((x) => x[0] === id);
   if (it.kind === "plan") {
     V.lay.plan.on = true;
@@ -4373,6 +4377,15 @@ function taskListHTML() {
       <span class="tmeta">${t.phase}${t.code ? ` — <code>${t.code}</code>` : ""}${t.caught ? ` — relevé ${t.caught}` : ""}</span>
       <span class="tdates">créée le ${fmtDay(t.createdAt)}${t.done && t.doneAt ? ` · cochée le ${fmtDay(t.doneAt)}` : ""}${
         t.archived ? ` · échéance ${fmtDay(t.day)}` : ""}</span></span>
+    ${(() => {
+      /* A task born from a conflict keeps the way back to it: the row says
+         which unit and level, and the button lays the two drawings that
+         reveal it and opens its card there. Only while the conflict is
+         open — once it is settled there is nothing to go and see. */
+      const c = t.src && CROSSINGS.find((x) => x[0] === t.src && !x[5]);
+      return c ? `<span class="tfile" ${act("taskgo", t.src)}
+        title="Voir ${c[0]} sur le plan — ${c[3] ? "unité " + c[3] + ", " : ""}niveau ${c[4]}">${icon("layers")}Voir sur le plan</span>` : "";
+    })()}
     ${t.done ? "" : `<span class="tact" ${act("tedit", t.id)} title="Modifier">${icon("pencil")}</span>`}
     ${t.done && !t.archived ? `<span class="tfile" ${act("taskfile", t.id)} title="Ranger dans « Archivées »">${icon("archive")}Archiver</span>` : ""}
     ${avatars(t)}
@@ -7641,6 +7654,9 @@ function onClick(e) {
       say(t.prio === "haute" ? `À passer avant le reste: ${t.title}` : `${t.title} repasse avec le reste.`);
       break;
     }
+    /* Straight to the conflict: goIssue does the whole move — the screen,
+       the two sheets, the level, the unit and the card. */
+    case "taskgo": goIssue(value); return;
     case "tfilter": V.taskFilter = value; break;
     /* The editor -------------------------------------------------------
        One form serves the new task and the existing one. "new" writes into
