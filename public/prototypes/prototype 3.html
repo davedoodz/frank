@@ -564,6 +564,20 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .fqs{font-size:12px;font-weight:400;color:var(--ink-2);margin-left:6px}
 .fqn{font-size:11px;color:var(--ink-3)}
 .fq-unit{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:10px}
+/* Façade tables: the head row opens the elevation, a material row keeps
+   that material in colour. The swatch is the colour the model paints it. */
+.fq-fac{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line-2);padding-top:10px}
+.ftbl thead tr{cursor:pointer}
+.ftbl thead th{color:var(--ink);font-size:12px;font-weight:600;border-bottom-color:var(--line)}
+.ftbl thead th svg{width:13px;height:13px;margin-right:6px;vertical-align:-2px;color:var(--ink-3)}
+.ftbl thead tr:hover th{background:var(--fill)}
+.ftbl.open thead th{background:#111;color:#fff}
+.ftbl.open thead th svg{color:#fff}
+.ftbl.open thead tr:hover th{background:#000}
+.ftbl td:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;width:100%}
+.ftbl .fsw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;vertical-align:-1px}
+.ftbl .fno{display:inline-block;min-width:16px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+body.elev .mtools{display:none}
 [data-theme="dark"] .tbl tr.on td{background:#2b3313}
 /* A figure and its head belong on one line: a wrapped "pi² total" stops
    being a column heading and becomes two words floating over numbers. */
@@ -827,6 +841,22 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .lmenu .mi{padding:5px 8px;cursor:pointer}
 .lmenu .mi:hover{background:var(--fill-2)}
 .lmenu .mi + .mi{border-top:1px solid var(--line-2)}
+.lmenu .mi.hist{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.lmenu .mi.hist .lu{width:12px;height:12px;flex:0 0 12px;color:var(--ink-3)}
+.lmenu .mi.hist.open{background:var(--fill-2)}
+.lmenu .mi.hist.open .lu{transform:rotate(180deg)}
+/* The previous documents hang under their row, newest first: the
+   revision, the file, the date. */
+.lpast{display:flex;flex-direction:column;border-top:1px solid var(--line-2);background:var(--fill-2)}
+.lpast .pd{display:grid;grid-template-columns:auto 1fr;column-gap:7px;row-gap:1px;
+  padding:5px 8px 5px 10px;cursor:pointer}
+.lpast .pd + .pd{border-top:1px solid var(--line)}
+.lpast .pd:hover{background:var(--fill)}
+.lpast .tg{grid-row:span 2;align-self:center;font-family:var(--mono);font-size:10.5px;color:var(--ink-2);
+  border:1px solid var(--line-2);border-radius:999px;padding:0 6px;background:var(--card)}
+.lpast .pf{font-family:var(--mono);font-size:10.5px;color:var(--ink);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.lpast .pdt{font-size:10.5px;color:var(--ink-3)}
 /* The export menu hangs off the table's header, right-aligned to the
    button that opens it so it never leaves the pane. */
 .expwrap{position:relative;display:inline-flex}
@@ -983,7 +1013,20 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .npin.back{opacity:.32}
 /* Pin mode: the next click on either drawing puts a point down, and both
    panes say so with the cursor. */
-[data-pin="on"] .zone{cursor:crosshair}
+/* Holding a pin is a state of the pointer and of the drawing both: the
+   cursor is the pin itself, and the 2D pane is ringed so it is plain which
+   surface will take it. The model is not one of them. */
+[data-pin="on"] .zone[data-zone="plan"] .vp,
+[data-pin="on"] .zone[data-zone="plan"] .vp .plan{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='-3 -3 30 30' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='5'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3Cg stroke='%23111' stroke-width='2'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3C/svg%3E") 12 26, crosshair}
+[data-pin="on"] .zone[data-zone="plan"]{box-shadow:inset 0 0 0 2px #8ba00f}
+/* The pin is armed on the drawing it lands on, top left of the 2D pane. */
+.pinarm{position:absolute;left:12px;top:12px;z-index:9;display:inline-flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);
+  font-size:12px;color:var(--ink);cursor:pointer;box-shadow:0 2px 6px rgba(17,17,18,.12);user-select:none}
+.pinarm:hover{border-color:var(--ink)}
+.pinarm svg{width:14px;height:14px}
+.pinarm.on{background:#c3e05a;border-color:#2f3a05;color:#2f3a05;font-weight:500}
+[data-fi="low"] .pinarm{display:none}
 [data-fi="low"] .npin,[data-fi="low"] .ncard .anch{display:none}
 .north text{fill:var(--ink);font-size:17px;font-weight:500;text-anchor:middle}
 [data-fi="low"] .north{display:none}
@@ -1048,10 +1091,10 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 /* No border of its own: the pane around it now states the edge, and two
    boxes one inside the other state it twice. */
 .model3d{position:relative;flex:1;min-height:0;overflow:hidden;
-  background:#f1f3f4 url(assets/skp-facade.jpg) center/contain no-repeat}
+  background:transparent url(assets/skp-facade.jpg) center/contain no-repeat}
 .model3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;
   opacity:0;touch-action:none;transition:opacity .18s ease}
-.model3d[data-state="ready"]{background:#f1f3f4}
+.model3d[data-state="ready"]{background:transparent}
 .model3d[data-state="ready"] .model3d-canvas{opacity:1}
 .model3d-status{position:absolute;left:50%;bottom:12px;z-index:2;transform:translateX(-50%);
   border:1px solid rgba(17,17,18,.12);border-radius:999px;background:rgba(255,255,255,.9);
@@ -1203,6 +1246,7 @@ svg.lu{width:14px;height:14px;stroke-width:1.8;color:currentColor}
 <script src="vendor/dialkit/browser.global.js"></script>
 <script src="assets/engineering/sheets.js"></script>
 <script src="wireframe-c3-circulation.js"></script>
+<script src="wireframe-c3-materials.js"></script>
 <script>
 /* ---------------------------------------------------------------- state */
 
@@ -1282,6 +1326,7 @@ const V = {
   pinMode: false,       // the next click on a drawing puts a point down
   pending: null,        // a point put down, waiting for its sentence
   draft: "",
+  mdraft: "",           /* the comment being written in the margin */
   selPin: null,
   /* Where the sheet has been dragged to inside the 2D pane, in pixels of
      the pane. Zoom and pan are one pair: the wheel writes both. */
@@ -1352,6 +1397,7 @@ const V = {
   layCard: true,
   exportMenu: false,  /* the format list on the table's header */
   layMenu: false,
+  layHist: false,     /* the previous-documents list inside that menu */
 };
 
 const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
@@ -1383,7 +1429,9 @@ function sprite() {
     /* Codes: copying an article with its notes, writing to the person who answers for it */
     "copy", "mail", "upload", "paperclip",
     /* the 3D pane's drag tools: orbit, move */
-    "rotate-3d", "move"];
+    "rotate-3d", "move",
+    /* a façade table's head: open its elevation */
+    "scan"];
   const defs = names.map((n) => {
     const node = lucide.icons[toPascal(n)];
     if (!node) return "";
@@ -2079,19 +2127,46 @@ const layStripHTML = () => `<div class="lstrip hi" data-lstrip>
 /* The card is the drawing's document: what it is, which file, what can be
    done with it, and how strongly it is laid on the sheet. Nothing about
    the pile — that is the badge's job. */
+/* The documents this sheet replaced, newest first. Sample issues for the
+   prototype: the earlier revisions are named, not read from a drawing. */
+const LAY_PAST = {
+  arp: [["2026-08-19", "19 août 2026"], ["2026-05-12", "12 mai 2026"], ["2026-02-03", "3 févr 2026"]],
+  pay: [["2026-05-22", "22 mai 2026"], ["2026-03-11", "11 mars 2026"], ["2025-12-04", "4 déc 2025"]],
+};
+const PLAN_PAST_DATES = ["3 oct 2026", "29 août 2026", "14 juil 2026"];
+function layHistory(k) {
+  const file = LAYDOC[k].file();
+  const [stem, ext] = [file.replace(/\.[^.]+$/, ""), file.split(".").pop()];
+  if (k === "plan") {
+    const n = Number(String(sheet().rev).slice(1)) || 4;
+    return [1, 2, 3].map((i) => {
+      const rev = `R${String(n - i).padStart(2, "0")}`;
+      return { tag: rev, file: `${stem}_${rev}.${ext}`, date: PLAN_PAST_DATES[i - 1] };
+    });
+  }
+  if (LAY_PAST[k]) return LAY_PAST[k].map(([iso, date], i) => ({
+    tag: `v${3 - i}`, file: file.replace(/\d{4}-\d{2}-\d{2}/, iso), date }));
+  return [3, 2, 1].map((em) => ({ tag: `Ém. ${em}`, file: `${stem}_EM${em}.${ext}`, date: "émission précédente" }));
+}
+
 function layCardHTML() {
   if (!V.layCard) return "";
   const k = layKeys().includes(V.layPick) ? V.layPick : "plan";
   const D = LAYDOC[k], op = Math.round(V.lay[k].opacity);
-  const items = [[D.act, `Ouvrir dans ${D.app}`], ["lswap", "Changer le document…"],
-    ["lhist", "Voir les documents précédents (3)"]];
+  const past = layHistory(k);
   return `<div class="lcard" data-lcard data-anchor="${k}">
     <div class="hd"><b>${D.disc}</b><span class="dt">${D.date()}</span>
       <span class="x" ${act("lclose")} title="Fermer">${icon("x")}</span></div>
     <div class="fn">${D.file()}</div>
     <span class="docbtn" ${act("ldoc")}>${icon("file")}Document ${icon("chevron-down")}</span>
-    ${V.layMenu ? `<div class="lmenu">${items.map(([a, t]) =>
-      `<span class="mi" ${act(a, k)}>${t}</span>`).join("")}</div>` : ""}
+    ${V.layMenu ? `<div class="lmenu">
+      <span class="mi" ${act(D.act, k)}>Ouvrir dans ${D.app}</span>
+      <span class="mi" ${act("lswap", k)}>Changer le document…</span>
+      <span class="mi hist ${V.layHist ? "open" : ""}" ${act("lhist", k)} aria-expanded="${V.layHist}">
+        Voir les documents précédents (${past.length})${icon("chevron-down")}</span>
+      ${V.layHist ? `<div class="lpast">${past.map((p, i) => `<span class="pd" ${act("lold", `${k}|${i}`)} title="${p.file}">
+        <span class="tg">${p.tag}</span><span class="pf">${p.file}</span><span class="pdt">${p.date}</span></span>`).join("")}</div>` : ""}
+    </div>` : ""}
     <div class="oprow"><span class="oplbl">${icon("blend")}Opacité</span>
       <span class="optrack" data-lop="${k}" title="Opacité ${LAYDOC[k].short} — ${op}%">
         <span class="fill" style="width:${op}%"></span>
@@ -3188,7 +3263,7 @@ function contentHTML() {
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}${conflictMarkHTML()}${pinMarkHTML()}</div></div>
-              ${north("plan")}${mini("plan")}${zcol("plan")}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}${pinBubbleHTML()}</div>`
+              ${north("plan")}${mini("plan")}${zcol("plan")}${pinArmHTML()}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}${pinBubbleHTML()}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
@@ -3316,12 +3391,9 @@ function quantScreenHTML(step) {
 /* ------------------------------------------------ the floor's quantities
    On a floor the unit list is the floor's area table: every unit with its
    type, net area and share, the floor's totals at the foot, and under it
-   the selected unit's share of what the floor counts. A click in the
-   table, on the plan or on the model moves the selection, and the green
-   row follows. Windows and materials have no per-floor count in the
-   drawings yet: the unit's figures are the building schedule shared out by
-   net area, and the block says so. */
-const BUILDING_NET = ALL_UNITS.reduce((s, r) => s + r[6], 0);
+   the selected unit's windows, counted in the 3D model. The materials are
+   read per façade, not per unit: a material is ordered and checked by
+   elevation, so the list ends on one table per façade. */
 const fqNum = (n, d = 0) => n.toLocaleString("fr-CA", { minimumFractionDigits: d, maximumFractionDigits: d });
 const fqPct = (a, b) => `${b ? Math.round(a / b * 100) : 0} %`;
 const unitNo = (r) => r[0].split(" — ")[0];
@@ -3336,7 +3408,6 @@ function floorQuant() {
   const types = [...new Set(floor.map((r) => r[5]))].sort();
   const ofType = (ty) => floor.filter((r) => r[5] === ty);
   const mean = unit ? ofType(unit[5]).reduce((s, r) => s + r[6], 0) / ofType(unit[5]).length : 0;
-  const unitShare = (q) => (unit ? q * unit[6] / BUILDING_NET : 0);
   return {
     level: viewOf("Unités"), unit, u: unit ? unitNo(unit) : null,
     /* A count answers "how many 4½"; the share answers "what kind of floor
@@ -3357,8 +3428,6 @@ function floorQuant() {
       ["Circulation", "", fqNum(brut - net), fqNum((brut - net) * M2), "15 %"],
       ["Brut", "", fqNum(brut), fqNum(brut * M2), ""]],
     versus: unit ? `${unit[6] >= mean ? "+" : "−"}${fqNum(Math.abs(unit[6] - mean))} pi² par rapport à la moyenne des ${unit[5]} de l'étage` : "",
-    windows: QTABS["Fenêtres"].rows.map((r) => [r[0], fqNum(unitShare(r[3]), 1)]),
-    materials: QTABS["Matériaux"].rows.map((r) => [r[0], fqNum(unitShare(r[2]), 1)]),
   };
 }
 
@@ -3393,14 +3462,81 @@ function fqTableHTML(q) {
     <div class="fqn">net : étiquettes du plan — circulation : 15 %, comme le tableau du bâtiment</div></div>`;
 }
 
+/* The unit's openings, counted in the model: its panes, grouped into the
+   openings they belong to, by the façade they look onto. A patio door is
+   an opening that starts at the floor. */
+function fqWindowsHTML(u) {
+  if (!u) return "";
+  const faces = window.fitteModel?.unitWindows?.(u);
+  if (!faces) return `<div class="fqn">Fenêtres : lecture de la maquette 3D…</div>`;
+  if (!faces.length) return `<div class="fqn">Aucun vitrage de la maquette n'est rattaché à l'unité ${u}.</div>`;
+  const order = ["nord", "est", "sud", "ouest"];
+  const rows = faces.slice().sort((a, b) => order.indexOf(a.face) - order.indexOf(b.face));
+  const ft2 = window.fitteMaterials.FT2_PER_UNIT2;
+  const sum = (k) => rows.reduce((s, f) => s + f[k], 0);
+  const cell = (c, n) => `<td class="${n ? "n" : ""}">${c}</td>`;
+  return `<table class="tbl"><thead><tr><th>Ouvertures</th><th class="n">Fenêtres</th><th class="n">Portes-patio</th><th class="n">Vitrage pi²</th></tr></thead>
+    <tbody>${rows.map((f) => `<tr>${cell(`Façade ${f.face}`)}${cell(f.windows, 1)}${cell(f.doors, 1)}${cell(fqNum(f.glass * ft2), 1)}</tr>`).join("")}</tbody>
+    <tfoot><tr>${cell("Total")}${cell(sum("windows"), 1)}${cell(sum("doors"), 1)}${cell(fqNum(sum("glass") * ft2), 1)}</tr></tfoot></table>
+    <div class="fqn">compté dans la maquette 3D : vitrages de l'unité regroupés en ouvertures</div>`;
+}
+
 function fqUnitHTML(q) {
-  const pairs = (rows) => rows.map(([k, v]) => `<tr><td>${k}</td><td class="n">${v}</td></tr>`).join("");
   return `<div class="fq-unit" data-fq>
     <div class="fqh">${icon("box")}<span>Unité ${q.u || "—"}</span><span class="fqs">${q.unit ? `${q.unit[5]} — ${fqNum(q.unit[6])} pi²` : ""}</span></div>
     ${q.versus ? `<div class="fqn">${q.versus}</div>` : ""}
-    <table class="tbl"><thead><tr><th>Fenêtres</th><th class="n">qté</th></tr></thead><tbody>${pairs(q.windows)}</tbody></table>
-    <table class="tbl"><thead><tr><th>Matériaux</th><th class="n">m²</th></tr></thead><tbody>${pairs(q.materials)}</tbody></table>
-    <div class="fqn">estimation : bordereau du bâtiment réparti par superficie nette — à vérifier</div></div>`;
+    ${fqWindowsHTML(q.u)}</div>`;
+}
+
+/* The materials of each façade, as the elevation sheet's legend numbers
+   them, in square feet and as a share of that façade. The areas are what
+   each material covers in the model's elevation of that façade. A click
+   on a façade turns the model to that elevation, square and without
+   perspective, every material in the colour of its swatch; a click on a
+   material keeps that one in colour and greys the rest. A second click on
+   the open façade goes back to the 3D view. */
+const FACADES = ["nord", "est", "sud", "ouest"];
+function facadeTablesHTML() {
+  const fm = window.fitteMaterials;
+  const data = window.fitteModel?.facades?.();
+  const open = V.facade;
+  const head = `<div class="fqh">${icon("layers")}<span>Matériaux par façade</span><span class="fqs">pi² vus en élévation</span>
+    ${open ? `<span style="flex:1"></span><span class="btnw sm" ${act("facade", open.face)} title="Revenir à la vue 3D">${icon("rotate-3d")}<span class="hi">Vue 3D</span></span>` : ""}</div>`;
+  if (!data) return `<div class="fq-fac" data-facades>${head}<div class="fqn">Lecture de la maquette 3D…</div></div>`;
+  const absent = fm.CATEGORIES.filter((c) => FACADES.every((f) => !(data[f].find((r) => r.n === c.n)?.ft2 >= 1)));
+  const tables = FACADES.map((face) => {
+    const rows = data[face].filter((r) => r.ft2 >= 1);
+    const total = rows.reduce((s, r) => s + r.ft2, 0);
+    const on = open?.face === face;
+    const body = rows.map((r) => {
+      const c = fm.category(r.n);
+      return `<tr class="${on && open.focus === r.n ? "on" : ""}" ${act("facmat", `${face}|${r.n}`)} title="${c.note}">
+        <td><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}</td>
+        <td class="n">${fqNum(r.ft2)}</td><td class="n">${fqPct(r.ft2, total)}</td></tr>`;
+    }).join("");
+    return `<table class="tbl ftbl ${on ? "open" : ""}">
+      <thead><tr ${act("facade", face)} title="${on ? "Revenir à la vue 3D" : `Voir l'élévation ${face} dans la maquette`}">
+        <th>${icon(on ? "eye" : "scan")}Façade ${face}</th><th class="n">pi²</th><th class="n">Part</th></tr></thead>
+      <tbody>${body}</tbody>
+      <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td></tr></tfoot></table>`;
+  }).join("");
+  return `<div class="fq-fac" data-facades>${head}${tables}
+    <div class="fqn">aires lues dans la maquette 3D, élévation par élévation ; numéros de la légende des élévations${
+      absent.length ? ` — absent de la maquette : ${absent.map((c) => `${c.n} ${c.name.toLowerCase()} (${c.note.split(" · ").pop()})`).join(", ")}` : ""}</div></div>`;
+}
+
+/* What the viewer reads to draw an elevation, set with the list. A screen
+   without the façade tables has no way out of an elevation: none there. */
+function syncElevation() {
+  const open = V.facade && document.querySelector("[data-facades]");
+  window.fitteElevation = open ? { face: V.facade.face, focus: V.facade.focus || 0 } : null;
+  // An elevation only moves and zooms: there is no drag tool to choose.
+  document.body.classList.toggle("elev", Boolean(open));
+}
+function paintFacades() {
+  document.querySelector("[data-facades]")?.replaceWith(document.createRange().createContextualFragment(facadeTablesHTML()));
+  syncElevation();
+  window.dispatchEvent(new CustomEvent("fitte:render"));
 }
 
 /* One table, four ways out of it: the spreadsheet the broker opens, the
@@ -3429,6 +3565,7 @@ function unitListHTML(step) {
        ${fqMixHTML(q)}
        ${fqTableHTML(q)}
        ${fqUnitHTML(q)}
+       ${facadeTablesHTML()}
      </div>`, step);
 }
 
@@ -3711,6 +3848,17 @@ function pinBubbleHTML() {
   </div>`;
 }
 
+/* Armed, the button is not a button any more: it is the pin, held. It
+   stays lit, it says what to do with it, and it is the way out of the
+   state as well — nothing else on the pane has to be hunted for. Only the
+   2D pane carries it: a point on a render is a point on nothing the
+   drawings can be measured against. */
+function pinArmHTML() {
+  return `<span class="pinarm ${V.pinMode ? "on" : ""}" ${act("pinmode")}
+    title="${V.pinMode ? "Échap pour reposer l'épingle" : "Déposer une épingle sur le plan — ou double-cliquez le plan directement"}">${icon("map-pin")}<span
+    class="hi">${V.pinMode ? "Cliquez un point du plan" : "Épingler"}</span></span>`;
+}
+
 function marginHTML() {
   const list = pinsVisible();
   const team = V.pinScope === "equipe";
@@ -3719,38 +3867,35 @@ function marginHTML() {
     <span class="tie"></span>
     <div class="who">${icon(p.scope === "equipe" ? "lock" : "circle")}<b>${p.who}</b><span class="when">${p.when}</span></div>
     <div class="txt">${p.txt}</div>
-    <div class="anch">${icon(p.surface === "model" ? "box" : "file")}${pinAnchor(p)}</div>
+    ${p.surface ? `<div class="anch">${icon(p.surface === "model" ? "box" : "file")}${pinAnchor(p)}</div>` : ""}
     ${p.id === V.selPin ? `<div class="nact"><span class="chip" ${act("notedel", p.id)}>${icon("trash-2")}<span class="lb">Supprimer</span></span></div>` : ""}
   </div>`;
-  /* The composer only appears once a point is down: a note without a place
-     is exactly what this margin exists to prevent. */
-  const composer = V.pending && V.pending.surface === "model"
-    ? `<div class="ncard new ${team ? "team" : ""}">
-        <div class="anch">${icon("map-pin")}${pinAnchor({ ...V.pending, scope: V.pinScope })}</div>
+  /* Two kinds of comment, one composer. Most of what is said about a
+     project is said about the project — "la grille est encore à R04" has
+     no point on a drawing — so writing is never gated on placing. The pin
+     is an option on what has been written: it arms the plan and carries
+     the sentence over to the bubble, which is where a placed note belongs.
+     A pin is a 2D act: a point on a render names nothing the drawings can
+     be measured against. */
+  const composer = `<div class="ncard new ${team ? "team" : ""}">
         <div class="row nscope">
           <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">À l'interne</span></span>
           <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
         </div>
-        <textarea class="hi nnew" data-pindraft rows="3"
-          placeholder="${team ? "Note interne — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
+        <textarea class="hi nnew" data-mdraft rows="3"
+          placeholder="${team ? "Commentaire interne — l'invité ne le verra pas" : "Commentaire partagé — visible par le lien"}">${V.mdraft.replace(/</g, "&lt;")}</textarea>
         <div class="nact">
-          <span class="chip" ${act("pincancel")}>Annuler</span>
-          <span class="btnw solid go" ${act("pinpost")}>${icon(team ? "lock" : "send")}<span class="hi">${team ? "Garder à l'interne" : "Poser l'épingle"}</span></span>
-        </div></div>`
-    : "";
+          <span class="chip ${V.pinMode ? "on" : ""}" ${act("markpin")} title="Armer l'épingle, puis cliquer un point du plan">${icon("map-pin")}<span class="lb">${V.pinMode ? "Cliquez le plan" : "Épingler au plan"}</span></span>
+          <span style="flex:1"></span>
+          <span class="btnw solid go" ${act("postnote")}>${icon(team ? "lock" : "send")}<span class="hi">Commenter</span></span>
+        </div></div>`;
   const inner = `<div class="ph">${icon("message-square")}<span class="lo bar" style="width:70px"></span>
       <span class="hi">Commentaires</span><span style="flex:1"></span>
       <span class="hi" style="font-size:11px;color:var(--ink-3)">${list.length}</span></div>
     <div class="pb nmargin">
-      <div class="row nscope">
-        <span style="flex:1"></span>
-        <span class="chip ${V.pinMode ? "on" : ""}" ${act("pinmode")}
-          title="Cliquez ensuite un point du dessin — ou double-cliquez le plan directement">${icon("map-pin")}<span class="lb">Épingler</span></span>
-      </div>
       ${composer}
       ${list.length ? list.map(card).join("")
-        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">Aucune note sur ce projet.<br>
-            Double-cliquez un point du plan pour en poser une.</div>`}
+        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">Aucun commentaire sur ce projet.</div>`}
     </div>`;
   return `<section class="pane rg margin" data-rg="marge" data-fi="${fiOf("inspector")}"
     data-region="margin">${inner}</section>`;
@@ -3803,27 +3948,10 @@ function pushModelPins() {
   })));
 }
 
-/* A click on the model is a ray into the building; a drag is an orbit. The
-   canvas belongs to the viewer and survives re-renders, so this is wired
-   once, on the pane, and asks the viewer what was hit. */
-function wireModelPins() {
-  let down = null;
-  document.addEventListener("pointerdown", (e) => {
-    down = e.target.closest('[data-zone="model"]') ? [e.clientX, e.clientY] : null;
-  }, true);
-  document.addEventListener("pointerup", (e) => {
-    const start = down; down = null;
-    if (!start || !V.pinMode) return;
-    if (Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 4) return;
-    const hit = window.fitteModel?.pick?.(e.clientX, e.clientY);
-    if (!hit) return;
-    e.stopPropagation();
-    V.pending = { surface: "model", ...hit };
-    V.selPin = null;
-    render();
-    document.querySelector("[data-pindraft]")?.focus();
-  }, true);
-}
+/* The model takes no new pins. A point picked off a render is a point on
+   nothing the drawings can be measured against, and a note is only worth
+   keeping if the place it names can be found again on a sheet. Pins
+   already anchored to the model are still drawn and still read. */
 
 /* ------------------------------------------------- reading the sheet
    The pane is a fixed window; the sheet moves behind it. Zoom is a number
@@ -4718,6 +4846,15 @@ function render() {
      straight to state so typing never costs a re-render. */
   document.getElementById("frame")?.setAttribute("data-pin", V.pinMode ? "on" : "off");
   pushModelPins();
+  const mdraft = document.querySelector("[data-mdraft]");
+  if (mdraft) {
+    mdraft.oninput = (e) => { V.mdraft = e.target.value; };
+    mdraft.onkeydown = (e) => {
+      if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
+      e.preventDefault();
+      document.querySelector('[data-act="postnote"]')?.click();
+    };
+  }
   const draft = document.querySelector("[data-pindraft]");
   if (draft) {
     draft.oninput = (e) => { V.draft = e.target.value; };
@@ -4762,6 +4899,7 @@ function render() {
   } else {
     window.fitteSelection = { level: currentLevel(), unit: null, index: null };
   }
+  syncElevation();
   window.dispatchEvent(new CustomEvent("fitte:render"));
 }
 
@@ -4772,6 +4910,13 @@ function render() {
    of the glide and turned it back into a jump. Three boxes actually change
    when the selection moves, so three boxes are rewritten. */
 function paintSelection() {
+  /* Choosing a unit is looking at the building again: the elevation
+     closes and the model goes back to the unit. */
+  if (V.facade) {
+    V.facade = null;
+    document.querySelector("[data-facades]")?.replaceWith(document.createRange().createContextualFragment(facadeTablesHTML()));
+    syncElevation();
+  }
   const sel = selIndex("Unités");
   document.querySelectorAll('[data-region="list"] [data-act="row"]').forEach((el) => {
     el.classList.toggle("on", Number(el.dataset.value) === sel);
@@ -5198,6 +5343,18 @@ function onClick(e) {
        filling the pane, not a contour somewhere off-screen. Choosing a unit
        is also choosing to read a floor, so it ends the building scope. */
     case "circulation": selectCirculation(); return;
+    /* A façade's elevation, opened from its table; the open one closes. */
+    case "facade":
+      V.facade = V.facade?.face === value ? null : { face: value, focus: 0 };
+      paintFacades();
+      return;
+    case "facmat": {
+      const [face, n] = value.split("|");
+      const focus = Number(n);
+      V.facade = V.facade?.face === face && V.facade.focus === focus ? { face, focus: 0 } : { face, focus };
+      paintFacades();
+      return;
+    }
     case "row":
       V.sel[screen] = Number(value);
       if (screen === "Unités" && V.scope === "Bâtiment") { V.scope = "Niveau"; break; }
@@ -5416,6 +5573,24 @@ function onClick(e) {
     /* Arming the pin: the next click on a drawing puts the point down, and
        nothing else on the screen changes meaning in the meantime. */
     case "pinmode": V.pinMode = !V.pinMode; V.pending = null; break;
+    /* The sentence already written travels with the pin: arming carries
+       the margin's draft into the bubble that will take the point. */
+    case "markpin":
+      V.pinMode = !V.pinMode;
+      V.pending = null;
+      if (V.pinMode) { V.draft = V.mdraft; V.mdraft = ""; } else { V.mdraft = V.draft; V.draft = ""; }
+      break;
+    /* A comment about the project, with no point on a drawing. */
+    case "postnote": {
+      const txt = V.mdraft.trim();
+      if (!txt) { document.querySelector("[data-mdraft]")?.focus(); return; }
+      V.pins.push({ id: nextPinId(), scope: V.pinScope,
+        who: V.pinScope === "equipe" ? "Vous" : "Vous (partagé)", when: "à l'instant", txt });
+      V.selPin = V.pins[V.pins.length - 1].id;
+      V.mdraft = "";
+      savePins();
+      break;
+    }
     case "pincancel": V.pending = null; V.draft = ""; V.pinMode = false; break;
     case "pinpost": postPin(); return;
     case "note":
@@ -5490,16 +5665,22 @@ function onClick(e) {
       dial.setValue("screen", FR_SCREEN["Échéancier"]);
       break;
     }
-    case "lclose": V.layCard = false; V.layMenu = false; break;
-    case "ldoc": V.layMenu = !V.layMenu; break;
+    case "lclose": V.layCard = false; V.layMenu = false; V.layHist = false; break;
+    case "ldoc": V.layMenu = !V.layMenu; V.layHist = false; break;
     case "lswap":
-      V.layMenu = false;
+      V.layMenu = false; V.layHist = false;
       say(`Choisir un autre document dans ${LAYDOC[value].dir()}`);
       break;
-    case "lhist":
-      V.layMenu = false;
-      say(`${LAYDOC[value].short}: 3 documents lus avant celui-ci.`);
+    /* The list opens in place, under its row: the card stays the one
+       place a drawing's documents are read. */
+    case "lhist": V.layHist = !V.layHist; break;
+    case "lold": {
+      const [lk, i] = value.split("|");
+      const p = layHistory(lk)[Number(i)];
+      V.layMenu = false; V.layHist = false;
+      say(`${p.file} — ouvert dans ${LAYDOC[lk].app}, en lecture seule.`);
       break;
+    }
     case "pdfview":
       V.layMenu = false;
       say(`${LAYDOC[value].file()} — ouvert dans Acrobat.`);
@@ -5719,10 +5900,18 @@ sprite();
 /* The notes outlive the tab: they are read back before the first paint, and
    the model's picker is wired once because its canvas survives re-renders. */
 V.pins = loadPins();
-wireModelPins();
 /* The first paint happens while the model is still downloading, so the pins
    hung on it are handed over again the moment there is a camera. */
-window.addEventListener("fitte:model-state", (e) => { if (e.detail === "ready") pushModelPins(); });
+window.addEventListener("fitte:model-state", (e) => {
+  if (e.detail !== "ready") return;
+  pushModelPins();
+  /* The unit's openings are counted in the model: drawn once it is in. */
+  document.querySelector("[data-fq]")?.replaceWith(document.createRange().createContextualFragment(fqUnitHTML(floorQuant())));
+});
+/* The façade areas are counted once, after the model loads. */
+window.addEventListener("fitte:facades", () => {
+  document.querySelector("[data-facades]")?.replaceWith(document.createRange().createContextualFragment(facadeTablesHTML()));
+});
 applyDial(dial.values);
 </script>
 </body>
