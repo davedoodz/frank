@@ -214,6 +214,15 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .nums{display:grid;gap:40px;margin-top:64px}
 .nums b{display:block;font-size:84px;font-weight:600;letter-spacing:-.045em;line-height:1;color:var(--ink)}
 .nums span{display:block;font-size:18px;color:var(--ink-2);margin-top:14px;line-height:1.45}
+/* time saved: by hand against Frank, bars scaled to 12 h */
+.sv .row{display:grid;grid-template-columns:96px 1fr 64px;align-items:center;gap:12px;margin-top:10px;font-size:15px;color:var(--ink-2)}
+.sv .bar{display:block;height:12px;border-radius:3px;background:var(--ink-3);min-width:6px}
+.sv .row.f .bar{background:var(--vert)}
+.sv .row b{font-family:var(--mono);font-weight:500;font-size:15px;color:var(--ink);text-align:right}
+.sv .need{font-size:15px;line-height:1.45;color:var(--ink-3);margin-top:16px}
+.sv .need b{color:var(--ink-2);font-weight:600}
+.sv~.nums b{font-size:52px}
+.sv~.nums span{font-size:16px;margin-top:10px}
 
 /* quotes from the interviews (paraphrased notes) */
 .q{border-left:4px solid var(--vert);padding:4px 0 4px 26px}
@@ -252,6 +261,19 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .tx .stack .zm{padding:18px}
 .zm .to{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);flex:none}
 .cost{margin-top:26px;font-size:19px}
+/* two views side by side inside one figure */
+.tx .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;min-height:0}
+.tx .pair .zm.full img{object-position:left top}
+/* a tool compared: logo, name, what it gives, what it costs */
+.tool{width:100%;background:#fff;border-radius:8px;box-shadow:0 0 0 1px var(--line);padding:26px 26px 22px}
+.tool .logos{display:flex;gap:12px}
+.tool .logo{width:52px;height:52px;display:block}
+.tool h4{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:18px 0 10px;color:var(--ink)}
+.tool ul{list-style:none;margin:0;padding:0}
+.tool li{display:flex;gap:10px;align-items:center;font-size:16px;line-height:1.4;color:var(--ink-3);margin-top:9px}
+.tool li.ok{color:var(--ink)}
+.tool .li{width:18px;height:18px;flex:none;fill:none;stroke:var(--ink-3);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tool li.ok .li{stroke:var(--vert-dark)}
 
 /* tables */
 table{border-collapse:collapse;width:100%;margin-top:44px;font-size:18px}
@@ -1310,11 +1332,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>The unit list is the area table: net ft², m², share, then net, circulation and gross, with the mix bar above and a Superficies / Ouvertures switch. Materials get a table per façade.</dd></div>
       </dl>
     </div>
-    <div class="pics cmp">
+    <div class="pics cmp" style="grid-template-columns:1fr 1.65fr">
       <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-quant.jpg" alt="Prototype 2: The area table, then the unit's openings listed again below"></a>
         <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — The area table, then the unit's openings listed again below</figcaption></figure>
-      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-quant.jpg" alt="Prototype 3: The mix bar above, a Superficies / Ouvertures switch"></a>
-        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — The mix bar above, a Superficies / Ouvertures switch</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-quant.jpg" alt="Prototype 3: The mix bar above, a Superficies / Ouvertures switch, and the same three colours on the plan"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — The mix bar above, a Superficies / Ouvertures switch, and the same three colours on the plan</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1404,10 +1426,50 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
+<!-- ============================================================ 23a no BIM -->
+<section class="s" data-sec="Trade-offs">
+<div class="b">
+  <p class="k">Trade-off 1 — Tools</p>
+  <h2>Keep AutoCAD and SketchUp. No Revit.</h2>
+  <div class="rule"></div>
+  <div class="tx c3">
+    <figure>
+      <div class="zm"><div class="tool">
+        <span class="logos"><svg class="logo" viewBox="0 0 24 24" role="img" aria-label="revit"><rect width="24" height="24" rx="3" fill="#1C6FE0"/><path fill="#fff" d="M7 5h6.2c2.9 0 4.8 1.6 4.8 4.2 0 1.9-1 3.2-2.7 3.8L18.6 19h-3.3l-2.9-5.6H10V19H7zm3 2.6v3.4h3c1.2 0 1.9-.7 1.9-1.7S14.2 7.6 13 7.6z"/></svg></span>
+        <h4>Revit, BIM</h4>
+        <ul>
+          <li class="ok"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>One model, clean data to read</li>
+          <li><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Months of training for three people</li>
+          <li><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Every project template redrawn</li>
+          <li><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>More than a condo building needs</li>
+        </ul></div></div>
+      <figcaption><span class="k">Instead of</span><p>Asking the office to move to BIM.</p></figcaption>
+    </figure>
+    <figure class="won">
+      <div class="zm"><div class="tool">
+        <span class="logos"><svg class="logo" viewBox="0 0 24 24" role="img" aria-label="autocad"><path fill="#E51050" d="M3.8672 1.0527v.0157L0 3.3848v17.914l3.8965-2.332h18.3398V2.3301c0-.702-.5773-1.2774-1.2793-1.2774H3.8672zm7.5058 4.0098h3.3008l2.9844 9.9512h-2.5879l-.5683-2.1895h-2.9844l-.5703 2.1621h-2.416l2.8417-9.9238zm11.8633.0273v14.877H4.172l-2.0684 1.2383v.4648c0 .702.5793 1.2774 1.2813 1.2774H24V5.0898h-.7637zM12.9668 6.6816l-.9941 4.3243h2.0468l-1.0527-4.3243z"/></svg><svg class="logo" viewBox="0 0 24 24" role="img" aria-label="sketchup"><path fill="#005F9E" d="M.968 9.027l7.717 4.428-.006 1.32-4.39-2.518-2.763 1.57 7.148 4.12.005 1.27-7.658-4.405c.02.516.488 2.106 1.383 3.337.91 1.247 1.946 1.776 1.946 1.776L11.428 24V11.849L.975 5.846zm22.064-3.8L15.22.723S13.982 0 12.008 0C9.952 0 8.76.746 8.76.746l-7.236 4.14 11.009 6.328V24l7.245-4.136s1.295-.715 2.279-2.414c.867-1.496.975-2.943.975-2.943zM11.251 7.308s1.615-.298 2.98.49l2.171 1.25s.003 1.097.003 2.736c0 1.313-1.112 2.674-1.112 2.674l.002-4.816zm6.402 10.562l-2.358 1.353v-1.269l1.835-1.05c1.748-1.26 2.037-3.117 2.037-3.761l-.007-5.705-5.006-2.881s-.76-.499-2.129-.499c-1.367 0-2.113.461-2.113.461L8.154 5.53l-1.11-.641L9.473 3.5s.95-.527 2.544-.527c1.462 0 2.6.571 2.6.571L20.27 6.81l-.007 6.226c.04.957-.406 3.296-2.61 4.835z"/></svg></span>
+        <h4>AutoCAD and SketchUp</h4>
+        <ul>
+          <li class="ok"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Used by the office for years</li>
+          <li class="ok"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No training, no new licences</li>
+          <li class="ok"><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Enough for 100 to 200 condo units</li>
+          <li><svg class="li" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Data arrives as PDF and DWG sheets</li>
+        </ul></div></div>
+      <figcaption><span class="k">I chose</span><p>Frank reads the files the office already makes.</p></figcaption>
+    </figure>
+    <figure>
+      <div class="zm full"><span class="src">Prototype 3 — zooming</span><img style="object-position:center top" src="assets/frank/to/t0-blur.png" alt="Prototype 3: a heavy PDF sheet still blurred while it loads after a zoom"></div>
+      <figcaption><span class="k">The cost</span><p>Heavy sheets. Zoom in and the plan blurs while it loads.</p></figcaption>
+    </figure>
+  </div>
+  <p class="cost"><b>Cost.</b> This prototype alone loads 32 PDF sheets: 98 MB, up to 8 MB each. Storing, indexing and drawing an archive of them is the hardest part of the backend.</p>
+</div>
+</section>
+
 <!-- ============================================================ 23 simulate -->
 <section class="s" data-sec="Trade-offs">
 <div class="b">
-  <p class="k">Trade-off 1 — Integration</p>
+  <p class="k">Trade-off 2 — Integration</p>
   <h2>Simulate AutoCAD and SketchUp. Make every handoff real.</h2>
   <div class="rule"></div>
   <div class="tx">
@@ -1427,7 +1489,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ 24 propose, never sync -->
 <section class="s" data-sec="Trade-offs">
 <div class="b">
-  <p class="k">Trade-off 2 — Trust</p>
+  <p class="k">Trade-off 3 — Trust</p>
   <h2>Frank proposes changes. A person applies them in the drawing.</h2>
   <div class="rule"></div>
   <div class="tx">
@@ -1444,10 +1506,33 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
+<!-- ============================================================ 26 plans as drawn -->
+<section class="s" data-sec="Trade-offs">
+<div class="b">
+  <p class="k">Trade-off 4 — The drawing comes first</p>
+  <h2>The plan is shown as drawn. Frank only adds a layer on top.</h2>
+  <div class="rule"></div>
+  <div class="tx">
+    <figure>
+      <div class="zm full"><span class="src">Prototype 1 — Oct 25</span><img src="assets/frank/to/t4-p1-plan.jpg" alt="Prototype 1: the floor plan filled in pink, blue and green by unit type"></div>
+      <figcaption><span class="k">Instead of</span><p>A plan painted over by unit type.</p></figcaption>
+    </figure>
+    <figure class="won">
+      <div class="pair">
+        <div class="zm full"><img src="assets/frank/to/t4-p3-units.jpg" alt="Prototype 3: the level 5 unit table, the 3½, 4½ and 5½ mix bar and each unit's type, net ft², m² and share"></div>
+        <div class="zm full"><span class="src">Prototype 3 — Oct 29</span><img style="object-position:left top" src="assets/frank/to/t4-p3-typo.jpg" alt="Prototype 3: the level 5 sheet as drawn, each unit filled in its type colour"></div>
+      </div>
+      <figcaption><span class="k">I chose</span><p>The sheet as drawn. The unit table colours each type on it.</p></figcaption>
+    </figure>
+  </div>
+  <p class="cost"><b>Cost.</b> No attractive AI-generated views. Nothing on screen the office would have to un-believe.</p>
+</div>
+</section>
+
 <!-- ============================================================ 25 no verdict -->
 <section class="s" data-sec="Trade-offs">
 <div class="b">
-  <p class="k">Trade-off 3 — Codes</p>
+  <p class="k">Trade-off 5 — Codes</p>
   <h2>An early warning, never a verdict.</h2>
   <div class="rule"></div>
   <div class="tx" style="grid-template-columns:5fr 7fr">
@@ -1464,39 +1549,19 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ 26 plans as drawn -->
-<section class="s" data-sec="Trade-offs">
-<div class="b">
-  <p class="k">Trade-off 4 — The drawing comes first</p>
-  <h2>The plan is shown as drawn. Frank only adds a layer on top.</h2>
-  <div class="rule"></div>
-  <div class="tx">
-    <figure>
-      <div class="zm full"><span class="src">Prototype 1 — Oct 25</span><img src="assets/frank/to/t4-p1-plan.jpg" alt="Prototype 1: the floor plan filled in pink, blue and green by unit type"></div>
-      <figcaption><span class="k">Instead of</span><p>A plan painted over by unit type.</p></figcaption>
-    </figure>
-    <figure class="won">
-      <div class="zm full"><span class="src">Prototype 3 — Oct 29</span><img src="assets/frank/to/t4-p3-plan.jpg" alt="Prototype 3: the sheet as drawn, with only unit 501 outlined and three comment pins"></div>
-      <figcaption><span class="k">I chose</span><p>The sheet as drawn, sharp at any zoom. Frank adds an outline and pins.</p></figcaption>
-    </figure>
-  </div>
-  <p class="cost"><b>Cost.</b> No attractive AI-generated views. Nothing on screen the office would have to un-believe.</p>
-</div>
-</section>
-
 <!-- ============================================================ 27 subtraction -->
 <section class="s" data-sec="Trade-offs">
 <div class="b">
-  <p class="k">Trade-off 5 — Subtraction</p>
+  <p class="k">Trade-off 6 — Subtraction</p>
   <h2>Much of prototype 3 is what I took out.</h2>
   <div class="rule"></div>
   <div class="tx c3">
     <figure>
       <div class="stack">
-        <div class="zm full"><span class="src">Prototype 2 — Oct 27</span><img src="assets/frank/to/t5-p2-model.jpg" alt="Prototype 2: a unit label floating on the 3D model"></div>
-        <div class="zm full"><span class="src">Prototype 3 — Oct 29</span><img src="assets/frank/to/t5-p3-model.jpg" alt="Prototype 3: the same model, no floating label"></div>
+        <div class="zm full"><span class="src">Prototype 2 — Oct 27</span><img src="assets/frank/to/t5-p2-model.jpg" alt="Prototype 2: a rendered picture of the building in the model pane"></div>
+        <div class="zm full"><span class="src">Prototype 3 — Oct 29</span><img src="assets/frank/to/t5-p3-model.jpg" alt="Prototype 3: the live SketchUp model, unit 501 named and its floor lit"></div>
       </div>
-      <figcaption><span class="k">Labels on the model</span><p>They jumped while orbiting. The tabs already name the floor.</p></figcaption>
+      <figcaption><span class="k">The rendered picture</span><p>Replaced by the model itself, with the selected unit lit.</p></figcaption>
     </figure>
     <figure>
       <div class="stack">
@@ -1593,14 +1658,28 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <section class="s" data-sec="Outcome">
 <div class="b">
   <p class="k">What comes next</p>
-  <h2>From a credible prototype to something the office runs on.</h2>
+  <h2>From a vibecoded app to something that could actually help my dad save money.</h2>
   <div class="rule"></div>
-  <div class="cols c4" style="margin-top:64px">
-    <div class="item bar-top"><span class="n">01</span><h3>Test prototype 3</h3><p>With Guy and Benoît, on a project they are drawing now, not the one they finished.</p></div>
-    <div class="item bar-top"><span class="n">02</span><h3>Read the files directly</h3><p>DXF parsing for units and windows; a vision model only where exports are poor.</p></div>
-    <div class="item bar-top"><span class="n">03</span><h3>Native palettes</h3><p>AutoCAD .NET or LISP, SketchUp Ruby. The simulated screens are the spec.</p></div>
-    <div class="item bar-top"><span class="n">04</span><h3>Have the codes reviewed</h3><p>A Québec code consultant defines what Frank may calculate, and how it must say so.</p></div>
+  <div class="cols c3 sv" style="margin-top:52px">
+    <div class="item ov"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg><h3>The unit schedule</h3>
+      <div class="row"><span>By hand</span><i class="bar" style="width:42%"></i><b>5 h</b></div>
+      <div class="row f"><span>With Frank</span><i class="bar" style="width:4%"></i><b>30 min</b></div>
+      <p class="need">104 units retraced and retyped each revision. Frank reads them from the DXF; a technician checks the flagged ones. <b>Needs:</b> reading the files directly.</p></div>
+    <div class="item ov"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg><h3>The code study</h3>
+      <div class="row"><span>By hand</span><i class="bar" style="width:100%"></i><b>12 h</b></div>
+      <div class="row f"><span>With Frank</span><i class="bar" style="width:33%"></i><b>4 h</b></div>
+      <p class="need">About ten pages rewritten. Frank fills in the measurements and names what is missing; the architect still concludes. <b>Needs:</b> a Québec code consultant's review.</p></div>
+    <div class="item ov"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg><h3>Checking the drawings</h3>
+      <div class="row"><span>By hand</span><i class="bar" style="width:50%"></i><b>6 h</b></div>
+      <div class="row f"><span>With Frank</span><i class="bar" style="width:8%"></i><b>1 h</b></div>
+      <p class="need">43 engineering sheets laid over the plans by eye. Frank lists the conflicts; a person confirms each one. <b>Needs:</b> native AutoCAD and SketchUp palettes.</p></div>
   </div>
+  <div class="nums c3" style="display:grid;margin-top:44px">
+    <div><b>23 h → 5.5 h</b><span>Per revision, for the three tasks above.</span></div>
+    <div><b>≈ 105 h</b><span>Saved over a project revised six times.</span></div>
+    <div><b>≈ $5,800</b><span>Of technician time per project, at $55 an hour.</span></div>
+  </div>
+  <p class="cap" style="margin-top:20px">Estimates, not measurements: based on Le Baldwin III (104 units, 8 floors, 43 engineering sheets) and on what Guy and Benoît described. Testing prototype 3 on a live project would measure them.</p>
 </div>
 </section>
 
