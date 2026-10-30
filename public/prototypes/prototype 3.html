@@ -127,7 +127,7 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs.lvl .views{flex:1;align-items:flex-end;overflow:visible}
 .tabs.lvl button{position:relative;font-size:12px;padding:0 10px;height:28px;margin-bottom:3px;
   border-radius:6px;white-space:nowrap}
-.tabs.lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 12px;
+.tabs.lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 12px 3px;
   border-radius:var(--tabr) var(--tabr) 0 0;background:var(--card);color:var(--ink);font-weight:600;--tabc:var(--card);z-index:1}
 .tabs.lvl button[aria-current="true"]:hover{background:var(--card);color:var(--ink)}
 .tabs.lvl .div{margin-bottom:9px}
@@ -475,10 +475,8 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .week .wh{padding:5px 6px;border-bottom:1px solid var(--line-2);font-size:11px;font-weight:600}
 .week .wcol.today .wh{background:var(--ink);color:var(--card)}
 .week .wb{padding:5px;display:flex;flex-direction:column;gap:4px}
-.wtask{border:1px solid var(--line-2);border-left:2px solid var(--ink-3);border-radius:5px;
+.wtask{border:1px solid var(--line-2);border-radius:5px;
   padding:4px 5px;font-size:11px;display:flex;flex-direction:column;gap:1px;background:var(--card)}
-.wtask[data-prio="haute"]{border-left-color:var(--ink);border-left-width:3px}
-.wtask[data-prio="moyenne"]{border-left-color:var(--ink-2)}
 .wtask .who{font-size:10px;color:var(--ink-3)}
 /* A task row reads left to right as: done, what, how urgent, when. */
 .task{display:flex;align-items:center;gap:8px;padding:6px 7px;border:1px solid var(--line-2);
@@ -489,7 +487,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    leaves the list when someone files it. */
 .task.done{opacity:.72}
 .task.done .ttl{text-decoration:line-through}
-.task.late{border-left:3px solid var(--ink)}
 .task .pr{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);
   border:1px solid var(--line-2);border-radius:4px;padding:1px 5px;white-space:nowrap}
 .task .pr[data-prio="haute"]{background:var(--vert);color:var(--vert-ink);border-color:var(--vert)}
@@ -723,21 +720,23 @@ body.elev .mtools{display:none}
    the studio's chrome, carrying the project's row and its levels down to
    the white page. The project is a thing set into the studio, not a second
    half of the same bar. */
-.projsheet{background:#232327;border-radius:12px 12px 0 0}
+.projsheet{background:var(--ch1);border-radius:12px 12px 0 0}
 /* One left edge for the whole chrome: every row's pill starts at 15 and
    every word at 25, so the studio line, the project line and the levels
    read as one stack rather than three strips that happen to be piled. */
 .tabs.one{height:36px;padding:0 9px}
 .tabs.two{height:38px;padding:0 9px}
-/* The screen switch at the head of the project's row. */
-.tabs.lvl .mseg{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;align-self:center;padding:2px;
+/* The screen switch at the head of the project's row. It sits on the
+   tabs' line, not the row's middle: its words and the level names read
+   as one line of text. */
+.tabs.lvl .mseg{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;align-self:flex-end;margin-bottom:1.5px;padding:2px;
   border-radius:11px;background:rgba(255,255,255,.08)}
 .tabs.lvl .ms{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:9px;cursor:pointer;
   font-size:12.5px;font-weight:500;color:rgba(255,255,255,.72);white-space:nowrap}
 .tabs.lvl .ms:hover{color:#fff}
 .tabs.lvl .ms[aria-current="true"]{background:rgba(255,255,255,.16);color:#fff;font-weight:600}
 .tabs.lvl .ms .lu{width:14px;height:14px}
-.tabs.lvl .msep{flex:0 0 1px;width:1px;height:18px;align-self:center;margin:0 8px;background:rgba(255,255,255,.16)}
+.tabs.lvl .msep{flex:0 0 1px;width:1px;height:18px;align-self:flex-end;margin:0 8px 8px;background:rgba(255,255,255,.16)}
 .tabs.one .crumb,.tabs.two .crumb{padding:5px 10px;border-radius:7px}
 .tabs.one .crumb[data-screen]{cursor:pointer}
 .tabs.one .crumb[data-screen]:hover{background:var(--wash)}
@@ -749,8 +748,8 @@ body.elev .mtools{display:none}
    competing with the screens beside it; as a tab it labels the sheet from
    outside and gives the second row back to the screens. */
 .projtab{position:relative;align-self:flex-end;display:flex;align-items:center;height:30px;
-  padding:0 12px;border-radius:var(--tabr) var(--tabr) 0 0;background:#232327;color:#fff;font-size:15px;
-  font-weight:600;white-space:nowrap;flex:0 0 auto;margin-left:6px;--tabc:#232327}
+  padding:0 12px;border-radius:var(--tabr) var(--tabr) 0 0;background:var(--ch1);color:#fff;font-size:15px;
+  font-weight:600;white-space:nowrap;flex:0 0 auto;margin-left:6px;--tabc:var(--ch1)}
 .projtab::before,.projtab::after{content:"";position:absolute;bottom:0;
   width:var(--tabr);height:var(--tabr)}
 .projtab::before{right:100%;background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
@@ -785,7 +784,7 @@ body.elev .mtools{display:none}
    The navigation goes black and the white card is the only lit surface, so
    the drawing gets all the attention. Green marks one thing: the view being
    read. The rail stays sober — where one came from is not the question. */
-.frame[data-chrome="black"]{background:#141416;border-color:#141416;--vert:#C3E05A}
+.frame[data-chrome="black"]{background:var(--ch0);border-color:var(--ch0);--vert:#C3E05A}
 .frame[data-chrome="black"] .rail .ic,
 .frame[data-chrome="black"] .rail .row,
 .frame[data-chrome="black"] .rail .stk{color:rgba(255,255,255,.52)}
@@ -860,13 +859,49 @@ body.elev .mtools{display:none}
    by the same 6 px all round. The grey around the page is the page's own
    spread shadow, so it follows the page's corners at radius + 6. */
 .frame[data-shell="inset"] .body:has(> .projsheet) > .work{margin:0 6px 6px;
-  border-radius:12px;box-shadow:0 0 0 6px #232327}
+  border-radius:12px;box-shadow:0 0 0 6px var(--ch2)}
 /* The band reaches 6px lower, behind the page's rounded top corners: what
    the corners curve away from is the band's own grey, so no chrome shows
    through the join and the page keeps curved corners on all four sides. */
 .frame[data-shell="inset"] .body > .projsheet{padding-bottom:6px;margin-bottom:-6px}
 .body > .projsheet{border-radius:18px 18px 0 0}
 .frame[data-chrome="black"] .rg::before{color:rgba(255,255,255,.45)}
+
+/* The three fills of the dark chrome, each picked on the panel: the top
+   bar (the studio's field), the tab row (the project's sheet and its name
+   tab) and the border round the white page. Each takes the current shade,
+   a dark grey, true black or the office green. Words standing on green
+   turn dark: white on that green is not read. */
+:root{--ch0:#141416;--ch1:#232327;--ch2:#232327}
+:root[data-tone-top="gray"]{--ch0:#2a2a2e}
+:root[data-tone-top="black"]{--ch0:#000}
+:root[data-tone-top="green"]{--ch0:#c3e05a}
+:root[data-tone-row="gray"]{--ch1:#3a3a3f}
+:root[data-tone-row="black"]{--ch1:#000}
+:root[data-tone-row="green"]{--ch1:#c3e05a}
+:root[data-tone-band="gray"]{--ch2:#3a3a3f}
+:root[data-tone-band="black"]{--ch2:#000}
+:root[data-tone-band="green"]{--ch2:#c3e05a}
+/* on a green top bar: the studio's line */
+[data-tone-top="green"] .frame[data-chrome="black"] .tabs.one .crumb{color:rgba(20,20,22,.7)}
+[data-tone-top="green"] .frame[data-chrome="black"] .tabs.one .crumb.ech,
+[data-tone-top="green"] .frame[data-chrome="black"] .me{color:#141416}
+[data-tone-top="green"] .frame[data-chrome="black"] .tabs.one .crumb[data-screen]:hover,
+[data-tone-top="green"] .frame[data-chrome="black"] .me:hover{background:rgba(0,0,0,.08);color:#141416}
+[data-tone-top="green"] .frame[data-chrome="black"] .me i{background:rgba(0,0,0,.12);color:#141416}
+/* on a green tab row: the project's name, the screen switch, the levels */
+[data-tone-row="green"] .frame[data-chrome="black"] .projsheet .tabs button,
+[data-tone-row="green"] .frame[data-chrome="black"] .projsheet .tabs .crumb,
+[data-tone-row="green"] .frame[data-chrome="black"] .tabs.lvl .ms{color:rgba(20,20,22,.7)}
+[data-tone-row="green"] .frame[data-chrome="black"] .projtab,
+[data-tone-row="green"] .frame[data-chrome="black"] .projsheet .tabs .crumb.on,
+[data-tone-row="green"] .frame[data-chrome="black"] .tabs.lvl .ms:hover{color:#141416}
+[data-tone-row="green"] .frame[data-chrome="black"] .projsheet .tabs button:hover{background:rgba(0,0,0,.08);color:#141416}
+[data-tone-row="green"] .frame[data-chrome="black"] .tabs.lvl .mseg{background:rgba(0,0,0,.07)}
+[data-tone-row="green"] .frame[data-chrome="black"] .tabs.lvl .ms[aria-current="true"]{background:rgba(0,0,0,.12);color:#141416}
+[data-tone-row="green"] .frame[data-chrome="black"] .projsheet .tabs .div,
+[data-tone-row="green"] .frame[data-chrome="black"] .projsheet .tabs .sep,
+[data-tone-row="green"] .frame[data-chrome="black"] .tabs.lvl .msep{background:rgba(0,0,0,.18)}
 
 /* High fidelity swaps the hatch for the drawing it stands for: the floor
    plan, the elevation, or the massing view, all from the platform assets. */
@@ -3111,7 +3146,7 @@ function issuesIn(kind) {
 /* The count a section carries in its header. It opens the list. */
 function issueBadge(kinds) {
   const n = kinds.reduce((s, k) => s + issuesIn(k).length, 0);
-  return n ? `<span class="ibadge hi" ${act("issues")} title="${n} problème${n > 1 ? "s" : ""} dans cette section — voir les conflits">${icon("alert-triangle")}${n}</span>` : "";
+  return n ? `<span class="ibadge hi" ${act("issues")} title="${n} conflit${n > 1 ? "s" : ""} dans cette section — voir la liste">${icon("alert-triangle")}${n}</span>` : "";
 }
 
 /* Opening a problem from the list shows it, wherever the page was: a
@@ -4095,7 +4130,7 @@ function headerHTML() {
           <div class="lo bar" style="width:170px;height:13px"></div>
           <div class="lo bar lt" style="width:260px;height:8px"></div>
           <div class="hi" style="font-size:16px;font-weight:600;display:flex;align-items:center">${title[0]}${V.screen === "Unités" && issues().length
-            ? `<span class="ibadge lg" ${act("issues")} title="Voir la liste des conflits">${icon("alert-triangle")}${issues().length} problèmes</span>` : ""}</div>
+            ? `<span class="ibadge lg" ${act("issues")} title="Voir la liste des conflits">${icon("alert-triangle")}${issues().length} conflit${issues().length > 1 ? "s" : ""}</span>` : ""}</div>
           ${title[1] ? `<div class="hi" style="font-size:12px;color:var(--ink-2)">${title[1]}</div>` : ""}
         </div>
         ${bare ? "" : SCREENS[V.screen].home
@@ -7326,6 +7361,12 @@ const dial = DialKit.createDialKit("Wireframe C3", {
      only white thing on the screen. Green marks the level, white marks the
      open view. The grey chrome is kept beside it for comparison. */
   chrome: sel(["Black", "Light"]),
+  /* The three fills of the dark chrome, each on its own: the top bar, the
+     tab row under it, the border round the page. */
+  chromeColors: { _collapsed: false,
+    topBar: sel(["Current", "Dark gray", "Black", "Brand green"]),
+    tabRow: sel(["Current", "Dark gray", "Black", "Brand green"]),
+    pageBorder: sel(["Current", "Dark gray", "Black", "Brand green"]) },
   /* The whole screen on a dark ramp. The drawing keeps its own paper: a
      plan is a white sheet, and inverting it would be redrawing it. */
   theme: sel(["Light", "Dark"]),
@@ -7411,6 +7452,10 @@ function applyDial(v) {
   /* On the root, not on the frame: the toast and the dialog sit outside it
      and read the same tokens. */
   document.documentElement.dataset.theme = String(v.theme || "").toLowerCase() === "dark" ? "dark" : "light";
+  const tone = (label) => ({ "dark gray": "gray", black: "black", "brand green": "green" })[String(label || "").toLowerCase()] || "";
+  const cc = v.chromeColors || {};
+  Object.assign(document.documentElement.dataset,
+    { toneTop: tone(cc.topBar), toneRow: tone(cc.tabRow), toneBand: tone(cc.pageBorder) });
   /* The panel names the glyph in English and title-cases what it is given,
      so the label is matched without regard to case. */
   const pick = (screen, label) => {
