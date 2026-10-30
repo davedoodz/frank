@@ -2021,21 +2021,21 @@ body:has([data-skppop]) .lcard{visibility:hidden}
    pale borders are not enough across that much white. */
 .gut[data-gut="plan"]::before{top:0;bottom:0;width:1px;margin-left:0;background:var(--line)}
 .gut[data-gut="plan"]:hover::before{width:2px;margin-left:-1px}
-/* In the white card the two drawings meet with nothing between them: the
-   rule is the plan's own right border, and the strip takes no room in the
-   row (its 10 px of grip hang over both drawings, centred on that border).
+/* In the white card every seam is a pane's own border and the strip takes
+   no room in the row: its 10 px of grip hang over that border, centred.
    At rest it draws nothing; under the pointer its ink lies on the border. */
-.frame[data-shell="inset"] .pane.drawing:has(+ .gut[data-gut="plan"]){border-right:1px solid var(--line)}
-.frame[data-shell="inset"] .gut[data-gut="plan"]:not(.fold){margin:0 -5px}
-.frame[data-shell="inset"] .gut[data-gut="plan"]:not(.fold)::before{left:50%;width:1px;margin-left:-1px;background:transparent}
-.frame[data-shell="inset"] .gut[data-gut="plan"]:not(.fold):hover::before,
-body.splitting .frame[data-shell="inset"] .gut[data-gut="plan"].live::before{width:2px;margin-left:-2px;background:var(--ink)}
+.frame[data-shell="inset"] .pane:has(+ .gut:not(.fold)){border-right:1px solid var(--line-2)}
+.frame[data-shell="inset"] .gut:not(.fold){margin:0 -5px}
+.frame[data-shell="inset"] .gut:not(.fold)::before{top:0;bottom:0;left:50%;width:1px;margin-left:-1px;
+  border-radius:0;background:transparent}
+.frame[data-shell="inset"] .gut:not(.fold):hover::before,
+body.splitting .frame[data-shell="inset"] .gut.live:not(.fold)::before{width:2px;margin-left:-1px;background:var(--ink)}
+/* Two drawings side by side are two readings of the same building: that
+   seam is drawn a shade darker than the others. */
+.frame[data-shell="inset"] .pane.drawing:has(+ .gut[data-gut="plan"]){border-right-color:var(--line)}
 .gut.fold{cursor:default}
-/* Échéancier's calendar and list meet as the plan and the model do: the
-   calendar's right border is the seam, and the edge takes no room in the
-   row — its 10 px of grip hang over that border, its ink lies on it. */
-.frame[data-shell="inset"] .pane:has(+ .gut[data-gut="cal"]:not(.fold)){border-right:1px solid var(--line)}
-.frame[data-shell="inset"] .gut[data-gut="cal"]:not(.fold){margin:0 -5px}
+/* Échéancier's calendar and list meet as the two drawings do. */
+.frame[data-shell="inset"] .pane:has(+ .gut[data-gut="cal"]:not(.fold)){border-right-color:var(--line)}
 /* À faire folded: the calendar's border goes with the open edge, so the
    strip draws the seam on its own left. */
 .frame[data-shell="inset"] .gut[data-gut="cal"].fold + .pane.fstrip{border-left:1px solid var(--line)}
@@ -2154,6 +2154,8 @@ const V = {
       { who: "Vous", when: "hier", txt: "Demande écrite envoyée le 3 oct. Toujours sans réponse — je relance lundi." }],
     "3.3.1.18": [{ who: "Chargée de projet", when: "24 oct", txt: "Le garde-corps est dessiné à 1 020 mm sur l'élévation sud. À reprendre avant le dépôt." }],
     "art. 546": [{ who: "Entrepreneur général", when: "22 oct", txt: "Le règlement plafonne à 0,5 case par logement: 52 au plus. Garder les 22 dessinées." }],
+    "art. 9": [{ who: "Chargée de projet", when: "28 oct", txt: "Le 6e étage dépasse le secteur. Retrait de la mezzanine ou dérogation mineure: à trancher avec le client avant le dépôt." }],
+    "3.2.3.1": [{ who: "Vous", when: "26 oct", txt: "Façade est: 5,7 m² de trop. Passer deux baies en verre armé ou reculer la façade — je chiffre les deux." }],
   },
   /* The office's own reading of each provision — the one judgement a code
      screen can honestly carry, since nobody outside the firm decides how
@@ -2161,7 +2163,7 @@ const V = {
      thinks; changed with a click on the row. */
   clarity: { "art. 9": "moyen", "3.2.3.1": "obscur", "art. 546": "clair",
     "art. 395": "moyen", "art. 32": "clair", "art. 43": "moyen", "3.3.1.9": "clair",
-    "3.4.2.1": "clair", "3.3.1.18": "clair", "3.8.3.6": "moyen", "3.2.2.48": "obscur" },
+    "3.3.1.18": "clair", "3.8.3.6": "moyen", "3.2.2.48": "obscur" },
   clarityOn: null,
   /* Codes articles kept at the top of their list, first marked first. */
   artPins: [],
@@ -2631,66 +2633,6 @@ const ARTICLES = [
     measured: "2,70 m", required: "3,00 m", state: "non résolu",
     needs: "limite arrière relevée, saillies admises à l'art. 349.1", page: 29,
     img: "assets/code/art-22-marge.png", ratio: "1602 / 982" },
-  { id: "art. 10", topic: "Hauteur en mètres",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "Dans un secteur de hauteur en mètres, la hauteur d'un bâtiment doit : 1º être égale ou inférieure à la hauteur en mètres maximale prescrite; 2º être égale ou supérieure à la hauteur en mètres minimale prescrite.",
-    measured: "—", required: "hauteur du secteur (annexe A)", state: "non résolu",
-    needs: "hauteur hors tout sur la coupe", page: 21,
-    fig: "classement" },
-  { id: "art. 26", topic: "Densité",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "La densité d'une construction doit être égale ou supérieure à la densité minimale tout en étant égale ou inférieure à la densité maximale prescrite par secteur sur ce plan.",
-    measured: "—", required: "ISP du secteur (annexe A)", state: "non résolu",
-    needs: "superficie de plancher totale et superficie du terrain", page: 26,
-    fig: "classement" },
-  { id: "art. 38", topic: "Alignement de construction",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "L'implantation d'un mur d'un bâtiment peut varier de plus ou moins 15 cm de la ligne d'implantation de la façade existante ou de la ligne d'implantation déterminée en vertu du Règlement sur les plans d'implantation et d'intégration architecturale…",
-    measured: "—", required: "± 15 cm", state: "non résolu",
-    needs: "ligne d'implantation des voisins sur le relevé", page: 28,
-    fig: "classement" },
-  { id: "art. 39", topic: "Marge latérale",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "Un mur latéral d'un bâtiment non érigé sur la limite latérale d'un terrain doit être implanté à une distance égale ou supérieure à la marge latérale minimale suivante, qui varie en fonction des hauteurs en mètres maximales prescrites au plan de l'annexe A",
-    measured: "—", required: "1,5 à 4,0 m selon la hauteur", state: "non résolu",
-    needs: "limites latérales relevées par l'arpenteur", page: 28,
-    fig: "classement" },
-  { id: "art. 349.1", topic: "Saillies dans les marges",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "Sous réserve d'une disposition contraire, seules les constructions suivantes sont autorisées dans une cour avant, ainsi que dans les marges latérales ou arrière aux conditions énoncées au tableau suivant :… Galerie ou balcon. 3 m 1,2 m",
-    measured: "—", required: "balcon: 3 m, à 1,2 m des limites", state: "non résolu",
-    needs: "saillie des balcons et distance aux limites", page: 103,
-    fig: "garde" },
-  { id: "art. 18.1", topic: "Terrasse sur le toit",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "Chaque élément d'une terrasse doit respecter un retrait par rapport à la façade du bâtiment équivalent à au moins 2 fois leur hauteur.",
-    measured: "—", required: "2 × la hauteur de l'élément", state: "non résolu",
-    needs: "retrait du garde-corps de la terrasse au plan du toit", page: 24,
-    fig: "garde" },
-  { id: "art. 49", topic: "Matériaux prohibés en façade",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "Sauf lorsqu'il s'agit d'une composante architecturale d'origine, les matériaux suivant sont prohibés sur toute partie extérieure d'un bâtiment :… 3º le verre, le miroir et tout autre matériau ayant un taux de réflexion de la lumière du jour extérieure supérieur à 20 %, sur plus de 5 % de la surface d'une façade incluant les ouvertures;",
-    measured: "—", required: "verre réfléchissant ≤ 5 % de la façade", state: "non résolu",
-    needs: "vitrage et parements au devis de façade", page: 30,
-    fig: "classement" },
-  { id: "art. 51.2", topic: "Revêtement des toits plats",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "Dans le cas de la construction d'un nouveau bâtiment… pour tout toit dont la pente est inférieure à 2 unités à la verticale dans 12 unités à l'horizontale… seuls les revêtements suivants sont autorisés : 1o un toit végétalisé; 2o un matériau dont l'indice de réflectance solaire (IRS) est d'au moins 56…",
-    measured: "—", required: "toit végétalisé ou IRS ≥ 56", state: "non résolu",
-    needs: "membrane de toiture au devis", page: 31,
-    fig: "classement" },
-  { id: "art. 550", topic: "Voies de circulation du stationnement",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "Une aire de stationnement intérieure et extérieure doit comporter une voie de circulation conduisant à chaque unité de stationnement. Cette voie de circulation doit avoir une largeur : 1º d'au moins 3 m lorsque l'unité de stationnement est parallèle à la voie de circulation; 2º d'au moins 5 m dans tout autre cas.",
-    measured: "—", required: "5 m (cases en angle)", state: "non résolu",
-    needs: "largeur des allées du garage souterrain", page: 148,
-    fig: "corridor" },
-  { id: "art. 629.5", topic: "Stationnement pour vélos",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
-    quote: "Pour un usage de la famille habitation, le nombre minimal d'unités de stationnement pour vélo est de 1 unité par logement…",
-    measured: "—", required: "1 par logement", state: "non résolu",
-    needs: "supports dessinés au sous-sol et à l'extérieur", page: 154,
-    fig: "issues" },
   /* The Québec construction code, chapter I — Bâtiment. An article with no
      measurement yet says « — »: it is followed, not yet read against the
      drawings. Schematics are drawn here from the two numbers, never a
@@ -2707,12 +2649,6 @@ const ARTICLES = [
     measured: "1 120 mm", required: "1 100 mm", state: "conforme",
     needs: "largeur relevée au point le plus étroit, saillies comprises", page: 298,
     fig: "corridor" },
-  { id: "3.4.2.1", topic: "Nombre d'issues par étage",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Sous réserve des paragraphes 2) à 4), toute aire de plancher destinée à un usage doit être desservie par au moins 2 issues.",
-    measured: "2 issues", required: "2 issues", state: "conforme",
-    needs: "distances de parcours mesurées depuis la porte la plus éloignée", page: 322,
-    fig: "issues" },
   { id: "3.3.1.18", topic: "Hauteur des garde-corps",
     doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
     quote: "Sous réserve du paragraphe 5) et de l'article 3.3.2.9., un garde-corps d'au moins 1070 mm de hauteur doit être installé : a) au pourtour des toits auxquels un accès est prévu pour d'autres fins que les travaux d'entretien;…",
@@ -2730,60 +2666,6 @@ const ARTICLES = [
     quote: "Un bâtiment du groupe C peut être construit conformément au paragraphe 2), à condition : a) qu'il soit entièrement protégé par gicleurs; b) qu'il ait une hauteur de bâtiment d'au plus 12 étages;…",
     measured: "groupe C — 8 étages", required: "incombustible", state: "non résolu",
     needs: "type de construction retenu et degré des planchers", page: 231,
-    fig: "classement" },
-  { id: "3.3.4.2", topic: "Séparations coupe-feu entre logements",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Sous réserve des paragraphes 2) et 3.2.2.9. 2), les suites des habitations doivent être isolées les unes des autres et du reste du bâtiment par une séparation coupe-feu d'au moins 1 h.",
-    measured: "—", required: "1 h", state: "non résolu",
-    needs: "degré des murs entre logements et vers le corridor", page: 314,
-    fig: "classement" },
-  { id: "3.3.4.6", topic: "Transmission du son",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Les occupants des logements doivent être protégés contre les sons aériens conformément à la section 5.8.",
-    measured: "—", required: "section 5.8", state: "non résolu",
-    needs: "composition des murs et planchers entre logements", page: 316,
-    fig: "classement" },
-  { id: "3.4.2.5", topic: "Distance de parcours jusqu'à une issue",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "…si une aire de plancher doit avoir plus d'une issue, celles-ci doivent être situées de manière que, pour gagner au moins l'une d'elles, la distance de parcours soit d'au plus :… c) 45 m pour toute aire de plancher entièrement protégée par gicleurs",
-    measured: "—", required: "45 m", state: "non résolu",
-    needs: "parcours depuis la porte de logement la plus éloignée", page: 325,
-    fig: "issues" },
-  { id: "3.4.4.1", topic: "Séparation coupe-feu des issues",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Sous réserve des paragraphes 2), 3.3.5.4. 3), 3.4.4.2. 2) et 3.4.4.3. 1), toutes les issues doivent être isolées du reste du bâtiment par une séparation coupe-feu ayant un degré de résistance au feu au moins égal à celui exigé à la sous-section 3.2.2., sans toutefois être inférieur à 45 min",
-    measured: "—", required: "au moins 45 min", state: "non résolu",
-    needs: "degré des cages d'escalier d'issue sur les coupes", page: 328,
-    fig: "issues" },
-  { id: "3.4.6.1", topic: "Surfaces antidérapantes",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Les rampes, les marches et les paliers des escaliers doivent comporter : a) une surface antidérapante; et b) s'ils sont accessibles au public, une surface présentant une couleur contrastante ou un motif distinctif…",
-    measured: "—", required: "antidérapant, nez contrastant", state: "non résolu",
-    needs: "fini des marches et paliers des deux cages", page: 330,
-    fig: "issues" },
-  { id: "3.4.6.5", topic: "Mains courantes",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Les escaliers de moins de 1100 mm de largeur doivent être munis de 1 main courante. 2) Une main courante doit être installée de chaque côté : a) d'escaliers d'au moins 1100 mm de largeur;…",
-    measured: "—", required: "1 ou 2 selon la largeur", state: "non résolu",
-    needs: "largeur des escaliers et mains courantes aux plans des cages", page: 331,
-    fig: "garde" },
-  { id: "3.2.5.12", topic: "Système de gicleurs",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Sous réserve des paragraphes 2) à 4) et 9), un système de gicleurs doit être conçu, construit, installé et mis à l'essai conformément à la norme NFPA 13",
-    measured: "—", required: "NFPA 13", state: "non résolu",
-    needs: "plans de protection incendie de l'ingénieur", page: 281,
-    fig: "classement" },
-  { id: "3.2.5.3", topic: "Accès au toit",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "…dans un bâtiment de plus de 3 étages de hauteur de bâtiment dont la pente du toit est inférieure à 1 : 4, il doit être possible d'accéder directement aux parties principales du toit depuis les aires de plancher situées immédiatement au-dessous :…",
-    measured: "—", required: "escalier, ou trappe 550 × 900 mm", state: "non résolu",
-    needs: "accès au toit depuis le niveau 8", page: 278,
-    fig: "classement" },
-  { id: "3.2.4.1", topic: "Système d'alarme incendie",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Sous réserve des paragraphes 2) et 3), un système d'alarme incendie doit être installé dans un bâtiment protégé par gicleurs.",
-    measured: "—", required: "exigé", state: "non résolu",
-    needs: "plans électriques et de sécurité incendie", page: 263,
     fig: "classement" },
 ];
 
@@ -4029,19 +3911,9 @@ const CODE_INDEX = {
   "Code de construction": [
     { id: "3.2.3.1", page: 249, k: "fenetre fenetres baie baies vitrage ouverture ouvertures facade limite voisin proche distance limitative rayonnement incendie", why: "Façade est: 74,2 m² dessinés pour 68,5 m² permis." },
     { id: "3.3.1.9", page: 298, k: "corridor couloir largeur commun passage", why: "Relevé: 1 120 mm au point le plus étroit." },
-    { id: "3.4.2.1", page: 322, k: "issue issues sortie sorties evacuation escalier etage combien nombre incendie", why: "Chaque étage est desservi par 2 issues." },
     { id: "3.3.1.18", page: 302, k: "garde-corps garde corps balcon rampe terrasse chute hauteur toit", why: "Coté à 1 020 mm sur l'élévation des balcons." },
     { id: "3.8.3.6", page: 367, k: "porte largeur fauteuil roulant accessible accessibilite handicap universel obstacle entree baie 850", why: "Relevé: 800 mm à la porte d'entrée, 50 mm sous l'exigence." },
     { id: "3.2.2.48", page: 231, k: "classement classe construction incombustible combustible usage groupe hauteur etages gicleurs", why: "Groupe C sur 8 étages, gicleurs: construction incombustible, planchers 1 h." },
-    { id: "3.3.4.2", page: 314, k: "separation coupe feu logement logements mur mitoyen suite resistance degre", why: "Entre les 104 logements, et entre chaque logement et le corridor." },
-    { id: "3.3.4.6", page: 316, k: "son bruit acoustique insonorisation stc astc mur plancher voisin", why: "Logements superposés et côte à côte sur un corridor à double chargement." },
-    { id: "3.4.2.5", page: 325, k: "distance parcours issue sortie evacuation gicleur gicleurs incendie loin 45", why: "À mesurer depuis la porte de logement la plus éloignée de chaque étage." },
-    { id: "3.4.4.1", page: 328, k: "issue escalier cage separation coupe feu degre resistance", why: "Les deux cages d'escalier, sur les 8 étages." },
-    { id: "3.4.6.1", page: 330, k: "antiderapant marche marches nez palier escalier contraste glissant", why: "Les deux escaliers d'issue et la rampe du garage." },
-    { id: "3.4.6.5", page: 331, k: "main courante mains courantes escalier rampe largeur", why: "Le nombre suit la largeur des deux escaliers d'issue." },
-    { id: "3.2.5.12", page: 281, k: "gicleur gicleurs sprinkler nfpa protection incendie", why: "Le classement 3.2.2.48 et la distance de 45 m en dépendent." },
-    { id: "3.2.5.3", page: 278, k: "toit toiture acces trappe echelle terrasse pompier", why: "8 étages, toit plat avec terrasse." },
-    { id: "3.2.4.1", page: 263, k: "alarme incendie detection detecteur systeme", why: "Exigé dès que le bâtiment est protégé par gicleurs." },
     { id: "3.3.1.4", page: 295, k: "corridor commun separation coupe feu", why: "Le paragraphe 4) l'allège si le parcours reste sous 45 m, gicleurs compris." },
     { id: "3.4.3.2", page: 326, k: "escalier escaliers issue largeur porte evacuation 1100 900", why: "Au tableau 3.4.3.2.-A: 1 100 mm pour un escalier qui dessert plus de 2 étages." },
     { id: "9.5.3.1", page: 899, k: "plafond hauteur libre piece sous-sol", why: "À vérifier sous les retombées de poutres et les plafonds suspendus." },
@@ -4057,16 +3929,6 @@ const CODE_INDEX = {
     { id: "art. 395", page: 122, k: "vert verdissement arbre arbres plantation paysage vegetal jardin cour terrain non construit", why: "Se compte sur la cour paysagée, d'après la superficie non construite." },
     { id: "art. 32", page: 27, k: "implantation taux sol emprise couverture terrain minimal maximal", why: "48,2 % pour 55 % permis au secteur." },
     { id: "art. 43", page: 29, k: "marge recul arriere limite terrain fond cour distance", why: "2,70 m dessinés pour 3,00 m exigés." },
-    { id: "art. 10", page: 21, k: "hauteur metres maximale minimale gabarit annexe secteur", why: "Se lit avec l'art. 9: le gabarit en mètres, pas seulement les étages." },
-    { id: "art. 26", page: 26, k: "densite isp indice superficie plancher cos", why: "104 logements: la superficie de plancher totale contre l'ISP du secteur." },
-    { id: "art. 38", page: 28, k: "alignement facade implantation rue voisin ligne avant", why: "La façade sur rue s'aligne sur les voisins." },
-    { id: "art. 39", page: 28, k: "marge recul laterale cote limite voisin terrain distance", why: "La façade est est proche de la limite latérale." },
-    { id: "art. 349.1", page: 103, k: "saillie saillies balcon balcons galerie escalier marge arriere laterale", why: "Les 0,30 m manquants à l'arrière sont des balcons." },
-    { id: "art. 18.1", page: 24, k: "terrasse toit retrait garde-corps parapet facade", why: "La terrasse du toit et son garde-corps." },
-    { id: "art. 49", page: 30, k: "materiau materiaux facade revetement brique maconnerie verre vitrage reflechissant vinyle", why: "Façades en maçonnerie et grandes baies vitrées." },
-    { id: "art. 51.2", page: 31, k: "toit blanc toiture vegetalise vert membrane irs reflectance albedo", why: "Le toit plat, hors terrasse et équipements." },
-    { id: "art. 550", page: 148, k: "allee voie circulation garage souterrain stationnement largeur", why: "Les allées du garage souterrain de 22 cases." },
-    { id: "art. 629.5", page: 154, k: "velo velos bicyclette stationnement support logement", why: "104 supports requis, un par logement." },
     { id: "art. 558", page: 149, k: "stationnement exterieur cour pleine terre vegetaux", why: "Ne joue que si une case sort du garage souterrain." },
     { id: "Note interne", from: "bureau", file: "Notes d'interprétation du bureau — arrondissement.docx", page: 3, sec: "Note du bureau",
       topic: "Balcons acceptés comme saillies dans la marge arrière", fig: "classement",
@@ -6888,7 +6750,11 @@ function render() {
      the content's own edge — the edge takes no room in the white card, so
      no white sliver opens between the strip and the pane next to it. */
   const strip = (k) => V.screen === "Unités" && folded(k);
-  const edge = (shut) => (shut && V.shell === "Inset card" ? "0px" : "var(--gap)");
+  /* In the white card a seam takes no room at all: the pane on its left
+     draws the rule as its own border and the strip's grip hangs over it.
+     A pane then has the same white on both sides — its own padding — where
+     before the gap on one side added ten pixels the other side never had. */
+  const edge = (shut) => (V.shell === "Inset card" ? "0px" : "var(--gap)");
   const cols = [hasList ? side(listShut, listW) : null, hasList ? edge(listShut || strip("plan")) : null, "1fr",
     hasInsp ? edge(sideShut || strip("model")) : null, hasInsp ? side(sideShut, sideW) : null]
     .filter(Boolean).join(" ");
