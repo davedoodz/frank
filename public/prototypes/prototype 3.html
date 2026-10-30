@@ -236,6 +236,11 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
   white-space:nowrap}
 /* A crowded header squeezes the title, never its icon. */
 .pane > .ph > svg{width:15px;height:15px;flex:0 0 15px;color:var(--ink-2)}
+/* and the title is what gives: it shortens with an ellipsis so the edge
+   between two panes can actually be dragged. The header's own width was the
+   floor of a drag (headNeed), and a title held at full length made that floor
+   wider than the pane already was, so the edge would not move at all. */
+.pane > .ph > .hi{min-width:0;overflow:hidden;text-overflow:ellipsis}
 /* Only the title is loud: chips, counts and buttons inside the header keep
    their own weight. */
 .pane > .ph .chip,.pane > .ph .btnw{font-weight:400}
@@ -1760,6 +1765,16 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .npin:hover .nl{border-color:var(--ink-2)}
 .npin.on .nl{background:var(--ink);color:#fff;border-color:var(--ink)}
 .npin.team .nl{border-color:#c6d4dc}
+
+/* Note labels are portalled outside the transformed sheet during zoom. Their
+   anchors keep moving with the plan; their text stays a sharp browser layer. */
+.annotation-labels{position:absolute;inset:0;z-index:18;pointer-events:none}
+[data-sharp-annotations="1"] .plan .npin .nl{visibility:hidden}
+.annotation-label{position:absolute;background:#fff;border:1px solid var(--line);border-radius:5px;
+  padding:2px 7px;font-size:10.5px;color:var(--ink);white-space:nowrap;max-width:190px;
+  overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(17,17,18,.16)}
+.annotation-label.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.annotation-label.team{border-color:#c6d4dc}
 /* The sentence is typed on the drawing, hung off the pin that anchors it. */
 .pbub{position:absolute;left:0;top:0;width:286px;background:var(--card);border:1px solid var(--ink);
   border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:6px;cursor:default;
@@ -5921,6 +5936,29 @@ window.fitteSelectLevel = (level) => {
    the drag would stutter. The slider and the percentage on the edge of the
    pane are patched in place, and the next real action draws from the same
    numbers. */
+function paintAnnotationLabels(el) {
+  let layer = el.querySelector(":scope > .annotation-labels");
+  if (!layer) {
+    layer = document.createElement("div");
+    layer.className = "annotation-labels";
+    el.append(layer);
+  }
+  layer.replaceChildren();
+  const bounds = el.getBoundingClientRect();
+  for (const pin of el.querySelectorAll(".plan .npin")) {
+    const source = pin.querySelector(".nl");
+    if (!source?.textContent) continue;
+    const point = pin.getBoundingClientRect();
+    const label = document.createElement("span");
+    label.className = `annotation-label${pin.classList.contains("on") ? " on" : ""}${pin.classList.contains("team") ? " team" : ""}`;
+    label.textContent = source.textContent;
+    label.style.left = `${point.left - bounds.left + 15}px`;
+    label.style.top = `${point.top - bounds.top - 13}px`;
+    layer.append(label);
+  }
+  el.dataset.sharpAnnotations = "1";
+}
+
 function paintSheet() {
   const el = vpEl();
   if (!el) return;
@@ -5956,6 +5994,7 @@ function paintSheet() {
   el.querySelectorAll(".plan .xmark").forEach((m) => {
     m.style.transform = `translate(-50%,-50%) rotate(${-ang}deg) scale(${(1 / kz).toFixed(4)})`;
   });
+  paintAnnotationLabels(el);
   placePlanPills();
   if (V.pending) placePinBubble();
   window.dispatchEvent(new Event("fitte:plan-paint"));
@@ -6057,7 +6096,10 @@ document.addEventListener("pointerdown", (e) => {
      pushed until the drawing is a sliver is an edge that gets pushed. */
   const room = parent.getBoundingClientRect().width;
   const other = (gut.dataset.grab === "prev" ? gut.nextElementSibling : gut.previousElementSibling);
-  const max = startW + (other ? other.getBoundingClientRect().width - Math.max(SPLIT_MIN, headNeed(other)) : room - SPLIT_MIN);
+  /* Never narrower than where the edge already sits: a pane laid out past
+     its own stop (a window too small for both headers) would otherwise jam
+     the edge at the first pixel of the drag. */
+  const max = Math.max(startW, startW + (other ? other.getBoundingClientRect().width - Math.max(SPLIT_MIN, headNeed(other)) : room - SPLIT_MIN));
   /* The track index of a grid child is its position, the header above
      spanning every column and taking none of its own. */
   const index = grid ? [...parent.children].indexOf(target) - 1 : -1;
@@ -6087,7 +6129,9 @@ document.addEventListener("pointerdown", (e) => {
     });
     return Math.ceil(Math.max(n, headNeed(target)));
   })();
-  const floor = Math.max(SPLIT_MIN, Math.min(need, max));
+  /* Same on the other side: the stop never sits above the width the pane is
+     already drawn at, or the edge could only ever grow. */
+  const floor = Math.max(SPLIT_MIN, Math.min(need, max, startW));
   let w = startW;
   gut.classList.add("live");
   document.body.classList.add("splitting");
