@@ -231,7 +231,7 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 /* the three core notes from a test: an icon, the theme, what was asked */
 .core{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:16px}
 .core li{display:grid;grid-template-columns:40px 1fr;column-gap:14px;align-items:start}
-.core svg{grid-row:span 2;width:40px;height:40px;padding:9px;border-radius:10px;background:var(--fill);fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.core svg{grid-row:span 2;width:40px;height:40px;padding:9px;border-radius:10px;background:var(--vert);fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .core b{font-size:18px;font-weight:600;color:var(--ink);line-height:1.25}
 .core span{font-size:16px;line-height:1.4;color:var(--ink-2)}
 
@@ -287,6 +287,17 @@ th{font-family:var(--pixel);font-weight:400;font-size:13px;letter-spacing:.09em;
 td{padding:13px 20px 13px 0;vertical-align:top;line-height:1.4;color:var(--ink-2)}
 td:first-child{color:var(--ink)}
 td .who{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;color:var(--ink-3);margin-left:8px}
+/* the test's notes in three themes: an icon, the theme, then each note and
+   the prototype 3 change it became */
+.fb3{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:44px}
+.fb3 .ic{width:56px;height:56px;padding:13px;border-radius:14px;background:var(--vert);fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.fb3 h3{font-size:28px;font-weight:600;letter-spacing:-.02em;margin-top:20px}
+.fb3 .sum{font-size:17px;line-height:1.4;color:var(--ink-2);margin-top:6px;min-height:2.8em}
+.fb3 .note{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.fb3 .said{font-size:17px;line-height:1.4;color:var(--ink)}
+.fb3 .said .who{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;color:var(--ink-3);margin-left:6px;white-space:nowrap}
+.fb3 .chg{font-size:16px;line-height:1.45;color:var(--ink-3);margin-top:6px;padding-left:22px;position:relative}
+.fb3 .chg::before{content:"→";position:absolute;left:0;color:var(--vert-dark)}
 td.arrow{color:var(--ink-3);width:40px}
 tr.hl td{background:var(--vert-pale)}
 
@@ -1093,16 +1104,30 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <p class="k">From feedback to change</p>
   <h2>Every note from the test has a change in prototype 3.</h2>
   <div class="rule"></div>
-  <table style="font-size:17px;margin-top:36px">
-    <tr><th>They said</th><th></th><th>Prototype 3</th></tr>
-    <tr><td>The mouse wheel zooms the wrong way <span class="who">BENOÎT</span></td><td class="arrow">→</td><td>Mouse and trackpad are told apart; each zooms the way its owner expects</td></tr>
-    <tr><td>Let me resize the panels, and zoom further <span class="who">BENOÎT</span></td><td class="arrow">→</td><td>Every pane resizes and folds; it stops at the width its table needs. Zoom to 1000 %</td></tr>
-    <tr><td>Totals per material are less useful than per façade <span class="who">BENOÎT</span></td><td class="arrow">→</td><td>Four façade tables, counted in the 3D model, with each maker's product sheet</td></tr>
-    <tr><td>Show the unit mix and the total net area <span class="who">BENOÎT</span></td><td class="arrow">→</td><td>A 3½ / 4½ / 5½ mix bar and the floor's net total above the area table</td></tr>
-    <tr><td>Previous drawing versions do not work <span class="who">GUY</span></td><td class="arrow">→</td><td>Each drawing card lists earlier issues; one click swaps it in, read-only</td></tr>
-    <tr><td>“Distribution”, “.csv” and “Client” are not our words <span class="who">GUY</span></td><td class="arrow">→</td><td>Trade names on each sheet, “Exporter”, and “Municipalité / Ville” in Codes</td></tr>
-    <tr><td>Green should mean progress, not urgency <span class="who">GUY</span></td><td class="arrow">→</td><td>Red for conflicts and late items; green only for today and what is selected</td></tr>
-  </table>
+  <div class="fb3">
+    <div class="col">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+      <h3>Drawings</h3>
+      <p class="sum">Zoom further, resize the panes, reach earlier versions.</p>
+      <div class="note"><p class="said">The mouse wheel zooms the wrong way <span class="who">BENOÎT</span></p><p class="chg">Mouse and trackpad are told apart; each zooms the way its owner expects</p></div>
+      <div class="note"><p class="said">Let me resize the panels, and zoom further <span class="who">BENOÎT</span></p><p class="chg">Every pane resizes and folds; it stops at the width its table needs. Zoom to 1000 %</p></div>
+      <div class="note"><p class="said">Previous drawing versions do not work <span class="who">GUY</span></p><p class="chg">Each drawing card lists earlier issues; one click swaps it in, read-only</p></div>
+    </div>
+    <div class="col">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+      <h3>Totals</h3>
+      <p class="sum">Count per façade, and show the unit mix and the net area.</p>
+      <div class="note"><p class="said">Totals per material are less useful than per façade <span class="who">BENOÎT</span></p><p class="chg">Four façade tables, counted in the 3D model, with each maker's product sheet</p></div>
+      <div class="note"><p class="said">Show the unit mix and the total net area <span class="who">BENOÎT</span></p><p class="chg">A 3½ / 4½ / 5½ mix bar and the floor's net total above the area table</p></div>
+    </div>
+    <div class="col">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg>
+      <h3>Words</h3>
+      <p class="sum">Use the office’s terms, not the software’s.</p>
+      <div class="note"><p class="said">“Distribution”, “.csv” and “Client” are not our words <span class="who">GUY</span></p><p class="chg">Trade names on each sheet, “Exporter”, and “Municipalité / Ville” in Codes</p></div>
+      <div class="note"><p class="said">Green should mean progress, not urgency <span class="who">GUY</span></p><p class="chg">Red for conflicts and late items; green only for today and what is selected</p></div>
+    </div>
+  </div>
 </div>
 </section>
 
