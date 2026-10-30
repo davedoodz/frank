@@ -42,8 +42,8 @@ function localPoint(turn, rect, x, y) {
   return [x - rect.left, y - rect.top];
 }
 
-function visibleTiles(canvas, manifest, viewport, turn) {
-  const rect = canvas.getBoundingClientRect();
+function visibleTiles(plan, manifest, viewport, turn) {
+  const rect = plan.getBoundingClientRect();
   const left = Math.max(rect.left, viewport.left);
   const top = Math.max(rect.top, viewport.top);
   const right = Math.min(rect.right, viewport.right);
@@ -76,17 +76,17 @@ function visibleTiles(canvas, manifest, viewport, turn) {
   return { level, tiles };
 }
 
-function tileLayer(canvas) {
-  let layer = canvas.parentElement.querySelector(":scope > .supabase-tiles");
+function tileLayer(plan) {
+  let layer = plan.querySelector(":scope > .supabase-tiles");
   if (layer) return layer;
   layer = document.createElement("div");
   layer.className = "supabase-tiles";
-  canvas.insertAdjacentElement("afterend", layer);
+  plan.append(layer);
   return layer;
 }
 
-function paint(canvas, manifest, request) {
-  const layer = tileLayer(canvas);
+function paint(plan, manifest, request) {
+  const layer = tileLayer(plan);
   const wanted = new Set();
   for (const { column, row } of request.tiles) {
     const key = `${request.level.level}/${column}_${row}`;
@@ -109,9 +109,12 @@ function paint(canvas, manifest, request) {
   for (const image of layer.querySelectorAll("img[data-tile]")) {
     if (!wanted.has(image.dataset.tile)) image.remove();
   }
-  canvas.dataset.supabaseTiles = "ready";
-  canvas.dataset.pdfState = "ready";
-  canvas.style.visibility = "hidden";
+  const canvas = plan.querySelector("canvas[data-sheetpdf]");
+  if (canvas) {
+    canvas.dataset.supabaseTiles = "ready";
+    canvas.dataset.pdfState = "ready";
+    canvas.style.visibility = "hidden";
+  }
 }
 
 async function schedule() {
@@ -119,11 +122,11 @@ async function schedule() {
   if (!viewport) return;
   const bounds = viewport.getBoundingClientRect();
   const turn = Number(viewport.dataset.turn || 0);
-  for (const canvas of viewport.querySelectorAll("canvas[data-sheetpdf]")) {
-    const manifest = await manifestFor(canvas.dataset.pdfUrl);
+  for (const plan of viewport.querySelectorAll("[data-plan-pdf]")) {
+    const manifest = await manifestFor(plan.dataset.planPdf);
     if (!manifest) continue;
-    const request = visibleTiles(canvas, manifest, bounds, turn);
-    if (request) paint(canvas, manifest, request);
+    const request = visibleTiles(plan, manifest, bounds, turn);
+    if (request) paint(plan, manifest, request);
   }
 }
 

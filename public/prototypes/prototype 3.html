@@ -9,6 +9,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="vendor/geist/geist.css">
 <script type="importmap">
+{"imports":{
   "three":"./vendor/three/build/three.module.js",
   "three/addons/":"./vendor/three/examples/jsm/"
 }}
@@ -147,17 +148,6 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 /* No tab stands on the page's corner any more: the screen switch opens
    the row, so the first level tab is inboard like every other one and the
    page keeps one silhouette at both ends. */
-/* The travelling tab of the panel's tab motion: the open tab's own shape
-   and feet, under the words, while the real tab waits transparent. */
-.tabs.lvl.gliding{position:relative}
-.tabs.lvl .tabglide{position:absolute;left:0;bottom:0;z-index:0;pointer-events:none;background:var(--card);
-  border-radius:var(--tabr) var(--tabr) 0 0;--tabc:var(--card)}
-.tabs.lvl .tabglide::before,.tabs.lvl .tabglide::after{content:"";position:absolute;bottom:0;width:var(--tabr);height:var(--tabr)}
-.tabs.lvl .tabglide::before{right:100%;background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
-.tabs.lvl .tabglide::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px)}
-.tabs.lvl.gliding button,.tabs.lvl.gliding .ms,.tabs.lvl.gliding .mseg{position:relative;z-index:1}
-.frame[data-chrome] .tabs.lvl.gliding button[aria-current="true"]{background:transparent}
-.tabs.lvl.gliding button[aria-current="true"]::before,.tabs.lvl.gliding button[aria-current="true"]::after{display:none}
 /* The switch's lit pill while it slides: under the words, the real one
    unlit until it lands. */
 .tabs.lvl .mseg.gliding{position:relative}
@@ -4732,7 +4722,7 @@ function contentHTML() {
              together. The wheel zooms where the pointer is; dragging pans. */
           ? `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="plan">
               <div class="vp" data-vp>
-              <div class="plan ${cls}" data-img="${kind}" data-src="${planVector() ? "vector" : "image"}"
+              <div class="plan ${cls}" data-img="${kind}" data-plan-pdf="${sheet().pdf || ""}" data-src="${planVector() ? "vector" : "image"}"
                    style="transform:translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100});
                      --planz:${layZ("plan")};--planop:${V.lay.plan.on ? V.lay.plan.opacity / 100 : 0}">
                 <span class="lo"></span><span class="hi">${note}</span>
@@ -8079,65 +8069,12 @@ document.addEventListener("input", (e) => {
   if (e.target.matches?.("textarea[data-note]")) armSend("notesave", e.target.value);
 });
 
-/* Moving between the tabs of the level row. The row is rewritten on every
-   render, so the tab that was open is measured as the pointer goes down,
-   and once the new row is drawn the move is played over it: a white tab
-   shape travelling from the old place to the new (slide, spring, stretch),
-   or the new tab rising out of the page or fading in. Words cross-fade
-   between dark and white so none goes white on white on the way. */
+/* Level tabs switch in place, with no travelling tab. TAB_MOTION only
+   paces the Coordination / Codes switch below. */
 const TAB_MOTION = { kind: "slide", ms: 280 };
-let tabFrom = null, tabFromAt = 0;
-document.addEventListener("pointerdown", (e) => {
-  const b = e.target.closest(".tabs.lvl button");
-  const cur = b?.closest(".tabs.lvl").querySelector('button[aria-current="true"]');
-  tabFrom = cur && cur !== b ? cur.getBoundingClientRect() : null;
-  tabFromAt = performance.now();
-}, true);
-window.addEventListener("fitte:render", () => {
-  const from = tabFrom;
-  tabFrom = null;
-  if (!from || TAB_MOTION.kind === "none" || performance.now() - tabFromAt > 800) return;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const row = document.querySelector(".tabs.lvl"), to = row?.querySelector('button[aria-current="true"]');
-  if (!to) return;
-  const t = to.getBoundingClientRect();
-  if (Math.abs(t.left - from.left) < 1) return;
-  playTabMotion(row, to, from, t);
-});
-function playTabMotion(row, to, from, t) {
-  const { kind, ms } = TAB_MOTION;
-  const ease = "cubic-bezier(.25,.8,.25,1)";
-  const ink = getComputedStyle(to).color, dim = "rgba(255,255,255,.72)";
-  const left = [...row.querySelectorAll("button")].find((b) => Math.abs(b.getBoundingClientRect().left - from.left) < 2 && b !== to);
-  if (kind === "rise" || kind === "fade") {
-    to.animate(kind === "rise" ? [{ transform: "translateY(100%)" }, { transform: "none" }] : [{ opacity: 0 }, { opacity: 1 }],
-      { duration: ms, easing: ease });
-    left?.animate(kind === "rise" ? [{ boxShadow: "inset 0 -36px 0 var(--card)", color: ink }, { boxShadow: "inset 0 0 0 var(--card)", color: dim }]
-      : [{ background: "var(--card)", color: ink }, { background: "transparent", color: dim }], { duration: ms, easing: ease });
-    return;
-  }
-  const r = row.getBoundingClientRect(), x0 = from.left - r.left, x1 = t.left - r.left;
-  const g = document.createElement("span");
-  g.className = "tabglide";
-  g.style.height = `${t.height}px`;
-  row.append(g);
-  row.classList.add("gliding");
-  const at = (x, w) => ({ transform: `translateX(${x}px)`, width: `${w}px` });
-  const lo = Math.min(x0, x1), hi = Math.max(x0 + from.width, x1 + t.width);
-  const frames = kind === "stretch" ? [at(x0, from.width), at(lo, hi - lo), at(x1, t.width)] : [at(x0, from.width), at(x1, t.width)];
-  const dur = kind === "spring" ? ms * 1.3 : kind === "stretch" ? ms * 1.2 : ms;
-  const easing = kind === "spring" ? "cubic-bezier(.34,1.5,.5,1)" : kind === "stretch" ? "cubic-bezier(.65,0,.35,1)" : ease;
-  const a = g.animate(frames, { duration: dur, easing });
-  to.animate([{ color: dim }, { color: ink }], { duration: dur, easing: "ease-in" });
-  left?.animate([{ color: ink }, { color: dim }], { duration: dur * 0.6, easing: "ease-out" });
-  const end = () => { g.remove(); row.classList.remove("gliding"); };
-  a.onfinish = end;
-  a.oncancel = end;
-}
-
 /* The Coordination / Codes switch: its lit pill slides from one screen to
-   the other, at the panel's tab-motion speed (springing when the levels
-   spring). Measured as the pointer goes down, played on the new row. */
+   the other (springing when TAB_MOTION is a spring). Measured as the
+   pointer goes down, played on the new row. */
 let msFrom = null, msFromAt = 0;
 document.addEventListener("pointerdown", (e) => {
   const b = e.target.closest(".tabs.lvl .ms");

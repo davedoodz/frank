@@ -16,6 +16,7 @@ Required in .env.local (never commit these):
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import io
 import json
 import math
@@ -155,14 +156,25 @@ def main() -> None:
     upload(supabase_url, service_role_key, TILE_BUCKET, public_path(args.drawing, "preview.webp"), preview_bytes(page), "image/webp", "31536000")
 
     levels = []
-    for level, width in enumerate(level_widths(max_width)):
-        height = math.ceil(page.rect.height * width / page.rect.width)
-        columns, rows = math.ceil(width / TILE_SIZE), math.ceil(height / TILE_SIZE)
-        levels.append({"level": level, "width": width, "height": height, "columns": columns, "rows": rows})
-        for column, row, body in tile_jobs(page, width):
-            path = public_path(args.drawing, str(level), f"{column}_{row}.webp")
-            upload(supabase_url, service_role_key, TILE_BUCKET, path, body, "image/webp", "31536000")
-        print(f"uploaded level {level}: {columns} × {rows} tiles")
+    with ThreadPoolExecutor(max_workers=16) as workers:
+        for level, width in enumerate(level_widths(max_width)):
+            height = math.ceil(page.rect.height * width / page.rect.width)
+            columns, rows = math.ceil(width / TILE_SIZE), math.ceil(height / TILE_SIZE)
+            levels.append({"level": level, "width": width, "height": height, "columns": columns, "rows": rows})
+            jobs = (
+                (
+                    supabase_url,
+                    service_role_key,
+                    TILE_BUCKET,
+                    public_path(args.drawing, str(level), f"{column}_{row}.webp"),
+                    body,
+                    "image/webp",
+                    "31536000",
+                )
+                for column, row, body in tile_jobs(page, width)
+            )
+            list(workers.map(lambda job: upload(*job), jobs))
+            print(f"uploaded level {level}: {columns} × {rows} tiles")
 
     manifest = {
         "version": 1,
