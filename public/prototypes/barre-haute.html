@@ -42,6 +42,14 @@ section p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;max-width:900px}
   background:#fff;color:#111;font-size:11px;font-weight:600}
 .share{border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:4px 10px;color:#fff;font-size:12.5px;cursor:pointer}
 .share:hover{background:#fff;color:#111;border-color:#fff}
+/* Who is signed in: the initials are the mark, the name is there because
+   an office runs on several people with the same two letters. */
+.me{display:flex;align-items:center;gap:8px;padding:3px 9px 3px 3px;border-radius:999px;
+  color:#fff;font-size:12.5px;cursor:pointer}
+.me:hover{background:rgba(255,255,255,.1)}
+.me i{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
+  background:rgba(255,255,255,.16);color:#fff;font-style:normal;font-size:10.5px;
+  font-weight:600;letter-spacing:.02em}
 .lvl{display:flex;align-items:flex-end;height:34px;padding:0 12px;gap:2px}
 .lvl button{display:flex;align-items:center;gap:6px;height:28px;margin-bottom:3px;padding:0 10px;border:0;background:none;font:inherit;font-size:12px;
   color:rgba(255,255,255,.72);border-radius:6px;cursor:pointer}
@@ -135,6 +143,7 @@ const page = () => `<div class="hold"><div class="card">
   <div class="h">${svg("bed-double")}Unités</div></div></div>`;
 
 const ech = `<span class="it">${svg("calendar-check")}Échéancier<span class="cnt">1</span></span>`;
+const me = `<span class="me"><i>GR</i>Guy Roberge</span>`;
 const share = `<span class="share">${svg("share-2")} Partager</span>`;
 const screens = (cls = "") => `<span class="it on ${cls}">${svg("git-compare")}Coordination</span>
   <span class="it ${cls}">${svg("hash")}Codes</span>`;
@@ -167,10 +176,14 @@ const BARS = {
     <span class="it proj">${svg("building-2")}Le Baldwin III</span>
     <span class="rule"></span>${screens()}</div>`,
 
+  /* The two right ends answer their own rows: who is signed in belongs to
+     the studio line, and sharing is a thing done to this project, so it
+     sits on the project's line, under the person doing it. */
   E: `<div class="bar one">
     <span class="it">${svg("folder")}Tous les projets</span>${ech}
-    <span class="sp"></span>${share}</div>
-   <div class="bar two"><span class="it proj">Le Baldwin III</span>${screens()}</div>`,
+    <span class="sp"></span>${me}</div>
+   <div class="bar two"><span class="it proj">Le Baldwin III</span>${screens()}
+    <span class="sp"></span>${share}</div>`,
 
   F: `<div class="bar">
     <span class="crumbchip">${svg("folder")}Tous les projets ${svg("chevron-right")}
