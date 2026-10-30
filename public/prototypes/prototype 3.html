@@ -122,7 +122,7 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    the white page under it, the way a folder's tab is the folder. The page
    grows up into the chrome where the level is named, and the join is the
    whole mark — no green, nothing to decode. */
-.tabs.lvl{height:34px;align-items:flex-end;background:none;border:0;padding:0 12px}
+.tabs.lvl{height:34px;align-items:flex-end;background:none;border:0;padding:0 9px}
 .tabs.lvl .views{flex:1;align-items:flex-end;overflow:visible}
 .tabs.lvl button{position:relative;font-size:12px;padding:0 10px;height:28px;margin-bottom:3px;
   border-radius:6px;white-space:nowrap}
@@ -143,10 +143,10 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    corner under a tab reads as two sheets, not one. The tab then has to sit
    on the card's own left edge — inset by the row's padding it would leave a
    sliver of chrome over a squared corner, which reads as a chip out of the
-   page — so the row loses its left padding and the tab its left radius and
-   its left foot: there is nothing on that side to curve into. */
+   page — so the row loses its left padding and the tab its left foot:
+   there is nothing on that side to curve into. Its top corners stay round
+   on both sides, like every other tab. */
 .tabs.lvl[data-head="true"]{padding-left:0}
-.tabs.lvl[data-head="true"] button[aria-current="true"]{border-radius:0 8px 0 0}
 .tabs.lvl[data-head="true"] button[aria-current="true"]::before{display:none}
 .tabs.lvl[data-head="true"] + .work{border-top-left-radius:0}
 .frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.72);font-size:12.5px}
@@ -597,6 +597,12 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .fqh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink)}
 .fqh svg{width:13px;height:13px}
 .fqs{font-size:12px;font-weight:400;color:var(--ink-2);margin-left:6px}
+/* A section head stays one line at any width of its pane: the title, its
+   badge and its button keep their size, and the grey caption gives way,
+   cut short with an ellipsis. contain:inline-size keeps the caption out of
+   the pane's minimum width, so the tables alone set where the edge stops. */
+.fqh > *{flex:none;white-space:nowrap}
+.fqh > .fqs{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;contain:inline-size}
 .fqn{font-size:11px;color:var(--ink-3)}
 .fq-unit{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:10px}
 /* Façade tables: the head row opens the elevation, a material row keeps
@@ -703,7 +709,32 @@ body.elev .mtools{display:none}
 .frame[data-shell="inset"]{background:var(--page-field);border-color:#eaeaec}
 .frame[data-shell="inset"] .rail{background:none;border-right:0}
 .frame[data-shell="inset"] .tabs{border-bottom:0}
-.frame[data-shell="inset"] .body{padding:0 10px 10px}
+.frame[data-shell="inset"] .body{padding:0 6px 6px}
+/* The sheet the project rests on: its own panel, one shade lighter than
+   the studio's chrome, carrying the project's row and its levels down to
+   the white page. The project is a thing set into the studio, not a second
+   half of the same bar. */
+.projsheet{background:#232327;border-radius:12px 12px 0 0}
+/* One left edge for the whole chrome: every row's pill starts at 15 and
+   every word at 25, so the studio line, the project line and the levels
+   read as one stack rather than three strips that happen to be piled. */
+.tabs.one{height:36px;padding:0 9px}
+.tabs.two{height:38px;padding:0 9px}
+.tabs.one .crumb,.tabs.two .crumb{padding:5px 10px;border-radius:7px}
+.tabs.one .crumb[data-screen]{cursor:pointer}
+.tabs.one .crumb[data-screen]:hover{background:var(--wash)}
+.frame[data-chrome="black"] .tabs.one .crumb[data-screen]:hover{background:rgba(255,255,255,.1);color:#fff}
+.tabs.two .proj{font-size:15px;font-weight:600}
+/* Who is signed in: the initials are the mark, the name is there because
+   an office runs on several people with the same two letters. */
+.me{display:flex;align-items:center;gap:8px;padding:3px 9px 3px 3px;border-radius:999px;
+  color:var(--ink);font-size:12.5px;cursor:pointer;flex:0 0 auto}
+.me:hover{background:var(--wash)}
+.me i{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
+  background:var(--wash-2);color:var(--ink);font-style:normal;font-size:10.5px;font-weight:600}
+.frame[data-chrome="black"] .me{color:#fff}
+.frame[data-chrome="black"] .me:hover{background:rgba(255,255,255,.1)}
+.frame[data-chrome="black"] .me i{background:rgba(255,255,255,.16);color:#fff}
 .frame[data-shell="inset"] .work{background:var(--card);border:1px solid var(--line-2);border-radius:12px;
   gap:0;padding:0;overflow:hidden;box-shadow:0 1px 2px rgba(17,17,18,.04),0 10px 26px rgba(17,17,18,.045)}
 .frame[data-shell="inset"] .pane{border:0;border-radius:0;background:none}
@@ -949,14 +980,9 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   display:flex;white-space:nowrap}
 .lcard .hd b .head{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .lcard .hd b .tail{flex:0 0 auto}
-.lcard .hd .x{display:grid;place-items:center;width:20px;height:20px;margin:0 -4px 0 0;flex:0 0 20px;
-  border-radius:5px;color:var(--ink-3);cursor:pointer}
-.lcard .hd .x:hover{background:var(--fill);color:var(--ink)}
-.lcard .hd .x svg{width:14px;height:14px}
 /* The card on loan is lighter than the one that was asked for, so which of
    the two the pointer is responsible for is never in doubt. */
 .lcard[data-peek]{border-color:var(--line-2);box-shadow:0 4px 14px rgba(17,17,18,.10)}
-.lcard[data-peek] .hd .x{display:none}
 .lcard .docbtn{display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;
   border:1px solid var(--line-2);border-radius:5px;padding:4px 8px;font-size:11.5px}
 .lcard .docbtn .lu{width:13px;height:13px}
@@ -1286,13 +1312,10 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .npin.on .nl{background:var(--ink);color:#fff;border-color:var(--ink)}
 .npin.team .nl{border-color:#c6d4dc}
 /* The sentence is typed on the drawing, hung off the pin that anchors it. */
-.pbub{position:absolute;left:0;top:0;width:258px;background:var(--card);border:1px solid var(--ink);
+.pbub{position:absolute;left:0;top:0;width:286px;background:var(--card);border:1px solid var(--ink);
   border-radius:9px;padding:8px;display:flex;flex-direction:column;gap:6px;cursor:default;
   box-shadow:0 10px 26px rgba(17,17,18,.22);z-index:12}
-.pbub .zone{font-family:var(--mono);font-size:10px;color:var(--ink-3)}
-/* Two scope chips and a zone name on one line: the chips never wrap, so
-   "À l'interne" stays a phrase rather than two stacked words. */
-.pbub{width:286px}
+.pbub .zone{font-family:var(--mono);font-size:10px;color:var(--ink-3);line-height:1.15;text-align:right;white-space:nowrap}
 .pbub .chip{white-space:nowrap}
 .pbub .nnew{width:100%;border:1px solid var(--line-2);border-radius:6px;padding:6px 7px;font:inherit;
   font-size:12.5px;color:var(--ink);background:#fff;resize:none}
@@ -1531,12 +1554,29 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .frame[data-shell="inset"] .gut[data-gut="plan"]:not(.fold):hover::before,
 body.splitting .frame[data-shell="inset"] .gut[data-gut="plan"].live::before{width:2px;margin-left:-2px;background:var(--ink)}
 .gut.fold{cursor:default}
+/* Échéancier's calendar and list meet as the plan and the model do: the
+   calendar's right border is the seam, and the edge takes no room in the
+   row — its 10 px of grip hang over that border, its ink lies on it. */
+.frame[data-shell="inset"] .pane:has(+ .gut[data-gut="cal"]:not(.fold)){border-right:1px solid var(--line)}
+.frame[data-shell="inset"] .gut[data-gut="cal"]:not(.fold){margin:0 -5px}
+.frame[data-shell="inset"] .gut[data-gut="cal"]:not(.fold)::before{left:50%;width:1px;margin-left:-1px;background:transparent}
+.frame[data-shell="inset"] .gut[data-gut="cal"]:not(.fold):hover::before,
+body.splitting .frame[data-shell="inset"] .gut[data-gut="cal"].live::before{width:2px;margin-left:-2px;background:var(--ink)}
+/* The period the calendar shows, centred over it. */
+.calmonth{text-align:center;font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 10px}
 /* In the white card a folded pane's strip meets its neighbour directly:
    the edge beside it takes no room (its grid track is 0 too), so no white
    sliver opens between the strip and the next pane. A strip with a pane on
    its right draws the seam itself, as the open pane did. */
 .frame[data-shell="inset"] .gut.fold{flex:0 0 0;width:0;margin:0}
 .frame[data-shell="inset"] .pane.fstrip:has(+ .gut.fold){border-right:1px solid var(--line)}
+/* An open side column beside the plan's or the model's strip: the edge is
+   still dragged, but it takes no room — its 10 px of grip hang over the
+   seam, the column's own border, which its line lies on under the pointer. */
+.frame[data-shell="inset"] .gut[data-gut="list"]:not(.fold):has(+ .pane .row > .fstrip:first-child),
+.frame[data-shell="inset"] .pane:has(.row > .fstrip:last-child) + .gut[data-gut="side"]:not(.fold){margin:0 -5px}
+.frame[data-shell="inset"] .gut[data-gut="list"]:not(.fold):has(+ .pane .row > .fstrip:first-child)::before{left:4px}
+.frame[data-shell="inset"] .pane:has(.row > .fstrip:last-child) + .gut[data-gut="side"]:not(.fold)::before{left:4px}
 /* Folding lives in the pane's own header (bord-replier-entete.html, A): a
    grey button at the header's end, like a window's close button, so
    nothing lands on the drawing. Folded, the same button heads the strip,
@@ -1732,8 +1772,8 @@ const V = {
   marginTab: "notes",  /* the margin shows the comments, or the conflicts */
   issueSel: null,      /* the problem last opened from the conflicts list */
   xdraft: { who: [], day: null },
-  layPick: "plan",     /* the thumbnail whose card is open */
-  layCard: true,
+  layPick: "plan",     /* the thumbnail last picked */
+  layCard: false,      /* its card is held open — only while the pointer is on it */
   exportMenu: false,  /* the format list on the table's header */
   layMenu: false,
   layHist: false,     /* the previous-documents list inside that menu */
@@ -1742,6 +1782,11 @@ const V = {
 };
 
 const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+/* The pin just put down, drawn inline rather than from the sprite: the
+   sprite's symbols carry fill="none", which the drop's white body cannot
+   override through <use>. Same outline as the pin on the pointer. */
+const PIN_GLYPH = `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path
+  d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>`;
 
 /* Lucide ships as a sprite-less library, so the icons are stamped once into
    a hidden sprite and referenced by id afterwards. */
@@ -2203,6 +2248,9 @@ const PEOPLE = [
   { id: "dl", label: "David — assistant modélisation 3D/2D", ini: "DL" },
 ];
 const person = (id) => PEOPLE.find((p) => p.id === id);
+/* Who is signed in. The studio strip says it in full, because an office
+   runs on several people whose initials are the same two letters. */
+const ME = { id: "gr", name: "Guy Roberge", ini: "GR" };
 const whoLabel = (t) => (t.who.length ? t.who.map((id) => person(id).label).join(", ") : "Personne assignée");
 let taskSeq = 100;
 const TASKS = [
@@ -2627,8 +2675,7 @@ function layCardHTML(peekKey = null) {
   const pdf = extOf(doc.file) === "pdf";
   const menu = !peekKey && V.layMenu, hist = !peekKey && V.layHist;
   return `<div class="lcard" data-lcard data-anchor="${k}" ${peekKey ? "data-peek" : ""}>
-    <div class="hd ${V.laySwap === k ? "swapped" : ""}">${fileGlyph(doc.file)}<b>${keepTail(doc.file)}</b>
-      <span class="x" ${act("lclose")} title="Fermer">${icon("x")}</span></div>
+    <div class="hd ${V.laySwap === k ? "swapped" : ""}">${fileGlyph(doc.file)}<b>${keepTail(doc.file)}</b></div>
     <span class="docbtn" ${act("ldoc")}>${icon("file")}Document ${icon("chevron-down")}</span>
     ${menu ? `<div class="lmenu">
       <span class="mi" ${act(pdf ? "pdfview" : "autocad", k)}>Ouvrir dans ${pdf ? "Acrobat" : "AutoCAD"}</span>
@@ -2673,20 +2720,34 @@ function clearLayPeek() {
   layPeek = null;
   placeLayCard();
 }
+/* The card lives under the pointer: a thumbnail shows it, the card itself
+   keeps it, and leaving both lets it go — the borrowed one and the one
+   being used alike. Nothing is left open on the drawing after a click. */
+function dropLayCard() {
+  if (!V.layCard) return;
+  V.layCard = false;
+  V.layMenu = false;
+  V.layHist = false;
+  document.querySelectorAll("[data-lcard]:not([data-peek])").forEach((el) => el.remove());
+  placeLayCard();
+}
 document.addEventListener("pointerover", (e) => {
   if (e.pointerType === "touch" || document.body.classList.contains("dragging")) return;
   const tile = e.target.closest?.("[data-ltile]");
   if (tile) {
     const k = tile.dataset.ltile;
-    // The pinned card is already this one: nothing to lend.
-    if (V.layCard && V.layPick === k && !layPeek) return;
+    keepLayPeek();
+    // The card in use is already this one: nothing to lend.
     if (V.layCard && V.layPick === k) { clearLayPeek(); return; }
+    dropLayCard();
     showLayPeek(k);
     return;
   }
-  if (e.target.closest?.("[data-lcard][data-peek]")) { keepLayPeek(); return; }
-  // The pointer crosses a few pixels of sheet between thumbnail and card.
-  if (layPeek && !layPeekTimer) layPeekTimer = setTimeout(() => { layPeekTimer = 0; clearLayPeek(); }, 160);
+  if (e.target.closest?.("[data-lcard]")) { keepLayPeek(); return; }
+  /* The pointer crosses a few pixels of sheet between thumbnail and card;
+     a held button (the opacity slider) keeps the card until it is let go. */
+  if ((layPeek || V.layCard) && !layPeekTimer && !e.buttons)
+    layPeekTimer = setTimeout(() => { layPeekTimer = 0; clearLayPeek(); dropLayCard(); }, 160);
 });
 /* Touching the borrowed card keeps it: it becomes the pinned card, and the
    one it stood in for is let go. The action under the pointer then runs on
@@ -3548,6 +3609,12 @@ function taskListHTML() {
       <span class="btnw" ${act("tnew")}>${icon("plus")}<span class="hi">Ajouter une tâche</span></span>
     </div>
     ${V.taskEdit === "new" ? taskForm(V.taskDraft, true) : ""}
+    ${archive.length ? `<div class="row arch" ${act("tarch")} style="gap:8px;margin-top:2px;cursor:pointer">
+      <span class="lo bar" style="width:70px"></span>
+      <span class="hi" style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;
+        display:flex;align-items:center;gap:4px">${icon(V.taskArch ? "chevron-down" : "chevron-right")}Archive — ${archive.length}</span>
+      <span style="flex:1;border-top:1px solid var(--line-2)"></span></div>
+      ${V.taskArch ? archive.map(line).join("") : ""}` : ""}
     ${here.length ? here.map(line).join("")
       : `<div class="tile"><span class="lo bar" style="width:60%"></span>
           <span class="hi" style="font-size:12px;color:var(--ink-2)">Rien ce jour-là.</span></div>`}
@@ -3556,12 +3623,6 @@ function taskListHTML() {
       <span class="hi" style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em">La suite</span>
       <span style="flex:1;border-top:1px solid var(--line-2)"></span></div>
     ${rest.map(line).join("")}
-    ${archive.length ? `<div class="row arch" ${act("tarch")} style="gap:8px;margin-top:2px;cursor:pointer">
-      <span class="lo bar" style="width:70px"></span>
-      <span class="hi" style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;
-        display:flex;align-items:center;gap:4px">${icon(V.taskArch ? "chevron-down" : "chevron-right")}Archive — ${archive.length}</span>
-      <span style="flex:1;border-top:1px solid var(--line-2)"></span></div>
-      ${V.taskArch ? archive.map(line).join("") : ""}` : ""}
   </div>`;
 }
 
@@ -3752,7 +3813,7 @@ function tabsHTML() {
      is a door out, and the path reads project → screen without a detour. */
   const echOn = V.screen === "Échéancier";
   const ech = `<span class="crumb ech hi ${echOn ? "cur" : ""}" data-screen="Échéancier" aria-current="${echOn}"
-      style="margin-left:auto;flex:0 0 auto"
+      style="flex:0 0 auto"
       title="Échéancier de l'atelier — ce qui est dû, tous les projets">${icon("calendar-check")}Échéancier${late
         ? `<span class="late">${late}</span>` : ""}</span>`;
   if (studio) {
@@ -3819,6 +3880,28 @@ function tabsHTML() {
      a studio screen it shares the last project open. */
   const share = `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
          style="margin-left:auto;flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
+
+  /* Two rows, two subjects. The first belongs to the studio: every project,
+     the week across them all, and the person signed in. The second belongs
+     to this project: its name, its screens, and sharing it — the thing
+     being shared is named on the same line as the button that shares it.
+     The project's row and its levels then sit on a raised sheet, so the
+     project reads as a thing resting in the studio's chrome, the way the
+     white page rests on the sheet in turn. */
+  if (mode === "Two rows, no rail" && !studio) {
+    const me = `<span class="me" title="${ME.name}"><i>${ME.ini}</i><span class="hi">${ME.name}</span></span>`;
+    return `<div class="tabs one rg ${solo("nav")}" data-rg="atelier" data-fi="${fiOf("nav")}"
+         data-labels-mode="${V.nav.labels}">
+        ${back}${ech}<span class="sp"></span>${me}
+      </div>
+      <div class="projsheet">
+        <div class="tabs two" data-labels-mode="${V.nav.labels}">
+          <span class="crumb on hi proj">${V.project}</span>
+          <div class="views">${names.map(tab).join("")}</div>
+          <span class="sp"></span>${share}
+        </div>${row2}
+      </div>`;
+  }
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
        data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
@@ -4068,13 +4151,13 @@ function contentHTML() {
     "Échéancier": () => `<div class="row" style="flex:1;align-items:stretch;gap:0">
       ${folded("cal") ? foldStripHTML("cal", "le calendrier") : `<div class="pane" style="flex:${V.split[splitKey("cal")] ? `0 0 ${V.split[splitKey("cal")]}px` : "1.25"}">
         <div class="ph">${icon("calendar-check")}<span class="lo bar" style="width:70px"></span>
-          <span class="hi">${calTitle()}</span><span style="flex:1"></span>
+          <span class="hi">Calendrier</span><span style="flex:1"></span>
           ${CAL_SCALES.map((s) => `<span class="chip ${V.scale === s ? "on" : ""}" ${act("calscale", s)}
             title="Dessiner le calendrier par ${s.toLowerCase()}"><span class="hi">${s}</span></span>`).join("")}
           <span class="btnw" ${act("calmove", "-1")} title="Avant">${icon("chevron-left")}</span>
           <span class="btnw" ${act("calmove", "1")} title="Après">${icon("chevron-right")}</span>
           <span class="btnw" ${act("calday", TODAY)}><span class="hi">Aujourd'hui</span></span></div>
-        <div class="pb">${calendarHTML()}</div></div>`}
+        <div class="pb"><div class="calmonth">${calTitle()}</div>${calendarHTML()}</div></div>`}
       ${gutter({ size: "cal", grab: "prev", prev: "cal", next: "todo",
         lprev: "le calendrier", lnext: "la liste" })}
       ${folded("todo") ? foldStripHTML("todo", "la liste") : `<div class="pane" style="flex:1">
@@ -4090,7 +4173,7 @@ function contentHTML() {
      set in large type two lines above, and the pane is the whole middle of
      the card — nothing else it could be. */
   return region("content", "contenu", `<div class="pb">${body}</div>`, step,
-    V.screen === "Unités" ? "bare" : "");
+    V.screen === "Unités" || V.screen === "Échéancier" ? "bare" : "");
 }
 
 /* ------------------------------------------------------- the quantities
@@ -4144,7 +4227,6 @@ function floorQuant() {
   const brut = net / 0.85;
   const types = [...new Set(floor.map((r) => r[5]))].sort();
   const ofType = (ty) => floor.filter((r) => r[5] === ty);
-  const mean = unit ? ofType(unit[5]).reduce((s, r) => s + r[6], 0) / ofType(unit[5]).length : 0;
   return {
     level: viewOf("Unités"), unit, u: unit ? unitNo(unit) : null,
     /* A count answers "how many 4½"; the share answers "what kind of floor
@@ -4168,7 +4250,6 @@ function floorQuant() {
         ["Circulation", "", fqNum(brut - net), fqNum((brut - net) * M2), "15 %"],
         ["Brut", "", fqNum(brut), fqNum(brut * M2), ""]]
       : [["Net", "", "", "", ""], ["Circulation", "", "", "", ""], ["Brut", "", "", "", ""]],
-    versus: unit ? `${unit[6] >= mean ? "+" : "−"}${fqNum(Math.abs(unit[6] - mean))} pi² par rapport à la moyenne des ${unit[5]} de l'étage` : "",
   };
 }
 
@@ -4201,8 +4282,7 @@ function fqTableHTML(q) {
     ${r.cells.map((c, j) => cell(c, j)).join("")}</tr>`).join("");
   return `<div class="fqt">
     <table class="tbl"><thead><tr>${["Unité", "Type", "Net pi²", "m²", "Part"].map((h, j) => cell(h, j, "th")).join("")}</tr></thead>
-      <tbody>${body}</tbody><tfoot>${q.foot.map((r) => r[0] === "Circulation" ? circulationRowHTML(r, cell) : `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("")}</tfoot></table>
-    <div class="fqn">net : étiquettes du plan — circulation : 15 %, comme le tableau du bâtiment</div></div>`;
+      <tbody>${body}</tbody><tfoot>${q.foot.map((r) => r[0] === "Circulation" ? circulationRowHTML(r, cell) : `<tr>${r.map((c, j) => cell(c, j)).join("")}</tr>`).join("")}</tfoot></table></div>`;
 }
 
 /* The unit's openings, counted in the model: its panes, grouped into the
@@ -4220,14 +4300,12 @@ function fqWindowsHTML(u) {
   const cell = (c, n) => `<td class="${n ? "n" : ""}">${c}</td>`;
   return `<table class="tbl"><thead><tr><th>Ouvertures</th><th class="n">Fenêtres</th><th class="n">Portes-patio</th><th class="n">Vitrage pi²</th></tr></thead>
     <tbody>${rows.map((f) => `<tr>${cell(`Façade ${f.face}`)}${cell(f.windows, 1)}${cell(f.doors, 1)}${cell(fqNum(f.glass * ft2), 1)}</tr>`).join("")}</tbody>
-    <tfoot><tr>${cell("Total")}${cell(sum("windows"), 1)}${cell(sum("doors"), 1)}${cell(fqNum(sum("glass") * ft2), 1)}</tr></tfoot></table>
-    <div class="fqn">compté dans la maquette 3D : vitrages de l'unité regroupés en ouvertures</div>`;
+    <tfoot><tr>${cell("Total")}${cell(sum("windows"), 1)}${cell(sum("doors"), 1)}${cell(fqNum(sum("glass") * ft2), 1)}</tr></tfoot></table>`;
 }
 
 function fqUnitHTML(q) {
   return `<div class="fq-unit" data-fq>
     <div class="fqh">${icon("box")}<span>Unité ${q.u || "—"}</span><span class="fqs">${q.unit ? `${q.unit[5]} — ${fqNum(q.unit[6])} pi²` : ""}</span></div>
-    ${q.versus ? `<div class="fqn">${q.versus}</div>` : ""}
     ${fqWindowsHTML(q.u)}</div>`;
 }
 
@@ -4246,7 +4324,6 @@ function facadeTablesHTML() {
   const head = `<div class="fqh">${icon("layers")}<span>Matériaux par façade</span>${issueBadge(["mat"])}<span class="fqs">pi² vus en élévation</span>
     ${open ? `<span style="flex:1"></span><span class="btnw sm" ${act("facade", open.face)} title="Revenir à la vue 3D">${icon("rotate-3d")}<span class="hi">Vue 3D</span></span>` : ""}</div>`;
   if (!data) return `<div class="fq-fac" data-facades>${head}<div class="fqn">Lecture de la maquette 3D…</div></div>`;
-  const absent = fm.CATEGORIES.filter((c) => FACADES.every((f) => !(data[f].find((r) => r.n === c.n)?.ft2 >= 1)));
   const tables = FACADES.map((face) => {
     const rows = data[face].filter((r) => r.ft2 >= 1);
     const total = rows.reduce((s, r) => s + r.ft2, 0);
@@ -4272,9 +4349,7 @@ function facadeTablesHTML() {
       <tbody>${body}</tbody>
       <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td><td class="fdd"></td></tr></tfoot></table>`;
   }).join("");
-  return `<div class="fq-fac" data-facades>${head}${tables}
-    <div class="fqn">aires lues dans la maquette 3D, élévation par élévation ; numéros de la légende des élévations${
-      absent.length ? ` — absent de la maquette : ${absent.map((c) => `${c.n} ${c.name.toLowerCase()} (${c.note.split(" · ").pop()})`).join(", ")}` : ""}</div></div>`;
+  return `<div class="fq-fac" data-facades>${head}${tables}</div>`;
 }
 
 /* A material's sheet, opened under its row: the legend's swatch, then what
@@ -4626,7 +4701,7 @@ function pinMarkHTML() {
       ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}"
       style="left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%;transform:scale(${(1 / z).toFixed(3)})"
       ${p.id ? act("note", p.id) : ""}>
-      ${p.id ? `<span class="nd"><i>${i + 1}</i></span>` : `<span class="ndg">${icon("map-pin")}</span>`}
+      ${p.id ? `<span class="nd"><i>${i + 1}</i></span>` : `<span class="ndg">${PIN_GLYPH}</span>`}
       ${p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""}
     </div>`).join("");
 }
@@ -4643,7 +4718,11 @@ function pinBubbleHTML() {
       <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">À l'interne</span></span>
       <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
       <span style="flex:1"></span>
-      <span class="zone">${pinAnchor({ ...V.pending, scope: V.pinScope })}</span>
+      <span class="zone">${(() => {
+        /* Two short lines, as in the study: the drawing, then where on it. */
+        const [what, ...where] = pinAnchor({ ...V.pending, scope: V.pinScope }).split(" — ");
+        return where.length ? `${what}<br>${where.join(" — ")}` : what;
+      })()}</span>
     </div>
     <textarea class="nnew" data-pindraft rows="3"
       placeholder="${team ? "Note interne — l'invité ne la verra pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
@@ -4753,7 +4832,7 @@ function pushModelPins() {
   window.fitteModel.setPins([...pinsOnModel(), ...pending].map((p, i) => ({
     id: p.id, p: p.p, n: p.n,
     cls: `${p.scope === "equipe" ? "team" : ""} ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}`,
-    html: p.id ? `<span class="nd"><i>${i + 1}</i></span>` : `<span class="ndg">${icon("map-pin")}</span>`
+    html: p.id ? `<span class="nd"><i>${i + 1}</i></span>` : `<span class="ndg">${PIN_GLYPH}</span>`
       + (p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""),
   })));
 }
@@ -5230,6 +5309,9 @@ document.addEventListener("pointerdown", (e) => {
       if (asked < floor && !stop.isConnected) target.append(stop);
       else if (asked >= floor) stop.remove();
     }
+    /* The drawing's card is fixed to the viewport beside its strip: it is
+       placed again on every move so it travels with the edge, not after. */
+    placeLayCard();
   };
   const up = () => {
     window.removeEventListener("pointermove", move);
@@ -5541,7 +5623,7 @@ function placePinBubble() {
   const pad = 10, gap = 14, head = 28;
   /* On a narrow pane the box gives up its width before it gives up being
      whole. */
-  bub.style.width = `${Math.min(258, Math.round(v.width - 2 * pad))}px`;
+  bub.style.width = `${Math.min(286, Math.round(v.width - 2 * pad))}px`;
   const w = bub.offsetWidth, h = bub.offsetHeight;
   const L = v.left - z.left + pad, R = v.right - z.left - pad, T = v.top - z.top + pad, B = v.bottom - z.top - pad;
   /* Centred under the pin's point, a tail pointing up at it; when there is
@@ -5792,10 +5874,13 @@ function render() {
   /* A side column is never narrower than what it holds: the track's floor
      is its content's own width, so a table is never cut at the edge. */
   const side = (shut, w) => (shut ? `${FOLD_W}px` : `minmax(min-content, ${w}px)`);
-  /* Beside a folded side column the edge takes no room in the white card. */
+  /* Beside a folded strip — a side column's, or the plan's or the model's at
+     the content's own edge — the edge takes no room in the white card, so
+     no white sliver opens between the strip and the pane next to it. */
+  const strip = (k) => V.screen === "Unités" && folded(k);
   const edge = (shut) => (shut && V.shell === "Inset card" ? "0px" : "var(--gap)");
-  const cols = [hasList ? side(listShut, listW) : null, hasList ? edge(listShut) : null, "1fr",
-    hasInsp ? edge(sideShut) : null, hasInsp ? side(sideShut, sideW) : null]
+  const cols = [hasList ? side(listShut, listW) : null, hasList ? edge(listShut || strip("plan")) : null, "1fr",
+    hasInsp ? edge(sideShut || strip("model")) : null, hasInsp ? side(sideShut, sideW) : null]
     .filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
@@ -6541,7 +6626,7 @@ function onClick(e) {
       const t = TASKS.find((x) => x.id === value);
       if (!t) break;
       t.archived = true;
-      say(`Archivée: ${t.title}. Elle reste dans l'archive, en bas de la liste.`);
+      say(`Archivée: ${t.title}. Elle reste dans l'archive, en haut de la liste.`);
       break;
     }
     /* Out of the archive and back onto its day, still ticked: pulling a
@@ -6653,11 +6738,15 @@ function onClick(e) {
        and let applyDial write V — writing both would let them disagree
        on the next dial change. The architect's sheet is not on the panel,
        so it is written here. */
+    /* Picking a thumbnail selects it; its card stays a hover card, shown
+       again at once since the click redrew the strip under the pointer. */
     case "lpick":
-      V.layCard = !(V.layPick === value && V.layCard);
+      V.layCard = false;
       V.layPick = value;
       V.layMenu = false;
-      break;
+      render();
+      showLayPeek(value);
+      return;
     /* The last drawing on the sheet carries no badge at all, so there is
        no way in here to empty the pane. */
     case "lstack": {
@@ -6714,7 +6803,6 @@ function onClick(e) {
       dial.setValue("screen", FR_SCREEN["Échéancier"]);
       break;
     }
-    case "lclose": V.layCard = false; V.layMenu = false; V.layHist = false; break;
     case "ldoc": V.layMenu = !V.layMenu; V.layHist = false; break;
     case "lswap":
       V.layMenu = false; V.layHist = false;
