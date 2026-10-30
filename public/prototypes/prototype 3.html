@@ -20,8 +20,6 @@
    read, not how they look. */
 :root{
   --tabr:12px;
-  --foot-l:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px);
-  --foot-r:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px);
   --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
   --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
   --line:#c9c9c9; --line-2:#e2e2e2;
@@ -139,8 +137,8 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs.lvl button[aria-current="true"]::before,
 .tabs.lvl button[aria-current="true"]::after{content:"";position:absolute;bottom:0;
   width:var(--tabr);height:var(--tabr)}
-.tabs.lvl button[aria-current="true"]::before{right:100%;background:var(--foot-l)}
-.tabs.lvl button[aria-current="true"]::after{left:100%;background:var(--foot-r)}
+.tabs.lvl button[aria-current="true"]::before{right:100%;background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
+.tabs.lvl button[aria-current="true"]::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px)}
 /* No tab stands on the page's corner any more: the screen switch opens
    the row, so the first level tab is inboard like every other one and the
    page keeps one silhouette at both ends. */
@@ -612,7 +610,13 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .fqcols{display:inline-flex}
 /* Façade tables: the head row opens the elevation, a material row keeps
    that material in colour. The swatch is the colour the model paints it. */
-.fq-fac{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line-2);padding-top:10px}
+.fq-fac{display:flex;flex-direction:column;gap:8px}
+/* The building's materials table sums the four below it: not a door to
+   one elevation, so its head is not a button. */
+.fbat thead tr{cursor:default}
+/* The types table: a swatch before each type, as in the mix band. */
+.btypes .fsw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
+.btypes tbody tr{cursor:pointer}
 .ftbl thead tr{cursor:pointer}
 .ftbl thead th{color:var(--ink);font-size:12px;font-weight:600;border-bottom-color:var(--line)}
 .ftbl thead th svg{width:13px;height:13px;margin-right:6px;vertical-align:-2px;color:var(--ink-3)}
@@ -749,8 +753,8 @@ body.elev .mtools{display:none}
   font-weight:600;white-space:nowrap;flex:0 0 auto;margin-left:6px;--tabc:#232327}
 .projtab::before,.projtab::after{content:"";position:absolute;bottom:0;
   width:var(--tabr);height:var(--tabr)}
-.projtab::before{right:100%;background:var(--foot-l)}
-.projtab::after{left:100%;background:var(--foot-r)}
+.projtab::before{right:100%;background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
+.projtab::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px)}
 /* Who is signed in: the initials are the mark, the name is there because
    an office runs on several people with the same two letters. */
 .me{display:flex;align-items:center;gap:8px;padding:3px 9px 3px 3px;border-radius:999px;
@@ -809,9 +813,9 @@ body.elev .mtools{display:none}
 .frame[data-chrome="black"] .projsheet:not(:has(> .tabs.lvl)) > .tabs.two button[aria-current="true"]::after{
   content:"";position:absolute;bottom:0;width:var(--tabr);height:var(--tabr)}
 .frame[data-chrome="black"] .projsheet:not(:has(> .tabs.lvl)) > .tabs.two button[aria-current="true"]::before{right:100%;
-  background:var(--foot-l)}
+  background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
 .frame[data-chrome="black"] .projsheet:not(:has(> .tabs.lvl)) > .tabs.two button[aria-current="true"]::after{left:100%;
-  background:var(--foot-r)}
+  background:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px)}
 .frame[data-chrome="black"] .tabs .crumb{color:rgba(255,255,255,.58)}
 .frame[data-chrome="black"] .tabs .crumb.ech{color:rgba(255,255,255,.92)}
 .frame[data-chrome="black"] .tabs .crumb.ech:hover{background:rgba(255,255,255,.1);color:#fff}
@@ -839,8 +843,8 @@ body.elev .mtools{display:none}
 .tabs.one.studio .crumb.cur::before,
 .tabs.one.studio .crumb.cur::after{content:"";position:absolute;bottom:0;
   width:var(--tabr);height:var(--tabr)}
-.tabs.one.studio .crumb.cur::before{right:100%;background:var(--foot-l)}
-.tabs.one.studio .crumb.cur::after{left:100%;background:var(--foot-r)}
+.tabs.one.studio .crumb.cur::before{right:100%;background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
+.tabs.one.studio .crumb.cur::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px)}
 .tabs.one.studio > .crumb:first-child.cur{margin-left:-9px}
 .tabs.one.studio > .crumb:first-child.cur::before{display:none}
 .body:has(.tabs.one.studio > .crumb:first-child.cur) .work{border-top-left-radius:0}
@@ -856,7 +860,11 @@ body.elev .mtools{display:none}
    by the same 6 px all round. The grey around the page is the page's own
    spread shadow, so it follows the page's corners at radius + 6. */
 .frame[data-shell="inset"] .body:has(> .projsheet) > .work{margin:0 6px 6px;
-  border-radius:0 0 12px 12px;box-shadow:0 0 0 6px #232327}
+  border-radius:12px;box-shadow:0 0 0 6px #232327}
+/* The band reaches 6px lower, behind the page's rounded top corners: what
+   the corners curve away from is the band's own grey, so no chrome shows
+   through the join and the page keeps curved corners on all four sides. */
+.frame[data-shell="inset"] .body > .projsheet{padding-bottom:6px;margin-bottom:-6px}
 .body > .projsheet{border-radius:18px 18px 0 0}
 .frame[data-chrome="black"] .rg::before{color:rgba(255,255,255,.45)}
 
@@ -3119,6 +3127,7 @@ function goIssue(id) {
   if (it.kind === "mat") {
     /* The façades are counted on the whole building only. */
     V.scope = "Bâtiment";
+    V.bTab = "m";
     render();
     const face = it.faces[0];
     if (face) {
@@ -4477,9 +4486,9 @@ function facadeTablesHTML() {
   const fm = window.fitteMaterials;
   const data = window.fitteModel?.facades?.();
   const open = V.facade;
-  const head = `<div class="fqh">${icon("layers")}<span>Matériaux par façade</span>${issueBadge(["mat"])}<span class="fqs">pi² vus en élévation</span>
+  const head = `<div class="fqh">${icon("layers")}<span>Matériaux</span>${issueBadge(["mat"])}<span class="fqs">pi² vus en élévation</span>
     ${open ? `<span style="flex:1"></span><span class="btnw sm" ${act("facade", open.face)} title="Revenir à la vue 3D">${icon("rotate-3d")}<span class="hi">Vue 3D</span></span>` : ""}</div>`;
-  if (!data) return `<div class="fq-fac" data-sec="m" data-facades>${head}<div class="fqn">Lecture de la maquette 3D…</div></div>`;
+  if (!data) return `<div class="fq-fac" data-facades>${head}<div class="fqn">Lecture de la maquette 3D…</div></div>`;
   const tables = FACADES.map((face) => {
     const rows = data[face].filter((r) => r.ft2 >= 1);
     const total = rows.reduce((s, r) => s + r.ft2, 0);
@@ -4505,7 +4514,32 @@ function facadeTablesHTML() {
       <tbody>${body}</tbody>
       <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td><td class="fdd"></td></tr></tfoot></table>`;
   }).join("");
-  return `<div class="fq-fac" data-sec="m" data-facades>${head}${tables}</div>`;
+  return `<div class="fq-fac" data-facades>${head}${buildingMaterialsHTML(data)}${tables}</div>`;
+}
+
+/* Every material over the whole building: what it covers on the four
+   elevations together, and its share of them. Listed in the legend's
+   order; each façade's own figures are in its table below. The sheet
+   opens under its row as on a façade. */
+function buildingMaterialsHTML(data) {
+  const fm = window.fitteMaterials;
+  const by = new Map();
+  FACADES.forEach((face) => data[face].forEach((r) => by.set(r.n, (by.get(r.n) || 0) + r.ft2)));
+  const rows = [...by].filter(([, ft2]) => ft2 >= 1).sort((a, b) => a[0] - b[0]);
+  const total = rows.reduce((s, [, ft2]) => s + ft2, 0);
+  const body = rows.map(([n, ft2]) => {
+    const c = fm.category(n), key = `bat|${n}`, sheet = V.matOpen?.[key];
+    return `<tr class="${sheet ? "fopen" : ""}" ${act("matinfo", key)} title="${c.note}">
+      <td><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}${c.check
+        ? `<span class="fwarn" title="${c.check}">${icon("alert-triangle")}</span>` : ""}</td>
+      <td class="n">${fqNum(ft2)}</td><td class="n">${fqPct(ft2, total)}</td>
+      <td class="fdd"><span class="fddb" role="button" aria-expanded="${Boolean(sheet)}">${icon(sheet ? "chevron-up" : "chevron-down")}</span></td></tr>
+      ${sheet ? `<tr class="fsheet"><td colspan="4">${materialSheetHTML(c)}</td></tr>` : ""}`;
+  }).join("");
+  return `<table class="tbl ftbl fbat">
+    <thead><tr><th>${icon("box")}Bâtiment entier — 4 façades</th><th class="n">pi²</th><th class="n">Part</th><th class="fdd"></th></tr></thead>
+    <tbody>${body}</tbody>
+    <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td><td class="fdd"></td></tr></tfoot></table>`;
 }
 
 /* A material's sheet, opened under its row: the legend's swatch, then what
@@ -4593,14 +4627,6 @@ function exportMenuHTML() {
   </span>`;
 }
 
-/* The three blocks of the pane, named once: the switch in the header, the
-   scroll spy and the section heads all read this list, so a target cannot
-   drift from the thing it jumps to. */
-const FQ_SECS = [
-  { id: "u", short: "Unités", long: "Unités et ouvertures", icon: "table" },
-  { id: "m", short: "Matériaux", long: "Matériaux par façade", icon: "layers" },
-];
-
 /* The whole building, read the way a floor is: the mix over every unit,
    then one line per level instead of one per unit. A level's line opens
    that level. */
@@ -4620,7 +4646,7 @@ function buildingTableHTML(q) {
   const cell = (c, n, tag = "td") => `<${tag} class="${n ? "n" : ""}">${c}</${tag}>`;
   const views = viewsOf("Unités");
   const brut = q.net / 0.85;
-  const open = (V.fqCols || "s") === "o";
+  const open = bTab() === "o";
   const counted = modelCounted();
   const each = counted ? LEVELS.map((lv) => sumOpenings(levelRows(lv).map((r) => unitOpenings(unitNo(r))))) : [];
   const total = counted ? sumOpenings(each) : null;
@@ -4635,8 +4661,39 @@ function buildingTableHTML(q) {
       .map(([k, v, p]) => `<tr>${cell(k)}${cell("", 1)}${cell(fqNum(v), 1)}${cell(fqNum(v * M2), 1)}${cell(p, 1)}</tr>`).join("");
   const head = `${cell("Niveau", 0, "th")}${cell("Unités", 1, "th")}${open ? openHead()
     : ["Net pi²", "m²", "Part"].map((h) => cell(h, 1, "th")).join("")}`;
-  return `<div class="fqt"><div class="fqcolrow">${fqColsHTML()}</div><table class="tbl"><thead><tr>${head}</tr></thead>
+  return `<div class="fqt"><table class="tbl"><thead><tr>${head}</tr></thead>
     <tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>`;
+}
+
+/* The building's statistics, four readings of the same 104 units and four
+   façades, one at a time: the mix of types, the areas, the openings, the
+   materials. Each fills the pane; nothing is scrolled past to reach the next. */
+const B_TABS = [["t", "Types d'unités"], ["s", "Superficies"], ["o", "Ouvertures"], ["m", "Matériaux"]];
+const bTab = () => V.bTab || "t";
+function bTabsHTML() {
+  return `<div class="fqcolrow"><span class="secseg fqcols" role="group" aria-label="Statistiques">${B_TABS.map(([k, label]) =>
+    `<span class="ss" ${act("btab", k)} aria-current="${bTab() === k}">${label}</span>`).join("")}</span></div>`;
+}
+/* The types, level by level: how many of each a floor carries, then the
+   building's count, share and mean area of each. A level's line opens it. */
+function buildingTypesHTML(q) {
+  const cell = (c, n, tag = "td") => `<${tag} class="${n ? "n" : ""}">${c}</${tag}>`;
+  const views = viewsOf("Unités");
+  const types = q.types.map((t) => t[0]);
+  const sw = (ty) => `<span class="fsw" style="background:${TYPO_INK[ty] || "var(--ink-3)"}"></span>`;
+  const body = LEVELS.map((lv) => {
+    const rows = levelRows(lv);
+    return `<tr ${act("view", views.indexOf(levelView(lv)))} title="Lire le ${levelView(lv).toLowerCase()}">${cell(levelView(lv))}
+      ${types.map((ty) => cell(rows.filter((r) => baseTypo(r[5]) === ty).length || "—", 1)).join("")}${cell(rows.length, 1)}</tr>`;
+  }).join("");
+  const foot = [
+    ["Total", (t) => t[1], q.count],
+    ["Part", (t) => `${Math.round(t[2] * 100)} %`, "100 %"],
+    ["Net pi²", (t) => fqNum(t[3]), fqNum(q.net)],
+    ["Moy. pi²", (t) => fqNum(t[1] ? t[3] / t[1] : 0), fqNum(q.count ? q.net / q.count : 0)],
+  ].map(([k, f, all]) => `<tr>${cell(k)}${q.types.map((t) => cell(f(t), 1)).join("")}${cell(all, 1)}</tr>`).join("");
+  return `<table class="tbl btypes"><thead><tr>${cell("Niveau", 0, "th")}${types.map((ty) => cell(`${sw(ty)}${ty}`, 1, "th")).join("")}${cell("Unités", 1, "th")}</tr></thead>
+    <tbody>${body}</tbody><tfoot>${foot}</tfoot></table>`;
 }
 
 function unitListHTML(step) {
@@ -4644,48 +4701,24 @@ function unitListHTML(step) {
      building, not to one floor: they are counted on « Bâtiment entier » only. */
   const whole = buildingScope();
   const q = whole ? buildingQuant() : floorQuant();
+  const tab = bTab();
+  const inner = !whole ? `${fqMixHTML(q, true)}${fqTableHTML(q)}`
+    : `${bTabsHTML()}${tab === "t" ? `${fqMixHTML(q, false)}${buildingTypesHTML(q)}`
+      : tab === "m" ? facadeTablesHTML() : buildingTableHTML(q)}`;
   return region("list", whole ? "liste — statistiques du bâtiment" : "liste — statistiques du niveau",
     `<div class="ph">${icon("table")}<span class="hi">${whole ? "Statistiques" : "Unités & ouvertures"}</span>${issueBadge(whole ? ["unit", "mat"] : ["unit"])}
        <span style="flex:1"></span>
-       ${whole ? `<span class="secseg" role="group" aria-label="Section">${FQ_SECS.map((s) =>
-         `<span class="ss" ${act("fqsec", s.id)} aria-current="${s.id === "u"}"
-            title="Aller à ${s.long.toLowerCase()}">${s.short}</span>`).join("")}</span>` : ""}
        ${exportMenuHTML()}</div>
-     <div class="pb" data-fqscroll style="overflow:auto;gap:10px">
-       <div data-sec="u" style="display:flex;flex-direction:column;gap:10px">
-         ${whole ? `<div class="fqh">${icon("table")}<span>Unités & ouvertures</span><span class="fqs">${q.count} unités</span></div>` : ""}
-         ${fqMixHTML(q, !whole)}
-         ${whole ? buildingTableHTML(q) : fqTableHTML(q)}
-       </div>
-       ${whole ? facadeTablesHTML() : ""}
-     </div>`, step);
+     <div class="pb" style="overflow:auto;gap:10px">${inner}</div>`, step);
 }
-
-/* Which block is under the eye: the last section head that has reached the
-   top of the scroller. The switch is painted in place, not re-rendered, so
-   the scroll it reports is not the scroll it destroys. */
-function paintFQSec() {
-  const box = document.querySelector("[data-fqscroll]");
-  if (!box) return;
-  const top = box.getBoundingClientRect().top + 2;
-  let at = FQ_SECS[0].id;
-  FQ_SECS.forEach((s) => {
-    const el = box.querySelector(`[data-sec="${s.id}"]`);
-    if (el && el.getBoundingClientRect().top <= top + 1) at = s.id;
-  });
-  document.querySelectorAll('.secseg .ss[data-act="fqsec"]')
-    .forEach((el) => el.setAttribute("aria-current", String(el.dataset.value === at)));
-}
-document.addEventListener("scroll", (e) => {
-  if (e.target instanceof HTMLElement && e.target.hasAttribute("data-fqscroll")) paintFQSec();
-}, true);
 
 /* A new selection, the figures switch or the model's count redraws the
    table alone, not the drawings and not the pane's scroll. */
 function paintFQ() {
   const list = document.querySelector('[data-region="list"] .fqt');
   if (!list) return;
-  list.outerHTML = buildingScope() ? buildingTableHTML(buildingQuant()) : fqTableHTML(floorQuant());
+  if (buildingScope()) { if (bTab() === "s" || bTab() === "o") list.outerHTML = buildingTableHTML(buildingQuant()); return; }
+  list.outerHTML = fqTableHTML(floorQuant());
 }
 
 /* The same rows, four blocks, one file, a blank line between them: a
@@ -7220,14 +7253,12 @@ function onClick(e) {
       V.fqCols = value;
       paintFQ();
       return;
-    case "fqsec": {
-      const box = document.querySelector("[data-fqscroll]");
-      const el = box?.querySelector(`[data-sec="${value}"]`);
-      if (!el) return;
-      box.scrollTo({ top: el.offsetTop - box.offsetTop, behavior: "smooth" });
-      setTimeout(paintFQSec, 400);
-      return;
-    }
+    /* The building's four readings. Areas and openings are the same two the
+       floor offers, so picking one here holds when a level is opened. */
+    case "btab":
+      V.bTab = value;
+      if (value === "s" || value === "o") V.fqCols = value;
+      break;
     case "export": {
       V.exportMenu = false;
       const name = EXPORTS.find(([k]) => k === value)?.[1] || value;
