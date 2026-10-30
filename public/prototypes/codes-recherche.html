@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Codes — recherche par question</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* A search bar on each of the three codes. The question is asked in plain
+   words (« combien de cases pour 104 logements »); the answer is the
+   articles of that code that govern it, each with the sentence that
+   matched, why it applies to this project, and whether it is already
+   followed. The matching here is a small synonym index over a fixture of
+   articles: it stands for the retrieval, it is not one. Quotes are
+   paraphrased, as on prototype 3, and every card links to the official
+   text. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --sel:#eef3dc;--hit:#fbf0c4;--red:#c0362c;--amber:#b0892a;--green:#2f7d4a}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px;max-width:1280px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:920px}
+svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* the Codes screen, as on prototype 3 --------------------------------- */
+.frame{margin-top:18px;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+.tabs{display:flex;align-items:flex-end;gap:2px;height:44px;padding:0 14px;background:#1f1f20}
+.tabs span{height:30px;padding:0 13px;display:flex;align-items:center;color:#c9c9cc;border-radius:8px 8px 0 0;cursor:pointer;font-size:12.5px}
+.tabs span[aria-current="true"]{position:relative;z-index:1;background:#fff;color:var(--ink);font-weight:600;
+  border-radius:12px 12px 0 0;--tabc:#fff}
+.tabs span[aria-current="true"]::before,.tabs span[aria-current="true"]::after{content:"";position:absolute;
+  bottom:0;width:12px;height:12px}
+.tabs span[aria-current="true"]::before{right:100%;
+  background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
+.tabs span[aria-current="true"]::after{left:100%;
+  background:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px)}
+.title{height:40px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid var(--line-2);font-weight:600;font-size:14.5px}
+.ph{display:flex;align-items:center;gap:8px;height:42px;padding:0 12px;border-bottom:1px solid var(--line-2)}
+.ph .n{color:var(--ink-3);font-size:12px}
+.sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:12px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.btn.solid{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.done{color:var(--ink-3);cursor:default}
+
+/* the search ----------------------------------------------------------- */
+.ask{padding:10px 12px 0}
+.box{display:flex;align-items:center;gap:8px;height:36px;padding:0 6px 0 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.box:focus-within{border-color:var(--ink)}
+.box .in{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:5px;background:var(--fill);font-size:11.5px;color:var(--ink-2);white-space:nowrap}
+.box input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:13px;color:var(--ink);background:transparent}
+.box input::placeholder{color:var(--ink-3)}
+.box kbd{font:inherit;font-size:11px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:0 5px;height:20px;display:flex;align-items:center}
+.box .x{display:none;color:var(--ink-3);cursor:pointer;padding:4px}
+.box.has .x{display:flex}
+.sugg{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0 2px;font-size:12px;color:var(--ink-3);align-items:center}
+.sugg span.q{height:24px;padding:0 9px;display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:12px;color:var(--ink-2);cursor:pointer}
+.sugg span.q:hover{border-color:var(--line);color:var(--ink)}
+
+/* the answer: articles, not prose ------------------------------------ */
+.res{margin:10px 12px 0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.res:empty{display:none}
+.rh{display:flex;align-items:baseline;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line-2);font-size:12px;color:var(--ink-2)}
+.rh b{color:var(--ink);font-weight:600}
+.syn{padding:8px 10px;border-bottom:1px solid var(--line-2);font-size:12.5px;color:var(--ink);background:var(--fill-2)}
+.syn .cite{display:inline-flex;height:18px;padding:0 5px;margin:0 1px;border:1px solid var(--line);border-radius:4px;background:#fff;font-size:11px;color:var(--ink-2);cursor:pointer;vertical-align:1px}
+.syn small{display:block;margin-top:3px;color:var(--ink-3);font-size:11px}
+.hit{display:grid;grid-template-columns:92px 1fr auto;gap:2px 12px;padding:9px 10px;border-top:1px solid var(--line-2)}
+.hit:first-of-type{border-top:0}
+.hit.on{background:var(--sel)}
+.hit .id{font-weight:600;font-size:12.5px;white-space:nowrap}
+.hit .sec{grid-column:1;color:var(--ink-3);font-size:11px}
+.hit .t{font-weight:600}
+.hit .q{grid-column:2;color:var(--ink-2)}
+.hit .q mark{background:var(--hit);color:var(--ink);padding:0 1px;border-radius:2px}
+.hit .why{grid-column:2;font-size:12px;color:var(--ink)}
+.hit .why i{font-style:normal;color:var(--ink-3)}
+.hit .acts{grid-row:1 / span 3;grid-column:3;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.hit .lnk{font-size:11.5px;color:var(--ink-2);text-decoration:underline;cursor:pointer}
+.else{display:flex;align-items:center;gap:6px;padding:8px 10px;border-top:1px solid var(--line-2);font-size:12px;color:var(--ink-2)}
+.else span.go{color:var(--ink);text-decoration:underline;cursor:pointer}
+.none{padding:10px;font-size:12.5px;color:var(--ink-2)}
+
+/* the followed articles, below, unchanged ----------------------------- */
+.list{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+.lh{font-size:11px;color:var(--ink-3);padding:4px 0 0}
+.card{display:grid;grid-template-columns:150px 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.card.flash{border-color:var(--ink)}
+.card .fig{background:var(--fill-2);border-right:1px solid var(--line-2);display:flex;align-items:center;justify-content:center;min-height:86px}
+.card .fig img{max-width:100%;max-height:86px;display:block}
+.card .fig span{font-size:11px;color:var(--ink-3)}
+.card .bd{padding:8px 10px;display:flex;flex-direction:column;gap:3px}
+.card .top{display:flex;align-items:center;gap:7px}
+.card .top b{font-weight:600}
+.st{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-2);margin-left:auto}
+.st i{width:7px;height:7px;border-radius:50%}
+.card .qt{color:var(--ink-2)}
+.card .need{font-size:12px;color:var(--ink-3)}
+
+.notes{margin-top:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;font-size:12.5px;color:var(--ink-2)}
+.notes b{display:block;color:var(--ink);font-weight:600;margin-bottom:3px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Codes — une question, les articles qui y répondent</h1>
+  <p class="lede">Une barre de recherche sous l'en-tête de chaque code. On écrit la question comme on la poserait à un collègue; la réponse est
+    la liste des articles <em>de ce code</em> qui la régissent, avec la phrase trouvée, pourquoi elle s'applique au projet et un bouton
+    pour la suivre. Essayer: « combien de cases pour les logements », « largeur de porte fauteuil roulant », « peut-on dépasser la hauteur ».
+    La recherche est simulée sur un petit index d'articles paraphrasés.</p>
+
+  <div class="frame">
+    <div class="tabs" id="tabs"></div>
+    <div class="title">Codes et règlements</div>
+    <div class="ph"><svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg>
+      <b id="cname"></b><span class="n" id="ccount"></span><span class="sp"></span>
+      <span class="btn solid"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Ajouter</span></div>
+
+    <div class="ask">
+      <div class="box" id="box">
+        <svg viewBox="0 0 24 24" style="color:var(--ink-3)"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span class="in" id="scope"></span>
+        <input id="q" autocomplete="off" spellcheck="false">
+        <span class="x" id="clear" title="Effacer"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+        <kbd>↵</kbd>
+      </div>
+      <div class="sugg" id="sugg"></div>
+    </div>
+    <div class="res" id="res"></div>
+
+    <div class="list" id="list"></div>
+  </div>
+
+  <div class="notes">
+    <div><b>Une barre par code</b>La recherche ne lit que le code ouvert: le Règlement d'urbanisme ne répond pas à une question
+      de garde-corps. Quand un autre code y répond, une ligne au bas des résultats le dit et y mène, sans mélanger les listes.</div>
+    <div><b>Des articles, pas une réponse rédigée</b>La ligne grise résume en une phrase et cite chaque article. Elle se lit avec
+      les articles, jamais à leur place: chaque carte garde la phrase du code et le lien vers le texte officiel.</div>
+    <div><b>Lu contre le projet</b>« Pourquoi » relie l'article aux chiffres du projet (104 logements, 8 étages, 22 cases).
+      « Suivre » l'ajoute à la liste en dessous, non mesuré, comme le fait Ajouter.</div>
+  </div>
+</main>
+
+<script src="codes-recherche-data.js"></script>
+<script>
+const S = { code: 2, q: "", on: null };
+const $ = (id) => document.getElementById(id);
+const ic = {
+  link: '<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
+  plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+};
+
+function paint() {
+  const code = CODES[S.code];
+  $("tabs").innerHTML = CODES.map((c, i) => `<span data-tab="${i}" aria-current="${i === S.code}">${c.short}</span>`).join("");
+  $("cname").textContent = code.name.replace(/, chapitre I — Bâtiment/, "");
+  const fol = code.arts.filter((a) => a.followed);
+  $("ccount").textContent = `${fol.length} article${fol.length > 1 ? "s" : ""} suivi${fol.length > 1 ? "s" : ""}`;
+  $("scope").textContent = `dans ${code.short}`;
+  $("q").placeholder = `Poser une question ${code.short === "Loi-cadre" ? "à la Loi-cadre" : `au ${code.short}`} — ex. « ${code.sugg[0]} »`;
+  $("box").classList.toggle("has", !!S.q);
+  $("sugg").innerHTML = S.q ? "" : `Exemples ${code.sugg.map((s) => `<span class="q" data-q="${s}">${s}</span>`).join("")}`;
+  $("res").innerHTML = S.q ? results(code) : "";
+  $("list").innerHTML = `<div class="lh">Articles suivis</div>` + fol.map(card).join("");
+}
+
+function results(code) {
+  const rows = search(code, S.q);
+  /* What the other two codes would answer: said, not mixed in. */
+  const best = (rs) => rs.length ? rs[0].n : 0;
+  const here = best(rows);
+  const other = CODES.map((c, i) => ({ c, i, r: i === S.code ? [] : search(c, S.q) }))
+    .map((o) => ({ ...o, n: o.r.length, s: best(o.r) })).filter((o) => o.n && o.s >= Math.max(2, here)).sort((a, b) => b.s - a.s)[0];
+  const elseLine = other ? `<div class="else">${ic.arrow}${other.n} article${other.n > 1 ? "s" : ""} dans
+    <span class="go" data-tab="${other.i}">${other.c.short}</span> répond${other.n > 1 ? "ent" : ""} aussi à cette question</div>` : "";
+  if (!rows.length) return `<div class="none">Aucun article de ce code ne répond à « ${S.q} ».</div>${elseLine}`;
+  const syn = `${rows.slice(0, 2).map((r) => `<span class="cite" data-on="${r.a.id}">${r.a.id}</span> ${r.a.t.toLowerCase()}`).join(" et ")}${rows.length > 2 ? `, puis ${rows.length - 2} autre${rows.length > 3 ? "s" : ""}` : ""}.
+    <small>Résumé tiré des articles ci-dessous; le texte officiel fait foi.</small>`;
+  return `<div class="rh"><b>${rows.length} article${rows.length > 1 ? "s" : ""}</b> ${code.of} pour « ${S.q} »</div>
+    <div class="syn">${syn}</div>
+    ${rows.map(({ a, hits }) => `<div class="hit ${S.on === a.id ? "on" : ""}" data-on="${a.id}">
+      <span class="id">${a.id}</span><span class="t">${a.t}</span>
+      <span class="sec">${a.sec}</span><span class="q">« ${lit(a.q, hits)} »</span>
+      <span></span><span class="why"><i>Pourquoi:</i> ${a.why}</span>
+      <span class="acts">${a.followed ? `<span class="btn done">${ic.check}Suivi</span>` : `<span class="btn" data-follow="${a.id}">${ic.plus}Suivre</span>`}
+        <span class="lnk">Lire le texte officiel</span></span>
+    </div>`).join("")}${elseLine}`;
+}
+
+function card(a) {
+  const st = STATE[a.state] || ["Non mesuré", "var(--ink-3)"];
+  return `<div class="card ${S.flash === a.id ? "flash" : ""}" id="c-${a.id.replace(/\W/g, "")}">
+    <div class="fig">${a.img ? `<img src="${a.img}" alt="">` : `<span>schéma</span>`}</div>
+    <div class="bd"><div class="top"><span>${a.id}</span><b>${a.t}</b><span class="st"><i style="background:${st[1]}"></i>${st[0]}</span></div>
+      <span class="qt">« ${a.q} »</span>
+      ${a.need ? `<span class="need">${a.need}</span>` : ""}</div></div>`;
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-tab],[data-q],[data-follow],[data-on],#clear");
+  if (!t) return;
+  if (t.id === "clear") { S.q = ""; $("q").value = ""; $("q").focus(); }
+  else if (t.dataset.tab) { S.code = +t.dataset.tab; S.on = null; }
+  else if (t.dataset.q) { S.q = t.dataset.q; $("q").value = S.q; }
+  else if (t.dataset.follow) { const a = CODES[S.code].arts.find((x) => x.id === t.dataset.follow); a.followed = true; S.flash = a.id; }
+  else if (t.dataset.on) S.on = t.dataset.on;
+  paint();
+});
+$("q").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { S.q = e.target.value.trim(); S.on = null; paint(); }
+  if (e.key === "Escape") { S.q = ""; e.target.value = ""; paint(); }
+});
+paint();
+</script>
+</body>
+</html>

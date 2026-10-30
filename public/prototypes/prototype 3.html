@@ -141,16 +141,9 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
   width:var(--tabr);height:var(--tabr)}
 .tabs.lvl button[aria-current="true"]::before{right:100%;background:var(--foot-l)}
 .tabs.lvl button[aria-current="true"]::after{left:100%;background:var(--foot-r)}
-/* When the first tab is the one open, it stands on the page's corner: its
-   left side runs straight down into the page's left side as one edge, so
-   there is no foot there and the page's own top-left corner is square —
-   the tab's rounded top is the corner. */
-.tabs.lvl > button:first-child[aria-current="true"],
-.tabs.lvl > .views:first-child > button:first-child[aria-current="true"]{margin-left:-9px}
-.tabs.lvl > button:first-child[aria-current="true"]::before,
-.tabs.lvl > .views:first-child > button:first-child[aria-current="true"]::before{display:none}
-.body:has(.tabs.lvl > button:first-child[aria-current="true"]) .work,
-.body:has(.tabs.lvl > .views:first-child > button:first-child[aria-current="true"]) .work{border-top-left-radius:0}
+/* No tab stands on the page's corner any more: the screen switch opens
+   the row, so the first level tab is inboard like every other one and the
+   page keeps one silhouette at both ends. */
 .frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.72);font-size:12.5px}
 .frame[data-chrome="black"] .tabs.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
 .frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{background:var(--card);color:var(--ink)}
@@ -863,7 +856,7 @@ body.elev .mtools{display:none}
    by the same 6 px all round. The grey around the page is the page's own
    spread shadow, so it follows the page's corners at radius + 6. */
 .frame[data-shell="inset"] .body:has(> .projsheet) > .work{margin:0 6px 6px;
-  box-shadow:0 0 0 6px #232327}
+  border-radius:0 0 12px 12px;box-shadow:0 0 0 6px #232327}
 .body > .projsheet{border-radius:18px 18px 0 0}
 .frame[data-chrome="black"] .rg::before{color:rgba(255,255,255,.45)}
 
@@ -3495,11 +3488,11 @@ const CONTACTS = {
   urbanisme: { role: "Urbaniste — arrondissement", mail: "urbanisme@exemple.ca", last: "12 oct", waited: 16 },
   rbq: { role: "RBQ — service technique", mail: "technique@exemple.ca", last: "3 oct", waited: 25 },
   paysage: { role: "Architecte paysagiste", mail: "paysage@exemple.ca", last: "21 oct", waited: 7 },
-  client: { role: "Client", mail: "promoteur@exemple.ca", last: "24 oct", waited: 4 },
+  direction: { role: "Directeur — service d'urbanisme", mail: "direction.urbanisme@exemple.ca", last: "24 oct", waited: 4 },
 };
 const GROUND_ARTICLES = ["art. 134", "art. 71", "art. 22", "art. 43"];
 const contactsFor = (a) => [a.doc.startsWith("Code de construction") ? "rbq" : "urbanisme",
-  ...(GROUND_ARTICLES.includes(a.id) ? ["paysage"] : []), "client"];
+  ...(GROUND_ARTICLES.includes(a.id) ? ["paysage"] : []), "direction"];
 
 /* The whole article as plain text: the sentence, the two numbers, what is
    missing, and every note written against it. This is what gets pasted
@@ -3951,7 +3944,7 @@ function tabsHTML() {
   let items;
   const views = CONTEXT[V.screen] || [];
   /* Under "Bâtiment entier" no level is the one being read, so none is lit. */
-  const viewBtn = (t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen) && !buildingScope()}" title="${t}">
+  const viewBtn = (t, i) => `<button ${act("view", i)} aria-current="${i === viewIndex(V.screen) && !buildingScope()}">
     <span class="lo bar" style="width:46px"></span><span class="hi">${t}</span></button>`;
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
