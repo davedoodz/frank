@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Filtrer par typologie — cinq façons</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The mix bar already names the three typologies and counts them. The
+   question is how to let one of them be read alone — and how to come back
+   to all of them. Five ways, each wired to the same fifteen units of level
+   5, so the filter is judged by what it does to the table under it, not by
+   how the control looks on its own. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#ededed;--fill-2:#f6f6f7;--card:#fff;
+  --wash:rgba(17,17,18,.055);--wash-2:rgba(17,17,18,.085);
+  --t3:#e0736e;--t4:#5b9bd5;--t5:#5cb46e;--vert:#c3e05a;--vert-ink:#2f3a05}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.45 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:24px 28px 80px;max-width:1340px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:840px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:26px;margin-top:26px}
+section h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:3.4em}
+
+.pane{background:var(--card);border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.ph{display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;border-bottom:1px solid var(--line-2);
+  font-weight:500}
+.ph .n{margin-left:auto;color:var(--ink-3);font-size:12px}
+.mix{padding:10px 12px 12px;border-bottom:1px solid var(--line-2)}
+.bar{display:flex;height:7px;border-radius:4px;overflow:hidden;gap:2px}
+.bar span{transition:opacity .14s ease,flex-basis .22s cubic-bezier(.3,0,.2,1)}
+.bar span[data-dim="true"]{opacity:.22}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.chip{display:flex;align-items:center;gap:6px;border:1px solid var(--line-2);border-radius:999px;
+  padding:3px 10px 3px 8px;font-size:12px;cursor:pointer;background:var(--card);
+  transition:background .12s ease,border-color .12s ease,opacity .12s ease}
+.chip:hover{background:var(--fill-2)}
+.chip .sw{width:8px;height:8px;border-radius:2px}
+.chip b{font-weight:600}
+.chip .q{color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip[aria-pressed="true"] .q{color:rgba(255,255,255,.6)}
+.chip[data-off="true"]{opacity:.45}
+.sum{margin-top:9px;font-size:12.5px;color:var(--ink-2)}
+.sum b{color:var(--ink);font-weight:600}
+.sum .cut{color:var(--ink-3)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:5px 12px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+th{color:var(--ink-3);font-weight:500}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+.ty{display:inline-flex;align-items:center;gap:6px}
+.ty i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.foot{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--line-2);
+  background:var(--fill-2);font-size:12.5px}
+.foot .clear{margin-left:auto;color:var(--ink-2);cursor:pointer;text-decoration:underline;
+  text-underline-offset:2px}
+.foot .clear:hover{color:var(--ink)}
+
+/* B — a segmented control, "Tout" included: one of four is always on, so
+   the way back is a target like any other and never a special case. */
+.seg{display:inline-flex;background:var(--fill);border-radius:9px;padding:2px;gap:2px}
+.seg button{border:0;background:none;font:inherit;font-size:12px;padding:4px 10px;border-radius:7px;
+  cursor:pointer;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.seg button:hover{background:var(--wash)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;
+  box-shadow:0 1px 2px rgba(17,17,18,.12)}
+.seg i{width:8px;height:8px;border-radius:2px}
+
+/* C — the bar itself is the control. Nothing is added to the pane: the
+   three bands already say how much of the floor each type is, so they are
+   what gets clicked. */
+.bar.click span{cursor:pointer}
+.bar.click{height:11px}
+.bar.click span[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px;border-radius:3px}
+
+/* D — a menu in the column head. The filter lives where the values are
+   read, the way a spreadsheet does it, and the pane keeps its figures. */
+.thf{display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:var(--ink-2)}
+.thf:hover{color:var(--ink)}
+.thf svg{width:12px;height:12px}
+.menu{position:absolute;z-index:5;margin-top:4px;background:var(--card);border:1px solid var(--line);
+  border-radius:9px;padding:4px;min-width:170px;box-shadow:0 10px 26px rgba(17,17,18,.16)}
+.menu .mi{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px}
+.menu .mi:hover{background:var(--fill-2)}
+.menu .mi .ck{width:14px;color:var(--ink)}
+.menu .mi i{width:8px;height:8px;border-radius:2px}
+.wrap{position:relative}
+
+/* E — several at a time. Each chip is a switch, so two typologies can be
+   read together; the count of what is hidden is stated, with one word to
+   undo it. */
+[data-v="E"] .chip[aria-pressed="true"]{background:var(--vert);border-color:#8ba00f;color:var(--vert-ink)}
+[data-v="E"] .chip[aria-pressed="true"] .q{color:rgba(47,58,5,.6)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Filtrer par typologie — cinq façons</h1>
+  <p class="lede">Le bandeau nomme déjà les trois typologies et les compte. Reste à pouvoir n'en lire qu'une,
+     et surtout à pouvoir revenir à toutes. Cinq commandes, toutes branchées sur les quinze unités du niveau 5:
+     le filtre se juge à ce qu'il fait au tableau, pas à son allure isolée.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+/* Level 5 of Le Baldwin III, as the prototype lists it. */
+const UNITS = [
+  ["501", "5½", 1275], ["502", "5½", 1496], ["503", "3½", 760], ["504", "4½", 1152],
+  ["505", "4½", 1221], ["506", "4½", 1106], ["507", "3½", 707], ["508", "4½", 970],
+  ["509", "4½", 958], ["510", "5½", 1465], ["511", "5½", 1345], ["512", "3½", 740],
+  ["513", "3½", 708], ["514", "3½", 716], ["515", "4½", 999],
+];
+const TYPES = ["3½", "4½", "5½"];
+const INK = { "3½": "var(--t3)", "4½": "var(--t4)", "5½": "var(--t5)" };
+const nb = (n) => n.toLocaleString("fr-CA").replace(/\u202f|\u00a0/g, " ");
+const of = (t) => UNITS.filter((u) => u[1] === t);
+const net = (rows) => rows.reduce((s, u) => s + u[2], 0);
+const TOTAL = net(UNITS);
+
+/* Each variant keeps its own selection: a Set, empty meaning "everything",
+   so "no filter" and "nothing chosen" are the same state and the table
+   never has to be told to show all of them twice. */
+const sel = { A: new Set(), B: new Set(), C: new Set(), D: new Set(), E: new Set() };
+const shown = (v) => (sel[v].size ? UNITS.filter((u) => sel[v].has(u[1])) : UNITS);
+
+const bar = (v, clickable) => `<div class="bar ${clickable ? "click" : ""}">${TYPES.map((t) => {
+  const on = !sel[v].size || sel[v].has(t);
+  return `<span style="flex:${net(of(t))} 0 0;background:${INK[t]}" data-dim="${!on}"
+    ${clickable ? `data-pick="${v}:${t}" aria-pressed="${sel[v].has(t)}" title="${t}"` : ""}></span>`;
+}).join("")}</div>`;
+
+const chips = (v, multi) => `<div class="chips">${TYPES.map((t) => {
+  const on = sel[v].has(t);
+  return `<span class="chip" data-pick="${v}:${t}" aria-pressed="${on}"
+    data-off="${sel[v].size && !on}"><i class="sw" style="background:${INK[t]}"></i>
+    <b>${t}</b> ${Math.round(net(of(t)) / TOTAL * 100)} % <span class="q">${of(t).length}</span></span>`;
+}).join("")}${multi && sel[v].size ? `<span class="chip" data-pick="${v}:*">Tout voir</span>` : ""}</div>`;
+
+const sum = (v) => {
+  const rows = shown(v);
+  const all = rows.length === UNITS.length;
+  return `<div class="sum"><b>${nb(net(rows))}</b> pi² nets sur ${rows.length} unité${rows.length > 1 ? "s" : ""}
+    ${all ? "" : `<span class="cut">— ${UNITS.length - rows.length} masquées sur ${UNITS.length}</span>`}</div>`;
+};
+
+const table = (v) => {
+  const rows = shown(v);
+  return `<table><thead><tr><th>Unité</th>
+    <th>${v === "D" ? `<span class="wrap"><span class="thf" data-menu="D">Type
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg></span>
+      ${openMenu === "D" ? menuHTML("D") : ""}</span>` : "Type"}</th>
+    <th class="n">Net pi²</th></tr></thead><tbody>${rows.map(([n, t, a]) =>
+      `<tr><td>${n}</td><td><span class="ty"><i style="background:${INK[t]}"></i>${t}</span></td>
+       <td class="n">${nb(a)}</td></tr>`).join("")}</tbody></table>`;
+};
+
+let openMenu = null;
+const menuHTML = (v) => `<div class="menu">
+  <div class="mi" data-pick="${v}:*"><span class="ck">${sel[v].size ? "" : "✓"}</span>Toutes les typologies</div>
+  ${TYPES.map((t) => `<div class="mi" data-pick="${v}:${t}">
+    <span class="ck">${sel[v].has(t) ? "✓" : ""}</span><i style="background:${INK[t]}"></i>${t}
+    <span class="q" style="margin-left:auto;color:var(--ink-3)">${of(t).length}</span></div>`).join("")}</div>`;
+
+const VARIANTS = [
+  ["A", "La pastille est l'interrupteur",
+   "Cliquer une typologie ne lit qu'elle; la recliquer revient à tout. Rien n'est ajouté à la barre: ce qui nomme devient ce qui filtre.",
+   (v) => `<div class="mix">${bar(v)}${chips(v, true)}${sum(v)}</div>${table(v)}`],
+
+  ["B", "Un segment, « Tout » compris",
+   "Un choix parmi quatre est toujours allumé, donc le retour à l'ensemble est une cible comme une autre et jamais un cas particulier.",
+   (v) => `<div class="mix">${bar(v)}
+     <div class="chips"><div class="seg">
+       <button data-pick="${v}:*" aria-pressed="${!sel[v].size}">Tout <span class="q">${UNITS.length}</span></button>
+       ${TYPES.map((t) => `<button data-pick="${v}:${t}" aria-pressed="${sel[v].has(t)}">
+         <i style="background:${INK[t]}"></i>${t} <span class="q">${of(t).length}</span></button>`).join("")}
+     </div></div>${sum(v)}</div>${table(v)}`],
+
+  ["C", "La barre est la commande",
+   "Les trois bandes disent déjà quelle part du plancher chaque type occupe: ce sont elles qu'on clique. Les pastilles redeviennent une légende.",
+   (v) => `<div class="mix">${bar(v, true)}${chips(v, true)}${sum(v)}</div>${table(v)}`],
+
+  ["D", "Un menu dans l'en-tête de colonne",
+   "Le filtre vit là où les valeurs se lisent, comme dans un tableur, et le bandeau garde ses chiffres sans rien gagner de cliquable.",
+   (v) => `<div class="mix">${bar(v)}${chips(v, false)}${sum(v)}</div>${table(v)}`],
+
+  ["E", "Plusieurs à la fois",
+   "Chaque pastille est un interrupteur: deux typologies peuvent se lire ensemble. Ce qui est masqué est dit, et un mot le défait.",
+   (v) => `<div class="mix">${bar(v)}${chips(v, false)}${sum(v)}</div>${table(v)}
+     ${sel[v].size ? `<div class="foot">${[...sel[v]].join(" + ")} — ${shown(v).length} unités
+       <span class="clear" data-pick="${v}:*">Tout voir</span></div>` : ""}`],
+];
+
+function paint() {
+  grid.innerHTML = VARIANTS.map(([v, h, p, body]) => `<section data-v="${v}">
+    <h2>${h}<i>${v}</i></h2><p>${p}</p>
+    <div class="pane"><div class="ph">Unités et superficies<span class="n">niveau 5</span></div>
+      ${body(v)}</div></section>`).join("");
+}
+
+document.addEventListener("click", (e) => {
+  const m = e.target.closest("[data-menu]");
+  if (m) { openMenu = openMenu === m.dataset.menu ? null : m.dataset.menu; paint(); return; }
+  const p = e.target.closest("[data-pick]");
+  if (!p) { if (openMenu) { openMenu = null; paint(); } return; }
+  const [v, t] = p.dataset.pick.split(":");
+  /* One rule for every variant: a type toggles, "*" clears. E keeps what
+     is already chosen; the others read one typology at a time. */
+  if (t === "*") sel[v].clear();
+  else if (v === "E") sel[v].has(t) ? sel[v].delete(t) : sel[v].add(t);
+  else if (sel[v].has(t)) sel[v].clear();
+  else { sel[v].clear(); sel[v].add(t); }
+  if (v !== "D") openMenu = null;
+  paint();
+});
+paint();
+</script>
+</body>
+</html>
