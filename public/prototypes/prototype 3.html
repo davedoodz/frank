@@ -1703,11 +1703,10 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .ncard .resl{display:flex;align-items:center;gap:8px}
 .ncard .resby{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#2f7a4d;margin-right:auto}
 .ncard .resby .lu{width:11px;height:11px}
-/* Actifs / Résolus: the archive is the second tab. */
-.ntabs{display:flex;gap:2px;border-bottom:1px solid var(--line-2);margin:2px -2px 0}
-.ntabs .ntab{padding:6px 10px;font-size:12px;color:var(--ink-2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.ntabs .ntab[aria-current="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
-.ntabs em{font-style:normal;color:var(--ink-3);font-weight:400;margin-left:4px}
+/* Actifs / Résolus: the same segmented pill the task list uses, so the
+   column's two rows do not both underline — the row above carries the
+   black tab, this one carries the grey segment. */
+.nseg{margin:4px 0 8px}
 .ncard .txt{font-size:12.5px;line-height:1.45}
 .ncard .anch{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-3);min-width:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -5692,7 +5691,7 @@ function marginHTML() {
   </div>`;
   };
   const shown = tabOn === "o" ? open : done;
-  const subtab = (k, nm, n) => `<span class="ntab" ${act("notetab", k)} aria-current="${tabOn === k}">${nm}<em>${n}</em></span>`;
+  const subtab = (k, nm, ic, n) => `<span class="${tabOn === k ? "on" : ""}" ${act("notetab", k)} aria-current="${tabOn === k}">${icon(ic)}${nm}<i>${n}</i></span>`;
   /* Two kinds of comment, one composer. Most of what is said about a
      project is said about the project — "la grille est encore à R04" has
      no point on a drawing — so writing is never gated on placing. The pin
@@ -5722,7 +5721,7 @@ function marginHTML() {
       <span class="mtabs">${tab("notes", "message-square", "Commentaires", open.length)}${tab("conf", "alert-triangle", "Conflits", nIssues)}</span></div>
     <div class="pb nmargin">
       ${V.marginTab === "conf" ? issuesListHTML() : `${composer}
-      <div class="ntabs">${subtab("o", "Actifs", open.length)}${subtab("r", "Résolus", done.length)}</div>
+      <span class="tseg nseg">${subtab("o", "Actifs", "inbox", open.length)}${subtab("r", "Résolus", "check", done.length)}</span>
       ${shown.length ? shown.map(card).join("")
         : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">${tabOn === "o" ? "Aucun commentaire actif." : "Rien n'a encore été résolu."}</div>`}`}
     </div>`;
@@ -7583,7 +7582,10 @@ function onClick(e) {
       break;
     /* The typologies are dials (the fidelity panel owns them), so a band
        of the mix goes through the dial and lets applyDial write V. */
+    /* Asking where a type is is a question about the whole floor, so no unit
+       stays chosen: the fills are read without one outline singled out. */
     case "typo":
+      V.sel["Unités"] = -1;
       dial.setValue(`typologies.${value}`, !V.typo[value]);
       return;
     /* Four files would be four clicks; the four tables in one file are read
