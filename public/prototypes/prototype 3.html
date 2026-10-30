@@ -1041,13 +1041,21 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
      and nothing else on the sheet carries one. */
   box-shadow:0 0 0 2px #fff,0 2px 5px rgba(17,17,18,.28)}
 .npin .nd > svg{transform:rotate(45deg);width:11px;height:11px}
+/* The drop is turned on its corner; the number it carries is not. */
+.npin .nd > i{display:block;transform:rotate(45deg);font-style:normal;line-height:1}
+/* A point just put down wears the same pin that was on the pointer — the
+   same outline, the same proportion — so the gesture and its result are
+   plainly one thing. */
+.npin .ndg{position:absolute;left:-14px;bottom:-3px;width:28px;height:28px;color:var(--ink);
+  filter:drop-shadow(0 2px 4px rgba(17,17,18,.3))}
+.npin .ndg svg{width:28px;height:28px;fill:#fff;stroke:currentColor;stroke-width:1.8}
 /* An internal note is still a pin: same green drop, same number, dashed
    outline. The lock that used to sit here read as a locked drawing rather
    than a note kept inside the office, and it broke the one shape the eye
    learns to look for on a sheet. */
 .npin.team .nd{border-style:dashed}
 .npin.on .nd{background:var(--ink);color:#fff;border-color:var(--ink);border-style:solid}
-.npin.pending .nd{background:#fff;border-style:dashed}
+
 .npin .nl{position:absolute;left:15px;top:-13px;background:#fff;border:1px solid var(--line);
   border-radius:5px;padding:2px 7px;font-size:10.5px;color:var(--ink);white-space:nowrap;max-width:190px;
   overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(17,17,18,.16)}
@@ -1075,8 +1083,16 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
    cursor is the pin itself, and the 2D pane is ringed so it is plain which
    surface will take it. The model is not one of them. */
 [data-pin="on"] .zone[data-zone="plan"] .vp,
-[data-pin="on"] .zone[data-zone="plan"] .vp .plan{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='-3 -3 30 30' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='5'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3Cg stroke='%23111' stroke-width='2'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3C/svg%3E") 12 26, crosshair}
+[data-pin="on"] .zone[data-zone="plan"] .vp *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='-3 -3 30 30' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='5'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3Cg stroke='%23111' stroke-width='2'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3C/svg%3E") 12 26, crosshair}
 [data-pin="on"] .zone[data-zone="plan"]{box-shadow:inset 0 0 0 2px #8ba00f}
+/* The sheet is held still while a pin is being placed: a unit that lights
+   and names itself under the pointer is an invitation to click it, and the
+   click is spoken for. Only the point being chosen is live. */
+[data-pin="on"] .zone[data-zone="plan"] .umark,
+[data-pin="on"] .zone[data-zone="plan"] .umark polygon.hit,
+[data-pin="on"] .zone[data-zone="plan"] .xmark,
+[data-pin="on"] .zone[data-zone="plan"] .npin{pointer-events:none}
+[data-pin="on"] .zone[data-zone="plan"] .uhover[data-pill="hover"]{display:none}
 /* The pin is armed on the drawing it lands on, top left of the 2D pane. */
 .pinarm{position:absolute;left:12px;top:12px;z-index:9;display:inline-flex;align-items:center;gap:6px;
   padding:5px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);
@@ -3366,7 +3382,7 @@ function contentHTML() {
       const zoomPill = (side) => `<div class="zpill" data-zpill="${side}">
         <span class="zb" ${act("zstep", side + ":-")} title="Réduire">${icon("minus")}</span>
         <span class="zread hi ${side === "plan" ? "fit" : ""}" ${side === "plan"
-          ? `data-zread ${act("zfit")} title="Revoir la feuille entière"` : "data-mread"}>${side === "plan" ? V.zoom : V.mzoom}%</span>
+          ? `data-zread ${act("zfit")} title="Revoir la feuille entière"` : "data-mread"}>${side === "plan" ? zoomShown(V.zoom) : V.mzoom}%</span>
         <span class="zb" ${act("zstep", side + ":+")} title="Agrandir">${icon("plus")}</span>
       </div>`;
       /* The corner view: the drawing whole, small. On the plan it is the
@@ -4004,7 +4020,8 @@ const currentSheetKey = () => {
 
 /* The pins drawn on the 2D sheet. They live inside the transformed box with
    the unit outlines, so they pan and zoom with the drawing; their size is
-   divided by the zoom so a pin stays a pin instead of growing into a sign. */
+   divided by the zoom so a pin stays a pin instead of growing into a sign.
+   The zoom moves without a render, so paintSheet keeps the division. */
 function pinMarkHTML() {
   const z = V.zoom / 100;
   const list = pinsOnSheet();
@@ -4014,7 +4031,7 @@ function pinMarkHTML() {
       ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}"
       style="left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%;transform:scale(${(1 / z).toFixed(3)})"
       ${p.id ? act("note", p.id) : ""}>
-      <span class="nd">${p.id ? i + 1 : "+"}</span>
+      ${p.id ? `<span class="nd"><i>${i + 1}</i></span>` : `<span class="ndg">${icon("map-pin")}</span>`}
       ${p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""}
     </div>`).join("");
 }
@@ -4138,7 +4155,7 @@ function pushModelPins() {
   window.fitteModel.setPins([...pinsOnModel(), ...pending].map((p, i) => ({
     id: p.id, p: p.p, n: p.n,
     cls: `${p.scope === "equipe" ? "team" : ""} ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}`,
-    html: `<span class="nd">${p.scope === "equipe" ? icon("lock") : (p.id ? i + 1 : "+")}</span>`
+    html: p.id ? `<span class="nd"><i>${i + 1}</i></span>` : `<span class="ndg">${icon("map-pin")}</span>`
       + (p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""),
   })));
 }
@@ -4154,8 +4171,15 @@ function pushModelPins() {
    drawing exactly where it was left. Nothing here touches the file. */
 
 /* 100 % is the sheet filling the pane; below it the paper keeps going, which
-   is what lets the eye step back from a drawing that runs to its own edges. */
-const ZMIN = 45, ZMAX = 600;
+   is what lets the eye step back from a drawing that runs to its own edges.
+   1000 % reads a dimension string on a permit sheet; the PDF is painted at
+   the screen's own density, so the line stays sharp all the way there. */
+const ZMIN = 75, ZMAX = 1000;
+/* What the pill reads. Zoomed all the way out the sheet spans three
+   quarters of the pane, with paper round it, and that is 0 %; the sheet
+   filling the pane is 100 %; from there the number is the scale itself, up
+   to 1000 %. Between 0 and 100 it runs evenly from one to the other. */
+const zoomShown = (z) => Math.round(z >= 100 ? z : ((z - ZMIN) / (100 - ZMIN)) * 100);
 const vpEl = () => document.querySelector("[data-vp]");
 
 /* The baked sheet carries every ordinary zoom. Past ZSHARP a 4000 px raster
@@ -4195,7 +4219,8 @@ function zoomTo(next, cx, cy, rect, base) {
   const z1 = Math.min(ZMAX, Math.max(ZMIN, next)) / 100;
   V.pan.x = cx - (cx - V.pan.x) * (z1 / z0);
   V.pan.y = cy - (cy - V.pan.y) * (z1 / z0);
-  V.zoom = Math.round(z1 * 100);
+  // Hundredths, not whole percents: a quarter step below 100 % is 6.25.
+  V.zoom = Math.round(z1 * 10000) / 100;
   clampPan(rect, V.zoom, base);
 }
 
@@ -4351,10 +4376,11 @@ function paintSheet() {
   /* V.zoom runs through fractions while the sheet glides; the percentage
      is read by a person, so it is rounded here rather than quantising the
      motion itself. */
-  const shown = Math.round(V.zoom);
+  const shown = zoomShown(V.zoom);
   const read = document.querySelector("[data-zread]");
   if (read) read.textContent = `${shown}%`;
   el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / V.zoom * 100).toFixed(3)}px`; });
+  el.querySelectorAll(".plan .npin").forEach((p) => { p.style.transform = `scale(${(100 / V.zoom).toFixed(3)})`; });
   placePlanPills();
   paintConflictMarks();
   if (V.pending) placePinBubble();
@@ -4872,7 +4898,7 @@ function wireViewport() {
      die with it. */
   el.onmousemove = (e) => {
     if (el.classList.contains("drag")) return setPlanHover(null);
-    setPlanHover(e.target.closest ? e.target.closest(".umark polygon.hit") : null);
+    setPlanHover(V.pinMode ? null : (e.target.closest ? e.target.closest(".umark polygon.hit") : null));
   };
   el.onmouseleave = () => setPlanHover(null);
   /* Drawn once here: the markup carries the last transform, but the box it
@@ -4957,6 +4983,10 @@ window.addEventListener("fitte:model-zoom", (e) => {
 });
 /* ---------------------------------------------------------------- frame */
 
+/* What the 3D viewer owns and draws into in the model pane: its host and
+   canvas, the note markers, the north ring, the axes and the corner view. */
+const LIVE_3D = ["[data-building-model]", "[data-npins]", "[data-north3d]", "[data-axes]", '[data-mini="model"]'];
+
 function render() {
   const def = SCREENS[V.screen];
   /* Counting the building is not reading a floor: the unit list, the two
@@ -4990,6 +5020,13 @@ function render() {
         "Wide rail with labels": "wide", "Wide rail with sections": "wide",
         "Rail with labels under icons": "stack" }[V.nav.layout] || "rail";
 
+  /* The 3D pane's live parts are never rebuilt. A render used to replace
+     the model's host with a fresh one marked "loading": the canvas faded
+     back in over 0.18 s with the old façade picture behind it, the north
+     ring and the axes were blank for a frame, and a click on a 2D layer
+     made the model flash. The live nodes are lifted out before the frame is
+     rewritten and put back in place of their fresh copies after it. */
+  const live3d = LIVE_3D.map((s) => document.querySelector(`[data-zone="model"] ${s}`));
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
          data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
@@ -5016,6 +5053,10 @@ function render() {
 
   /* The journey strip lived under the frame; with the frame filling the
      window, the step badges on the screen carry it alone. */
+  LIVE_3D.forEach((s, i) => {
+    const fresh = document.querySelector(`[data-zone="model"] ${s}`);
+    if (live3d[i] && fresh) fresh.replaceWith(live3d[i]);
+  });
 
   if (V.dialog) document.getElementById("frame").insertAdjacentHTML("beforeend", dialogHTML());
 
@@ -5909,7 +5950,15 @@ function onClick(e) {
       const [side, dir] = value.split(":");
       const k = dir === "+" ? 1 : -1;
       if (side === "plan") {
-        zoomBy(Math.round(V.zoom * (dir === "+" ? 1.25 : 1 / 1.25)));
+        /* Above 100 % a step is a quarter more; below it, where the sheet
+           only shrinks from filling the pane to three quarters of it, a
+           step is a quarter of that range, so 100 → 75 → 50 → 25 → 0. */
+        const up = dir === "+";
+        const s = zoomShown(V.zoom);
+        const below = up ? s < 100 : V.zoom <= 100;
+        const toZ = (t) => ZMIN + (Math.max(0, Math.min(100, t)) / 100) * (100 - ZMIN);
+        zoomBy(below ? toZ(up ? Math.floor(s / 25) * 25 + 25 : Math.ceil(s / 25) * 25 - 25)
+          : Math.round(V.zoom * (up ? 1.25 : 1 / 1.25)));
         paintSheet();
       } else {
         V.mzoom = Math.max(0, Math.min(100, V.mzoom + k * 8));
