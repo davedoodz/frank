@@ -260,7 +260,15 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    cannot act yet is visibly out of reach rather than silently inert. */
 [data-act],[data-screen]{cursor:pointer}
 [data-act]:hover{border-color:var(--line)}
-.chip[data-act]:hover,.btnw[data-act]:hover{background:var(--fill)}
+.chip[data-act]:hover{background:var(--fill)}
+/* The outlined buttons — Exporter, Ouvrir dans…, Document — invert under
+   the pointer: ink fill, card-coloured words and glyphs. The solid and the
+   switched-off ones keep their own state. */
+.btnw[data-act]:not(.solid):not(.off):hover,.lcard .docbtn:hover{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.btnw[data-act]:not(.solid):not(.off):hover .hi{color:inherit}
+/* On the black top bar an ink fill would vanish into the bar, so there the
+   same press turns the light button full white with black words instead. */
+.frame[data-chrome="black"] .tabs .btnw[data-act]:not(.solid):not(.off):hover{background:#fff;border-color:#fff;color:#111}
 .listrow[data-act]:hover{background:var(--fill-2)}
 .tbl tr[data-act]:hover td{background:var(--fill-2)}
 .tile[data-act].on,.chip.on{border-color:var(--ink)}
@@ -821,13 +829,14 @@ body.elev .mtools{display:none}
 .ltile.sel{background:var(--ink);border-color:var(--ink)}
 .ltile.sel .nm{color:#fff}
 .ltile.sel .pic{border-color:var(--ink)}
-/* Carried: no transition at all, or the tile lags behind the pointer. */
-.ltile.held{transition:none;z-index:9;background:var(--card);
-  border-color:var(--line-2);box-shadow:0 6px 18px rgba(0,0,0,.18)}
-.ltile.held .pic{border-color:var(--ink-3)}
+/* Carried: no transition at all, or the tile lags behind the pointer. A
+   carried tile keeps its own colours: the selected one stays ink with its
+   name in white — turned white on white, the name vanished mid-drag. */
+.ltile.held{transition:none;z-index:9;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.ltile.held:not(.sel){background:var(--card);border-color:var(--line-2)}
+.ltile.held:not(.sel) .pic{border-color:var(--ink-3)}
 /* Kept through the landing so the lift fades instead of blinking off. */
 .ltile.landing{z-index:9;box-shadow:0 6px 18px rgba(0,0,0,.18)}
-body.lpress,body.lpress *{cursor:grab !important}
 body.ldrag,body.ldrag *{cursor:grabbing !important}
 
 /* The badge: black with a + while the drawing is aside, green with its
@@ -837,7 +846,8 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   display:flex;align-items:center;justify-content:center;gap:1px;cursor:pointer;z-index:3;
   background:var(--ink);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);
   transition:background .12s,transform .12s}
-.lbadge:hover{background:#000;transform:scale(1.08)}
+/* The + turns the green it will become: the hover says what the click does. */
+.lbadge:hover{background:#c3e05a;color:#2f3a05;transform:scale(1.08)}
 .lbadge .lu{width:12px;height:12px}
 .lbadge.on{width:auto;min-width:40px;border-radius:12px;padding:0 7px 0 2px;
   background:#c3e05a;color:#2f3a05;box-shadow:0 1px 3px rgba(0,0,0,.22)}
@@ -865,7 +875,6 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   word-break:break-all}
 .lcard .docbtn{display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;
   border:1px solid var(--line-2);border-radius:5px;padding:4px 8px;font-size:11.5px}
-.lcard .docbtn:hover{border-color:var(--ink)}
 .lcard .docbtn .lu{width:13px;height:13px}
 .lmenu{display:flex;flex-direction:column;border:1px solid var(--line-2);border-radius:5px;
   overflow:hidden}
@@ -905,9 +914,34 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   animation:swapline .85s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes swapveil{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(100% 0 0 0)}}
 @keyframes swapline{0%{top:0;opacity:.9}100%{top:100%;opacity:0}}
-.lay.swapin{animation:layin .85s cubic-bezier(.4,0,.2,1)}
+.swapin{animation:layin .85s cubic-bezier(.4,0,.2,1)}
 @keyframes layin{0%{clip-path:inset(0 0 100% 0)}100%{clip-path:inset(0 0 0 0)}}
-@media (prefers-reduced-motion: reduce){.swapfx,.swapfx::after,.lay.swapin,.lcard .fn.swapped{animation-duration:.01s}}
+/* Cross-fade: the two issues are held over each other and one is let go.
+   Nothing says which way the change ran, which is the point when the two
+   drawings differ in a dozen small places at once. */
+[data-swap="Cross-fade"] .swapfx{animation:swapout .45s ease forwards}
+[data-swap="Cross-fade"] .swapfx::after{display:none}
+[data-swap="Cross-fade"] .swapin{animation:swapfadein .45s ease}
+@keyframes swapout{to{opacity:0}}
+@keyframes swapfadein{from{opacity:0}}
+/* Tracing lift: the old sheet is lifted off the pile — it rises a little
+   and goes — while the new one settles down onto the paper. */
+[data-swap="Tracing lift"] .swapfx{transform-origin:50% 50%;
+  animation:swaplift .5s cubic-bezier(.3,0,.2,1) forwards}
+[data-swap="Tracing lift"] .swapfx::after{display:none}
+[data-swap="Tracing lift"] .swapin{animation:swapsettle .5s cubic-bezier(.3,0,.2,1)}
+@keyframes swaplift{to{opacity:0;transform:scale(1.06) translateY(-10px)}}
+@keyframes swapsettle{from{opacity:0;transform:scale(.985)}}
+/* Side wipe: the plotter pass turned on its side, for drawings read in
+   columns — the pen crosses the sheet left to right. */
+[data-swap="Side wipe"] .swapfx{animation:swapveilx .7s cubic-bezier(.4,0,.2,1) forwards}
+[data-swap="Side wipe"] .swapfx::after{left:auto;right:0;top:0;bottom:0;width:2px;height:auto;
+  animation:swaplinex .7s cubic-bezier(.4,0,.2,1) forwards}
+[data-swap="Side wipe"] .swapin{animation:layinx .7s cubic-bezier(.4,0,.2,1)}
+@keyframes swapveilx{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}
+@keyframes swaplinex{0%{right:100%;opacity:.9}100%{right:0;opacity:0}}
+@keyframes layinx{0%{clip-path:inset(0 100% 0 0)}100%{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion: reduce){.swapfx,.swapfx::after,.swapin,.lcard .fn.swapped{animation-duration:.01s}}
 .lpast .pdt{font-size:10.5px;color:var(--ink-3)}
 /* The export menu hangs off the table's header, right-aligned to the
    button that opens it so it never leaves the pane. */
@@ -1330,6 +1364,7 @@ const V = {
   labels: true,
   journey: true,
   density: "comfortable",
+  swap: "Plotter wipe",   /* how a drawing changes for another document */
   shell: "Inset card",
   chrome: "Black",
   homeLayout: "Card grid",
@@ -2192,6 +2227,33 @@ function layBadge(k) {
     on ? layBars(rank, shown.length) + `<b class="rk">${rank}</b>` : icon("plus")}</span>`;
 }
 
+/* Putting a drawing on the sheet, or taking it off, is one button changing
+   shape: the circle with its + stretches into the pill with its pile and
+   rank, or the pill draws back into the circle. The click re-renders the
+   strip, so the old badge's size and colour are read first and the new one
+   is grown from them on the next frame. */
+function morphBadge(k) {
+  const sel = `[data-ltile="${k}"] .lbadge`;
+  const old = document.querySelector(sel);
+  if (!old) return;
+  const r = old.getBoundingClientRect();
+  const cs = getComputedStyle(old);
+  const from = { width: `${r.width}px`, minWidth: "0px", padding: cs.padding, borderRadius: cs.borderRadius,
+    backgroundColor: cs.backgroundColor, color: cs.color };
+  requestAnimationFrame(() => {
+    const el = document.querySelector(sel);
+    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const ns = getComputedStyle(el);
+    const to = { width: `${el.getBoundingClientRect().width}px`, minWidth: "0px", padding: ns.padding,
+      borderRadius: ns.borderRadius, backgroundColor: ns.backgroundColor, color: ns.color };
+    const ease = "cubic-bezier(.2,.7,.3,1)";
+    el.animate([from, to], { duration: 240, easing: ease });
+    [...el.children].forEach((c) => c.animate(
+      [{ opacity: 0, transform: "scale(.6)" }, { opacity: 1, transform: "scale(1)" }],
+      { duration: 200, delay: 60, easing: ease, fill: "backwards" }));
+  });
+}
+
 const layTile = (k) => `<div class="ltile ${V.lay[k].on ? "on" : ""} ${V.layPick === k ? "sel" : ""}"
   data-ltile="${k}" ${act("lpick", k)} title="${LAYDOC[k].disc} — ${LAYDOC[k].date()}">
   <span class="wrap"><span class="pic" style="background-image:url(${LAYDOC[k].thumb()})"></span>${layBadge(k)}</span>
@@ -2343,17 +2405,19 @@ document.addEventListener("pointerdown", (e) => {
    overlay drawing is revealed from the top. */
 function swapFx(k) {
   const zone = document.querySelector('[data-zone="plan"]');
-  if (!zone) return;
-  if (k === "plan") {
-    const plan = zone.querySelector(".plan");
-    if (!plan) return;
-    const fx = document.createElement("div");
-    fx.className = "swapfx";
-    plan.append(fx);
-    fx.addEventListener("animationend", () => fx.remove(), { once: true });
-    return;
-  }
-  const el = zone.querySelector(`.lay[data-lay="${k}"]`);
+  if (!zone || V.swap === "Instant") return;
+  const plan = zone.querySelector(".plan");
+  if (!plan) return;
+  /* The veil is the old sheet still standing; it is always hung on the
+     paper, even when what changed is a consultant's overlay, because the
+     pass has to read across the whole drawing to look like a pass. */
+  const fx = document.createElement("div");
+  fx.className = "swapfx";
+  plan.append(fx);
+  fx.addEventListener("animationend", () => fx.remove(), { once: true });
+  /* The sheet that arrives: the paper itself for the architecture, the
+     overlay for anything else. */
+  const el = k === "plan" ? plan : zone.querySelector(`.lay[data-lay="${k}"]`);
   if (!el) return;
   el.classList.remove("swapin");
   void el.offsetWidth;
@@ -4697,14 +4761,13 @@ document.addEventListener("pointerdown", (e) => {
     });
   };
 
-  /* Pressed, the open hand: the tile can be carried. Moving, the closed
-     hand: it is being carried. Before the press it is the ordinary arrow. */
+  /* A press is a click until the tile moves: the arrow stays. Moving, the
+     closed hand: the tile is being carried. */
   tile.classList.add("held");
-  document.body.classList.add("lpress");
   const move = (ev) => {
     const dy = ev.clientY - startY;
     if (!moved && Math.abs(dy) < 3) return;   /* a press is not a drag */
-    if (!moved) document.body.classList.replace("lpress", "ldrag");
+    if (!moved) document.body.classList.add("ldrag");
     moved = true;
     tile.style.transform = `translateY(${dy}px)`;
     const c = mid[from] + dy;
@@ -4726,7 +4789,7 @@ document.addEventListener("pointerdown", (e) => {
   const up = () => {
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", up);
-    document.body.classList.remove("lpress", "ldrag");
+    document.body.classList.remove("ldrag");
     if (!moved) { tile.classList.remove("held"); tile.style.transform = ""; return; }
     /* The landing is where a drag usually stutters: animate to a guessed
        offset, wait on a timer, re-render, and the sheet jumps because the
@@ -5037,7 +5100,7 @@ function render() {
   const live3d = LIVE_3D.map((s) => document.querySelector(`[data-zone="model"] ${s}`));
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
-         data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
+         data-density="${V.density}" data-swap="${V.swap}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
          data-shell="${V.shell === "Inset card" ? "inset" : "flat"}"
          data-chrome="${V.chrome === "Black" ? "black" : "light"}"
          style="--plan:url(${sheet().webp || sheet().img})">
@@ -5867,6 +5930,7 @@ function onClick(e) {
     /* The last drawing on the sheet carries no badge at all, so there is
        no way in here to empty the pane. */
     case "lstack": {
+      morphBadge(value);
       const adding = !V.lay[value].on;
       V.layPick = value;
       V.layCard = true;
@@ -6070,6 +6134,10 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   regionLabels: false,
   journeySteps: true,
   density: sel(["comfortable", "compact"]),
+  /* Swapping a drawing for another issue of itself is the one moment the
+     sheet changes under the eye. Five ways to say it happened, from the
+     plotter pass that draws the new sheet on, to nothing at all. */
+  swap: sel(["Plotter wipe", "Cross-fade", "Tracing lift", "Side wipe", "Instant"]),
   shell: sel(["Inset card", "Flat"]),
   /* The dark bar: the chrome stops imitating paper, so the drawing is the
      only white thing on the screen. Green marks the level, white marks the
@@ -6119,8 +6187,9 @@ const dial = DialKit.createDialKit("Wireframe C3", {
    Coordination tab and its glyph, which a saved panel would otherwise pin
    back to Layers. r5: the footer strip is gone, so its group must not
    reappear from a saved panel. r6: the Codes glyph is a number sign, and
-   a panel saved on "Scale" would name an option that no longer exists. */
-}, { id: "wireframe-c3-r6", persist: true });
+   a panel saved on "Scale" would name an option that no longer exists.
+   r7: the document-swap animation, which a saved panel would not carry. */
+}, { id: "wireframe-c3-r7", persist: true });
 
 DialKit.createDialRoot({ position: "top-right", theme: "light" });
 
@@ -6130,6 +6199,7 @@ function applyDial(v) {
   V.labels = v.regionLabels;
   V.journey = v.journeySteps;
   V.density = v.density;
+  V.swap = v.swap;
   V.shell = v.shell;
   V.chrome = v.chrome;
   V.homeLayout = v.homeLayout;
