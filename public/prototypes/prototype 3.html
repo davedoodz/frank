@@ -1208,11 +1208,8 @@ body.elev .mtools{display:none}
 .plan canvas.sheetpdf{position:absolute;inset:0;width:100%;height:100%;display:block;
   z-index:var(--planz,1);opacity:var(--planop,1);mix-blend-mode:multiply}
 .plan canvas.sheetpdf[data-ready="1"]{background:#fff}
-.plan .supabase-tiles{position:absolute;inset:0;z-index:var(--planz,1);overflow:hidden;pointer-events:none;mix-blend-mode:multiply}
+.plan .supabase-tiles{position:absolute;inset:0;z-index:var(--planz,1);overflow:hidden;pointer-events:none}
 .plan .supabase-tiles img{position:absolute;display:block;max-width:none}
-.vp{position:relative}
-.supabase-tiles-portal{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none;mix-blend-mode:multiply}
-.supabase-tiles-portal img{position:absolute;display:block;max-width:none}
 /* While the pass runs the pane says so in its own title bar, at the end of
    the row: the file strip that used to carry it is gone. It is a transient
    note, so it gives way before anything else — under a pane wide enough to
@@ -1866,7 +1863,7 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .frame[data-chrome="black"] .pane.drawing{border-color:rgba(255,255,255,.22)}
 /* The sheet's own box is sized in script to fit this one, so 0–1 on the
    drawing stays 0–1 on the element the overlays are drawn in. */
-.vp > .plan{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;
+.vp > .plan{position:absolute;left:0;top:0;transform-origin:0 0;
   border:0;background-color:#fff}
 /* The selected unit, drawn over the sheet and never into it: a thin outline
    and a light wash, both in the one accent the screen already uses. */

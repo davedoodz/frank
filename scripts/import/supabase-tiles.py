@@ -36,7 +36,7 @@ ENV_PATH = ROOT / ".env.local"
 ORIGINAL_BUCKET = "drawing-originals"
 TILE_BUCKET = "drawing-tiles"
 PROJECT = "baldwin-iii"
-TILE_SIZE = 512
+TILE_SIZE = 1024
 PREVIEW_WIDTH = 1600
 MAX_WIDTH = 12288
 WEBP_QUALITY = 90
@@ -185,7 +185,7 @@ def main() -> None:
 
     max_width = max(768, args.max_width) if suffix == ".pdf" else min(max(768, args.max_width), math.ceil(source_width))
     source_bytes = source.read_bytes()
-    tile_version = hashlib.sha256(source_bytes + f":{max_width}".encode()).hexdigest()[:16]
+    tile_version = hashlib.sha256(source_bytes + f":{max_width}:{TILE_SIZE}:opaque-v1".encode()).hexdigest()[:16]
     source_path = public_path(args.drawing, f"source{suffix}")
     tile_root = public_path(args.drawing)
     versioned_tile_root = public_path(args.drawing, "v", tile_version)
