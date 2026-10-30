@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Les deux rangées — comment les séparer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The bar now carries two rows that belong to two different things: the
+   studio's row (every project, the week, the person signed in) and the
+   project's row (its name, its screens, sharing it). They read as one
+   block. Seven ways of putting a seam between them, from the lightest to
+   the one that moves them apart. Everything else is held still: same left
+   edge at 24px, same items, same heights, so only the seam is judged. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line-2:#e6e6e8;--card:#fff;
+  --chrome:#141416;--r:12px}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:24px 28px 80px;max-width:1340px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:840px}
+section{margin-top:30px}
+section h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;max-width:940px}
+
+.frame{background:var(--chrome);border-radius:12px;overflow:hidden}
+.frame svg{width:14px;height:14px;flex:0 0 auto}
+.bar{display:flex;align-items:center;gap:6px;padding:0 15px;color:rgba(255,255,255,.62);
+  font-size:13px;white-space:nowrap;overflow:hidden}
+.bar > *{flex:0 0 auto}
+.bar.one{height:34px;font-size:12.5px}
+.bar.two{height:36px;padding-top:2px}
+.sp{flex:1 1 auto !important;min-width:8px}
+.it{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:7px;cursor:pointer}
+.it:hover{background:rgba(255,255,255,.1);color:#fff}
+.it.on{background:#fff;color:#141416;font-weight:600}
+.it.proj{color:#fff;font-weight:600;font-size:15px}
+.cnt{display:grid;place-items:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;
+  background:#fff;color:#111;font-size:11px;font-weight:600}
+.me{display:flex;align-items:center;gap:8px;padding:3px 9px 3px 3px;border-radius:999px;color:#fff;
+  font-size:12.5px;cursor:pointer}
+.me:hover{background:rgba(255,255,255,.1)}
+.me i{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;
+  background:rgba(255,255,255,.16);color:#fff;font-style:normal;font-size:10.5px;font-weight:600}
+.share{border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:4px 10px;color:#fff;
+  font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.share:hover{background:#fff;color:#111;border-color:#fff}
+.lvl{display:flex;align-items:flex-end;height:34px;padding:0 14px;gap:2px}
+.lvl button{display:flex;align-items:center;gap:6px;height:28px;margin-bottom:3px;padding:0 10px;
+  border:0;background:none;font:inherit;font-size:12px;color:rgba(255,255,255,.72);border-radius:6px;cursor:pointer}
+.lvl button[aria-current="true"]{position:relative;height:31px;margin-bottom:0;padding:0 12px;
+  border-radius:8px 8px 0 0;background:var(--card);color:var(--ink);font-weight:600;z-index:1}
+.lvl button[aria-current="true"]::before,.lvl button[aria-current="true"]::after{content:"";
+  position:absolute;bottom:0;width:8px;height:8px}
+.lvl button[aria-current="true"]::before{right:100%;background:radial-gradient(circle at 0 0,transparent 7.5px,var(--card) 8px)}
+.lvl button[aria-current="true"]::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--card) 8px)}
+.hold{padding:0 10px 10px}
+.card{background:var(--card);border-radius:var(--r);height:84px;overflow:hidden}
+.card .t{padding:11px 14px 9px;border-bottom:1px solid var(--line-2)}
+.card .t b{font-size:14px;font-weight:600}
+.card .t span{display:block;color:var(--ink-2);font-size:11.5px;margin-top:2px}
+.card .h{display:flex;align-items:center;gap:7px;height:32px;padding:0 14px;font-weight:500;color:var(--ink)}
+
+/* 1 — a hairline. The cheapest seam there is: one rule at 10% white, the
+   full width of the bar. Says "two rows" and nothing else. */
+[data-s="1"] .bar.one{border-bottom:1px solid rgba(255,255,255,.1)}
+
+/* 2 — the studio's row is sunk. It is darker than the project's row, as
+   if the project sat on top of it: depth instead of a line. */
+[data-s="2"] .bar.one{background:#0c0c0e}
+
+/* 3 — the project's row is lifted. The same move turned over: the studio
+   keeps the frame's own black and the project's row is a shade lighter,
+   so the lighter band runs down into the level tabs and the page. */
+[data-s="3"] .bar.two,[data-s="3"] .lvl{background:#232327}
+
+/* 4 — air. No line, no shade: four pixels of nothing above the project's
+   row and a smaller, quieter studio row. Separation by distance. */
+[data-s="4"] .bar.one{height:32px;font-size:12px;color:rgba(255,255,255,.5)}
+[data-s="4"] .bar.two{height:44px;align-items:flex-end;padding-bottom:4px}
+
+/* 5 — the hairline stops short. The rule runs only under the studio's own
+   items and stops where they stop: it separates the two rows without
+   drawing a full-width line across a bar that has no other lines. */
+[data-s="5"] .bar.one{position:relative}
+[data-s="5"] .bar.one::after{content:"";position:absolute;left:15px;right:15px;bottom:0;height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,.18),rgba(255,255,255,0) 62%)}
+
+/* 6 — the project's row is a sheet. It and the levels sit on a raised
+   panel with its own top corners, so the project is visibly a thing
+   resting in the studio's chrome, the way the page rests in it. */
+[data-s="6"] .sheet{background:#232327;border-radius:12px 12px 0 0;margin:0 6px;padding-top:2px}
+[data-s="6"] .bar.two{padding-left:9px}
+[data-s="6"] .lvl{padding-left:8px}
+[data-s="6"] .hold{padding:0 4px 4px}
+
+/* 7 — the studio's row is not chrome at all. It is the page's own grey,
+   above the black: the two rows are two materials, and no line is needed
+   to tell them apart. */
+[data-s="7"]{background:#fafafa;border-radius:12px;overflow:hidden}
+[data-s="7"] .frame{border-radius:0}
+[data-s="7"] .bar.one{background:#fafafa;color:var(--ink-2)}
+[data-s="7"] .bar.one .it:hover{background:rgba(17,17,18,.07);color:var(--ink)}
+[data-s="7"] .bar.one .cnt{background:#111;color:#fff}
+[data-s="7"] .bar.one .me{color:var(--ink)}
+[data-s="7"] .bar.one .me i{background:rgba(17,17,18,.1);color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Les deux rangées — comment les séparer</h1>
+  <p class="lede">La rangée de l'atelier (tous les projets, la semaine, la personne connectée) et la rangée du
+     projet (son nom, ses écrans, le partage) se lisent encore comme un seul bloc. Sept coutures, de la plus
+     légère à celle qui les éloigne. Tout le reste est tenu immobile — même bord gauche à 24 px, mêmes éléments,
+     mêmes hauteurs — pour que seule la couture soit jugée.</p>
+  <div id="grid"></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n) => { const i = lucide.icons[pascal(n)];
+  return i ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+    stroke-linejoin="round">${i[2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : ""; };
+
+const LEVELS = ["Bâtiment entier", "Sous-sol 00", "Niveau 1", "Niveau 2", "Niveau 3", "Toiture"];
+const rowOne = () => `<div class="bar one">
+  <span class="it">${svg("folder")}Tous les projets</span>
+  <span class="it">${svg("calendar-check")}Échéancier<span class="cnt">1</span></span>
+  <span class="sp"></span><span class="me"><i>GR</i>Guy Roberge</span></div>`;
+const rowTwo = () => `<div class="bar two"><span class="it proj">Le Baldwin III</span>
+  <span class="it on">${svg("git-compare")}Coordination</span><span class="it">${svg("hash")}Codes</span>
+  <span class="sp"></span><span class="share">${svg("share-2")}Partager</span></div>`;
+const levels = () => `<nav class="lvl">${LEVELS.map((l, i) =>
+  `<button aria-current="${i === 3}">${i === 0 ? svg("building-2") : ""}${l}</button>`).join("")}</nav>`;
+const page = () => `<div class="hold"><div class="card">
+  <div class="t"><b>Plans — niveau 2</b><span>15 unités — 15 619 pi² nets</span></div>
+  <div class="h">${svg("bed-double")}Unités</div></div></div>`;
+
+const VARIANTS = [
+  ["1", "Un filet", "Une règle à 10 % de blanc sur toute la largeur. Dit « deux rangées » et rien d'autre."],
+  ["2", "La rangée de l'atelier est enfoncée", "Elle est plus sombre que celle du projet, comme si le projet était posé dessus: de la profondeur au lieu d'un trait."],
+  ["3", "La rangée du projet est soulevée", "Le même geste retourné: la bande claire descend jusque dans les onglets de niveau et dans la page."],
+  ["4", "De l'air", "Ni trait ni ombre: une rangée d'atelier plus petite et plus discrète, et quatre pixels de rien au-dessus du projet. Séparer par la distance."],
+  ["5", "Le filet s'arrête", "La règle ne court que sous les éléments de l'atelier et s'éteint où ils s'arrêtent: sépare sans tracer une ligne pleine largeur dans une barre qui n'en a aucune autre."],
+  ["6", "Le projet est une feuille", "Le projet et ses niveaux reposent sur un panneau à coins arrondis: le projet est visiblement une chose posée dans le chrome de l'atelier, comme la page l'est."],
+  ["7", "Deux matières", "La rangée de l'atelier n'est pas du chrome: c'est le gris de la page, au-dessus du noir. Deux matières n'ont pas besoin de trait pour se distinguer."],
+];
+
+grid.innerHTML = VARIANTS.map(([s, h, p]) => `<section data-s="${s}">
+  <h2>${h}<i>${s}</i></h2><p>${p}</p>
+  ${s === "7" ? `${rowOne()}<div class="frame">${rowTwo()}${levels()}${page()}</div>`
+    : s === "6" ? `<div class="frame">${rowOne()}<div class="sheet">${rowTwo()}${levels()}</div>${page()}</div>`
+    : `<div class="frame">${rowOne()}${rowTwo()}${levels()}${page()}</div>`}
+</section>`).join("");
+</script>
+</body>
+</html>
