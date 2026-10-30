@@ -997,7 +997,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .north{position:absolute;right:10px;top:10px;z-index:5;width:34px;height:50px;
   pointer-events:none;overflow:visible}
 .north circle{fill:#fff;stroke:var(--ink);stroke-width:1.7}
-.north polygon{fill:none;stroke:var(--ink);stroke-width:1.7}
+.north polygon{fill:#fff;stroke:var(--ink);stroke-width:1.7}
 .north line{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
 
 /* ---------------------------------------------------------- the margin
@@ -3263,12 +3263,11 @@ function tabsHTML() {
         <div class="views">${views.map(viewBtn).join("")}</div></div>`
     : "";
   /* A project is read by people who do not draw: the client, the urbaniste,
-     the contractor. Sharing is the end of the first row, on every screen
-     that has a project open, because it is about the project and not about
-     what is on screen. The studio screens span every project at once, so
-     there is nothing there to share. */
-  const share = studio ? ""
-    : `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
+     the contractor. Sharing is the end of the first row on every screen,
+     the studio's included: a button that comes and goes with the screen
+     makes the top right unreliable, and the eye goes there to find it. On
+     a studio screen it shares the last project open. */
+  const share = `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
          style="margin-left:auto;flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
 
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
