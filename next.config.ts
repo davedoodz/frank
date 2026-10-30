@@ -8,7 +8,10 @@ const nextConfig: NextConfig = {
   // (un rewrite laisserait l'URL sur /prototypes, et shared.css partirait à la racine).
   // (the real memory fix is source(none) in app/globals.css)
   async redirects() {
-    return [{ source: "/prototypes", destination: "/prototypes/index.html", permanent: false }];
+    return [
+      { source: "/", destination: "/prototypes/prototype%203.html", permanent: false },
+      { source: "/prototypes", destination: "/prototypes/index.html", permanent: false },
+    ];
   },
 };
 
