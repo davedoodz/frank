@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Bâtiment entier — Matériaux : cinq mises en table</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* Bâtiment entier > Matériaux écrit aujourd'hui les mêmes neuf matériaux
+   cinq fois : une table du bâtiment, puis une table par façade. Rien ne
+   distingue à l'œil la ligne qui ouvre une élévation de celle qui ne fait
+   que compter. Cinq mises en table, mêmes chiffres (tirés de la maquette
+   du Baldwin III), même règle d'affordance : ce qui ouvre une élévation
+   porte le viseur et se souligne sous le pointeur ; ce qui ne fait que
+   compter n'a ni pointeur ni survol. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --sel:#eef3dc;--warn:#c0362c}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:980px}
+.rule{margin:12px 0 0;padding:9px 12px;border:1px solid var(--line-2);border-radius:8px;background:#fff;max-width:980px;font-size:12.5px;color:var(--ink-2)}
+.rule b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,398px);gap:30px 26px;margin-top:22px;align-items:start}
+.v h2{margin:0;font-size:14px;font-weight:600}
+.v p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:72px}
+
+/* le volet, comme sur prototype 3 -------------------------------------- */
+.pane{width:398px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ph{display:flex;align-items:center;gap:7px;height:38px;padding:0 10px;border-bottom:1px solid var(--line-2);font-weight:500;white-space:nowrap}
+.ph svg{width:15px;height:15px;color:var(--ink-2)}
+.ph .sp{flex:1}
+.ph .fqs{font-weight:400;font-size:11.5px;color:var(--ink-3)}
+.bdg{display:inline-flex;align-items:center;gap:3px;height:19px;padding:0 6px;border-radius:10px;background:var(--warn);color:#fff;font-size:11px;font-weight:600}
+.bdg svg{width:11px;height:11px;color:#fff}
+.pb{padding:10px}
+.seg{display:inline-flex;padding:2px;border-radius:7px;background:var(--fill);font-size:12px;margin-bottom:9px}
+.seg span{padding:3px 9px;border-radius:5px;color:var(--ink-2);cursor:pointer}
+.seg span[aria-current="true"]{background:#fff;color:var(--ink);font-weight:500;box-shadow:0 0 0 1px var(--line-2)}
+
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-weight:400;font-size:11px;color:var(--ink-3);text-align:left;padding:0 4px 6px;white-space:nowrap}
+th.n,td.n{text-align:right}
+td{height:28px;padding:0 4px;border-top:1px solid var(--line-2);font-size:12.5px;white-space:nowrap}
+tfoot td{font-weight:600}
+.sw{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:0}
+.no{display:inline-block;min-width:14px;color:var(--ink-3);font-size:11px}
+.warn{width:12px;height:12px;color:var(--warn);vertical-align:-2px;margin-left:4px}
+.mute{color:var(--ink-3)}
+
+/* ce qui ouvre une élévation -------------------------------------------
+   un seul motif dans les cinq options : le viseur, le pointeur, le
+   soulignement au survol. Les chiffres, eux, ne bougent jamais. */
+.go{cursor:pointer}
+.go .lbl{text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px}
+.go:hover .lbl{text-decoration-color:var(--ink-3)}
+.go svg.sc{width:13px;height:13px;color:var(--ink-3);vertical-align:-2px;margin-right:5px}
+.go.on{background:var(--sel)}
+.go.on svg.sc{color:var(--ink)}
+.go.on .lbl{font-weight:600}
+.read td,.read th{cursor:default}
+
+/* A — matrice : une ligne par matériau, une colonne par façade */
+.mx th.f{text-align:right;padding-bottom:7px}
+.mx th.f .lbl{font-size:11.5px;color:var(--ink-2)}
+.mx th.f.on .lbl{color:var(--ink)}
+.mx th.f svg.sc{width:12px;height:12px;margin:0 0 0 3px}
+.mx{table-layout:fixed}
+.mx td:first-child,.mx th:first-child{overflow:hidden;text-overflow:ellipsis}
+.mx td{font-size:12px;padding:0 3px}
+.mx th{padding-left:3px;padding-right:3px}
+.mx col.num{width:44px}
+.mx col.tot{width:50px}
+.mx col.on{background:var(--sel)}
+.mx .tot{border-left:1px solid var(--line-2)}
+
+/* B — une façade à la fois */
+.bnav{display:flex;gap:6px;margin-bottom:9px}
+.bnav .b{flex:1;height:30px;border:1px solid var(--line);border-radius:7px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:12px;cursor:pointer;background:#fff}
+.bnav .b.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:500}
+.bnav .b.on svg{color:#fff}
+.bnav .b svg{width:12px;height:12px;color:var(--ink-3)}
+.cap{margin:0 0 8px;font-size:12px;color:var(--ink-3)}
+.cap b{color:var(--ink);font-weight:600}
+
+/* C — le total, chaque ligne se déplie sur ses quatre façades */
+.sub td{height:24px;border-top:0;background:var(--fill-2);font-size:11.5px;color:var(--ink-2)}
+.sub .first td{border-top:1px solid var(--line-2)}
+.chev{width:13px;height:13px;color:var(--ink-3);vertical-align:-2px;float:right}
+.exp{cursor:pointer}
+.exp:hover td{background:var(--fill-2)}
+
+/* D — la répartition comme barre, chaque bande ouvre sa façade */
+.dist{display:flex;height:14px;border-radius:3px;overflow:hidden;background:var(--fill);width:118px}
+.dist i{display:block;height:100%;cursor:pointer;border-right:1px solid #fff}
+.dist i:last-child{border-right:0}
+.dist i.on{outline:2px solid var(--ink);outline-offset:-2px}
+.legd{display:flex;gap:10px;margin:8px 0 0;font-size:11px;color:var(--ink-3)}
+.legd span{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+.legd i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.legd span.on{color:var(--ink);font-weight:600}
+
+/* E — la carte façade, ouverte ou repliée */
+.fcard{border:1px solid var(--line-2);border-radius:8px;margin-top:8px;overflow:hidden}
+.fcard .fh{display:flex;align-items:center;gap:6px;height:34px;padding:0 9px;background:var(--fill-2);font-size:12.5px;font-weight:500;cursor:pointer}
+.fcard .fh .sp{flex:1}
+.fcard .fh .k{font-weight:400;color:var(--ink-3);font-size:11.5px}
+.fcard.open .fh{background:var(--sel)}
+.fcard .fb{padding:0 9px 8px}
+.fcard svg.sc{width:13px;height:13px;color:var(--ink-3)}
+.fcard.open svg.sc{color:var(--ink)}
+
+.state{margin-top:9px;font-size:11.5px;color:var(--ink-3)}
+.state b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <h1>Bâtiment entier — Matériaux : cinq mises en table</h1>
+  <p class="lede">L'onglet écrit aujourd'hui les mêmes neuf matériaux cinq fois : le bâtiment, puis les quatre façades.
+    Rien ne dit à l'œil quelle ligne ouvre une élévation et laquelle ne fait que compter.
+    Cinq façons de dire les deux sans répétition. Chiffres réels de la maquette du Baldwin III ; un clic ouvre une élévation dans les cinq.</p>
+  <p class="rule">Règle commune aux cinq : <b>ce qui ouvre une élévation porte le viseur</b> <svg class="sc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+    <b>, prend le pointeur et se souligne au survol</b> ; ce qui ne fait que compter n'a ni pointeur ni survol. Une façade ouverte reste allumée en vert.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+/* Relevé de la maquette : pi² vus en élévation, par façade et par numéro
+   de légende. Le matériau 5 ne paraît sur aucune façade (moins de 1 pi²)
+   et n'est donc pas listé. */
+const ROWS = {"nord":[[1,2485],[2,2429],[3,3664],[4,29],[6,518],[7,346],[8,1619],[9,4632],[10,3431]],
+  "est":[[1,2779],[2,336],[3,5187],[4,221],[6,576],[7,227],[8,1175],[9,3468],[10,1923]],
+  "sud":[[1,1074],[2,3718],[3,4119],[4,339],[6,508],[7,230],[8,1524],[9,4608],[10,3027]],
+  "ouest":[[1,2185],[3,4726],[4,234],[6,322],[7,222],[8,1210],[9,3663],[10,2527]]};
+const META = {1:{name:"Brique Melville Slik",color:"#c8372d",maker:"Permacon"},
+  2:{name:"Bloc architectural Tapestry",color:"#e9a51c",maker:"Shouldice"},
+  3:{name:"Brique Strata",color:"#2f7fd6",maker:"Shouldice",check:"chamois absent de la gamme Strata Smooth actuelle"},
+  4:{name:"Panneau d'aluminium série 300",color:"#8a4bc4",maker:"Alutech"},
+  6:{name:"Solin, marquise et parapet",color:"#11a38a",maker:"Vicwest"},
+  7:{name:"Allège fenêtre et porte-patio",color:"#f07b1f",maker:"non nommé"},
+  8:{name:"Fenêtre et porte-patio",color:"#273746",maker:"non nommé"},
+  9:{name:"Vitrage",color:"#62c6ee",maker:"non nommé"},
+  10:{name:"Garde-corps",color:"#58b335",maker:"non nommé"}};
+const F = ["nord","est","sud","ouest"];
+const NUMS = [...new Set(F.flatMap((f) => ROWS[f].map(([n]) => n)))].sort((a,b)=>a-b);
+const at = (f, n) => (ROWS[f].find((r) => r[0] === n) || [0,0])[1];
+const facTotal = (f) => ROWS[f].reduce((s,[,v]) => s+v, 0);
+const matTotal = (n) => F.reduce((s,f) => s+at(f,n), 0);
+const TOTAL = F.reduce((s,f) => s+facTotal(f), 0);
+
+const n = (v) => Math.round(v).toLocaleString("fr-CA").replace(/\u202f|\u00a0/g, "\u2009");
+const pct = (a,b) => `${b ? Math.round(a/b*100) : 0} %`;
+const cap = (s) => s[0].toUpperCase()+s.slice(1);
+const svg = (d, cls="") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const SCAN = svg(`<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>`, "sc");
+const EYE = svg(`<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7"/><circle cx="12" cy="12" r="3"/>`, "sc");
+const WARN = svg(`<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>`, "warn");
+const LAYERS = svg(`<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m6.08 9.5-3.5 1.6a1 1 0 0 0 0 1.81l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9a1 1 0 0 0 0-1.83l-3.5-1.59"/><path d="m6.08 14.5-3.5 1.6a1 1 0 0 0 0 1.81l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9a1 1 0 0 0 0-1.83l-3.5-1.59"/>`);
+const CHEV = (open) => svg(open ? `<path d="m18 15-6-6-6 6"/>` : `<path d="m6 9 6 6 6-6"/>`, "chev");
+
+const mat = (num, withWarn = true) => {
+  const m = META[num];
+  return `<span class="sw" style="background:${m.color}"></span><span class="no">${num}</span>${m.name}${
+    withWarn && m.check ? WARN : ""}`;
+};
+const head = (right = "") => `<div class="ph">${LAYERS}<span>Matériaux</span><span class="bdg">${WARN}1</span>
+  <span class="sp"></span>${right}<span class="fqs">pi² vus en élévation</span></div>`;
+
+/* Une seule façade ouverte à la fois, partagée par les cinq maquettes :
+   on voit du premier coup d'œil quelle commande a répondu. */
+let open = "";
+let expand = 0;      /* C : le matériau déplié */
+let bFace = "bat";   /* B : la façade affichée */
+
+const V = [
+{ id:"A", title:"A — Une seule table : matériaux × façades",
+  note:"Les neuf matériaux écrits une fois, les quatre façades en colonnes, le total du bâtiment à droite. Seuls les quatre en-têtes de colonne ouvrent une élévation ; la colonne ouverte s'allume. Cinq tables deviennent une.",
+  html: () => {
+    const cols = F.map((f) => `<col class="num ${open===f?"on":""}">`).join("");
+    const body = NUMS.map((num) => `<tr><td>${mat(num)}</td>${
+      F.map((f) => `<td class="n ${at(f,num)?"":"mute"}">${at(f,num)?n(at(f,num)):"—"}</td>`).join("")
+      }<td class="n tot">${n(matTotal(num))}</td></tr>`).join("");
+    return head() + `<div class="pb"><table class="mx">
+      <colgroup><col>${cols}<col class="tot"></colgroup>
+      <thead><tr><th>Matériau</th>${
+        F.map((f) => `<th class="f go ${open===f?"on":""}" data-f="${f}" title="Voir l'élévation ${f}"><span class="lbl">${cap(f)[0]}</span>${open===f?EYE:SCAN}</th>`).join("")
+        }<th class="n tot">Total</th></tr></thead>
+      <tbody>${body}</tbody>
+      <tfoot><tr><td>Total pi²</td>${F.map((f)=>`<td class="n">${n(facTotal(f))}</td>`).join("")}<td class="n tot">${n(TOTAL)}</td></tr></tfoot>
+      </table><div class="state">${open?`Élévation <b>${open}</b> ouverte — ${n(facTotal(open))} pi², ${pct(facTotal(open),TOTAL)} de l'enveloppe`:"Maquette 3D — cliquez un en-tête de façade"}</div></div>`;
+  } },
+
+{ id:"B", title:"B — Une façade à la fois",
+  note:"Le même interrupteur que Superficies / Ouvertures, mais pour les façades : quatre boutons, une seule table dessous. Les boutons commandent, la table ne fait que compter. Rien n'est écrit deux fois puisque rien n'est affiché deux fois.",
+  html: () => {
+    const rows = bFace === "bat" ? NUMS.map((num)=>[num, matTotal(num)]) : ROWS[bFace];
+    const tot = bFace === "bat" ? TOTAL : facTotal(bFace);
+    return head() + `<div class="pb">
+      <div class="bnav">${[["bat","Les 4"],...F.map((f)=>[f,cap(f)])].map(([k,l])=>
+        `<span class="b ${bFace===k?"on":""}" data-b="${k}">${k==="bat"?"":(open===k?EYE:SCAN)}${l}</span>`).join("")}</div>
+      <p class="cap">${bFace==="bat"?`<b>${n(TOTAL)}</b> pi² sur les quatre façades`:`Façade <b>${bFace}</b> — <b>${n(tot)}</b> pi², ${pct(tot,TOTAL)} de l'enveloppe`}</p>
+      <table class="read"><thead><tr><th>Matériau</th><th class="n">pi²</th><th class="n">Part</th></tr></thead>
+      <tbody>${rows.map(([num,v])=>`<tr><td>${mat(num)}</td><td class="n">${n(v)}</td><td class="n">${pct(v,tot)}</td></tr>`).join("")}</tbody>
+      <tfoot><tr><td>Total</td><td class="n">${n(tot)}</td><td class="n">100 %</td></tr></tfoot></table>
+      <div class="state">${open?`Élévation <b>${open}</b> ouverte dans la maquette`:"Maquette 3D — une façade choisie ici s'ouvre aussi dans la maquette"}</div></div>`;
+  } },
+
+{ id:"C", title:"C — Le bâtiment, chaque matériau se déplie sur ses façades",
+  note:"Une table : le matériau sur tout le bâtiment. Le chevron déplie ses quatre lignes de façade, et là seulement la façade devient une porte. On ne lit le détail que du matériau qu'on suit.",
+  html: () => {
+    const body = NUMS.map((num) => {
+      const t = matTotal(num), isOpen = expand === num;
+      const sub = isOpen ? F.map((f,i) => `<tr class="sub go ${open===f?"on":""} ${i===0?"first":""}" data-f="${f}" title="Voir l'élévation ${f}">
+        <td>${open===f?EYE:SCAN}<span class="lbl">Façade ${f}</span></td><td class="n">${at(f,num)?n(at(f,num)):"—"}</td><td class="n">${pct(at(f,num),t)}</td></tr>`).join("") : "";
+      return `<tr class="exp" data-x="${num}"><td>${mat(num)}</td><td class="n">${n(t)}</td><td class="n">${pct(t,TOTAL)}${CHEV(isOpen)}</td></tr>${sub}`;
+    }).join("");
+    return head() + `<div class="pb"><table>
+      <thead><tr><th>Bâtiment entier — 4 façades</th><th class="n">pi²</th><th class="n">Part</th></tr></thead>
+      <tbody>${body}</tbody>
+      <tfoot><tr><td>Total</td><td class="n">${n(TOTAL)}</td><td class="n">100 %</td></tr></tfoot></table>
+      <div class="state">${open?`Élévation <b>${open}</b> ouverte`:"Maquette 3D — dépliez un matériau pour atteindre ses façades"}</div></div>`;
+  } },
+
+{ id:"D", title:"D — Le total, la répartition en barre",
+  note:"Une table, et une colonne de plus : la barre qui dit comment le matériau se répartit sur les quatre faces. Chaque bande est la façade et l'ouvre. La répartition se lit sans chiffres ; les quatre tables tombent.",
+  html: () => {
+    const body = NUMS.map((num) => {
+      const t = matTotal(num);
+      const bands = F.map((f) => {
+        const v = at(f,num);
+        return v ? `<i data-f="${f}" class="${open===f?"on":""}" style="flex:${v};background:${META[num].color};opacity:${open&&open!==f?.3:1}" title="Façade ${f} — ${n(v)} pi², ${pct(v,t)}"></i>` : "";
+      }).join("");
+      return `<tr><td>${mat(num)}</td><td class="n">${n(t)}</td><td><span class="dist">${bands}</span></td></tr>`;
+    }).join("");
+    return head() + `<div class="pb"><table>
+      <thead><tr><th>Matériau</th><th class="n">pi²</th><th>Nord, est, sud, ouest</th></tr></thead>
+      <tbody>${body}</tbody>
+      <tfoot><tr><td>Total</td><td class="n">${n(TOTAL)}</td><td></td></tr></tfoot></table>
+      <div class="legd">${F.map((f)=>`<span class="go ${open===f?"on":""}" data-f="${f}">${open===f?EYE:SCAN}<span class="lbl">${cap(f)}</span> ${pct(facTotal(f),TOTAL)}</span>`).join("")}</div>
+      <div class="state">${open?`Élévation <b>${open}</b> ouverte — les autres bandes sont estompées`:"Maquette 3D — cliquez une bande ou un nom de façade"}</div></div>`;
+  } },
+
+{ id:"E", title:"E — Le total lu, les façades pliées",
+  note:"Les deux tables d'aujourd'hui, mais tranchées : le bâtiment est une table muette (ni pointeur ni survol), les façades sont quatre cartes pliées qui ne montrent que leur total. En déplier une l'ouvre dans la maquette : une seule façade écrite à la fois.",
+  html: () => {
+    const cards = F.map((f) => {
+      const t = facTotal(f), isOpen = open === f;
+      const warns = ROWS[f].filter(([num]) => META[num].check).length;
+      return `<div class="fcard ${isOpen?"open":""}">
+        <div class="fh go" data-f="${f}">${isOpen?EYE:SCAN}<span class="lbl">Façade ${f}</span>${warns?`<span class="bdg">${WARN}${warns}</span>`:""}<span class="sp"></span><span class="k">${n(t)} pi² — ${pct(t,TOTAL)}</span></div>
+        ${isOpen?`<div class="fb"><table class="read"><tbody>${ROWS[f].map(([num,v])=>
+          `<tr><td>${mat(num)}</td><td class="n">${n(v)}</td><td class="n">${pct(v,t)}</td></tr>`).join("")}</tbody>
+          <tfoot><tr><td>Total</td><td class="n">${n(t)}</td><td class="n">100 %</td></tr></tfoot></table></div>`:""}</div>`;
+    }).join("");
+    return head() + `<div class="pb">
+      <table class="read"><thead><tr><th>Bâtiment entier — 4 façades</th><th class="n">pi²</th><th class="n">Part</th></tr></thead>
+      <tbody>${NUMS.map((num)=>`<tr><td>${mat(num)}</td><td class="n">${n(matTotal(num))}</td><td class="n">${pct(matTotal(num),TOTAL)}</td></tr>`).join("")}</tbody>
+      <tfoot><tr><td>Total</td><td class="n">${n(TOTAL)}</td><td class="n">100 %</td></tr></tfoot></table>
+      ${cards}
+      <div class="state">${open?`Élévation <b>${open}</b> ouverte — repliez la carte pour revenir à la maquette`:"Maquette 3D — dépliez une façade pour l'ouvrir"}</div></div>`;
+  } },
+];
+
+const grid = document.getElementById("grid");
+function paint() {
+  grid.innerHTML = V.map((v) => `<section class="v"><h2>${v.title}</h2><p>${v.note}</p><div class="pane">${v.html()}</div></section>`).join("");
+}
+/* Une commande d'élévation bascule : cliquer la façade ouverte revient à
+   la maquette, comme sur prototype 3. */
+grid.addEventListener("click", (e) => {
+  const f = e.target.closest("[data-f]");
+  const b = e.target.closest("[data-b]");
+  const x = e.target.closest("[data-x]");
+  if (f) { open = open === f.dataset.f ? "" : f.dataset.f; if (open) bFace = open; }
+  else if (b) { bFace = b.dataset.b; open = bFace === "bat" ? "" : bFace; }
+  else if (x) { expand = expand === +x.dataset.x ? 0 : +x.dataset.x; }
+  else return;
+  paint();
+});
+paint();
+</script>
+</body>
+</html>
