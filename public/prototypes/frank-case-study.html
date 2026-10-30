@@ -64,6 +64,10 @@ p b,.lede b{color:var(--ink);font-weight:600}
 .shot{border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
 .shot img{width:100%;height:100%;object-fit:cover;object-position:top left}
 .cap{font-size:15px;color:var(--ink-3);margin-top:12px;line-height:1.45}
+a.shot{transition:box-shadow .18s}
+a.shot:hover{box-shadow:0 0 0 2px var(--ink)}
+.cap a.app{font-family:var(--mono);font-size:13px;color:var(--ink);text-decoration:none;white-space:nowrap;margin-left:6px}
+.cap a.app:hover{color:var(--vert-dark)}
 /* Slots David fills later. They say what goes there and nothing else. */
 .slot{border:1.5px dashed #c9c9c6;border-radius:8px;background:var(--fill);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:8px;text-align:center;padding:24px;color:var(--ink-3)}
@@ -314,12 +318,26 @@ tr.hl td{background:var(--vert-pale)}
 .pic>a{flex:1;min-height:0;display:block;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
 .pic img{width:100%;height:100%;object-fit:cover;object-position:top left}
 .pic figcaption{font-size:14px;color:var(--ink-3);margin-top:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Before and after, left and right: one shared image row and one shared caption
+   row, so both captions start on the same line under the taller image. */
+.pics.cmp{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;column-gap:28px;row-gap:0;align-content:start}
+.pics.cmp .pic{display:grid;grid-template-rows:subgrid;grid-row:span 2;min-width:0}
+.pics.cmp .pic>a{box-shadow:none;border-radius:0;display:flex;align-items:flex-start;justify-content:flex-start;overflow:visible}
+.pics.cmp .pic img{width:auto;height:auto;max-width:100%;max-height:730px;object-fit:contain;border-radius:8px;box-shadow:0 0 0 1px var(--line)}
+.pics.cmp figcaption{white-space:normal;line-height:1.4}
+.pics.cmp.wide{margin-top:32px}
+.pics.cmp.wide .pic img{max-height:470px}
+.pic .ba{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
 .pic figcaption a{font-family:var(--mono);color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
 /* Process chapters: a prototype as deployed beside the problems it raised */
 .chap-o{display:grid;grid-template-columns:896px 1fr;gap:48px;margin-top:40px;flex:1;min-height:0}
 .live{width:896px;height:560px;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px var(--line);position:relative}
 .live iframe{position:absolute;left:0;top:0;width:1600px;height:1000px;border:0;transform:scale(.56);transform-origin:0 0}
-.dep{width:896px;height:560px}
+.dep{width:896px;height:560px;display:block}
+/* The deployed shot is the door to the running app: clicking the screen does
+   what the link beside it does, with a quiet accent edge on hover. */
+a.dep{transition:box-shadow .16s ease}
+a.dep:hover{box-shadow:0 0 0 2px var(--vert)}
 .chap-side>p:first-child{font-size:17px}
 .sets{display:flex;flex-direction:column;gap:14px;margin-top:12px}
 .set .k{display:block;margin-bottom:4px;color:var(--ink)}
@@ -796,8 +814,8 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <figcaption class="cap"><span class="mono" style="margin-right:10px">Dropped</span>coupe, October 25 morning: the detail library, wall sections filtered by condition, structure and rating.</figcaption>
       </figure>
       <figure style="margin:0;display:flex;flex-direction:column;min-height:0">
-        <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/fitte-units.jpg" alt="fitte, October 25: the level 5 floor plan with unit 501 selected, beside its unit schedule row and details"></div>
-        <figcaption class="cap"><span class="mono" style="margin-right:10px">Kept</span>fitte, October 25: the unit plan and its schedule, read from the sheet A-205.</figcaption>
+        <a class="shot" style="flex:1;min-height:0;display:block" href="https://cafitte-prototype1.vercel.app/p/P-2022-04/units?floor=5&amp;u=501" target="_blank" rel="noopener"><img src="assets/frank/fitte-units.jpg" alt="fitte, October 25: the level 5 floor plan with unit 501 selected, beside its unit schedule row and details"></a>
+        <figcaption class="cap"><span class="mono" style="margin-right:10px">Kept</span>fitte, October 25: the unit plan and its schedule, read from the sheet A-205. <a class="app" href="https://cafitte-prototype1.vercel.app/p/P-2022-04/units?floor=5&amp;u=501" target="_blank" rel="noopener">cafitte-prototype1.vercel.app ↗</a></figcaption>
       </figure>
     </div>
   </div>
@@ -872,36 +890,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Option C, « what repeats », became the line every later prototype grew from: wireframe C, then C3, then prototype 3.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="plateforme-b.html" target="_blank" rel="noopener"><img src="assets/frank/x/plateforme-b.jpg" alt="B — coordination is a layer of the unit"></a>
-        <figcaption><a href="plateforme-b.html" target="_blank" rel="noopener">plateforme-b.html</a> — B — coordination is a layer of the unit</figcaption></figure>
-      <figure class="pic"><a href="plateforme-c.html" target="_blank" rel="noopener"><img src="assets/frank/x/plateforme-c.jpg" alt="C — what repeats, kept"></a>
-        <figcaption><a href="plateforme-c.html" target="_blank" rel="noopener">plateforme-c.html</a> — C — what repeats, kept</figcaption></figure>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- ============================================================ decision 02 — was 05 -->
-<section class="s" data-sec="Process — Prototype 1">
-<div class="b">
-  <div class="st">
-    <div class="st-t">
-      <div class="pnum"><b>02</b><span><span class="k">What the city asks</span>Codes</span></div>
-      <h2>Finding the article was easy. Applying it to this project was the work.</h2>
-      <div class="rule"></div>
-      <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Finding the article is easy. Understanding what it means for this project is the slow part.</q><cite>Guy — interview, Oct 26</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Seven rules from three bodies of law sat in one list, split by a grey caps line that was lost on scroll.</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Across 48 presentations, the card had to show the measurement against the requirement, and what is missing, before anyone reads the quote. Each source needed its own place.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>One card per article: a small drawing of the rule, the quote, the edition, and « manque pour conclure ». Each body of rules has its own tab; the official text opens at the article.</dd></div>
-      </dl>
-    </div>
-    <div class="pics">
-      <figure class="pic"><a href="zonage-visualisations.html" target="_blank" rel="noopener"><img src="assets/frank/x/zonage-visualisations.jpg" alt="Six ways to read the same seven rules"></a>
-        <figcaption><a href="zonage-visualisations.html" target="_blank" rel="noopener">zonage-visualisations.html</a> — Six ways to read the same seven rules</figcaption></figure>
-      <figure class="pic"><a href="zonage-fiches.html" target="_blank" rel="noopener"><img src="assets/frank/x/zonage-fiches.jpg" alt="Ten anatomies of the article card"></a>
-        <figcaption><a href="zonage-fiches.html" target="_blank" rel="noopener">zonage-fiches.html</a> — Ten anatomies of the article card</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype1.vercel.app/prototypes/plateforme-b.html" target="_blank" rel="noopener"><img src="assets/frank/p1-plateforme-b.jpg" alt="Prototype 1: Direction B: the plan and the model side by side"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype1.vercel.app/prototypes/plateforme-b.html" target="_blank" rel="noopener">Prototype 1</a> — Direction B: the plan and the model side by side</figcaption></figure>
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/p2-wireframe-c3.jpg" alt="Prototype 2: Direction C: the checks around one floor"></a>
+        <figcaption><span class="ba">After</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Direction C: the checks around one floor</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1007,27 +1000,44 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ decision 03 — was 02 -->
+<!-- ============================================================ decision 02 — was 05 -->
 <section class="s" data-sec="Process — Prototype 2">
 <div class="b">
   <div class="st">
     <div class="st-t">
-      <div class="pnum"><b>03</b><span><span class="k">Finding your way</span>Navigation</span></div>
-      <h2>Nobody found the top buttons. The contrast was the problem, not the size.</h2>
+      <div class="pnum"><b>02</b><span><span class="k">What the city asks</span>Codes</span></div>
+      <h2>Finding the article was easy. Applying it to this project was the work.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Closing pop-up bubbles with the × is not obvious. Add hints for new users.</q><cite>Benoît — test of prototype 2, Oct 28</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>In the test, people did not find the buttons at the top of the screen.</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Measured on the real screen: 12.5 px light grey on white, 2.8:1 contrast, under the 4.5:1 threshold. The targets were big enough. They did not look like buttons.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Black chrome, a green project strip, and the level being read became the white page's own folder tab.</dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>Finding the article is easy. Understanding what it means for this project is the slow part.</q><cite>Guy — interview, Oct 26</cite></dd></div>
+        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Seven rules from three bodies of law sat in one list, split by a grey caps line that was lost on scroll.</dd></div>
+        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Across 48 presentations, the card had to show the measurement against the requirement, and what is missing, before anyone reads the quote. Each source needed its own place.</dd></div>
+        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>One card per article: a small drawing of the rule, the quote, the edition, and « manque pour conclure ». Each body of rules has its own tab; the official text opens at the article.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="lisibilite.html" target="_blank" rel="noopener"><img src="assets/frank/x/lisibilite.jpg" alt="Six legibility fixes, contrast measured in the page"></a>
-        <figcaption><a href="lisibilite.html" target="_blank" rel="noopener">lisibilite.html</a> — Six legibility fixes, contrast measured in the page</figcaption></figure>
-      <figure class="pic"><a href="niveaux-onglet-dossier.html" target="_blank" rel="noopener"><img src="assets/frank/x/niveaux-onglet-dossier.jpg" alt="The level as a folder tab of the page, five ways"></a>
-        <figcaption><a href="niveaux-onglet-dossier.html" target="_blank" rel="noopener">niveaux-onglet-dossier.html</a> — The level as a folder tab of the page, five ways</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-codes-zoom.jpg" alt="Prototype 2: One list of articles, split by a grey caps line"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — One list of articles, split by a grey caps line</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-codes-zoom.jpg" alt="Prototype 3: One tab per body of rules, one card per article"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — One tab per body of rules, one card per article</figcaption></figure>
     </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ 
+     CODES — BEFORE AND AFTER, FULL WIDTH
+     ============================================================ -->
+<section class="s" data-sec="Process — Prototype 2">
+<div class="b">
+  <p class="k">What the city asks — Codes, before and after</p>
+  <h2>Each body of rules got its own tab. Each article got its own thread.</h2>
+  <div class="rule"></div>
+  <div class="pics cmp wide">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-codes-wide.jpg" alt="Prototype 2: Codes et règlements, one list of followed articles under a grey CODE DU QUÉBEC line, each card with a drawing, the quote, the edition and what is missing to conclude"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — One list for every body of rules. A grey caps line marks where the Code du Québec starts, and scrolls away.</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-codes-wide.jpg" alt="Prototype 3: Codes with a tab for the Code de construction and one for the Règlement de zonage, a search field, and a comment count on each article card"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — Code de construction and Règlement de zonage as tabs, a search that takes a question, and comments on each article.</figcaption></figure>
   </div>
 </div>
 </section>
@@ -1037,7 +1047,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <div class="st one">
     <div class="st-t">
-      <div class="pnum"><b>04</b><span><span class="k">Finding your way</span>Words</span></div>
+      <div class="pnum"><b>03</b><span><span class="k">Finding your way</span>Words</span></div>
       <h2>In Québec, a « croisement » is a street corner.</h2>
       <div class="rule"></div>
       <dl>
@@ -1047,9 +1057,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>« Conflit », chosen from six candidates tried in the header badge, the marker card and the page title. One warning triangle and one red, everywhere.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="calques-mots.html" target="_blank" rel="noopener"><img src="assets/frank/x/calques-mots.jpg" alt="Six names for what does not agree, in place"></a>
-        <figcaption><a href="calques-mots.html" target="_blank" rel="noopener">calques-mots.html</a> — Six names for what does not agree, in place</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-words.jpg" alt="Prototype 2: « 8 avec un croisement ouvert »"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — « 8 avec un croisement ouvert »</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-words.jpg" alt="Prototype 3: « 12 conflits », one red triangle"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — « 12 conflits », one red triangle</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1060,7 +1072,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <div class="st">
     <div class="st-t">
-      <div class="pnum"><b>05</b><span><span class="k">Seeing the drawing</span>Room for the drawing</span></div>
+      <div class="pnum"><b>04</b><span><span class="k">Seeing the drawing</span>Room for the drawing</span></div>
       <h2>The drawing being read filled a fifth of the screen.</h2>
       <div class="rule"></div>
       <dl>
@@ -1070,34 +1082,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Zoom became a small « − 100 % + » pill in the free corner, the whole sheet sits in a corner map, and any pane folds into a strip that keeps its name.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="wireframe-c3-espace.html" target="_blank" rel="noopener"><img src="assets/frank/x/wireframe-c3-espace.jpg" alt="Ten gestures, the drawing's share measured live"></a>
-        <figcaption><a href="wireframe-c3-espace.html" target="_blank" rel="noopener">wireframe-c3-espace.html</a> — Ten gestures, the drawing's share measured live</figcaption></figure>
-      <figure class="pic"><a href="zoom-plat.html" target="_blank" rel="noopener"><img src="assets/frank/x/zoom-plat.jpg" alt="Six flat zoom controls and a corner map"></a>
-        <figcaption><a href="zoom-plat.html" target="_blank" rel="noopener">zoom-plat.html</a> — Six flat zoom controls and a corner map</figcaption></figure>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- ============================================================ decision 06 — was 04 -->
-<section class="s" data-sec="Process — Prototype 2">
-<div class="b">
-  <div class="st one">
-    <div class="st-t">
-      <div class="pnum"><b>06</b><span><span class="k">Seeing the drawing</span>Reading the plan</span></div>
-      <h2>At 320 pixels wide, the plan was decoration, not evidence.</h2>
-      <div class="rule"></div>
-      <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>The mouse-wheel direction for zooming into floor plans feels inverted.</q><cite>Benoît — test of prototype 2, Oct 28</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>A 204-foot floor in a 320 px pane: no dimension, room name or unit number could be read.</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Six solutions tried on the real sheet A-209: only the framing and the scale have to change. The drawing itself never needs touching.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Choosing a unit frames it. Sheets render sharp to 1000 %, unit numbers stay crisp, and mouse and trackpad each zoom the way their owner expects.</dd></div>
-      </dl>
-    </div>
-    <div class="pics">
-      <figure class="pic"><a href="plan-lisibilite.html" target="_blank" rel="noopener"><img src="assets/frank/x/plan-lisibilite.jpg" alt="Six solutions, each shown on the real floor sheet"></a>
-        <figcaption><a href="plan-lisibilite.html" target="_blank" rel="noopener">plan-lisibilite.html</a> — Six solutions, each shown on the real floor sheet</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-room.jpg" alt="Prototype 2: A long zoom rail beside a small plan"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — A long zoom rail beside a small plan</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-room.jpg" alt="Prototype 3: « − 100 % + » in the corner, the sheet in the corner map"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — « − 100 % + » in the corner, the sheet in the corner map</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1108,7 +1097,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <div class="st">
     <div class="st-t">
-      <div class="pnum"><b>07</b><span><span class="k">Seeing the drawing</span>Drawing layers</span></div>
+      <div class="pnum"><b>05</b><span><span class="k">Seeing the drawing</span>Drawing layers</span></div>
       <h2>Seven drawings per floor. Most of the time you need one.</h2>
       <div class="rule"></div>
       <dl>
@@ -1118,11 +1107,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>A strip of thumbnails beside the plan. A green badge lays a drawing on the sheet, and once two are on, the plan marks their conflicts in red.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="calques-compact.html" target="_blank" rel="noopener"><img src="assets/frank/x/calques-compact.jpg" alt="Eight ways to keep the layers and give width back"></a>
-        <figcaption><a href="calques-compact.html" target="_blank" rel="noopener">calques-compact.html</a> — Eight ways to keep the layers and give width back</figcaption></figure>
-      <figure class="pic"><a href="layer-icons-variantes.html" target="_blank" rel="noopener"><img src="assets/frank/x/layer-icons-variantes.jpg" alt="Ten glyph treatments, F kept"></a>
-        <figcaption><a href="layer-icons-variantes.html" target="_blank" rel="noopener">layer-icons-variantes.html</a> — Ten glyph treatments, F kept</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-layers.jpg" alt="Prototype 2: Drawings as tiles, each with an opacity slider"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Drawings as tiles, each with an opacity slider</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-layers.jpg" alt="Prototype 3: An eye lays a drawing on the sheet; the plan counts its conflicts"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — An eye lays a drawing on the sheet; the plan counts its conflicts</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1133,7 +1122,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <div class="st">
     <div class="st-t">
-      <div class="pnum"><b>08</b><span><span class="k">Seeing the drawing</span>3D model</span></div>
+      <div class="pnum"><b>06</b><span><span class="k">Seeing the drawing</span>3D model</span></div>
       <h2>Labels on a turning building jumped by up to 577 pixels.</h2>
       <div class="rule"></div>
       <dl>
@@ -1143,11 +1132,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Labels removed. Hover lights the unit a click will select. A 3D — Nord — Est — Sud — Ouest switch shows each façade square-on.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="niveaux-3d-variantes.html" target="_blank" rel="noopener"><img src="assets/frank/x/niveaux-3d-variantes.jpg" alt="Six label placements on one shared camera"></a>
-        <figcaption><a href="niveaux-3d-variantes.html" target="_blank" rel="noopener">niveaux-3d-variantes.html</a> — Six label placements on one shared camera</figcaption></figure>
-      <figure class="pic"><a href="maquette-elevations.html" target="_blank" rel="noopener"><img src="assets/frank/x/maquette-elevations.jpg" alt="The four elevations, A kept"></a>
-        <figcaption><a href="maquette-elevations.html" target="_blank" rel="noopener">maquette-elevations.html</a> — The four elevations, A kept</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-3d.jpg" alt="Prototype 2: Orbit and pan only"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Orbit and pan only</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-3d.jpg" alt="Prototype 3: 3D — Nord — Est — Sud — Ouest"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — 3D — Nord — Est — Sud — Ouest</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1169,7 +1158,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <h2>Frank: every note from the second test, answered on the same screen.</h2>
   <div class="rule"></div>
   <div class="chap-o">
-    <div class="shot dep"><img src="assets/frank/dep-p3-frank.jpg" alt="Frank as deployed: floor 5 with units, plan, layers, the 3D model and comments"></div>
+    <a class="shot dep" href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener" title="Open Frank — hey-its-frank.vercel.app"><img src="assets/frank/dep-p3-frank.jpg" alt="Frank as deployed: floor 5 with units, plan, layers, the 3D model and comments"></a>
     <div class="chap-side">
       <p>Frank keeps C’s single floor and fixes how it is used day to day: quantities where the units are, a schedule across projects, comments that know who can read them, and panes that never crop a number.</p>
       <p class="k" style="margin-top:28px">Problems it raised</p>
@@ -1311,7 +1300,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <div class="st">
     <div class="st-t">
-      <div class="pnum"><b>09</b><span><span class="k">The work around the drawing</span>Quantities</span></div>
+      <div class="pnum"><b>07</b><span><span class="k">The work around the drawing</span>Quantities</span></div>
       <h2>Quantities lived on another screen, and every unit was listed twice.</h2>
       <div class="rule"></div>
       <dl>
@@ -1321,11 +1310,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>The unit list is the area table: net ft², m², share, then net, circulation and gross, with the mix bar above and a Superficies / Ouvertures switch. Materials get a table per façade.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="quantites.html" target="_blank" rel="noopener"><img src="assets/frank/x/quantites.jpg" alt="Six places for quantities inside the Units screen"></a>
-        <figcaption><a href="quantites.html" target="_blank" rel="noopener">quantites.html</a> — Six places for quantities inside the Units screen</figcaption></figure>
-      <figure class="pic"><a href="unites-ouvertures-niveau.html" target="_blank" rel="noopener"><img src="assets/frank/x/unites-ouvertures-niveau.jpg" alt="Six ways to write each unit once"></a>
-        <figcaption><a href="unites-ouvertures-niveau.html" target="_blank" rel="noopener">unites-ouvertures-niveau.html</a> — Six ways to write each unit once</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-quant.jpg" alt="Prototype 2: The area table, then the unit's openings listed again below"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — The area table, then the unit's openings listed again below</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-quant.jpg" alt="Prototype 3: The mix bar above, a Superficies / Ouvertures switch"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — The mix bar above, a Superficies / Ouvertures switch</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1336,7 +1325,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <div class="st">
     <div class="st-t">
-      <div class="pnum"><b>10</b><span><span class="k">The work around the drawing</span>Schedule</span></div>
+      <div class="pnum"><b>08</b><span><span class="k">The work around the drawing</span>Schedule</span></div>
       <h2>A week of work crosses four projects. The schedule cannot live inside one.</h2>
       <div class="rule"></div>
       <dl>
@@ -1346,11 +1335,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Échéancier sits top right on every screen: a calendar and one to-do list grouped by day. Each task belongs to one of four people and points at its article. Red only for what is late.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="calendrier.html" target="_blank" rel="noopener"><img src="assets/frank/x/calendrier.jpg" alt="Six calendars, judged on four questions"></a>
-        <figcaption><a href="calendrier.html" target="_blank" rel="noopener">calendrier.html</a> — Six calendars, judged on four questions</figcaption></figure>
-      <figure class="pic"><a href="navigation-carnet.html" target="_blank" rel="noopener"><img src="assets/frank/x/navigation-carnet.jpg" alt="Where the schedule and the history live"></a>
-        <figcaption><a href="navigation-carnet.html" target="_blank" rel="noopener">navigation-carnet.html</a> — Where the schedule and the history live</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-sched.jpg" alt="Prototype 2: Every task flagged in green"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Every task flagged in green</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-sched.jpg" alt="Prototype 3: Grouped by day; red only for what is late"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — Grouped by day; red only for what is late</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1361,7 +1350,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <div class="st">
     <div class="st-t">
-      <div class="pnum"><b>11</b><span><span class="k">Sharing and using it</span>Comments</span></div>
+      <div class="pnum"><b>09</b><span><span class="k">Sharing and using it</span>Comments</span></div>
       <h2>What a comment is attached to decides whether it is still true tomorrow.</h2>
       <div class="rule"></div>
       <dl>
@@ -1371,11 +1360,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Comments pin to the drawing and carry their unit and sheet. « À l'interne » or « Partagée » is chosen while writing; internal notes are not rendered in the shared link.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="commentaires.html" target="_blank" rel="noopener"><img src="assets/frank/x/commentaires.jpg" alt="Six things a guest comment can hang on"></a>
-        <figcaption><a href="commentaires.html" target="_blank" rel="noopener">commentaires.html</a> — Six things a guest comment can hang on</figcaption></figure>
-      <figure class="pic"><a href="epingles.html" target="_blank" rel="noopener"><img src="assets/frank/x/epingles.jpg" alt="Internal and shared notes on the same drawing"></a>
-        <figcaption><a href="epingles.html" target="_blank" rel="noopener">epingles.html</a> — Internal and shared notes on the same drawing</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-comments.jpg" alt="Prototype 2: Studio notes and guest comments in one list"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Studio notes and guest comments in one list</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-comments.jpg" alt="Prototype 3: « À l'interne » or « Partagée », chosen while writing"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — « À l'interne » or « Partagée », chosen while writing</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1386,7 +1375,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <div class="st">
     <div class="st-t">
-      <div class="pnum"><b>12</b><span><span class="k">Sharing and using it</span>Panes</span></div>
+      <div class="pnum"><b>10</b><span><span class="k">Sharing and using it</span>Panes</span></div>
       <h2>Make a pane narrow, and its table was cut at the edge.</h2>
       <div class="rule"></div>
       <dl>
@@ -1396,11 +1385,11 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>A pane stops at the width its table needs, with a « butée » tag. Narrower, it folds into a strip that keeps its icon, its title and the button that reopens it.</dd></div>
       </dl>
     </div>
-    <div class="pics">
-      <figure class="pic"><a href="volet-unites-redimension.html" target="_blank" rel="noopener"><img src="assets/frank/x/volet-unites-redimension.jpg" alt="Five ways to resize without cropping, A kept"></a>
-        <figcaption><a href="volet-unites-redimension.html" target="_blank" rel="noopener">volet-unites-redimension.html</a> — Five ways to resize without cropping, A kept</figcaption></figure>
-      <figure class="pic"><a href="bord-replier-entete.html" target="_blank" rel="noopener"><img src="assets/frank/x/bord-replier-entete.jpg" alt="Folding from the header, and the way back"></a>
-        <figcaption><a href="bord-replier-entete.html" target="_blank" rel="noopener">bord-replier-entete.html</a> — Folding from the header, and the way back</figcaption></figure>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-panes.jpg" alt="Prototype 2: Narrowed, the table loses its last columns"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Narrowed, the table loses its last columns</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-panes.jpg" alt="Prototype 3: The pane stops at « butée »"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — The pane stops at « butée »</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1895,9 +1884,10 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     localStorage.removeItem("frank-deck-edits-v1");
   }
   const save = () => localStorage.setItem(STORE, JSON.stringify(edits));
-  /* elements added to a slide after edits were saved stay out of the numbering,
-     so saved edits keep landing on the element they were made on */
-  const SKIP = ".foot, .trk, script, style, svg, .byline, .pdf";
+  /* The byline and the PDF button were in the numbering when the saved edits
+     were made, so they stay in it. Skipping them shifted every later block on
+     the title slide by one and dropped each saved edit onto its neighbour. */
+  const SKIP = ".foot, .trk, script, style, svg";
   const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
   const blocks = [];
   allSlides.forEach((slide) => {
