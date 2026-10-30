@@ -140,7 +140,14 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs.lvl button[aria-current="true"]::after{left:100%;
   background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tabc) 8px)}
 /* A tab standing on the card's corner squares that corner off: a rounded
-   corner under a tab reads as two sheets, not one. */
+   corner under a tab reads as two sheets, not one. The tab then has to sit
+   on the card's own left edge — inset by the row's padding it would leave a
+   sliver of chrome over a squared corner, which reads as a chip out of the
+   page — so the row loses its left padding and the tab its left radius and
+   its left foot: there is nothing on that side to curve into. */
+.tabs.lvl[data-head="true"]{padding-left:0}
+.tabs.lvl[data-head="true"] button[aria-current="true"]{border-radius:0 8px 0 0}
+.tabs.lvl[data-head="true"] button[aria-current="true"]::before{display:none}
 .tabs.lvl[data-head="true"] + .work{border-top-left-radius:0}
 .frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.72);font-size:12.5px}
 .frame[data-chrome="black"] .tabs.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
@@ -1013,43 +1020,89 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .fpop .lpast .pd.cur{cursor:default;background:none}
 .lcard .hd.swapped{animation:fnswap .9s ease}
 @keyframes fnswap{0%{background:var(--vert);color:var(--vert-ink)}100%{background:transparent}}
-/* The swap, mimicked: the sheet is wiped from the top and drawn back in
-   behind a moving line, as if the new file were being read. Nothing stays
-   on the drawing once it is done. */
-.swapfx{position:absolute;inset:0;pointer-events:none;z-index:40;background:var(--card);
-  animation:swapveil .85s cubic-bezier(.4,0,.2,1) forwards}
-.swapfx::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--ink);
-  animation:swapline .85s cubic-bezier(.4,0,.2,1) forwards}
-@keyframes swapveil{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(100% 0 0 0)}}
-@keyframes swapline{0%{top:0;opacity:.9}100%{top:100%;opacity:0}}
-.swapin{animation:layin .85s cubic-bezier(.4,0,.2,1)}
-@keyframes layin{0%{clip-path:inset(0 0 100% 0)}100%{clip-path:inset(0 0 0 0)}}
-/* Cross-fade: the two issues are held over each other and one is let go.
-   Nothing says which way the change ran, which is the point when the two
-   drawings differ in a dozen small places at once. */
-[data-swap="Cross-fade"] .swapfx{animation:swapout .45s ease forwards}
-[data-swap="Cross-fade"] .swapfx::after{display:none}
-[data-swap="Cross-fade"] .swapin{animation:swapfadein .45s ease}
-@keyframes swapout{to{opacity:0}}
-@keyframes swapfadein{from{opacity:0}}
-/* Tracing lift: the old sheet is lifted off the pile — it rises a little
-   and goes — while the new one settles down onto the paper. */
-[data-swap="Tracing lift"] .swapfx{transform-origin:50% 50%;
-  animation:swaplift .5s cubic-bezier(.3,0,.2,1) forwards}
-[data-swap="Tracing lift"] .swapfx::after{display:none}
-[data-swap="Tracing lift"] .swapin{animation:swapsettle .5s cubic-bezier(.3,0,.2,1)}
-@keyframes swaplift{to{opacity:0;transform:scale(1.06) translateY(-10px)}}
-@keyframes swapsettle{from{opacity:0;transform:scale(.985)}}
-/* Side wipe: the plotter pass turned on its side, for drawings read in
-   columns — the pen crosses the sheet left to right. */
-[data-swap="Side wipe"] .swapfx{animation:swapveilx .7s cubic-bezier(.4,0,.2,1) forwards}
-[data-swap="Side wipe"] .swapfx::after{left:auto;right:0;top:0;bottom:0;width:2px;height:auto;
-  animation:swaplinex .7s cubic-bezier(.4,0,.2,1) forwards}
-[data-swap="Side wipe"] .swapin{animation:layinx .7s cubic-bezier(.4,0,.2,1)}
-@keyframes swapveilx{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}
-@keyframes swaplinex{0%{right:100%;opacity:.9}100%{right:0;opacity:0}}
-@keyframes layinx{0%{clip-path:inset(0 100% 0 0)}100%{clip-path:inset(0 0 0 0)}}
-@media (prefers-reduced-motion: reduce){.swapfx,.swapfx::after,.swapin,.lcard .hd.swapped{animation-duration:.01s}}
+/* Opening another file, mimicked as it really goes: a heavy drawing or
+   model takes a second or two to read, then appears. Each swap is a load
+   phase (the pane says it is reading, and how far) and a short reveal.
+   The overlay `.ldfx` sits in the pane's window (.vp for the plan, the
+   model's own box for the 3D), never on the zoomed sheet, so its marks
+   keep their size; the drawing under it is dimmed, blurred or greyed by
+   the window's data-ldst. --p is the progress, 0 to 1; --rv the reveal. */
+.ldfx{position:absolute;inset:0;z-index:40;pointer-events:none;--p:0}
+.ldfx > *{display:none}
+.ldfx .lpaper{position:absolute;inset:0;background:var(--card)}
+.ldfx .lbar{position:absolute;left:0;top:0;height:2px;width:calc(var(--p) * 100%);background:var(--ink)}
+.ldfx .lpill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);align-items:center;gap:7px;height:28px;
+  padding:0 11px;background:var(--card);border:1px solid var(--line);border-radius:14px;font-size:12px;color:var(--ink-2);white-space:nowrap;
+  max-width:calc(100% - 24px)}
+.ldfx .lpill b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;min-width:30px;text-align:right}
+.ldfx .lpill .lf{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:11px;max-width:220px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.ldfx .lspin{width:12px;height:12px;flex:0 0 12px;border-radius:50%;border:1.6px solid var(--line);border-top-color:var(--ink);animation:lspin .8s linear infinite}
+@keyframes lspin{to{transform:rotate(360deg)}}
+.ldfx .lring{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;display:none}
+.ldfx .lring svg{width:52px;height:52px;display:block}
+.ldfx .lring circle{fill:none;stroke:var(--line);stroke-width:2.2}
+.ldfx .lring .arc{stroke:var(--ink);stroke-dasharray:calc(var(--p) * 100) 100;transform:rotate(-90deg);transform-origin:50% 50%}
+.ldfx .lring b{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+.ldfx .ltiles{position:absolute;inset:0;grid-template:repeat(4,1fr)/repeat(6,1fr)}
+.ldfx .ltiles i{background:var(--card)}
+/* The sheet's border and title block, held clear of the pane's own tools:
+   the pin button and north above, the zoom and minimap below. */
+.ldfx .lblock{position:absolute;inset:56px 16px 120px;border:1px solid var(--ink-3)}
+.ldfx .lblock span{position:absolute;right:0;bottom:0;width:38%;min-width:min(150px,100%);max-width:100%;border-left:1px solid var(--ink-3);border-top:1px solid var(--ink-3);
+  padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:10.5px;color:var(--ink-3)}
+.ldfx .lblock span b{font-family:var(--mono,ui-monospace,Menlo,monospace);font-weight:500;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ldfx .lline{position:absolute;background:var(--ink)}
+.ldfx .lmid{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);flex-direction:column;align-items:center;gap:9px;font-size:12px;color:var(--ink-2)}
+.ldfx .lmid i{display:block;width:170px;height:2px;background:var(--line-2);position:relative;overflow:hidden}
+.ldfx .lmid i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--p) * 100%);background:var(--ink)}
+.ldfx .lmid i{max-width:70%}
+.ldfx .lmid .lf{max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:11px;color:var(--ink-3)}
+/* What each style shows while reading … */
+.ldfx:is([data-ld="Dim + top bar"],[data-ld="Blur to sharp"],[data-ld="Untextured first"]) .lbar,
+.ldfx:is([data-ld="Veil + spinner"],[data-ld="Status pill"],[data-ld="Paced plotter"],[data-ld="Raster bands"],
+  [data-ld="Paced side wipe"],[data-ld="Silhouette"],[data-ld="Rise up"],[data-ld="Settle in"]) .lpill{display:flex}
+.ldfx:is([data-ld="Veil + spinner"],[data-ld="Paced plotter"],[data-ld="Raster bands"],[data-ld="Paced side wipe"],
+  [data-ld="Title block first"],[data-ld="Fade through paper"],[data-ld="Rise up"],[data-ld="Settle in"]) .lpaper{display:block}
+.ldfx[data-ld="Veil + spinner"] .lpaper{opacity:.72}
+/* Under the pane's top row of tools (pin button, north; the 3D's view
+   switch), so it never sits on one of them. */
+.ldfx[data-ld="Status pill"] .lpill{top:54px;transform:translateX(-50%)}
+.ldfx[data-ld="Tiles"] .ltiles{display:grid}
+.ldfx[data-ld="Tiles"] .lpill{display:flex}
+.ldfx[data-ld="Title block first"] .lblock{display:block}
+.ldfx[data-ld="Fade through paper"] .lmid{display:flex}
+.ldfx[data-ld="Progress ring"] .lring{display:block}
+.ldfx:is([data-ld="Paced plotter"],[data-ld="Paced side wipe"]).rv .lline{display:block}
+/* … what the drawing under it looks like while it reads … */
+:is(.vp,.model3d)[data-ldst] > :is(.plan,.model3d-canvas){transition:opacity var(--rv,400ms) ease,filter var(--rv,400ms) ease,transform var(--rv,400ms) cubic-bezier(.2,0,.2,1)}
+:is(.vp,.model3d):is([data-ldst="Dim + top bar"],[data-ldst="Progress ring"]):not(.rv) > :is(.plan,.model3d-canvas){opacity:.32}
+:is(.vp,.model3d)[data-ldst="Blur to sharp"]:not(.rv) > :is(.plan,.model3d-canvas){filter:blur(6px);opacity:.55}
+:is(.vp,.model3d)[data-ldst="Untextured first"]:not(.rv) > :is(.plan,.model3d-canvas){filter:grayscale(1) contrast(.75) brightness(1.1)}
+:is(.vp,.model3d)[data-ldst="Silhouette"]:not(.rv) > :is(.plan,.model3d-canvas){filter:brightness(0);opacity:.12}
+:is(.vp,.model3d)[data-ldst="Settle in"]:not(.rv) > :is(.plan,.model3d-canvas){transform:scale(.97);opacity:0}
+:is(.vp,.model3d)[data-ldst="Status pill"].rv > :is(.plan,.model3d-canvas){animation:ldblink var(--rv) ease}
+@keyframes ldblink{0%{opacity:.35}100%{opacity:1}}
+/* … and how it lets go. */
+.ldfx.rv > *:not(.lpaper):not(.ltiles):not(.lline){display:none}
+.ldfx.rv:is([data-ld="Veil + spinner"],[data-ld="Title block first"],[data-ld="Fade through paper"],[data-ld="Settle in"]) .lpaper{animation:ldout var(--rv) ease forwards}
+.ldfx.rv[data-ld="Title block first"] .lblock{display:block;animation:ldout var(--rv) ease forwards}
+@keyframes ldout{to{opacity:0}}
+.ldfx.rv[data-ld="Paced plotter"] .lpaper{animation:ldwipey var(--rv) cubic-bezier(.4,0,.2,1) forwards}
+.ldfx.rv[data-ld="Paced plotter"] .lline{left:0;right:0;height:2px;animation:ldliney var(--rv) cubic-bezier(.4,0,.2,1) forwards}
+@keyframes ldwipey{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(100% 0 0 0)}}
+@keyframes ldliney{from{top:0}to{top:100%;opacity:.2}}
+.ldfx.rv[data-ld="Paced side wipe"] .lpaper{animation:ldwipex var(--rv) cubic-bezier(.4,0,.2,1) forwards}
+.ldfx.rv[data-ld="Paced side wipe"] .lline{top:0;bottom:0;width:2px;animation:ldlinex var(--rv) cubic-bezier(.4,0,.2,1) forwards}
+@keyframes ldwipex{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 0 0 100%)}}
+@keyframes ldlinex{from{left:0}to{left:100%;opacity:.2}}
+.ldfx.rv[data-ld="Raster bands"] .lpaper{animation:ldwipey var(--rv) steps(8,end) forwards}
+.ldfx.rv[data-ld="Rise up"] .lpaper{animation:ldrise var(--rv) cubic-bezier(.3,0,.2,1) forwards}
+@keyframes ldrise{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 0 100% 0)}}
+.ldfx.rv[data-ld="Tiles"] .ltiles i{animation:ldout calc(var(--rv) * .45) ease forwards;animation-delay:calc(var(--d) * var(--rv) * .55)}
+@media (prefers-reduced-motion: reduce){.ldfx *,.ldfx{animation-duration:.01s !important;animation-delay:0s !important}
+  :is(.vp,.model3d)[data-ldst] > *{transition-duration:.01s !important}}
+/* the card says which file it now names */
+@media (prefers-reduced-motion: reduce){.lcard .hd.swapped{animation-duration:.01s}}
 .lpast .pdt{font-size:10.5px;color:var(--ink-3)}
 /* The export menu hangs off the table's header, right-aligned to the
    button that opens it so it never leaves the pane. */
@@ -1338,7 +1391,9 @@ body:has([data-skppop]) .lcard{visibility:hidden}
    behind it only while the 58 MB GLB loads, or if WebGL cannot start. */
 /* No border of its own: the pane around it now states the edge, and two
    boxes one inside the other state it twice. */
-.model3d{position:relative;flex:1;min-height:0;overflow:hidden;
+/* isolate: a loading overlay inside stays under the pane's tools (view
+   switch, zoom, north, minimap), as the plan's window already does. */
+.model3d{position:relative;flex:1;min-height:0;overflow:hidden;isolation:isolate;
   background:transparent url(assets/skp-facade.jpg) center/contain no-repeat}
 .model3d-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;
   opacity:0;touch-action:none;transition:opacity .18s ease}
@@ -1397,6 +1452,9 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .step{position:absolute;z-index:5;width:19px;height:19px;border-radius:50%;background:var(--hi);
   color:var(--on-hi);font-size:11px;display:none;place-items:center;top:6px;right:6px}
 [data-journey="true"] .step{display:grid}
+/* A pane folded from its header has its button in that corner: the step
+   number sits just left of it. */
+.rg:has(.fbtn[data-fold]) > .step{right:40px}
 /* With the model folded, the region's right edge is the model's strip:
    the step number moves off its icon. */
 .rg:has(.fstrip[data-strip="model"]) > .step{right:44px}
@@ -1473,33 +1531,35 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .frame[data-shell="inset"] .gut[data-gut="plan"]:not(.fold):hover::before,
 body.splitting .frame[data-shell="inset"] .gut[data-gut="plan"].live::before{width:2px;margin-left:-2px;background:var(--ink)}
 .gut.fold{cursor:default}
-/* The tab is the whole control once a pane is folded, so it is sized to be
-   seen from across the screen and hit without aiming: a 24 × 54 bar in
-   solid ink with a white chevron. A pale tab was lost against the drawing
-   on one side and the black rail on the other; ink with a light ring reads
-   on both. */
-.gut .gfold{position:relative;z-index:2;width:24px;height:54px;border-radius:7px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;background:var(--ink);
-  border:0;box-shadow:0 0 0 1.5px var(--card);color:#fff;opacity:0;transition:opacity .12s}
-.gut:hover .gfold,.gut.fold .gfold{opacity:1}
-.gut .gfold:hover{background:#000}
-.gut .gfold .lu{width:17px;height:17px;stroke-width:2.6}
+/* In the white card a folded pane's strip meets its neighbour directly:
+   the edge beside it takes no room (its grid track is 0 too), so no white
+   sliver opens between the strip and the next pane. A strip with a pane on
+   its right draws the seam itself, as the open pane did. */
+.frame[data-shell="inset"] .gut.fold{flex:0 0 0;width:0;margin:0}
+.frame[data-shell="inset"] .pane.fstrip:has(+ .gut.fold){border-right:1px solid var(--line)}
+/* Folding lives in the pane's own header (bord-replier-entete.html, A): a
+   grey button at the header's end, like a window's close button, so
+   nothing lands on the drawing. Folded, the same button heads the strip,
+   turned to open, and the whole strip opens it. */
+.fbtn{margin-left:auto;flex:0 0 26px;width:26px;height:24px;border-radius:6px;display:grid;place-items:center;
+  background:var(--fill);color:var(--ink);cursor:pointer}
+.fbtn .lu{width:15px;height:15px}
+.fbtn:hover{background:var(--ink);color:#fff}
 /* Beside a folded pane the edge only separates: nothing to drag. */
 .gut.fold::before{content:none}
-/* A folded pane keeps a strip of itself: its header's icon on the header's
-   rule, its title read upward from the top. The whole strip unfolds it. */
+/* A folded pane keeps a strip of itself: the button on the header's rule,
+   then the title read upward with the pane's icon at its start. */
 .pane.fstrip{flex:0 0 38px;width:38px;cursor:pointer;user-select:none}
 .pane.fstrip > .ph{justify-content:center;padding:0}
+.pane.fstrip .fbtn{margin:0}
 .pane.fstrip:hover{background:var(--fill-2)}
-.pane.fstrip:hover > .ph > svg{color:var(--ink)}
-.pane.fstrip .fsv{flex:1;min-height:0;display:flex;justify-content:center;align-items:flex-start;padding-top:12px;overflow:hidden}
+.pane.fstrip:hover .fbtn{background:var(--ink);color:#fff}
+.pane.fstrip .fsv{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;padding-top:12px;overflow:hidden}
 .pane.fstrip .fsv span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap}
+.pane.fstrip .fsv > .lu{width:15px;height:15px;flex:0 0 15px;color:var(--ink-2);margin-top:8px}
 /* The edge stops where the table would start to be cut, and says so. */
 .pane > .stop{position:absolute;top:50%;right:6px;transform:translateY(-50%);z-index:20;font-size:10.5px;font-style:italic;
   color:#fff;background:var(--ink);border-radius:4px;padding:2px 6px;pointer-events:none}
-/* Two tabs on one edge sit one above the other, not side by side: the
-   strip is ten pixels wide and they would overlap the drawings. */
-.gut .gfold + .gfold{margin-top:6px}
 .gut{flex-direction:column}
 /* While an edge is being dragged every cursor on the screen is the drag
    cursor: the pointer is on a 2 px line and will leave it. */
@@ -1715,6 +1775,8 @@ function sprite() {
     "rotate-3d", "move",
     /* the plan's quarter turn */
     "rotate-cw",
+    /* folding a pane from its header, and opening it from its strip */
+    "panel-left-close", "panel-left-open", "panel-right-close", "panel-right-open",
     /* a façade table's head: open its elevation */
     "scan"];
   const defs = names.map((n) => {
@@ -2520,21 +2582,15 @@ function skpChipHTML() {
         ${D.skpHist ? `<div class="lpast">${past.map((x) => row(x, (y) => `${y.rev} · ${y.date} — ${y.note}`)).join("")}</div>` : ""}
       </div></div>` : ""}`;
 }
-/* A new file is laid in the pane in place of the old one: the model is
-   wiped from the top, so the swap is seen, not just read. */
+/* A new file is laid in the pane in place of the old one: the pane reads
+   it first (startLoad), so the swap is seen, not just read. */
 function skpPick(i) {
   const D = V.docs;
   if (!SKP_ALL[i] || i === D.skpCur) return;
   Object.assign(D, { skpCur: i, skpOpen: false, skpHist: false, skpList: false, skpSwapped: true });
   render();
   D.skpSwapped = false;
-  const m = document.querySelector("[data-building-model]");
-  if (m && V.swap !== "Instant") {
-    const fx = document.createElement("div");
-    fx.className = "swapfx";
-    m.append(fx);
-    fx.addEventListener("animationend", () => fx.remove(), { once: true });
-  }
+  startLoad("model", V.modelSwap, skpDoc().file);
   say(i === 0 ? `Version émise ${skpDoc().rev} rechargée.`
     : `${skpDoc().file} affichée. La maquette émise reste ${SKP_VERSIONS[0].file}.`);
 }
@@ -2650,30 +2706,91 @@ document.addEventListener("pointerdown", (e) => {
   placeLayCard();
 }, true);
 
-/* Plays the swap on the sheet once the screen is redrawn with the new
-   document: the architecture is veiled and redrawn from the top; an
-   overlay drawing is revealed from the top. */
-function swapFx(k) {
-  const zone = document.querySelector('[data-zone="plan"]');
-  if (!zone || V.swap === "Instant") return;
-  const plan = zone.querySelector(".plan");
-  if (!plan) return;
-  /* The veil is the old sheet still standing; it is always hung on the
-     paper, even when what changed is a consultant's overlay, because the
-     pass has to read across the whole drawing to look like a pass. */
-  const fx = document.createElement("div");
-  fx.className = "swapfx";
-  plan.append(fx);
-  fx.addEventListener("animationend", () => fx.remove(), { once: true });
-  /* The sheet that arrives: the paper itself for the architecture, the
-     overlay for anything else. */
-  const el = k === "plan" ? plan : zone.querySelector(`.lay[data-lay="${k}"]`);
-  if (!el) return;
-  el.classList.remove("swapin");
-  void el.offsetWidth;
-  el.classList.add("swapin");
-  el.addEventListener("animationend", () => el.classList.remove("swapin"), { once: true });
+/* ------------------------------------------------- opening another file
+   A drawing set or a model is tens or hundreds of megabytes: opening it
+   takes a moment, and the pane says so before it shows the new file. One
+   load per pane is kept in LOADS, outside the DOM, because the plan's pane
+   is rebuilt by every render: resumeLoads() hangs the overlay back on at
+   the progress reached. The bar never runs at an even speed — it jumps
+   while the header is read, waits on the geometry, then finishes. */
+const LOADS = {};
+const LOAD_STEPS = [[0, 0], [.18, .31], [.4, .55], [.62, .61], [.84, .9], [1, 1]];
+/* How long each style takes to let go once the file is read, in ms. */
+const REVEAL_MS = {
+  "Dim + top bar": 350, "Veil + spinner": 420, "Status pill": 300, "Paced plotter": 1250, "Raster bands": 1000,
+  "Tiles": 900, "Blur to sharp": 700, "Title block first": 520, "Paced side wipe": 1000, "Progress ring": 380,
+  "Untextured first": 900, "Silhouette": 900, "Fade through paper": 600, "Rise up": 1100, "Settle in": 600,
+};
+const loadHost = (kind) => kind === "plan"
+  ? document.querySelector('[data-zone="plan"] .vp')
+  : document.querySelector("[data-building-model]");
+const progressAt = (t) => {
+  for (let i = 1; i < LOAD_STEPS.length; i++) {
+    const [t1, p1] = LOAD_STEPS[i], [t0, p0] = LOAD_STEPS[i - 1];
+    if (t <= t1) return p0 + (p1 - p0) * ((t - t0) / (t1 - t0));
+  }
+  return 1;
+};
+function hangLoad(kind) {
+  const L = LOADS[kind], host = loadHost(kind);
+  if (!L || !host) return null;
+  let fx = host.querySelector(":scope > .ldfx");
+  if (!fx) {
+    fx = document.createElement("div");
+    fx.className = "ldfx";
+    fx.innerHTML = `<span class="lpaper"></span><span class="ltiles">${L.tiles.map((d) => `<i style="--d:${d}"></i>`).join("")}</span>
+      <span class="lblock"><span><b>${L.file}</b>Lecture du fichier… <em class="lpct">0 %</em></span></span>
+      <span class="lmid">${kind === "plan" ? "Ouverture du dessin…" : "Ouverture de la maquette…"}<i></i><span class="lf">${L.file}</span></span>
+      <i class="lbar"></i><span class="lpill"><i class="lspin"></i><span class="lf">${L.file}</span><b class="lpct">0 %</b></span>
+      <span class="lring"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="22"/><circle class="arc" cx="26" cy="26" r="22" pathLength="100"/></svg><b class="lpct">0 %</b></span>
+      <i class="lline"></i>`;
+    host.append(fx);
+  }
+  fx.dataset.ld = L.style;
+  host.dataset.ldst = L.style;
+  host.style.setProperty("--rv", `${L.reveal}ms`);
+  fx.style.setProperty("--rv", `${L.reveal}ms`);
+  fx.classList.toggle("rv", L.phase === "reveal");
+  host.classList.toggle("rv", L.phase === "reveal");
+  return fx;
 }
+function endLoad(kind) {
+  const host = loadHost(kind);
+  host?.querySelector(":scope > .ldfx")?.remove();
+  if (host) { delete host.dataset.ldst; host.classList.remove("rv"); host.style.removeProperty("--rv"); }
+  delete LOADS[kind];
+}
+function startLoad(kind, style, file) {
+  if (LOADS[kind]) endLoad(kind);
+  if (!style || style === "Instant") return;
+  const secs = kind === "plan" ? V.planLoad : V.modelLoad;
+  const L = LOADS[kind] = {
+    style, file, phase: "load", t0: performance.now(),
+    load: secs * 1000 * (.88 + Math.random() * .24), reveal: REVEAL_MS[style] || 400,
+    tiles: Array.from({ length: 24 }, () => Math.random().toFixed(2)),
+  };
+  hangLoad(kind);
+  const tick = (now) => {
+    if (LOADS[kind] !== L) return;
+    const t = Math.min(1, (now - L.t0) / L.load);
+    const fx = hangLoad(kind);
+    if (fx) {
+      const pr = progressAt(t);
+      fx.style.setProperty("--p", pr.toFixed(3));
+      const txt = `${Math.round(pr * 100)} %`;
+      fx.querySelectorAll(".lpct").forEach((n) => { if (n.textContent !== txt) n.textContent = txt; });
+    }
+    if (t < 1) { requestAnimationFrame(tick); return; }
+    L.phase = "reveal";
+    hangLoad(kind);
+    setTimeout(() => { if (LOADS[kind] === L) endLoad(kind); }, L.reveal + 60);
+  };
+  requestAnimationFrame(tick);
+}
+/* After a render the plan's window is new: put its load back on. */
+function resumeLoads() { Object.keys(LOADS).forEach(hangLoad); }
+/* The plan's swap: whichever drawing changed, the window reads it. */
+function swapFx(k) { startLoad("plan", V.planSwap, layDoc(k).file); }
 
 /* ------------------------------------------------------- the conflicts
    A consultant's sheet laid over the architecture is read for one thing:
@@ -2966,25 +3083,40 @@ const gutName = (label) => {
   const noun = label.replace(/^(le |la |l'|les )/, "");
   return noun.charAt(0).toUpperCase() + noun.slice(1);
 };
+/* The edge only drags. Each pane it separates is named on it, so the
+   pass after render can put the fold button in that pane's header. */
 function gutter({ size, grab, prev, next, lprev, lnext }) {
   const shut = (prev && folded(prev)) || (next && folded(next));
-  const tab = (key, label, dir, side) => `<span class="gfold" ${act("gutfold", key)} data-side="${side}"
-      title="Replier ${label}">${icon(dir)}</span>`;
   /* Beside a folded pane the strip is the way back, so the edge has nothing
      to offer and cannot be dragged. */
-  const tabs = shut ? ""
-    : `${prev ? tab(prev, lprev, "chevron-left", "prev") : ""}${next ? tab(next, lnext, "chevron-right", "next") : ""}`;
-  return `<div class="gut${shut ? " fold" : ""}" data-gut="${size}" data-grab="${grab}"
-      title="${shut ? "" : "Glisser pour déplacer le bord"}">${tabs}</div>`;
+  const named = shut ? "" : `${prev ? `data-prev="${prev}" data-lprev="${lprev}"` : ""} ${next ? `data-next="${next}" data-lnext="${lnext}"` : ""}`;
+  return `<div class="gut${shut ? " fold" : ""}" data-gut="${size}" data-grab="${grab}" ${named}
+      title="${shut ? "" : "Glisser pour déplacer le bord"}"></div>`;
 }
-/* The strip a folded pane leaves: the icon and title its header carried
-   (read as it folded), the icon on the header's rule, the title upward. */
+/* Which way each pane folds: toward the screen's edge it sits against. */
+const FOLD_SIDE = { list: "left", plan: "left", cal: "left", side: "right", model: "right", todo: "right" };
+const foldBtnHTML = (key, label) => `<span class="fbtn" ${act("gutfold", key)} data-fold="${key}"
+  title="Replier ${label}">${icon(`panel-${FOLD_SIDE[key] || "left"}-close`)}</span>`;
+/* Every pane an edge separates gets the button at the end of its header. */
+function placeFoldButtons() {
+  document.querySelectorAll(".gut:not(.fold)").forEach((gut) => {
+    [["prev", gut.previousElementSibling], ["next", gut.nextElementSibling]].forEach(([side, pane]) => {
+      const key = gut.dataset[side];
+      const ph = pane && (pane.querySelector(":scope > .ph") || pane.querySelector(".ph"));
+      if (!key || !ph || ph.querySelector(":scope > .fbtn")) return;
+      ph.insertAdjacentHTML("beforeend", foldBtnHTML(key, gut.dataset[`l${side}`]));
+    });
+  });
+}
+/* The strip a folded pane leaves: the same button on the header's rule,
+   turned to open; below it the title read upward, the pane's icon at the
+   title's start. */
 const FOLD_W = 38;
 function foldStripHTML(key, label) {
   const h = V.foldHead[splitKey(key)] || {};
   return `<section class="pane fstrip" ${act("gutfold", key)} data-strip="${key}" title="Déplier ${label}">
-    <div class="ph">${icon(h.ic || "list")}</div>
-    <div class="fsv"><span>${h.t || gutName(label)}</span></div></section>`;
+    <div class="ph"><span class="fbtn">${icon(`panel-${FOLD_SIDE[key] || "left"}-open`)}</span></div>
+    <div class="fsv"><span>${h.t || gutName(label)}</span>${icon(h.ic || "list")}</div></section>`;
 }
 const bars = (n, w = [100, 70, 85]) =>
   Array.from({ length: n }, (_, i) => `<div class="bar" style="width:${w[i % w.length]}%"></div>`).join("");
@@ -3677,7 +3809,7 @@ function tabsHTML() {
     ? `<div class="tabs lvl rg ${solo("nav")}" data-rg="vues" data-fi="${fiOf("nav")}"
          data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}" data-off="${off}"
          data-head="${off || !wholeBtn}">
-        ${wholeBtn}${wholeBtn ? `<span class="div"></span>` : ""}
+        ${wholeBtn}
         <div class="views">${views.map(viewBtn).join("")}</div></div>`
     : "";
   /* A project is read by people who do not draw: the client, the urbaniste,
@@ -5014,20 +5146,18 @@ function placePlanPills() {
 /* Folding reads the pane's header first, so the strip it leaves carries
    the same icon and title on any screen. */
 document.addEventListener("click", (e) => {
-  const tab = e.target.closest?.(".gfold[data-side]");
-  if (!tab) return;
-  const gut = tab.closest(".gut");
-  const pane = tab.dataset.side === "prev" ? gut.previousElementSibling : gut.nextElementSibling;
-  const ph = pane?.querySelector(".ph");
+  const btn = e.target.closest?.(".fbtn[data-fold]");
+  if (!btn) return;
+  const ph = btn.closest(".ph");
   if (!ph) return;
-  V.foldHead[splitKey(tab.dataset.value)] = {
+  V.foldHead[splitKey(btn.dataset.fold)] = {
     ic: ph.querySelector("use")?.getAttribute("href")?.replace("#lu-", ""),
     t: ph.querySelector(".hi")?.textContent.trim(),
   };
 }, true);
 document.addEventListener("pointerdown", (e) => {
   const gut = e.target.closest?.(".gut");
-  if (!gut || e.target.closest(".gfold") || gut.classList.contains("fold")) return;
+  if (!gut || gut.classList.contains("fold")) return;
   e.preventDefault();
   const parent = gut.parentElement;
   const grid = parent.classList.contains("work");
@@ -5662,8 +5792,10 @@ function render() {
   /* A side column is never narrower than what it holds: the track's floor
      is its content's own width, so a table is never cut at the edge. */
   const side = (shut, w) => (shut ? `${FOLD_W}px` : `minmax(min-content, ${w}px)`);
-  const cols = [hasList ? side(listShut, listW) : null, hasList ? "var(--gap)" : null, "1fr",
-    hasInsp ? "var(--gap)" : null, hasInsp ? side(sideShut, sideW) : null]
+  /* Beside a folded side column the edge takes no room in the white card. */
+  const edge = (shut) => (shut && V.shell === "Inset card" ? "0px" : "var(--gap)");
+  const cols = [hasList ? side(listShut, listW) : null, hasList ? edge(listShut) : null, "1fr",
+    hasInsp ? edge(sideShut) : null, hasInsp ? side(sideShut, sideW) : null]
     .filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
@@ -5680,7 +5812,7 @@ function render() {
   const live3d = LIVE_3D.map((s) => document.querySelector(`[data-zone="model"] ${s}`));
   document.getElementById("frame").innerHTML = `
     <div class="frame" data-nav="${navMode}" data-labels="${V.labels}" data-journey="${V.journey}"
-         data-density="${V.density}" data-swap="${V.swap}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
+         data-density="${V.density}" data-fi="${V.fidelity}" data-isolate="${V.isolate}"
          data-shell="${V.shell === "Inset card" ? "inset" : "flat"}"
          data-chrome="${V.chrome === "Black" ? "black" : "light"}"
          style="--plan:url(${sheet().webp || sheet().img})">
@@ -5726,11 +5858,13 @@ function render() {
   document.getElementById("frame").onclick = onClick;
   /* The pane that holds the sheet is rebuilt with the screen, so its wheel
      and drag are hooked back up every time it is drawn. */
+  placeFoldButtons();
   wireViewport();
   wireZoomRails();
   /* The drawing's card is written without a position and then measured to
      its own thumbnail, so it follows a tile that the pile reordered. */
   placeLayCard();
+  resumeLoads();
   /* The margin's three live parts: the pin cursor on the drawings, the
      model's projected markers, and the composer's field — which writes
      straight to state so typing never costs a re-render. */
@@ -6740,10 +6874,17 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   regionLabels: false,
   journeySteps: true,
   density: sel(["comfortable", "compact"]),
-  /* Swapping a drawing for another issue of itself is the one moment the
-     sheet changes under the eye. Five ways to say it happened, from the
-     plotter pass that draws the new sheet on, to nothing at all. */
-  swap: sel(["Plotter wipe", "Cross-fade", "Tracing lift", "Side wipe", "Instant"]),
+  /* Opening another file — a drawing on the plan, a model in the 3D — is
+     the one moment a pane changes under the eye, and heavy files take a
+     moment to read. Ten ways each to show the reading and the arrival,
+     and how long the reading takes, in seconds. */
+  fileSwap: { _collapsed: false,
+    plan: sel(["Dim + top bar", "Veil + spinner", "Status pill", "Paced plotter", "Raster bands", "Tiles",
+      "Blur to sharp", "Title block first", "Paced side wipe", "Progress ring", "Instant"]),
+    planSeconds: [1.4, 0.3, 4, 0.1],
+    model: sel(["Dim + top bar", "Veil + spinner", "Status pill", "Untextured first", "Blur to sharp", "Silhouette",
+      "Fade through paper", "Rise up", "Settle in", "Progress ring", "Instant"]),
+    modelSeconds: [2.2, 0.3, 5, 0.1] },
   shell: sel(["Inset card", "Flat"]),
   /* The dark bar: the chrome stops imitating paper, so the drawing is the
      only white thing on the screen. Green marks the level, white marks the
@@ -6805,7 +6946,10 @@ function applyDial(v) {
   V.labels = v.regionLabels;
   V.journey = v.journeySteps;
   V.density = v.density;
-  V.swap = v.swap;
+  V.planSwap = v.fileSwap.plan;
+  V.planLoad = v.fileSwap.planSeconds;
+  V.modelSwap = v.fileSwap.model;
+  V.modelLoad = v.fileSwap.modelSeconds;
   V.shell = v.shell;
   V.chrome = v.chrome;
   V.homeLayout = v.homeLayout;
