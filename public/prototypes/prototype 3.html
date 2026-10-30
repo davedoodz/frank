@@ -19,6 +19,9 @@
    What is being tested here is where things sit and in what order they are
    read, not how they look. */
 :root{
+  --tabr:12px;
+  --foot-l:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px);
+  --foot-r:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px);
   --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
   --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
   --line:#c9c9c9; --line-2:#e2e2e2;
@@ -122,23 +125,22 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    the white page under it, the way a folder's tab is the folder. The page
    grows up into the chrome where the level is named, and the join is the
    whole mark — no green, nothing to decode. */
-.tabs.lvl{height:34px;align-items:flex-end;background:none;border:0;padding:0 9px}
+.tabs.lvl{height:44px;align-items:flex-end;background:none;border:0;padding:0 9px}
 .tabs.lvl .views{flex:1;align-items:flex-end;overflow:visible}
 .tabs.lvl button{position:relative;font-size:12px;padding:0 10px;height:28px;margin-bottom:3px;
   border-radius:6px;white-space:nowrap}
 .tabs.lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 12px;
-  border-radius:8px 8px 0 0;background:var(--card);color:var(--ink);font-weight:600;--tabc:var(--card);z-index:1}
+  border-radius:var(--tabr) var(--tabr) 0 0;background:var(--card);color:var(--ink);font-weight:600;--tabc:var(--card);z-index:1}
 .tabs.lvl button[aria-current="true"]:hover{background:var(--card);color:var(--ink)}
 .tabs.lvl .div{margin-bottom:9px}
 /* The tab's two flared feet: a concave corner each side, where the page
    curves up into the tab. A masked square of the tab's own colour, so it
    is a shape the page makes, not a shading laid over it. */
 .tabs.lvl button[aria-current="true"]::before,
-.tabs.lvl button[aria-current="true"]::after{content:"";position:absolute;bottom:0;width:8px;height:8px}
-.tabs.lvl button[aria-current="true"]::before{right:100%;
-  background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tabc) 8px)}
-.tabs.lvl button[aria-current="true"]::after{left:100%;
-  background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tabc) 8px)}
+.tabs.lvl button[aria-current="true"]::after{content:"";position:absolute;bottom:0;
+  width:var(--tabr);height:var(--tabr)}
+.tabs.lvl button[aria-current="true"]::before{right:100%;background:var(--foot-l)}
+.tabs.lvl button[aria-current="true"]::after{left:100%;background:var(--foot-r)}
 /* When the first tab is the one open, it stands on the page's corner: its
    left side runs straight down into the page's left side as one edge, so
    there is no foot there and the page's own top-left corner is square —
@@ -731,14 +733,14 @@ body.elev .mtools{display:none}
 .tabs.one{height:36px;padding:0 9px}
 .tabs.two{height:38px;padding:0 9px}
 /* The screen switch at the head of the project's row. */
-.tabs.lvl .mseg{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;align-self:center;margin-top:2px;padding:2px;
-  border-radius:8px;background:rgba(255,255,255,.08)}
-.tabs.lvl .ms{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:6px;cursor:pointer;
+.tabs.lvl .mseg{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;align-self:center;padding:2px;
+  border-radius:11px;background:rgba(255,255,255,.08)}
+.tabs.lvl .ms{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:9px;cursor:pointer;
   font-size:12.5px;font-weight:500;color:rgba(255,255,255,.72);white-space:nowrap}
 .tabs.lvl .ms:hover{color:#fff}
 .tabs.lvl .ms[aria-current="true"]{background:rgba(255,255,255,.16);color:#fff;font-weight:600}
 .tabs.lvl .ms .lu{width:14px;height:14px}
-.tabs.lvl .msep{flex:0 0 1px;width:1px;height:18px;align-self:center;margin:2px 8px 0;background:rgba(255,255,255,.16)}
+.tabs.lvl .msep{flex:0 0 1px;width:1px;height:18px;align-self:center;margin:0 8px;background:rgba(255,255,255,.16)}
 .tabs.one .crumb,.tabs.two .crumb{padding:5px 10px;border-radius:7px}
 .tabs.one .crumb[data-screen]{cursor:pointer}
 .tabs.one .crumb[data-screen]:hover{background:var(--wash)}
@@ -750,11 +752,12 @@ body.elev .mtools{display:none}
    competing with the screens beside it; as a tab it labels the sheet from
    outside and gives the second row back to the screens. */
 .projtab{position:relative;align-self:flex-end;display:flex;align-items:center;height:30px;
-  padding:0 12px;border-radius:8px 8px 0 0;background:#232327;color:#fff;font-size:15px;
+  padding:0 12px;border-radius:var(--tabr) var(--tabr) 0 0;background:#232327;color:#fff;font-size:15px;
   font-weight:600;white-space:nowrap;flex:0 0 auto;margin-left:6px;--tabc:#232327}
-.projtab::before,.projtab::after{content:"";position:absolute;bottom:0;width:8px;height:8px}
-.projtab::before{right:100%;background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tabc) 8px)}
-.projtab::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tabc) 8px)}
+.projtab::before,.projtab::after{content:"";position:absolute;bottom:0;
+  width:var(--tabr);height:var(--tabr)}
+.projtab::before{right:100%;background:var(--foot-l)}
+.projtab::after{left:100%;background:var(--foot-r)}
 /* Who is signed in: the initials are the mark, the name is there because
    an office runs on several people with the same two letters. */
 .me{display:flex;align-items:center;gap:8px;padding:3px 9px 3px 3px;border-radius:999px;
@@ -808,14 +811,14 @@ body.elev .mtools{display:none}
 .frame[data-chrome="black"] .projsheet:not(:has(> .tabs.lvl)) > .tabs.two .views{align-self:stretch;align-items:flex-end;
   padding:0 8px;margin:0 -8px}
 .frame[data-chrome="black"] .projsheet:not(:has(> .tabs.lvl)) > .tabs.two button[aria-current="true"]{
-  position:relative;z-index:1;height:34px;border-radius:8px 8px 0 0;--tabc:#fff}
+  position:relative;z-index:1;height:34px;border-radius:var(--tabr) var(--tabr) 0 0;--tabc:#fff}
 .frame[data-chrome="black"] .projsheet:not(:has(> .tabs.lvl)) > .tabs.two button[aria-current="true"]::before,
 .frame[data-chrome="black"] .projsheet:not(:has(> .tabs.lvl)) > .tabs.two button[aria-current="true"]::after{
-  content:"";position:absolute;bottom:0;width:8px;height:8px}
+  content:"";position:absolute;bottom:0;width:var(--tabr);height:var(--tabr)}
 .frame[data-chrome="black"] .projsheet:not(:has(> .tabs.lvl)) > .tabs.two button[aria-current="true"]::before{right:100%;
-  background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tabc) 8px)}
+  background:var(--foot-l)}
 .frame[data-chrome="black"] .projsheet:not(:has(> .tabs.lvl)) > .tabs.two button[aria-current="true"]::after{left:100%;
-  background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tabc) 8px)}
+  background:var(--foot-r)}
 .frame[data-chrome="black"] .tabs .crumb{color:rgba(255,255,255,.58)}
 .frame[data-chrome="black"] .tabs .crumb.ech{color:rgba(255,255,255,.92)}
 .frame[data-chrome="black"] .tabs .crumb.ech:hover{background:rgba(255,255,255,.1);color:#fff}
@@ -837,12 +840,14 @@ body.elev .mtools{display:none}
    the tab meets the page. The lit crumb is one short word, so it has
    nothing to clip. */
 .tabs.one.studio .crumb.cur{position:relative;margin-bottom:0;height:32px;display:inline-flex;align-items:center;
-  overflow:visible;border-radius:8px 8px 0 0;background:var(--card);color:var(--ink);font-weight:600;z-index:1}
+  overflow:visible;border-radius:var(--tabr) var(--tabr) 0 0;background:var(--card);color:var(--ink);
+  font-weight:600;--tabc:var(--card);z-index:1}
 .frame[data-chrome] .tabs.one.studio .crumb.cur[data-screen]:hover{background:var(--card);color:var(--ink)}
 .tabs.one.studio .crumb.cur::before,
-.tabs.one.studio .crumb.cur::after{content:"";position:absolute;bottom:0;width:8px;height:8px}
-.tabs.one.studio .crumb.cur::before{right:100%;background:radial-gradient(circle at 0 0,transparent 7.5px,var(--card) 8px)}
-.tabs.one.studio .crumb.cur::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--card) 8px)}
+.tabs.one.studio .crumb.cur::after{content:"";position:absolute;bottom:0;
+  width:var(--tabr);height:var(--tabr)}
+.tabs.one.studio .crumb.cur::before{right:100%;background:var(--foot-l)}
+.tabs.one.studio .crumb.cur::after{left:100%;background:var(--foot-r)}
 .tabs.one.studio > .crumb:first-child.cur{margin-left:-9px}
 .tabs.one.studio > .crumb:first-child.cur::before{display:none}
 .body:has(.tabs.one.studio > .crumb:first-child.cur) .work{border-top-left-radius:0}
@@ -1088,6 +1093,19 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .lmenu .mi{padding:5px 8px;cursor:pointer}
 .lmenu .mi:hover{background:var(--fill-2)}
 .lmenu .mi + .mi{border-top:1px solid var(--line-2)}
+/* Where the file lives, read as part of its name: the last two folders,
+   which are what tell one drawing's file from another's. The whole path
+   is on hover and copied on a click. */
+.lcard .lcrumbs{display:flex;align-items:center;gap:2px;min-width:0;margin:-4px 0 0 27px;font-size:10.5px;
+  color:var(--ink-3);cursor:pointer}
+.lcard .lcrumbs:hover{color:var(--ink)}
+.lcard .lcrumbs .lu{width:10px;height:10px;flex:0 0 10px;opacity:.7}
+.lcard .lcrumbs .c{white-space:nowrap}
+.lcard .lcrumbs .c.last{overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* What opens the file, and what replaces it: two buttons, no menu first. */
+.lcard .lpair{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.lmenu .mi.hist .hl{display:flex;align-items:center;gap:6px}
+.lmenu .mi.hist .hl .lu{color:var(--ink-2)}
 .lmenu .mi.hist{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .lmenu .mi.hist .lu{width:12px;height:12px;flex:0 0 12px;color:var(--ink-3)}
 .lmenu .mi.hist.open{background:var(--fill-2)}
@@ -1894,8 +1912,7 @@ const V = {
   layPick: "plan",     /* the thumbnail last picked */
   layCard: false,      /* its card is held open — only while the pointer is on it */
   exportMenu: false,  /* the format list on the table's header */
-  layMenu: false,
-  layHist: false,     /* the previous-documents list inside that menu */
+  layHist: false,     /* the previous-documents list on a drawing's card */
   layCur: {},         /* per drawing, which of its documents is laid on (0 = issued) */
   laySwap: null,      /* the drawing whose document was just swapped, for the card's flash */
 };
@@ -1938,6 +1955,8 @@ function sprite() {
     "download",
     /* Codes: copying an article with its notes, writing to the person who answers for it */
     "copy", "mail", "upload", "paperclip",
+    /* a drawing's card: changing its file, the files it replaced */
+    "folder-open", "history",
     /* the 3D pane's drag tools: orbit, move */
     "rotate-3d", "move",
     /* the plan's quarter turn */
@@ -2582,13 +2601,13 @@ const layZ = (k) => layKeys().length - layKeys().indexOf(k);
 const LAYDOC = {
   plan: { short: "Architecte", disc: "Architecture", app: "AutoCAD", act: "autocad",
     thumb: () => sheet().img, file: () => dwgName(),
-    date: () => `${sheet().date} 2026`, dir: () => V.docs.dir },
+    date: () => `${sheet().date} 2026`, dir: () => `${V.docs.dir}Architecture\\Plans d'étages\\` },
   arp: { short: "Arpenteur", disc: "Arpentage", app: "AutoCAD", act: "autocad",
     thumb: () => "assets/arp-site.png", file: () => "BAL3_IMPLANTATION_2026-10-07.dwg",
-    date: () => "7 oct 2026", dir: () => `${V.docs.dir}Reçus\\` },
+    date: () => "7 oct 2026", dir: () => `${V.docs.dir}Reçus\\Arpenteur\\2026-10-07 Certificat d'implantation\\` },
   pay: { short: "Paysage", disc: "Architecture de paysage", app: "Acrobat", act: "pdfview",
     thumb: () => "assets/paysage.png", file: () => "BAL3_AMENAGEMENT-PAYSAGER_2026-07-07.pdf",
-    date: () => "7 juil 2026", dir: () => `${V.docs.dir}Reçus\\` },
+    date: () => "7 juil 2026", dir: () => `${V.docs.dir}Reçus\\Paysage\\2026-07-07 Aménagement paysager\\` },
   /* The engineering sheets are read off the issued set, so their line is
      the sheet itself — its number, its page, its file. No date is invented
      for them: the set carries none. */
@@ -2598,7 +2617,7 @@ const LAYDOC = {
     thumb: () => engSheet(d, paneLevel())?.img || "",
     file: () => engFileName(d, paneLevel()),
     date: () => { const s = engSheet(d, paneLevel()); return s ? `${engCode(s)} — p.${s.page}` : ""; },
-    dir: () => `${V.docs.dir}Reçus\\`,
+    dir: () => `${V.docs.dir}Reçus\\Ingénierie\\${d === "electrical" ? "Électricité" : "Mécanique-Plomberie"}\\Émission de coordination\\`,
   }])),
 };
 
@@ -2793,18 +2812,20 @@ function layCardHTML(peekKey = null) {
   const docs = layDocs(k), cur = V.layCur[k] || 0, doc = docs[cur];
   const past = docs.map((d, i) => ({ ...d, i })).filter((d) => d.i !== cur);
   const pdf = extOf(doc.file) === "pdf";
-  const menu = !peekKey && V.layMenu, hist = !peekKey && V.layHist;
+  const hist = !peekKey && V.layHist;
   return `<div class="lcard" data-lcard data-anchor="${k}" ${peekKey ? "data-peek" : ""}>
     <div class="hd ${V.laySwap === k ? "swapped" : ""}">${fileGlyph(doc.file)}<b>${keepTail(doc.file)}</b></div>
-    <span class="docbtn" ${act("ldoc")}>${icon("file")}Document ${icon("chevron-down")}</span>
-    ${menu ? `<div class="lmenu">
-      <span class="mi" ${act(pdf ? "pdfview" : "autocad", k)}>Ouvrir dans ${pdf ? "Acrobat" : "AutoCAD"}</span>
-      <span class="mi" ${act("lswap", k)}>Changer le document…</span>
+    <span class="lcrumbs" ${peekKey ? "" : act("lcopy", k)} title="${D.dir()}${doc.file} — cliquer pour copier le chemin">${icon("folder")}<span class="c">…</span>${icon("chevron-right")}${
+      D.dir().split("\\").filter(Boolean).slice(-2).map((s, i) => `<span class="c ${i ? "last" : ""}">${s}</span>`).join(icon("chevron-right"))}</span>
+    <div class="lpair">
+      <span class="docbtn" ${act(pdf ? "pdfview" : "autocad", k)} title="Ouvrir dans ${pdf ? "Acrobat" : "AutoCAD"}">${icon("external-link")}${pdf ? "Acrobat" : "AutoCAD"}</span>
+      <span class="docbtn" ${act("lswap", k)} title="Choisir un autre document dans ${D.dir()}">${icon("folder-open")}Changer…</span></div>
+    <div class="lmenu">
       <span class="mi hist ${hist ? "open" : ""}" ${act("lhist", k)} aria-expanded="${hist}">
-        ${cur ? "Voir les autres documents" : "Voir les documents précédents"} (${past.length})${icon("chevron-down")}</span>
+        <span class="hl">${icon("history")}${cur ? "Autres documents" : "Documents précédents"} (${past.length})</span>${icon("chevron-down")}</span>
       ${hist ? `<div class="lpast">${past.map((p) => `<span class="pd" ${act("lold", `${k}|${p.i}`)} title="Remplacer par ${p.file}">
         ${fileGlyph(p.file)}<span class="pf">${p.file}</span><span class="pdt">${p.i ? p.date : `${p.date} — émis`}</span></span>`).join("")}</div>` : ""}
-    </div>` : ""}
+    </div>
     <div class="oprow"><span class="oplbl">${icon("blend")}Opacité</span>
       <span class="optrack" data-lop="${k}" title="Opacité ${LAYDOC[k].short} — ${op}%">
         <span class="fill" style="width:${op}%"></span>
@@ -2846,7 +2867,6 @@ function clearLayPeek() {
 function dropLayCard() {
   if (!V.layCard) return;
   V.layCard = false;
-  V.layMenu = false;
   V.layHist = false;
   document.querySelectorAll("[data-lcard]:not([data-peek])").forEach((el) => el.remove());
   placeLayCard();
@@ -2877,7 +2897,6 @@ document.addEventListener("pointerdown", (e) => {
   if (!card) return;
   V.layPick = card.dataset.anchor;
   V.layCard = true;
-  V.layMenu = false;
   V.layHist = false;
   /* The borrowed card becomes the kept one, and the card it was shown
      beside gives way: one kept card at a time. */
@@ -7011,7 +7030,6 @@ function onClick(e) {
     case "lpick":
       V.layCard = false;
       V.layPick = value;
-      V.layMenu = false;
       bringLayFront(value);
       return;
     /* The last drawing on the sheet carries no badge at all, so there is
@@ -7019,7 +7037,6 @@ function onClick(e) {
     case "lstack": {
       const show = !V.lay[value].on;
       V.layPick = value;
-      V.layMenu = false;
       setLayShown(value, show);
       say(`${LAYDOC[value].short} ${show ? "affiché" : "masqué"}.`);
       return;
@@ -7065,9 +7082,13 @@ function onClick(e) {
       dial.setValue("screen", FR_SCREEN["Échéancier"]);
       break;
     }
-    case "ldoc": V.layMenu = !V.layMenu; V.layHist = false; break;
+    /* The whole path, file included, as it would be pasted into Explorer. */
+    case "lcopy":
+      navigator.clipboard?.writeText(`${LAYDOC[value].dir()}${layDoc(value).file}`).catch(() => {});
+      say(`Chemin copié: ${LAYDOC[value].dir()}${layDoc(value).file}`);
+      break;
     case "lswap":
-      V.layMenu = false; V.layHist = false;
+      V.layHist = false;
       say(`Choisir un autre document dans ${LAYDOC[value].dir()}`);
       break;
     /* The list opens in place, under its row: the card stays the one
@@ -7079,7 +7100,7 @@ function onClick(e) {
     case "lold": {
       const [lk, i] = value.split("|");
       V.layCur[lk] = Number(i);
-      V.layMenu = false; V.layHist = false;
+      V.layHist = false;
       V.laySwap = lk;
       render();
       swapFx(lk);
@@ -7088,7 +7109,6 @@ function onClick(e) {
       return;
     }
     case "pdfview":
-      V.layMenu = false;
       say(`${layDoc(value).file} — ouvert dans Acrobat.`);
       break;
     case "mtool":
