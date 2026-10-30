@@ -127,6 +127,11 @@ body[data-dt="240 · large"] .div h1{font-size:240px}
 body[data-dt="300 · huge"] .div h1{font-size:300px}
 
 .div .lede{margin-top:48px;color:#cfcfcf}
+/* a feedback section opens on the people who gave it: the photo fills the
+   slide under a flat ink scrim so the title stays readable */
+.div>.dph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.div:has(>.dph)::after{content:"";position:absolute;inset:0;background:rgba(17,17,17,.66)}
+.div:has(>.dph) .b{position:relative;z-index:1}
 .title .pdf{margin-top:48px;display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 20px;border:0;border-radius:999px;background:var(--ink);color:#fff;font:500 16px/1 var(--sans);cursor:pointer}
 .title .pdf:hover{background:var(--vert);color:var(--ink)}
 .title .pdf svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -867,6 +872,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ divider: feedback 1 -->
 <section class="s div" data-sec="Process — Feedback 1">
+<img class="dph" src="assets/frank/feedback1-users.jpg" alt="A technician at the office table, prototype 1 open on the laptop, the permit set beside it" style="object-position:50% 40%">
 <div class="b">
   <p class="big">04</p>
   <h1>Feedback 1</h1>
@@ -981,6 +987,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ divider: feedback 2 -->
 <section class="s div" data-sec="Process — Feedback 2">
+<img class="dph" src="assets/frank/feedback2-users.jpg" alt="A technician explaining a detail across the table, the laptop open between us" style="object-position:50% 30%">
 <div class="b">
   <p class="big">06</p>
   <h1>Feedback 2</h1>
