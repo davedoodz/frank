@@ -321,14 +321,30 @@ tr.hl td{background:var(--vert-pale)}
 .ba td:nth-child(3){color:var(--ink)}
 
 /* problem → reframe → decision, with the pages that explored it */
-.st{display:grid;grid-template-columns:540px 1fr;gap:56px;flex:1;min-height:0}
+/* A decision slide reads like every other slide: the eyebrow (theme — name)
+   and the title run across the top at the shared sizes; the notes and the
+   screenshots sit side by side below. The left column's wrapper is dissolved
+   so its eyebrow and title can span both columns. */
+.st{display:grid;grid-template-columns:540px 1fr;grid-template-rows:auto auto auto 1fr;column-gap:56px;flex:1;min-height:0}
+.st-t{display:contents}
+.st .pnum,.st h2,.st .rule{grid-column:1/-1}
+.st dl{grid-column:1;grid-row:4;align-self:start}
+.st h2{margin-top:18px}
+/* the screenshots take what the title leaves: the image row shrinks to fit */
+.st>.pics{grid-column:2;grid-row:4;margin-top:22px;min-height:0}
+.st>.pics.cmp:not(.elev){grid-template-rows:minmax(0,max-content) auto}
+.st>.pics.cmp .pic>a{min-height:0}
+.st>.pics.cmp:not(.elev) .pic img{max-height:100%}
+.st .pnum{display:block}
+.st .pnum>span{display:block;font-family:var(--pixel);font-size:14px;font-weight:400;letter-spacing:.09em;line-height:inherit;text-transform:uppercase;color:var(--ink-3)}
+.st .pnum .k{font-weight:400}
+.st .pnum .k::after{content:" — "}
 /* the problem's number, big and bold like a chapter mark; its name beside it */
 .pnum{display:flex;align-items:flex-end;gap:20px}
 /* The decision numbers are hidden, not deleted: saved text edits are matched
    by each block's position on its slide, and the number is block 1. */
 .pnum b{display:none}
 .pnum>span{display:flex;flex-direction:column;gap:6px;font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.1;color:var(--ink)}
-.st h2{font-size:34px;margin-top:22px}
 .st .rule{margin-top:20px}
 .st dl{margin-top:22px;display:flex;flex-direction:column;gap:8px}
 .st dl>div{display:grid;grid-template-columns:132px 1fr;gap:12px;padding:11px 16px;border-radius:10px;background:var(--fill)}
@@ -374,9 +390,9 @@ tr.hl td{background:var(--vert-pale)}
 .ide .links.on-board a svg{width:15px;height:15px}
 .ide-arrow{align-self:center;margin-top:-40px;color:var(--ink-3);font-size:18px;text-align:center}
 .pics.cmp.elev{grid-template-rows:auto auto auto auto;row-gap:0}
-.pics.cmp.elev .pic img{max-height:300px}
+.pics.cmp.elev .pic img{max-height:220px}
 .pics.cmp.elev .pic.span{grid-column:1/-1;margin-top:18px}
-.pics.cmp.elev .pic.span img{max-height:330px}
+.pics.cmp.elev .pic.span img{max-height:230px}
 .pics.cmp.wide{margin-top:32px}
 .pics.cmp.wide .pic img{max-height:470px}
 .pic .ba{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
@@ -554,7 +570,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ 02b the firm -->
 <section class="s" data-sec="Background">
 <div class="b">
-  <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
+  <div class="cols c5-7" style="margin-top:0;align-items:start;flex:1">
     <div>
       <p class="k">The firm — since 1989</p>
       <h2>I learned the trade in my father's office.</h2>
@@ -589,7 +605,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ 02 before Frank -->
 <section class="s" data-sec="Background">
 <div class="b">
-  <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
+  <div class="cols c5-7" style="margin-top:0;align-items:start;flex:1">
     <div>
       <p class="k">Before Frank</p>
       <h2>Trained in architecture first.</h2>
@@ -741,7 +757,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <section class="s" data-sec="Overview">
 <div class="b">
   <p class="k">The problem, framed</p>
-  <h2 style="font-size:52px;max-width:1250px">Give the office a memory of every change, kept with the drawings it already makes.</h2>
+  <h2 style="max-width:1250px">Give the office a memory of every change, kept with the drawings it already makes.</h2>
   <div class="rule"></div>
   <div class="cols c3 qs">
     <div><p class="qn"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></svg><span class="n">01</span></p><h3>What changed?</h3><figure class="pf"><div class="shot"><img src="assets/frank/crop-p1-change.jpg" alt="Prototype 1 gap card: window F-05-09, 1800 mm in the plan against 1560 mm in the model, since revision R03"></div><p class="cap pc"><svg class="pi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><span class="mono">V1</span>Each gap names the revision it appeared in.</p></figure></div>
@@ -864,9 +880,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ prototype 1 — annotated screen -->
 <section class="s" data-sec="Process — Prototype 1">
-<div class="b" style="padding-top:72px">
+<div class="b">
   <p class="k">Prototype 1 — Direction B</p>
-  <h2 style="font-size:44px">The plan and the model on one screen, with the gap between them named.</h2>
+  <h2>The plan and the model on one screen, with the gap between them named.</h2>
   <div class="shot full"><img src="assets/frank/p1-plateforme-b.jpg" alt="Prototype 1, direction B: the type floor plan beside the SketchUp massing, with unit 9 selected and its 240 mm window gap measured">
     <span class="mk" style="--x:32%;--y:8%">1</span>
     <span class="mk" style="--x:12.5%;--y:34%">2</span>
@@ -893,7 +909,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <!-- ============================================================ prototype 1 — what they asked for -->
 <section class="s" data-sec="Process — Feedback 1">
 <div class="b">
-  <div class="cols c5-7" style="margin-top:0;align-items:center;flex:1">
+  <div class="cols c5-7" style="margin-top:0;align-items:start;flex:1">
     <div>
       <p class="k">Feedback 1 — October 26</p>
       <h2>After prototype&nbsp;1, they asked for twenty things.</h2>
@@ -979,9 +995,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ prototype 2 — annotated screen -->
 <section class="s" data-sec="Process — Prototype 2">
-<div class="b" style="padding-top:72px">
+<div class="b">
   <p class="k">Prototype 2 — Direction C</p>
-  <h2 style="font-size:44px">One floor of the permit set, with the other trades stacked on it.</h2>
+  <h2>One floor of the permit set, with the other trades stacked on it.</h2>
   <div class="shot full"><img src="assets/frank/p2-wireframe-c3.jpg" alt="Prototype 2: level 5 with the unit and area table, the 2D plan, the 3D model and the comments">
     <span class="mk" style="--x:33.3%;--y:4.7%">1</span>
     <span class="mk" style="--x:50%;--y:33%">2</span>
@@ -1015,7 +1031,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     <div class="q"><blockquote>Both technicians focused on usability and workflow details rather than new features.</blockquote><cite>Central finding, prototype 2 testing notes</cite>
       <p style="margin-top:28px">So prototype 3 added little. It made what was there behave the way an architect expects.</p></div>
     <figure style="margin:0;display:flex;flex-direction:column;min-height:0">
-      <div class="shot" style="aspect-ratio:16/11"><img src="assets/frank/tl-feedback2.jpg" alt="Two people at the office counter, prototype 2 open on the laptop, a printed set beside it" style="object-position:50% 28%"></div>
+      <div class="shot" style="aspect-ratio:3/2"><img src="assets/frank/tl-feedback2.jpg" alt="Two people at the office counter, prototype 2 open on the laptop, a printed set beside it" style="object-position:50% 28%"></div>
       <figcaption class="cap">Test of prototype 2 at the office counter, October 28, with the permit set the screen was built from.</figcaption>
     </figure>
   </div>
@@ -1070,9 +1086,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ p3 — projects -->
 <section class="s" data-sec="Process — Prototype 3">
-<div class="b" style="padding-top:72px">
+<div class="b">
   <p class="k">Prototype 3 — Projects</p>
-  <h2 style="font-size:44px">A project starts from the drawings the office already has.</h2>
+  <h2>A project starts from the drawings the office already has.</h2>
   <div class="shot full"><img src="assets/frank/p3-projets.jpg" alt="Prototype 3 project list: Le Baldwin III and a new-project card">
     <span class="mk" style="--x:17%;--y:31%">1</span>
     <span class="mk" style="--x:30.5%;--y:21%">2</span>
@@ -1088,9 +1104,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ 30 the floor -->
 <section class="s" data-sec="Process — Prototype 3">
-<div class="b" style="padding-top:72px">
+<div class="b">
   <p class="k">Prototype 3 — The floor</p>
-  <h2 style="font-size:44px">The area table, the plan, the model and the comments, all on one unit.</h2>
+  <h2>The area table, the plan, the model and the comments, all on one unit.</h2>
   <div class="shot full"><img src="assets/frank/p3-niveau.jpg" alt="Prototype 3 floor screen">
     <span class="mk" style="--x:17.5%;--y:44%">1</span>
     <span class="mk" style="--x:28%;--y:57%">2</span>
@@ -1106,9 +1122,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ p3 — whole building -->
 <section class="s" data-sec="Process — Prototype 3">
-<div class="b" style="padding-top:72px">
+<div class="b">
   <p class="k">Prototype 3 — The whole building</p>
-  <h2 style="font-size:44px">Every floor at once: the unit mix the developer prices from.</h2>
+  <h2>Every floor at once: the unit mix the developer prices from.</h2>
   <div class="shot full"><img src="assets/frank/p3-batiment.jpg" alt="Prototype 3 whole-building view: unit types per floor beside the full building model">
     <span class="mk" style="--x:24%;--y:45%">1</span>
     <span class="mk" style="--x:11.5%;--y:21%">2</span>
@@ -1124,9 +1140,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ p3 — elevations -->
 <section class="s" data-sec="Process — Prototype 3">
-<div class="b" style="padding-top:72px">
+<div class="b">
   <p class="k">Prototype 3 — Elevations</p>
-  <h2 style="font-size:44px">The model turns to the façade being checked.</h2>
+  <h2>The model turns to the façade being checked.</h2>
   <div class="shot full"><img src="assets/frank/p3-elevation.jpg" alt="Prototype 3 floor screen with the model turned to the east elevation">
     <span class="mk" style="--x:61%;--y:19%">1</span>
     <span class="mk" style="--x:28%;--y:57%">2</span>
@@ -1142,9 +1158,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ 31 conflicts -->
 <section class="s" data-sec="Process — Prototype 3">
-<div class="b" style="padding-top:72px">
+<div class="b">
   <p class="k">Prototype 3 — Conflicts</p>
-  <h2 style="font-size:44px">One click from a conflict to the two drawings that cause it.</h2>
+  <h2>One click from a conflict to the two drawings that cause it.</h2>
   <div class="shot full"><img src="assets/frank/p3-conflits.jpg" alt="Prototype 3 conflicts">
     <span class="mk" style="--x:90%;--y:40%">1</span>
     <span class="mk" style="--x:28%;--y:57%">2</span>
@@ -1160,9 +1176,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ 32 codes -->
 <section class="s" data-sec="Process — Prototype 3">
-<div class="b" style="padding-top:72px">
+<div class="b">
   <p class="k">Prototype 3 — Codes</p>
-  <h2 style="font-size:44px">The code study as a living list, read in the office's words.</h2>
+  <h2>The code study as a living list, read in the office's words.</h2>
   <div class="shot full"><img src="assets/frank/p3-codes.jpg" alt="Prototype 3 codes">
     <span class="mk" style="--x:50%;--y:22%">1</span>
     <span class="mk" style="--x:23.7%;--y:35.3%">2</span>
@@ -1178,9 +1194,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 
 <!-- ============================================================ 33 échéancier -->
 <section class="s" data-sec="Process — Prototype 3">
-<div class="b" style="padding-top:72px">
+<div class="b">
   <p class="k">Prototype 3 — Échéancier</p>
-  <h2 style="font-size:44px">Deadlines that lead back to the project.</h2>
+  <h2>Deadlines that lead back to the project.</h2>
   <div class="shot full"><img src="assets/frank/p3-echeancier.jpg" alt="Prototype 3 schedule">
     <span class="mk" style="--x:95.8%;--y:23.4%">1</span>
     <span class="mk" style="--x:60.6%;--y:40.3%">2</span>
