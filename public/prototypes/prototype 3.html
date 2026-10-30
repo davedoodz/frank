@@ -606,6 +606,17 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .fqh > *{flex:none;white-space:nowrap}
 .fqh > .fqs{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;contain:inline-size}
 .fqn{font-size:11px;color:var(--ink-3)}
+/* The pane holds three tables about one floor, so its title names the
+   figures and a segment in the same line says which of the three is under
+   the eye. The jump costs no row: it rides in the header the title was
+   already using, and it follows the scroll, because a jump control that
+   does not move with the wheel lies as soon as the wheel is touched. */
+.secseg{display:flex;gap:2px;flex:0 0 auto;padding:2px;background:var(--fill);border-radius:8px}
+.secseg .ss{height:22px;padding:0 8px;border-radius:6px;display:flex;align-items:center;
+  font-size:11.5px;color:var(--ink-2);cursor:pointer;user-select:none;white-space:nowrap}
+.secseg .ss:hover{background:var(--wash)}
+.secseg .ss[aria-current="true"]{background:var(--card);color:var(--ink);font-weight:600;
+  box-shadow:0 1px 2px rgba(17,17,18,.12)}
 .fq-unit{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:10px}
 /* Façade tables: the head row opens the elevation, a material row keeps
    that material in colour. The swatch is the colour the model paints it. */
@@ -4346,14 +4357,14 @@ function fqWindowsHTML(u) {
   const ft2 = window.fitteMaterials.FT2_PER_UNIT2;
   const sum = (k) => rows.reduce((s, f) => s + f[k], 0);
   const cell = (c, n) => `<td class="${n ? "n" : ""}">${c}</td>`;
-  return `<table class="tbl"><thead><tr><th>Ouvertures</th><th class="n">Fenêtres</th><th class="n">Portes-patio</th><th class="n">Vitrage pi²</th></tr></thead>
+  return `<table class="tbl"><thead><tr><th>Façade</th><th class="n">Fenêtres</th><th class="n">Portes-patio</th><th class="n">Vitrage pi²</th></tr></thead>
     <tbody>${rows.map((f) => `<tr>${cell(`Façade ${f.face}`)}${cell(f.windows, 1)}${cell(f.doors, 1)}${cell(fqNum(f.glass * ft2), 1)}</tr>`).join("")}</tbody>
     <tfoot><tr>${cell("Total")}${cell(sum("windows"), 1)}${cell(sum("doors"), 1)}${cell(fqNum(sum("glass") * ft2), 1)}</tr></tfoot></table>`;
 }
 
 function fqUnitHTML(q) {
-  return `<div class="fq-unit" data-fq>
-    <div class="fqh">${icon("box")}<span>Unité ${q.u || "—"}</span><span class="fqs">${q.unit ? `${q.unit[5]} — ${fqNum(q.unit[6])} pi²` : ""}</span></div>
+  return `<div class="fq-unit" data-sec="o" data-fq>
+    <div class="fqh">${icon("app-window")}<span>Ouvertures</span><span class="fqs">${q.u ? `unité ${q.u}${q.unit ? ` — ${q.unit[5]}` : ""}` : "aucune unité choisie"}</span></div>
     ${fqWindowsHTML(q.u)}</div>`;
 }
 
@@ -4371,7 +4382,7 @@ function facadeTablesHTML() {
   const open = V.facade;
   const head = `<div class="fqh">${icon("layers")}<span>Matériaux par façade</span>${issueBadge(["mat"])}<span class="fqs">pi² vus en élévation</span>
     ${open ? `<span style="flex:1"></span><span class="btnw sm" ${act("facade", open.face)} title="Revenir à la vue 3D">${icon("rotate-3d")}<span class="hi">Vue 3D</span></span>` : ""}</div>`;
-  if (!data) return `<div class="fq-fac" data-facades>${head}<div class="fqn">Lecture de la maquette 3D…</div></div>`;
+  if (!data) return `<div class="fq-fac" data-sec="m" data-facades>${head}<div class="fqn">Lecture de la maquette 3D…</div></div>`;
   const tables = FACADES.map((face) => {
     const rows = data[face].filter((r) => r.ft2 >= 1);
     const total = rows.reduce((s, r) => s + r.ft2, 0);
@@ -4397,7 +4408,7 @@ function facadeTablesHTML() {
       <tbody>${body}</tbody>
       <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td><td class="fdd"></td></tr></tfoot></table>`;
   }).join("");
-  return `<div class="fq-fac" data-facades>${head}${tables}</div>`;
+  return `<div class="fq-fac" data-sec="m" data-facades>${head}${tables}</div>`;
 }
 
 /* A material's sheet, opened under its row: the legend's swatch, then what
@@ -4485,18 +4496,53 @@ function exportMenuHTML() {
   </span>`;
 }
 
+/* The three blocks of the pane, named once: the switch in the header, the
+   scroll spy and the section heads all read this list, so a target cannot
+   drift from the thing it jumps to. */
+const FQ_SECS = [
+  { id: "u", short: "Unités", long: "Unités et superficies", icon: "table" },
+  { id: "o", short: "Ouvertures", long: "Ouvertures", icon: "app-window" },
+  { id: "m", short: "Matériaux", long: "Matériaux par façade", icon: "layers" },
+];
+
 function unitListHTML(step) {
   const q = floorQuant();
-  return region("list", "liste — unités et superficies",
-    `<div class="ph">${icon("table")}<span class="hi">Unités et superficies</span><span class="fqs">${q.level}</span>${issueBadge(["unit", "mat"])}
-       <span style="flex:1"></span>${exportMenuHTML()}</div>
-     <div class="pb" style="overflow:auto;gap:10px">
-       ${fqMixHTML(q)}
-       ${fqTableHTML(q)}
+  return region("list", "liste — statistiques du niveau",
+    `<div class="ph">${icon("bar-chart-3")}<span class="hi">Statistiques</span><span class="fqs">${q.level}</span>${issueBadge(["unit", "mat"])}
+       <span style="flex:1"></span>
+       <span class="secseg" role="group" aria-label="Section">${FQ_SECS.map((s) =>
+         `<span class="ss" ${act("fqsec", s.id)} aria-current="${s.id === "u"}"
+            title="Aller à ${s.long.toLowerCase()}">${s.short}</span>`).join("")}</span>
+       ${exportMenuHTML()}</div>
+     <div class="pb" data-fqscroll style="overflow:auto;gap:10px">
+       <div data-sec="u" style="display:flex;flex-direction:column;gap:10px">
+         <div class="fqh">${icon("table")}<span>Unités et superficies</span><span class="fqs">${q.count} unités</span></div>
+         ${fqMixHTML(q)}
+         ${fqTableHTML(q)}
+       </div>
        ${fqUnitHTML(q)}
        ${facadeTablesHTML()}
      </div>`, step);
 }
+
+/* Which block is under the eye: the last section head that has reached the
+   top of the scroller. The switch is painted in place, not re-rendered, so
+   the scroll it reports is not the scroll it destroys. */
+function paintFQSec() {
+  const box = document.querySelector("[data-fqscroll]");
+  if (!box) return;
+  const top = box.getBoundingClientRect().top + 2;
+  let at = FQ_SECS[0].id;
+  FQ_SECS.forEach((s) => {
+    const el = box.querySelector(`[data-sec="${s.id}"]`);
+    if (el && el.getBoundingClientRect().top <= top + 1) at = s.id;
+  });
+  document.querySelectorAll('.secseg .ss[data-act="fqsec"]')
+    .forEach((el) => el.setAttribute("aria-current", String(el.dataset.value === at)));
+}
+document.addEventListener("scroll", (e) => {
+  if (e.target instanceof HTMLElement && e.target.hasAttribute("data-fqscroll")) paintFQSec();
+}, true);
 
 /* A new selection redraws the table and the unit block, not the drawings. */
 function paintFQ() {
@@ -7029,6 +7075,16 @@ function onClick(e) {
     case "skplist": V.docs.skpList = !V.docs.skpList; V.docs.skpHist = false; break;
     case "skppick": skpPick(Number(value)); return;
     case "expmenu": V.exportMenu = !V.exportMenu; break;
+    /* A jump is not a state change: scrolling the pane and then rendering
+       it would throw away the scroll that was just asked for. */
+    case "fqsec": {
+      const box = document.querySelector("[data-fqscroll]");
+      const el = box?.querySelector(`[data-sec="${value}"]`);
+      if (!el) return;
+      box.scrollTo({ top: el.offsetTop - box.offsetTop, behavior: "smooth" });
+      setTimeout(paintFQSec, 400);
+      return;
+    }
     case "export": {
       V.exportMenu = false;
       const name = EXPORTS.find(([k]) => k === value)?.[1] || value;
