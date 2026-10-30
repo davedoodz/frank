@@ -125,12 +125,15 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    whole mark — no green, nothing to decode. */
 .tabs.lvl{height:44px;align-items:flex-end;background:none;border:0;padding:0 9px}
 .tabs.lvl .views{flex:1;align-items:flex-end;overflow:visible}
-.tabs.lvl button{position:relative;font-size:12px;padding:0 10px;height:28px;margin-bottom:3px;
+/* The row's words sit in its middle: as much dark above them as below
+   (8.5 px each way in the 44 px row). The open tab grows by the same 5 px
+   so it still stands on the page. */
+.tabs.lvl button{position:relative;font-size:12px;padding:0 10px;height:28px;margin-bottom:8px;
   border-radius:6px;white-space:nowrap}
-.tabs.lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 12px 3px;
+.tabs.lvl button[aria-current="true"]{height:36px;margin-bottom:0;padding:0 12px 8px;
   border-radius:var(--tabr) var(--tabr) 0 0;background:var(--card);color:var(--ink);font-weight:600;--tabc:var(--card);z-index:1}
 .tabs.lvl button[aria-current="true"]:hover{background:var(--card);color:var(--ink)}
-.tabs.lvl .div{margin-bottom:9px}
+.tabs.lvl .div{margin-bottom:14px}
 /* The tab's two flared feet: a concave corner each side, where the page
    curves up into the tab. A masked square of the tab's own colour, so it
    is a shape the page makes, not a shading laid over it. */
@@ -335,6 +338,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    codes no longer share the width three ways, so an article reads at the
    full width of the card — drawing at the left, sentence at the right —
    instead of in a column narrow enough to stack them. */
+.crumb .omark{width:14px;height:14px;flex:0 0 14px;color:#c0d739}
 .codelist{display:flex;flex-direction:column;gap:8px}
 .codelist .codeempty{font-size:12px;color:var(--ink-3);padding:4px 2px}
 /* The question bar of a code: the whole code is read, in the office's
@@ -344,14 +348,11 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .cask{display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 10px;border:1px solid var(--line);border-radius:7px;background:var(--card);margin-bottom:8px}
 .cask:focus-within{border-color:var(--ink)}
 .cask svg{width:14px;height:14px;color:var(--ink-3);flex:none}
-.cask .in{display:inline-flex;align-items:center;height:21px;padding:0 7px;border-radius:5px;background:var(--fill);font-size:11.5px;color:var(--ink-2);white-space:nowrap}
 .cask input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:12.5px;color:var(--ink);background:transparent}
 .cask input::placeholder{color:var(--ink-3)}
 .cask .x{display:none}
 .cask.has .x{display:flex}
-.cask.has kbd{display:none}
-.cask .x,.cask kbd{align-items:center;color:var(--ink-3);cursor:pointer;padding:3px}
-.cask kbd{display:flex;font:inherit;font-size:11px;border:1px solid var(--line-2);border-radius:4px;height:20px;padding:0 5px;cursor:default}
+.cask .x{align-items:center;color:var(--ink-3);cursor:pointer;padding:3px}
 .cans{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .cans:empty{display:none}
 .cprog{display:flex;align-items:center;gap:12px;font-size:11.5px;color:var(--ink-3);flex-wrap:wrap}
@@ -799,14 +800,14 @@ body.elev .mtools{display:none}
 /* The screen switch at the head of the project's row. It sits on the
    tabs' line, not the row's middle: its words and the level names read
    as one line of text. */
-.tabs.lvl .mseg{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;align-self:flex-end;margin-bottom:1.5px;padding:2px;
+.tabs.lvl .mseg{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;align-self:flex-end;margin-bottom:6.5px;padding:2px;
   border-radius:11px;background:rgba(255,255,255,.08)}
 .tabs.lvl .ms{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:9px;cursor:pointer;
   font-size:12.5px;font-weight:500;color:rgba(255,255,255,.72);white-space:nowrap}
 .tabs.lvl .ms:hover{color:#fff}
 .tabs.lvl .ms[aria-current="true"]{background:rgba(255,255,255,.16);color:#fff;font-weight:600}
 .tabs.lvl .ms .lu{width:14px;height:14px}
-.tabs.lvl .msep{flex:0 0 1px;width:1px;height:18px;align-self:flex-end;margin:0 8px 8px;background:rgba(255,255,255,.16)}
+.tabs.lvl .msep{flex:0 0 1px;width:1px;height:18px;align-self:flex-end;margin:0 8px 13px;background:rgba(255,255,255,.16)}
 .tabs.one .crumb,.tabs.two .crumb{padding:5px 10px;border-radius:7px}
 .tabs.one .crumb[data-screen]{cursor:pointer}
 .tabs.one .crumb[data-screen]:hover{background:var(--wash)}
@@ -817,13 +818,21 @@ body.elev .mtools{display:none}
    project on the sheet itself left the sheet unlabelled above and the name
    competing with the screens beside it; as a tab it labels the sheet from
    outside and gives the second row back to the screens. */
-.projtab{position:relative;align-self:flex-end;display:flex;align-items:center;height:30px;
-  padding:0 12px;border-radius:var(--tabr) var(--tabr) 0 0;background:var(--ch1);color:#fff;font-size:15px;
-  font-weight:600;white-space:nowrap;flex:0 0 auto;margin-left:6px;--tabc:var(--ch1)}
+.projtab{position:relative;align-self:flex-end;display:flex;align-items:center;height:32px;
+  padding:0 12px;border-radius:var(--tabr) var(--tabr) 0 0;background:var(--ch1);color:#fff;font-size:12.5px;
+  font-weight:500;white-space:nowrap;flex:0 0 auto;margin-left:6px;--tabc:var(--ch1)}
 .projtab::before,.projtab::after{content:"";position:absolute;bottom:0;
   width:var(--tabr);height:var(--tabr)}
 .projtab::before{right:100%;background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
 .projtab::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px)}
+/* Away from the project, its name is one more item on the studio's line:
+   no sheet under it, so no tab — the same 26 px pill as the schedule, the
+   same lift under the pointer. Its text stays where it was. */
+.projtab.away{cursor:pointer;height:26px;margin-bottom:3px;border-radius:7px;background:none;color:rgba(255,255,255,.92)}
+.projtab.away::before,.projtab.away::after{display:none}
+.projtab.away:hover{background:rgba(255,255,255,.1);color:#fff}
+[data-tone-top="green"] .frame[data-chrome="black"] .projtab.away{color:#141416}
+[data-tone-top="green"] .frame[data-chrome="black"] .projtab.away:hover{background:rgba(0,0,0,.08)}
 /* Who is signed in: the initials are the mark, the name is there because
    an office runs on several people with the same two letters. */
 .me{display:flex;align-items:center;gap:8px;padding:3px 9px 3px 3px;border-radius:999px;
@@ -898,8 +907,15 @@ body.elev .mtools{display:none}
    it, the same folder tab as a level: it grows down into the page, with a
    flared foot each side. The first one stands on the page's corner — one
    straight left edge, the tab's rounded top as the corner. */
-.tabs.one.studio{align-items:flex-end}
-.tabs.one.studio > *{margin-bottom:4px}
+/* The studio's line holds still whichever page is open: every item keeps
+   its place, its weight and its text line (centre 20 px down the 36 px
+   row); only the fill says which page is read. The crumbs are 26 px pills
+   standing 3 px off the floor; the open one and the project's tab are
+   32 px tabs standing on it, with nothing between them and the page. */
+.tabs.one{align-items:flex-end}
+.tabs.one > .crumb,.tabs.one > .crumb.ech{height:26px;margin-bottom:3px;padding-top:0;padding-bottom:0}
+.tabs.one > .me,.tabs.one > .btnw{align-self:center}
+.tabs.one .crumb.cur:not(.ech){font-weight:400}
 /* overflow:visible is what makes the feet appear at all: a crumb clips its
    own overflow so a long project name ends in an ellipsis, and that clip
    was cutting the two flared feet off flush, leaving a square step where
@@ -907,14 +923,14 @@ body.elev .mtools{display:none}
    nothing to clip. */
 .tabs.one.studio .crumb.cur{position:relative;margin-bottom:0;height:32px;display:inline-flex;align-items:center;
   overflow:visible;border-radius:var(--tabr) var(--tabr) 0 0;background:var(--card);color:var(--ink);
-  font-weight:600;--tabc:var(--card);z-index:1}
+  --tabc:var(--card);z-index:1}
 .frame[data-chrome] .tabs.one.studio .crumb.cur[data-screen]:hover{background:var(--card);color:var(--ink)}
 .tabs.one.studio .crumb.cur::before,
 .tabs.one.studio .crumb.cur::after{content:"";position:absolute;bottom:0;
   width:var(--tabr);height:var(--tabr)}
 .tabs.one.studio .crumb.cur::before{right:100%;background:radial-gradient(circle at 0 0,transparent 11.2px,var(--tabc) 12.3px)}
 .tabs.one.studio .crumb.cur::after{left:100%;background:radial-gradient(circle at 100% 0,transparent 11.2px,var(--tabc) 12.3px)}
-.tabs.one.studio > .crumb:first-child.cur{margin-left:-9px}
+.tabs.one.studio > .crumb:first-child.cur{margin-left:-9px;padding-left:13px}
 .tabs.one.studio > .crumb:first-child.cur::before{display:none}
 .body:has(.tabs.one.studio > .crumb:first-child.cur) .work{border-top-left-radius:0}
 .frame[data-chrome="black"] .tabs .crumb.on{color:#fff;font-size:13px}
@@ -1051,7 +1067,6 @@ body.elev .mtools{display:none}
    2000×1675 canvas, so they fill the box edge to edge rather than being
    scaled and centred the way the surveyor's differently-cropped sheet is. */
 .plan .lay.eng{inset:0;background-size:100% 100%;mix-blend-mode:multiply}
-.model-context-note{padding:6px 10px;font-size:11px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
 /* The engineering chips keep the row under the pane header; the three
    drawings moved out of it and into the strip. */
 /* The floor's mix: one band per type, carrying its own name at its leading
@@ -2024,6 +2039,9 @@ const V = {
 };
 
 const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
+/* The office's mark, traced from its file to three shapes so it holds at
+   any size; drawn in the office green. */
+const OFFICE_MARK = `<svg class="omark" viewBox="0 0 1342 1341" aria-hidden="true"><g fill="currentColor"><path d="M0 0H145V1340H0Z"/><path d="M168 0H618V1340H283V341L572 667V454Z"/><path d="M752 0H1342V1320L797 708V960L1035 1229H752Z"/></g></svg>`;
 /* The pin just put down, drawn inline rather than from the sprite: the
    sprite's symbols carry fill="none", which the drop's white body cannot
    override through <use>. Same outline as the pin on the pointer. */
@@ -3754,9 +3772,9 @@ const codeFound = (label, q) => { const c = codeQ(); return codeSearch(label, q,
 
 function codeAskBarHTML(label) {
   const c = codeQ();
-  return `<label class="cask ${c.q ? "has" : ""}">${icon("search")}<span class="in">dans ${label}</span>
+  return `<label class="cask ${c.q ? "has" : ""}">${icon("search")}
     <input data-codeq value="${c.q.replace(/"/g, "&quot;")}" placeholder="Poser une question ${label === "Loi-cadre" ? "à la Loi-cadre" : `au ${label}`} — ex. « ${{ "Code du Québec": "largeur de porte fauteuil roulant", "Loi-cadre": "peut-on dépasser la hauteur", "Règlement d'urbanisme": "combien de cases pour les logements" }[label]} »" autocomplete="off" spellcheck="false">
-    <span class="x" ${act("codeqclear")} title="Effacer">${icon("x")}</span><kbd>↵</kbd></label>`;
+    <span class="x" ${act("codeqclear")} title="Effacer">${icon("x")}</span></label>`;
 }
 function codeAskHTML(label) {
   const c = codeQ();
@@ -4249,7 +4267,9 @@ function tabsHTML() {
      on every screen; on the index itself they are the only thing in it. */
   const late = lateCount();
   const idxOn = V.screen === "Projets";
-  const back = `<span class="crumb hi ${idxOn ? "cur" : ""}" data-screen="Projets" aria-current="${idxOn}" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
+  /* The office's mark stands where the folder was: the way home is the
+     office's own sign, and the strip gains nothing to read. */
+  const back = `<span class="crumb hi ${idxOn ? "cur" : ""}" data-screen="Projets" aria-current="${idxOn}" title="Tous les projets">${OFFICE_MARK}Tous les projets</span>`;
   /* The studio's schedule is not a step on the way into this project, so it
      leaves the path on the left and sits at the right end of the strip with
      the other things that are about leaving: it is a door out, like Partager
@@ -4264,10 +4284,14 @@ function tabsHTML() {
      screen being read is lit in it — the index, the schedule — and on a
      project screen neither is, because the project's own row is below. */
   const me = `<span class="me" title="${ME.name}"><i>${ME.ini}</i><span class="hi">${ME.name}</span></span>`;
-  /* The tab belongs to the sheet it names: on the index and on the studio's
-     schedule there is no project open and no sheet under the line, so the
-     name is not there to be read either. */
-  const projTab = studio ? "" : `<span class="projtab">${V.project}</span>`;
+  /* The project's tab stays on the studio's line on every page. On the
+     index and the schedule no project is open, so it is a tab behind the
+     page rather than the top of a sheet: a click on it goes back to the
+     screen the project was last read on. */
+  if (!studio) V.projBack = V.screen;
+  const projTab = studio
+    ? `<span class="projtab away" data-screen="${V.projBack || "Unités"}" title="Revenir à ${V.project}">${V.project}</span>`
+    : `<span class="projtab">${V.project}</span>`;
   /* Sharing names the project it shares, so on a project screen it sits on
      the studio's line, after the project's tab, beside the person sharing. */
   const shareTop = studio || mode !== "Two rows, no rail" ? "" : `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
@@ -4509,7 +4533,6 @@ function contentHTML() {
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>${kind === "plan" ? issueBadge(["plan"]) : skpChipHTML()}
         <span style="flex:1"></span>
         ${hostButton(kind === "plan" ? "plan" : "model")}</div>
-        ${kind !== "plan" && !buildingScope() && isNonresLevel(paneLevel()) ? `<div class="model-context-note hi">${note}</div>` : ""}
         ${kind === "plan"
           /* The sheet is larger than the pane, so the pane is a window onto
              it: the drawing, the consultants' layers, the typology fills and
@@ -4543,9 +4566,6 @@ function contentHTML() {
          the full width there. The roof is in the model, so it keeps both. */
       const whole = buildingScope();
       const noModel = !whole && (paneLevel() === -1 || paneLevel() === 0);
-      const modelNote = whole ? "Bâtiment entier — volumétrie"
-        : paneLevel() === 9 ? "Toiture — bandeau et repère affichés sur la maquette"
-        : `${unit} — volumétrie, même niveau`;
       /* The two drawings share the width and the edge between them moves:
          a plan read closely wants the window, a massing check wants the
          opposite. Folding either one gives the other everything, which is
@@ -4555,9 +4575,9 @@ function contentHTML() {
       /* An explicit width only means something while both are open. */
       const planFlex = planW && !modelShut ? `0 0 ${planW}px` : "1";
       const plan = () => pane("Plan 2D", planNote, "plan", "align", typoHTML() + layersHTML(), planFlex);
-      const model = () => (noModel ? "" : pane("Maquette 3D", modelNote, "model", "fit"));
+      const model = () => (noModel ? "" : pane("Maquette 3D", "", "model", "fit"));
       /* The whole building has no plan of its own: the model takes the width. */
-      if (whole) return `<div class="row" style="flex:1;align-items:stretch;gap:0;min-height:0">${pane("Maquette 3D", modelNote, "model", "fit")}</div>`;
+      if (whole) return `<div class="row" style="flex:1;align-items:stretch;gap:0;min-height:0">${pane("Maquette 3D", "", "model", "fit")}</div>`;
       if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
       if (mode === "Single pane + inset") return `<div class="col" style="flex:1;gap:var(--gap)">
         <div style="position:relative;flex:1;display:flex">${plan()}
@@ -4579,7 +4599,7 @@ function contentHTML() {
       return `<div class="col" style="flex:1;gap:var(--gap)">
         <div class="pane" style="flex:0 0 auto">
           <div class="ph">${icon("hash")}<span class="lo bar" style="width:90px"></span>
-            <span class="hi">${label}</span><span class="fqs hi">${rows.length} article${rows.length > 1 ? "s" : ""} suivi${rows.length > 1 ? "s" : ""}</span>
+            <span class="hi">${label}</span>
             <span style="flex:1"></span>
             <span class="btnw solid" ${act("addcode")}>${icon("plus")}<span class="hi">Ajouter</span></span></div>
           <div class="pb">
