@@ -1745,6 +1745,8 @@ body:has([data-skppop]) .lcard{visibility:hidden}
    does in the margin; the shape stays the one the eye looks for. */
 .npin.team .nd{background:#dbe4e9;color:#2f4858;border-color:#2f4858}
 .npin.on .nd{background:var(--ink);color:#fff;border-color:var(--ink);border-style:solid}
+/* The selected pin and its label are read above every other pin. */
+.npin.on{z-index:17}
 
 .npin .nl{position:absolute;left:15px;top:-13px;background:#fff;border:1px solid var(--line);
   border-radius:5px;padding:2px 7px;font-size:10.5px;color:var(--ink);white-space:nowrap;max-width:190px;
@@ -1911,8 +1913,9 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 /* Ready to be saved: the project's green, the same one the selected level
    wears, so the one colour means "this is live" everywhere. */
 [data-fi="high"] .btnw.solid.go{background:#8ba00f;border-color:#8ba00f;color:#fff}
-/* The pin's own send: the green the armed « Commenter » and the pin
-   cursor wear, so the pin is green from arming to posting. */
+/* Every « Commenter » send, on the plan, in the margin and on an article:
+   the green the armed « Commenter » and the pin cursor wear, so a comment
+   is green from arming to posting. */
 [data-fi="high"] .btnw.solid.pingo{background:#c3e05a;border-color:#c3e05a;color:#2f3a05}
 /* Nothing written yet: the send button waits in grey, and takes its full
    colour with the first character. */
@@ -3768,6 +3771,10 @@ function gutter({ size, grab, prev, next, lprev, lnext }) {
 }
 /* Which way each pane folds: toward the screen's edge it sits against. */
 const FOLD_SIDE = { list: "left", plan: "left", cal: "left", side: "right", model: "right", todo: "right" };
+/* The glyph a strip wears when it was never folded by hand — « Bâtiment
+   entier » folds the sheet itself, so there is no header to read it off.
+   Each one is the glyph that pane's own header carries. */
+const FOLD_GLYPH = { list: "table", plan: "file", cal: "calendar-check", side: "message-square", model: "box", todo: "list-checks" };
 const foldBtnHTML = (key, label) => `<span class="fbtn" ${act("gutfold", key)} data-fold="${key}"
   title="Replier ${label}">${icon(`panel-${FOLD_SIDE[key] || "left"}-close`)}</span>`;
 /* Every pane an edge separates gets the button at the end of its header. */
@@ -3789,7 +3796,7 @@ function foldStripHTML(key, label) {
   const h = V.foldHead[splitKey(key)] || {};
   return `<section class="pane fstrip" ${act("gutfold", key)} data-strip="${key}" title="Déplier ${label}">
     <div class="ph"><span class="fbtn">${icon(`panel-${FOLD_SIDE[key] || "left"}-open`)}</span></div>
-    <div class="fsv"><span>${h.t || gutName(label)}</span>${icon(h.ic || "list")}</div></section>`;
+    <div class="fsv"><span>${h.t || gutName(label)}</span>${icon(h.ic || FOLD_GLYPH[key] || "list")}</div></section>`;
 }
 const bars = (n, w = [100, 70, 85]) =>
   Array.from({ length: n }, (_, i) => `<div class="bar" style="width:${w[i % w.length]}%"></div>`).join("");
@@ -5456,7 +5463,7 @@ function codeSideHTML(a) {
     ${V.noteEdit ? "" : `<div class="ncard acmt new">
       <textarea class="noteinput" data-note="${a.id}" rows="3" placeholder="Commenter l'article ${a.id}…"></textarea>
       <div class="row" style="justify-content:flex-end">
-        <span class="btnw solid go wait" ${act("notesave", a.id)} title="Commenter (⌘↵)">${icon("send")}<span class="hi">Commenter</span></span>
+        <span class="btnw solid pingo wait" ${act("notesave", a.id)} title="Commenter (⌘↵)">${icon("send")}<span class="hi">Commenter</span></span>
       </div></div>`}
     <div class="cfoot">
       <div class="clbl">${icon("users")}<span class="hi">Interlocuteurs</span><i>${Object.keys(CONTACTS).length}</i></div>
@@ -5703,7 +5710,7 @@ function marginHTML() {
             ? `<span class="chip pinned" ${act("markpin")} title="Épinglé: ${pinAnchor(V.mAnchor)} — cliquer pour retirer l'épingle">${icon("map-pin")}<span class="lb">Épinglé au plan</span></span>`
             : `<span class="chip ${V.pinMode && V.pinFor === "margin" ? "on" : ""}" ${act("markpin")} title="Armer l'épingle, puis cliquer un point du plan">${icon("map-pin")}<span class="lb">${V.pinMode && V.pinFor === "margin" ? "Cliquez le plan" : "Épingler au plan"}</span></span>`}
           <span style="flex:1"></span>
-          <span class="btnw solid go ${V.mdraft.trim() ? "" : "wait"}" ${act("postnote")}>${icon("send")}<span class="hi">Commenter</span></span>
+          <span class="btnw solid pingo ${V.mdraft.trim() ? "" : "wait"}" ${act("postnote")}>${icon("send")}<span class="hi">Commenter</span></span>
         </div></div>`;
   /* Two lists in one margin: what people said, and what is wrong. The
      conflicts carry the alarm so they are not read as one more comment. */
