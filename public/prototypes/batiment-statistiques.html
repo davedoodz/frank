@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Bâtiment entier — structurer les statistiques</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* At the scale of one floor the materials pane is four short tables. At
+   the scale of the building it is the same four tables with every façade
+   of eight storeys in them: thirty-five rows, nine of which are the same
+   nine materials said four times. The units half barely changes — a floor
+   becomes a row — so every option below keeps it as it is and only
+   restructures the envelope. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#ededed;--fill-2:#f6f6f7;--page:#fafafa;--card:#fff;--wash:rgba(17,17,18,.055);
+  --t3:#e0736e;--t4:#5b9bd5;--t5:#5cb46e;--red:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.45 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--page)}
+main{padding:24px 28px 80px;max-width:1700px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:940px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:24px;margin-top:24px}
+section > h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section > h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section > p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:5.8em}
+
+.pane{background:var(--card);border:1px solid var(--line-2);border-radius:10px;overflow:hidden;
+  display:flex;flex-direction:column;height:640px}
+.ph{display:flex;align-items:center;gap:8px;min-height:38px;padding:0 10px;flex:0 0 auto;white-space:nowrap;
+  border-bottom:1px solid var(--line-2);font-size:13px;font-weight:500}
+.ph .n{color:var(--ink-3);font-size:12px;font-weight:400}
+.scroll{overflow-y:auto;flex:1;scrollbar-width:thin;scroll-behavior:smooth}
+.sec{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:7px;padding:8px 12px;
+  background:var(--fill-2);border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
+  font-weight:600;font-size:12.5px;white-space:nowrap}
+.sec .q{margin-left:auto;font-weight:400;font-size:11.5px;color:var(--ink-3)}
+.sub{position:sticky;top:34px;z-index:2;display:flex;align-items:center;gap:7px;padding:7px 12px 5px;
+  background:var(--card);box-shadow:0 1px 0 var(--line-2);font-size:11px;font-weight:600;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.sub .q{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400}
+.ico{width:13px;height:13px;flex:0 0 13px;color:var(--ink-2)}
+.warn{display:inline-flex;align-items:center;gap:3px;background:var(--red);color:#fff;border-radius:9px;
+  padding:0 6px;height:16px;font-size:10.5px;font-weight:600}
+.warn svg{width:10px;height:10px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:5px 12px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+th{color:var(--ink-3);font-weight:500;font-size:11.5px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.tot td{font-weight:600;border-bottom:1px solid var(--line)}
+.sw{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:7px;vertical-align:1px}
+.no{display:inline-block;width:13px;color:var(--ink-3);font-size:11px;font-variant-numeric:tabular-nums}
+.flag{color:var(--red);margin-left:5px}
+.flag svg{width:11px;height:11px;vertical-align:-2px}
+
+/* the units half, identical in every option ------------------------- */
+.mix{padding:10px 12px}
+.bar{display:flex;gap:2px;height:20px;border-radius:5px;overflow:hidden}
+.bar span{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0;overflow:hidden;
+  padding:0 7px;color:#fff;font-size:11.5px;font-weight:600;white-space:nowrap}
+.bar span small{font-size:11px;font-weight:500;opacity:.8}
+.sum{margin-top:8px;font-size:12.5px;color:var(--ink-2)}
+.sum b{color:var(--ink);font-weight:600}
+
+/* B — the matrix: one row per material, one column per façade --------- */
+.mx th,.mx td{padding:5px 8px}
+.mx .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.mx td.n,.mx th.n{font-size:11.5px}
+
+/* C — the envelope first: a material's total, then where it is ------- */
+.split{display:flex;gap:1px;height:7px;border-radius:4px;overflow:hidden;min-width:74px}
+.split i{display:block}
+tr.open td{border-bottom:0}
+tr.where td{padding:0 12px 8px;border-bottom:1px solid var(--line-2)}
+.where .facs{display:flex;gap:10px;font-size:11.5px;color:var(--ink-2);flex-wrap:wrap}
+.where .facs b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.exp{cursor:pointer}
+.exp:hover{background:var(--fill-2)}
+.caret{margin-left:auto;color:var(--ink-3)}
+.caret svg{width:13px;height:13px}
+
+/* D — one façade at a time ------------------------------------------ */
+.segs{display:flex;gap:2px;background:var(--fill);border-radius:8px;padding:2px;margin-left:auto}
+.segs button{border:0;background:none;font:inherit;font-size:11.5px;padding:3px 8px;border-radius:6px;
+  cursor:pointer;color:var(--ink-2)}
+.segs button:hover{background:var(--wash)}
+.segs button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;
+  box-shadow:0 1px 2px rgba(17,17,18,.12)}
+.strip{display:flex;gap:6px;padding:9px 12px;border-bottom:1px solid var(--line-2)}
+.strip .cell{flex:1;min-width:0;border:1px solid var(--line-2);border-radius:7px;padding:6px 8px;
+  font-size:11.5px;cursor:pointer;background:var(--card)}
+.strip .cell[aria-pressed="true"]{border-color:var(--ink);background:var(--fill-2)}
+.strip .cell b{display:block;font-size:12px;font-weight:600;margin-bottom:3px}
+.strip .cell span{color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* E — by family ------------------------------------------------------ */
+.famrow td{background:var(--fill-2);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <h1>Bâtiment entier — structurer les statistiques</h1>
+  <p class="lede">Sur un niveau, les matériaux tiennent en quatre petits tableaux. Sur le bâtiment, ce sont les
+     mêmes quatre tableaux avec huit étages dedans: trente-cinq lignes, dont neuf matériaux répétés quatre
+     fois. La moitié « unités » ne change presque pas — un niveau devient une ligne — alors les cinq options
+     la gardent telle quelle et ne restructurent que l'enveloppe. Chiffres réels, lus dans la maquette.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n, cls = "ico") => { const i = lucide.icons[pascal(n)];
+  return i ? `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">${i[2].map(([t, a]) =>
+      `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : ""; };
+
+/* Read out of the prototype's own model: assets/materials + the elevation
+   pass, façade by façade. Numbers are square feet seen in elevation. */
+const FACES = ["nord", "est", "sud", "ouest"];
+const MATS = [
+  { n: 1, name: "Brique Melville Slik", color: "#c8372d", fam: "Maçonnerie" },
+  { n: 2, name: "Bloc architectural Tapestry", color: "#e9a51c", fam: "Maçonnerie" },
+  { n: 3, name: "Brique Strata", color: "#2f7fd6", fam: "Maçonnerie", check: true },
+  { n: 4, name: "Panneau d'aluminium série 300", color: "#8a4bc4", fam: "Métal" },
+  { n: 6, name: "Solin, marquise et parapet", color: "#11a38a", fam: "Métal" },
+  { n: 7, name: "Allège fenêtre et porte-patio", color: "#f07b1f", fam: "Métal" },
+  { n: 8, name: "Fenêtre et porte-patio", color: "#273746", fam: "Ouvertures" },
+  { n: 9, name: "Vitrage", color: "#62c6ee", fam: "Ouvertures" },
+  { n: 10, name: "Garde-corps", color: "#58b335", fam: "Métal" },
+];
+const FT2 = {
+  nord: { 1: 2485, 2: 2429, 3: 3664, 4: 29, 6: 518, 7: 346, 8: 1619, 9: 4632, 10: 3431 },
+  est: { 1: 2779, 2: 336, 3: 5187, 4: 221, 6: 576, 7: 227, 8: 1175, 9: 3468, 10: 1923 },
+  sud: { 1: 1074, 2: 3718, 3: 4119, 4: 339, 6: 508, 7: 230, 8: 1524, 9: 4608, 10: 3027 },
+  ouest: { 1: 2185, 3: 4726, 4: 234, 6: 322, 7: 222, 8: 1210, 9: 3663, 10: 2527 },
+};
+const LEVELS = [["Niveau 1", 2, 2392, 222.2], ["Niveau 2", 14, 14903, 1384.5],
+  ["Niveau 3", 15, 15619, 1451.1], ["Niveau 4", 15, 15619, 1451.1], ["Niveau 5", 15, 15619, 1451.1],
+  ["Niveau 6", 15, 15619, 1451.1], ["Niveau 7", 15, 15619, 1451.1], ["Niveau 8", 13, 13503, 1254.5]];
+const TYPES = [["3½", "var(--t3)", 33], ["4½", "var(--t4)", 41], ["5½", "var(--t5)", 26]];
+const FACE_FLAG = { nord: 1, est: 1, sud: 1, ouest: 1 };   // Brique Strata, à vérifier, sur les quatre
+
+const nb = (n) => Math.round(n).toLocaleString("fr-CA").replace(/\u202f|\u00a0/g, " ");
+const fr1 = (n) => n.toLocaleString("fr-CA", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const faceTotal = (f) => MATS.reduce((s, m) => s + (FT2[f][m.n] || 0), 0);
+const matTotal = (m) => FACES.reduce((s, f) => s + (FT2[f][m.n] || 0), 0);
+const ENV = MATS.reduce((s, m) => s + matTotal(m), 0);
+const pc = (a, b) => `${Math.round(a / b * 100)} %`;
+const FLAG = `<span class="flag" title="à vérifier">${svg("alert-triangle", "")}</span>`;
+const key = (m) => `<span class="no">${m.n}</span><i class="sw" style="background:${m.color}"></i>${m.name}${m.check ? FLAG : ""}`;
+
+/* ---------------------------------------------- the units half, shared */
+const unitsSection = () => `
+  <div class="sec" id="SEC-u">${svg("table")}Unités et superficies<span class="q">104 unités</span></div>
+  <div class="mix">
+    <div class="bar">${TYPES.map(([t, c, p]) =>
+      `<span style="flex:${p} 0 0;background:${c}">${t}<small>${p} %</small></span>`).join("")}</div>
+    <div class="sum"><b>108 893</b> pi² nets sur 104 unités, 8 niveaux</div>
+  </div>
+  <table><thead><tr><th>Niveau</th><th class="n">Unités</th><th class="n">Net pi²</th><th class="n">m²</th>
+    <th class="n">Part</th></tr></thead><tbody>
+    ${LEVELS.map(([nm, u, a, m]) => `<tr><td>${nm}</td><td class="n">${u}</td><td class="n">${nb(a)}</td>
+      <td class="n">${fr1(m)}</td><td class="n">${pc(a, 108893)}</td></tr>`).join("")}
+    <tr class="tot"><td>Net</td><td class="n">104</td><td class="n">108 893</td><td class="n">10 116</td><td class="n">100 %</td></tr>
+    <tr class="tot"><td>Circulation</td><td class="n"></td><td class="n">19 216</td><td class="n">1 785</td><td class="n">15 %</td></tr>
+    <tr class="tot"><td>Brut</td><td class="n"></td><td class="n">128 109</td><td class="n">11 902</td><td class="n"></td></tr>
+  </tbody></table>`;
+
+/* --------------------------------------------------- the five envelopes */
+const facadeTable = (f) => `<table><thead><tr><th>Matériau</th><th class="n">pi²</th><th class="n">Part</th>
+  </tr></thead><tbody>
+  ${MATS.filter((m) => FT2[f][m.n]).map((m) => `<tr><td>${key(m)}</td>
+    <td class="n">${nb(FT2[f][m.n])}</td><td class="n">${pc(FT2[f][m.n], faceTotal(f))}</td></tr>`).join("")}
+  <tr class="tot"><td>Total</td><td class="n">${nb(faceTotal(f))}</td><td class="n">100 %</td></tr></tbody></table>`;
+
+const ENVELOPES = {
+  /* A — what the floor does, at eight storeys: four tables, one under the
+     other. Nothing new to learn, and nothing compares across façades. */
+  A: () => FACES.map((f) => `<div class="sub">Façade ${f}
+      <span class="q">${nb(faceTotal(f))} pi²</span></div>${facadeTable(f)}`).join(""),
+
+  /* B — the matrix: the material is the row, the façade is the column.
+     One table instead of four, and the comparison the four tables could
+     not make is the line itself. */
+  B: () => `<table class="mx"><thead><tr><th>Matériau</th>
+    ${FACES.map((f) => `<th class="n" title="Façade ${f}">${f[0].toUpperCase()}</th>`).join("")}
+    <th class="n">Total</th></tr></thead><tbody>
+    ${MATS.map((m) => `<tr><td class="nm">${key(m)}</td>
+      ${FACES.map((f) => `<td class="n">${FT2[f][m.n] ? nb(FT2[f][m.n]) : "—"}</td>`).join("")}
+      <td class="n">${nb(matTotal(m))}</td></tr>`).join("")}
+    <tr class="tot"><td>Total</td>${FACES.map((f) => `<td class="n">${nb(faceTotal(f))}</td>`).join("")}
+      <td class="n">${nb(ENV)}</td></tr></tbody></table>`,
+
+  /* C — the envelope first: one line per material for the whole building,
+     with a bar saying how it is spread over the four façades. The façade
+     numbers are one click under the line that summarises them. */
+  C: (v) => `<table><thead><tr><th>Matériau</th><th class="n">pi²</th><th class="n">Part</th>
+    <th>Répartition</th></tr></thead><tbody>
+    ${MATS.map((m) => {
+      const on = open[v] === m.n;
+      return `<tr class="exp ${on ? "open" : ""}" data-exp="${v}:${m.n}">
+        <td>${key(m)}</td><td class="n">${nb(matTotal(m))}</td><td class="n">${pc(matTotal(m), ENV)}</td>
+        <td><span class="split">${FACES.map((f) => `<i style="flex:${FT2[f][m.n] || 0} 0 0;
+          background:${m.color};opacity:${0.45 + 0.18 * FACES.indexOf(f)}" title="${f}"></i>`).join("")}</span></td></tr>
+      ${on ? `<tr class="where"><td colspan="4"><span class="facs">${FACES.map((f) =>
+        `<span>${f} <b>${FT2[f][m.n] ? nb(FT2[f][m.n]) : "—"}</b></span>`).join("")}</span></td></tr>` : ""}`;
+    }).join("")}
+    <tr class="tot"><td>Enveloppe</td><td class="n">${nb(ENV)}</td><td class="n">100 %</td><td></td></tr>
+    </tbody></table>`,
+
+  /* D — one façade at a time, chosen from four cells that already carry
+     their area: the strip is the summary and the switch at once. */
+  D: (v) => `<div class="strip">${FACES.map((f) => `<span class="cell" data-face="${v}:${f}"
+      aria-pressed="${face[v] === f}"><b>${f}</b><span>${nb(faceTotal(f))} pi²</span></span>`).join("")}</div>
+    ${facadeTable(face[v])}`,
+
+  /* E — by family: masonry, openings, metal. A façade is bought by trade,
+     and a trade is what the subtotal is for. */
+  E: () => ["Maçonnerie", "Ouvertures", "Métal"].map((fam) => {
+    const rows = MATS.filter((m) => m.fam === fam);
+    const tot = rows.reduce((s, m) => s + matTotal(m), 0);
+    return `<table><tbody>
+      <tr class="famrow"><td>${fam}</td><td class="n">${nb(tot)}</td><td class="n">${pc(tot, ENV)}</td></tr>
+      ${rows.map((m) => `<tr><td>${key(m)}</td><td class="n">${nb(matTotal(m))}</td>
+        <td class="n">${pc(matTotal(m), ENV)}</td></tr>`).join("")}</tbody></table>`;
+  }).join("") + `<table><tbody><tr class="tot"><td>Enveloppe</td><td class="n">${nb(ENV)}</td>
+    <td class="n">100 %</td></tr></tbody></table>`,
+};
+
+const VARIANTS = [
+  ["A", "Les quatre façades, l'une sous l'autre",
+   "Exactement ce que fait un niveau, à huit étages: quatre tableaux empilés. Rien de neuf à apprendre, et le volet garde la même forme à toutes les échelles. En revanche la même brique est écrite quatre fois et rien ne se compare d'une façade à l'autre sans faire défiler."],
+  ["B", "Une matrice: matériau en ligne, façade en colonne",
+   "Un tableau au lieu de quatre, et la comparaison que les quatre tableaux ne pouvaient pas faire devient la ligne elle-même: on voit d'un coup que la Strata porte l'est et l'ouest. Le prix est la largeur — six colonnes de chiffres dans un volet étroit, et les noms coupés."],
+  ["C", "L'enveloppe d'abord, la façade au second plan",
+   "Une ligne par matériau pour tout le bâtiment, avec une barre qui dit comment il se répartit sur les quatre faces. C'est la quantité qu'on commande; le détail par façade est sous la ligne qui le résume, à un clic. La façade cesse d'être le premier classement."],
+  ["D", "Une façade à la fois",
+   "Quatre cellules qui portent déjà leur superficie: le sélecteur est aussi le sommaire. Le tableau reste court et lisible comme sur un niveau, mais une seule façade est à l'écran, donc la comparaison redevient un aller-retour."],
+  ["E", "Par corps de métier",
+   "Maçonnerie, ouvertures, métal, chacun avec son sous-total. Une enveloppe se commande et se pose par corps de métier, et c'est ce que le sous-total sert à chiffrer. Le classement par façade disparaît: il faut rouvrir une façade pour savoir où un matériau est posé."],
+];
+
+const open = { C: 3 };                 // one material expanded, so the shape is visible at rest
+const face = { D: "nord" };
+
+function paint() {
+  grid.innerHTML = VARIANTS.map(([v, h, p]) => `<section data-v="${v}">
+    <h2>${h}<i>${v}</i></h2><p>${p}</p>
+    <div class="pane">
+      <div class="ph">${svg("bar-chart-3")}Statistiques<span class="n">bâtiment entier</span>
+        <span class="warn" style="margin-left:auto">${svg("alert-triangle")}8</span></div>
+      <div class="scroll">
+        ${unitsSection().replace(/SEC-u/g, `${v}-u`)}
+        <div class="sec">${svg("layers")}Matériaux par façade
+          <span class="warn">${svg("alert-triangle")}4</span>
+          <span class="q">${nb(ENV)} pi² vus en élévation</span></div>
+        ${ENVELOPES[v](v)}
+      </div></div></section>`).join("");
+}
+
+function showEnvelope() {
+  document.querySelectorAll(".scroll").forEach((sc) => {
+    const head = sc.querySelectorAll(".sec")[1];
+    sc.scrollTop = head.offsetTop - sc.offsetTop;
+  });
+}
+document.addEventListener("click", (e) => {
+  const x = e.target.closest("[data-exp]");
+  if (x) { const [v, n] = x.dataset.exp.split(":");
+    open[v] = open[v] === Number(n) ? null : Number(n); paint(); showEnvelope(); return; }
+  const f = e.target.closest("[data-face]");
+  if (f) { const [v, name] = f.dataset.face.split(":"); face[v] = name; paint(); showEnvelope(); }
+});
+paint();
+showEnvelope();
+</script>
+</body>
+</html>
