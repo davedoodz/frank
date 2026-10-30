@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Carte d'un dessin — fichier, emplacement, actions</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The card shown beside a drawing's thumbnail on the 2D pane: which file
+   is read, where it lives, what opens it, what came before it, how strongly
+   it is drawn. Today the location hides inside « Changer le document… » and
+   every action waits behind a black « Document » button. Four ways to lay
+   the same five things out. Each card is live: open, change, the previous
+   documents, the slider. Sample data; the folder is the prototype's. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --card:#fff;--mono:ui-monospace,Menlo,monospace;--hi:#c3e05a}
+*{box-sizing:border-box}
+body{margin:0;font:12px/1.4 Geist,"Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header{padding:20px 24px 4px;max-width:1100px}
+header h1{margin:0;font-size:16px;font-weight:600}
+header p{margin:4px 0 0;color:var(--ink-2);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px;padding:12px 24px 30px}
+.opt{border:1px solid var(--line-2);border-radius:8px;background:#fff;padding:12px 14px 14px;display:flex;flex-direction:column}
+.opt.rec{border-color:var(--ink)}
+.opt h3{margin:0;font-size:13px;font-weight:600}
+.opt h3 i{font-style:normal;font-weight:500;font-size:11px;color:var(--ink-2);margin-left:6px}
+.opt .why{margin:2px 0 10px;font-size:11.5px;color:var(--ink-2);min-height:62px}
+.stage{position:relative;flex:1;min-height:380px;border:1px solid var(--line);border-radius:8px;overflow:hidden;
+  background:#fff url("assets/arp-site.png") 40% 50%/560px auto no-repeat;padding:14px;display:flex;justify-content:flex-end;align-items:flex-start}
+.svg{width:13px;height:13px;flex:0 0 13px}
+
+/* the card, as on the prototype */
+.lcard{width:262px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.10);
+  padding:9px;display:flex;flex-direction:column;gap:7px}
+.hd{display:flex;align-items:center;gap:7px;min-width:0}
+.hd b{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.fg{flex:0 0 22px;width:22px;height:26px}
+.fg .band{fill:#111}.fg text{fill:#fff;font:700 6.5px var(--mono)}
+.fg.pdf .band{fill:#b3261e}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;height:28px;border:1px solid var(--line);border-radius:6px;
+  background:#fff;font-size:12px;font-weight:500;cursor:pointer;color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.btn.dark{background:#111;color:#fff;border-color:#111}
+.op{display:flex;align-items:center;gap:8px;color:var(--ink-2);font-size:11.5px}
+.op input{flex:1;accent-color:#111}
+.op span:last-child{width:34px;text-align:right;font-variant-numeric:tabular-nums}
+.menu{display:flex;flex-direction:column;border:1px solid var(--line-2);border-radius:6px;overflow:hidden}
+.mi{display:flex;align-items:center;gap:7px;padding:6px 8px;cursor:pointer}
+.mi:hover{background:var(--fill-2)}
+.mi + .mi,.past + .mi,.mi + .past{border-top:1px solid var(--line-2)}
+.mi .ch{margin-left:auto;color:var(--ink-3)}
+.mi.open .ch{transform:rotate(180deg)}
+.mi .lead{color:var(--ink-2)}
+.past{display:flex;flex-direction:column;background:var(--fill-2)}
+.pd{display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:center;padding:5px 8px;cursor:pointer}
+.pd:hover{background:var(--fill)}
+.pd + .pd{border-top:1px solid var(--line)}
+.pd .r{font-weight:600;font-size:10.5px}
+.pd .f{font-family:var(--mono);font-size:10px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pd .d{font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+.path{font-family:var(--mono);font-size:10px;line-height:1.4;color:var(--ink-3)}
+.path > span{white-space:nowrap}
+.toast{position:absolute;left:12px;bottom:12px;right:12px;background:#111;color:#fff;border-radius:7px;padding:7px 10px;font-size:11.5px}
+
+/* A: the place is part of the file's name */
+.crumbs{display:flex;align-items:center;gap:2px;min-width:0;font-size:10.5px;color:var(--ink-3);cursor:pointer;margin-top:-3px;padding-left:29px}
+.crumbs:hover{color:var(--ink)}
+.crumbs .c{white-space:nowrap}
+.crumbs .c.last{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.crumbs .svg{width:10px;height:10px;flex:0 0 10px;opacity:.6}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+
+/* B: an emplacement block at the foot */
+.loc{border-top:1px solid var(--line-2);padding-top:7px;display:flex;flex-direction:column;gap:3px}
+.loc .k{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink-3)}
+.loc .k .cp{margin-left:auto;cursor:pointer;color:var(--ink-2);display:inline-flex;align-items:center;gap:4px}
+.loc .k .cp:hover{color:var(--ink)}
+
+/* C: two tabs inside the card */
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:2px;border-radius:7px;background:var(--fill)}
+.seg span{display:flex;align-items:center;justify-content:center;gap:5px;height:24px;border-radius:5px;font-size:11.5px;font-weight:500;cursor:pointer;color:var(--ink-2)}
+.seg span.on{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:11px}
+.kv .k{color:var(--ink-3)}
+
+/* D: one row of icons */
+.tools{display:flex;gap:4px}
+.tools .btn{flex:1;height:30px;padding:0}
+.tools .btn.on{background:var(--fill);border-color:var(--ink)}
+.tools .btn .svg{width:14px;height:14px}
+.tip{font-size:10.5px;color:var(--ink-3);text-align:center;margin-top:-3px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Carte d'un dessin — le fichier, son emplacement, ses actions</h1>
+  <p>Aujourd'hui, l'emplacement se cache sous « Changer le document… » et toutes les actions attendent derrière le bouton noir « Document ». Quatre façons d'ordonner les mêmes cinq choses: le fichier, où il vit, ce qui l'ouvre, ce qui l'a précédé, son opacité. Les cartes sont vivantes. L'option recommandée a la bordure noire.</p>
+</header>
+<div class="grid" id="grid"></div>
+
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const svg = (n, cls = "") => `<svg class="svg ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+  lucide.icons[n][2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+const ROOT = ["\\\\serveur-bureau", "Projets", "2026", "BAL3", "Dessins"];
+const DIR = [...ROOT, "Reçus", "Arpenteur", "2026-10-07 Certificat d'implantation"];
+const DOCS = [
+  { rev: "R03", file: "BAL3_IMPLANTATION_2026-10-07.dwg", date: "7 oct 2026", dir: DIR },
+  { rev: "R02", file: "BAL3_IMPLANTATION_2026-08-19.dwg", date: "19 août 2026", dir: [...ROOT, "Reçus", "Arpenteur", "2026-08-19 Implantation préliminaire"] },
+  { rev: "R01", file: "BAL3_RELEVE-TOPO_2026-05-02.pdf", date: "2 mai 2026", dir: [...ROOT, "Reçus", "Arpenteur", "2026-05-02 Relevé topographique"] },
+  { rev: "R00", file: "BAL3_CERTIFICAT-LOCALISATION_2025.pdf", date: "12 nov 2025", dir: [...ROOT, "Reçus", "Arpenteur", "2025 Certificat de localisation"] },
+];
+const ext = (f) => f.split(".").pop().toLowerCase();
+const app = (f) => (ext(f) === "pdf" ? "Acrobat" : "AutoCAD");
+const pathStr = (d) => d.join("\\") + "\\";
+const pathHTML = (d) => d.map((s) => `<span>${s}\\</span>`).join("<wbr>");
+const glyph = (f) => `<svg class="fg ${ext(f)}" viewBox="0 0 26 30"><path d="M6.5 1h11l6.5 6.5v20.5a1 1 0 0 1-1 1h-16.5a1 1 0 0 1-1-1v-26a1 1 0 0 1 1-1z" fill="#fff" stroke="currentColor" stroke-width="1.2"/><path d="M17.5 1v6.5h6.5" fill="none" stroke="currentColor" stroke-width="1.2"/><rect class="band" x="0" y="14" width="21" height="10" rx="1.6"/><text x="10.5" y="21.6" text-anchor="middle">${ext(f).toUpperCase()}</text></svg>`;
+
+const S = Object.fromEntries(["now", "A", "B", "C", "D"].map((k) => [k, { cur: 0, menu: k === "now", hist: false, op: 100, tab: "f", tool: null, toast: "" }]));
+const pastOf = (st) => DOCS.map((d, i) => ({ ...d, i })).filter((d) => d.i !== st.cur);
+const pastHTML = (st) => `<div class="past">${pastOf(st).map((p) => `<span class="pd" data-pick="${p.i}" title="${pathStr(p.dir)}${p.file}"><span class="r">${p.rev}</span><span class="f">${p.file}</span><span class="d">${p.date}</span></span>`).join("")}</div>`;
+const opHTML = (st) => `<div class="op">${svg("Blend")}<span>Opacité</span><input type="range" min="0" max="100" value="${st.op}" data-op><span>${st.op} %</span></div>`;
+const head = (d) => `<div class="hd">${glyph(d.file)}<b title="${d.file}">${d.file}</b></div>`;
+
+const OPTS = [
+  { id: "now", title: "Aujourd'hui", why: "Pour comparer: tout passe par le bouton noir « Document »; l'emplacement se lit sous « Changer le document… », coupé sur quatre lignes.",
+    html: (st, d) => `${head(d)}<span class="btn dark" data-act="menu">${svg("File")}Document ${svg("ChevronDown")}</span>
+      ${st.menu ? `<div class="menu"><span class="mi" data-act="open">${svg("ExternalLink", "lead")}Ouvrir dans ${app(d.file)}</span>
+        <span class="mi" data-act="change" style="flex-direction:column;align-items:flex-start;gap:2px">Changer le document…<span class="path">${pathHTML(d.dir)}</span></span>
+        <span class="mi ${st.hist ? "open" : ""}" data-act="hist">Voir les documents précédents (${DOCS.length - 1})${svg("ChevronDown", "ch")}</span>${st.hist ? pastHTML(st) : ""}</div>` : ""}
+      ${opHTML(st)}` },
+  { id: "A", rec: true, title: "A — L'emplacement fait partie du nom",
+    why: "Sous le nom du fichier, ses deux derniers dossiers en fil d'Ariane — ce qui distingue ce dessin des autres; le chemin entier au survol, copié au clic. Les deux actions sont des boutons visibles, plus de menu à ouvrir; les documents précédents restent une ligne qui se déplie.",
+    html: (st, d) => `${head(d)}
+      <span class="crumbs" data-act="copy" title="${pathStr(d.dir)} — cliquer pour copier">${svg("Folder")}<span class="c">…</span>${svg("ChevronRight")}<span class="c">${d.dir.at(-2)}</span>${svg("ChevronRight")}<span class="c last">${d.dir.at(-1)}</span></span>
+      <div class="pair"><span class="btn" data-act="open">${svg("ExternalLink")}${app(d.file)}</span><span class="btn" data-act="change">${svg("FolderOpen")}Changer…</span></div>
+      <div class="menu"><span class="mi ${st.hist ? "open" : ""}" data-act="hist">${svg("History", "lead")}Documents précédents (${DOCS.length - 1})${svg("ChevronDown", "ch")}</span>${st.hist ? pastHTML(st) : ""}</div>
+      ${opHTML(st)}` },
+  { id: "B", title: "B — Un bloc « Emplacement » au pied",
+    why: "Le menu reste, chaque ligne avec son icône, mais l'emplacement en sort: il a son propre bloc en bas de la carte, chemin complet, coupé seulement entre les dossiers, avec « Copier ». Toujours lisible, mais la carte grandit de quatre lignes.",
+    html: (st, d) => `${head(d)}<span class="btn dark" data-act="menu">${svg("File")}Document ${svg("ChevronDown")}</span>
+      ${st.menu ? `<div class="menu"><span class="mi" data-act="open">${svg("ExternalLink", "lead")}Ouvrir dans ${app(d.file)}</span>
+        <span class="mi" data-act="change">${svg("FolderOpen", "lead")}Changer le document…</span>
+        <span class="mi ${st.hist ? "open" : ""}" data-act="hist">${svg("History", "lead")}Documents précédents (${DOCS.length - 1})${svg("ChevronDown", "ch")}</span>${st.hist ? pastHTML(st) : ""}</div>` : ""}
+      ${opHTML(st)}
+      <div class="loc"><span class="k">${svg("Folder")}Emplacement<span class="cp" data-act="copy">${svg("Copy")}Copier</span></span><span class="path">${pathHTML(d.dir)}</span></div>` },
+  { id: "C", title: "C — Deux onglets: Fichier et Historique",
+    why: "La carte se partage en deux lectures. « Fichier »: le dossier, la date, la révision, les deux actions. « Historique »: la liste des documents précédents, à plat. Rien ne se déplie, mais l'historique est à un onglet de distance.",
+    html: (st, d) => `${head(d)}
+      <div class="seg"><span class="${st.tab === "f" ? "on" : ""}" data-tab="f">${svg("File")}Fichier</span><span class="${st.tab === "h" ? "on" : ""}" data-tab="h">${svg("History")}Historique ${DOCS.length - 1}</span></div>
+      ${st.tab === "f" ? `<div class="kv"><span class="k">Dossier</span><span class="path">${pathHTML(d.dir.slice(5))}</span><span class="k">Révision</span><span>${d.rev} — ${d.date}</span></div>
+        <div class="pair"><span class="btn" data-act="open">${svg("ExternalLink")}${app(d.file)}</span><span class="btn" data-act="change">${svg("FolderOpen")}Changer…</span></div>`
+        : `<div class="menu">${pastHTML(st)}</div>`}
+      ${opHTML(st)}` },
+  { id: "D", title: "D — Une rangée d'icônes",
+    why: "Le plus compact: quatre icônes sous le nom — ouvrir, changer, documents précédents, copier le chemin — et le dossier en une ligne grise. Rapide une fois appris, mais il faut survoler pour savoir quelle icône fait quoi.",
+    html: (st, d) => `${head(d)}
+      <span class="path" style="padding-left:29px;margin-top:-4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${pathStr(d.dir)}">…\\${d.dir.slice(-2).join("\\")}\\</span>
+      <div class="tools"><span class="btn" data-act="open" title="Ouvrir dans ${app(d.file)}">${svg("ExternalLink")}</span><span class="btn" data-act="change" title="Changer le document…">${svg("FolderOpen")}</span>
+        <span class="btn ${st.hist ? "on" : ""}" data-act="hist" title="Documents précédents">${svg("History")}</span><span class="btn" data-act="copy" title="Copier le chemin">${svg("Copy")}</span></div>
+      ${st.hist ? `<div class="menu">${pastHTML(st)}</div>` : ""}
+      ${opHTML(st)}` },
+];
+
+function paint() {
+  document.getElementById("grid").innerHTML = OPTS.map((o) => {
+    const st = S[o.id], d = DOCS[st.cur];
+    return `<div class="opt ${o.rec ? "rec" : ""}" data-o="${o.id}"><h3>${o.title}${o.rec ? "<i>recommandée</i>" : ""}</h3><div class="why">${o.why}</div>
+      <div class="stage"><div class="lcard">${o.html(st, d)}</div>${st.toast ? `<div class="toast">${st.toast}</div>` : ""}</div></div>`;
+  }).join("");
+}
+document.addEventListener("click", (e) => {
+  const box = e.target.closest("[data-o]");
+  if (!box) return;
+  const st = S[box.dataset.o], d = DOCS[st.cur];
+  const a = e.target.closest("[data-act]")?.dataset.act, pick = e.target.closest("[data-pick]"), tab = e.target.closest("[data-tab]");
+  st.toast = "";
+  if (pick) { st.cur = Number(pick.dataset.pick); st.hist = false; st.toast = `${DOCS[st.cur].file} lu sur le plan.`; }
+  else if (tab) st.tab = tab.dataset.tab;
+  else if (a === "menu") { st.menu = !st.menu; st.hist = false; }
+  else if (a === "hist") st.hist = !st.hist;
+  else if (a === "open") st.toast = `S'ouvrirait dans ${app(d.file)} (simulé).`;
+  else if (a === "change") st.toast = `Choisir un autre fichier dans …\\${d.dir.slice(-2).join("\\")}\\`;
+  else if (a === "copy") st.toast = `Chemin copié: ${pathStr(d.dir)}`;
+  else return;
+  paint();
+});
+document.addEventListener("input", (e) => {
+  if (!e.target.matches("[data-op]")) return;
+  const st = S[e.target.closest("[data-o]").dataset.o];
+  st.op = Number(e.target.value);
+  e.target.nextElementSibling.textContent = `${st.op} %`;
+});
+paint();
+</script>
+</body>
+</html>

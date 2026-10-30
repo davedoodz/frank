@@ -234,6 +234,28 @@ ${unitAtGlsl}` + shader.fragmentShader;
       position: target.clone().addScaledVector(normal, distance), duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 550 };
   }
 
+  // A level picked from the whole building's table is flown to: the
+  // camera keeps its bearing, drops to the floor's height and comes in
+  // until the lit band reads as a floor rather than a stripe.
+  function frameLevel(level) {
+    const min = floorUniforms.fitteFloorMin.value, max = floorUniforms.fitteFloorMax.value;
+    if (!(level >= 1 && level <= 9) || !(max > min)) return false;
+    const bounds = new THREE.Box3().setFromObject(model);
+    const size = bounds.getSize(new THREE.Vector3());
+    const center = bounds.getCenter(new THREE.Vector3());
+    const target = new THREE.Vector3(center.x, (min + max) / 2, center.z);
+    const radius = Math.max(Math.max(size.x, size.z) * 0.32, (max - min) * 3);
+    const bearing = camera.position.clone().sub(controls.target).setY(0);
+    if (bearing.lengthSq() < 0.01) bearing.set(1, 0, 1);
+    bearing.normalize().setY(0.3).normalize();
+    const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+    const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+    const distance = Math.max(controls.minDistance * 1.1, radius / Math.sin(Math.min(verticalFov, horizontalFov) / 2));
+    flight = { start: performance.now(), from: camera.position.clone(), fromTarget: controls.target.clone(), target,
+      position: target.clone().addScaledVector(bearing, distance), duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 550 };
+    return true;
+  }
+
   function sync({ frame = true } = {}) {
     mapWindows();
     const selection = window.fitteSelection || {};
@@ -250,13 +272,14 @@ ${unitAtGlsl}` + shader.fragmentShader;
     floorUniforms.fitteFloorMax.value = (level === 9 ? 12.36 : ELEVATIONS[level] || 0) - sourceOffset.y;
     label(selection);
     placeSelPill();
-    /* A unit is flown to; a floor is stood back from. With nothing chosen
-       on the level the camera returns to the whole building, where a lit
-       band means something — a floor tint read from six inches off one
-       façade is just a brighter wall. */
+    /* A unit is flown to; a floor is stood back from, unless the floor was
+       asked for from the whole building, where it is flown to. With nothing
+       chosen the camera returns to the whole building, where a lit band
+       means something — a floor tint read from six inches off one façade
+       is just a brighter wall. */
     if (!changed || !frame) return;
     if (selected.length) frameWindows();
-    else window.fitteModel?.reset();
+    else if (!(selection.frame === "level" && frameLevel(level))) window.fitteModel?.reset();
   }
   // One raycast answers both hover and click. The first surface hit names
   // a floor by its height and, from the second floor up, always a unit:

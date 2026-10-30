@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Codes — ce qu'il faut considérer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* After the search studies: the screen does not wait for a question. It
+   has read the project's figures against the three codes and says what
+   to consider — what fails, what cannot be concluded yet, what is fine —
+   each point with its numbers, the articles it rests on across codes,
+   what is missing and who acts next. A question re-scopes it to an
+   intent (« ajouter un étage »). Three ways to present it, on the same
+   readings. The readings are written by hand here; they stand for what
+   the model would produce, and every one cites its articles. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --sel:#eef3dc;--red:#c0362c;--amber:#b0892a;--green:#2f7d4a}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px;max-width:1240px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:940px}
+.v{margin-top:30px}
+.v h2{margin:0;font-size:14px;font-weight:600}
+.v>p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;max-width:940px}
+svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.scr{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+.ph{display:flex;align-items:center;gap:8px;min-height:42px;padding:0 12px;border-bottom:1px solid var(--line-2)}
+.ph b{font-weight:600}
+.ph .n{color:var(--ink-3);font-size:12px}
+.sp{flex:1}
+.btn{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:12px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.btn.solid{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.done{color:var(--ink-3);cursor:default}
+.btn.sm{height:22px;padding:0 7px;font-size:11.5px}
+
+/* the intent field: the one thing asked of the reader ----------------- */
+.ask{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line-2);flex-wrap:wrap}
+.box{display:flex;align-items:center;gap:7px;height:32px;padding:0 6px 0 9px;border:1px solid var(--line);border-radius:7px;background:#fff;flex:1 1 360px;min-width:0}
+.box:focus-within{border-color:var(--ink)}
+.box input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:12.5px;background:transparent;color:var(--ink)}
+.box input::placeholder{color:var(--ink-3)}
+.box .x{color:var(--ink-3);cursor:pointer;display:flex;padding:3px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:26px;padding:0 10px;display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:13px;font-size:12px;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.chip[aria-current="true"]{border-color:var(--ink);color:var(--ink);font-weight:500}
+
+/* the verdict line ----------------------------------------------------- */
+.verdict{display:flex;align-items:baseline;gap:14px;padding:10px 12px;border-bottom:1px solid var(--line-2);flex-wrap:wrap}
+.verdict .lead{font-size:13.5px;font-weight:600}
+.cnt{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2);cursor:pointer}
+.cnt i,.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.r{background:var(--red)} .a{background:var(--amber)} .g{background:var(--green)}
+.src{font-size:11px;color:var(--ink-3);margin-left:auto}
+
+/* A — the list of considerations -------------------------------------- */
+.grp{padding:8px 12px 2px;font-size:11px;color:var(--ink-3);display:flex;gap:6px;align-items:center}
+.con{display:grid;grid-template-columns:14px 1fr 230px;gap:4px 12px;padding:10px 12px;border-top:1px solid var(--line-2)}
+.grp+.con{border-top:0}
+.con .dot{margin-top:5px}
+.con .t{font-weight:600;font-size:13.5px}
+.con .b{grid-column:2;color:var(--ink-2)}
+.con .figs{grid-column:2;display:flex;gap:16px;font-variant-numeric:tabular-nums;font-size:12.5px}
+.con .figs span{color:var(--ink-3)} .con .figs b{font-weight:600;color:var(--ink)}
+.con .figs .bad{color:var(--red)}
+.con .cites{grid-column:2;display:flex;gap:5px;flex-wrap:wrap;align-items:center;font-size:11.5px;color:var(--ink-3)}
+.ref{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 6px;border:1px solid var(--line);border-radius:4px;background:#fff;font-size:11px;color:var(--ink-2);white-space:nowrap}
+.ref em{font-style:normal;color:var(--ink-3)}
+.ref.new{border-style:dashed}
+.con .miss{grid-column:2;font-size:12px;color:var(--ink-3)}
+.con .side{grid-column:3;grid-row:1 / span 5;display:flex;flex-direction:column;gap:6px;align-items:flex-start;border-left:1px solid var(--line-2);padding-left:12px}
+.con .side .k{font-size:11px;color:var(--ink-3)}
+.con .side .eff{font-size:11.5px;color:var(--ink-2)}
+.fold{padding:9px 12px;border-top:1px solid var(--line-2);font-size:12px;color:var(--ink-2);cursor:pointer}
+.fine{padding:0 12px 10px;display:flex;flex-direction:column;gap:4px;font-size:12.5px}
+.fine div{display:flex;gap:8px;align-items:center}
+.fine span{color:var(--ink-3)}
+.foot{padding:8px 12px;border-top:1px solid var(--line-2);font-size:11px;color:var(--ink-3)}
+
+/* B — the decision path ------------------------------------------------ */
+.path{display:grid;grid-template-columns:260px 1fr}
+.path .left{border-right:1px solid var(--line-2);padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.path .left h3,.path .right h3{margin:0;font-size:11px;font-weight:400;color:var(--ink-3)}
+.path .ap{display:flex;flex-direction:column;gap:5px}
+.path .ap div{display:flex;gap:7px;align-items:baseline;font-size:12.5px}
+.path .right{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.routes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.route{border:1px solid var(--line);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:5px;cursor:pointer}
+.route.rec{border-color:var(--ink)}
+.route .tag{align-self:flex-start;font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--ink);color:#fff}
+.route .tag.no{background:var(--fill);color:var(--ink-2)}
+.route b{font-size:13px}
+.route .d{font-size:12px;color:var(--ink-2)}
+.route dl{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;margin:2px 0 0;font-size:11.5px}
+.route dt{color:var(--ink-3)} .route dd{margin:0}
+.route.on{background:var(--sel)}
+.next{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--fill-2)}
+.next b{font-weight:600}
+
+/* C — notes on the followed list -------------------------------------- */
+.list{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.card{display:grid;grid-template-columns:150px 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.card .fig{background:var(--fill-2);border-right:1px solid var(--line-2);display:flex;align-items:center;justify-content:center}
+.card .fig img{max-width:100%;max-height:96px;display:block}
+.card .fig span{font-size:11px;color:var(--ink-3)}
+.card .bd{padding:8px 10px;display:flex;flex-direction:column;gap:4px}
+.card .top{display:flex;align-items:center;gap:7px}
+.card .top b{font-weight:600}
+.card .qt{color:var(--ink-2);font-size:12.5px}
+.note{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start;padding:7px 9px;border-radius:6px;background:var(--fill-2);border:1px solid var(--line-2);font-size:12.5px}
+.note .k{font-size:11px;color:var(--ink-3);padding-top:1px;white-space:nowrap}
+.card.sug{border-style:dashed}
+.card.sug .fig{background:#fff}
+.st{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-2);margin-left:auto;white-space:nowrap}
+.bar{display:flex;align-items:center;gap:12px;padding:9px 12px;border-bottom:1px solid var(--line-2);font-size:12.5px;background:var(--fill-2)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:7px 12px;border-radius:7px;font-size:12.5px;display:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Codes — ce qu'il faut considérer</h1>
+  <p class="lede">Plutôt que chercher un article, l'écran a déjà lu les chiffres du projet contre les trois codes et dit quoi considérer:
+    ce qui ne passe pas, ce qu'on ne peut pas encore conclure, ce qui est réglé. Chaque point porte ses chiffres, les articles sur lesquels
+    il s'appuie, d'un code à l'autre, ce qui manque et la prochaine action. Une intention (« ajouter un étage ») recentre la lecture.
+    Les lectures sont écrites à la main ici: elles tiennent lieu de ce que le modèle produirait.</p>
+
+  <section class="v"><h2>A — La fiche « À considérer »</h2>
+    <p>En tête de l'écran Codes, une seule liste pour les trois codes, triée par ce qui pèse le plus. Rien à chercher: on lit de haut en bas
+      et on clique la prochaine action. Le champ change l'intention; la fiche se réécrit pour elle.</p>
+    <div class="scr" id="A"></div></section>
+
+  <section class="v"><h2>B — Le chemin de décision</h2>
+    <p>Pour une intention, la lecture ne liste pas: elle tranche. À gauche ce qui s'applique et ce qui bloque; à droite les voies possibles,
+      avec délai, risque et articles, une seule marquée recommandée; dessous, l'étape suivante, prête à envoyer.</p>
+    <div class="scr" id="B"></div></section>
+
+  <section class="v"><h2>C — Une note sur chaque article suivi</h2>
+    <p>La liste d'aujourd'hui reste; chaque carte reçoit une ligne « À considérer » et son action. Les articles que le projet devrait suivre
+      et ne suit pas s'insèrent, en pointillé, là où ils servent.</p>
+    <div class="scr" id="C"></div></section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const ic = {
+  spark: '<svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>',
+  x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  mail: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  task: '<svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>',
+  ruler: '<svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/></svg>',
+  plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+};
+/* Codes, by their short names: a reference always says which code it is
+   in, since a point usually rests on more than one. */
+const CQ = "Code du Québec", LC = "Loi-cadre", RU = "Règlement d'urbanisme";
+const ref = (code, id, followed = true) => ({ code, id, followed });
+
+/* The readings. sev: r à régler, a à confirmer, g réglé. eff: how much the
+   fix costs — a note, a redraw, or a procedure with the borough. */
+const READ = {
+  revue: { label: "Revue du projet", words: "",
+    lead: "Le projet ne passe pas encore: quatre points à régler, dont un seul demande une démarche.",
+    items: [
+      { sev: "r", t: "Un étage de plus que ce que la zone permet", figs: [["dessinés", "6 étages"], ["prescrits", "5 étages"]],
+        b: "Une dérogation mineure ne couvre pas un étage entier. Il reste à retirer l'étage ou à passer par un projet particulier, souvent soumis à l'approbation référendaire.",
+        refs: [ref(RU, "art. 9"), ref(LC, "art. 145.36", false), ref(LC, "art. 123", false)],
+        miss: "la grille des usages et normes de la zone, pour confirmer le 5", eff: "Démarche — plusieurs mois",
+        act: ["Demander la grille à l'urbaniste", "mail"] },
+      { sev: "r", t: "Il manque 8 cases de stationnement", figs: [["dessinées", "22 cases"], ["exigées", "30 cases"]],
+        b: "Le calcul suit le nombre de logements. Une réduction près du transport collectif peut combler l'écart, si le terrain est assez proche d'une station.",
+        refs: [ref(RU, "art. 71"), ref(RU, "art. 72", false)],
+        miss: "la distance à la station la plus proche", eff: "Probablement réglé par l'art. 72",
+        act: ["Mesurer la distance à la station", "ruler"] },
+      { sev: "r", t: "La façade est a trop de vitrage pour sa distance à la limite", figs: [["dessinés", "74,2 m²"], ["permis", "68,5 m²"]],
+        b: "5,7 m² de trop: environ trois fenêtres de chambre. Les retirer, ou les rendre protégées (verre armé, gicleurs de façade).",
+        refs: [ref(CQ, "3.2.3.1")],
+        miss: "la distance limitative mesurée sur le plan d'implantation", eff: "Redessin — façade est",
+        act: ["Ajouter une tâche au dessin", "task"] },
+      { sev: "r", t: "La porte d'entrée est trop étroite pour un fauteuil", figs: [["relevés", "800 mm"], ["exigés", "850 mm"]],
+        b: "Une porte de 914 mm règle le parcours sans obstacles et les portes de logement en même temps.",
+        refs: [ref(CQ, "3.8.1.3"), ref(CQ, "3.3.4.4", false)],
+        miss: "", eff: "Note au dessin",
+        act: ["Ajouter une tâche au dessin", "task"] },
+      { sev: "a", t: "La marge arrière est courte, sauf si les balcons comptent comme saillies", figs: [["dessinés", "2,70 m"], ["exigés", "3,00 m"]],
+        b: "Si l'écart vient des balcons, ce sont des saillies admises et la marge passe. Sinon, 30 cm relèvent d'une dérogation mineure.",
+        refs: [ref(RU, "art. 22"), ref(LC, "art. 145.1", false)],
+        miss: "la limite arrière relevée par l'arpenteur", eff: "À confirmer avant de redessiner",
+        act: ["Écrire à l'urbaniste", "mail"] },
+      { sev: "a", t: "Garde-corps des balcons: 50 mm sous la hauteur", figs: [["cotés", "1 020 mm"], ["exigés", "1 070 mm"]],
+        b: "Probablement une cote d'élévation prise sur la dalle et non sur la surface finie. À vérifier avant de corriger.",
+        refs: [ref(CQ, "3.3.1.18")], miss: "la cote prise sur le fini du balcon", eff: "Vérification",
+        act: ["Ajouter une tâche au dessin", "task"] },
+      { sev: "a", t: "Verdissement: 3 % de pleine terre à trouver", figs: [["mesurés", "17 %"], ["exigés", "20 %"]],
+        b: "Environ 44 m² de terrain. La cour arrière libérée par une case de stationnement en moins y suffirait.",
+        refs: [ref(RU, "art. 134")], miss: "le plan d'aménagement paysager coté", eff: "Redessin — paysage",
+        act: ["Écrire au paysagiste", "mail"] },
+    ],
+    fine: [["Taux d'implantation", "48,2 % pour 55 %", RU, "art. 43"], ["Largeur des corridors", "1 120 mm pour 1 100", CQ, "3.3.1.9"], ["Issues par étage", "2 pour 2", CQ, "3.4.2.1"]],
+    routes: null },
+  etage: { label: "Ajouter un étage", words: "etage etages hauteur ajouter monter surelever niveau",
+    lead: "Un 7e étage met le projet à deux étages au-dessus de la zone: seule une démarche de projet particulier le permet.",
+    items: [
+      { sev: "r", t: "Deux étages au-dessus de la grille", figs: [["visés", "7 étages"], ["prescrits", "5 étages"]],
+        b: "La dérogation mineure est exclue à cette échelle. Le projet particulier est la voie, avec un risque référendaire réel.",
+        refs: [ref(RU, "art. 9"), ref(LC, "art. 145.36", false), ref(LC, "art. 123", false)], miss: "la grille de la zone", eff: "Démarche — 6 à 9 mois",
+        act: ["Demander une rencontre préparatoire", "mail"] },
+      { sev: "r", t: "Le stationnement exigé monte avec les logements", figs: [["logements", "104 → 119"], ["cases exigées", "30 → 34"]],
+        b: "L'écart passe de 8 à 12 cases. La réduction près du transport collectif devient la condition du projet.",
+        refs: [ref(RU, "art. 71"), ref(RU, "art. 72", false)], miss: "la distance à la station", eff: "Calcul",
+        act: ["Mesurer la distance à la station", "ruler"] },
+      { sev: "a", t: "Le classement du bâtiment ne change pas, mais il faut le redire", figs: [["groupe", "C"], ["construction", "incombustible"]],
+        b: "Le bâtiment est déjà incombustible; un étage de plus ne change pas l'exigence, mais l'aire par étage doit être reportée.",
+        refs: [ref(CQ, "3.2.1.1", false)], miss: "l'aire de bâtiment par étage", eff: "Note",
+        act: ["Ajouter une tâche au dessin", "task"] },
+      { sev: "a", t: "15 supports à vélo de plus", figs: [["requis", "104 → 119"]],
+        b: "Un par logement. La salle à vélos du sous-sol en tient 110 au plan actuel.",
+        refs: [ref(RU, "art. 86", false)], miss: "le nombre de supports dessinés", eff: "Redessin — sous-sol",
+        act: ["Ajouter une tâche au dessin", "task"] },
+    ],
+    fine: [["Issues par étage", "inchangé, 2 par étage", CQ, "3.4.2.1"], ["Taux d'implantation", "inchangé, 48,2 %", RU, "art. 43"]],
+    routes: { now: "6 étages dessinés, 5 prescrits; on vise 7.", applies: [[RU, "art. 9", "hauteur en étages"], [LC, "art. 145.1", "dérogation mineure"], [LC, "art. 145.36", "projet particulier"], [LC, "art. 123", "approbation référendaire"]],
+      list: [
+        { t: "Retirer l'étage", d: "Revenir à 5 étages. Le projet passe sans démarche.", delay: "aucun", risk: "faible", cost: "15 logements de moins", refs: "art. 9" },
+        { t: "Projet particulier", d: "Demander au conseil d'autoriser 7 étages par résolution, en justifiant l'insertion.", delay: "6 à 9 mois", risk: "moyen — référendaire possible", cost: "honoraires, consultation", refs: "art. 145.36, art. 123", rec: true },
+        { t: "Dérogation mineure", d: "Non applicable: deux étages ne sont pas un écart mineur.", delay: "—", risk: "refus certain", cost: "—", refs: "art. 145.1", no: true },
+      ],
+      next: ["Demander une rencontre préparatoire à l'urbaniste de l'arrondissement", "mail"] } },
+  stationnement: { label: "Réduire le stationnement", words: "stationnement case cases parking garage auto voiture reduire",
+    lead: "Le règlement prévoit déjà une réduction près du transport collectif: c'est elle à confirmer avant toute dérogation.",
+    items: [
+      { sev: "r", t: "8 cases sous l'exigence de base", figs: [["dessinées", "22"], ["exigées", "30"]],
+        b: "L'exigence suit le nombre de logements. Réduire davantage creuse l'écart, sauf réduction.",
+        refs: [ref(RU, "art. 71")], miss: "", eff: "—", act: ["Mesurer la distance à la station", "ruler"] },
+      { sev: "a", t: "La réduction près d'une station peut tout régler", figs: [["réduction", "jusqu'à 50 %"], ["exigé réduit", "15 cases"]],
+        b: "Si le terrain est dans le rayon prévu, 15 cases suffisent et les 22 dessinées dépassent déjà.",
+        refs: [ref(RU, "art. 72", false)], miss: "la distance à pied à la station", eff: "Mesure",
+        act: ["Mesurer la distance à la station", "ruler"] },
+      { sev: "g", t: "Moins de cases libère de la pleine terre", figs: [["par case", "≈ 15 m²"], ["à trouver", "44 m²"]],
+        b: "Trois cases de surface retirées règlent aussi le verdissement.",
+        refs: [ref(RU, "art. 134")], miss: "", eff: "Redessin — paysage", act: ["Écrire au paysagiste", "mail"] },
+    ],
+    fine: [["Stationnement pour vélos", "inchangé, 1 par logement", RU, "art. 86"]],
+    routes: { now: "22 cases dessinées, 30 exigées.", applies: [[RU, "art. 71", "stationnement"], [RU, "art. 72", "réduction transport collectif"], [LC, "art. 145.1", "dérogation mineure"]],
+      list: [
+        { t: "Réduction transport collectif", d: "Confirmer la distance à la station; l'exigence tombe à 15 cases.", delay: "1 semaine", risk: "faible", cost: "une mesure", refs: "art. 72", rec: true },
+        { t: "Dérogation mineure", d: "Demander 22 au lieu de 30 si la réduction ne s'applique pas.", delay: "2 à 3 mois", risk: "moyen", cost: "demande au comité", refs: "art. 145.1" },
+        { t: "Ajouter des cases", d: "8 cases de plus au sous-sol: environ un demi-niveau.", delay: "redessin", risk: "faible", cost: "coût de construction élevé", refs: "art. 71" },
+      ],
+      next: ["Mesurer la distance à pied jusqu'à la station la plus proche", "ruler"] } },
+  fenetres: { label: "Agrandir les fenêtres de la façade est", words: "fenetre fenetres vitrage baie baies agrandir facade est lumiere",
+    lead: "La façade est est déjà au-dessus du vitrage permis: agrandir demande de protéger les baies.",
+    items: [
+      { sev: "r", t: "Déjà 5,7 m² au-dessus du permis", figs: [["dessinés", "74,2 m²"], ["permis", "68,5 m²"]],
+        b: "Chaque m² de plus doit être protégé: verre armé ou gicleurs de façade, selon la distance à la limite.",
+        refs: [ref(CQ, "3.2.3.1")], miss: "la distance limitative mesurée", eff: "Redessin + ingénierie",
+        act: ["Écrire à l'ingénieur en protection incendie", "mail"] },
+      { sev: "g", t: "Le minimum de lumière naturelle est déjà atteint", figs: [["vitrage des chambres", "≥ 5 %"]],
+        b: "Agrandir n'est pas exigé par le code; c'est un choix de projet.",
+        refs: [ref(CQ, "9.7.2.3", false)], miss: "", eff: "—", act: ["Ajouter une tâche au dessin", "task"] },
+    ],
+    fine: [],
+    routes: { now: "74,2 m² dessinés, 68,5 m² permis sur la façade est.", applies: [[CQ, "3.2.3.1", "baies non protégées"], [CQ, "9.7.2.3", "surface vitrée des pièces"]],
+      list: [
+        { t: "Gicleurs de façade", d: "Les baies deviennent protégées; la limite tombe pour cette façade.", delay: "ingénierie", risk: "faible", cost: "système et entretien", refs: "3.2.3.1", rec: true },
+        { t: "Verre armé", d: "Protéger les baies les plus proches de la limite seulement.", delay: "redessin", risk: "faible", cost: "aspect des fenêtres", refs: "3.2.3.1" },
+        { t: "Garder les fenêtres actuelles", d: "Retirer trois fenêtres pour revenir à 68,5 m².", delay: "redessin", risk: "faible", cost: "lumière des chambres", refs: "3.2.3.1" },
+      ],
+      next: ["Écrire à l'ingénieur en protection incendie pour les gicleurs de façade", "mail"] } },
+};
+const KEYS = Object.keys(READ);
+const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+/* A typed intent lands on the closest reading; nothing close, the review. */
+function intentOf(q) {
+  const w = norm(q).split(/[^a-z]+/).filter((x) => x.length > 2);
+  let best = "revue", n = 0;
+  KEYS.forEach((k) => { const bag = READ[k].words.split(" "); const m = w.filter((x) => bag.some((b) => b && (b.startsWith(x) || x.startsWith(b)))).length; if (m > n) { n = m; best = k; } });
+  return best;
+}
+const sevName = { r: "À régler", a: "À confirmer", g: "Réglé" };
+const refHTML = (r) => `<span class="ref ${r.followed ? "" : "new"}" title="${r.followed ? "Suivi" : "Pas encore suivi"}"><em>${r.code === CQ ? "CQ" : r.code === LC ? "Loi" : "RU"}</em>${r.id}</span>`;
+const done = new Set();
+const actBtn = (key, [label, icn], solid) => done.has(key) ? `<span class="btn sm done">${ic.task}Fait</span>`
+  : `<span class="btn sm ${solid ? "solid" : ""}" data-act="${key}" data-label="${label}">${ic[icn]}${label}</span>`;
+const askBar = (s, ph) => `<div class="ask"><div class="box">${ic.spark}<input data-in="${s.id}" value="${s.q}" placeholder="${ph}">${s.q ? `<span class="x" data-clear="${s.id}">${ic.x}</span>` : ""}</div>
+  <div class="chips">${KEYS.map((k) => `<span class="chip" data-intent="${s.id}:${k}" aria-current="${s.k === k}">${READ[k].label}</span>`).join("")}</div></div>`;
+const counts = (R) => ["r", "a", "g"].map((v) => [v, R.items.filter((i) => i.sev === v).length + (v === "g" ? R.fine.length : 0)]);
+
+/* A ------------------------------------------------------------------- */
+const SA = { id: "A", q: "", k: "revue", fine: false };
+function paintA() {
+  const R = READ[SA.k];
+  const items = R.items.map((c, i) => ({ ...c, key: `A-${SA.k}-${i}` }));
+  const group = (v) => items.filter((c) => c.sev === v);
+  const con = (c) => `<div class="con"><i class="dot ${c.sev}"></i><span class="t">${c.t}</span>
+    <div class="side"><span class="k">Prochaine action</span>${actBtn(c.key, c.act, c.sev === "r")}<span class="k">Effort</span><span class="eff">${c.eff}</span></div>
+    <span></span><div class="figs">${c.figs.map(([k, v], j) => `<div><b class="${c.sev === "r" && j === 0 ? "bad" : ""}">${v}</b> <span>${k}</span></div>`).join("")}</div>
+    <span></span><span class="b">${c.b}</span>
+    <span></span><div class="cites">Selon ${c.refs.map(refHTML).join("")}</div>
+    ${c.miss ? `<span></span><span class="miss">Il manque pour conclure: ${c.miss}</span>` : ""}</div>`;
+  document.getElementById("A").innerHTML = `
+    <div class="ph">${ic.spark}<b>À considérer</b><span class="n">lu contre les trois codes · projet au 30 oct.</span><span class="sp"></span>
+      <span class="btn">Voir les articles</span></div>
+    ${askBar(SA, "Que voulez-vous faire? — ex. « ajouter un étage »")}
+    <div class="verdict"><span class="lead">${R.lead}</span></div>
+    <div class="verdict" style="padding-top:6px;padding-bottom:6px">${counts(R).map(([v, n]) => `<span class="cnt"><i class="${v}"></i>${n} ${sevName[v].toLowerCase()}</span>`).join("")}
+      <span class="src">Lecture générée — chaque point cite ses articles; le texte officiel fait foi.</span></div>
+    ${["r", "a", "g"].map((v) => group(v).length ? `<div class="grp"><i class="dot ${v}"></i>${sevName[v]}</div>${group(v).map(con).join("")}` : "").join("")}
+    ${R.fine.length ? `<div class="fold" data-fold>${SA.fine ? "▾" : "▸"} ${R.fine.length} point${R.fine.length > 1 ? "s" : ""} déjà réglé${R.fine.length > 1 ? "s" : ""}</div>
+      ${SA.fine ? `<div class="fine">${R.fine.map(([t, v, c, id]) => `<div><i class="dot g"></i>${t}<span>${v}</span>${refHTML(ref(c, id))}</div>`).join("")}</div>` : ""}` : ""}
+    <div class="foot">Les références en pointillé ne sont pas encore suivies; une action les ajoute à la liste du code.</div>`;
+}
+
+/* B ------------------------------------------------------------------- */
+const SB = { id: "B", q: "ajouter un étage", k: "etage", pick: null };
+function paintB() {
+  const k = READ[SB.k].routes ? SB.k : "etage";
+  const R = READ[k], P = R.routes;
+  const pick = SB.pick ?? P.list.findIndex((r) => r.rec);
+  const blocks = R.items.filter((i) => i.sev === "r");
+  document.getElementById("B").innerHTML = `
+    <div class="ph">${ic.spark}<b>Décider</b><span class="n">${R.label.toLowerCase()}</span><span class="sp"></span></div>
+    ${askBar({ ...SB, k }, "Que voulez-vous faire?").replace(/<span class="chip" data-intent="B:revue"[^>]*>[^<]*<\/span>/, "")}
+    <div class="verdict"><span class="lead">${R.lead}</span></div>
+    <div class="path">
+      <div class="left"><h3>Aujourd'hui</h3><span>${P.now}</span>
+        <h3>Ce qui s'applique</h3><div class="ap">${P.applies.map(([c, id, t]) => `<div>${refHTML(ref(c, id))}<span>${t}</span></div>`).join("")}</div>
+        <h3>Ce qui bloque</h3><div class="ap">${blocks.map((b) => `<div><i class="dot r"></i><span>${b.t}</span></div>`).join("")}</div></div>
+      <div class="right"><h3>Les voies possibles</h3>
+        <div class="routes">${P.list.map((r, i) => `<div class="route ${r.rec ? "rec" : ""} ${i === pick ? "on" : ""}" data-route="${i}">
+          ${r.rec ? `<span class="tag">Recommandé</span>` : r.no ? `<span class="tag no">Exclu</span>` : `<span class="tag no">Possible</span>`}
+          <b>${r.t}</b><span class="d">${r.d}</span>
+          <dl><dt>Délai</dt><dd>${r.delay}</dd><dt>Risque</dt><dd>${r.risk}</dd><dt>Coût</dt><dd>${r.cost}</dd><dt>Selon</dt><dd>${r.refs}</dd></dl></div>`).join("")}</div>
+        <h3>Étape suivante — ${P.list[pick].t.toLowerCase()}</h3>
+        <div class="next">${ic[P.next[1]]}<span style="flex:1">${pick === P.list.findIndex((r) => r.rec) ? P.next[0] : `Préparer: ${P.list[pick].d[0].toLowerCase()}${P.list[pick].d.slice(1)}`}</span>
+          ${pick === P.list.findIndex((r) => r.rec) ? actBtn(`B-${k}-${pick}`, [P.next[1] === "mail" ? "Rédiger le courriel" : "Ajouter la tâche", P.next[1]], true)
+            : actBtn(`B-${k}-${pick}`, ["Ajouter la tâche", "task"], true)}</div>
+        <span class="src" style="margin:0">Lecture générée — délais et risques indicatifs; le texte officiel fait foi.</span></div>
+    </div>`;
+}
+
+/* C ------------------------------------------------------------------- */
+const CARDS = [
+  { id: "art. 9", t: "Hauteur en étages", img: "assets/code/art-9-hauteur.png", st: "a",
+    q: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
+    note: "Un étage de trop, et une dérogation mineure ne le couvre pas. Retirer l'étage ou préparer un projet particulier.", act: ["Demander la grille", "mail"] },
+  { sug: true, id: "art. 145.36", code: LC, t: "Projet particulier (PPCMOI)",
+    q: "Le conseil peut autoriser un projet particulier qui déroge au règlement, à certaines conditions, par résolution.",
+    note: "C'est la seule voie si l'étage reste. Le projet ne le suit pas encore.", act: ["Suivre", "plus"] },
+  { id: "art. 22", t: "Marge arrière", img: "assets/code/art-22-marge.png", st: "a",
+    q: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
+    note: "Si les 30 cm manquants sont des balcons, ce sont des saillies admises et la marge passe.", act: ["Écrire à l'urbaniste", "mail"] },
+  { id: "art. 43", t: "Taux d'implantation", img: "assets/code/art-43-implantation.png", st: "g",
+    q: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
+    note: "Réglé: 48,2 % pour 55 %. Rien à faire.", act: null },
+  { id: "art. 71", t: "Stationnement", img: "assets/code/art-71-stationnement.png", st: "r",
+    q: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
+    note: "8 cases manquent, mais l'art. 72 peut ramener l'exigence à 15. Mesurer la distance à la station avant tout redessin.", act: ["Mesurer la distance", "ruler"] },
+  { sug: true, id: "art. 72", code: RU, t: "Réduction près du transport collectif",
+    q: "Le nombre minimal d'unités de stationnement peut être réduit pour un terrain situé près d'une station de transport collectif.",
+    note: "C'est la pièce qui manque pour conclure l'art. 71.", act: ["Suivre", "plus"] },
+  { id: "art. 134", t: "Verdissement et pleine terre", img: "assets/code/art-134-verdissement.png", st: "a",
+    q: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
+    note: "44 m² à trouver; trois cases de surface en moins les donnent.", act: ["Écrire au paysagiste", "mail"] },
+];
+const ST = { r: ["Pas clair du tout", "r"], a: ["Moyennement clair", "a"], g: ["Clair", "g"] };
+function paintC() {
+  const sug = CARDS.filter((c) => c.sug && !done.has(`C-${c.id}`)).length;
+  const acts = CARDS.filter((c) => !c.sug && c.act && !done.has(`C-${c.id}`)).length;
+  document.getElementById("C").innerHTML = `
+    <div class="ph"># <b>Règlement d'urbanisme</b><span class="n">5 articles suivis</span><span class="sp"></span><span class="btn solid">${ic.plus}Ajouter</span></div>
+    <div class="bar">${ic.spark}<span><b>${acts} action${acts > 1 ? "s" : ""}</b> sur les articles suivis · <b>${sug} article${sug > 1 ? "s" : ""}</b> à suivre, d'un autre code ou de celui-ci</span>
+      <span class="sp"></span><span style="font-size:11px;color:var(--ink-3)">Lecture générée — le texte officiel fait foi.</span></div>
+    <div class="list">${CARDS.map((c) => {
+      const key = `C-${c.id}`, followedNow = c.sug && done.has(key);
+      return `<div class="card ${c.sug && !followedNow ? "sug" : ""}">
+        <div class="fig">${c.img ? `<img src="${c.img}" alt="">` : `<span>${c.sug ? (c.code === LC ? "Loi-cadre" : "à suivre") : "schéma"}</span>`}</div>
+        <div class="bd"><div class="top"><span>${c.id}</span><b>${c.t}</b>${c.sug ? `<span class="st">${followedNow ? "Suivi — non mesuré" : `suggéré${c.code === LC ? " · Loi-cadre" : ""}`}</span>`
+          : `<span class="st"><i class="dot ${ST[c.st][1]}"></i>${ST[c.st][0]}</span>`}</div>
+          <span class="qt">« ${c.q} »</span>
+          <div class="note"><span class="k">${ic.spark}</span><span>${c.note}</span>${c.act ? actBtn(key, c.act, c.sug) : ""}</div></div></div>`;
+    }).join("")}</div>`;
+}
+
+const paintAll = () => { paintA(); paintB(); paintC(); };
+const S = { A: SA, B: SB };
+const toast = (t) => { const el = document.getElementById("toast"); el.textContent = t; el.style.display = "block"; clearTimeout(toast.h); toast.h = setTimeout(() => el.style.display = "none", 1800); };
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-intent],[data-clear],[data-act],[data-fold],[data-route]");
+  if (!t) return;
+  if (t.dataset.intent) { const [id, k] = t.dataset.intent.split(":"); S[id].k = k; S[id].q = k === "revue" ? "" : READ[k].label.toLowerCase(); S[id].pick = null; }
+  else if (t.dataset.clear) { const s = S[t.dataset.clear]; s.q = ""; s.k = s.id === "B" ? "etage" : "revue"; s.pick = null; }
+  else if (t.dataset.act) { done.add(t.dataset.act); toast(t.dataset.label === "Suivre" ? "Ajouté aux articles suivis" : `${t.dataset.label} — ajouté aux tâches`); }
+  else if (t.hasAttribute("data-fold")) SA.fine = !SA.fine;
+  else if (t.dataset.route) SB.pick = +t.dataset.route;
+  paintAll();
+});
+document.addEventListener("keydown", (e) => {
+  const inp = e.target.closest?.("[data-in]");
+  if (!inp || e.key !== "Enter") return;
+  const s = S[inp.dataset.in]; s.q = inp.value.trim(); s.k = intentOf(s.q); if (s.id === "B" && !READ[s.k].routes) s.k = "etage"; s.pick = null;
+  paintAll(); document.querySelector(`[data-in="${s.id}"]`)?.focus();
+});
+paintAll();
+</script>
+</body>
+</html>

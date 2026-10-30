@@ -4641,10 +4641,13 @@ function buildingQuant() {
   };
 }
 /* The building, one line per level, read the way a floor is: the level
-   and its unit count written once, the switch choosing areas or openings. */
+   and its unit count written once, the switch choosing areas or openings.
+   A level's line lights that floor on the model and flies to it; the
+   page stays on the whole building. A second click lets it go. */
+const bLevelRow = (lv) => `class="${V.bLevel === lv ? "on" : ""}" ${act("blevel", lv)}
+  title="${V.bLevel === lv ? "Revenir au bâtiment entier" : `Voir le ${levelView(lv).toLowerCase()} sur la maquette`}"`;
 function buildingTableHTML(q) {
   const cell = (c, n, tag = "td") => `<${tag} class="${n ? "n" : ""}">${c}</${tag}>`;
-  const views = viewsOf("Unités");
   const brut = q.net / 0.85;
   const open = bTab() === "o";
   const counted = modelCounted();
@@ -4652,7 +4655,7 @@ function buildingTableHTML(q) {
   const total = counted ? sumOpenings(each) : null;
   const body = LEVELS.map((lv, i) => {
     const rows = levelRows(lv), net = rows.reduce((s, r) => s + r[6], 0);
-    return `<tr ${act("view", views.indexOf(levelView(lv)))} title="Lire le ${levelView(lv).toLowerCase()}">
+    return `<tr ${bLevelRow(lv)}>
       ${cell(levelView(lv))}${cell(rows.length, 1)}${open ? openCells(each[i], total, cell)
         : `${cell(fqNum(net), 1)}${cell(fqNum(net * M2, 1), 1)}${cell(fqPct(net, q.net), 1)}`}</tr>`;
   }).join("");
@@ -4675,15 +4678,15 @@ function bTabsHTML() {
     `<span class="ss" ${act("btab", k)} aria-current="${bTab() === k}">${label}</span>`).join("")}</span></div>`;
 }
 /* The types, level by level: how many of each a floor carries, then the
-   building's count, share and mean area of each. A level's line opens it. */
+   building's count, share and mean area of each. A level's line is picked
+   on the model as in the other tables. */
 function buildingTypesHTML(q) {
   const cell = (c, n, tag = "td") => `<${tag} class="${n ? "n" : ""}">${c}</${tag}>`;
-  const views = viewsOf("Unités");
   const types = q.types.map((t) => t[0]);
   const sw = (ty) => `<span class="fsw" style="background:${TYPO_INK[ty] || "var(--ink-3)"}"></span>`;
   const body = LEVELS.map((lv) => {
     const rows = levelRows(lv);
-    return `<tr ${act("view", views.indexOf(levelView(lv)))} title="Lire le ${levelView(lv).toLowerCase()}">${cell(levelView(lv))}
+    return `<tr ${bLevelRow(lv)}>${cell(levelView(lv))}
       ${types.map((ty) => cell(rows.filter((r) => baseTypo(r[5]) === ty).length || "—", 1)).join("")}${cell(rows.length, 1)}</tr>`;
   }).join("");
   const foot = [
@@ -6278,7 +6281,7 @@ function render() {
     const level = currentLevel() ?? Number(no.slice(0, -2));
     window.fitteSelection = { level, unit: no, index: selectedRow[2] };
   } else {
-    window.fitteSelection = { level: buildingScope() ? null : currentLevel(), unit: null, index: null };
+    window.fitteSelection = buildingLevelSelection();
   }
   syncElevation();
   window.dispatchEvent(new CustomEvent("fitte:render"));
@@ -6343,8 +6346,14 @@ function paintSelection() {
   window.fitteSelection = row
     ? { level: currentLevel() ?? Number(row[0].split(" — ")[0].slice(0, -2)),
         unit: row[0].split(" — ")[0], index: row[2] }
-    : { level: buildingScope() ? null : currentLevel(), unit: null, index: null };
+    : buildingLevelSelection();
   window.dispatchEvent(new CustomEvent("fitte:render"));
+}
+/* No unit chosen: on a floor, that floor's band; on the whole building,
+   the level picked in its table, flown to, or nothing. */
+function buildingLevelSelection() {
+  if (!buildingScope()) return { level: currentLevel(), unit: null, index: null };
+  return V.bLevel ? { level: V.bLevel, unit: null, index: null, frame: "level" } : { level: null, unit: null, index: null };
 }
 
 /* A menu left open over the table it exports is in the way of reading it:
@@ -7258,6 +7267,9 @@ function onClick(e) {
     case "btab":
       V.bTab = value;
       if (value === "s" || value === "o") V.fqCols = value;
+      break;
+    case "blevel":
+      V.bLevel = V.bLevel === Number(value) ? null : Number(value);
       break;
     case "export": {
       V.exportMenu = false;
