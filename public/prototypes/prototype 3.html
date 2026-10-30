@@ -783,6 +783,9 @@ body.elev .mtools{display:none}
 .frame[data-chrome="black"] .tabs .crumb.ech.cur{background:#fff;color:#111}
 .frame[data-chrome="black"] .tabs .crumb.ech .late{box-shadow:none}
 .frame[data-chrome="black"] .tabs .crumb.ech.cur .late{background:#111;color:#fff}
+/* The index, when it is the page being read, is lit the way the schedule is. */
+.tabs .crumb.cur{background:var(--fill);color:var(--ink);font-weight:500}
+.frame[data-chrome="black"] .tabs .crumb.cur{background:#fff;color:#111}
 .frame[data-chrome="black"] .tabs .crumb.on{color:#fff;font-size:13px}
 .frame[data-chrome="black"] .tabs .div,
 .frame[data-chrome="black"] .tabs .sep{background:rgba(255,255,255,.16)}
@@ -872,18 +875,18 @@ body.elev .mtools{display:none}
 .model-context-note{padding:6px 10px;font-size:11px;color:var(--ink-2);border-bottom:1px solid var(--line-2)}
 /* The engineering chips keep the row under the pane header; the three
    drawings moved out of it and into the strip. */
-/* The floor's mix: one bar, one chip per type, the net area at the end. */
+/* The floor's mix: one band per type, carrying its own name at its leading
+   edge and its share at the trailing one, where a scale's labels sit. The
+   band is the legend, so the type is read before the number: the name is
+   semibold, the share is lighter and half a step down. */
 .fqmix{display:flex;flex-direction:column;gap:6px}
-.fqmix .mixbar{display:flex;height:7px;border-radius:4px;overflow:hidden;background:var(--fill-2)}
-.fqmix .mixbar span{display:block;height:100%}
+.fqmix .mixbar{display:flex;gap:2px;height:20px;border-radius:5px;overflow:hidden}
+.fqmix .mixbar span{display:flex;align-items:center;justify-content:space-between;gap:6px;
+  min-width:0;overflow:hidden;padding:0 7px;color:#fff;font-size:11.5px;font-weight:600;white-space:nowrap}
+.fqmix .mixbar span small{font-size:11px;font-weight:500;opacity:.8;font-variant-numeric:tabular-nums}
 .fqmix .mixrow{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
-.fqmix .chip{padding:1px 8px 1px 6px;font-size:11px;white-space:nowrap;gap:5px}
-.fqmix .chip .sw{width:8px;height:8px;border-radius:2px;flex:0 0 8px}
-.fqmix .chip b{font-weight:600;color:var(--ink)}
-.fqmix .chip .pc{color:var(--ink);font-variant-numeric:tabular-nums}
-.fqmix .chip .ct{color:var(--ink-3);font-variant-numeric:tabular-nums}
-/* The type column repeats the mix chips above it, so a row's type reads
-   in the same colour as its share of the floor. */
+/* The type column repeats the bands above it, so a row's type reads in the
+   same colour as its share of the floor. */
 .fqt .tpill{height:20px;padding:0 8px 0 6px;font-size:11px;gap:5px;white-space:nowrap;vertical-align:middle}
 .fqt .tpill .sw{width:8px;height:8px;border-radius:2px;flex:0 0 8px}
 .fqt tr.on .tpill{border-color:var(--ink-3);color:var(--ink);font-weight:600}
@@ -933,13 +936,40 @@ body.elev .mtools{display:none}
    by the picture and the badge; the word stays a word. */
 .ltile .pic{opacity:.45}
 .ltile:hover{background:var(--fill-2)}
-/* The discipline glyph: a white disc in the middle of the thumbnail,
-   sitting under the badge, never catching the pointer. */
-.ltile .lglyph{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-19px 0 0 -19px;z-index:2;
-  display:flex;align-items:center;justify-content:center;pointer-events:none;
-  border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--line-2);color:var(--ink)}
-.ltile .lglyph .lu{width:20px;height:20px}
-.ltile.on .lglyph{background:rgba(255,255,255,.75)}
+/* The discipline glyph leads the name, in the name's own colour, so the
+   thumbnail shows only the drawing. */
+.ltile .lglyph{display:inline-flex;vertical-align:-2px;margin-right:4px;color:inherit;pointer-events:none}
+.ltile .lglyph .lu{width:13px;height:13px}
+/* « Ajouter un dessin »: pinned to the foot of the strip, so it stays in
+   reach when the pile scrolls, one line tall. */
+.ladd{position:sticky;bottom:-8px;margin:auto -7px -8px;padding:8px 7px;background:var(--paper);border-top:1px solid var(--line-2);z-index:2}
+.ladd span{display:flex;align-items:center;justify-content:center;gap:5px;min-height:28px;padding:4px 6px;
+  border:1px solid var(--line);border-radius:6px;background:var(--card);font-size:11.5px;font-weight:500;
+  line-height:1.2;text-align:center;cursor:pointer}
+.ladd span:hover,.ladd span.open{border-color:var(--ink)}
+.ladd span .lu{width:13px;height:13px;flex:0 0 13px}
+/* A drawing taken from the folder but not yet aligned to the plan: its
+   file stands in for the picture, and the tag says what is still owed. */
+.ltile.added{cursor:default}
+.ltile.added .pic{opacity:1;display:grid;place-items:center;background:var(--fill-2)}
+.ltile.added .pic .fglyph{width:26px;height:30px}
+.ltile .lcal{position:absolute;left:4px;top:4px;font-size:9.5px;font-weight:600;padding:0 4px;border-radius:4px;background:#fff4dc;color:#9a5b00}
+.addpop{position:absolute;right:112px;bottom:12px;z-index:30;width:min(320px,calc(100% - 124px));max-height:calc(100% - 24px);overflow:auto;
+  background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.10);
+  padding:9px 10px;display:flex;flex-direction:column;gap:5px;font-size:11.5px}
+.addpop .hd{display:flex;align-items:center;gap:6px}
+.addpop .hd .lu{width:13px;height:13px}
+.addpop .hd .x{margin-left:auto;cursor:pointer;color:var(--ink-3);display:grid;place-items:center;width:20px;height:20px;border-radius:5px}
+.addpop .hd .x:hover{background:var(--fill-2)}
+.addpop .path{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.addpop .grp{font-size:10px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+.addpop .arow{display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:5px;cursor:pointer;min-width:0}
+.addpop .arow:hover{background:var(--fill-2)}
+.addpop .arow .fglyph{width:15px;height:18px;flex:0 0 15px}
+.addpop .arow .f{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.addpop .arow .d{font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+.addpop .arow.has{cursor:default;opacity:.5}
+.addpop .arow.has:hover{background:none}
 .ltile:hover .pic{opacity:.8}
 .ltile.on .pic{opacity:1}
 /* Colour only: a bolder weight is wider, so a two-line name such as
@@ -1358,6 +1388,13 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 /* The origin stands over the zoom figure: the readout is 46 px wide and
    centred, starting 10 + 33 px in, so its middle is at 66 px; the 62 px box
    has the origin at its own middle, so its left edge is at 66 − 31. */
+/* The elevation marker's triangle, set from the panel. Read right to left:
+   stretched along its axis about its flat base (x = −4.5 in the drawn
+   triangle, so the base stays and only the tip moves), then sized and
+   pushed out along the way it points, both from the circle's centre. */
+.elevmark .emarrow{transform-box:view-box;transform-origin:0 0;
+  transform:translateX(var(--em-off,0px)) scale(var(--em-scale,1))
+    translateX(-4.5px) scaleX(var(--em-len,1)) translateX(4.5px)}
 .axes{position:absolute;left:35px;bottom:50px;z-index:5;width:62px;height:62px;
   pointer-events:none}
 .axes line{stroke-width:1.8;stroke-linecap:round}
@@ -1567,6 +1604,9 @@ body.splitting .frame[data-shell="inset"] .gut[data-gut="plan"].live::before{wid
    row — its 10 px of grip hang over that border, its ink lies on it. */
 .frame[data-shell="inset"] .pane:has(+ .gut[data-gut="cal"]:not(.fold)){border-right:1px solid var(--line)}
 .frame[data-shell="inset"] .gut[data-gut="cal"]:not(.fold){margin:0 -5px}
+/* À faire folded: the calendar's border goes with the open edge, so the
+   strip draws the seam on its own left. */
+.frame[data-shell="inset"] .gut[data-gut="cal"].fold + .pane.fstrip{border-left:1px solid var(--line)}
 .frame[data-shell="inset"] .gut[data-gut="cal"]:not(.fold)::before{left:50%;width:1px;margin-left:-1px;background:transparent}
 .frame[data-shell="inset"] .gut[data-gut="cal"]:not(.fold):hover::before,
 body.splitting .frame[data-shell="inset"] .gut[data-gut="cal"].live::before{width:2px;margin-left:-2px;background:var(--ink)}
@@ -1738,6 +1778,8 @@ const V = {
     skpHist: false,   // the card lists the previous versions
     skpList: false,   // the card lists the whole folder
     skpSwapped: false,
+    addOpen: false,   // the « Ajouter un dessin » card over the plan
+    added: [],        // drawings taken from the folder onto the pile: {lv, disc, ic, file, date}
   },
   /* Which typologies are asked for. Nothing is on: the plan is read in black
      and white until someone asks a question of it. Keyed by TYPOS, written
@@ -1813,8 +1855,9 @@ function sprite() {
     "share-2", "eye", "eye-off", "message-square",
     /* the opacity line on each drawing's card */
     "blend",
-    /* each drawing's discipline, centred on its thumbnail; see LAYGLYPH */
+    /* each drawing's discipline, before its name; see LAYGLYPH and ADD_FOLDER */
     "map", "drafting-compass", "trees", "zap", "waves", "droplet", "fan",
+    "columns-3", "flame", "route", "plus",
     /* the margin: posting a note, keeping one for the studio */
     "lock", "map-pin", "send", "users", "trash-2",
     /* the plan's comment button */
@@ -2523,11 +2566,42 @@ const LAYGLYPH = { arp: "map", plan: "drafting-compass", pay: "trees", electrica
   drainage: "waves", distribution: "droplet", ventilation: "fan" };
 const layTile = (k) => `<div class="ltile ${V.lay[k].on ? "on" : ""} ${V.layPick === k ? "sel" : ""}"
   data-ltile="${k}" ${act("lpick", k)} title="${LAYDOC[k].disc} — ${LAYDOC[k].date()}">
-  <span class="wrap"><span class="pic" style="background-image:url(${LAYDOC[k].thumb()})"></span><span class="lglyph">${icon(LAYGLYPH[k])}</span>${layBadge(k)}</span>
-  <span class="nm">${LAYDOC[k].short}</span></div>`;
+  <span class="wrap"><span class="pic" style="background-image:url(${LAYDOC[k].thumb()})"></span>${layBadge(k)}</span>
+  <span class="nm"><span class="lglyph">${icon(LAYGLYPH[k])}</span>${LAYDOC[k].short}</span></div>`;
 
 const layStripHTML = () => `<div class="lstrip hi" data-lstrip>
-  <div class="lpile" data-lpile>${layKeys().map(layTile).join("")}</div></div>`;
+  <div class="lpile" data-lpile>${layKeys().map(layTile).join("")}</div>
+  ${addedHere().map(addedTile).join("")}
+  <div class="ladd"><span class="${V.docs.addOpen ? "open" : ""}" ${act("laddopen")} aria-expanded="${V.docs.addOpen}">${icon("plus")}Ajouter un dessin</span></div></div>`;
+
+/* Adding a drawing. The card reads the project's Dessins folder for the
+   level, by discipline; what is already on the pile stays listed, greyed,
+   so the folder reads whole. Sample files for the prototype. A drawing
+   taken from the folder joins the bottom of the pile, but it has not been
+   registered to the plan yet, so it is shown as a file waiting to be
+   aligned — never as a sheet fitte does not have. */
+const ADD_FOLDER = (lv) => [
+  { disc: "Structure", ic: "columns-3", files: [[`S-${200 + lv}_STRUCTURE_NIVEAU_${lv}.dwg`, "21 oct 2026"], ["S-105_FONDATIONS.pdf", "2 sept 2026"]] },
+  { disc: "Gicleurs", ic: "flame", files: [[`FP-${300 + lv}_GICLEURS_NIVEAU_${lv}.pdf`, "17 oct 2026"]] },
+  { disc: "Civil", ic: "route", files: [["C-101_CIVIL_SITE.dwg", "30 sept 2026"]] },
+];
+const addedHere = () => V.docs.added.filter((a) => a.lv === paneLevel());
+const addedTile = (a) => `<div class="ltile added" title="${a.file} — à caler sur le plan avant de l'afficher">
+  <span class="wrap"><span class="pic">${fileGlyph(a.file)}</span><span class="lcal">à caler</span></span>
+  <span class="nm"><span class="lglyph">${icon(a.ic)}</span>${a.disc}</span></div>`;
+function addPopHTML() {
+  if (!V.docs.addOpen) return "";
+  const lv = paneLevel();
+  const row = (file, date, has, disc, ic) => `<div class="arow ${has ? "has" : ""}" ${has ? "" : act("laddpick", [disc, ic, file, date].join("|"))}
+      title="${has ? "Déjà sur la pile" : `Ajouter ${file}`}">${fileGlyph(file)}<span class="f">${file}</span><span class="d">${has ? "sur la pile" : date}</span></div>`;
+  const taken = new Set(V.docs.added.map((a) => a.file));
+  return `<div class="addpop" data-addpop>
+    <div class="hd">${icon("plus")}<b>Ajouter un dessin</b><span class="x" ${act("laddopen")} title="Fermer">${icon("x")}</span></div>
+    <span class="path" title="${V.docs.dir}">${V.docs.dir}</span>
+    ${ADD_FOLDER(lv).map((g) => `<div class="grp">${g.disc}</div>${g.files.map(([f, d]) => row(f, d, taken.has(f), g.disc, g.ic)).join("")}`).join("")}
+    <div class="grp">Sur la pile</div>
+    ${layKeys().map((k) => row(LAYDOC[k].file(), "", true)).join("")}</div>`;
+}
 
 /* The card is the drawing's document: what it is, which file, what can be
    done with it, and how strongly it is laid on the sheet. Nothing about
@@ -3784,7 +3858,8 @@ function tabsHTML() {
   /* The index is reached from the words "Tous les projets". They sit in the strip
      on every screen; on the index itself they are the only thing in it. */
   const late = lateCount();
-  const back = `<span class="crumb hi" data-screen="Projets" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
+  const idxOn = V.screen === "Projets";
+  const back = `<span class="crumb hi ${idxOn ? "cur" : ""}" data-screen="Projets" aria-current="${idxOn}" title="Tous les projets">${icon("folder")}Tous les projets</span>`;
   /* The studio's schedule is not a step on the way into this project, so it
      leaves the path on the left and sits at the right end of the strip with
      the other things that are about leaving: it is a door out, like Partager
@@ -3794,17 +3869,17 @@ function tabsHTML() {
       style="flex:0 0 auto"
       title="Échéancier de l'atelier — ce qui est dû, tous les projets">${icon("calendar-check")}Échéancier${late
         ? `<span class="late">${late}</span>` : ""}</span>`;
-  if (studio) {
-    /* The studio strip: the projects and the week are siblings here, and
-       the project's own tabs are not in it at all. */
-    const stab = (name, label) => `<button data-screen="${name}" aria-current="${name === V.screen}"
-        title="${label}">${ic ? icon(SCREENS[name].icon) : ""}<span class="lo bar" style="width:46px"></span>
-        <span class="hi">${label}</span></button>`;
-    items = `<span class="crumb on hi">${icon("folder")}Tous les projets</span>
-      <span class="div"></span>
-      <div class="views">${stab("Projets", "Projets")}</div>
-      <span class="sp"></span>`;
-  } else if (!views.length && mode !== "Two rows, no rail") {
+  /* The first row is the studio's, and it is the same row on every screen:
+     every project, the schedule across them, the person signed in. The
+     screen being read is lit in it — the index, the schedule — and on a
+     project screen neither is, because the project's own row is below. */
+  const me = `<span class="me" title="${ME.name}"><i>${ME.ini}</i><span class="hi">${ME.name}</span></span>`;
+  const one = `<div class="tabs one rg ${solo("nav")}" data-rg="atelier" data-fi="${fiOf("nav")}"
+       data-labels-mode="${V.nav.labels}">
+      ${back}${ech}<span class="sp"></span>${me}
+    </div>`;
+  if (studio) return one;
+  if (!views.length && mode !== "Two rows, no rail") {
     /* A screen that reads on one page has nothing to filter, so the strip
        carries the project's name and the way back, and no tabs at all. The
        two-row layout is the exception: it is the only way between screens,
@@ -3852,10 +3927,8 @@ function tabsHTML() {
         <div class="views">${views.map(viewBtn).join("")}</div></div>`
     : "";
   /* A project is read by people who do not draw: the client, the urbaniste,
-     the contractor. Sharing is the end of the first row on every screen,
-     the studio's included: a button that comes and goes with the screen
-     makes the top right unreliable, and the eye goes there to find it. On
-     a studio screen it shares the last project open. */
+     the contractor. Sharing ends the project's own row, on the same line as
+     the name of what is being shared. */
   const share = `<span class="btnw" ${act("share")} title="Partager le projet en lecture et commentaires"
          style="margin-left:auto;flex:0 0 auto">${icon("share-2")}<span class="hi">Partager</span></span>`;
 
@@ -3866,12 +3939,8 @@ function tabsHTML() {
      The project's row and its levels then sit on a raised sheet, so the
      project reads as a thing resting in the studio's chrome, the way the
      white page rests on the sheet in turn. */
-  if (mode === "Two rows, no rail" && !studio) {
-    const me = `<span class="me" title="${ME.name}"><i>${ME.ini}</i><span class="hi">${ME.name}</span></span>`;
-    return `<div class="tabs one rg ${solo("nav")}" data-rg="atelier" data-fi="${fiOf("nav")}"
-         data-labels-mode="${V.nav.labels}">
-        ${back}${ech}<span class="sp"></span>${me}
-      </div>
+  if (mode === "Two rows, no rail") {
+    return `${one}
       <div class="projsheet">
         <div class="tabs two" data-labels-mode="${V.nav.labels}">
           <span class="crumb on hi proj">${V.project}</span>
@@ -4061,7 +4130,7 @@ function contentHTML() {
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}${conflictMarkHTML()}${pinMarkHTML()}</div></div>
-              ${north("plan")}${mini("plan")}<div class="zctl">${zoomPill("plan")}${rotPillHTML()}</div>${pinArmHTML()}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}${pinBubbleHTML()}</div>`
+              ${north("plan")}${mini("plan")}<div class="zctl">${zoomPill("plan")}${rotPillHTML()}</div>${pinArmHTML()}${layStripHTML()}${addPopHTML()}${layCardHTML()}${conflictCardHTML()}${pinBubbleHTML()}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
@@ -4231,21 +4300,19 @@ function floorQuant() {
   };
 }
 
-/* The mix of a floor, read in one line: a bar in the typology colours the
-   plan already uses, then one chip per type with its count and its share.
-   The floor's net area stands beside it because every percentage on the
-   row is a share of it. */
+/* The mix of a floor, read in one band: each type names itself at the left
+   of its own share of the width, with that share written at the right. The
+   bar was a legend before it was a measure, so the colour and the name are
+   fused and the percentage follows. The floor's net area stands under it
+   because every percentage in the band is a share of it. */
 function fqMixHTML(q) {
   if (!q.count) return `<div class="fqmix"><div class="mixrow">
     <span class="mixnet">Aucune unité résidentielle à ce niveau</span></div></div>`;
   return `<div class="fqmix">
-    <div class="mixbar">${q.types.map(([ty, , share]) =>
-      `<span style="width:${(share * 100).toFixed(1)}%;background:${TYPO_INK[ty]}" title="${ty} — ${Math.round(share * 100)} %"></span>`).join("")}</div>
+    <div class="mixbar">${q.types.map(([ty, count, share]) =>
+      `<span style="flex:${(share * 1000).toFixed(0)} 0 0;background:${TYPO_INK[ty]}"
+        title="${count} unités de ${ty} — ${Math.round(share * 100)} % des pi² nets">${ty}<small>${Math.round(share * 100)} %</small></span>`).join("")}</div>
     <div class="mixrow">
-      ${q.types.map(([ty, count, share]) => `<span class="chip" title="${count} unités de ${ty}">
-        <span class="sw" style="background:${TYPO_INK[ty]}"></span><b>${ty}</b>
-        <span class="pc">${Math.round(share * 100)} %</span><span class="ct">${count}</span></span>`).join("")}
-      <span style="flex:1"></span>
       <span class="mixnet"><b>${fqNum(q.net)}</b> pi² nets sur ${q.count} unités</span>
     </div>
     ${(() => {
@@ -6093,15 +6160,22 @@ document.addEventListener("click", (e) => {
   render();
 }, true);
 document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape" || !(V.exportMenu || V.docs.skpOpen)) return;
+  if (e.key !== "Escape" || !(V.exportMenu || V.docs.skpOpen || V.docs.addOpen)) return;
   V.exportMenu = false;
   V.docs.skpOpen = false;
+  V.docs.addOpen = false;
   render();
 });
 /* The model file's card closes the same way. */
 document.addEventListener("click", (e) => {
   if (!V.docs.skpOpen || e.target.closest?.("[data-skppop],.fchip")) return;
   V.docs.skpOpen = false;
+  render();
+}, true);
+/* And the « Ajouter un dessin » card. */
+document.addEventListener("click", (e) => {
+  if (!V.docs.addOpen || e.target.closest?.("[data-addpop],.ladd")) return;
+  V.docs.addOpen = false;
   render();
 }, true);
 
@@ -6948,6 +7022,13 @@ function onClick(e) {
       say(`Remise à SketchUp: ${skpDoc().file} s'ouvre sur ${viewOf("Unités").toLowerCase()}. Lecture seule.`);
       break;
     case "skpchip": V.docs.skpOpen = !V.docs.skpOpen; V.docs.skpHist = V.docs.skpList = false; break;
+    case "laddopen": V.docs.addOpen = !V.docs.addOpen; V.layCard = false; break;
+    case "laddpick": {
+      const [disc, ic, file, date] = String(value).split("|");
+      V.docs.added.push({ lv: paneLevel(), disc, ic, file, date });
+      V.docs.addOpen = false;
+      break;
+    }
     case "skphist": V.docs.skpHist = !V.docs.skpHist; V.docs.skpList = false; break;
     case "skplist": V.docs.skpList = !V.docs.skpList; V.docs.skpHist = false; break;
     case "skppick": skpPick(Number(value)); return;
@@ -6993,6 +7074,15 @@ const dial = DialKit.createDialKit("Wireframe C3", {
     model: sel(["Dim + top bar", "Veil + spinner", "Status pill", "Untextured first", "Blur to sharp", "Silhouette",
       "Fade through paper", "Rise up", "Settle in", "Progress ring", "Instant"]),
     modelSeconds: [2.2, 0.3, 5, 0.1] },
+  /* The elevation marker in the 3D corner view: the triangle's size, in %
+     of the drawn one; its length alone, base to tip, in % (the base stays,
+     the tip comes in or goes out); and how far it is pushed out from the
+     circle's centre along the way it points, in px (negative tucks it
+     under the circle). */
+  elevationMark: { _collapsed: false,
+    arrowScale: [100, 40, 200, 5],
+    arrowLength: [100, 30, 250, 5],
+    arrowOffset: [0, -8, 12, 0.5] },
   shell: sel(["Inset card", "Flat"]),
   /* The dark bar: the chrome stops imitating paper, so the drawing is the
      only white thing on the screen. Green marks the level, white marks the
@@ -7073,6 +7163,9 @@ function applyDial(v) {
   V.planLoad = v.fileSwap.planSeconds;
   V.modelSwap = v.fileSwap.model;
   V.modelLoad = v.fileSwap.modelSeconds;
+  document.documentElement.style.setProperty("--em-scale", v.elevationMark.arrowScale / 100);
+  document.documentElement.style.setProperty("--em-len", v.elevationMark.arrowLength / 100);
+  document.documentElement.style.setProperty("--em-off", `${v.elevationMark.arrowOffset}px`);
   V.shell = v.shell;
   V.chrome = v.chrome;
   V.homeLayout = v.homeLayout;
