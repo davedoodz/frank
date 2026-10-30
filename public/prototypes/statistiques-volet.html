@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Statistiques — nommer le volet et sauter dans ses sections</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The pane holds three tables about one floor: its units, the selected
+   unit's openings, and the materials seen on each façade. It is named for
+   one of the three today. Here it is named for what the three have in
+   common — figures — and given a way to jump between them. Six shortcuts,
+   each with a candidate name, all with scroll-spy: the control always
+   shows which section is under the eye, because a jump control that does
+   not follow the scroll lies as soon as you touch the wheel. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#ededed;--fill-2:#f6f6f7;--page:#fafafa;--card:#fff;--wash:rgba(17,17,18,.055);
+  --t3:#e0736e;--t4:#5b9bd5;--t5:#5cb46e;--red:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.45 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--page)}
+main{padding:24px 28px 80px;max-width:1500px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:900px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:24px;margin-top:24px}
+section > h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section > h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section > p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:4.6em}
+
+.pane{background:var(--card);border:1px solid var(--line-2);border-radius:10px;overflow:hidden;
+  display:flex;flex-direction:column;height:520px;position:relative}
+.ph{display:flex;align-items:center;gap:8px;min-height:38px;padding:0 10px;flex:0 0 auto;white-space:nowrap;
+  border-bottom:1px solid var(--line-2);font-size:13px;font-weight:500}
+.ph .nm{display:flex;align-items:center;gap:7px;padding-left:2px}
+.ph .n{margin-left:auto;color:var(--ink-3);font-size:12px;font-weight:400;overflow:hidden;
+  text-overflow:ellipsis;min-width:0}
+.scroll{overflow-y:auto;flex:1;scrollbar-width:thin;scroll-behavior:smooth}
+
+.sec{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:7px;padding:8px 12px;
+  background:var(--fill-2);border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
+  font-weight:600;font-size:12.5px;white-space:nowrap}
+.sub{position:sticky;top:34px;z-index:2;display:flex;align-items:center;gap:7px;padding:7px 12px 5px;
+  background:var(--card);box-shadow:0 1px 0 var(--line-2);font-size:11px;font-weight:600;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.sec .q{margin-left:auto;font-weight:400;font-size:11.5px;color:var(--ink-3)}
+.ico{width:13px;height:13px;flex:0 0 13px;color:var(--ink-2)}
+.warn{display:inline-flex;align-items:center;gap:3px;background:var(--red);color:#fff;border-radius:9px;
+  padding:0 6px;height:16px;font-size:10.5px;font-weight:600}
+.warn svg{width:10px;height:10px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:5px 12px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+th{color:var(--ink-3);font-weight:500;font-size:11.5px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.tot td{font-weight:600;border-bottom:1px solid var(--line)}
+.sw{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+.mix{padding:10px 12px}
+.bar{display:flex;height:9px;border-radius:5px;overflow:hidden;gap:2px}
+.keys{display:flex;gap:2px;margin-bottom:6px;font-size:12.5px}
+.keys .k{display:flex;align-items:baseline;gap:5px;overflow:hidden;white-space:nowrap}
+.keys .k b{font-weight:600}
+.keys .k span{color:var(--ink-3);font-size:11px}
+.sum{margin-top:8px;font-size:12.5px;color:var(--ink-2)}
+.sum b{color:var(--ink);font-weight:600}
+
+/* A — a segmented switch in the title line. Three targets, always the
+   same three, and the one under the eye is lit. */
+.segs{display:flex;gap:2px;background:var(--fill);border-radius:8px;padding:2px;margin-left:auto}
+.segs button{border:0;background:none;font:inherit;font-size:11.5px;padding:3px 8px;border-radius:6px;
+  cursor:pointer;color:var(--ink-2)}
+.segs button:hover{background:var(--wash)}
+.segs button[aria-current="true"]{background:var(--card);color:var(--ink);font-weight:600;
+  box-shadow:0 1px 2px rgba(17,17,18,.12)}
+
+/* B — a row of chips under the title, each carrying its own count. The
+   shortcut doubles as a summary of what the pane holds. */
+.chips{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line-2);overflow-x:auto;
+  scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:0 0 auto;display:flex;align-items:center;gap:6px;border:1px solid var(--line-2);
+  background:var(--card);border-radius:999px;padding:3px 10px;font:inherit;font-size:11.5px;cursor:pointer;
+  color:var(--ink-2)}
+.chips button:hover{background:var(--fill-2)}
+.chips button[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chips .c{color:var(--ink-3)}
+.chips button[aria-current="true"] .c{color:rgba(255,255,255,.65)}
+
+/* C — an index behind one word. The title line stays a title; the jump
+   list opens under "Aller à" and names the three with their counts. */
+.go{display:flex;align-items:center;gap:5px;margin-left:auto;border:1px solid var(--line-2);
+  border-radius:7px;padding:3px 8px;font-size:11.5px;cursor:pointer;color:var(--ink-2)}
+.go:hover{background:var(--fill-2);color:var(--ink)}
+.go svg{width:12px;height:12px}
+.menu{position:absolute;right:10px;top:40px;z-index:9;background:var(--card);border:1px solid var(--line);
+  border-radius:9px;padding:4px;min-width:200px;box-shadow:0 10px 26px rgba(17,17,18,.16)}
+.menu .mi{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12.5px}
+.menu .mi:hover{background:var(--fill-2)}
+.menu .mi[aria-current="true"]{font-weight:600}
+.menu .q{margin-left:auto;color:var(--ink-3);font-size:11.5px;font-weight:400}
+
+/* D — a rail of dots down the pane's edge. Nothing is written until the
+   pointer is on it: three points, a position, and a tooltip. */
+.rail{position:absolute;right:6px;top:46px;z-index:6;display:flex;flex-direction:column;gap:7px}
+.rail button{width:9px;height:9px;padding:0;border:0;border-radius:50%;background:var(--line);cursor:pointer;
+  position:relative}
+.rail button[aria-current="true"]{background:var(--ink);transform:scale(1.25)}
+.rail button:hover::after{content:attr(data-label);position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  background:var(--ink);color:#fff;font-size:11px;padding:3px 7px;border-radius:5px;white-space:nowrap}
+
+/* E — the title line is the section. It names what is under the eye and
+   carries two steppers: previous table, next table. One line, no list. */
+.step{display:flex;gap:2px;margin-left:auto}
+.step button{width:24px;height:22px;border:1px solid var(--line-2);background:var(--card);border-radius:6px;
+  cursor:pointer;display:grid;place-items:center;color:var(--ink-2)}
+.step button:hover{background:var(--fill-2);color:var(--ink)}
+.step svg{width:13px;height:13px}
+[data-v="E"] .cur{font-weight:600}
+[data-v="E"] .cur span{color:var(--ink-3);font-weight:400}
+
+/* F — one table at a time. The shortcut is not a jump but a choice: the
+   pane shows the section asked for and nothing else, so there is nothing
+   to scroll past. */
+[data-v="F"] .blk[data-off="true"]{display:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Statistiques — nommer le volet, et sauter dans ses sections</h1>
+  <p class="lede">Le volet porte trois tableaux sur un même étage: ses unités, les ouvertures de l'unité
+     sélectionnée, et les matériaux vus sur chaque façade. Ce qu'ils ont en commun, ce sont des chiffres. Six
+     noms et six raccourcis, tous avec repérage au défilement: une commande de saut qui ne suit pas la molette
+     ment dès qu'on y touche. Faites défiler, puis sautez.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n, cls = "ico") => { const i = lucide.icons[pascal(n)];
+  return i ? `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">${i[2].map(([t, a]) =>
+      `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : ""; };
+
+const UNITS = [["501","5½",1275,118.5],["502","5½",1496,139.0],["503","3½",760,70.6],["504","4½",1152,107.0],
+  ["505","4½",1221,113.4],["506","4½",1106,102.8],["507","3½",707,65.7],["508","4½",970,90.1],
+  ["509","4½",958,89.0],["510","5½",1466,136.2],["511","5½",1345,125.0],["512","3½",740,68.7],
+  ["513","3½",708,65.8],["514","3½",716,66.5],["515","4½",999,92.8]];
+const TYPES = ["3½", "4½", "5½"];
+const INK = { "3½": "var(--t3)", "4½": "var(--t4)", "5½": "var(--t5)" };
+const MAT = {
+  "Façade nord": [["Brique Melville Slik","#b3261e",2485,13],["Bloc architectural Tapestry","#e0922f",2429,13],
+    ["Brique Strata","#2f6fd0",3664,19],["Solin, marquise et parapet","#0f7a6c",518,3],
+    ["Fenêtre et porte-patio","#1b1b1b",1619,8],["Vitrage","#4fc3e8",4632,24],["Garde-corps","#5cb46e",3431,18]],
+  "Façade est": [["Brique Melville Slik","#b3261e",2779,17],["Brique Strata","#2f6fd0",5187,33],
+    ["Panneau d'aluminium série 300","#7a3fb5",221,1],["Vitrage","#4fc3e8",3980,25],["Garde-corps","#5cb46e",2812,18]],
+  "Façade sud": [["Brique Melville Slik","#b3261e",3104,19],["Brique Strata","#2f6fd0",4120,26],
+    ["Vitrage","#4fc3e8",4410,28],["Garde-corps","#5cb46e",2390,15]],
+};
+const nb = (n) => n.toLocaleString("fr-CA").replace(/\u202f|\u00a0/g, " ");
+const fr1 = (n) => n.toLocaleString("fr-CA", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const of = (t) => UNITS.filter((u) => u[1] === t);
+const net = (r) => r.reduce((s, u) => s + u[2], 0);
+const pc = (t) => Math.round(net(of(t)) / net(UNITS) * 100);
+
+/* The three sections, named once and used by every shortcut: a jump list
+   that is typed twice drifts from the thing it jumps to. */
+const KEYS = [
+  { id: "u", short: "Unités", long: "Unités et superficies", icon: "table", q: "15 unités" },
+  { id: "s", short: "Unité 513", long: "Unité 513", icon: "box", q: "9 ouvertures" },
+  { id: "m", short: "Matériaux", long: "Matériaux par façade", icon: "layers", q: "3 façades" },
+];
+
+const mix = () => `<div class="mix">
+  <div class="keys">${TYPES.map((t) => `<span class="k" style="flex:${net(of(t))} 0 0">
+    <i class="sw" style="background:${INK[t]};margin:0"></i><b>${t}</b><span>${pc(t)} %</span></span>`).join("")}</div>
+  <div class="bar">${TYPES.map((t) => `<span style="flex:${net(of(t))} 0 0;background:${INK[t]}"></span>`).join("")}</div>
+  <div class="sum"><b>15 619</b> pi² nets sur 15 unités</div></div>`;
+
+const unitTable = () => `<table><thead><tr><th>Unité</th><th>Type</th><th class="n">Net pi²</th>
+  <th class="n">m²</th></tr></thead><tbody>
+  ${UNITS.map(([n, t, a, m]) => `<tr><td>${n}</td><td><i class="sw" style="background:${INK[t]}"></i>${t}</td>
+    <td class="n">${nb(a)}</td><td class="n">${fr1(m)}</td></tr>`).join("")}
+  <tr class="tot"><td>Net</td><td></td><td class="n">15 619</td><td class="n">1 451</td></tr>
+  <tr class="tot"><td>Brut</td><td></td><td class="n">18 375</td><td class="n">1 707</td></tr></tbody></table>`;
+
+const matTable = (rows) => `<table><thead><tr><th>Matériau</th><th class="n">pi²</th><th class="n">Part</th>
+  </tr></thead><tbody>${rows.map(([n, c, a, p]) => `<tr><td><i class="sw" style="background:${c}"></i>${n}</td>
+  <td class="n">${nb(a)}</td><td class="n">${p} %</td></tr>`).join("")}
+  <tr class="tot"><td>Total</td><td class="n">${nb(rows.reduce((s, r) => s + r[2], 0))}</td>
+  <td class="n">100 %</td></tr></tbody></table>`;
+
+const BODY = {
+  u: () => `${mix()}${unitTable()}`,
+  s: () => `<table><tbody>
+    <tr><td>Façade est</td><td class="n">4 fenêtres</td><td class="n">93 pi²</td></tr>
+    <tr><td>Façade sud</td><td class="n">5 fenêtres</td><td class="n">122 pi²</td></tr>
+    <tr class="tot"><td>Total</td><td class="n">9</td><td class="n">215 pi²</td></tr></tbody></table>`,
+  m: () => Object.entries(MAT).map(([f, rows]) => `<div class="sub">${f}</div>${matTable(rows)}`).join(""),
+};
+
+const sections = (v, only = null) => KEYS.map((k) => `
+  <div class="blk" data-off="${only ? only !== k.id : false}">
+    <div class="sec" id="${v}-${k.id}">${svg(k.icon)}${k.long}
+      ${k.id === "m" ? `<span class="warn">${svg("alert-triangle")}2</span>` : ""}
+      <span class="q">${k.q}</span></div>${BODY[k.id]()}</div>`).join("");
+
+/* Which section is under the eye: the last one whose sticky header has
+   reached the top of the scroller. */
+function spy(scroll) {
+  const top = scroll.getBoundingClientRect().top + 2;
+  let at = KEYS[0].id;
+  scroll.querySelectorAll(".sec").forEach((s) => {
+    if (s.getBoundingClientRect().top <= top + 1) at = s.id.split("-")[1];
+  });
+  return at;
+}
+
+const VARIANTS = [
+  ["A", "Statistiques", "Un segment dans la ligne de titre",
+   "Trois cibles, toujours les mêmes, et celle qui est sous l'œil est allumée. Le raccourci tient dans la barre de titre et ne coûte aucune rangée.",
+   (v) => `<div class="ph"><span class="nm">${svg("bar-chart-3")}Statistiques</span>
+     <span class="segs">${KEYS.map((k) => `<button data-go="${v}-${k.id}" data-key="${k.id}">${k.short}</button>`).join("")}</span></div>`],
+
+  ["B", "Chiffres", "Une rangée de pastilles",
+   "Chaque raccourci porte son compte: la commande de saut est en même temps le sommaire de ce que le volet contient. Elle défile si l'étage en gagne un quatrième.",
+   (v) => `<div class="ph"><span class="nm">${svg("hash")}Chiffres</span><span class="n">niveau 5</span></div>
+     <div class="chips">${KEYS.map((k) => `<button data-go="${v}-${k.id}" data-key="${k.id}">${k.short}
+       <span class="c">${k.q.split(" ")[0]}</span></button>`).join("")}</div>`],
+
+  ["C", "Données", "Un index derrière un mot",
+   "La ligne de titre reste une ligne de titre; la liste s'ouvre sous « Aller à » et nomme les trois avec leurs comptes. Rien n'est pris au tableau tant qu'on ne demande rien.",
+   (v) => `<div class="ph"><span class="nm">${svg("database")}Données</span>
+     <span class="go" data-menu="${v}">${svg("list")}Aller à ${svg("chevron-down")}</span></div>`],
+
+  ["D", "Mesures", "Un rail de points",
+   "Trois points sur le bord droit: une position dans le volet, et un nom au survol. La commande ne prend pas une ligne et dit quand même où l'on est.",
+   (v) => `<div class="ph"><span class="nm">${svg("ruler")}Mesures</span><span class="n">niveau 5</span></div>
+     <div class="rail">${KEYS.map((k) => `<button data-go="${v}-${k.id}" data-key="${k.id}"
+       data-label="${k.long}"></button>`).join("")}</div>`],
+
+  ["E", "Tableaux", "Le titre est la section, avec deux flèches",
+   "La ligne du haut nomme ce qui est sous l'œil et porte deux pas: tableau précédent, tableau suivant. Une ligne, aucune liste, et le pouce peut y aller à l'aveugle.",
+   (v) => `<div class="ph"><span class="nm">${svg("table-2")}Tableaux</span>
+     <span class="cur" style="margin-left:8px">— <span data-cur></span></span>
+     <span class="step"><button data-step="${v}:-1">${svg("chevron-up")}</button>
+       <button data-step="${v}:1">${svg("chevron-down")}</button></span></div>`],
+
+  ["F", "Relevés", "Un tableau à la fois",
+   "Le raccourci n'est plus un saut mais un choix: le volet montre la section demandée et rien d'autre. Il n'y a plus rien à dépasser au défilement, mais plus rien à comparer d'un coup d'œil non plus.",
+   (v) => `<div class="ph"><span class="nm">${svg("clipboard-list")}Relevés</span>
+     <span class="segs">${KEYS.map((k) => `<button data-only="${v}:${k.id}" data-key="${k.id}">${k.short}</button>`).join("")}</span></div>`],
+];
+
+const only = { F: "u" };
+let openMenu = null;
+
+function paint() {
+  grid.innerHTML = VARIANTS.map(([v, name, h, p, head]) => `<section data-v="${v}">
+    <h2>${h}<i>${v} — ${name}</i></h2><p>${p}</p>
+    <div class="pane">${head(v)}
+      ${openMenu === v ? `<div class="menu">${KEYS.map((k) => `<div class="mi" data-go="${v}-${k.id}"
+        data-key="${k.id}">${svg(k.icon)}${k.long}<span class="q">${k.q}</span></div>`).join("")}</div>` : ""}
+      <div class="scroll" data-pane="${v}">${sections(v, v === "F" ? only.F : null)}</div></div></section>`).join("");
+  document.querySelectorAll(".scroll").forEach(mark);
+}
+
+/* One painter for every shortcut: whatever carries data-key is lit when
+   its section is the one under the eye. */
+function mark(scroll) {
+  const v = scroll.dataset.pane;
+  const at = v === "F" ? only.F : spy(scroll);
+  document.querySelectorAll(`[data-v="${v}"] [data-key]`)
+    .forEach((el) => el.setAttribute("aria-current", el.dataset.key === at));
+  const cur = document.querySelector(`[data-v="${v}"] [data-cur]`);
+  if (cur) cur.textContent = KEYS.find((k) => k.id === at).long;
+}
+
+document.addEventListener("scroll", (e) => {
+  if (e.target.classList && e.target.classList.contains("scroll")) mark(e.target);
+}, true);
+
+document.addEventListener("click", (e) => {
+  const m = e.target.closest("[data-menu]");
+  if (m) { openMenu = openMenu === m.dataset.menu ? null : m.dataset.menu; paint(); return; }
+  const o = e.target.closest("[data-only]");
+  if (o) { const [v, id] = o.dataset.only.split(":"); only[v] = id; paint(); return; }
+  const s = e.target.closest("[data-step]");
+  if (s) {
+    const [v, d] = s.dataset.step.split(":");
+    const scroll = document.querySelector(`[data-pane="${v}"]`);
+    const i = KEYS.findIndex((k) => k.id === spy(scroll));
+    const next = KEYS[Math.min(KEYS.length - 1, Math.max(0, i + Number(d)))];
+    jump(document.getElementById(`${v}-${next.id}`));
+    return;
+  }
+  const g = e.target.closest("[data-go]");
+  if (g) {
+    const el = document.getElementById(g.dataset.go);
+    if (openMenu) { openMenu = null; document.querySelector(".menu")?.remove(); }
+    jump(el);
+    return;
+  }
+  if (openMenu) { openMenu = null; paint(); }
+});
+
+function jump(el) {
+  const scroll = el.closest(".scroll");
+  scroll.scrollTo({ top: el.offsetTop - scroll.offsetTop, behavior: "smooth" });
+  setTimeout(() => mark(scroll), 400);
+}
+paint();
+</script>
+</body>
+</html>
