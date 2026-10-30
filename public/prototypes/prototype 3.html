@@ -453,29 +453,48 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .clh{font-size:11.5px;color:var(--ink-3);padding-top:2px}
 .coderow{display:grid;grid-template-columns:258px 1fr;gap:0;align-items:stretch;
   border:1px solid var(--line-2);border-radius:var(--r);background:var(--card);overflow:hidden}
-/* Under the pointer the card greys; chosen, it turns black and its words,
-   buttons and pin turn over with it. No dark contour either way. The
-   schematic keeps its own light ground so the drawing is never inverted. */
+/* Under the pointer the card takes the lightest grey; chosen, a firmer grey
+   (dialkit « Article Selected » can still turn it black, its words, buttons,
+   pin and linework over with it). No dark contour either way. The
+   schematic has no ground of its own: it sits on the card's fill. */
 .coderow{transition:background-color .12s,border-color .12s}
-.coderow:hover{background:var(--fill);border-color:var(--fill)}
-.coderow.on{background:var(--ink);border-color:var(--ink)}
-.coderow.on > .tx{--ink:#fff;--ink-2:rgba(255,255,255,.78);--ink-3:rgba(255,255,255,.55);
+.coderow:hover{background:var(--fill-2);border-color:var(--fill-2)}
+.coderow.on{background:var(--fill);border-color:var(--fill)}
+:root[data-art-sel="black"] .coderow.on{background:var(--ink);border-color:var(--ink)}
+:root[data-art-sel="black"] .coderow.on > .tx,:root[data-art-sel="black"] .coderow.on > .draw{--ink:#fff;--ink-2:rgba(255,255,255,.78);--ink-3:rgba(255,255,255,.55);
   --line:rgba(255,255,255,.28);--line-2:rgba(255,255,255,.18);--card:transparent;--fill:rgba(255,255,255,.1);--fill-2:rgba(255,255,255,.1);color:#fff}
-.coderow.on > .draw{border-right-color:var(--ink)}
-.coderow.on .btnw{background:transparent;border-color:rgba(255,255,255,.28);color:#fff}
-.coderow.on .btnw:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5)}
-.coderow.on .btnw.done{background:#fff;border-color:#fff;color:var(--ink)}
-.coderow.on .btnw.done svg{color:var(--ink)}
-.coderow.on .artpin:hover{background:rgba(255,255,255,.12)}
-.coderow > .draw{padding:10px;background:var(--fill-2);border-right:1px solid var(--line-2);
-  display:grid;place-items:center}
+:root[data-art-sel="black"] .coderow.on > .draw img{filter:invert(1);mix-blend-mode:screen}
+:root[data-art-sel="black"] .coderow.on .btnw{background:transparent;border-color:rgba(255,255,255,.28);color:#fff}
+:root[data-art-sel="black"] .coderow.on .btnw:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5)}
+:root[data-art-sel="black"] .coderow.on .btnw.done{background:#fff;border-color:#fff;color:var(--ink)}
+:root[data-art-sel="black"] .coderow.on .btnw.done svg{color:var(--ink)}
+:root[data-art-sel="black"] .coderow.on .artpin:hover{background:rgba(255,255,255,.12)}
+.coderow > .draw{padding:10px;background:transparent;display:grid;place-items:center}
+/* Every card says it opens a thread: « Commenter », or how many are there. */
+.ccmt{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:6px;border:1px solid var(--line-2);
+  font-size:11.5px;color:var(--ink-2);background:var(--card);cursor:pointer;white-space:nowrap}
+.ccmt .lu{width:13px;height:13px}
+.ccmt b{font-weight:600;color:var(--ink)}
+.ccmt:hover{background:var(--fill)}
+.coderow.on .ccmt{background:var(--ink);border-color:var(--ink);color:#fff}
+.coderow.on .ccmt b{color:#fff}
+/* The Codes column: thread, composer, and the interlocutors at its foot. */
+.csub{font-size:11.5px;font-weight:400;color:var(--ink-3);margin-left:6px}
+.cside{display:flex;flex-direction:column;gap:9px;min-height:100%}
+.cnone{font-size:12px;color:var(--ink-3);padding:2px}
+.ncard.acmt{cursor:default}
+.ncard.acmt .au{padding-right:0}
+.ncard.acmt .aact{margin-left:auto;display:inline-flex;gap:2px}
+.ncard.acmt.new{border-color:var(--line-2)}
+.ncard.acmt .noteinput{width:100%}
+.cfoot{margin-top:auto;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column}
+.clbl{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:2px 0 4px}
+.clbl .lu{width:14px;height:14px}
+.clbl i{font-style:normal;font-weight:400;color:var(--ink-3);font-size:11px}
+.chint{font-size:11px;color:var(--ink-3);line-height:1.45;padding-bottom:4px}
 .coderow > .draw img{width:100%;height:auto;display:block;mix-blend-mode:multiply}
 .coderow > .tx{padding:11px 12px;display:flex;flex-direction:column;gap:7px;min-width:0}
 .coderow .note{border-left:2px solid var(--vert);padding-left:9px;display:flex;flex-direction:column}
-/* A note in the right column: the one place a note is written, read,
-   rewritten or dropped. */
-.anote{border-left:2px solid var(--vert);padding:2px 0 2px 9px;display:flex;flex-direction:column;gap:2px}
-.anote.edit{gap:6px}
 .nedit{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
   border-radius:5px;color:var(--ink-3);cursor:pointer}
 [data-fi="high"] .nedit.hi{display:inline-flex}
@@ -509,6 +528,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
   box-shadow:0 8px 24px rgba(17,17,18,.14)}
 .xcard .hd{display:flex;align-items:baseline;gap:7px}
 .xcard .hd b{font-size:12.5px}
+/* The card opens with the conflict's own mark: the same red triangle the
+   drawing and the list carry, so the three surfaces say one thing. */
+.xcard .hd .xi{display:inline-flex;align-self:center;color:#b3261e}
+.xcard .hd .xi svg{width:14px;height:14px}
 .xcard .hd .dt{font-size:11px;color:var(--ink-3);flex:1}
 .xcard .hd .x{cursor:pointer;color:var(--ink-3);display:inline-flex}
 .xcard .hd .x:hover{color:var(--ink)}
@@ -520,10 +543,6 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .xcard .tk svg{width:13px;height:13px;color:#3d6b22;flex:0 0 13px;margin-top:2px}
 .xcard .tk b{font-size:12px;font-weight:600;display:block}
 .xcard .tk i{font-size:11px;color:var(--ink-3);font-style:normal}
-/* The card in the list only counts them. */
-.nct{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-3)}
-[data-fi="high"] .nct.hi{display:inline-flex}
-.nct svg{width:12px;height:12px}
 .noteinput{flex:1;resize:vertical;border:1px solid var(--line-2);border-radius:6px;padding:6px 8px;
   font:inherit;font-size:12px;color:var(--ink);background:var(--card)}
 .noteinput:focus{outline:1px solid var(--ink);outline-offset:1px}
@@ -596,8 +615,11 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    same ground a chosen row wears — not a chip around its number. */
 .cal .day.today{background:#eef3dc}
 .cal .day.today.on{box-shadow:none}
-/* « Aujourd'hui » lights green while the calendar stands on today. */
-.btnw.today.on,.btnw.today:active{background:var(--vert);border-color:var(--vert);color:var(--vert-ink)}
+/* « Aujourd'hui » is there only once the calendar has left today: on today
+   it has nothing to do, so it is hidden, its place kept so the header does
+   not shift. It hovers like every .btnw, and presses a shade blacker. */
+.btnw.today.here{visibility:hidden}
+.btnw.today:active{background:#000;border-color:#000;color:#fff;transform:translateY(1px)}
 .cal .day .n{font-size:11.5px;font-weight:600;align-self:flex-start}
 .cal .day .lbl{font-size:10.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cal .dots{display:flex;gap:3px;align-items:center}
@@ -633,10 +655,19 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .tseg > span.on{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
 .tseg .lu{width:12px;height:12px;margin-right:-1px}
 .tseg > span:not(.on) .lu{color:var(--ink-3)}
-.task .tfile{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;flex:0 0 auto;
-  border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-size:11px;cursor:pointer}
-.task .tfile:hover{border-color:var(--ink-2);color:var(--ink)}
+/* « Archiver » is drawn by the page's .btnw rule: grey at rest, ink under
+   the cursor, a shade blacker and a pixel down when pressed. */
+.task .tfile{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 8px;border-radius:5px;flex:0 0 auto;
+  border:1px solid var(--line);background:var(--fill-2);color:var(--ink-2);font-size:11px;cursor:pointer;user-select:none}
+.task .tfile:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.task .tfile:active{background:#000;border-color:#000;color:#fff;transform:translateY(1px)}
 .task .tfile .lu{width:12px;height:12px}
+/* Archived: the row folds where it stood before it leaves, and the
+   « Archivées » count it went to stands out for a moment. */
+.task{transition:max-height .22s ease,padding .22s ease,opacity .18s ease}
+.task.gone{max-height:0 !important;padding-top:0;padding-bottom:0;opacity:0;border-bottom-width:0;overflow:hidden}
+.tseg i.bump{color:var(--ink);font-weight:650}
+.toast u[data-act]{color:inherit;cursor:pointer;margin-left:12px}
 .tseg i{font-style:normal;font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .tday{display:flex;align-items:baseline;gap:6px;padding:12px 6px 5px;border-bottom:1px solid var(--line)}
 .tday b{font-size:12px;font-weight:600;color:var(--ink)}
@@ -737,12 +768,8 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 [data-fi="high"] .plan.ghost.cover svg{display:none}
 .pnew .newbox{aspect-ratio:16 / 9;border:1px solid var(--line-2);border-radius:var(--r);background:var(--fill-2);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:12px}
-.state{display:inline-flex;align-items:center;gap:5px}
 /* the home fills the width it is given, whatever the window is */
 .work > div > .pane{flex:1 1 auto;min-width:0}
-.state .d{width:6px;height:6px;border-radius:50%;background:var(--bar)}
-.state[data-open="1"]{color:var(--hi)}
-.state[data-open="1"] .d{background:var(--hi)}
 .tbl{width:100%;border-collapse:collapse;font-size:12px}
 .tbl th{font-weight:500;color:var(--ink-3);font-size:11px;text-align:left;padding:6px 8px;border-bottom:1px solid var(--line-2)}
 .tbl td{padding:6px 8px;border-bottom:1px solid var(--line-2);color:var(--ink-2)}
@@ -877,21 +904,12 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
    treatments. */
 .icard{transition:background-color .12s,border-color .12s}
 .icard:hover{background:var(--fill);border-color:var(--fill)}
-/* Black: the same chosen state as the Codes cards. */
-:root[data-conf-sel="black"] .icard.on{background:var(--ink);border-color:var(--ink);color:#fff}
-:root[data-conf-sel="black"] .icard.on .who svg{color:#ff8a80}
-:root[data-conf-sel="black"] .icard.on .when,:root[data-conf-sel="black"] .icard.on .anch{color:rgba(255,255,255,.6)}
-/* Red: the conflict's own colour, as the « Conflits » tab wears it. */
-:root[data-conf-sel="red"] .icard.on{background:#b3261e;border-color:#b3261e;color:#fff}
-:root[data-conf-sel="red"] .icard.on .who svg{color:#fff}
-:root[data-conf-sel="red"] .icard.on .when,:root[data-conf-sel="red"] .icard.on .anch{color:rgba(255,255,255,.72)}
-/* Tint: a pale red ground, the words unchanged. */
-:root[data-conf-sel="tint"] .icard.on{background:#fbeae8;border-color:#fbeae8}
-/* Grey: the hover fill, held — quietest. */
-:root[data-conf-sel="grey"] .icard.on{background:#e4e4e6;border-color:#e4e4e6}
-/* Code tag: the card stays white; only its code turns into a red tag. */
-:root[data-conf-sel="tag"] .icard.on{background:var(--fill-2);border-color:var(--fill-2)}
-:root[data-conf-sel="tag"] .icard.on .who b{background:#b3261e;color:#fff;border-radius:4px;padding:0 5px}
+/* The chosen conflict takes the conflict's own red, not the page's black:
+   black is the colour of a chosen thing anywhere on this screen, and a
+   conflict is not just chosen, it is wrong. */
+.icard.on{background:#b3261e;border-color:#b3261e;color:#fff}
+.icard.on .who svg{color:#fff}
+.icard.on .when,.icard.on .anch{color:rgba(255,255,255,.72)}
 .icard .who{display:flex;align-items:center;gap:5px;font-size:12px}
 .icard .who svg{width:13px;height:13px;color:#b3261e;flex:0 0 auto}
 .icard .when{margin-left:auto;font-size:11px;color:var(--ink-3);white-space:nowrap}
@@ -2118,6 +2136,8 @@ const V = {
   mailFrom: "atelier@bureau-architectes.ca",
   mails: {},
   notes: {
+    "3.2.2.48": [{ who: "Chargée de projet", when: "il y a 3 j", txt: "Groupe C confirmé au téléphone avec la RBQ. Il faut l'avoir par écrit avant le dépôt." },
+      { who: "Vous", when: "hier", txt: "Demande écrite envoyée le 3 oct. Toujours sans réponse — je relance lundi." }],
     "3.3.1.18": [{ who: "Chargée de projet", when: "24 oct", txt: "Le garde-corps est dessiné à 1 020 mm sur l'élévation sud. À reprendre avant le dépôt." }],
     "art. 546": [{ who: "Entrepreneur général", when: "22 oct", txt: "Le règlement plafonne à 0,5 case par logement: 52 au plus. Garder les 22 dessinées." }],
   },
@@ -2254,7 +2274,7 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
 /* A raised task needs a filled flag: the sprite's symbols declare
    fill="none" on themselves, which no inherited fill can override, so the
    solid one is its own drawing. */
-const BOOKMARK_SOLID = `<svg class="lu" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M5 3h14a2 2 0 0 1 2 2v16l-9-5-9 5V5a2 2 0 0 1 2-2z"/></svg>`;
+const BOOKMARK_SOLID = `<svg class="lu" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>`;
 const FLAG_SOLID = `<svg class="lu" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V4" fill="none" stroke-linecap="round"/></svg>`;
 /* The office's mark, traced from its file to three shapes so it holds at
    any size; drawn in the office green. */
@@ -3475,7 +3495,7 @@ function conflictCardHTML() {
   const d = V.xdraft;
   const sheet2 = engFileName(c[6], c[4]);
   return `<div class="xcard" data-xcard>
-    <div class="hd"><b>${c[0]}</b><span class="dt">unité ${c[3]} — niveau ${c[4]}</span>
+    <div class="hd"><span class="xi">${icon("alert-triangle")}</span><b>${c[0]}</b><span class="dt">unité ${c[3]} — niveau ${c[4]}</span>
       <span class="x" ${act("xclose")} title="Fermer">${icon("x")}</span></div>
     <div class="wh">${c[1]}</div>
     <div class="fn">${dwgName()}<br>${sheet2}</div>
@@ -3909,9 +3929,6 @@ const CONTACTS = {
   paysage: { role: "Architecte paysagiste", mail: "paysage@exemple.ca", last: "21 oct", waited: 7 },
   direction: { role: "Directeur — service d'urbanisme", mail: "direction.urbanisme@exemple.ca", last: "24 oct", waited: 4 },
 };
-const GROUND_ARTICLES = ["art. 395", "art. 546", "art. 43", "art. 32", "art. 39", "art. 349.1"];
-const contactsFor = (a) => [a.doc.startsWith("Code de construction") ? "rbq" : "urbanisme",
-  ...(GROUND_ARTICLES.includes(a.id) ? ["paysage"] : []), "direction"];
 
 /* The whole article as plain text: the sentence, the two numbers, what is
    missing, and every note written against it. This is what gets pasted
@@ -4164,7 +4181,9 @@ function codeRow(a) {
         <a class="btnw src-link hi" href="${officialUrl(a)}" target="_blank" rel="noreferrer"
            ${act("source")} data-value="${a.id}">${icon("external-link")}Lire le texte officiel</a>
         <span class="btnw ${copied(`art|`+a.id) ? "done" : ""}" ${act("copyarticle", a.id)}>${copyFace(`art|`+a.id, "Copier", "copy", "Copié")}</span>
-        ${notes.length ? `<span class="hi nct">${icon("message-square")}${notes.length}</span>` : ""}
+        <span style="flex:1"></span>
+        <span class="ccmt" title="${notes.length ? "Lire les commentaires" : "Commenter cet article"}">${icon("message-square")}${notes.length
+          ? `<b>${notes.length}</b>&nbsp;commentaire${notes.length > 1 ? "s" : ""}` : "Commenter"}</span>
       </div>
     </div>
   </div>`;
@@ -4346,7 +4365,7 @@ function taskListHTML() {
   const list = TASKS.filter(f[2]).sort((a, b) => (journal ? dayOf(b).localeCompare(dayOf(a)) : a.day.localeCompare(b.day))
     || PRIO[b.prio] - PRIO[a.prio]);
   const days = [...new Set(list.map(dayOf))];
-  const seg = `<span class="tseg">${TASK_FILTERS.map(([k, nm, fn, ic]) => `<span class="${k === f[0] ? "on" : ""}" ${act("tfilter", k)}>${icon(ic)}${nm}<i>${TASKS.filter(fn).length}</i></span>`).join("")}</span>`;
+  const seg = `<span class="tseg">${TASK_FILTERS.map(([k, nm, fn, ic]) => `<span class="${k === f[0] ? "on" : ""}" ${act("tfilter", k)}>${icon(ic)}${nm}<i class="${k === "hist" && V.archBump ? "bump" : ""}">${TASKS.filter(fn).length}</i></span>`).join("")}</span>`;
   const line = (t) => (V.taskEdit === t.id ? taskForm(t, false) : `<div class="task ${t.done ? "done" : ""} ${V.task === t.id ? "on" : ""}"
       data-task="${t.id}" ${act("task", t.id)}>
     <span class="tick dot ${t.done ? "on" : ""}" ${act("tasktick", t.id)} title="${t.done ? "Rouvrir" : "Cocher — elle reste ici, barrée"}">${t.done ? icon("check") : ""}</span>
@@ -4417,10 +4436,6 @@ const PROJECTS = [
     "\\\\serveur-bureau\\Projets\\2026\\BAL3", "6 écarts", 1, "3 février 2026"],
 ];
 
-/* The state is the one word on a card allowed colour: a project with
-   differences or missing inputs reads in the accent, a settled one stays grey. */
-const pstate = (p) => `<span class="state" data-open="${p[4]}"><span class="d"></span>${p[3]}</span>`;
-
 /* At low fidelity a project is told apart by a tint and its initials. At
    high fidelity the card carries the project's own rendering, the one image
    that names the building faster than any sheet. */
@@ -4438,7 +4453,7 @@ const pcard = (p, i = 0) => `<div class="tile pcard" ${act("open", p[0])} title=
   <div><span class="lo bar" style="width:55%"></span><span class="hi" style="font-weight:600;font-size:13px">${p[0]}</span></div>
   <div><span class="lo bar lt" style="width:72%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-2)">${p[1]}</span></div>
   <div><span class="lo bar lt" style="width:60%"></span><span class="hi ppath" style="font-size:11.5px;color:var(--ink-3)" title="${p[2]}">${p[2]}</span></div>
-  <div><span class="lo bar lt" style="width:48%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">Ouvert le ${p[5]} — ${pstate(p)}</span></div>
+  <div><span class="lo bar lt" style="width:48%"></span><span class="hi" style="font-size:11.5px;color:var(--ink-3)">Ouvert le ${p[5]}</span></div>
 </div>`;
 
 /* The tile takes the thumbnail's shape, so it sits in the row instead of
@@ -4915,7 +4930,7 @@ function contentHTML() {
       ${folded("cal") ? foldStripHTML("cal", "le calendrier") : `<div class="pane" style="flex:${V.split[splitKey("cal")] ? `0 0 ${V.split[splitKey("cal")]}px` : "1.25"}">
         <div class="ph">${icon("calendar-check")}<span class="lo bar" style="width:70px"></span>
           <span class="hi">Calendrier</span><span style="flex:1"></span>
-          <span class="btnw today ${V.day === TODAY ? "on" : ""}" ${act("calday", TODAY)}><span class="hi">Aujourd'hui</span></span></div>
+          <span class="btnw today ${V.day === TODAY ? "here" : ""}" ${act("calday", TODAY)} title="Revenir à aujourd'hui">${icon("undo-2")}<span class="hi">Aujourd'hui</span></span></div>
         <div class="pb"><div class="calmonth">
           <span class="tseg cal">${CAL_SCALES.map((s) => `<span class="${V.scale === s ? "on" : ""}" ${act("calscale", s)}
             title="Dessiner le calendrier par ${s.toLowerCase()}">${icon(CAL_SCALE_ICONS[s])}${s}</span>`).join("")}</span>
@@ -5370,45 +5385,40 @@ function nonresInspectorHTML(mode, step) {
   return region("inspector", "inspecteur", inner, step);
 }
 
-/* The right column of the Codes screen is where an article is worked on:
-   how clear the office finds it, the notes written against it, and the
-   people it has to be argued with. The notes are the same store the row
-   below shows — one note, written once, read in both places. */
+/* The right column of the Codes screen is where an article is commented:
+   its thread, then the box to add to it. The people the office argues the
+   code with sit at the foot of the column and do not change with the
+   article — they are the project's interlocutors, not the article's. */
 function codeSideHTML(a) {
   const notes = V.notes[a.id] || [];
-  return `<div class="col" style="gap:9px">
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <span class="hi" style="font-size:12px;color:var(--ink-2)">Lecture du Bureau d'Architectes</span>
-      ${clarityChip(a.id)}
-    </div>
-    <div class="col" style="gap:6px">
-      <div class="row" style="justify-content:space-between;align-items:baseline">
-        <span class="hi" style="font-size:12px;color:var(--ink-2)">Notes</span>
-        <span class="hi" style="font-size:11px;color:var(--ink-3)">${notes.length
-          ? `${notes.length} écrite${notes.length > 1 ? "s" : ""}` : "aucune"}</span>
-      </div>
-      ${notes.map((n, i) => V.noteEdit === `${a.id}|${i}` ? `<div class="anote edit">
-        <textarea class="noteinput" data-noteedit="${a.id}|${i}" rows="3">${n.txt}</textarea>
-        <div class="row" style="gap:6px">
-          <span class="btnw solid" ${act("noteeditsave", `${a.id}|${i}`)}>${icon("check")}<span class="hi">Enregistrer</span></span>
-          <span class="btnw" ${act("noteeditstop")}><span class="hi">Annuler</span></span>
-        </div></div>` : `<div class="anote">
-        <div class="row" style="align-items:baseline;gap:6px">
-          <span class="hi" style="font-size:11px;color:var(--ink-3);flex:1">${n.who} — ${n.when}</span>
-          <span class="nedit hi" ${act("noteedit", `${a.id}|${i}`)} title="Modifier la note">${icon("pen-line")}</span>
-          <span class="nedit hi" ${act("notedrop", `${a.id}|${i}`)} title="Supprimer la note">${icon("trash-2")}</span>
-        </div>
-        <span class="hi" style="font-size:12px">${n.txt}</span></div>`).join("")}
-      ${V.noteEdit ? "" : `<textarea class="noteinput" data-note="${a.id}" rows="3"
-        placeholder="Écrire une note sur cet article…"></textarea>
+  const msg = (n, i) => {
+    const au = pinAuthor(n);
+    if (V.noteEdit === `${a.id}|${i}`) return `<div class="ncard acmt">
+      <textarea class="noteinput" data-noteedit="${a.id}|${i}" rows="3">${n.txt}</textarea>
       <div class="row" style="gap:6px">
-        <span class="btnw solid" ${act("notesave", a.id)}>${icon("check")}<span class="hi">Écrire la note</span></span>
-        <span class="btnw ${copied(`art|`+a.id) ? "done" : ""}" ${act("copyarticle", a.id)}>${copyFace(`art|`+a.id, "Copier", "copy", "Copié")}</span>
-      </div>`}
-    </div>
-    <div class="col" style="gap:0">
-      <span class="hi" style="font-size:12px;color:var(--ink-2);padding-bottom:4px">Qui en répond</span>
-      ${contactsFor(a).map((k) => { const c = CONTACTS[k]; const sent = (V.mails[k] || []).length; return `<div class="contact ${c.waited > 14 ? "slow" : ""}">
+        <span class="btnw solid" ${act("noteeditsave", `${a.id}|${i}`)}>${icon("check")}<span class="hi">Enregistrer</span></span>
+        <span class="btnw" ${act("noteeditstop")}><span class="hi">Annuler</span></span>
+      </div></div>`;
+    return `<div class="ncard acmt">
+      <div class="au"><span class="av ${au.me ? "mine" : ""}">${au.ini}</span><span class="w"><b>${au.name}</b><span>${au.role}</span></span>
+        <span class="aact">
+          <span class="nedit hi" ${act("noteedit", `${a.id}|${i}`)} title="Modifier le commentaire">${icon("pen-line")}</span>
+          <span class="nedit hi" ${act("notedrop", `${a.id}|${i}`)} title="Supprimer le commentaire">${icon("trash-2")}</span>
+        </span></div>
+      <div class="txt">${n.txt}</div>
+      <div class="meta"><span class="when">${n.when}</span></div></div>`;
+  };
+  return `<div class="cside">
+    ${notes.map(msg).join("") || `<div class="hi cnone">Aucun commentaire sur cet article.</div>`}
+    ${V.noteEdit ? "" : `<div class="ncard acmt new">
+      <textarea class="noteinput" data-note="${a.id}" rows="3" placeholder="Commenter l'article ${a.id}…"></textarea>
+      <div class="row" style="justify-content:flex-end">
+        <span class="btnw solid go wait" ${act("notesave", a.id)} title="Commenter (⌘↵)">${icon("send")}<span class="hi">Commenter</span></span>
+      </div></div>`}
+    <div class="cfoot">
+      <div class="clbl">${icon("users")}<span class="hi">Interlocuteurs</span><i>${Object.keys(CONTACTS).length}</i></div>
+      <div class="hi chint">Avec qui le bureau discute du code sur ce projet — les mêmes pour tous les articles.</div>
+      ${Object.keys(CONTACTS).map((k) => { const c = CONTACTS[k]; const sent = (V.mails[k] || []).length; return `<div class="contact ${c.waited > 14 ? "slow" : ""}">
         <span class="who"><b class="hi">${c.role}</b><span class="hi">${c.waited === 0 ? "dernier échange aujourd'hui"
             : `dernier échange le ${c.last} — il y a ${c.waited} j`}</span>
           ${sent ? `<span class="hi sent">${sent} courriel${sent > 1 ? "s" : ""} envoyé${sent > 1 ? "s" : ""} d'ici</span>` : ""}</span>
@@ -5426,7 +5436,7 @@ function inspectorHTML() {
   if (V.screen === "Unités" && isNonresLevel(paneLevel())) return nonresInspectorHTML(mode, step);
   const row = selRow(V.screen);
   const title = { "Unités": `Unité ${(row || ["—"])[0].split(" ")[0]}`,
-    "Codes": "Article ouvert" }[V.screen] || "Détail";
+    "Codes": `Commentaires<span class="csub">${V.articleId || ""}</span>` }[V.screen] || "Détail";
   /* A decision panel on the screen where something is decided; a short
      read-only column everywhere else. */
   const decides = V.screen === "Unités";
@@ -5454,10 +5464,10 @@ function inspectorHTML() {
     "Unités": unitRows[UNIT_TABS[V.utab]],
     /* The short column beside the provisions names the one that is open;
        what it asks and what the drawings say are in the reading itself. */
-    "Codes": [["Article", ARTICLES.find((x) => x.id === V.articleId)?.id || "—"]],
+    "Codes": [],
   }[V.screen] || [["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"], ["Chantier", "value"]];
 
-  const inner = `<div class="ph">${icon("circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
+  const inner = `<div class="ph">${icon(V.screen === "Codes" ? "message-square" : "circle")}<span class="lo bar" style="width:70px"></span><span class="hi">${title}</span></div>
     <div class="pb">
       ${V.screen === "Unités" ? `<div class="row utabs">${UNIT_TABS.map((t, i) => `<span class="chip ico ${i === V.utab ? "on" : ""}" ${act("utab", i)} title="${t}" aria-label="${t}">
         ${icon(UNIT_TAB_ICONS[i])}</span>`).join("")}
@@ -6113,6 +6123,29 @@ document.addEventListener("click", (e) => {
     t: ph.querySelector(".hi")?.textContent.trim(),
   };
 }, true);
+/* The narrowest a pane's header goes before its controls touch: each one at
+   the width it is drawn, none squeezed, plus the gaps and padding between.
+   Text that already gives way with an ellipsis, like the file name in the
+   model's chip, counts for nothing: it is meant to fold away first. */
+function headNeed(pane) {
+  let n = 0;
+  pane.querySelectorAll(".ph").forEach((ph) => {
+    const cs = getComputedStyle(ph), kids = [...ph.children].filter((c) => getComputedStyle(c).display !== "none");
+    const was = kids.map((c) => c.style.flexShrink);
+    const give = [...ph.querySelectorAll("*")].filter((c) => getComputedStyle(c).textOverflow === "ellipsis");
+    const gw = give.map((c) => c.style.display);
+    give.forEach((c) => { c.style.display = "none"; });
+    kids.forEach((c) => { c.style.flexShrink = "0"; });
+    const w = kids.reduce((sum, c) => {
+      const k = getComputedStyle(c);
+      return sum + c.getBoundingClientRect().width + parseFloat(k.marginLeft) + parseFloat(k.marginRight);
+    }, 0) + (parseFloat(cs.columnGap) || 0) * Math.max(0, kids.length - 1) + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    kids.forEach((c, i) => { c.style.flexShrink = was[i]; });
+    give.forEach((c, i) => { c.style.display = gw[i]; });
+    n = Math.max(n, w);
+  });
+  return Math.ceil(n);
+}
 document.addEventListener("pointerdown", (e) => {
   const gut = e.target.closest?.(".gut");
   if (!gut || gut.classList.contains("fold")) return;
@@ -6128,7 +6161,7 @@ document.addEventListener("pointerdown", (e) => {
      pushed until the drawing is a sliver is an edge that gets pushed. */
   const room = parent.getBoundingClientRect().width;
   const other = (gut.dataset.grab === "prev" ? gut.nextElementSibling : gut.previousElementSibling);
-  const max = startW + (other ? other.getBoundingClientRect().width : room) - SPLIT_MIN;
+  const max = startW + (other ? other.getBoundingClientRect().width - Math.max(SPLIT_MIN, headNeed(other)) : room - SPLIT_MIN);
   /* The track index of a grid child is its position, the header above
      spanning every column and taking none of its own. */
   const index = grid ? [...parent.children].indexOf(target) - 1 : -1;
@@ -6143,7 +6176,7 @@ document.addEventListener("pointerdown", (e) => {
   /* Option A: a pane stops at the width its tables and its header need,
      measured as laid out without the pane holding them in. A table drawn
      at 100 % reports the pane's width, not its own, so each is read at its
-     natural width; the header is read at max-content, its spacer at zero. */
+     natural width; the header by headNeed. */
   const need = (() => {
     const pr = target.getBoundingClientRect().width;
     let n = 0;
@@ -6156,13 +6189,7 @@ document.addEventListener("pointerdown", (e) => {
         t.style.width = was;
       });
     });
-    target.querySelectorAll(".ph").forEach((ph) => {
-      const was = ph.style.width;
-      ph.style.width = "max-content";
-      n = Math.max(n, ph.offsetWidth);
-      ph.style.width = was;
-    });
-    return Math.ceil(n);
+    return Math.ceil(Math.max(n, headNeed(target)));
   })();
   const floor = Math.max(SPLIT_MIN, Math.min(need, max));
   let w = startW;
@@ -6828,7 +6855,7 @@ function render() {
   if (V.toast) {
     const t = document.createElement("div");
     t.className = "toast hi";
-    t.textContent = V.toast;
+    fillToast(t);
     document.getElementById("frame").appendChild(t);
   }
 
@@ -7271,18 +7298,25 @@ function addCodeDialogHTML(d) {
 /* Saying what just happened, briefly. An action that leaves no trace on the
    screen says so here instead of pretending to be a button. */
 let TOAST_TIMER = null;
-function say(message) {
+function fillToast(t) {
+  t.textContent = V.toast;
+  if (V.toastUndo) t.insertAdjacentHTML("beforeend", `<u ${act(V.toastUndo[0], V.toastUndo[1])}>Annuler</u>`);
+}
+/* A message may carry the way back: [action, value] draws « Annuler » in it
+   and keeps it up a little longer, long enough to reach. */
+function say(message, undo = null) {
   V.toast = message;
+  V.toastUndo = undo;
   /* Shown now, not at the next render: a strip reorder redraws only the
      strip, and its message would otherwise wait for an unrelated change. */
   const frame = document.getElementById("frame");
   if (frame) {
     let t = frame.querySelector(":scope > .toast");
     if (!t) { t = document.createElement("div"); t.className = "toast hi"; frame.appendChild(t); }
-    t.textContent = message;
+    fillToast(t);
   }
   clearTimeout(TOAST_TIMER);
-  TOAST_TIMER = setTimeout(() => { V.toast = null; render(); }, 2600);
+  TOAST_TIMER = setTimeout(() => { V.toast = null; V.toastUndo = null; render(); }, undo ? 4500 : 2600);
 }
 
 /* A note is written in one place, from the button or from the keyboard:
@@ -7292,8 +7326,8 @@ function saveNote(id) {
   const el = document.querySelector(`[data-note="${CSS.escape(id)}"]`);
   const txt = (el?.value || "").trim();
   if (!txt) { say("Rien à écrire: la note est vide."); return; }
-  (V.notes[id] ||= []).push({ who: "Chargée de projet", when: "aujourd'hui", txt });
-  say(`Note écrite sur ${id}. Elle reste dans fitte, rien n'est envoyé au texte officiel.`);
+  (V.notes[id] ||= []).push({ who: "Vous", when: "aujourd'hui", txt });
+  say(`Commentaire ajouté sur ${id}. Il reste dans fitte, rien n'est envoyé au texte officiel.`);
 }
 
 /* A note is rewritten in place and keeps its author: the same person is
@@ -7578,9 +7612,24 @@ function onClick(e) {
       if (V.taskEdit === t.id) V.taskEdit = null;
       break;
     }
+    /* The row folds first, then the task moves to « Archivées », whose count
+       stands out for a moment; the message offers the way back. */
     case "taskfile": {
       const t = TASKS.find((x) => x.id === value);
-      if (t) { t.archived = true; say(`Archivée: ${t.title}. Elle est dans « Historique ».`); }
+      if (!t) break;
+      const row = document.querySelector(`.task[data-task="${value}"]`);
+      if (row) { row.style.maxHeight = `${row.offsetHeight}px`; void row.offsetHeight; row.classList.add("gone"); }
+      setTimeout(() => {
+        t.archived = true; V.archBump = true;
+        say(`Archivée: ${t.title}.`, ["taskunfile", t.id]);
+        render();
+        setTimeout(() => { V.archBump = false; render(); }, 1400);
+      }, row ? 220 : 0);
+      return;
+    }
+    case "taskunfile": {
+      const t = TASKS.find((x) => x.id === value);
+      if (t) { delete t.archived; V.archBump = false; say(`Reprise: ${t.title}.`); }
       break;
     }
     /* The flag on a row: raising a task, or letting it back down, without
@@ -8034,9 +8083,8 @@ const dial = DialKit.createDialKit("Wireframe C3", {
   /* What « Commenter » on the plan does under the pointer. Outline is how
      it was; the others change it without a dark contour. */
   commentHover: sel(["Grey fill", "Lift shadow", "Ink fill", "Green tint", "Bare (no border)", "Outline (before)"]),
-  /* How the chosen conflict in the right column stands out — a fill each,
-     no contour and no red bar down its left side. */
-  conflictSelected: sel(["Black fill", "Red fill", "Red tint", "Grey fill", "Red code tag"]),
+  /* The chosen article card in Codes: a firmer grey, or the black card. */
+  articleSelected: sel(["Grey fill", "Black fill"]),
   /* The whole screen on a dark ramp. The drawing keeps its own paper: a
      plan is a white sheet, and inverting it would be redrawing it. */
   theme: sel(["Light", "Dark"]),
@@ -8130,7 +8178,7 @@ function applyDial(v) {
   TAB_MOTION.ms = v.tabMotion?.ms ?? 280;
   document.documentElement.dataset.foldIcon = v.foldedIcons === "Turned with text" ? "turn" : "upright";
   document.documentElement.dataset.pinHover = String(v.commentHover || "Grey fill").split(" ")[0].toLowerCase();
-  document.documentElement.dataset.confSel = { "Black fill": "black", "Red fill": "red", "Red tint": "tint", "Grey fill": "grey", "Red code tag": "tag" }[v.conflictSelected] || "black";
+  document.documentElement.dataset.artSel = v.articleSelected === "Black fill" ? "black" : "grey";
   /* The panel names the glyph in English and title-cases what it is given,
      so the label is matched without regard to case. */
   const pick = (screen, label) => {
@@ -8156,6 +8204,12 @@ function applyDial(v) {
 function armSend(action, text) {
   document.querySelector(`[data-act="${action}"]`)?.classList.toggle("wait", !text.trim());
 }
+/* « Écrire la note » stays grey until there is something to write. The
+   field is redrawn by both render() and paintSelection(), so the page
+   listens once instead of each redraw wiring it again. */
+document.addEventListener("input", (e) => {
+  if (e.target.matches?.("textarea[data-note]")) armSend("notesave", e.target.value);
+});
 
 /* Moving between the tabs of the level row. The row is rewritten on every
    render, so the tab that was open is measured as the pointer goes down,
