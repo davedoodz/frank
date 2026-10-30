@@ -487,11 +487,14 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .ncard.acmt .aact{margin-left:auto;display:inline-flex;gap:2px}
 .ncard.acmt.new{border-color:var(--line-2)}
 .ncard.acmt .noteinput{width:100%}
-.cfoot{margin-top:auto;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column}
+/* The interlocutors stand apart from the thread on a grey ground, not
+   behind a rule; between people, space does the separating. */
+.cfoot{margin-top:auto;background:var(--fill-2);border-radius:8px;padding:10px 10px 4px;display:flex;flex-direction:column}
+.cfoot .contact{border-bottom:0;padding:5px 0}
+.cfoot .mailto{background:#fff}
 .clbl{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:2px 0 4px}
 .clbl .lu{width:14px;height:14px}
 .clbl i{font-style:normal;font-weight:400;color:var(--ink-3);font-size:11px}
-.chint{font-size:11px;color:var(--ink-3);line-height:1.45;padding-bottom:4px}
 .coderow > .draw img{width:100%;height:auto;display:block;mix-blend-mode:multiply}
 .coderow > .tx{padding:11px 12px;display:flex;flex-direction:column;gap:7px;min-width:0}
 .coderow .note{border-left:2px solid var(--vert);padding-left:9px;display:flex;flex-direction:column}
@@ -3545,11 +3548,15 @@ function issues() {
   }
   return out;
 }
-/* The plan and unit problems are counted on the level on screen; a
-   material is the whole building's. */
+/* What the page is answering for: the level on screen, or the whole
+   project under « Bâtiment entier ». A material conflict belongs to a
+   façade, not to a floor, so it is only ever counted on the building —
+   which is also the only scope where the façade tables are read. */
+const issuesHere = () => (buildingScope() ? issues()
+  : issues().filter((i) => i.kind !== "mat" && i.level === paneLevel()));
+/* The count a section carries, within whatever the page is reading. */
 function issuesIn(kind) {
-  const lv = paneLevel();
-  return issues().filter((i) => i.kind === kind && (kind === "mat" || buildingScope() || i.level === lv));
+  return issuesHere().filter((i) => i.kind === kind);
 }
 /* The count a section carries in its header. It opens the list. */
 function issueBadge(kinds) {
@@ -3590,6 +3597,13 @@ function goIssue(id) {
   if (it.kind === "plan") {
     V.lay.plan.on = true;
     ENG_DISCIPLINES.forEach((d) => { V.lay[d].on = d === c[6]; });
+    /* The drawing in conflict is laid over the architecture, not under it:
+       it moves to just above the plan in the stack (first is on top). */
+    if (V.layOrder.indexOf(c[6]) > V.layOrder.indexOf("plan")) {
+      const o = V.layOrder.filter((k) => k !== c[6]);
+      o.splice(o.indexOf("plan"), 0, c[6]);
+      V.layOrder = o;
+    }
     V.layPick = c[6];
     V.xopen = c[0];
     V.caught[c[0]] ||= stampNow();
@@ -3606,7 +3620,7 @@ function goIssue(id) {
 }
 
 function issuesListHTML() {
-  const all = issues();
+  const all = issuesHere();
   const lv = paneLevel();
   if (!all.length) return `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px">Aucun conflit ouvert.</div>`;
   return Object.entries(ISSUE_KINDS).map(([k, g]) => {
@@ -3648,7 +3662,9 @@ const typoHTML = () => {
    pill placed in script (placePlanPills), so it follows the zoom. */
 function unitMarkHTML() {
   const rows = rowsOf("Unités");
-  const sel = selIndex("Unités");
+  /* Counting the building selects no unit — the list beside the plan is
+     the levels, not the units — so nothing on the sheet is lit. */
+  const sel = buildingScope() ? -1 : selIndex("Unités");
   const polys = polysForPane();
   const lv = paneLevel();
   const zs = V.zoom / 100;
@@ -4731,8 +4747,14 @@ function headerHTML() {
         <div class="col" style="flex:1;gap:5px">
           <div class="lo bar" style="width:170px;height:13px"></div>
           <div class="lo bar lt" style="width:260px;height:8px"></div>
-          <div class="hi" style="font-size:16px;font-weight:600;display:flex;align-items:center">${title[0]}${V.screen === "Unités" && issues().length
-            ? `<span class="ibadge lg" ${act("issues")} title="Voir la liste des conflits">${icon("alert-triangle")}${issues().length} conflit${issues().length > 1 ? "s" : ""}</span>` : ""}</div>
+          <div class="hi" style="font-size:16px;font-weight:600;display:flex;align-items:center">${title[0]}${(() => {
+            /* The badge counts what the page is reading: this level, or the
+               building under « Bâtiment entier ». A count that never moved
+               told the reader nothing about where he was. */
+            const n = V.screen === "Unités" ? issuesHere().length : 0;
+            return n ? `<span class="ibadge lg" ${act("issues")} title="Voir la liste des conflits"
+              >${icon("alert-triangle")}${n} conflit${n > 1 ? "s" : ""}</span>` : "";
+          })()}</div>
           ${title[1] ? `<div class="hi" style="font-size:12px;color:var(--ink-2)">${title[1]}</div>` : ""}
         </div>
         ${bare ? "" : SCREENS[V.screen].home
@@ -4881,8 +4903,12 @@ function contentHTML() {
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
          is why it is the one pane drawn at the plan's own aspect. */
+      /* Counting the whole building does not mean reading no drawing: the
+         level on the tab is still the sheet on screen, it is simply not a
+         unit that is being read, so the note names the level instead. */
       const planNote = isNonresLevel(paneLevel())
         ? `${levelView(paneLevel())} — aucune unité résidentielle à ce niveau`
+        : buildingScope() ? `${levelView(paneLevel())} — contours par-dessus`
         : `${unit} — contours par-dessus`;
       /* The two basements are not in the model: the massing starts at the
          ground. A pane saying so is a pane of nothing, so the plan takes
@@ -4899,8 +4925,6 @@ function contentHTML() {
       const planFlex = planW && !modelShut ? `0 0 ${planW}px` : "1";
       const plan = () => pane("Plan 2D", planNote, "plan", "align", typoHTML() + layersHTML(), planFlex);
       const model = () => (noModel ? "" : pane("Maquette 3D", "", "model", "fit"));
-      /* The whole building has no plan of its own: the model takes the width. */
-      if (whole) return `<div class="row" style="flex:1;align-items:stretch;gap:0;min-height:0">${pane("Maquette 3D", "", "model", "fit")}</div>`;
       if (mode === "Stacked") return `<div class="col" style="flex:1">${plan()}${model()}</div>`;
       if (mode === "Single pane + inset") return `<div class="col" style="flex:1;gap:var(--gap)">
         <div style="position:relative;flex:1;display:flex">${plan()}
@@ -5430,7 +5454,6 @@ function codeSideHTML(a) {
       </div></div>`}
     <div class="cfoot">
       <div class="clbl">${icon("users")}<span class="hi">Interlocuteurs</span><i>${Object.keys(CONTACTS).length}</i></div>
-      <div class="hi chint">Avec qui le bureau discute du code sur ce projet — les mêmes pour tous les articles.</div>
       ${Object.keys(CONTACTS).map((k) => { const c = CONTACTS[k]; const sent = (V.mails[k] || []).length; return `<div class="contact ${c.waited > 14 ? "slow" : ""}">
         <span class="who"><b class="hi">${c.role}</b><span class="hi">${c.waited === 0 ? "dernier échange aujourd'hui"
             : `dernier échange le ${c.last} — il y a ${c.waited} j`}</span>
@@ -5528,17 +5551,21 @@ function inspectorHTML() {
    list: a pin the invited collaborator can read, and a studio note that
    stays inside the office. The scope is written on the pin and carried by
    the share link; inside the studio both are shown. */
-const PIN_KEY = "fitte:epingles:c3";
+/* The key carries a version: changing the seed resets what a browser kept,
+   test notes included. Each seeded pin sits on what it talks about, read
+   off plan-niveau-5: 507's entry door on the corridor, 510's balcony past
+   the street face, the corridor at the stair. */
+const PIN_KEY = "fitte:epingles:c3:v2";
 const PIN_SEED = [
-  { id: 1, scope: "partage", surface: "plan", level: 5, sheet: "plan", x: .455, y: .565,
+  { id: 1, scope: "partage", surface: "plan", level: 5, sheet: "plan", x: .432, y: .307, zone: "unité 507",
     who: "Entrepreneur général", when: "hier 16:20",
-    txt: "Le dégagement devant la porte du 507 fait 860 mm, il en faut 900." },
-  { id: 2, scope: "partage", surface: "plan", level: 5, sheet: "plan", x: .60, y: .33,
+    txt: "Le dégagement devant la porte d'entrée du 507 fait 860 mm, il en faut 900." },
+  { id: 2, scope: "partage", surface: "plan", level: 5, sheet: "plan", x: .719, y: .179, zone: "unité 510",
     who: "Chargée de projet", when: "lun. 09:05",
     txt: "Le balcon du 510 dépasse la ligne d'alignement de 0,4 m." },
-  { id: 3, scope: "equipe", surface: "plan", level: 5, sheet: "plan", x: .33, y: .70,
+  { id: 3, scope: "equipe", surface: "plan", level: 5, sheet: "plan", x: .577, y: .319, zone: "corridor commun",
     who: "Vous", when: "mar. 08:40",
-    txt: "Rappel: le corridor est encore dessiné avec l'ancienne sortie. À reprendre avant R05." },
+    txt: "Rappel: la porte du corridor vers l'escalier est encore dessinée à l'ancienne position. À reprendre avant R05." },
 ];
 function loadPins() {
   try {
@@ -5674,7 +5701,7 @@ function marginHTML() {
         </div></div>`;
   /* Two lists in one margin: what people said, and what is wrong. The
      conflicts carry the alarm so they are not read as one more comment. */
-  const nIssues = issues().length;
+  const nIssues = issuesHere().length;
   const tab = (k, ic, nm, n) => `<span class="mtab ${k} ${(V.marginTab === "conf") === (k === "conf") ? "on" : ""}" ${act("mtab", k)}>${icon(ic)}<span class="hi">${nm}</span><i>${n}</i></span>`;
   const inner = `<div class="ph"><span class="lo bar" style="width:70px"></span>
       <span class="mtabs">${tab("notes", "message-square", "Commentaires", open.length)}${tab("conf", "alert-triangle", "Conflits", nIssues)}</span></div>
