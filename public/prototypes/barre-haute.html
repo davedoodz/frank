@@ -91,9 +91,16 @@ section p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;max-width:900px}
 /* E — the project's name is the title and its screens hang under it, in
    the level row's own strip: one block of chrome holds name, screens and
    levels, and the studio keeps the top line to itself. */
+/* One left edge for the whole frame: the studio line, the project title,
+   the first level and the page's own title all start at 24px, so the four
+   rows read as one stack and not as four boxes that happen to be stacked.
+   The paddings differ because each row carries a different inset of its
+   own; what is kept equal is where the words begin. */
+[data-o="E"] .bar{padding-left:15px}
 [data-o="E"] .bar.one{height:34px;font-size:12.5px}
 [data-o="E"] .bar.two{height:36px;padding-top:2px}
-[data-o="E"] .bar.two .it.proj{font-size:15px;padding-left:0}
+[data-o="E"] .bar.two .it.proj{font-size:15px}
+[data-o="E"] .lvl{padding-left:14px}
 
 /* F — the door is a chip with the project in it. "Tous les projets" holds
    the open project like a folder holds a file, so where it came from is
