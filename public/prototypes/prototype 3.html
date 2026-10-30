@@ -3893,9 +3893,13 @@ function tabsHTML() {
      screen being read is lit in it — the index, the schedule — and on a
      project screen neither is, because the project's own row is below. */
   const me = `<span class="me" title="${ME.name}"><i>${ME.ini}</i><span class="hi">${ME.name}</span></span>`;
+  /* The tab belongs to the sheet it names: on the index and on the studio's
+     schedule there is no project open and no sheet under the line, so the
+     name is not there to be read either. */
+  const projTab = studio ? "" : `<span class="projtab">${V.project}</span>`;
   const one = `<div class="tabs one rg ${solo("nav")}" data-rg="atelier" data-fi="${fiOf("nav")}"
        data-labels-mode="${V.nav.labels}">
-      ${back}${ech}<span class="projtab">${V.project}</span><span class="sp"></span>${me}
+      ${back}${ech}${projTab}<span class="sp"></span>${me}
     </div>`;
   if (studio) return one;
   if (!views.length && mode !== "Two rows, no rail") {
