@@ -233,6 +233,8 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .core li{display:grid;grid-template-columns:40px 1fr;column-gap:14px;align-items:start}
 .core svg{grid-row:span 2;width:40px;height:40px;padding:9px;border-radius:10px;background:var(--vert);fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .core b{font-size:18px;font-weight:600;color:var(--ink);line-height:1.25}
+.core b i,.fb3 h3 i{font-style:normal;font-family:var(--mono);font-weight:400;color:var(--ink-3);margin-right:10px}
+.fb3 h3 i{font-size:20px}
 .core span{font-size:16px;line-height:1.4;color:var(--ink-2)}
 
 /* "Instead of … I chose …" */
@@ -292,7 +294,7 @@ td .who{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;color:var(-
 .fb3{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;margin-top:44px}
 .fb3 .ic{width:56px;height:56px;padding:13px;border-radius:14px;background:var(--vert);fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .fb3 h3{font-size:28px;font-weight:600;letter-spacing:-.02em;margin-top:20px}
-.fb3 .sum{font-size:17px;line-height:1.4;color:var(--ink-2);margin-top:6px;min-height:2.8em}
+.fb3 .sum{font-size:17px;line-height:1.4;color:var(--ink-2);margin-top:6px}
 .fb3 .note{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
 .fb3 .said{font-size:17px;line-height:1.4;color:var(--ink)}
 .fb3 .said .who{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;color:var(--ink-3);margin-left:6px;white-space:nowrap}
@@ -351,6 +353,10 @@ tr.hl td{background:var(--vert-pale)}
 .st .pnum>span{display:block;font-family:var(--pixel);font-size:14px;font-weight:400;letter-spacing:.09em;line-height:inherit;text-transform:uppercase;color:var(--ink-3)}
 .st .pnum .k{font-weight:400}
 .st .pnum .k::after{content:" — "}
+/* a decision answering a test theme carries its number and icon */
+.st .pnum:has(.fbi){display:flex;align-items:center;gap:12px}
+.st .pnum .fbi{width:32px;height:32px;padding:7px;border-radius:8px;background:var(--vert);fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;margin:-7px 0}
+.st .pnum [data-fb]::before{content:attr(data-fb);font-family:var(--mono);color:var(--ink);margin-right:10px;letter-spacing:.04em}
 /* the problem's number, big and bold like a chapter mark; its name beside it */
 .pnum{display:flex;align-items:flex-end;gap:20px}
 /* The decision numbers are hidden, not deleted: saved text edits are matched
@@ -1086,9 +1092,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <p style="margin-top:28px">So prototype 3 added little. It made what was there behave the way an architect expects.</p>
       <p class="k" style="margin-top:40px">Core feedback</p>
       <ul class="core">
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg><b>Drawings</b><span>Zoom further, resize the panes, reach earlier versions.</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg><b>Totals</b><span>Count per façade, and show the unit mix and the net area.</span></li>
-        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg><b>Words</b><span>Use the office’s terms, not the software’s.</span></li>
+        <li><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg><b><i>01</i>Words</b><span>Say it the office’s way.</span></li>
+        <li><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg><b><i>02</i>Drawings</b><span>Show one drawing, clearly.</span></li>
+        <li><svg class="ci" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg><b><i>03</i>Totals</b><span>Count the way they count.</span></li>
       </ul></div>
     <figure style="margin:0;display:flex;flex-direction:column;min-height:0">
       <div class="shot" style="aspect-ratio:3/2"><img src="assets/frank/feedback2-users.jpg" alt="A technician explaining a detail across the office table, the laptop open between us" style="object-position:50% 40%"></div>
@@ -1106,26 +1112,103 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <div class="rule"></div>
   <div class="fb3">
     <div class="col">
-      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
-      <h3>Drawings</h3>
-      <p class="sum">Zoom further, resize the panes, reach earlier versions.</p>
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg>
+      <h3><i>01</i>Words</h3>
+      <p class="sum">Say it the office’s way.</p>
+      <div class="note"><p class="said">“Distribution”, “.csv” and “Client” are not our words <span class="who">GUY</span></p><p class="chg">Trade names on each sheet, “Exporter”, and “Municipalité / Ville” in Codes</p></div>
+      <div class="note"><p class="said">Green should mean progress, not urgency <span class="who">GUY</span></p><p class="chg">Red for conflicts and late items; green only for today and what is selected</p></div>
+    </div>
+    <div class="col">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+      <h3><i>02</i>Drawings</h3>
+      <p class="sum">Show one drawing, clearly.</p>
       <div class="note"><p class="said">The mouse wheel zooms the wrong way <span class="who">BENOÎT</span></p><p class="chg">Mouse and trackpad are told apart; each zooms the way its owner expects</p></div>
       <div class="note"><p class="said">Let me resize the panels, and zoom further <span class="who">BENOÎT</span></p><p class="chg">Every pane resizes and folds; it stops at the width its table needs. Zoom to 1000 %</p></div>
       <div class="note"><p class="said">Previous drawing versions do not work <span class="who">GUY</span></p><p class="chg">Each drawing card lists earlier issues; one click swaps it in, read-only</p></div>
     </div>
     <div class="col">
       <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
-      <h3>Totals</h3>
-      <p class="sum">Count per façade, and show the unit mix and the net area.</p>
+      <h3><i>03</i>Totals</h3>
+      <p class="sum">Count the way they count.</p>
       <div class="note"><p class="said">Totals per material are less useful than per façade <span class="who">BENOÎT</span></p><p class="chg">Four façade tables, counted in the 3D model, with each maker's product sheet</p></div>
       <div class="note"><p class="said">Show the unit mix and the total net area <span class="who">BENOÎT</span></p><p class="chg">A 3½ / 4½ / 5½ mix bar and the floor's net total above the area table</p></div>
     </div>
-    <div class="col">
-      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg>
-      <h3>Words</h3>
-      <p class="sum">Use the office’s terms, not the software’s.</p>
-      <div class="note"><p class="said">“Distribution”, “.csv” and “Client” are not our words <span class="who">GUY</span></p><p class="chg">Trade names on each sheet, “Exporter”, and “Municipalité / Ville” in Codes</p></div>
-      <div class="note"><p class="said">Green should mean progress, not urgency <span class="who">GUY</span></p><p class="chg">Red for conflicts and late items; green only for today and what is selected</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ decision 04 — was 07 -->
+<section class="s" data-sec="Process — Feedback 2">
+<div class="b">
+  <div class="st one">
+    <div class="st-t">
+      <div class="pnum"><b>03</b><svg class="fbi" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg><span data-fb="01"><span class="k">Finding your way</span>Words</span></div>
+      <h2>In Québec, a « croisement » is a street corner.</h2>
+      <div class="rule"></div>
+      <dl>
+        <div class="said"><dt class="k">They said</dt><dd><q>The term « Distribution » is not intuitive. Avoid file words like « .csv ».</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
+        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>The screen called a clash between two drawings a « croisement ».</dd></div>
+        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Here, a « croisement » is a street corner. The words must be the office's.</dd></div>
+        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>« Conflit » everywhere, with one red triangle.</dd></div>
+      </dl>
+    </div>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-words.jpg" alt="Prototype 2: « 8 avec un croisement ouvert »"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — « 8 avec un croisement ouvert »</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-words.jpg" alt="Prototype 3: « 12 conflits », one red triangle"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — « 12 conflits », one red triangle</figcaption></figure>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ decision 07 — was 06 -->
+<section class="s" data-sec="Process — Feedback 2">
+<div class="b">
+  <div class="st">
+    <div class="st-t">
+      <div class="pnum"><b>05</b><svg class="fbi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg><span data-fb="02"><span class="k">Seeing the drawing</span>Drawings</span></div>
+      <h2>Seven drawings per floor. Most of the time you need one.</h2>
+      <div class="rule"></div>
+      <dl>
+        <div class="said"><dt class="k">They said</dt><dd><q>Opacity controls are unclear. Start every drawing at 100 %.</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
+        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Seven drawings per floor, in a rail that took a column from the plan. Opacity was unclear.</dd></div>
+        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>You read one drawing at a time. The others matter only where they clash.</dd></div>
+        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>A thin strip of thumbnails. An eye turns a drawing on; the plan marks the clashes in red.</dd></div>
+      </dl>
+    </div>
+    <div class="pics cmp">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-layers.jpg" alt="Prototype 2: Drawings as tiles, each with an opacity slider"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Drawings as tiles, each with an opacity slider</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-layers.jpg" alt="Prototype 3: An eye lays a drawing on the sheet; the plan counts its conflicts"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — An eye lays a drawing on the sheet; the plan counts its conflicts</figcaption></figure>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ decision 08 — was 11 -->
+<section class="s" data-sec="Process — Feedback 2">
+<div class="b">
+  <div class="st">
+    <div class="st-t">
+      <div class="pnum"><b>06</b><svg class="fbi" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg><span data-fb="03"><span class="k">Counting the building</span>Totals</span></div>
+      <h2>Benoît counts per façade, not per material.</h2>
+      <div class="rule"></div>
+      <dl>
+        <div class="said"><dt class="k">They said</dt><dd><q>Totals per material are less useful than per façade.</q><cite>Benoît — test of prototype 2, Oct 28</cite></dd></div>
+        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>One material table for the whole building.</dd></div>
+        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>The 3D model already knows each face. It can do the count.</dd></div>
+        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Four façade tables from the model. Pick a side; the model turns to it.</dd></div>
+      </dl>
+    </div>
+    <div class="pics cmp elev">
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-3d.jpg" alt="Prototype 2: Orbit and pan only"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Orbit only, no count per side</figcaption></figure>
+      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-3d.jpg" alt="Prototype 3: 3D — Nord — Est — Sud — Ouest"></a>
+        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — One side at a time: Nord, Est, Sud, Ouest</figcaption></figure>
+      <figure class="pic span"><a href="https://hey-its-frank.vercel.app/prototypes/prototype%203.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-elev-mat.jpg" alt="Prototype 3, whole building: the south elevation coloured by material, beside the Matériaux table with each material's area per façade"></a>
+        <figcaption><span class="ba">After, whole building</span><a href="https://hey-its-frank.vercel.app/prototypes/prototype%203.html" target="_blank" rel="noopener">Prototype 3</a> — Sud opens the south elevation in its materials; the table beside it gives each one's area per façade.</figcaption></figure>
     </div>
   </div>
 </div>
@@ -1289,73 +1372,6 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
-<!-- ============================================================ decision 02 — was 05 -->
-<section class="s" data-sec="Process — Prototype 3">
-<div class="b">
-  <div class="st">
-    <div class="st-t">
-      <div class="pnum"><b>02</b><span><span class="k">What the city asks</span>Codes</span></div>
-      <h2>Finding the article was easy. Applying it to this project was the work.</h2>
-      <div class="rule"></div>
-      <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Finding the article is easy. Understanding what it means for this project is the slow part.</q><cite>Guy — interview, Oct 26</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Seven rules from three bodies of law sat in one list, split by a grey caps line that was lost on scroll.</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Across 48 presentations, the card had to show the measurement against the requirement, and what is missing, before anyone reads the quote. Each source needed its own place.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>One card per article: a small drawing of the rule, the quote, the edition, and « manque pour conclure ». Each body of rules has its own tab; the official text opens at the article.</dd></div>
-      </dl>
-    </div>
-    <div class="pics cmp">
-      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-codes-zoom.jpg" alt="Prototype 2: One list of articles, split by a grey caps line"></a>
-        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — One list of articles, split by a grey caps line</figcaption></figure>
-      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-codes-zoom.jpg" alt="Prototype 3: One tab per body of rules, one card per article"></a>
-        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — One tab per body of rules, one card per article</figcaption></figure>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- ============================================================ 
-     CODES — BEFORE AND AFTER, FULL WIDTH
-     ============================================================ -->
-<section class="s" data-sec="Process — Prototype 3">
-<div class="b">
-  <p class="k">What the city asks — Codes, before and after</p>
-  <h2>Each body of rules got its own tab. Each article got its own thread.</h2>
-  <div class="rule"></div>
-  <div class="pics cmp wide">
-      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-codes-wide.jpg" alt="Prototype 2: Codes et règlements, one list of followed articles under a grey CODE DU QUÉBEC line, each card with a drawing, the quote, the edition and what is missing to conclude"></a>
-        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — One list for every body of rules. A grey caps line marks where the Code du Québec starts, and scrolls away.</figcaption></figure>
-      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-codes-wide.jpg" alt="Prototype 3: Codes with a tab for the Code de construction and one for the Règlement de zonage, a search field, and a comment count on each article card"></a>
-        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — Code de construction and Règlement de zonage as tabs, a search that takes a question, and comments on each article.</figcaption></figure>
-  </div>
-</div>
-</section>
-
-<!-- ============================================================ decision 04 — was 07 -->
-<section class="s" data-sec="Process — Prototype 3">
-<div class="b">
-  <div class="st one">
-    <div class="st-t">
-      <div class="pnum"><b>03</b><span><span class="k">Finding your way</span>Words</span></div>
-      <h2>In Québec, a « croisement » is a street corner.</h2>
-      <div class="rule"></div>
-      <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>The term « Distribution » is not intuitive. Avoid file words like « .csv ».</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>The interface called a place where two drawings disagree a « croisement ».</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Read in the office's language, a « croisement » is a street intersection. Words are interface: each candidate had to be read in place, not in a list.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>« Conflit », chosen from six candidates tried in the header badge, the marker card and the page title. One warning triangle and one red, everywhere.</dd></div>
-      </dl>
-    </div>
-    <div class="pics cmp">
-      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-words.jpg" alt="Prototype 2: « 8 avec un croisement ouvert »"></a>
-        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — « 8 avec un croisement ouvert »</figcaption></figure>
-      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-words.jpg" alt="Prototype 3: « 12 conflits », one red triangle"></a>
-        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — « 12 conflits », one red triangle</figcaption></figure>
-    </div>
-  </div>
-</div>
-</section>
-
 <!-- ============================================================ decision 05 — was 03 -->
 <section class="s" data-sec="Process — Prototype 3">
 <div class="b">
@@ -1376,58 +1392,6 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — A long zoom rail beside a small plan</figcaption></figure>
       <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-room.jpg" alt="Prototype 3: « − 100 % + » in the corner, the sheet in the corner map"></a>
         <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — « − 100 % + » in the corner, the sheet in the corner map</figcaption></figure>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- ============================================================ decision 07 — was 06 -->
-<section class="s" data-sec="Process — Prototype 3">
-<div class="b">
-  <div class="st">
-    <div class="st-t">
-      <div class="pnum"><b>05</b><span><span class="k">Seeing the drawing</span>Drawing layers</span></div>
-      <h2>Seven drawings per floor. Most of the time you need one.</h2>
-      <div class="rule"></div>
-      <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Opacity controls are unclear. Start every drawing at 100 %.</q><cite>Guy — test of prototype 2, Oct 28</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Seven drawings per floor, in a 272 px rail that took almost a full column from the plan.</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Several drawings matter together only to see where they contradict, which Benoît did by overlaying them in his head. The rest of the time, you read one.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>A strip of thumbnails beside the plan. A green badge lays a drawing on the sheet, and once two are on, the plan marks their conflicts in red.</dd></div>
-      </dl>
-    </div>
-    <div class="pics cmp">
-      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-layers.jpg" alt="Prototype 2: Drawings as tiles, each with an opacity slider"></a>
-        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Drawings as tiles, each with an opacity slider</figcaption></figure>
-      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-layers.jpg" alt="Prototype 3: An eye lays a drawing on the sheet; the plan counts its conflicts"></a>
-        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — An eye lays a drawing on the sheet; the plan counts its conflicts</figcaption></figure>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- ============================================================ decision 08 — was 11 -->
-<section class="s" data-sec="Process — Prototype 3">
-<div class="b">
-  <div class="st">
-    <div class="st-t">
-      <div class="pnum"><b>06</b><span><span class="k">Seeing the drawing</span>3D model</span></div>
-      <h2>Labels on a turning building jumped by up to 577 pixels.</h2>
-      <div class="rule"></div>
-      <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Let the client turn the building. Useful in meetings, not during production.</q><cite>Guy — interview, Oct 26</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Level labels on the 3D model jumped while it orbited: up to 577 px in a slow scripted orbit.</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Six placements, then six treatments of the active level alone, all on one shared camera: the level tabs already name the floor. The model's job is to select and to show façades, not to label.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Labels removed. Hover lights the unit a click will select. A 3D — Nord — Est — Sud — Ouest switch shows each façade square-on.</dd></div>
-      </dl>
-    </div>
-    <div class="pics cmp elev">
-      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p2-3d.jpg" alt="Prototype 2: Orbit and pan only"></a>
-        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Orbit and pan only</figcaption></figure>
-      <figure class="pic"><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-3d.jpg" alt="Prototype 3: 3D — Nord — Est — Sud — Ouest"></a>
-        <figcaption><span class="ba">After</span><a href="https://hey-its-frank.vercel.app/" target="_blank" rel="noopener">Prototype 3</a> — 3D — Nord — Est — Sud — Ouest</figcaption></figure>
-      <figure class="pic span"><a href="https://hey-its-frank.vercel.app/prototypes/prototype%203.html" target="_blank" rel="noopener"><img src="assets/frank/cmp/p3-elev-mat.jpg" alt="Prototype 3, whole building: the south elevation coloured by material, beside the Matériaux table with each material's area per façade"></a>
-        <figcaption><span class="ba">After, whole building</span><a href="https://hey-its-frank.vercel.app/prototypes/prototype%203.html" target="_blank" rel="noopener">Prototype 3</a> — Sud opens the south elevation in its materials; the table beside it gives each one's area per façade.</figcaption></figure>
     </div>
   </div>
 </div>
