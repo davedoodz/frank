@@ -29,7 +29,7 @@ from urllib.error import HTTPError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 import fitz  # PyMuPDF
-from PIL import Image
+from PIL import Image, ImageChops
 
 ROOT = Path(__file__).resolve().parents[2]
 ENV_PATH = ROOT / ".env.local"
@@ -98,13 +98,18 @@ def level_widths(max_width: int) -> list[int]:
 
 def webp_bytes(image: Image.Image, *, lossless: bool) -> bytes:
     output = io.BytesIO()
-    image.convert("RGB").save(output, "WEBP", lossless=lossless, quality=WEBP_QUALITY, method=6)
+    mode = "RGBA" if image.mode == "RGBA" else "RGB"
+    image.convert(mode).save(output, "WEBP", lossless=lossless, quality=WEBP_QUALITY, method=6)
     return output.getvalue()
 
 
 def tile_bytes(page: fitz.Page, clip: fitz.Rect, scale: float) -> bytes:
     pixmap = page.get_pixmap(matrix=fitz.Matrix(scale, scale), clip=clip, alpha=False)
-    return webp_bytes(Image.open(io.BytesIO(pixmap.tobytes("png"))), lossless=True)
+    image = Image.open(io.BytesIO(pixmap.tobytes("png"))).convert("RGBA")
+    red, green, blue, _ = image.split()
+    minimum = ImageChops.darker(ImageChops.darker(red, green), blue)
+    image.putalpha(minimum.point(lambda value: 0 if value >= 250 else 255))
+    return webp_bytes(image, lossless=True)
 
 
 def tile_jobs(page: fitz.Page, width: int) -> Iterator[tuple[int, int, bytes]]:
@@ -185,7 +190,7 @@ def main() -> None:
 
     max_width = max(768, args.max_width) if suffix == ".pdf" else min(max(768, args.max_width), math.ceil(source_width))
     source_bytes = source.read_bytes()
-    tile_version = hashlib.sha256(source_bytes + f":{max_width}:{TILE_SIZE}:opaque-v1".encode()).hexdigest()[:16]
+    tile_version = hashlib.sha256(source_bytes + f":{max_width}:{TILE_SIZE}:white-alpha-v1".encode()).hexdigest()[:16]
     source_path = public_path(args.drawing, f"source{suffix}")
     tile_root = public_path(args.drawing)
     versioned_tile_root = public_path(args.drawing, "v", tile_version)
