@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Échéancier — ajouter une tâche depuis le calendrier</title>
+<style>
+:root{--ink:#1b1b1b;--ink-2:#6b6b6b;--ink-3:#9b9b9b;--line-2:#e8e8e8;--vert:#c3e05a;--vert-ink:#2f3a05;--sans:'Geist',ui-sans-serif,system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:#fff;color:var(--ink);padding:28px 32px 80px}
+h1{font-size:18px;font-weight:600}
+p.lede{font-size:12.5px;color:var(--ink-2);margin-top:6px;max-width:900px;line-height:1.5}
+.rec{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:9px;background:var(--vert);color:var(--vert-ink);
+  font-size:10.5px;font-weight:600;margin-left:6px;vertical-align:1px}
+.opt{margin-top:30px}
+.opt .cap{display:flex;align-items:baseline;gap:10px}
+.opt .cap b{font-size:14px;font-weight:600}
+.opt .cap span{font-size:12px;color:var(--ink-2)}
+.opt ul{font-size:12px;color:var(--ink-2);margin:6px 0 10px 18px;line-height:1.55;max-width:980px}
+.stage{position:relative;width:100%;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:#111}
+.stage iframe{position:absolute;left:0;top:0;width:1568px;height:1000px;border:0;transform-origin:0 0}
+.stage .wait{position:absolute;inset:0;display:grid;place-items:center;color:#888;font-size:12px;z-index:2}
+</style>
+</head>
+<body>
+<h1>Échéancier — ajouter une tâche depuis le calendrier</h1>
+<p class="lede">Cinq façons de proposer « ajouter une tâche » quand on clique un jour. Chaque vue est le vrai prototype, sur le mois de novembre, avec le 27 choisi. Le jour choisi est gris, sans contour noir. Les boutons ouvrent le vrai formulaire de tâche, daté du jour choisi.</p>
+<div id="opts"></div>
+<script>
+const OPTS = [
+  { k: "A", rec: true, t: "Un bouton dans la case",
+    s: "Le jour choisi montre « + Tâche » en bas de sa case.",
+    pts: ["On voit l'action là où l'on vient de cliquer, sans fenêtre de plus.",
+      "Le bouton ouvre le formulaire de la liste à droite, déjà daté du 27 nov.",
+      "Les autres cases restent nues: une seule action à la fois."] },
+  { k: "B", t: "Un « + » au survol de chaque case",
+    s: "Chaque case montre un petit « + » en haut à droite sous le pointeur; le jour choisi le garde.",
+    pts: ["On peut ajouter sur n'importe quel jour sans le choisir d'abord.",
+      "Ici le 20 est survolé et le 27 choisi."] },
+  { k: "C", t: "Une saisie rapide sous la case",
+    s: "Cliquer un jour ouvre une petite boîte accrochée à la case: on tape le titre, Entrée crée la tâche.",
+    pts: ["Le plus rapide pour noter une échéance pendant un appel.",
+      "« Plus de détails » ouvre le formulaire complet dans la liste (priorité, phase, personnes)."] },
+  { k: "D", t: "La case devient le champ",
+    s: "Le jour choisi s'ouvre en champ de saisie dans la case même.",
+    pts: ["Rien ne bouge autour; la tâche apparaît dans la case dès qu'elle est créée.",
+      "La case est petite: le titre est coupé au-delà d'une ligne."] },
+  { k: "E", t: "La liste suit le jour choisi",
+    s: "Cliquer un jour fait défiler la liste à ce jour; une ligne « Ajouter une tâche au 27 nov » y attend.",
+    pts: ["Le calendrier reste un calendrier; l'écriture se fait au même endroit que d'habitude.",
+      "Un jour sans tâche a quand même sa place dans la liste, le temps d'en ajouter une."] },
+];
+opts.innerHTML = OPTS.map((o) => `<section class="opt">
+  <div class="cap"><b>${o.k} — ${o.t}${o.rec ? `<span class="rec">recommandé</span>` : ""}</b><span>${o.s}</span></div>
+  <ul>${o.pts.map((p) => `<li>${p}</li>`).join("")}</ul>
+  <div class="stage" data-k="${o.k}"><div class="wait">chargement…</div></div></section>`).join("");
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const until = async (fn) => { for (let i = 0; i < 200; i++) { try { if (fn()) return; } catch {} await sleep(100); } };
+function fit() {
+  document.querySelectorAll(".stage").forEach((s) => {
+    const k = s.clientWidth / 1568;
+    s.style.height = `${1000 * k}px`;
+    const f = s.querySelector("iframe"); if (f) f.style.transform = `scale(${k})`;
+  });
+}
+addEventListener("resize", fit);
+
+const DAY = "2026-11-27";
+const CSS_IN = `
+[class*="dialkit"]{display:none!important}
+/* The chosen day: a fill, no black contour. */
+.cal .day.on{box-shadow:none!important}
+.xa{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:5px;background:#fff;border:1px solid var(--line-2);
+  font-size:11px;font-weight:500;color:var(--ink);cursor:pointer;white-space:nowrap}
+.xa:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.xa .lu{width:12px;height:12px}
+/* A */
+[data-xc="A"] .cal .day.on .xa{margin-top:auto;align-self:flex-start}
+/* B */
+.xp{position:absolute;top:4px;right:5px;display:none;place-items:center;width:20px;height:20px;border-radius:5px;color:var(--ink-2);cursor:pointer}
+.xp .lu{width:13px;height:13px}
+.xp:hover{background:var(--ink);color:#fff}
+[data-xc="B"] .cal .day:hover .xp,[data-xc="B"] .cal .day.on .xp,[data-xc="B"] .cal .day.xh .xp{display:grid}
+[data-xc="B"] .cal .day.xh{background:var(--fill-2)}
+/* C */
+.xpop{position:fixed;z-index:60;width:280px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px;
+  display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 22px rgba(17,17,18,.12)}
+.xpop .hd{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.xpop .hd span{font-weight:400;color:var(--ink-3)}
+.xpop input{height:30px;border:1px solid var(--line-2);border-radius:6px;padding:0 8px;font:inherit;font-size:12.5px;color:var(--ink)}
+.xpop .ft{display:flex;align-items:center;gap:6px}
+.xpop .ft .more{font-size:11.5px;color:var(--ink-2);cursor:pointer;margin-right:auto}
+.xpop .ft .more:hover{color:var(--ink)}
+/* D */
+.xin{margin-top:2px;width:100%;height:26px;border:1px solid var(--line);border-radius:5px;padding:0 6px;font:inherit;font-size:11.5px;background:#fff;color:var(--ink)}
+.xkey{font-size:10px;color:var(--ink-3)}
+/* E */
+.xrow{display:flex;align-items:center;gap:8px;padding:8px 6px;margin:2px 0;border-radius:6px;background:var(--fill-2);font-size:12px;color:var(--ink-2);cursor:pointer}
+.xrow:hover{background:var(--fill);color:var(--ink)}
+.xrow .lu{width:13px;height:13px}
+.xrow b{font-weight:600;color:var(--ink)}
+.tday.xsel{background:var(--fill-2)}
+`;
+
+async function boot(stage, k) {
+  const f = document.createElement("iframe");
+  f.src = "prototype%203.html";
+  stage.append(f); fit();
+  await new Promise((r) => f.addEventListener("load", r, { once: true }));
+  const w = f.contentWindow, d = w.document;
+  await until(() => w.eval("typeof dial") === "object" && w.eval("typeof V") === "object");
+  await sleep(1500);
+  const st = d.createElement("style"); st.textContent = CSS_IN; d.head.append(st);
+  d.documentElement.dataset.xc = k;
+  w.eval('dial.setValue("screen", "Schedule")');
+  await sleep(1300);
+  w.eval(`V.scale = "Mois"; V.day = "${DAY}";`);
+  const icon = w.eval("icon"), dayLabel = (s) => w.eval(`typeof dayLabel === "function" ? dayLabel("${s}") : "${s}"`);
+  const add = (label = "Tâche") => `<span class="xa" data-act="tnew" title="Ajouter une tâche le ${dayLabel(DAY)}">${icon("plus")}${label}</span>`;
+  const patch = () => {
+    const on = d.querySelector(".cal .day.on");
+    if (!on || on.dataset.x) return;
+    on.dataset.x = 1;
+    if (k === "A") on.insertAdjacentHTML("beforeend", add());
+    if (k === "B") {
+      d.querySelectorAll(".cal .day:not(.dim)").forEach((c) => c.insertAdjacentHTML("beforeend", `<span class="xp" data-act="tnew" title="Ajouter une tâche">${icon("plus")}</span>`));
+      d.querySelector('.cal .day[data-value="2026-11-20"]')?.classList.add("xh");
+    }
+    if (k === "C") {
+      d.querySelector(".xpop")?.remove();
+      const r = on.getBoundingClientRect();
+      const pop = d.createElement("div"); pop.className = "xpop";
+      pop.style.left = `${Math.min(r.left, w.innerWidth - 300)}px`; pop.style.top = `${r.bottom + 6}px`;
+      pop.innerHTML = `<div class="hd">${icon("plus")}Nouvelle tâche<span>— ${dayLabel(DAY)}</span></div>
+        <input placeholder="Titre de la tâche" value="">
+        <div class="ft"><span class="more" data-act="tnew">Plus de détails</span>
+          <span class="btnw solid wait">${icon("check")}<span class="hi">Créer</span></span></div>`;
+      d.body.append(pop);
+      const inp = pop.querySelector("input"), go = pop.querySelector(".solid");
+      inp.oninput = () => go.classList.toggle("wait", !inp.value.trim());
+      pop.onclick = (e) => e.stopPropagation();
+    }
+    if (k === "D") {
+      on.insertAdjacentHTML("beforeend", `<input class="xin" placeholder="Nouvelle tâche…"><span class="xkey">Entrée pour créer</span>`);
+      on.querySelector(".xin").onclick = (e) => e.stopPropagation();
+    }
+    if (k === "E") {
+      const list = d.querySelector(".tlist");
+      const heads = [...list.querySelectorAll(".tday")];
+      const own = heads.find((h) => h.dataset.tday === DAY);
+      const row = `<div class="xrow" data-act="tnew">${icon("plus")}<span>Ajouter une tâche au <b>${dayLabel(DAY)}</b></span></div>`;
+      if (own) {
+        /* The day already has tasks: the line closes its group. */
+        own.classList.add("xsel");
+        const next = heads[heads.indexOf(own) + 1];
+        if (next) next.insertAdjacentHTML("beforebegin", row); else list.insertAdjacentHTML("beforeend", row);
+      } else {
+        const after = heads.find((h) => h.dataset.tday > DAY);
+        const html = `<div class="tday xsel" data-tday="${DAY}"><span class="tcount">0</span><b>${dayLabel(DAY)}</b></div>${row}`;
+        if (after) after.insertAdjacentHTML("beforebegin", html); else list.insertAdjacentHTML("beforeend", html);
+      }
+      /* Scroll only the list's own column, never the page around it. */
+      const sel = list.querySelector(".xsel");
+      let sc = list; while (sc && sc !== d.body && !/(auto|scroll)/.test(w.getComputedStyle(sc).overflowY)) sc = sc.parentElement;
+      if (sc && sc !== d.body) sc.scrollTop += sel.getBoundingClientRect().top - sc.getBoundingClientRect().top - sc.clientHeight / 3;
+    }
+  };
+  w.addEventListener("fitte:render", () => setTimeout(patch, 0));
+  w.eval("render()");
+  stage.querySelector(".wait")?.remove();
+}
+(async () => { for (const s of document.querySelectorAll(".stage")) { try { await boot(s, s.dataset.k); } catch (e) { console.error(s.dataset.k, e); } } })();
+fit();
+</script>
+</body>
+</html>

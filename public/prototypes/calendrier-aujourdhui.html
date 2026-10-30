@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Calendrier — le bouton « Aujourd'hui »</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* The calendar pane of prototype 3, its header and its period row, redrawn
+   with the page's own rules: .btnw for buttons (grey at rest, ink under the
+   cursor), .calarr for the arrows (bare, a grey wash under the cursor),
+   .tseg for the scale. Six ways to seat « Aujourd'hui » among them, each in
+   four states: at rest, hovered, pressed, and already on today. The live
+   mock at the top of each works: step away with the arrows, come back. */
+:root{--ink:#141416;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f6;
+  --card:#fff;--today:#eef3dc}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Geist",ui-sans-serif,system-ui,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px;max-width:1240px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:900px}
+/* One option per row: the pane is drawn at the width it has on the page. */
+.grid{display:grid;grid-template-columns:minmax(0,960px);gap:16px;margin-top:20px}
+.v{background:var(--card);border:1px solid var(--line-2);border-radius:10px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px}
+.v h2{margin:0;font-size:13px;font-weight:600}
+.v > p{margin:-6px 0 0;color:var(--ink-2);font-size:12px}
+.lu{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* the pane, as in prototype 3 */
+.pane{border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.ph{height:38px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:8px;padding:0 11px;font-size:13px;font-weight:500}
+.ph > .lu{width:15px;height:15px;color:var(--ink-2)}
+.sp{flex:1}
+.fold{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;background:var(--fill);color:var(--ink-2)}
+.pb{padding:10px 11px 12px}
+.calmonth{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;font-size:14px;font-weight:600;margin:2px 0 10px}
+.tseg{display:inline-flex;gap:2px;padding:2px;border-radius:7px;background:var(--fill);justify-self:start}
+.tseg > span{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:5px;font-size:11.5px;font-weight:500;color:var(--ink-2)}
+.tseg > span.on{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+.tseg .lu{width:12px;height:12px}
+.tseg > span:not(.on) .lu{color:var(--ink-3)}
+.cnav{display:flex;align-items:center;gap:10px}
+.ct{min-width:200px;text-align:center}
+.calarr{width:26px;height:26px;border-radius:6px;display:grid;place-items:center;color:var(--ink-2);cursor:pointer}
+.calarr:hover{background:var(--fill);color:var(--ink)}
+.calarr .lu{width:15px;height:15px}
+.right{justify-self:end;display:flex;align-items:center;gap:6px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--line-2);border-radius:6px;overflow:hidden}
+.days span{padding:6px 8px;font-size:11.5px;font-weight:600;border-left:1px solid var(--line-2);height:46px}
+.days span:first-child{border-left:0}
+.days span.today{background:var(--today)}
+
+/* the page's button */
+.btnw{height:26px;border:1px solid var(--line);border-radius:5px;background:var(--fill-2);display:inline-flex;align-items:center;gap:6px;
+  padding:0 9px;font:inherit;font-size:12px;font-weight:400;color:var(--ink-2);cursor:pointer;white-space:nowrap;user-select:none}
+.btnw .lu{width:13px;height:13px}
+
+/* ---- the six options; .is-hover / .is-press force a state in the strip ---- */
+/* A — the page's own rule */
+.A .btnw:hover,.A .btnw.is-hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.A .btnw:active,.A .btnw.is-press{background:#000;border-color:#000;color:#fff;transform:translateY(1px)}
+.A .btnw.here{opacity:.45;pointer-events:none}
+/* B — a word between the arrows */
+.B .tw{height:26px;padding:0 8px;border-radius:6px;display:inline-flex;align-items:center;font-size:12px;font-weight:500;color:var(--ink-2);cursor:pointer;user-select:none}
+.B .tw:hover,.B .tw.is-hover{background:var(--fill);color:var(--ink)}
+.B .tw:active,.B .tw.is-press{background:var(--line-2);color:var(--ink)}
+.B .tw.here{color:var(--ink-3);pointer-events:none}
+.B .ct{min-width:190px;font-size:14px}
+/* C — the arrows and the word as one group, like the scale beside it */
+.C .grp{display:inline-flex;gap:2px;padding:2px;border-radius:7px;background:var(--fill)}
+.C .grp > span{height:24px;min-width:24px;padding:0 8px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:500;color:var(--ink-2);cursor:pointer;user-select:none}
+.C .grp > span.arr{padding:0}
+.C .grp > span:hover,.C .grp > span.is-hover{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+.C .grp > span:active,.C .grp > span.is-press{background:var(--ink);color:#fff;box-shadow:none}
+.C .grp > span.here{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line-2);pointer-events:none}
+.C .calmonth{grid-template-columns:auto 1fr auto}
+.C .ct{min-width:0;text-align:center}
+/* D — the day's number, as the month view marks today */
+.D .btnw{padding:0 9px 0 4px}
+.D .btnw .n{min-width:18px;height:18px;padding:0 4px;border-radius:4px;background:var(--ink);color:#fff;font-size:10.5px;font-weight:600;
+  display:inline-grid;place-items:center;font-variant-numeric:tabular-nums}
+.D .btnw:hover,.D .btnw.is-hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.D .btnw:hover .n,.D .btnw.is-hover .n{background:#fff;color:var(--ink)}
+.D .btnw:active,.D .btnw.is-press{background:#000;border-color:#000;color:#fff;transform:translateY(1px)}
+.D .btnw:active .n,.D .btnw.is-press .n{background:#fff;color:#000}
+.D .btnw.here{background:var(--card);border-color:var(--line-2);color:var(--ink-3);pointer-events:none}
+.D .btnw.here .n{background:var(--fill);color:var(--ink-3)}
+/* E — only when away from today, with the way back */
+.E .btnw:hover,.E .btnw.is-hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.E .btnw:active,.E .btnw.is-press{background:#000;border-color:#000;color:#fff;transform:translateY(1px)}
+.E .btnw.here{visibility:hidden}
+/* F — a quiet outline, the arrows' weight */
+.F .btnw{background:var(--card);border-color:var(--line-2);color:var(--ink-2)}
+.F .btnw .lu{color:var(--ink-3)}
+.F .btnw:hover,.F .btnw.is-hover{background:var(--fill);border-color:var(--line);color:var(--ink)}
+.F .btnw:hover .lu,.F .btnw.is-hover .lu{color:var(--ink)}
+.F .btnw:active,.F .btnw.is-press{background:var(--line-2);border-color:var(--line);color:var(--ink);transform:translateY(1px)}
+.F .btnw.here{color:var(--ink-3);pointer-events:none}
+
+/* the four-state strip */
+.states{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.st{border:1px solid var(--line-2);border-radius:7px;padding:10px 10px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--fill-2)}
+.st .stage{height:36px;display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:5px;width:100%;padding:0 6px}
+.st em{font-style:normal;font-size:11px;color:var(--ink-3)}
+.states .ph{border:0;height:auto;padding:0}
+</style>
+</head>
+<body>
+<main>
+  <h1>Calendrier — le bouton « Aujourd'hui »</h1>
+  <p class="lede">Le volet Calendrier de la page, avec ses vraies règles: un bouton est gris au repos et passe à l'encre sous le curseur;
+    les flèches restent nues et prennent un fond gris au survol; l'échelle Semaine / Mois / Année est un groupe. Six façons d'y placer
+    « Aujourd'hui », chacune en quatre états: repos, survol, clic, et déjà sur aujourd'hui. La maquette du haut fonctionne: avancez avec
+    les flèches, revenez avec le bouton.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
+const icon = (n) => {
+  const node = lucide.icons[pascal(n)];
+  if (!node) throw new Error("icône absente: " + n);
+  return `<svg class="lu" viewBox="0 0 24 24">${node[2].map(([t, a]) =>
+    `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+};
+/* Today is the prototype's: samedi 14 novembre 2026, in the week of the 9th. */
+const TODAY = new Date(2026, 10, 14);
+const MON = new Date(2026, 10, 9);
+const DAY = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
+const MONTH = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+const add = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const weekTitle = (w) => { const a = add(MON, 7 * w), b = add(a, 6); return `semaine du ${a.getDate()} ${MONTH[a.getMonth()]} au ${b.getDate()} ${MONTH[b.getMonth()]}`; };
+const days = (w) => `<div class="days">${DAY.map((d, i) => { const x = add(MON, 7 * w + i);
+  return `<span class="${+x === +TODAY ? "today" : ""}">${d} ${x.getDate()}</span>`; }).join("")}</div>`;
+const scale = `<span class="tseg">${[["calendar-range", "Semaine", 1], ["calendar-days", "Mois"], ["calendar", "Année"]]
+  .map(([i, t, on]) => `<span class="${on ? "on" : ""}">${icon(i)}${t}</span>`).join("")}</span>`;
+const arrows = (body) => `<span class="cnav"><span class="calarr" data-step="-1" title="Avant">${icon("chevron-left")}</span>${body}<span class="calarr" data-step="1" title="Après">${icon("chevron-right")}</span></span>`;
+const header = (extra) => `<div class="ph">${icon("calendar-check")}<span>Calendrier</span><span class="sp"></span>${extra}<span class="fold">${icon("panel-left-close")}</span></div>`;
+
+/* Each option: where the button sits, how it is drawn (cls = forced state),
+   what the four states mean. */
+const O = [
+  { id: "A", h: "A — Le bouton de la page, désactivé sur aujourd'hui",
+    p: "Rien de nouveau: la règle .btnw. Encre au survol, plus noire et enfoncée d'un pixel au clic. Sur aujourd'hui il pâlit et ne répond plus: il n'a rien à faire.",
+    btn: (c) => `<span class="btnw ${c}" data-today>Aujourd'hui</span>`, where: "head" },
+  { id: "B", h: "B — Un mot entre les flèches",
+    p: "« Aujourd'hui » rejoint ce qu'il commande: la navigation. Même poids que les flèches — nu au repos, fond gris au survol, plus foncé au clic. Sur aujourd'hui, il reste lisible mais gris.",
+    btn: (c) => `<span class="tw ${c}" data-today>Aujourd'hui</span>`, where: "nav" },
+  { id: "C", h: "C — Flèches et mot en un groupe",
+    p: "Le trio devient un groupe comme Semaine / Mois / Année: on le reconnaît d'un coup d'œil. Survol: le segment se lève en blanc; clic: encre. Sur aujourd'hui, le mot reste levé, comme une échelle choisie.",
+    btn: (c) => `<span class="${c}" data-today>Aujourd'hui</span>`, where: "group" },
+  { id: "D", h: "D — Le numéro du jour",
+    p: "Le bouton porte le 14 dans la petite case noire du mois: il dit où il mène. Au survol la case s'inverse. Sur aujourd'hui, le bouton s'éteint en gris.",
+    btn: (c) => `<span class="btnw ${c}" data-today><span class="n">14</span>Aujourd'hui</span>`, where: "head" },
+  { id: "E", h: "E — Seulement quand on s'est éloigné",
+    p: "Sur aujourd'hui, pas de bouton: rien à faire, rien à montrer. Il apparaît dès qu'une flèche quitte la semaine, avec le retour en icône. La place reste réservée: l'en-tête ne bouge pas.",
+    btn: (c) => `<span class="btnw ${c}" data-today>${icon("undo-2")}Aujourd'hui</span>`, where: "head" },
+  { id: "F", h: "F — Un contour calme",
+    p: "Blanc et filet clair, au poids des flèches plutôt qu'à celui des actions: survol gris, clic un ton plus foncé. Pas d'encre: revenir à aujourd'hui n'est pas une action qui change quelque chose.",
+    btn: (c) => `<span class="btnw ${c}" data-today>${icon("locate-fixed")}Aujourd'hui</span>`, where: "head" },
+];
+const state = Object.fromEntries(O.map((o) => [o.id, 0]));
+const pane = (o, w, cls) => {
+  const here = w === 0 ? "here" : "";
+  const c = [cls, here].filter(Boolean).join(" ");
+  const title = `<span class="ct">${weekTitle(w)}</span>`;
+  let nav, right = "";
+  if (o.where === "nav") nav = arrows(`${title}${o.btn(c)}`);
+  else if (o.where === "group") nav = `<span class="ct">${weekTitle(w)}</span>`;
+  else nav = arrows(title);
+  if (o.where === "group") right = `<span class="right"><span class="grp"><span class="arr" data-step="-1" title="Avant">${icon("chevron-left")}</span>${o.btn(c)}<span class="arr" data-step="1" title="Après">${icon("chevron-right")}</span></span></span>`;
+  return `<div class="pane">${header(o.where === "head" ? o.btn(c) : "")}
+    <div class="pb"><div class="calmonth">${scale}${nav}${right}</div>${days(w)}</div></div>`;
+};
+/* The strip shows only the control and its neighbours, at each state. */
+const strip = (o) => {
+  const one = (cls, w) => {
+    const c = [cls, w === 0 ? "here" : ""].filter(Boolean).join(" ");
+    if (o.where === "head") return `<div class="ph" style="gap:6px">${o.btn(c)}<span class="fold">${icon("panel-left-close")}</span></div>`;
+    if (o.where === "nav") return `<span class="cnav" style="gap:4px"><span class="calarr">${icon("chevron-left")}</span>${o.btn(c)}<span class="calarr">${icon("chevron-right")}</span></span>`;
+    return `<span class="grp"><span class="arr">${icon("chevron-left")}</span>${o.btn(c)}<span class="arr">${icon("chevron-right")}</span></span>`;
+  };
+  return `<div class="states">${[["", 1, "Repos"], ["is-hover", 1, "Survol"], ["is-press", 1, "Clic"], ["", 0, "Déjà sur aujourd'hui"]]
+    .map(([cls, w, t]) => `<div class="st"><div class="stage">${one(cls, w)}</div><em>${t}</em></div>`).join("")}</div>`;
+};
+const grid = document.getElementById("grid");
+const paint = () => {
+  grid.innerHTML = O.map((o) => `<section class="v ${o.id}" data-o="${o.id}"><h2>${o.h}</h2><p>${o.p}</p>
+    <div data-live>${pane(o, state[o.id])}</div>${strip(o)}</section>`).join("");
+};
+paint();
+grid.addEventListener("click", (e) => {
+  const v = e.target.closest("[data-o]"); if (!v || !e.target.closest("[data-live]")) return;
+  const step = e.target.closest("[data-step]"), today = e.target.closest("[data-today]");
+  if (step) state[v.dataset.o] += +step.dataset.step;
+  else if (today) state[v.dataset.o] = 0;
+  else return;
+  paint();
+});
+</script>
+</body>
+</html>

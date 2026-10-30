@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Codes — interlocuteurs au pied du volet</title>
+<style>
+:root{--ink:#1b1b1b;--ink-2:#6b6b6b;--ink-3:#9b9b9b;--line-2:#e8e8e8;--vert:#c3e05a;--vert-ink:#2f3a05;--sans:'Geist',ui-sans-serif,system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:#fff;color:var(--ink);padding:28px 32px 60px}
+h1{font-size:18px;font-weight:600}
+p.lede{font-size:12.5px;color:var(--ink-2);margin-top:6px;max-width:900px;line-height:1.5}
+.rec{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:9px;background:var(--vert);color:var(--vert-ink);
+  font-size:10.5px;font-weight:600;margin-left:6px}
+.row{display:flex;gap:22px;flex-wrap:wrap;margin-top:22px;align-items:flex-start}
+.opt{width:350px;display:flex;flex-direction:column;gap:8px}
+.opt b.t{font-size:13.5px;font-weight:600;display:flex;align-items:center}
+.opt p{font-size:12px;color:var(--ink-2);line-height:1.5;min-height:54px}
+/* Each option is the real prototype at full size, framed on its right column. */
+.stage{position:relative;width:350px;height:918px;overflow:hidden;border:1px solid var(--line-2);border-radius:10px;background:#fff}
+.stage iframe{position:absolute;top:-82px;left:-1214px;width:1568px;height:1000px;border:0}
+.stage .wait{position:absolute;inset:0;display:grid;place-items:center;color:#999;font-size:12px;background:#fff;z-index:2}
+</style>
+</head>
+<body>
+<h1>Codes — interlocuteurs au pied du volet</h1>
+<p class="lede">Cinq façons de montrer les interlocuteurs sans filet au-dessus et sans phrase d'explication. Chaque vue est le vrai prototype, à taille réelle, sur l'article 3.2.2.48. Les délais en rouge passent 14 jours.</p>
+<div class="row" id="opts"></div>
+<script>
+const OPTS = [
+  { k: "A", rec: true, t: "Un fond gris", p: "Le bloc se détache du fil par un fond gris clair, comme les cartes survolées. Pas de filets entre les personnes: l'espace suffit." },
+  { k: "B", t: "Initiales, comme les auteurs", p: "Chaque interlocuteur a son cercle d'initiales, comme l'auteur d'un commentaire. Le délai passe à droite; « Écrire » devient une icône." },
+  { k: "C", t: "Replié en une ligne", p: "Une ligne: les initiales empilées et « 2 en attente ». Cliquer la déplie. Le fil garde toute la hauteur." },
+  { k: "D", t: "Pastilles", p: "Une pastille grise par personne avec son délai; cliquer écrit. Le plus compact, le moins lisible pour les longs titres." },
+  { k: "E", t: "Liste nue", p: "Le titre, puis quatre lignes sans cadre: nom à gauche, délai à droite, l'enveloppe au survol." },
+];
+opts.innerHTML = OPTS.map((o) => `<div class="opt"><b class="t">${o.k} — ${o.t}${o.rec ? `<span class="rec">recommandé</span>` : ""}</b>
+  <p>${o.p}</p><div class="stage" data-k="${o.k}"><div class="wait">chargement…</div></div></div>`).join("");
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const until = async (fn) => { for (let i = 0; i < 200; i++) { try { if (fn()) return; } catch {} await sleep(100); } };
+
+/* Shared: no divider, no sentence. */
+const BASE = `
+[class*="dialkit"]{display:none!important}
+.cfoot{border-top:0!important;padding-top:0!important}
+.chint{display:none!important}
+.ifoot{display:flex;flex-direction:column}
+.ifoot .lu{width:14px;height:14px}
+.ifoot .av{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:12px;background:var(--fill);font-size:10px;font-weight:600;color:var(--ink-2);flex:0 0 24px}
+.ifoot .slowc,.ifoot .p .d.slowc,.ifoot .chip2 span.slowc{color:#b3261e}
+.ifoot .mi{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:6px;color:var(--ink-3);cursor:pointer;flex:0 0 26px}
+.ifoot .mi:hover{background:var(--fill);color:var(--ink)}
+`;
+const CSS = {
+  A: `.cfoot{background:var(--fill-2);border-radius:8px;padding:10px 10px 4px!important}
+      .cfoot .contact{border-bottom:0;padding:5px 0}
+      .cfoot .mailto{background:#fff}`,
+  B: `.ifoot .p{display:flex;align-items:center;gap:8px;padding:6px 0}
+      .ifoot .p .w{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+      .ifoot .p b{font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .ifoot .p .d{font-size:11px;color:var(--ink-3)}`,
+  C: `.ifoot .bar{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:var(--fill-2);cursor:pointer}
+      .ifoot .bar:hover{background:var(--fill)}
+      .ifoot .bar b{font-size:12px;font-weight:600}
+      .ifoot .stack{display:flex}
+      .ifoot .stack .av{border:2px solid var(--fill-2);margin-left:-6px;width:24px;height:24px}
+      .ifoot .stack .av:first-child{margin-left:0}
+      .ifoot .bar .n{font-size:11px;margin-left:auto}
+      .ifoot .list{display:none;padding-top:4px}
+      .ifoot.open .list{display:flex;flex-direction:column}
+      .ifoot .list .p{display:flex;align-items:center;gap:8px;padding:5px 2px}
+      .ifoot .list .p .w{flex:1;min-width:0;font-size:11.5px;font-weight:600}
+      .ifoot .list .p .d{font-size:11px;color:var(--ink-3)}`,
+  D: `.ifoot .chips{display:flex;flex-wrap:wrap;gap:6px}
+      .ifoot .chip2{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 4px 0 10px;border-radius:14px;background:var(--fill-2);font-size:11.5px;cursor:pointer}
+      .ifoot .chip2:hover{background:var(--fill)}
+      .ifoot .chip2 b{font-weight:600}
+      .ifoot .chip2 span{color:var(--ink-3)}
+      .ifoot .chip2 .mi{width:20px;height:20px;flex-basis:20px;border-radius:10px;background:#fff}
+      .ifoot .chip2 .mi .lu{width:11px;height:11px}`,
+  E: `.ifoot .p{display:flex;align-items:center;gap:8px;height:30px;padding:0 2px;border-radius:6px}
+      .ifoot .p:hover{background:var(--fill-2)}
+      .ifoot .p b{flex:1;min-width:0;font-size:11.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .ifoot .p .d{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+      .ifoot .p .mi{opacity:0;width:22px;height:22px;flex-basis:22px}
+      .ifoot .p:hover .mi{opacity:1}`,
+};
+
+async function boot(stage, k) {
+  const f = document.createElement("iframe");
+  f.src = "prototype%203.html";
+  stage.append(f);
+  await new Promise((r) => f.addEventListener("load", r, { once: true }));
+  const w = f.contentWindow, d = w.document;
+  await until(() => w.eval("typeof dial") === "object" && w.eval("typeof V") === "object");
+  await sleep(1500);
+  const st = d.createElement("style"); st.textContent = BASE + CSS[k]; d.head.append(st);
+  w.eval('dial.setValue("articleSelected", "Grey fill"); dial.setValue("screen", "Codes")');
+  await sleep(1300);
+  w.eval('V.articleId = "3.2.2.48"');
+  const C = w.eval("CONTACTS"), icon = w.eval("icon");
+  const list = Object.keys(C).map((x) => ({ k: x, ...C[x], ini: C[x].role.startsWith("RBQ") ? "RB" : C[x].role.split(/[\s—-]+/).filter(Boolean).map((s) => s[0]).join("").slice(0, 2).toUpperCase() }));
+  const days = (c) => `<span class="d ${c.waited > 14 ? "slowc" : ""}">il y a ${c.waited} j</span>`;
+  const mail = (c) => `<span class="mi" data-act="mailopen" data-value="3.2.2.48|${c.k}" title="Écrire à ${c.role}">${icon("mail")}</span>`;
+  const head = `<div class="clbl">${icon("users")}<span class="hi">Interlocuteurs</span><i>${list.length}</i></div>`;
+  const body = {
+    B: () => `${head}${list.map((c) => `<div class="p"><span class="av">${c.ini}</span><span class="w"><b>${c.role}</b>${days(c)}</span>${mail(c)}</div>`).join("")}`,
+    C: () => { const slow = list.filter((c) => c.waited > 14).length;
+      return `<div class="bar">${icon("users")}<b>Interlocuteurs</b><span class="stack">${list.map((c) => `<span class="av">${c.ini}</span>`).join("")}</span>
+        <span class="n ${slow ? "slowc" : ""}">${slow ? `${slow} en attente` : `${list.length}`}</span>${icon("chevron-up")}</div>
+        <div class="list">${list.map((c) => `<div class="p"><span class="av">${c.ini}</span><span class="w">${c.role}</span>${days(c)}${mail(c)}</div>`).join("")}</div>`; },
+    D: () => `${head}<div class="chips">${list.map((c) => `<span class="chip2" data-act="mailopen" data-value="3.2.2.48|${c.k}" title="Écrire à ${c.role}"><b>${c.role}</b><span class="${c.waited > 14 ? "slowc" : ""}">${c.waited} j</span>${mail(c)}</span>`).join("")}</div>`,
+    E: () => `${head}${list.map((c) => `<div class="p"><b>${c.role}</b>${days(c)}${mail(c)}</div>`).join("")}`,
+  }[k];
+  const patch = () => {
+    if (!body) return;
+    const foot = d.querySelector(".cfoot");
+    if (!foot || foot.dataset.x) return;
+    foot.dataset.x = 1;
+    foot.innerHTML = `<div class="ifoot">${body()}</div>`;
+    const bar = foot.querySelector(".bar");
+    if (bar) bar.onclick = (e) => { e.stopPropagation(); bar.parentElement.classList.toggle("open"); };
+  };
+  w.addEventListener("fitte:render", () => setTimeout(patch, 0));
+  w.eval("render()");
+  stage.querySelector(".wait")?.remove();
+}
+(async () => { for (const s of document.querySelectorAll(".stage")) { try { await boot(s, s.dataset.k); } catch (e) { console.error(s.dataset.k, e); } } })();
+</script>
+</body>
+</html>

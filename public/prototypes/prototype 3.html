@@ -298,6 +298,10 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    change of state, not a colour of its own. */
 .btnw.done,.btnw.done:hover{background:var(--ink);border-color:var(--ink);color:#fff}
 .btnw.done svg{color:#fff}
+/* The mail dialog's « Envoyer »: outlined until the pointer is on it. */
+.btnw.send:not(.done){color:var(--ink)}
+.btnw.send:hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.btnw.send:hover svg{color:#fff}
 .lcrumbs.done,.lcrumbs.done .c{color:var(--ink)}
 .fpath.sharelink .copy.done{background:var(--ink);border-color:var(--ink);color:#fff}
 .fpath.sharelink .copy.done .lu{color:#fff}
@@ -406,7 +410,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
    copy then online, and the answer is the articles that govern the
    question, each saying where it was found. Its words show at any
    fidelity, like the dialog: it is the application answering. */
-.cask{display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 10px;border:1px solid var(--line);border-radius:7px;background:var(--card);margin-bottom:8px}
+.cask{display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 10px;border:1px solid var(--line);border-radius:7px;background:var(--card)}
+/* The search and « Ajouter » share one line, their centres level. */
+.caskrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.caskrow .cask{flex:1;min-width:0}
 .cask:focus-within{border-color:var(--ink)}
 .cask svg{width:14px;height:14px;color:var(--ink-3);flex:none}
 .cask input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:12.5px;color:var(--ink);background:transparent}
@@ -4612,8 +4619,10 @@ function headerHTML() {
      The counts are summed from the same unit rows the Statistiques pane
      reads, so the title and the pane never disagree. */
   const bq = buildingScope() ? buildingQuant() : null;
-  const title = { "Projets": ["Projets", ""],
-    "Codes": ["Codes et règlements", ""],
+  const title = { "Projets": ["Projets Lafond Architecte", ""],
+    /* The full name of the code being read; the tab above keeps its short one. */
+    "Codes": [(() => { const c = CODE_SOURCES.find((x) => x.short === viewOf("Codes"));
+      return c ? (c.name.includes(c.place) ? c.name : `${c.name} — ${c.place}`) : "Codes et règlements"; })(), ""],
     "Échéancier": ["Échéancier", ""],
     "Unités": buildingScope()
       ? [`${V.project} — bâtiment entier`,
@@ -4821,7 +4830,8 @@ function contentHTML() {
        what each article measures, the sentence in French, what is still
        missing, and the notes written against it. Nothing here writes to a
        drawing. One body of rules is read at a time — the tab above the
-       page names it, so the list under it needs no heading of its own. */
+       page names it, so the list needs no heading and no rule: the search
+       and « Ajouter » share its first line. */
     "Codes": () => {
       const label = viewOf("Codes");
       /* Pinned articles lead the list, in the order they were pinned. */
@@ -4829,12 +4839,9 @@ function contentHTML() {
       const rows = [...V.artPins.map((id) => all.find((a) => a.id === id)).filter(Boolean), ...all.filter((a) => !V.artPins.includes(a.id))];
       return `<div class="col" style="flex:1;gap:var(--gap)">
         <div class="pane" style="flex:0 0 auto">
-          <div class="ph">${icon("hash")}<span class="lo bar" style="width:90px"></span>
-            <span class="hi">${label}</span>
-            <span style="flex:1"></span>
-            <span class="btnw solid" ${act("addcode")}>${icon("plus")}<span class="hi">Ajouter</span></span></div>
           <div class="pb">
-            ${codeAskBarHTML(label)}${codeAskHTML(label)}
+            <div class="caskrow">${codeAskBarHTML(label)}
+              <span class="btnw solid" ${act("addcode")}>${icon("plus")}<span class="hi">Ajouter</span></span></div>${codeAskHTML(label)}
             <div class="codelist">${rows.length ? rows.map(codeRow).join("")
               : `<div class="codeempty">Aucun article suivi dans ce code</div>`}</div>
           </div></div>
@@ -7084,9 +7091,10 @@ function mailDialogHTML(d) {
       <div class="df">
         <span style="flex:1"></span>
         <span class="btnw" ${act("dlgclose")}><span class="hi">Annuler</span></span>
-        <!-- The one act of the dialog, filled with ink rather than left in
-             the grey the secondary buttons wear. -->
-        <span class="btnw solid" ${act("mailsend")}>${icon("send")}<span class="hi">Envoyer</span></span>
+        <!-- The dialog's one act: outlined at rest, ink under the pointer,
+             and « Envoyé » in ink once sent, like « Copié ». -->
+        ${d.sent ? `<span class="btnw send done">${icon("check")}<span class="hi">Envoyé</span></span>`
+          : `<span class="btnw send" ${act("mailsend")}>${icon("send")}<span class="hi">Envoyer</span></span>`}
       </div>
     </div></div>`;
 }
@@ -7497,10 +7505,17 @@ function onClick(e) {
         body: d.body, files: [...d.files, ...d.local.map((f) => f.name)], art: d.art });
       CONTACTS[d.contact].last = "aujourd'hui";
       CONTACTS[d.contact].waited = 0;
-      V.dialog = null;
-      say(`Courriel envoyé à ${d.to.trim()}${(d.cc || "").trim() ? `, copie à ${d.cc.trim()}` : ""}${count
-        ? ` avec ${count} pièce${count > 1 ? "s" : ""} jointe${count > 1 ? "s" : ""}`
-        : ""}. Il reste au dossier de l'article.`);
+      /* The button answers first — « Envoyé », black like « Copié » — then
+         the dialog closes on its own. */
+      d.sent = true;
+      setTimeout(() => {
+        if (V.dialog !== d) return;
+        V.dialog = null;
+        say(`Courriel envoyé à ${d.to.trim()}${(d.cc || "").trim() ? `, copie à ${d.cc.trim()}` : ""}${count
+          ? ` avec ${count} pièce${count > 1 ? "s" : ""} jointe${count > 1 ? "s" : ""}`
+          : ""}. Il reste au dossier de l'article.`);
+        render();
+      }, 900);
       break;
     }
     case "noteedit": V.noteEdit = value; break;

@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Codes — commenter un article</title>
+<script src="vendor/lucide/lucide.min.js"></script>
+<style>
+:root{--ink:#1b1b1b;--ink-2:#6b6b6b;--ink-3:#9b9b9b;--line:#d9d9d9;--line-2:#e8e8e8;--fill:#ededed;--fill-2:#f6f6f6;
+  --vert:#c3e05a;--vert-ink:#2f3a05;--sans:'Geist',ui-sans-serif,system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--sans)}
+body{background:#fff;color:var(--ink);padding:28px 32px 80px}
+h1{font-size:18px;font-weight:600}
+h2{font-size:14px;font-weight:600;margin:34px 0 4px}
+p.lede{font-size:12.5px;color:var(--ink-2);margin-top:6px;max-width:860px;line-height:1.5}
+.rec{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:9px;background:var(--vert);color:var(--vert-ink);
+  font-size:10.5px;font-weight:600;margin-left:6px;vertical-align:1px}
+.lu{width:15px;height:15px;stroke-width:1.8}
+/* wording sheet */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.w{border:1px solid var(--line-2);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.w .ph{display:flex;align-items:center;gap:7px;height:30px;border-bottom:1px solid var(--line-2);padding-bottom:8px}
+.w .ph b{font-size:13px;font-weight:600}
+.w .ph i{font-style:normal;font-size:11.5px;color:var(--ink-3)}
+.w .ph .lu{width:15px;height:15px}
+.w .k{font-size:10.5px;font-weight:600;color:var(--ink-3);letter-spacing:.04em}
+.w .why{font-size:11.5px;color:var(--ink-2);line-height:1.45}
+.w.on{background:#eef3dc;border-color:#eef3dc}
+/* full-page options */
+.opt{margin-top:30px}
+.opt .cap{display:flex;align-items:baseline;gap:10px}
+.opt .cap b{font-size:14px;font-weight:600}
+.opt .cap span{font-size:12px;color:var(--ink-2)}
+.opt ul{font-size:12px;color:var(--ink-2);margin:6px 0 10px 18px;line-height:1.55;max-width:980px}
+.stage{position:relative;width:100%;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:#111}
+.stage iframe{position:absolute;left:0;top:0;width:1568px;height:1000px;border:0;transform-origin:0 0}
+.stage .wait{position:absolute;inset:0;display:grid;place-items:center;color:#888;font-size:12px}
+</style>
+</head>
+<body>
+<h1>Codes — commenter un article</h1>
+<p class="lede">Ce qui change dans les cinq vues: la lecture du Bureau d'Architectes est retirée, « Écrire » reste gris tant que rien n'est écrit, la carte choisie est grise, et les interlocuteurs ne dépendent plus de l'article — ce sont les personnes avec qui le bureau discute habituellement du code sur ce projet. Chaque vue est le vrai prototype, chargé en entier.</p>
+
+<h2>1 — Le titre du volet</h2>
+<p class="lede">Ce qu'on lit en haut du volet de droite quand un article est choisi. Il dit qu'on y commente l'article.</p>
+<div class="grid" id="words"></div>
+
+<h2>2 — Le nom des interlocuteurs</h2>
+<p class="lede">Remplace « Qui en répond ». Le bloc reste le même d'un article à l'autre.</p>
+<div class="grid" id="who"></div>
+
+<h2>3 — Cinq façons de le montrer, en contexte</h2>
+<div id="opts"></div>
+
+<script>
+const L = (n) => { const el = lucide.createElement(lucide[n]); el.setAttribute("class", "lu"); return el.outerHTML; };
+
+const WORDS = [
+  ["MessageSquare", "Commentaires", "3.2.2.48", "Le même mot et la même icône que la marge de Coordination: on reconnaît l'endroit où l'on écrit.", true],
+  ["MessagesSquare", "Discussion", "3.2.2.48", "Dit qu'il y a un échange à plusieurs, pas une note seule."],
+  ["MessageCircle", "Commentaires sur l'article", "", "Le plus explicite; un peu long pour un volet étroit."],
+  ["MessageSquareText", "Fil de l'article", "3.2.2.48", "Dit qu'on lit une suite de messages, du plus ancien au plus récent."],
+  ["StickyNote", "Notes de l'équipe", "3.2.2.48", "Proche de l'idée d'aujourd'hui: une note interne plutôt qu'un échange."],
+  ["BookOpenText", "3.2.2.48", "Construction — groupe C", "Le titre est l'article lui-même; les commentaires sont en dessous, sans mot pour les nommer."],
+];
+const WHO = [
+  ["Users", "Interlocuteurs", "", "Le mot juste: les personnes avec qui on discute du dossier.", true],
+  ["Contact", "Contacts du projet", "", "Simple et connu; dit qu'ils valent pour tout le projet."],
+  ["UsersRound", "Avec qui on en parle", "", "Le plus parlé; se lit comme une phrase."],
+  ["Building", "Autorités et conseillers", "", "Dit qui ils sont plutôt que ce qu'on fait avec eux."],
+];
+const card = ([ic, t, sub, why, rec]) => `<div class="w ${rec ? "on" : ""}">
+  <div class="ph">${L(ic)}<b>${t}</b>${sub ? `<i>${sub}</i>` : ""}${rec ? `<span class="rec">recommandé</span>` : ""}</div>
+  <div class="k">${ic}</div><div class="why">${why}</div></div>`;
+words.innerHTML = WORDS.map(card).join("");
+who.innerHTML = WHO.map(card).join("");
+
+/* ---------------------------------------------------------------- options */
+const OPTS = [
+  { k: "A", rec: true, t: "Volet « Commentaires », interlocuteurs en pied",
+    s: "Le volet de droite devient l'endroit où l'on commente l'article choisi.",
+    pts: ["Titre « Commentaires » avec l'icône de la marge de Coordination, le numéro de l'article à côté.",
+      "Le fil de l'article, puis la boîte « Commenter l'article… »: le bouton reste gris jusqu'au premier mot.",
+      "Chaque carte dit « Commenter » ou le nombre de commentaires: on sait avant de cliquer que l'article s'ouvre là.",
+      "« Interlocuteurs » est posé au pied du volet et ne change pas quand on change d'article."] },
+  { k: "B", t: "Deux onglets, comme Coordination",
+    s: "« Commentaires » et « Interlocuteurs » partagent le volet, avec les mêmes onglets que « Commentaires / Conflits ».",
+    pts: ["Le motif existe déjà dans le prototype: rien de nouveau à apprendre.",
+      "Les interlocuteurs ont toute la hauteur du volet, mais ils sont cachés tant qu'on n'ouvre pas l'onglet."] },
+  { k: "C", t: "Le fil s'ouvre dans la carte",
+    s: "Cliquer un article déplie ses commentaires sous le texte, dans la carte même.",
+    pts: ["Le lien entre l'article et ses commentaires est évident: ils sont au même endroit.",
+      "Le volet de droite ne porte plus que les interlocuteurs, toujours visibles.",
+      "La liste s'allonge à chaque article ouvert; on lit moins d'articles à la fois."] },
+  { k: "D", t: "L'article cité en tête du fil, interlocuteurs en tête de liste",
+    s: "Le volet rappelle l'article qu'on commente avant ses commentaires.",
+    pts: ["Titre « Discussion »; l'extrait de l'article est cité en haut du volet, pour savoir ce qu'on commente.",
+      "Les interlocuteurs deviennent une rangée sous la recherche: visibles sur toute la section Codes, quel que soit l'article."] },
+  { k: "E", t: "Interlocuteurs dans l'en-tête de la page",
+    s: "Les interlocuteurs montent à côté du titre « Codes et règlements »; le volet est tout entier au fil.",
+    pts: ["Chaque interlocuteur est une pastille avec son délai et un bouton « Écrire »: le plus clairement lié à toute la section.",
+      "Chaque carte porte un bouton « Commenter » en bas à droite."] },
+];
+
+opts.innerHTML = OPTS.map((o) => `<section class="opt">
+  <div class="cap"><b>${o.k} — ${o.t}${o.rec ? `<span class="rec">recommandé</span>` : ""}</b><span>${o.s}</span></div>
+  <ul>${o.pts.map((p) => `<li>${p}</li>`).join("")}</ul>
+  <div class="stage" data-k="${o.k}"><div class="wait">chargement…</div></div></section>`).join("");
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const until = async (fn) => { for (let i = 0; i < 200; i++) { try { if (fn()) return; } catch {} await sleep(100); } };
+
+function fit() {
+  document.querySelectorAll(".stage").forEach((s) => {
+    const k = s.clientWidth / 1568;
+    s.style.height = `${1000 * k}px`;
+    const f = s.querySelector("iframe"); if (f) f.style.transform = `scale(${k})`;
+  });
+}
+addEventListener("resize", fit);
+
+/* Seeded comments: names as the share list gives them, no client. */
+const THREADS = {
+  0: [{ ini: "AL", name: "Alain", role: "architecte principal", when: "il y a 3 j",
+        txt: "Groupe C confirmé au téléphone avec la RBQ. Il faut l'avoir par écrit avant le dépôt." },
+      { ini: "GR", name: "Guy Roberge", role: "modélisation 3D, esquisses, codes", when: "hier", mine: true,
+        txt: "Demande écrite envoyée le 3 oct. Toujours sans réponse — je relance lundi." }],
+  1: [{ ini: "BE", name: "Benoit", role: "dessin 2D", when: "il y a 5 j",
+        txt: "Façade mesurée sur R04: 74,2 m². La distance limitative est à revoir avec l'élévation est." }],
+};
+
+/* Everything the options add to the page, in the prototype's own classes. */
+const CSS_IN = `
+[class*="dialkit"]{display:none!important}
+.xc-sub{font-size:11.5px;color:var(--ink-3);font-weight:400;margin-left:6px}
+.xc-recap{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:8px;background:var(--fill-2)}
+.xc-recap b{font-size:12px;font-weight:600}
+.xc-recap q{font-size:11.5px;color:var(--ink-2);line-height:1.45;quotes:"« " " »"}
+.xc-lbl{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink);padding:2px 0 4px}
+.xc-lbl .lu{width:14px;height:14px}
+.xc-lbl i{font-style:normal;font-weight:400;color:var(--ink-3);font-size:11px}
+.xc-hint{font-size:11px;color:var(--ink-3);line-height:1.45;padding-bottom:4px}
+.xc-side{display:flex;flex-direction:column;gap:9px;min-height:100%}
+.xc-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:10px}
+.xc-none{font-size:12px;color:var(--ink-3);padding:2px}
+.ncard.xc{cursor:default}
+.ncard.new.xc{border-color:var(--line-2)}
+.xc-inline .ncard{background:#fff;border-color:#fff}
+.ncard.xc .au{padding-right:0}
+.ncard.new.xc textarea{width:100%;border:1px solid var(--line-2);border-radius:6px;padding:6px 7px;font:inherit;font-size:12.5px;color:var(--ink);background:#fff;resize:none}
+.ncard.new.xc .nact{display:flex;justify-content:flex-end}
+.xc-cmt{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:6px;border:1px solid var(--line-2);
+  font-size:11.5px;color:var(--ink-2);background:var(--card);cursor:pointer;white-space:nowrap}
+.xc-cmt .lu{width:13px;height:13px}
+.xc-cmt b{font-weight:600;color:var(--ink)}
+.xc-cmt:hover{background:var(--fill)}
+.coderow.on .xc-cmt{background:var(--ink);border-color:var(--ink);color:#fff}
+.coderow.on .xc-cmt b{color:#fff}
+/* C: the thread inside the card */
+.xc-inline{grid-column:1 / -1;border-top:1px solid var(--line);padding:12px 12px 12px 270px;display:flex;flex-direction:column;gap:8px}
+.xc-strip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:2px 0 4px}
+.xc-strip .xc-lbl{padding:0 4px 0 0}
+.xc-pill{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 4px 0 10px;border-radius:14px;background:var(--fill-2);font-size:11.5px}
+.xc-pill b{font-weight:600}
+.xc-pill span{color:var(--ink-3)}
+.xc-pill.slow span{color:#b3261e}
+.xc-pill .go{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:11px;background:#fff;color:var(--ink-2);cursor:pointer}
+.xc-pill .go:hover{background:var(--ink);color:#fff}
+.xc-pill .go .lu{width:12px;height:12px}
+/* E: contacts in the page header */
+.xc-head{display:flex;align-items:center;gap:6px;margin-left:auto}
+`;
+
+async function boot(stage, k) {
+  const f = document.createElement("iframe");
+  f.src = "prototype%203.html";
+  stage.append(f); fit();
+  await new Promise((r) => f.addEventListener("load", r, { once: true }));
+  const w = f.contentWindow, d = w.document;
+  await until(() => w.eval("typeof dial") === "object" && w.eval("typeof V") === "object");
+  await sleep(1500);
+  const st = d.createElement("style"); st.textContent = CSS_IN; d.head.append(st);
+  d.documentElement.dataset.xc = k;
+  w.eval('dial.setValue("articleSelected", "Grey fill"); dial.setValue("screen", "Codes")');
+  await sleep(1300);
+  const ids = [...d.querySelectorAll(".codelist .coderow")].map((r) => r.dataset.value);
+  const V = w.eval("V"), CONTACTS = w.eval("CONTACTS"), ARTICLES = w.eval("ARTICLES");
+  const thread = {}; ids.forEach((id, i) => (thread[id] = THREADS[i] || []));
+  V.articleId = ids[0];
+  const ic = (n) => { const el = w.lucide.createElement(w.lucide[n]); el.setAttribute("class", "lu"); return el.outerHTML; };
+  const art = () => ARTICLES.find((a) => a.id === V.articleId);
+  const contacts = Object.keys(CONTACTS).map((x) => ({ k: x, ...CONTACTS[x] }));
+  const contactRows = () => contacts.map((c) => `<div class="contact ${c.waited > 14 ? "slow" : ""}">
+      <span class="who"><b class="hi">${c.role}</b><span class="hi">dernier échange le ${c.last} — il y a ${c.waited} j</span></span>
+      <span class="mailto hi">${ic("Mail")}<span class="hi">Écrire</span></span></div>`).join("");
+  const contactBlock = (hint = true, label = true) => `<div class="col" style="gap:0">
+      ${label ? `<div class="xc-lbl">${ic("Users")}Interlocuteurs<i>${contacts.length}</i></div>` : ""}
+      ${hint ? `<div class="xc-hint">Avec qui le bureau discute du code sur ce projet — les mêmes pour tous les articles.</div>` : ""}
+      ${contactRows()}</div>`;
+  const msg = (c) => `<div class="ncard xc"><div class="au"><span class="av ${c.mine ? "mine" : ""}">${c.ini}</span>
+      <span class="w"><b>${c.name}</b><span>${c.role}</span></span></div>
+      <div class="txt">${c.txt}</div><div class="meta"><span class="when">${c.when}</span></div></div>`;
+  const composer = (id) => `<div class="ncard new xc">
+      <textarea class="hi xc-in" rows="3" placeholder="Commenter l'article ${id}…"></textarea>
+      <div class="nact"><span class="btnw solid go wait xc-send">${ic("Send")}<span class="hi">Commenter</span></span></div></div>`;
+  const threadHTML = (id) => `${(thread[id] || []).map(msg).join("") || `<div class="xc-none">Aucun commentaire sur cet article.</div>`}${composer(id)}`;
+  const cmtBtn = (id) => { const n = (thread[id] || []).length;
+    return `<span class="xc-cmt">${ic("MessageSquare")}${n ? `<b>${n}</b> commentaire${n > 1 ? "s" : ""}` : "Commenter"}</span>`; };
+
+  /* The right column per option. */
+  const side = {
+    A: (a) => `<div class="xc-side">${threadHTML(a.id)}<div class="xc-foot">${contactBlock()}</div></div>`,
+    B: (a) => (V.xcTab === "who" ? contactBlock(true, false) : `<div class="xc-side">${threadHTML(a.id)}</div>`),
+    C: () => contactBlock(true, false),
+    D: (a) => `<div class="xc-side"><div class="xc-recap"><b>${a.id} — ${a.topic}</b><q>${a.quote.slice(0, 150)}…</q></div>${threadHTML(a.id)}</div>`,
+    E: (a) => `<div class="xc-side">${threadHTML(a.id)}</div>`,
+  }[k];
+  w.eval("codeSideHTML = function (a) { return window.__xcSide(a); }");
+  w.__xcSide = side;
+
+  /* Cards: the comment button (every option), the inline thread (C). */
+  const baseRow = w.codeRow;
+  w.__xcRow = (a) => {
+    let h = baseRow(a);
+    const on = V.articleId === a.id;
+    if (k !== "C" || !on) h = h.replace(/<span class="hi nct">[\s\S]*?<\/span>/, "").replace(
+      /(<\/div>\s*<\/div>\s*<\/div>\s*)$/, (m) => `<span style="flex:1"></span>${cmtBtn(a.id)}${m}`);
+    if (k === "C" && on) h = h.replace(/<\/div>\s*$/, `<div class="xc-inline">
+        <div class="xc-lbl">${ic("MessageSquare")}Commentaires<i>${(thread[a.id] || []).length}</i></div>${threadHTML(a.id)}</div></div>`);
+    return h;
+  };
+  w.eval("codeRow = function (a) { return window.__xcRow(a); }");
+
+  const patch = () => {
+    const ins = d.querySelector('[data-region="inspector"]');
+    if (!ins) return;
+    const ph = ins.querySelector(":scope > .ph"), a = art();
+    const ttl = ph.querySelector(":scope > .hi");
+    const first = ph.querySelector(":scope > svg.lu");
+    const head = {
+      A: ["MessageSquare", `Commentaires<span class="xc-sub">${a.id}</span>`],
+      C: ["Users", "Interlocuteurs"],
+      D: ["MessagesSquare", "Discussion"],
+      E: ["MessageSquare", `Commentaires<span class="xc-sub">${a.id}</span>`],
+    }[k];
+    if (head && !ph.dataset.xc) {
+      first.outerHTML = ic(head[0]); ttl.innerHTML = head[1]; ph.dataset.xc = 1;
+    }
+    if (k === "B" && !ph.dataset.xc) {
+      first.remove(); const n = (thread[a.id] || []).length;
+      ttl.outerHTML = `<span class="mtabs"><span class="mtab ${V.xcTab === "who" ? "" : "on"}" data-xct="c">${ic("MessageSquare")}<span class="hi">Commentaires</span><i>${n}</i></span>
+        <span class="mtab ${V.xcTab === "who" ? "on" : ""}" data-xct="who">${ic("Users")}<span class="hi">Interlocuteurs</span><i>${contacts.length}</i></span></span>`;
+      ph.dataset.xc = 1;
+      ph.querySelectorAll("[data-xct]").forEach((t) => (t.onclick = (e) => { e.stopPropagation(); V.xcTab = t.dataset.xct; w.render(); }));
+    }
+    /* The « Article » row is the card's own number: gone. */
+    ins.querySelectorAll(".pb > .row").forEach((r) => { if (/^\s*Article/.test(r.textContent)) r.remove(); });
+    /* « Commenter » stays grey until a word is typed. */
+    d.querySelectorAll(".xc-in").forEach((t) => (t.oninput = () => t.closest(".ncard").querySelector(".xc-send").classList.toggle("wait", !t.value.trim())));
+    d.querySelectorAll(".xc-inline").forEach((x) => (x.onclick = (e) => e.stopPropagation()));
+    if (k === "D" && !d.querySelector(".xc-strip")) {
+      const search = d.querySelector(".codelist")?.previousElementSibling;
+      const strip = d.createElement("div"); strip.className = "xc-strip";
+      strip.innerHTML = `<span class="xc-lbl">${ic("Users")}Interlocuteurs</span>` + contacts.map((c) =>
+        `<span class="xc-pill ${c.waited > 14 ? "slow" : ""}"><b>${c.role}</b><span>${c.waited} j</span><span class="go" title="Écrire">${ic("Mail")}</span></span>`).join("");
+      search?.after(strip);
+    }
+    if (k === "E" && !d.querySelector(".xc-head")) {
+      const t = [...d.querySelectorAll(".hi")].find((e) => e.textContent.trim() === "Codes et règlements");
+      const row = t?.closest(".col")?.parentElement;
+      if (row) {
+        const h = d.createElement("div"); h.className = "xc-head";
+        h.innerHTML = `<span class="xc-lbl" style="padding:0 4px 0 0">${ic("Users")}Interlocuteurs</span>` + contacts.map((c) =>
+          `<span class="xc-pill ${c.waited > 14 ? "slow" : ""}"><b>${c.role}</b><span>${c.waited} j</span><span class="go" title="Écrire">${ic("Mail")}</span></span>`).join("");
+        row.append(h);
+      }
+    }
+  };
+  w.addEventListener("fitte:render", () => setTimeout(patch, 0));
+  w.eval("render()");
+  stage.querySelector(".wait")?.remove();
+}
+
+(async () => {
+  for (const s of document.querySelectorAll(".stage")) { try { await boot(s, s.dataset.k); } catch (e) { console.error(s.dataset.k, e); } }
+})();
+fit();
+</script>
+</body>
+</html>

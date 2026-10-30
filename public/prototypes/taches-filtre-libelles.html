@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tâches — le mot et l'icône du filtre</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* The task switch of prototype 3, drawn with its own styles (.tseg),
+   eight ways. The first segment shows every task not yet filed — ticked
+   ones included, struck through until filed — so its word has to mean
+   « still on the list », not « unfinished ». */
+:root{--ink:#141416;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--card:#fff;--red:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Geist",ui-sans-serif,system-ui,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px;max-width:1180px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:880px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;margin-top:20px}
+.v{background:var(--card);border:1px solid var(--line-2);border-radius:10px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.v h2{margin:0;font-size:13px;font-weight:600}
+.v p{margin:0;color:var(--ink-2);font-size:12px;min-height:50px}
+.lu{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* prototype 3, verbatim */
+.tseg{display:inline-flex;gap:2px;padding:2px;border-radius:7px;background:var(--fill);align-self:flex-start}
+.tseg > span{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:5px;font-size:11.5px;
+  font-weight:500;color:var(--ink-2);cursor:pointer}
+.tseg > span.on{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+.tseg .lu{margin-right:-1px}
+.tseg > span:not(.on) .lu{color:var(--ink-3)}
+.tseg i{font-style:normal;font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+/* option-specific */
+.tseg .late i{color:var(--red)}
+.tseg .dot{width:7px;height:7px;border-radius:50%;flex:none}
+.tseg .dot.o{border:1.5px solid var(--ink-2)}
+.tseg .dot.r{background:var(--red)}
+.tseg .dot.g{background:var(--ink-3)}
+.note{font-size:11.5px;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Tâches — le mot et l'icône du filtre</h1>
+  <p class="lede">Le sélecteur de la liste des tâches, avec ses vrais styles. Le premier onglet montre toutes les tâches pas encore archivées —
+    celles cochées y restent, barrées, jusqu'à ce qu'on les archive. Le mot doit donc dire « encore sur la liste », pas « pas finie ».
+    Chaque option change les trois onglets ensemble pour qu'ils se lisent comme une famille. Cliquez pour changer d'onglet.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
+const icon = (n) => {
+  if (n.startsWith("dot-")) return `<span class="dot ${n.slice(4)}"></span>`;
+  const node = lucide.icons[pascal(n)];
+  if (!node) throw new Error("icône absente: " + n);
+  return `<svg class="lu" viewBox="0 0 24 24">${node[2].map(([t, a]) =>
+    `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+};
+const N = [10, 2, 4];
+const O = [
+  ["A — Actuel", "La référence. Le cercle vide dit « pas fait », ce qui est faux pour une tâche cochée mais pas encore archivée.",
+    [["circle", "Ouvertes"], ["alert-triangle", "En retard"], ["history", "Historique"]]],
+  ["B — À faire / Archivées", "Le plus courant dans un bureau. « Archivées » répond au bouton « Archiver » d'une tâche cochée, même icône: on voit où elle part.",
+    [["list-todo", "À faire"], ["clock-alert", "En retard"], ["archive", "Archivées"]]],
+  ["C — En cours / Terminées", "Lu comme l'état d'un chantier. Mais « Terminées » laisse croire que les cochées non archivées n'y sont pas.",
+    [["circle-dashed", "En cours"], ["alarm-clock", "En retard"], ["circle-check", "Terminées"]]],
+  ["D — Agenda, trois calendriers", "La liste est rangée par jour: les trois icônes sont un calendrier qui change de signe. Une famille très calme.",
+    [["calendar", "Agenda"], ["calendar-x", "En retard"], ["calendar-check", "Passées"]]],
+  ["E — La liste / le journal", "Deux objets: la liste qu'on tient, le carnet où elles finissent. « Journal » est plus chaleureux que « Historique ».",
+    [["list-checks", "Liste"], ["circle-alert", "En retard"], ["book-open", "Journal"]]],
+  ["F — Boîte / archive", "Le vocabulaire du courriel: ce qui est dans la boîte, ce qui est rangé. Familier, mais ce ne sont pas des messages.",
+    [["inbox", "Actives"], ["clock-alert", "En retard"], ["archive", "Archivées"]]],
+  ["G — Sans icônes, retard en rouge", "Les mots seuls; seul le compte en retard est rouge. Le plus dense, et le rouge ne sert qu'à ce qui presse.",
+    [["", "À faire"], ["", "En retard", true], ["", "Archivées"]]],
+  ["H — Pastilles", "Pas de dessin: un rond vide, un point rouge, un point gris. Comme les pastilles de clarté des articles.",
+    [["dot-o", "À faire"], ["dot-r", "En retard"], ["dot-g", "Archivées"]]],
+];
+const seg = (o, on) => `<span class="tseg">${o[2].map(([ic, w, red], i) =>
+  `<span class="${i === on ? "on" : ""} ${red ? "late" : ""}" data-i="${i}">${ic ? icon(ic) : ""}${w}<i>${N[i]}</i></span>`).join("")}</span>`;
+const grid = document.getElementById("grid");
+const state = O.map(() => 0);
+const paint = () => {
+  grid.innerHTML = O.map((o, k) => `<section class="v" data-k="${k}"><h2>${o[0]}</h2><p>${o[1]}</p>
+    <div>${seg(o, state[k])}</div>
+    <div class="note">${o[2].map(([, w]) => w).join(" · ")}</div></section>`).join("");
+};
+paint();
+grid.addEventListener("click", (e) => {
+  const s = e.target.closest("[data-i]"), v = e.target.closest("[data-k]");
+  if (!s || !v) return;
+  state[+v.dataset.k] = +s.dataset.i; paint();
+});
+</script>
+</body>
+</html>

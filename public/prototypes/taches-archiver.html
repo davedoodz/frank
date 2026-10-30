@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tâches — le bouton « Archiver »</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* The task row of prototype 3 with its own rules: the 15 px tick, the
+   struck title once ticked, the initials, the flag. « Archiver » appears
+   only on a ticked task. Six ways to draw it, each in four states — at
+   rest, hovered, pressed, and just after the click — and a live list on
+   top: tick a task, archive it, take it back. */
+:root{--ink:#141416;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f6;
+  --card:#fff;--red:#c0362c;--mono:ui-monospace,"SF Mono",Menlo,monospace}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Geist",ui-sans-serif,system-ui,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px;max-width:1240px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:900px}
+/* One option per row: the pane is drawn at the width it has on the page. */
+.grid{display:grid;grid-template-columns:minmax(0,960px);gap:16px;margin-top:20px}
+.v{background:var(--card);border:1px solid var(--line-2);border-radius:10px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px;position:relative}
+.v h2{margin:0;font-size:13px;font-weight:600}
+.v > p{margin:-6px 0 0;color:var(--ink-2);font-size:12px}
+.lu{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* the list, as in prototype 3 */
+.tseg{display:inline-flex;gap:2px;padding:2px;border-radius:7px;background:var(--fill);align-self:flex-start}
+.tseg > span{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:5px;font-size:11.5px;font-weight:500;color:var(--ink-2)}
+.tseg > span.on{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+.tseg .lu{width:12px;height:12px}
+.tseg > span:not(.on) .lu{color:var(--ink-3)}
+.tseg i{font-style:normal;font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.tseg i.bump{color:var(--ink);font-weight:600}
+.list{border-top:1px solid var(--line);min-height:150px}
+.task{display:flex;align-items:center;gap:10px;padding:7px 6px;border-bottom:1px solid var(--line-2);background:var(--card);cursor:default;
+  overflow:hidden;max-height:70px;transition:max-height .22s ease,padding .22s ease,opacity .18s ease}
+.task:hover{background:var(--fill-2)}
+.task .tw{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.task .ttl{font-size:12.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task .tmeta{font-size:11px;color:var(--ink-3)}
+.task .tmeta code{font-family:inherit;font-size:11px;color:var(--ink-2)}
+.task .tdates{font-size:10.5px;color:var(--ink-3)}
+.task.done .ttl{text-decoration:line-through;color:var(--ink-3)}
+.task .tick{flex:0 0 auto;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--ink-3);background:var(--card);
+  display:inline-flex;align-items:center;justify-content:center;color:#fff;cursor:pointer}
+.task:hover .tick{border-color:var(--ink-2)}
+.task .tick.on{background:var(--ink);border-color:var(--ink)}
+.task .tick .lu{width:10px;height:10px;stroke-width:3}
+.av{width:20px;height:20px;border-radius:50%;background:var(--fill);border:1px solid var(--line-2);display:inline-block;text-align:center;
+  align-content:center;font-size:9px;font-weight:650;color:var(--ink-2);flex:none;line-height:1}
+.flag{width:22px;display:grid;place-items:center;color:var(--red);flex:none}
+.flag .lu{width:14px;height:14px;fill:currentColor}
+.task.gone{max-height:0;padding-top:0;padding-bottom:0;opacity:0;border-bottom-width:0}
+.toast{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:8px 12px;
+  border-radius:7px;background:var(--ink);color:#fff;font-size:12px;white-space:nowrap;z-index:3}
+.toast u{cursor:pointer}
+
+/* the shared base of the button; each option overrides */
+.ab{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;flex:0 0 auto;font:inherit;
+  font-size:11px;cursor:pointer;user-select:none;white-space:nowrap;border:1px solid transparent;background:none;color:var(--ink-2)}
+.ab .lu{width:12px;height:12px}
+
+/* A — today's outline, finished: pressed turns ink */
+.A .ab{border-color:var(--line);background:var(--card)}
+.A .ab:hover,.A .ab.is-hover{border-color:var(--ink-2);color:var(--ink)}
+.A .ab:active,.A .ab.is-press{background:var(--ink);border-color:var(--ink);color:#fff}
+/* B — the page's .btnw rule */
+.B .ab{height:24px;border-color:var(--line);background:var(--fill-2);border-radius:5px}
+.B .ab:hover,.B .ab.is-hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.B .ab:active,.B .ab.is-press{background:#000;border-color:#000;color:#fff;transform:translateY(1px)}
+/* C — the next step, already in ink */
+.C .ab{background:var(--ink);border-color:var(--ink);color:#fff}
+.C .ab:hover,.C .ab.is-hover{background:#000;border-color:#000}
+.C .ab:active,.C .ab.is-press{background:#000;border-color:#000;transform:scale(.96)}
+.C .undo{display:flex;align-items:center;gap:8px;padding:9px 6px 9px 31px;border-bottom:1px solid var(--line-2);font-size:11.5px;color:var(--ink-2)}
+.C .undo .lu{width:12px;height:12px;color:var(--ink-3)}
+.C .undo u{color:var(--ink);cursor:pointer;margin-left:auto}
+/* D — the icon alone */
+.D .ab{width:24px;height:24px;padding:0;justify-content:center;border-radius:6px;color:var(--ink-3)}
+.D .ab .lu{width:14px;height:14px}
+.D .ab:hover,.D .ab.is-hover{background:var(--fill);color:var(--ink)}
+.D .ab:active,.D .ab.is-press{background:var(--ink);color:#fff}
+.D .tip{position:relative}
+.D .ab.is-hover::after,.D .ab:hover::after{content:"Archiver";position:absolute;bottom:calc(100% + 5px);right:0;padding:3px 7px;border-radius:4px;
+  background:var(--ink);color:#fff;font-size:11px;pointer-events:none}
+.D .ab{position:relative}
+/* E — a word, underlined under the cursor */
+.E .ab{padding:0 4px;color:var(--ink-2)}
+.E .ab:hover,.E .ab.is-hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.E .ab:active,.E .ab.is-press{color:#000;background:var(--fill)}
+/* F — all ticked tasks at once, from the head of the list */
+.F .ab{height:24px;border-color:var(--line);background:var(--fill-2);border-radius:5px}
+.F .ab:hover,.F .ab.is-hover{background:var(--ink);border-color:var(--ink);color:#fff}
+.F .ab:active,.F .ab.is-press{background:#000;border-color:#000;color:#fff;transform:translateY(1px)}
+.F .ab .c{font-variant-numeric:tabular-nums;opacity:.7}
+.F .bar{display:flex;align-items:center;gap:8px}
+.F .bar .sp{flex:1}
+
+/* the four-state strip */
+.states{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.st{border:1px solid var(--line-2);border-radius:7px;padding:8px 8px 7px;display:flex;flex-direction:column;align-items:center;gap:7px;background:var(--fill-2)}
+.D .st .stage{overflow:visible}
+.st .stage{height:44px;display:flex;align-items:center;justify-content:flex-end;gap:8px;background:var(--card);border-radius:5px;width:100%;padding:0 8px;overflow:hidden}
+.st .stage .after{font-size:11px;color:var(--ink-2);display:flex;align-items:center;gap:6px;width:100%;justify-content:center}
+.st .stage .after u{color:var(--ink)}
+.st em{font-style:normal;font-size:11px;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Tâches — le bouton « Archiver »</h1>
+  <p class="lede">Une tâche cochée reste dans la liste, barrée, avec « Archiver » à sa droite. Six façons de dessiner ce bouton avec
+    les règles de la page, chacune en quatre états: repos, survol, clic, et juste après le clic. La liste du haut fonctionne:
+    cochez une tâche, archivez-la, reprenez-la.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join("");
+const icon = (n) => {
+  const node = lucide.icons[pascal(n)];
+  if (!node) throw new Error("icône absente: " + n);
+  return `<svg class="lu" viewBox="0 0 24 24">${node[2].map(([t, a]) =>
+    `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+};
+/* The prototype's own tasks; names are the office's initials only. */
+const seed = () => [
+  { id: 1, title: "Largeur libre des portes du parcours sans obstacles", phase: "Permis", code: "3.8.3.6", made: "4 nov", who: "BA", done: true, flag: false },
+  { id: 2, title: "Confirmer le type de construction pour 8 étages", phase: "Permis", code: "3.2.2.48", made: "30 oct", who: "GR", done: false, flag: true },
+  { id: 3, title: "Confirmer les cases sous le plafond de 0,5 par logement", phase: "Permis", code: "art. 546", made: "5 nov", who: "DL", done: false, flag: false },
+];
+/* after: what follows the click — the page's toast, a line left in place,
+   or the toast and the count of the tab rising. */
+const O = [
+  { id: "A", h: "A — Le contour actuel, terminé",
+    p: "On garde le bouton d'aujourd'hui: blanc à filet clair, le filet fonce au survol. Il manquait le clic: il passe à l'encre. Après, la ligne se replie et le message de la page propose Annuler.",
+    btn: (c) => `<span class="ab ${c}" data-arch>${icon("archive")}Archiver</span>`, after: "toast" },
+  { id: "B", h: "B — La règle .btnw de la page",
+    p: "Le bouton se dessine comme tous ceux de la page: gris au repos, encre au survol, plus noir et enfoncé d'un pixel au clic. Après, la ligne se replie, le compte « Archivées » monte d'un, en gras un instant, et le message propose Annuler.",
+    btn: (c) => `<span class="ab ${c}" data-arch>${icon("archive")}Archiver</span>`, after: "count" },
+  { id: "C", h: "C — L'étape suivante, déjà à l'encre",
+    p: "Cocher appelle une seule suite: le bouton est noir dès qu'il paraît. Survol plus noir, clic qui rétrécit à peine. Après, une ligne reste à la place de la tâche — « Archivée » et Annuler — jusqu'au prochain geste.",
+    btn: (c) => `<span class="ab ${c}" data-arch>${icon("archive")}Archiver</span>`, after: "inline" },
+  { id: "D", h: "D — L'icône seule",
+    p: "Le plus discret: la boîte d'archive, sans mot; le mot vient en bulle au survol. Fond gris au survol, encre au clic. Après, le message de la page.",
+    btn: (c) => `<span class="ab ${c}" data-arch title="">${icon("archive")}</span>`, after: "toast" },
+  { id: "E", h: "E — Un mot souligné",
+    p: "« Archiver » comme un lien: gris au repos, souligné au survol, un fond gris au clic. Le moins de poids possible à côté des initiales. Après, le message de la page.",
+    btn: (c) => `<span class="ab ${c}" data-arch>Archiver</span>`, after: "toast" },
+  { id: "F", h: "F — Toutes les cochées, en tête de liste",
+    p: "La ligne ne porte plus de bouton: dès qu'une tâche est cochée, « Archiver les cochées (n) » paraît à côté des onglets et les range toutes d'un coup. Même règle .btnw; après, le compte monte et Annuler les reprend toutes.",
+    btn: (c, n = 1) => `<span class="ab ${c}" data-arch>${icon("archive")}Archiver les cochées <span class="c">${n}</span></span>`, after: "count", bulk: true },
+];
+const S = Object.fromEntries(O.map((o) => [o.id, { list: seed(), arch: 3, toast: null, inline: null, bump: false }]));
+
+const row = (o, t, cls = "", inBtn = true) => `<div class="task ${t.done ? "done" : ""} ${cls}" data-id="${t.id}">
+  <span class="tick ${t.done ? "on" : ""}" data-tick="${t.id}">${t.done ? icon("check") : ""}</span>
+  <span class="tw"><span class="ttl">${t.title}</span><span class="tmeta">${t.phase} — <code>${t.code}</code></span>
+    <span class="tdates">créée le ${t.made}${t.done ? " · cochée le 14 nov" : ""}</span></span>
+  ${t.done && inBtn && !o.bulk ? o.btn("") : ""}
+  <span class="av">${t.who}</span><span class="flag">${t.flag ? icon("flag") : ""}</span></div>`;
+
+const live = (o) => {
+  const s = S[o.id], open = s.list.filter((t) => !t.archived), ticked = open.filter((t) => t.done).length;
+  const tabs = `<span class="tseg"><span class="on">${icon("inbox")}Actives<i>${open.length + 8}</i></span>
+    <span>${icon("archive")}Archivées<i class="${s.bump ? "bump" : ""}">${s.arch}</i></span></span>`;
+  const head = o.bulk ? `<div class="bar">${tabs}<span class="sp"></span>${ticked ? o.btn("", ticked) : ""}</div>` : tabs;
+  const rows = s.list.map((t) => {
+    if (t.archived && s.inline === t.id) return `<div class="undo">${icon("archive")}Archivée — dans « Archivées »<u data-undo="${t.id}">Annuler</u></div>`;
+    if (t.archived) return t.leaving ? row(o, t, "gone") : "";
+    return row(o, t);
+  }).join("");
+  return `${head}<div class="list">${rows}</div>${s.toast ? `<div class="toast">Archivée: ${s.toast.title}.<u data-undo="${s.toast.id}">Annuler</u></div>` : ""}`;
+};
+const strip = (o) => {
+  const t = seed()[0];
+  const bare = (cls) => o.bulk
+    ? `<span class="tseg" style="transform:scale(.85);transform-origin:right"><span class="on">Actives<i>11</i></span></span>${o.btn(cls, 1)}`
+    : `${o.btn(cls)}<span class="av">BA</span>`;
+  const after = {
+    toast: `<span class="after"><span style="background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px">Archivée. <u style="color:#fff">Annuler</u></span></span>`,
+    count: `<span class="after">Archivées <b style="color:var(--ink)">4</b> · <span style="background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px"><u style="color:#fff">Annuler</u></span></span>`,
+    inline: `<span class="after">${icon("archive")}Archivée — <u>Annuler</u></span>`,
+  }[o.after];
+  return `<div class="states">${[["", "Repos"], ["is-hover", "Survol"], ["is-press", "Clic"]]
+    .map(([c, w]) => `<div class="st"><div class="stage">${bare(c)}</div><em>${w}</em></div>`).join("")}
+    <div class="st"><div class="stage">${after}</div><em>Après le clic</em></div></div>`;
+};
+const grid = document.getElementById("grid");
+const paintOne = (o) => { grid.querySelector(`[data-o="${o.id}"] [data-live]`).innerHTML = live(o); };
+grid.innerHTML = O.map((o) => `<section class="v ${o.id}" data-o="${o.id}"><h2>${o.h}</h2><p>${o.p}</p>
+  <div data-live></div>${strip(o)}</section>`).join("");
+O.forEach(paintOne);
+
+grid.addEventListener("click", (e) => {
+  const v = e.target.closest("[data-o]"); if (!v || !e.target.closest("[data-live]")) return;
+  const o = O.find((x) => x.id === v.dataset.o), s = S[o.id];
+  const tick = e.target.closest("[data-tick]"), arch = e.target.closest("[data-arch]"), undo = e.target.closest("[data-undo]");
+  if (tick) { const t = s.list.find((x) => x.id === +tick.dataset.tick); t.done = !t.done; }
+  else if (arch) {
+    const ids = o.bulk ? s.list.filter((t) => t.done && !t.archived).map((t) => t.id) : [+arch.closest("[data-id]").dataset.id];
+    clearTimeout(s.t);
+    ids.forEach((id) => { const t = s.list.find((x) => x.id === id); t.archived = true; t.leaving = o.after !== "inline"; s.arch++; });
+    const first = s.list.find((x) => x.id === ids[0]);
+    s.last = ids;
+    if (o.after === "inline") s.inline = first.id;
+    else s.toast = { id: first.id, title: ids.length > 1 ? `${ids.length} tâches` : first.title };
+    if (o.after === "count") s.bump = true;
+    paintOne(o);
+    /* The row folds in place before it goes, so the eye sees where it went. */
+    s.list.forEach((t) => { if (t.leaving) { const el = v.querySelector(`.task[data-id="${t.id}"]`); el?.classList.remove("gone"); void el?.offsetHeight; el?.classList.add("gone"); } });
+    s.t = setTimeout(() => { s.list.forEach((t) => (t.leaving = false)); s.toast = null; s.bump = false; paintOne(o); }, 4000);
+    return;
+  }
+  else if (undo) {
+    (s.last || [+undo.dataset.undo]).forEach((id) => { const t = s.list.find((x) => x.id === id); t.archived = false; t.leaving = false; s.arch--; });
+    s.last = null; s.toast = null; s.inline = null; s.bump = false; clearTimeout(s.t);
+  }
+  else return;
+  if (!arch && !undo) { s.inline = null; }
+  paintOne(o);
+});
+</script>
+</body>
+</html>
