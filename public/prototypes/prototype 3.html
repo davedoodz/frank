@@ -118,17 +118,33 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
    screen asks for — here, which level is being read. The dependency is
    stated by the order alone: no group boxes, no captions, nothing on the
    left edge. The level row is the only place the office green appears. */
-.tabs.lvl{height:32px;background:var(--fill-2);border-top:1px solid var(--line-2);
-  border-bottom:1px solid var(--line-2)}
-.tabs.lvl .views{flex:1}
-.tabs.lvl button{font-size:12px;padding:4px 9px}
-.tabs.lvl button[aria-current="true"]{background:var(--vert);color:var(--vert-ink);font-weight:600}
-.frame[data-chrome="black"] .tabs.lvl{background:#1e1e21;border-color:#2c2c31}
+/* The level being read is not a pill sitting in the bar: it is the tab of
+   the white page under it, the way a folder's tab is the folder. The page
+   grows up into the chrome where the level is named, and the join is the
+   whole mark — no green, nothing to decode. */
+.tabs.lvl{height:34px;align-items:flex-end;background:none;border:0;padding:0 12px}
+.tabs.lvl .views{flex:1;align-items:flex-end;overflow:visible}
+.tabs.lvl button{position:relative;font-size:12px;padding:0 10px;height:28px;margin-bottom:3px;
+  border-radius:6px;white-space:nowrap}
+.tabs.lvl button[aria-current="true"]{height:31px;margin-bottom:0;padding:0 12px;
+  border-radius:8px 8px 0 0;background:var(--card);color:var(--ink);font-weight:600;--tabc:var(--card);z-index:1}
+.tabs.lvl button[aria-current="true"]:hover{background:var(--card);color:var(--ink)}
+.tabs.lvl .div{margin-bottom:9px}
+/* The tab's two flared feet: a concave corner each side, where the page
+   curves up into the tab. A masked square of the tab's own colour, so it
+   is a shape the page makes, not a shading laid over it. */
+.tabs.lvl button[aria-current="true"]::before,
+.tabs.lvl button[aria-current="true"]::after{content:"";position:absolute;bottom:0;width:8px;height:8px}
+.tabs.lvl button[aria-current="true"]::before{right:100%;
+  background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tabc) 8px)}
+.tabs.lvl button[aria-current="true"]::after{left:100%;
+  background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tabc) 8px)}
+/* A tab standing on the card's corner squares that corner off: a rounded
+   corner under a tab reads as two sheets, not one. */
+.tabs.lvl[data-head="true"] + .work{border-top-left-radius:0}
 .frame[data-chrome="black"] .tabs.lvl button{color:rgba(255,255,255,.72);font-size:12.5px}
 .frame[data-chrome="black"] .tabs.lvl button:hover{background:rgba(255,255,255,.1);color:#fff}
-/* The green stays on the level and nowhere else: it is the one value the
-   whole screen is filtered by, and it has to beat a white pill one row up. */
-.frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{background:var(--vert);color:var(--vert-ink)}
+.frame[data-chrome="black"] .tabs.lvl button[aria-current="true"]{background:var(--card);color:var(--ink)}
 
 /* rail with the label under the icon */
 .rail.stack{align-items:stretch;padding:10px 6px}
@@ -607,6 +623,45 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .fchk svg{width:13px;height:13px;flex:0 0 auto}
 .flinks{display:flex;flex-wrap:wrap;gap:6px}
 .flinks a{text-decoration:none}
+/* A problem, counted where it lives: the one red on the page outside the
+   drawing's own conflict marks, which share it. */
+.ibadge{display:inline-flex;align-items:center;gap:3px;height:19px;padding:0 6px 0 5px;margin-left:6px;border-radius:10px;
+  background:#b3261e;color:#fff;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;cursor:pointer;flex:0 0 auto}
+/* Scoped past `svg.lu`, the `.hi` switch and a table head's icon rule,
+   which would otherwise draw the icon at 14 px, grey and pushed off by a
+   margin, and turn the badge back into a block. */
+.ibadge svg.lu{width:11px;height:11px;flex:0 0 11px;margin:0;color:currentColor;vertical-align:0}
+[data-fi="high"] .ibadge.hi{display:inline-flex}
+.ibadge.lg{height:22px;gap:4px;padding:0 8px 0 7px;margin-left:10px;border-radius:11px;font-size:12px}
+.ibadge.lg svg.lu{width:13px;height:13px;flex-basis:13px}
+.ibadge.sm{height:17px;padding:0 5px 0 4px;font-size:10.5px;cursor:inherit}
+.fwarn{display:inline-flex;margin-left:6px;color:#b3261e;vertical-align:-2px}
+.fwarn svg{width:13px;height:13px}
+/* The margin's two lists */
+.mtabs{display:flex;gap:2px;min-width:0}
+.mtab{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 8px;border-radius:6px;font-size:12.5px;font-weight:500;
+  color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.mtab svg{width:14px;height:14px}
+.mtab i{font-style:normal;font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.mtab:hover{background:var(--fill)}
+.mtab.on{background:#111;color:#fff}
+.mtab.on i{color:#cfcfd2}
+.mtab.conf:not(.on){color:#b3261e}
+.mtab.conf:not(.on) i{color:#b3261e}
+.mtab.conf.on{background:#b3261e}
+.mtab.conf.on i{color:#fff}
+.igrp{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--ink-2);padding:6px 2px 0}
+.igrp svg{width:13px;height:13px}
+.igrp i{font-style:normal;font-weight:400;color:var(--ink-3)}
+.icard{display:flex;flex-direction:column;gap:3px;padding:8px 9px;border:1px solid var(--line);border-radius:7px;background:var(--card);cursor:pointer}
+.icard:hover{border-color:var(--ink)}
+.icard.on{border-color:#b3261e;box-shadow:inset 3px 0 0 #b3261e}
+.icard .who{display:flex;align-items:center;gap:5px;font-size:12px}
+.icard .who svg{width:13px;height:13px;color:#b3261e;flex:0 0 auto}
+.icard .when{margin-left:auto;font-size:11px;color:var(--ink-3);white-space:nowrap}
+.icard .txt{font-size:12.5px;line-height:1.35}
+.icard .anch{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-3)}
+.icard .anch svg{width:12px;height:12px}
 body.elev .mtools{display:none}
 [data-theme="dark"] .tbl tr.on td{background:#2b3313}
 /* A figure and its head belong on one line: a wrapped "pi² total" stops
@@ -879,8 +934,14 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.10)}
 .lcard .hd{display:flex;align-items:center;gap:8px}
 .lcard .hd .fglyph{width:19px;height:22px;flex:0 0 19px}
+/* The head of a consultant's file name is the project and the discipline,
+   which the thumbnail beside the card already says; the tail is the level,
+   which is the part being checked. So the cut is put in the middle and the
+   tail always survives: the head gives way, the end is kept. */
 .lcard .hd b{font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:500;flex:1;min-width:0;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  display:flex;white-space:nowrap}
+.lcard .hd b .head{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.lcard .hd b .tail{flex:0 0 auto}
 .lcard .hd .x{display:grid;place-items:center;width:20px;height:20px;margin:0 -4px 0 0;flex:0 0 20px;
   border-radius:5px;color:var(--ink-3);cursor:pointer}
 .lcard .hd .x:hover{background:var(--fill);color:var(--ink)}
@@ -916,6 +977,40 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .fglyph .band{fill:var(--ink)}
 .fglyph.pdf .band{fill:#c8372d}
 .fglyph text{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:7.4px;fill:#fff;letter-spacing:.03em}
+/* SketchUp's band is its own blue, so a model never reads as a drawing. */
+.fglyph.skp .band{fill:#1f5fa8}
+/* The model's file, named in its pane's header after the pane's own name.
+   A click opens its card under the header; nothing sits on the model. */
+.fchip{display:inline-flex;align-items:center;gap:6px;min-width:0;height:28px;padding:0 6px 0 4px;margin-left:2px;
+  border:1px solid transparent;border-radius:6px;font-weight:400;color:var(--ink);cursor:pointer}
+.fchip:hover,.fchip.open{border-color:var(--line);background:var(--fill-2)}
+.fchip .fglyph{width:17px;height:20px;flex:0 0 17px}
+.fchip b{font-family:var(--mono);font-size:11px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fchip .old{font-size:11px;font-weight:500;color:#9a5b00;white-space:nowrap}
+.fchip > svg:last-child{width:13px;height:13px;flex:0 0 13px;color:var(--ink-3)}
+.fpop{position:absolute;left:8px;top:36px;z-index:30;width:min(340px,calc(100% - 16px));background:var(--card);
+  border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.10);padding:9px 10px;
+  display:flex;flex-direction:column;gap:7px;font-size:11.5px;font-weight:400;white-space:normal}
+.fpop .hd{display:flex;align-items:center;gap:8px}
+.fpop .hd .fglyph{width:19px;height:22px;flex:0 0 19px}
+.fpop .hd .nm{flex:1;min-width:0;display:flex;flex-direction:column}
+.fpop .hd b{font-family:var(--mono);font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fpop .hd .meta{color:var(--ink-3);font-size:10.5px}
+.fpop .hd .meta .old{color:#9a5b00}
+.fpop .hd.swapped{animation:fnswap .9s ease}
+.fpop .path{font-family:var(--mono);font-size:10px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fpop .lmenu .mi{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.fpop .lmenu .mi svg{width:12px;height:12px;flex:0 0 12px;color:var(--ink-3)}
+.fpop .lmenu .mi.open{background:var(--fill-2)}
+.fpop .lmenu .mi.open > svg{transform:rotate(180deg)}
+.fpop .lmenu .mi.back{font-weight:500}
+.fpop .lmenu .lpast + .mi{border-top:1px solid var(--line-2)}
+.fpop .lpast .dir{padding:5px 9px 4px;font-family:var(--mono);font-size:10px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fpop .lpast .dir + .pd{border-top:1px solid var(--line)}
+/* The layer cards float over the 3D pane; the model's own card is read
+   alone while it is open. */
+body:has([data-skppop]) .lcard{visibility:hidden}
+.fpop .lpast .pd.cur{cursor:default;background:none}
 .lcard .hd.swapped{animation:fnswap .9s ease}
 @keyframes fnswap{0%{background:var(--vert);color:var(--vert-ink)}100%{background:transparent}}
 /* The swap, mimicked: the sheet is wiped from the top and drawn back in
@@ -1009,6 +1104,21 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .zread{min-width:46px;font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;text-align:center}
 .zread.fit{cursor:pointer}
 [data-fi="low"] .zpill{display:none}
+/* The plan's foot: the zoom, and beside it the quarter turn. Both pills sit
+   in one row so the second never has to know how wide the first is. */
+.zctl{position:absolute;bottom:10px;left:10px;z-index:7;display:flex;gap:6px;align-items:center}
+.zctl .zpill{position:static}
+/* At rest one button. Once the sheet is turned, the angle shows beside it,
+   and the angle is the way back: a click puts north at the top. */
+.rpill .ang{display:none;min-width:40px;height:30px;padding:0 6px;border-radius:6px;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;cursor:pointer}
+.rpill .ang:hover{background:var(--fill)}
+.rpill.turned{border-color:var(--ink)}
+.rpill.turned .ang{display:flex}
+/* The composer's tail points at the pin it writes on. */
+.pbub .ptail{position:absolute;width:12px;height:12px;background:var(--card);border:1px solid var(--ink);transform:rotate(45deg);pointer-events:none}
+.pbub .ptail.t{top:-7px;border-bottom:0;border-right:0}
+.pbub .ptail.b{bottom:-7px;border-top:0;border-left:0}
 .zb{width:26px;height:26px;display:flex;align-items:center;justify-content:center;
   color:var(--ink-2);cursor:pointer;flex:0 0 26px}
 .zb:hover{background:var(--fill);color:var(--ink)}
@@ -1022,6 +1132,17 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 /* The tool in use is the one solid thing in the corner. */
 .mtools .zb.on,.mtools .zb.on:hover{background:#111;color:#fff}
 [data-fi="low"] .mtools{display:none}
+/* The view switch, top left: the model, or one façade seen square. The drag
+   tools step right to make room; in an elevation they are hidden anyway. */
+.eseg{position:absolute;left:10px;top:10px;z-index:8;display:flex;gap:2px;padding:2px;
+  background:#fff;border:1px solid var(--line);border-radius:8px}
+.eseg .zs{height:31px;min-width:31px;padding:0 9px;border-radius:6px;display:flex;align-items:center;
+  font-size:12.5px;color:var(--ink-2);cursor:pointer;user-select:none}
+.eseg .zs:hover{background:var(--fill);color:var(--ink)}
+.eseg .zs.on,.eseg .zs.on:hover{background:#111;color:#fff}
+.eseg .div{width:1px;background:var(--line-2);margin:5px 2px}
+.zone[data-zone="model"] .mtools{left:auto;right:56px}
+[data-fi="low"] .eseg{display:none}
 /* The corner view, bottom right, never under the zoom: the whole drawing at
    a glance and the rectangle of what is on screen. Flat, framed, opaque. */
 .mini{position:absolute;right:10px;bottom:10px;z-index:5;width:132px;background:var(--paper);
@@ -1276,6 +1397,9 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .step{position:absolute;z-index:5;width:19px;height:19px;border-radius:50%;background:var(--hi);
   color:var(--on-hi);font-size:11px;display:none;place-items:center;top:6px;right:6px}
 [data-journey="true"] .step{display:grid}
+/* With the model folded, the region's right edge is the model's strip:
+   the step number moves off its icon. */
+.rg:has(.fstrip[data-strip="model"]) > .step{right:44px}
 
 /* journey strip ------------------------------------------------------- */
 .journey{margin-top:14px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:12px 14px}
@@ -1329,7 +1453,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 /* Only between two panes whose own header (or drawing's header) carries
    the rule at that height: elsewhere, as beside the codes list's taller
    header, the bridge would be a stub. */
-:is(:has(> .ph), :has(.pane.drawing > .ph)) + .gut:not(.fold):is(:has(+ * > .ph), :has(+ * .pane.drawing > .ph))::after{content:"";position:absolute;top:37px;height:1px;left:0;right:-4px;background:var(--line-2);pointer-events:none}
+:is(:has(> .ph), :has(.pane.drawing > .ph)) + .gut:is(:has(+ * > .ph), :has(+ * .pane.drawing > .ph))::after{content:"";position:absolute;top:37px;height:1px;left:0;right:-4px;background:var(--line-2);pointer-events:none}
 /* A drawing pane carries a 1 px border its neighbours do not, so its header
    is a pixel shorter to put its rule on the same line as theirs. */
 .frame:not([data-shell="inset"]) .pane.drawing > .ph{height:37px}
@@ -1360,26 +1484,19 @@ body.splitting .frame[data-shell="inset"] .gut[data-gut="plan"].live::before{wid
 .gut:hover .gfold,.gut.fold .gfold{opacity:1}
 .gut .gfold:hover{background:#000}
 .gut .gfold .lu{width:17px;height:17px;stroke-width:2.6}
-/* Folded, the tab stops being a chevron and becomes a label, so a folded
-   pane says what it is instead of asking to be opened to find out. The
-   label is read on one line, white on black, and the tab sits above every
-   pane and tool strip: written sideways or in grey it was not read, and the
-   layer strip's buttons covered it. It is wider than the strip it lives in
-   and lies over the drawing next to it; that drawing is still there. */
-.gut.fold{z-index:60}
-.gut.fold .gfold{width:auto;height:34px;padding:0 12px 0 9px;flex:0 0 auto;flex-direction:row;gap:6px;
-  white-space:nowrap;user-select:none;background:var(--ink);color:#fff;border:0;
-  box-shadow:0 0 0 1.5px var(--card)}
-.gut.fold .gfold:hover{background:#000}
-.gut.fold .gfold .lu{width:15px;height:15px}
-.gut.fold .gname{font-size:13px;font-weight:600;line-height:1}
-.gut.fold.fold-s{align-items:flex-start}
-.gut.fold.fold-s .gfold{margin-left:5px}
-.gut.fold.fold-e{align-items:flex-end}
-.gut.fold.fold-e .gfold{margin-right:5px}
-/* With the drawing and the notes both folded, two tabs land on the same
-   edge at the same height. The drawing's tab sits one row lower. */
-.gut.fold[data-gut="plan"] .gfold{transform:translateY(44px)}
+/* Beside a folded pane the edge only separates: nothing to drag. */
+.gut.fold::before{content:none}
+/* A folded pane keeps a strip of itself: its header's icon on the header's
+   rule, its title read upward from the top. The whole strip unfolds it. */
+.pane.fstrip{flex:0 0 38px;width:38px;cursor:pointer;user-select:none}
+.pane.fstrip > .ph{justify-content:center;padding:0}
+.pane.fstrip:hover{background:var(--fill-2)}
+.pane.fstrip:hover > .ph > svg{color:var(--ink)}
+.pane.fstrip .fsv{flex:1;min-height:0;display:flex;justify-content:center;align-items:flex-start;padding-top:12px;overflow:hidden}
+.pane.fstrip .fsv span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap}
+/* The edge stops where the table would start to be cut, and says so. */
+.pane > .stop{position:absolute;top:50%;right:6px;transform:translateY(-50%);z-index:20;font-size:10.5px;font-style:italic;
+  color:#fff;background:var(--ink);border-radius:4px;padding:2px 6px;pointer-events:none}
 /* Two tabs on one edge sit one above the other, not side by side: the
    strip is ten pixels wide and they would overlap the drawings. */
 .gut .gfold + .gfold{margin-top:6px}
@@ -1419,6 +1536,7 @@ const V = {
      move the calendar on Échéancier. Empty means the designed width. */
   split: {},
   fold: {},
+  foldHead: {},  /* per folded pane, the icon and title read off its header as it folded */
   /* One glyph per screen, written by the panel. Keyed by the French screen
      name, filled from NAV_ICONS which is declared further down the file. */
   icons: {},
@@ -1472,6 +1590,7 @@ const V = {
   scope: "Niveau",
   utab: 1,           // which tab of the unit inspector
   zoom: 100,         // plan zoom, in percent
+  rot: 0,            // plan turn in degrees, kept unwrapped so each quarter turn goes the short way
   /* The margin: notes pinned on a drawing. Two publics share one list — the
      studio's own reminders, and the pins an invited collaborator can read
      through the shared link. */
@@ -1506,7 +1625,11 @@ const V = {
     dir: "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Dessins\\",
     names: {},   // level → the drawing file read for it, once it was changed
     skpDir: "\\\\serveur-bureau\\Projets\\2026\\BAL3\\Maquette\\",
-    skp: "BAL3_Maquette_R07.skp",
+    skpCur: 0,        // which file of the Maquette folder the pane reads
+    skpOpen: false,   // its card is open under the pane's header
+    skpHist: false,   // the card lists the previous versions
+    skpList: false,   // the card lists the whole folder
+    skpSwapped: false,
   },
   /* Which typologies are asked for. Nothing is on: the plan is read in black
      and white until someone asks a question of it. Keyed by TYPOS, written
@@ -1546,6 +1669,8 @@ const V = {
      same conflict is not "caught" twice. */
   caught: {},
   xopen: null,         /* the conflict whose card is open */
+  marginTab: "notes",  /* the margin shows the comments, or the conflicts */
+  issueSel: null,      /* the problem last opened from the conflicts list */
   xdraft: { who: [], day: null },
   layPick: "plan",     /* the thumbnail whose card is open */
   layCard: true,
@@ -1588,6 +1713,8 @@ function sprite() {
     "copy", "mail", "upload", "paperclip",
     /* the 3D pane's drag tools: orbit, move */
     "rotate-3d", "move",
+    /* the plan's quarter turn */
+    "rotate-cw",
     /* a façade table's head: open its elevation */
     "scan"];
   const defs = names.map((n) => {
@@ -2350,8 +2477,80 @@ function layDocs(k) {
    picked from the list. */
 const layDoc = (k) => layDocs(k)[V.layCur[k] || 0];
 const extOf = (file) => file.split(".").pop().toLowerCase();
+
+/* The model folder and what is in it. Sample files for the prototype,
+   named the way an office's folder reads: the issued revision first, then
+   the coordination, permit and massing models it replaced, and two side
+   studies that were never issued. */
+const SKP_VERSIONS = [
+  { file: "BAL3_MAQUETTE_R07_2026-10-24.skp", rev: "R07", date: "24 oct 2026", note: "émise", size: "186 Mo" },
+  { file: "COORD_MAQUETTE_R06_2026-09-30.skp", rev: "R06", date: "30 sept 2026", note: "coordination", size: "181 Mo" },
+  { file: "PERMIS_MAQUETTE_R05_2026-08-29.skp", rev: "R05", date: "29 août 2026", note: "émise pour permis", size: "174 Mo" },
+  { file: "VOLUMETRIE_OPT2_R03_2026-06-12.skp", rev: "R03", date: "12 juin 2026", note: "volumétrie option 2", size: "62 Mo" },
+];
+const SKP_ALL = [...SKP_VERSIONS,
+  { file: "ETUDE_TOITURE-TERRASSE_2026-10-02.skp", date: "2 oct 2026", note: "étude", size: "38 Mo" },
+  { file: "SITE_CONTEXTE-URBAIN_2026-04-18.skp", date: "18 avr 2026", note: "contexte", size: "97 Mo" },
+];
+const skpDoc = () => SKP_ALL[V.docs.skpCur];
+const skpOld = () => V.docs.skpCur !== 0;
+
+/* The model pane names its file after its own name; a click opens the
+   card: the file, where it sits, and what can be done with it. */
+function skpChipHTML() {
+  const d = skpDoc(), D = V.docs;
+  const row = (x, label) => `<span class="pd ${x === d ? "cur" : ""}" ${x === d ? "" : act("skppick", SKP_ALL.indexOf(x))}
+    title="${x === d ? "Affichée" : `Remplacer par ${x.file}`}">${fileGlyph(x.file)}<span class="pf">${x.file}</span>
+    <span class="pdt">${label(x)}</span></span>`;
+  const past = SKP_VERSIONS.filter((v) => v !== d);
+  return `<span class="fchip ${D.skpOpen ? "open" : ""}" ${act("skpchip")} title="${D.skpDir}${d.file}" aria-expanded="${D.skpOpen}">
+      ${fileGlyph(d.file)}<b>${d.file}</b>${skpOld() ? `<span class="old">${d.rev || "étude"}</span>` : ""}${icon("chevron-down")}</span>
+    ${D.skpOpen ? `<div class="fpop" data-skppop>
+      <div class="hd ${D.skpSwapped ? "swapped" : ""}">${fileGlyph(d.file)}<span class="nm"><b title="${d.file}">${d.file}</b>
+        <span class="meta">${[d.rev, d.date, d.size].filter(Boolean).join(" · ")}${skpOld() ? ` · <span class="old">version antérieure</span>` : ""}</span></span></div>
+      <span class="path" title="${D.skpDir}">${D.skpDir}</span>
+      <div class="lmenu">
+        ${skpOld() ? `<span class="mi back" ${act("skppick", 0)}>Revenir à la version émise (${SKP_VERSIONS[0].rev})</span>` : ""}
+        <span class="mi" ${act("sketchup")}>Ouvrir dans SketchUp</span>
+        <span class="mi ${D.skpList ? "open" : ""}" ${act("skplist")} aria-expanded="${D.skpList}">Changer la maquette…${icon("chevron-down")}</span>
+        ${D.skpList ? `<div class="lpast"><span class="dir" title="${D.skpDir}">${D.skpDir}</span>
+          ${SKP_ALL.map((x) => row(x, (y) => y === d ? "affichée" : `${y.date} — ${y.note}`)).join("")}</div>` : ""}
+        <span class="mi ${D.skpHist ? "open" : ""}" ${act("skphist")} aria-expanded="${D.skpHist}">
+          ${skpOld() ? "Voir les autres versions" : "Voir les versions précédentes"} (${past.length})${icon("chevron-down")}</span>
+        ${D.skpHist ? `<div class="lpast">${past.map((x) => row(x, (y) => `${y.rev} · ${y.date} — ${y.note}`)).join("")}</div>` : ""}
+      </div></div>` : ""}`;
+}
+/* A new file is laid in the pane in place of the old one: the model is
+   wiped from the top, so the swap is seen, not just read. */
+function skpPick(i) {
+  const D = V.docs;
+  if (!SKP_ALL[i] || i === D.skpCur) return;
+  Object.assign(D, { skpCur: i, skpOpen: false, skpHist: false, skpList: false, skpSwapped: true });
+  render();
+  D.skpSwapped = false;
+  const m = document.querySelector("[data-building-model]");
+  if (m && V.swap !== "Instant") {
+    const fx = document.createElement("div");
+    fx.className = "swapfx";
+    m.append(fx);
+    fx.addEventListener("animationend", () => fx.remove(), { once: true });
+  }
+  say(i === 0 ? `Version émise ${skpDoc().rev} rechargée.`
+    : `${skpDoc().file} affichée. La maquette émise reste ${SKP_VERSIONS[0].file}.`);
+}
 /* A file reads by its kind before its name: a page with the extension on
    a band, ink for a drawing, red for a PDF. */
+/* The kept tail must start at one of the name's own separators: cutting
+   mid word gives "UTION_NIVEAU_5", which is not a shorter name but a wrong
+   one. The head is marked so CSS, not arithmetic, decides how much of it
+   the card can afford. */
+const keepTail = (file, want = 18) => {
+  if (file.length <= 22) return file;
+  const at = file.indexOf("_", file.length - want - 1);
+  const tail = at < 0 || file.length - at > want + 10 ? file.slice(-want) : file.slice(at + 1);
+  return `<span class="head">${file.slice(0, file.length - tail.length)}</span><span class="tail">${tail}</span>`;
+};
+
 const fileGlyph = (file) => {
   const ext = extOf(file);
   return `<svg class="fglyph ${ext}" viewBox="0 0 26 30" aria-hidden="true">
@@ -2372,7 +2571,7 @@ function layCardHTML(peekKey = null) {
   const pdf = extOf(doc.file) === "pdf";
   const menu = !peekKey && V.layMenu, hist = !peekKey && V.layHist;
   return `<div class="lcard" data-lcard data-anchor="${k}" ${peekKey ? "data-peek" : ""}>
-    <div class="hd ${V.laySwap === k ? "swapped" : ""}">${fileGlyph(doc.file)}<b>${doc.file}</b>
+    <div class="hd ${V.laySwap === k ? "swapped" : ""}">${fileGlyph(doc.file)}<b>${keepTail(doc.file)}</b>
       <span class="x" ${act("lclose")} title="Fermer">${icon("x")}</span></div>
     <span class="docbtn" ${act("ldoc")}>${icon("file")}Document ${icon("chevron-down")}</span>
     ${menu ? `<div class="lmenu">
@@ -2556,6 +2755,105 @@ function conflictCardHTML() {
   </div>`;
 }
 
+/* ------------------------------------------------------- the problems
+   Every open problem in the project in one list, whatever found it: two
+   drawings that disagree in a unit, two that disagree only once one is
+   laid over the other, and a material the legend names that the maker no
+   longer sells or the model does not carry. Each knows the section it is
+   read in, so a section can say how many it holds before anyone scrolls
+   down to it, and each knows how to take the reader to itself. */
+const ISSUE_KINDS = {
+  plan: { nm: "Superposition des plans", ic: "layers" },
+  unit: { nm: "Unités", ic: "table" },
+  mat: { nm: "Matériaux par façade", ic: "box" },
+};
+function issues() {
+  const out = CROSSINGS.filter((c) => !c[5]).map((c) => ({
+    id: c[0], kind: c[6] ? "plan" : "unit", level: c[4], title: c[1],
+    where: `${c[3] ? `unité ${c[3]} — ` : ""}niv. ${c[4]}`,
+    pair: `architecture × ${c[6] ? ENG_LABELS[c[6]].toLowerCase() : c[2]}`,
+  }));
+  const fm = window.fitteMaterials, data = window.fitteModel?.facades?.();
+  if (fm) for (const c of fm.CATEGORIES) {
+    const faces = data ? FACADES.filter((f) => data[f].find((r) => r.n === c.n)?.ft2 >= 1) : [];
+    const absent = Boolean(data) && !faces.length;
+    if (!c.check && !absent) continue;
+    out.push({ id: `M-${c.n}`, kind: "mat", n: c.n, faces, title: c.check || "absent de la maquette 3D",
+      where: `${c.n} ${c.name}${faces.length ? ` — ${faces.join(", ")}` : ""}`,
+      pair: c.check ? `légende × ${c.maker || "fabricant"}` : "légende × maquette 3D" });
+  }
+  return out;
+}
+/* The plan and unit problems are counted on the level on screen; a
+   material is the whole building's. */
+function issuesIn(kind) {
+  const lv = paneLevel();
+  return issues().filter((i) => i.kind === kind && (kind === "mat" || i.level === lv));
+}
+/* The count a section carries in its header. It opens the list. */
+function issueBadge(kinds) {
+  const n = kinds.reduce((s, k) => s + issuesIn(k).length, 0);
+  return n ? `<span class="ibadge hi" ${act("issues")} title="${n} problème${n > 1 ? "s" : ""} dans cette section — voir les conflits">${icon("alert-triangle")}${n}</span>` : "";
+}
+
+/* Opening a problem from the list shows it, wherever the page was: a
+   superposition conflict lays exactly the two drawings that reveal it on
+   the sheet, opens its card and frames its unit; a unit conflict selects
+   the unit; a material opens the façade it is on with its sheet. */
+function goIssue(id) {
+  const it = issues().find((i) => i.id === id);
+  if (!it) return;
+  V.issueSel = id;
+  V.marginTab = "conf";
+  if (V.screen !== "Unités") { V.screen = "Unités"; dial.setValue("screen", FR_SCREEN[V.screen]); }
+  if (it.kind === "mat") {
+    render();
+    const face = it.faces[0];
+    if (face) {
+      V.facade = { face, focus: it.n };
+      V.matOpen = { ...V.matOpen, [`${face}|${it.n}`]: true };
+    }
+    paintFacades();
+    document.querySelector(face ? "[data-facades] tr.fopen" : "[data-facades] > .fqn:last-child")
+      ?.scrollIntoView({ block: "center", inline: "nearest" });
+    return;
+  }
+  const c = CROSSINGS.find((x) => x[0] === id);
+  if (it.kind === "plan") {
+    V.lay.plan.on = true;
+    ENG_DISCIPLINES.forEach((d) => { V.lay[d].on = d === c[6]; });
+    V.layPick = c[6];
+    V.xopen = c[0];
+    V.caught[c[0]] ||= stampNow();
+    V.xdraft = { who: [], day: dayPlus(3) };
+  }
+  render();
+  if (it.kind === "plan") {
+    /* The surveyor's and the landscaper's sheets are dials; they would
+       only cover the two drawings being compared. */
+    if (V.lay.arp?.on) dial.setValue("layers.surveyor", false);
+    if (V.lay.pay?.on) dial.setValue("layers.landscaping", false);
+  }
+  if (c[3]) window.fitteSelectUnit(c[3]); else window.fitteSelectLevel(c[4]);
+}
+
+function issuesListHTML() {
+  const all = issues();
+  const lv = paneLevel();
+  if (!all.length) return `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px">Aucun conflit ouvert.</div>`;
+  return Object.entries(ISSUE_KINDS).map(([k, g]) => {
+    /* The level on screen first, then the others in order. */
+    const list = all.filter((i) => i.kind === k)
+      .sort((a, b) => (a.level === lv ? -1 : 0) - (b.level === lv ? -1 : 0) || (a.level || 0) - (b.level || 0));
+    if (!list.length) return "";
+    return `<div class="igrp">${icon(g.ic)}<span>${g.nm}</span><i>${list.length}</i></div>
+      ${list.map((i) => `<div class="icard ${V.issueSel === i.id ? "on" : ""}" ${act("issue", i.id)} title="Afficher ce conflit">
+        <div class="who">${icon("alert-triangle")}<b>${k === "mat" ? `Légende ${i.n}` : i.id}</b><span class="when">${i.where}</span></div>
+        <div class="txt">${i.title}</div>
+        <div class="anch">${icon(k === "plan" ? "layers" : k === "mat" ? "box" : "table")}${i.pair}</div></div>`).join("")}`;
+  }).join("");
+}
+
 /* Typology fill is the one colour the prototype adds to the sheet: the
    architect's own ink stays as it was plotted. */
 const typosOn = () => TYPOS.filter((t) => V.typo[t]);
@@ -2656,37 +2954,37 @@ function region(name, label, inner, step, cls = "") {
    away. "size" names the width being written, "grab" says which pane that
    width belongs to — the one before the strip or the one after — because
    that decides which way a drag of ten pixels moves the number. A folded
-   pane leaves the strip behind, which is the only way back. */
+   pane leaves a strip of itself beside the edge (foldStripHTML), which is
+   the way back. */
 const SPLIT_MIN = 170;
 const splitKey = (name) => `${V.screen}/${name}`;
 const splitW = (name, def) => (V.split[splitKey(name)] ?? def);
 const folded = (name) => !!V.fold[splitKey(name)];
-/* Tooltips read with the article — "Replier la liste" — and the tab of a
-   folded pane reads without it, sideways, as a name: "LISTE". One label
-   serves both. */
+/* Tooltips read with the article — "Replier la liste"; a folded pane whose
+   header was never read names itself from the same label: "Liste". */
 const gutName = (label) => {
   const noun = label.replace(/^(le |la |l'|les )/, "");
   return noun.charAt(0).toUpperCase() + noun.slice(1);
 };
 function gutter({ size, grab, prev, next, lprev, lnext }) {
-  const shutP = prev && folded(prev), shutN = next && folded(next);
-  const tab = (key, label, dir) => {
-    const shut = folded(key);
-    return `<span class="gfold" ${act("gutfold", key)}
-      title="${shut ? `Déplier ${label}` : `Replier ${label}`}">${icon(dir)}${
-        shut ? `<span class="gname">${gutName(label)}</span>` : ""}</span>`;
-  };
-  /* With a pane folded there is one thing to say, so one chevron says it,
-     pointing the way the pane will come back. */
-  const tabs = shutP ? tab(prev, lprev, "chevron-right")
-    : shutN ? tab(next, lnext, "chevron-left")
-    : `${prev ? tab(prev, lprev, "chevron-left") : ""}${next ? tab(next, lnext, "chevron-right") : ""}`;
-  const shut = shutP || shutN;
-  /* The tab is wider than the strip, so it lies over the pane that stays
-     open: centred, it was cut in half at the screen's edge. */
-  const side = shutP ? " fold-s" : shutN ? " fold-e" : "";
-  return `<div class="gut${shut ? " fold" : ""}${side}" data-gut="${size}" data-grab="${grab}"
+  const shut = (prev && folded(prev)) || (next && folded(next));
+  const tab = (key, label, dir, side) => `<span class="gfold" ${act("gutfold", key)} data-side="${side}"
+      title="Replier ${label}">${icon(dir)}</span>`;
+  /* Beside a folded pane the strip is the way back, so the edge has nothing
+     to offer and cannot be dragged. */
+  const tabs = shut ? ""
+    : `${prev ? tab(prev, lprev, "chevron-left", "prev") : ""}${next ? tab(next, lnext, "chevron-right", "next") : ""}`;
+  return `<div class="gut${shut ? " fold" : ""}" data-gut="${size}" data-grab="${grab}"
       title="${shut ? "" : "Glisser pour déplacer le bord"}">${tabs}</div>`;
+}
+/* The strip a folded pane leaves: the icon and title its header carried
+   (read as it folded), the icon on the header's rule, the title upward. */
+const FOLD_W = 38;
+function foldStripHTML(key, label) {
+  const h = V.foldHead[splitKey(key)] || {};
+  return `<section class="pane fstrip" ${act("gutfold", key)} data-strip="${key}" title="Déplier ${label}">
+    <div class="ph">${icon(h.ic || "list")}</div>
+    <div class="fsv"><span>${h.t || gutName(label)}</span></div></section>`;
 }
 const bars = (n, w = [100, 70, 85]) =>
   Array.from({ length: n }, (_, i) => `<div class="bar" style="width:${w[i % w.length]}%"></div>`).join("");
@@ -3377,7 +3675,8 @@ function tabsHTML() {
     : "";
   const row2 = mode === "Two rows, no rail" && views.length
     ? `<div class="tabs lvl rg ${solo("nav")}" data-rg="vues" data-fi="${fiOf("nav")}"
-         data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}" data-off="${off}">
+         data-style="${V.nav.tabStyle}" data-labels-mode="${V.nav.labels}" data-off="${off}"
+         data-head="${off || !wholeBtn}">
         ${wholeBtn}${wholeBtn ? `<span class="div"></span>` : ""}
         <div class="views">${views.map(viewBtn).join("")}</div></div>`
     : "";
@@ -3428,7 +3727,8 @@ function headerHTML() {
         <div class="col" style="flex:1;gap:5px">
           <div class="lo bar" style="width:170px;height:13px"></div>
           <div class="lo bar lt" style="width:260px;height:8px"></div>
-          <div class="hi" style="font-size:16px;font-weight:600">${title[0]}</div>
+          <div class="hi" style="font-size:16px;font-weight:600;display:flex;align-items:center">${title[0]}${V.screen === "Unités" && issues().length
+            ? `<span class="ibadge lg" ${act("issues")} title="Voir la liste des conflits">${icon("alert-triangle")}${issues().length} problèmes</span>` : ""}</div>
           ${title[1] ? `<div class="hi" style="font-size:12px;color:var(--ink-2)">${title[1]}</div>` : ""}
         </div>
         ${bare ? "" : SCREENS[V.screen].home
@@ -3519,15 +3819,15 @@ function contentHTML() {
         : `<div class="mini hi" data-mini="model">
         <span class="mi" data-mi><canvas data-mini3d></canvas></span>
       </div>`);
-      /* North, top right of each pane. On the sheet it is a fixed mark: the
-         drawing does not turn. On the model it is the same mark laid flat on
+      /* North, top right of each pane. On the sheet it turns with the
+         drawing's quarter turns (see paintSheet). On the model it is the same mark laid flat on
          the ground and seen from wherever the camera is, so the ring
          flattens and the needle swings as the building is orbited. */
       const north = (side) => (side === "plan"
         ? `<svg class="north hi" data-north viewBox="-22 -32 44 64" aria-label="Nord">
-        <text x="0" y="-21">N</text>
+        <text data-nl x="0" y="-21">N</text>
         <circle cx="0" cy="6" r="14"></circle>
-        <line x1="0" y1="6" x2="0" y2="-7"></line>
+        <line data-nneedle2d x1="0" y1="6" x2="0" y2="-7"></line>
       </svg>`
         : `<svg class="north hi" data-north3d viewBox="-22 -32 44 64" aria-label="Nord">
         <polygon data-nring points=""></polygon>
@@ -3551,7 +3851,7 @@ function contentHTML() {
       /* The model's header carries the cube, the same glyph that marks a
          note pinned on the model; the plan keeps the sheet. */
       const pane = (t, note, kind, cls = "", layers = "", fx = "1") => `<div class="pane drawing" style="flex:${fx}"><div class="ph">${icon(kind === "model" ? "box" : "file")}
-        <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
+        <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>${kind === "plan" ? issueBadge(["plan"]) : skpChipHTML()}
         <span style="flex:1"></span>
         ${hostButton(kind === "plan" ? "plan" : "model")}</div>
         ${kind !== "plan" && isNonresLevel(paneLevel()) ? `<div class="model-context-note hi">${note}</div>` : ""}
@@ -3568,14 +3868,14 @@ function contentHTML() {
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}${conflictMarkHTML()}${pinMarkHTML()}</div></div>
-              ${north("plan")}${mini("plan")}${zoomPill("plan")}${pinArmHTML()}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}${pinBubbleHTML()}</div>`
+              ${north("plan")}${mini("plan")}<div class="zctl">${zoomPill("plan")}${rotPillHTML()}</div>${pinArmHTML()}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}${pinBubbleHTML()}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
               </div>
               <div class="npins" data-npins></div>
-              ${mtools}${north("model")}${axes}${mini("model")}${zoomPill("model")}
+              ${elevNavHTML()}${mtools}${north("model")}${axes}${mini("model")}${zoomPill("model")}
             </div>`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
@@ -3606,9 +3906,9 @@ function contentHTML() {
         ${noModel ? "" : `<div class="pane" style="position:absolute;right:10px;bottom:10px;width:220px;height:150px">
         <div class="pb"><div class="plan" data-img="massing"><span class="hi">3D inset</span></div></div></div>`}</div></div>`;
       return `<div class="row" style="flex:1;align-items:stretch;gap:0;min-height:0">${
-        planShut ? "" : plan()}${noModel ? "" : gutter({ size: "plan", grab: "prev",
+        planShut ? foldStripHTML("plan", "le plan") : plan()}${noModel ? "" : gutter({ size: "plan", grab: "prev",
           prev: "plan", next: "model", lprev: "le plan", lnext: "la maquette" })}${
-        modelShut ? "" : model()}</div>`;
+        noModel ? "" : modelShut ? foldStripHTML("model", "la maquette") : model()}</div>`;
     },
     /* Codes is the vertical reading of the provisions: the Québec
        construction code first, then the bylaw, each one with the schematic
@@ -3634,7 +3934,7 @@ function contentHTML() {
        scale sits on the calendar it draws, beside the dates it changes,
        rather than in a strip above that looked like a change of screen. */
     "Échéancier": () => `<div class="row" style="flex:1;align-items:stretch;gap:0">
-      ${folded("cal") ? "" : `<div class="pane" style="flex:${V.split[splitKey("cal")] ? `0 0 ${V.split[splitKey("cal")]}px` : "1.25"}">
+      ${folded("cal") ? foldStripHTML("cal", "le calendrier") : `<div class="pane" style="flex:${V.split[splitKey("cal")] ? `0 0 ${V.split[splitKey("cal")]}px` : "1.25"}">
         <div class="ph">${icon("calendar-check")}<span class="lo bar" style="width:70px"></span>
           <span class="hi">${calTitle()}</span><span style="flex:1"></span>
           ${CAL_SCALES.map((s) => `<span class="chip ${V.scale === s ? "on" : ""}" ${act("calscale", s)}
@@ -3645,7 +3945,7 @@ function contentHTML() {
         <div class="pb">${calendarHTML()}</div></div>`}
       ${gutter({ size: "cal", grab: "prev", prev: "cal", next: "todo",
         lprev: "le calendrier", lnext: "la liste" })}
-      ${folded("todo") ? "" : `<div class="pane" style="flex:1">
+      ${folded("todo") ? foldStripHTML("todo", "la liste") : `<div class="pane" style="flex:1">
         <div class="ph">${icon("list-checks")}<span class="lo bar" style="width:60px"></span>
           <span class="hi">À faire</span><span style="flex:1"></span>
           <span class="chip"><span class="lo bar" style="width:40px"></span>
@@ -3811,7 +4111,7 @@ function facadeTablesHTML() {
   const fm = window.fitteMaterials;
   const data = window.fitteModel?.facades?.();
   const open = V.facade;
-  const head = `<div class="fqh">${icon("layers")}<span>Matériaux par façade</span><span class="fqs">pi² vus en élévation</span>
+  const head = `<div class="fqh">${icon("layers")}<span>Matériaux par façade</span>${issueBadge(["mat"])}<span class="fqs">pi² vus en élévation</span>
     ${open ? `<span style="flex:1"></span><span class="btnw sm" ${act("facade", open.face)} title="Revenir à la vue 3D">${icon("rotate-3d")}<span class="hi">Vue 3D</span></span>` : ""}</div>`;
   if (!data) return `<div class="fq-fac" data-facades>${head}<div class="fqn">Lecture de la maquette 3D…</div></div>`;
   const absent = fm.CATEGORIES.filter((c) => FACADES.every((f) => !(data[f].find((r) => r.n === c.n)?.ft2 >= 1)));
@@ -3824,7 +4124,8 @@ function facadeTablesHTML() {
       const key = `${face}|${r.n}`;
       const sheet = V.matOpen?.[key];
       return `<tr class="${on && open.focus === r.n ? "on" : ""} ${sheet ? "fopen" : ""}" ${act("facmat", key)} title="${c.note}">
-        <td><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}</td>
+        <td><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}${c.check
+          ? `<span class="fwarn" title="${c.check}">${icon("alert-triangle")}</span>` : ""}</td>
         <td class="n">${fqNum(r.ft2)}</td><td class="n">${fqPct(r.ft2, total)}</td>
         <td class="fdd"><span class="fddb" ${act("matinfo", key)} role="button" aria-expanded="${Boolean(sheet)}"
           title="${sheet ? "Masquer la fiche" : "Voir la fiche du produit"}">${icon(sheet ? "chevron-up" : "chevron-down")}</span></td></tr>
@@ -3832,7 +4133,10 @@ function facadeTablesHTML() {
     }).join("");
     return `<table class="tbl ftbl ${on ? "open" : ""}">
       <thead><tr ${act("facade", face)} title="${on ? "Revenir à la vue 3D" : `Voir l'élévation ${face} dans la maquette`}">
-        <th>${icon(on ? "eye" : "scan")}Façade ${face}</th><th class="n">pi²</th><th class="n">Part</th><th class="fdd"></th></tr></thead>
+        <th>${icon(on ? "eye" : "scan")}Façade ${face}${(() => {
+          const n = rows.filter((r) => fm.category(r.n).check).length;
+          return n ? `<span class="ibadge sm" title="${n} matériau${n > 1 ? "x" : ""} à vérifier sur cette façade">${icon("alert-triangle")}${n}</span>` : "";
+        })()}</th><th class="n">pi²</th><th class="n">Part</th><th class="fdd"></th></tr></thead>
       <tbody>${body}</tbody>
       <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td><td class="fdd"></td></tr></tfoot></table>`;
   }).join("");
@@ -3849,10 +4153,9 @@ function materialSheetHTML(c) {
   const pic = c.thumb
     ? `<img class="fimg ${c.n === 7 ? "fit" : ""}" src="assets/materials/${c.thumb}.png" alt="${c.name}">`
     : `<span class="fimg" style="background:${c.tile}"></span>`;
-  const host = (u) => new URL(u).hostname.replace(/^www\./, "");
   const links = [
-    c.url ? `<a class="btnw sm" href="${c.url}" target="_blank" rel="noopener noreferrer">${icon("external-link")}<span class="hi">${c.maker} — ${host(c.url)}</span></a>` : "",
-    c.colourUrl ? `<a class="btnw sm" href="${c.colourUrl}" target="_blank" rel="noopener noreferrer">${icon("external-link")}<span class="hi">Nuancier Vicwest</span></a>` : "",
+    c.url ? `<a class="btnw sm" href="${c.url}" target="_blank" rel="noopener noreferrer" title="${c.url}">${icon("external-link")}<span class="hi">${c.maker} — ${c.page}</span></a>` : "",
+    c.colourUrl ? `<a class="btnw sm" href="${c.colourUrl}" target="_blank" rel="noopener noreferrer" title="${c.colourUrl}">${icon("external-link")}<span class="hi">Vicwest — ${c.colourPage}</span></a>` : "",
   ].join("");
   return `<div class="fsh">${pic}<div class="finfo">
     <div class="fgrid">${line("Fabricant", c.maker)}${line("Couleur", c.colour)}${line("Format", c.size)}</div>
@@ -3861,18 +4164,53 @@ function materialSheetHTML(c) {
   </div></div>`;
 }
 
-/* What the viewer reads to draw an elevation, set with the list. A screen
-   without the façade tables has no way out of an elevation: none there. */
+/* The four façades in the order met walking round the building. The corner
+   view marks which one is on screen with the letter it carries on the sheets. */
+const ELEV_FACES = {
+  nord: { nm: "Élévation nord" },
+  est: { nm: "Élévation est" },
+  sud: { nm: "Élévation sud" },
+  ouest: { nm: "Élévation ouest" },
+};
+const ELEV_ORDER = ["nord", "est", "sud", "ouest"];
+/* The switch over the model: the 3D view or one façade. The arrow keys walk
+   round the building and Escape goes back to the model. One switch for both ways in: a façade picked here is seen with its own
+   textures; one opened from its material table keeps the legend colours. */
+function elevNavHTML() {
+  const face = V.facade?.face || "";
+  const seg = `<div class="eseg" role="group" aria-label="Vue">
+    <span class="zs ${face ? "" : "on"}" ${act("elev", "")} aria-pressed="${!face}" title="Maquette 3D">3D</span><i class="div"></i>
+    ${ELEV_ORDER.map((k) => `<span class="zs ${face === k ? "on" : ""}" ${act("elev", k)} aria-pressed="${face === k}"
+      title="${ELEV_FACES[k].nm}">${k[0].toUpperCase()}${k.slice(1)}</span>`).join("")}</div>`;
+  return `<div data-elevnav style="display:contents">${seg}</div>`;
+}
+
+/* What the viewer reads to draw an elevation. One opened from the material
+   tables needs them on screen to be closed again; one picked from the
+   switch over the model can always be left from that switch. */
 function syncElevation() {
-  const open = V.facade && document.querySelector("[data-facades]");
-  window.fitteElevation = open ? { face: V.facade.face, focus: V.facade.focus || 0 } : null;
+  const open = V.facade && (V.facade.plain || document.querySelector("[data-facades]"));
+  window.fitteElevation = open ? { face: V.facade.face, focus: V.facade.focus || 0, plain: Boolean(V.facade.plain) } : null;
   // An elevation only moves and zooms: there is no drag tool to choose.
   document.body.classList.toggle("elev", Boolean(open));
 }
 function paintFacades() {
   document.querySelector("[data-facades]")?.replaceWith(document.createRange().createContextualFragment(facadeTablesHTML()));
+  document.querySelector("[data-elevnav]")?.replaceWith(document.createRange().createContextualFragment(elevNavHTML()));
   syncElevation();
   window.dispatchEvent(new CustomEvent("fitte:render"));
+}
+/* In an elevation the arrow keys walk round the building and Escape goes
+   back to the model — not while typing. */
+document.addEventListener("keydown", (e) => {
+  if (!V.facade || e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.("input,textarea,[contenteditable]")) return;
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); stepElevation(e.key === "ArrowRight" ? 1 : -1); }
+  else if (e.key === "Escape") { V.facade = null; paintFacades(); }
+});
+function stepElevation(d) {
+  const i = ELEV_ORDER.indexOf(V.facade?.face || "sud");
+  V.facade = { face: ELEV_ORDER[(i + d + 4) % 4], focus: 0, plain: V.facade ? V.facade.plain : true };
+  paintFacades();
 }
 
 /* One table, four ways out of it: the spreadsheet the broker opens, the
@@ -3895,7 +4233,7 @@ function exportMenuHTML() {
 function unitListHTML(step) {
   const q = floorQuant();
   return region("list", "liste — unités et superficies",
-    `<div class="ph">${icon("table")}<span class="hi">Unités et superficies</span><span class="fqs">${q.level}</span>
+    `<div class="ph">${icon("table")}<span class="hi">Unités et superficies</span><span class="fqs">${q.level}</span>${issueBadge(["unit", "mat"])}
        <span style="flex:1"></span>${exportMenuHTML()}</div>
      <div class="pb" style="overflow:auto;gap:10px">
        ${fqMixHTML(q)}
@@ -4226,13 +4564,16 @@ function marginHTML() {
           <span style="flex:1"></span>
           <span class="btnw solid go" ${act("postnote")}>${icon(team ? "lock" : "send")}<span class="hi">Commenter</span></span>
         </div></div>`;
-  const inner = `<div class="ph">${icon("message-square")}<span class="lo bar" style="width:70px"></span>
-      <span class="hi">Commentaires</span><span style="flex:1"></span>
-      <span class="hi" style="font-size:11px;color:var(--ink-3)">${list.length}</span></div>
+  /* Two lists in one margin: what people said, and what is wrong. The
+     conflicts carry the alarm so they are not read as one more comment. */
+  const nIssues = issues().length;
+  const tab = (k, ic, nm, n) => `<span class="mtab ${k} ${(V.marginTab === "conf") === (k === "conf") ? "on" : ""}" ${act("mtab", k)}>${icon(ic)}<span class="hi">${nm}</span><i>${n}</i></span>`;
+  const inner = `<div class="ph"><span class="lo bar" style="width:70px"></span>
+      <span class="mtabs">${tab("notes", "message-square", "Commentaires", list.length)}${tab("conf", "alert-triangle", "Conflits", nIssues)}</span></div>
     <div class="pb nmargin">
-      ${composer}
+      ${V.marginTab === "conf" ? issuesListHTML() : `${composer}
       ${list.length ? list.map(card).join("")
-        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">Aucun commentaire sur ce projet.</div>`}
+        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">Aucun commentaire sur ce projet.</div>`}`}
     </div>`;
   return `<section class="pane rg margin" data-rg="marge" data-fi="${fiOf("inspector")}"
     data-region="margin">${inner}</section>`;
@@ -4319,7 +4660,7 @@ const SHEET_AR = 2000 / 1675;
 function layoutSheet(el) {
   const plan = el.querySelector(".plan");
   if (!plan) return { w: 0, h: 0 };
-  const r = el.getBoundingClientRect();
+  const r = vpBox(el);
   let w = r.width, h = w / SHEET_AR;
   if (h > r.height) { h = r.height; w = h * SHEET_AR; }
   plan.style.width = `${w}px`;
@@ -4337,6 +4678,100 @@ function clampPan(rect, zoom, base) {
   V.pan.y = bh <= rect.height ? (rect.height - bh) / 2 : Math.min(0, Math.max(rect.height - bh, V.pan.y));
 }
 
+/* ------------------------------------------------- the quarter turn
+   The sheet, every layer on it, the outlines and the pins turn as one, by
+   quarter turns, about the middle of the pane. Pan and zoom stay in the
+   sheet's own upright frame — a box the size of the pane, its sides
+   swapped when the sheet lies on its side — so every rule above (fit,
+   centre, clamp, zoom about a point) reads the same at any angle. Only
+   what the hand does on screen is turned back into that frame. */
+const rotA = () => ((V.rot % 360) + 360) % 360;
+const rotSide = () => rotA() % 180 !== 0;
+function vpBox(el) {
+  const r = el.getBoundingClientRect();
+  return rotSide() ? { width: r.height, height: r.width } : { width: r.width, height: r.height };
+}
+const turnBy = (dx, dy, deg) => {
+  const t = (deg * Math.PI) / 180, c = Math.round(Math.cos(t) * 1e6) / 1e6, s = Math.round(Math.sin(t) * 1e6) / 1e6;
+  return { x: dx * c - dy * s, y: dx * s + dy * c };
+};
+/* A point of the screen, in the upright frame. */
+function toWorld(el, cx, cy) {
+  const r = el.getBoundingClientRect(), b = vpBox(el);
+  const p = turnBy(cx - r.left - r.width / 2, cy - r.top - r.height / 2, -rotA());
+  return { x: p.x + b.width / 2, y: p.y + b.height / 2 };
+}
+/* A 0–1 point of the sheet, on screen. */
+function sheetToClient(el, x, y) {
+  const r = el.getBoundingClientRect(), b = vpBox(el), base = layoutSheet(el), z = V.zoom / 100;
+  const p = turnBy(V.pan.x + x * base.w * z - b.width / 2, V.pan.y + y * base.h * z - b.height / 2, rotA());
+  return { x: r.left + r.width / 2 + p.x, y: r.top + r.height / 2 + p.y };
+}
+
+function rotPillHTML() {
+  const a = rotA();
+  return `<div class="zpill rpill ${a ? "turned" : ""}" data-rpill>
+    <span class="zb" ${act("rot", "90")} title="Tourner de 90° (R · ⇧R à gauche)">${icon("rotate-cw")}</span>
+    <span class="ang" data-rang ${act("rot0")} title="Remettre le nord en haut (⇧N)">${a}°</span></div>`;
+}
+
+/* While the sheet turns, the frame is painted from these instead of from
+   V: the angle, the scale and the point of the sheet at the pane's middle,
+   each eased from where it was to where it lands. */
+let ROT_ANIM = null, ROT_RAF = 0;
+function rotatePlan(d) {
+  const el = vpEl();
+  if (!d) return;
+  if (!el) { V.rot += d; return; }
+  stopGlide();
+  if (ROT_RAF) { cancelAnimationFrame(ROT_RAF); ROT_RAF = 0; ROT_ANIM = null; }
+  const z0 = V.zoom / 100, b0 = vpBox(el), base0 = layoutSheet(el);
+  const f0 = { x: (b0.width / 2 - V.pan.x) / (base0.w * z0), y: (b0.height / 2 - V.pan.y) / (base0.h * z0) };
+  const a0 = V.rot;
+  V.rot += d;
+  const b1 = vpBox(el), base1 = layoutSheet(el);
+  /* Close in, the drawing keeps its size on screen, so the unit being read
+     stays framed; at the whole sheet it is fitted to the pane again. */
+  if (V.zoom > 100) V.zoom = Math.min(ZMAX, Math.max(100, Math.round(V.zoom * base0.w / base1.w * 100) / 100));
+  const z1 = V.zoom / 100;
+  V.pan.x = b1.width / 2 - f0.x * base1.w * z1;
+  V.pan.y = b1.height / 2 - f0.y * base1.h * z1;
+  clampPan(b1, V.zoom, base1);
+  const f1 = { x: (b1.width / 2 - V.pan.x) / (base1.w * z1), y: (b1.height / 2 - V.pan.y) / (base1.h * z1) };
+  const k0 = (base0.w * z0) / base1.w, k1 = z1;
+  const pill = document.querySelector("[data-rpill]");
+  pill?.classList.toggle("turned", rotA() !== 0);
+  const ang = pill?.querySelector("[data-rang]");
+  if (ang) ang.textContent = `${rotA()}°`;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { paintSheet(); return; }
+  const t0 = performance.now(), ms = 320;
+  const step = (now) => {
+    const t = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - t, 3);
+    ROT_ANIM = { a: a0 + d * e, k: k0 * Math.pow(k1 / k0, e), fx: f0.x + (f1.x - f0.x) * e, fy: f0.y + (f1.y - f0.y) * e };
+    paintSheet();
+    if (t < 1) { ROT_RAF = requestAnimationFrame(step); return; }
+    ROT_RAF = 0; ROT_ANIM = null;
+    paintSheet();
+  };
+  ROT_RAF = requestAnimationFrame(step);
+}
+/* North back at the top, the short way round: 270 goes on to 360. */
+function resetPlanTurn() {
+  const a = rotA();
+  if (a) rotatePlan(a > 180 ? 360 - a : -a);
+}
+/* R turns right, ⇧R left, ⇧N puts north up — while the pointer is over
+   the plan, and never while typing. */
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.("input,textarea,[contenteditable]")) return;
+  if (!document.querySelector('[data-zone="plan"]')?.matches(":hover")) return;
+  if (e.key === "r") rotatePlan(90);
+  else if (e.key === "R") rotatePlan(-90);
+  else if (e.key === "N") resetPlanTurn();
+  else return;
+  e.preventDefault();
+});
+
 /* Zooms around a point of the pane, the pointer under the wheel or the
    middle of the pane for the buttons, so what is being read stays put. */
 function zoomTo(next, cx, cy, rect, base) {
@@ -4352,7 +4787,7 @@ function zoomTo(next, cx, cy, rect, base) {
 function zoomBy(next) {
   const el = vpEl();
   if (!el) { V.zoom = Math.min(ZMAX, Math.max(ZMIN, next)); return; }
-  const r = el.getBoundingClientRect();
+  const r = vpBox(el);
   zoomTo(next, r.width / 2, r.height / 2, r, layoutSheet(el));
 }
 
@@ -4406,7 +4841,7 @@ function fitUnit(glide = true) {
   if (!el || !row) return;
   const poly = polysForPane()[row[2]];
   if (!poly) return;   // no measured contour for this unit — leave the view as it is
-  const r = el.getBoundingClientRect();
+  const r = vpBox(el);
   const base = layoutSheet(el);
   const [x, y, w, h] = polyBounds(poly);
   const z = Math.min(ZMAX, Math.max(ZMIN,
@@ -4496,8 +4931,22 @@ function paintSheet() {
   /* Laid out first: the pane can have been resized since the last paint,
      and the pan is centred against the box this returns. */
   const base = layoutSheet(el);
-  clampPan(el.getBoundingClientRect(), V.zoom, base);
-  if (plan) plan.style.transform = `translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})`;
+  const box = vpBox(el), real = el.getBoundingClientRect();
+  clampPan(box, V.zoom, base);
+  el.dataset.turn = String(rotA());
+  /* The sheet's frame: to the pane's middle, turned, then the upright
+     frame's own pan and zoom. While it turns, the eased frame instead. */
+  const RA = ROT_ANIM;
+  const ang = RA ? RA.a : V.rot, kz = RA ? RA.k : V.zoom / 100;
+  if (plan) plan.style.transform = RA
+    ? `translate(${real.width / 2}px,${real.height / 2}px) rotate(${ang}deg) scale(${kz}) translate(${-RA.fx * base.w}px,${-RA.fy * base.h}px)`
+    : `translate(${real.width / 2}px,${real.height / 2}px) rotate(${ang}deg) translate(${V.pan.x - box.width / 2}px,${V.pan.y - box.height / 2}px) scale(${kz})`;
+  /* North turns with the sheet: the needle swings, the letter rides round
+     the ring and stays upright. */
+  const nd = ((ang % 360) + 360) % 360, rad = (nd * Math.PI) / 180;
+  document.querySelector("[data-nneedle2d]")?.setAttribute("transform", `rotate(${nd} 0 6)`);
+  const nl = document.querySelector("[data-north] [data-nl]");
+  if (nl) { nl.setAttribute("x", (Math.sin(rad) * 24).toFixed(1)); nl.setAttribute("y", (6 - Math.cos(rad) * 33 + 6).toFixed(1)); }
   /* V.zoom runs through fractions while the sheet glides; the percentage
      is read by a person, so it is rounded here rather than quantising the
      motion itself. */
@@ -4505,7 +4954,9 @@ function paintSheet() {
   const read = document.querySelector("[data-zread]");
   if (read) read.textContent = `${shown}%`;
   el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / V.zoom * 100).toFixed(3)}px`; });
-  el.querySelectorAll(".plan .npin").forEach((p) => { p.style.transform = `scale(${(100 / V.zoom).toFixed(3)})`; });
+  /* Pins and conflict marks stay upright and pin-sized whatever the sheet does. */
+  el.querySelectorAll(".plan .npin").forEach((p) => { p.style.transform = `rotate(${-ang}deg) scale(${(1 / kz).toFixed(3)})`; });
+  el.querySelectorAll(".plan .xmark").forEach((m) => { m.style.transform = `translate(-50%,-50%) rotate(${-ang}deg)`; });
   placePlanPills();
   paintConflictMarks();
   if (V.pending) placePinBubble();
@@ -4560,6 +5011,20 @@ function placePlanPills() {
    on release. The grid case rewrites the whole track list because a grid
    item cannot widen its own column; the flex case writes the basis of the
    pane itself. */
+/* Folding reads the pane's header first, so the strip it leaves carries
+   the same icon and title on any screen. */
+document.addEventListener("click", (e) => {
+  const tab = e.target.closest?.(".gfold[data-side]");
+  if (!tab) return;
+  const gut = tab.closest(".gut");
+  const pane = tab.dataset.side === "prev" ? gut.previousElementSibling : gut.nextElementSibling;
+  const ph = pane?.querySelector(".ph");
+  if (!ph) return;
+  V.foldHead[splitKey(tab.dataset.value)] = {
+    ic: ph.querySelector("use")?.getAttribute("href")?.replace("#lu-", ""),
+    t: ph.querySelector(".hi")?.textContent.trim(),
+  };
+}, true);
 document.addEventListener("pointerdown", (e) => {
   const gut = e.target.closest?.(".gut");
   if (!gut || e.target.closest(".gfold") || gut.classList.contains("fold")) return;
@@ -4587,23 +5052,63 @@ document.addEventListener("pointerdown", (e) => {
     const fr = [...parent.children].indexOf(parent.querySelector('[data-region="content"]')) - 1;
     if (fr >= 0) tracks[fr] = "1fr";
   }
+  /* Option A: a pane stops at the width its tables and its header need,
+     measured as laid out without the pane holding them in. A table drawn
+     at 100 % reports the pane's width, not its own, so each is read at its
+     natural width; the header is read at max-content, its spacer at zero. */
+  const need = (() => {
+    const pr = target.getBoundingClientRect().width;
+    let n = 0;
+    target.querySelectorAll(".pb").forEach((pb) => {
+      const pad = pr - pb.clientWidth + parseFloat(getComputedStyle(pb).paddingLeft) + parseFloat(getComputedStyle(pb).paddingRight);
+      pb.querySelectorAll("table").forEach((t) => {
+        const was = t.style.width;
+        t.style.width = "max-content";
+        n = Math.max(n, t.offsetWidth + pad);
+        t.style.width = was;
+      });
+    });
+    target.querySelectorAll(".ph").forEach((ph) => {
+      const was = ph.style.width;
+      ph.style.width = "max-content";
+      n = Math.max(n, ph.offsetWidth);
+      ph.style.width = was;
+    });
+    return Math.ceil(n);
+  })();
+  const floor = Math.max(SPLIT_MIN, Math.min(need, max));
   let w = startW;
   gut.classList.add("live");
   document.body.classList.add("splitting");
+  /* A grid column will not go under its content (see `side` in render):
+     when the pane stops wider than the pointer asks, the edge says so. */
+  const stop = document.createElement("i");
+  stop.className = "stop";
+  stop.textContent = "butée";
   const move = (ev) => {
-    w = Math.max(SPLIT_MIN, Math.min(max, startW + sign * (ev.clientX - startX)));
+    const asked = startW + sign * (ev.clientX - startX);
+    w = Math.max(floor, Math.min(max, asked));
     if (grid) {
       const next = tracks.slice();
-      next[index] = `${Math.round(w)}px`;
+      next[index] = `minmax(min-content, ${Math.round(w)}px)`;
       parent.style.gridTemplateColumns = next.join(" ");
-    } else target.style.flex = `0 0 ${Math.round(w)}px`;
+      const held = target.getBoundingClientRect().width > w + 1 || asked < floor;
+      if (held && !stop.isConnected) target.append(stop);
+      else if (!held) stop.remove();
+    } else {
+      target.style.flex = `0 0 ${Math.round(w)}px`;
+      if (asked < floor && !stop.isConnected) target.append(stop);
+      else if (asked >= floor) stop.remove();
+    }
   };
   const up = () => {
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", up);
     gut.classList.remove("live");
     document.body.classList.remove("splitting");
-    V.split[key] = Math.round(w);
+    stop.remove();
+    /* The width kept is the one on screen, not the one asked past the stop. */
+    V.split[key] = Math.round(grid ? Math.max(w, target.getBoundingClientRect().width) : w);
     render();
   };
   window.addEventListener("pointermove", move);
@@ -4690,10 +5195,14 @@ function placeLayCard() {
   let y = z.top + pad;
   for (const c of live) { c.top = Math.max(c.t, y); y = c.top + c.h + gap; }
   const over = Math.max(0, y - gap - (z.bottom - pad));
-  const left = live[0].strip.getBoundingClientRect().right + 8;
+  /* With the model folded there is no pane to lie over on the right, only
+     the folded strips and the margin: the cards open on the strip's left,
+     over the drawing, instead. */
+  const s = live[0].strip.getBoundingClientRect();
+  const modelOpen = Boolean(document.querySelector('[data-zone="model"]'));
   for (const c of live) {
     c.card.style.right = "";
-    c.card.style.left = `${left}px`;
+    c.card.style.left = `${modelOpen ? s.right + 8 : s.left - 8 - c.card.offsetWidth}px`;
     c.card.style.top = `${Math.max(z.top + pad, c.top - over)}px`;
   }
 }
@@ -4896,20 +5405,28 @@ function placePinBubble() {
   const plan = el.querySelector(".plan");
   const zone = el.closest(".zone");
   if (!plan || !zone) return;
-  const r = plan.getBoundingClientRect(), z = zone.getBoundingClientRect();
-  const v = el.getBoundingClientRect();
-  const px = r.left + V.pending.x * r.width - z.left;
-  const py = r.top + V.pending.y * r.height - z.top;
-  const pad = 10;
+  const z = zone.getBoundingClientRect(), v = el.getBoundingClientRect();
+  const tip = sheetToClient(el, V.pending.x, V.pending.y);
+  const px = tip.x - z.left, py = tip.y - z.top;
+  const pad = 10, gap = 14, head = 28;
   /* On a narrow pane the box gives up its width before it gives up being
      whole. */
   bub.style.width = `${Math.min(258, Math.round(v.width - 2 * pad))}px`;
   const w = bub.offsetWidth, h = bub.offsetHeight;
-  const min = v.left - z.left + pad, max = v.right - z.left - w - pad;
-  /* To the right of the pin when there is room, to its left otherwise. */
-  const left = px + 18 > max ? px - 18 - w : px + 18;
-  bub.style.left = `${Math.max(min, Math.min(left, max)).toFixed(0)}px`;
-  bub.style.top = `${Math.max(v.top - z.top + pad, Math.min(py - 14, v.bottom - z.top - h - pad)).toFixed(0)}px`;
+  const L = v.left - z.left + pad, R = v.right - z.left - pad, T = v.top - z.top + pad, B = v.bottom - z.top - pad;
+  /* Centred under the pin's point, a tail pointing up at it; when there is
+     no room below, above the pin's head. Either way it never covers the
+     pin. With room for neither, the side with more of it. */
+  const left = Math.max(L, Math.min(px - w / 2, R - w));
+  const below = py + gap, above = py - head - gap - h;
+  const under = below + h <= B || (above < T && B - py >= py - head - T);
+  const top = under ? Math.min(below, B - h) : Math.max(T, above);
+  bub.style.left = `${left.toFixed(0)}px`;
+  bub.style.top = `${top.toFixed(0)}px`;
+  let tail = bub.querySelector(":scope > .ptail");
+  if (!tail) { tail = document.createElement("i"); bub.append(tail); }
+  tail.className = `ptail ${under ? "t" : "b"}`;
+  tail.style.left = `${Math.max(10, Math.min(w - 22, px - left - 6)).toFixed(0)}px`;
 }
 
 function paintConflictMarks() {
@@ -4947,8 +5464,8 @@ function dropPinAt(e, el) {
   if (inBubble(e)) return false;
   const plan = el.querySelector(".plan");
   if (!plan) return false;
-  const r = plan.getBoundingClientRect();
-  const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  const base = layoutSheet(el), z = V.zoom / 100, p = toWorld(el, e.clientX, e.clientY);
+  const x = (p.x - V.pan.x) / (base.w * z), y = (p.y - V.pan.y) / (base.h * z);
   if (x < 0 || x > 1 || y < 0 || y > 1) return false;
   V.pending = { surface: "plan", level: paneLevel(), sheet: currentSheetKey(),
     x, y, zone: unitAt(x, y) };
@@ -4977,13 +5494,13 @@ function wireViewport() {
     if (inBubble(e)) return;
     e.preventDefault();
     stopGlide();
-    const r = el.getBoundingClientRect();
+    const p = toWorld(el, e.clientX, e.clientY);
     /* One direction for every device. Guessing the device from the shape of
        the deltas got it wrong often enough that the same gesture zoomed both
        ways within one stroke, which is worse than any convention: a trackpad
        sends a stream of small deltas and a single large one is enough to flip
        the sign mid-swipe. Two fingers down, the drawing goes away. */
-    zoomTo(V.zoom * Math.exp(e.deltaY * 0.0016), e.clientX - r.left, e.clientY - r.top, r, layoutSheet(el));
+    zoomTo(V.zoom * Math.exp(e.deltaY * 0.0016), p.x, p.y, vpBox(el), layoutSheet(el));
     paint();
   };
   el.ondblclick = (e) => {
@@ -4996,7 +5513,7 @@ function wireViewport() {
     /* Selecting the words of a note is not a pan. */
     if (inBubble(e)) return;
     stopGlide();
-    const r = el.getBoundingClientRect();
+    const r = vpBox(el);
     const start = { x: e.clientX, y: e.clientY, px: V.pan.x, py: V.pan.y };
     let moved = false;
     el.onpointermove = (m) => {
@@ -5009,8 +5526,10 @@ function wireViewport() {
         el.setPointerCapture(m.pointerId);
         el.classList.add("drag");
       }
-      V.pan.x = start.px + (m.clientX - start.x);
-      V.pan.y = start.py + (m.clientY - start.y);
+      /* The hand moves on screen; the pan is in the sheet's upright frame. */
+      const dd = turnBy(m.clientX - start.x, m.clientY - start.y, -rotA());
+      V.pan.x = start.px + dd.x;
+      V.pan.y = start.py + dd.y;
       clampPan(r, V.zoom, layoutSheet(el));
       paint();
     };
@@ -5063,7 +5582,7 @@ function wireMiniPlan() {
   const goTo = (e) => {
     const el = vpEl();
     if (!el) return;
-    const b = mi.getBoundingClientRect(), r = el.getBoundingClientRect();
+    const b = mi.getBoundingClientRect(), r = vpBox(el);
     const base = layoutSheet(el), z = V.zoom / 100;
     const fx = Math.max(0, Math.min(1, (e.clientX - b.left) / b.width));
     const fy = Math.max(0, Math.min(1, (e.clientY - b.top) / b.height));
@@ -5086,7 +5605,7 @@ function paintMiniPlan() {
   const mi = box.querySelector("[data-mi]"), rect = box.querySelector("[data-mrect]");
   const b = mi.getBoundingClientRect();
   if (!b.width) return;
-  const r = el.getBoundingClientRect(), base = layoutSheet(el), z = V.zoom / 100;
+  const r = vpBox(el), base = layoutSheet(el), z = V.zoom / 100;
   const x = Math.max(0, Math.min(1, -V.pan.x / (base.w * z)));
   const y = Math.max(0, Math.min(1, -V.pan.y / (base.h * z)));
   const w = Math.min(1 - x, r.width / (base.w * z));
@@ -5140,8 +5659,11 @@ function render() {
   const sideShut = hasInsp && folded("side");
   const listW = splitW("list", V.screen === "Unités" ? 400 : 260);
   const sideW = splitW("side", margin ? 286 : 340);
-  const cols = [hasList && !listShut ? `${listW}px` : null, hasList ? "var(--gap)" : null, "1fr",
-    hasInsp ? "var(--gap)" : null, hasInsp && !sideShut ? `${sideW}px` : null]
+  /* A side column is never narrower than what it holds: the track's floor
+     is its content's own width, so a table is never cut at the edge. */
+  const side = (shut, w) => (shut ? `${FOLD_W}px` : `minmax(min-content, ${w}px)`);
+  const cols = [hasList ? side(listShut, listW) : null, hasList ? "var(--gap)" : null, "1fr",
+    hasInsp ? "var(--gap)" : null, hasInsp ? side(sideShut, sideW) : null]
     .filter(Boolean).join(" ");
   /* No rail until a project is open: the rail is the proof that one is. */
   const navMode = def.index ? "top"
@@ -5169,12 +5691,13 @@ function render() {
           <div style="grid-column:1/-1">${headerHTML()}</div>
           ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
           ${SCREENS[V.screen].home ? "" : `${!whole && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
-          ${hasList && !listShut ? listHTML() : ""}
+          ${hasList ? (listShut ? foldStripHTML("list", "la liste") : listHTML()) : ""}
           ${hasList ? gutter({ size: "list", grab: "prev", prev: "list", lprev: "la liste" }) : ""}
           ${contentHTML()}
           ${hasInsp ? gutter({ size: "side", grab: "next", next: "side",
             lnext: margin ? "les commentaires" : "l'inspecteur" }) : ""}
-          ${hasInsp && !sideShut ? (margin ? marginHTML() : inspectorHTML()) : ""}`}
+          ${hasInsp ? (sideShut ? foldStripHTML("side", margin ? "les commentaires" : "l'inspecteur")
+            : (margin ? marginHTML() : inspectorHTML())) : ""}`}
         </div>
         ${!whole && def.regions.includes("inspector") && !hasInsp ? inspectorHTML() : ""}
       </div>
@@ -5341,10 +5864,17 @@ document.addEventListener("click", (e) => {
   render();
 }, true);
 document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape" || !V.exportMenu) return;
+  if (e.key !== "Escape" || !(V.exportMenu || V.docs.skpOpen)) return;
   V.exportMenu = false;
+  V.docs.skpOpen = false;
   render();
 });
+/* The model file's card closes the same way. */
+document.addEventListener("click", (e) => {
+  if (!V.docs.skpOpen || e.target.closest?.("[data-skppop],.fchip")) return;
+  V.docs.skpOpen = false;
+  render();
+}, true);
 
 /* Escape closes the dialog, because a dialog that can only be dismissed by
    finding the right button is a trap. */
@@ -5713,6 +6243,12 @@ function onClick(e) {
        filling the pane, not a contour somewhere off-screen. Choosing a unit
        is also choosing to read a floor, so it ends the building scope. */
     case "circulation": selectCirculation(); return;
+    /* The switch over the model: the model itself, or one façade with its
+       own textures. */
+    case "elev":
+      V.facade = value ? { face: value, focus: 0, plain: true } : null;
+      paintFacades();
+      return;
     /* A façade's elevation, opened from its table; the open one closes. */
     case "facade":
       V.facade = V.facade?.face === value ? null : { face: value, focus: 0 };
@@ -6015,6 +6551,9 @@ function onClick(e) {
       break;
     }
     case "xclose": V.xopen = null; break;
+    case "mtab": V.marginTab = value; break;
+    case "issues": V.marginTab = "conf"; break;
+    case "issue": goIssue(value); return;
     case "xwho": {
       const w = V.xdraft.who;
       V.xdraft.who = w.includes(value) ? w.filter((x) => x !== value) : [...w, value];
@@ -6079,6 +6618,8 @@ function onClick(e) {
     /* The steppers move the zoom without going through render: the drawing
        must not be rebuilt to be pushed one notch. */
     case "zfit": { V.zoom = 100; V.pan = { x: 0, y: 0 }; paintSheet(); return; }
+    case "rot": rotatePlan(Number(value)); return;
+    case "rot0": resetPlanTurn(); return;
     case "zstep": {
       const [side, dir] = value.split(":");
       const k = dir === "+" ? 1 : -1;
@@ -6162,8 +6703,12 @@ function onClick(e) {
       say(`Remise à AutoCAD: ${value && LAYDOC[value] ? layDoc(value).file : dwgName()} s'ouvre sur l'unité, la décision suit.`);
       break;
     case "sketchup":
-      say(`Remise à SketchUp: ${V.docs.skp} s'ouvre sur ${viewOf("Unités").toLowerCase()}. Lecture seule.`);
+      say(`Remise à SketchUp: ${skpDoc().file} s'ouvre sur ${viewOf("Unités").toLowerCase()}. Lecture seule.`);
       break;
+    case "skpchip": V.docs.skpOpen = !V.docs.skpOpen; V.docs.skpHist = V.docs.skpList = false; break;
+    case "skphist": V.docs.skpHist = !V.docs.skpHist; V.docs.skpList = false; break;
+    case "skplist": V.docs.skpList = !V.docs.skpList; V.docs.skpHist = false; break;
+    case "skppick": skpPick(Number(value)); return;
     case "expmenu": V.exportMenu = !V.exportMenu; break;
     case "export": {
       V.exportMenu = false;
@@ -6302,10 +6847,9 @@ window.addEventListener("fitte:model-state", (e) => {
   /* The unit's openings are counted in the model: drawn once it is in. */
   document.querySelector("[data-fq]")?.replaceWith(document.createRange().createContextualFragment(fqUnitHTML(floorQuant())));
 });
-/* The façade areas are counted once, after the model loads. */
-window.addEventListener("fitte:facades", () => {
-  document.querySelector("[data-facades]")?.replaceWith(document.createRange().createContextualFragment(facadeTablesHTML()));
-});
+/* The façade areas are counted once, after the model loads. The materials'
+   problems are only known then, so every count on the page is redrawn. */
+window.addEventListener("fitte:facades", () => render());
 applyDial(dial.values);
 </script>
 </body>
