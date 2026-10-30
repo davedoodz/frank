@@ -395,7 +395,14 @@ tr.hl td{background:var(--vert-pale)}
 /* Process chapters: a prototype as deployed beside the problems it raised */
 .chap-o{display:grid;grid-template-columns:896px 1fr;gap:48px;margin-top:40px;flex:1;min-height:0}
 .live{width:896px;height:560px;border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px var(--line);position:relative}
+.live.shotl{display:block}
+.live.shotl img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
 .live iframe{position:absolute;left:0;top:0;width:1600px;height:1000px;border:0;transform:scale(.56);transform-origin:0 0}
+/* A live frame sized to the 7-column cell instead of the chapter slot. The
+   page runs at 1024 wide: narrow enough that the scaled text stays readable,
+   wide enough that the three-column card rows never crop. */
+.live.fit{width:761px;height:785px}
+.live.fit iframe{width:1024px;height:1056px;transform:scale(.7432)}
 .dep{width:896px;height:560px;display:block}
 /* The deployed shot is the door to the running app: clicking the screen does
    what the link beside it does, with a quiet accent edge on hover. */
@@ -862,7 +869,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <h2>Two directions, put in front of the users side by side.</h2>
   <div class="rule"></div>
   <div class="chap-o">
-    <div class="live"><iframe src="deck-p1-index.html" title="Prototype 1, as deployed" loading="lazy"></iframe></div>
+    <a class="live shotl" href="https://cafitte-prototype1.vercel.app/prototypes/plateforme-b.html" target="_blank" rel="noopener"><img src="assets/frank/chap-p1-app.jpg" alt="Prototype 1, direction B as deployed: the unit list, the floor plan, the SketchUp massing and unit NO. 9 with its opening to coordinate"></a>
     <div class="chap-side">
       <p>A asked whether one project overview makes information and revisions easier to find. B asked whether connecting the AutoCAD plans to the SketchUp model cuts manual coordination. The interviews on October 26 chose B, but not for the sync. What they wanted from it was a record of every change and who asked for it.</p>
       <p class="k" style="margin-top:28px">Problems it raised</p>
@@ -924,7 +931,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <p class="lede" style="font-size:21px">I wrote down every ask in plain words: what they do by hand today, what the tool should do instead, and what that looks like on screen. Then I ranked them with Guy and Benoît: 9 high, 9 medium, 2 low.</p>
       <div class="links" style="margin-top:28px"><a href="interview-features.html" target="_blank" rel="noopener">The user requests <span class="mono">/prototypes/interview-features.html</span><svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
     </div>
-    <div class="shot" style="height:720px"><img style="object-position:50% 0" src="assets/frank/feedback1-asks.jpg" alt="The user requests page: twenty asks from the two interviews, each with today, should do and on screen, and a priority"></div>
+    <div class="live fit"><iframe src="interview-features.html" title="The twenty user requests, as a page you can sort and re-rank" loading="lazy"></iframe></div>
   </div>
 </div>
 </section>
@@ -989,7 +996,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <h2>One coordination workspace: units, plan, model and comments on one floor.</h2>
   <div class="rule"></div>
   <div class="chap-o">
-    <div class="live"><iframe src="deck-p2-index.html" title="Prototype 2, as deployed" loading="lazy"></iframe></div>
+    <a class="live shotl" href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/chap-p2-app.jpg" alt="Prototype 2 as deployed: level 5 with the units table, the 2D plan and its drawing layers, the 3D model and the comments"></a>
     <div class="chap-side">
       <p>C is direction B built on the real permit set of a 104-unit building: eight floors, the SketchUp model and the engineers’ drawings as layers. Selecting a unit anywhere selects it everywhere. The test on October 28 raised how the screen is read, not what it lacks.</p>
       <p class="k" style="margin-top:28px">Problems it raised</p>
