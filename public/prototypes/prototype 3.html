@@ -683,7 +683,8 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
    section counts and the material rows carry. */
 .tbl .xwarn{display:inline-flex;margin-left:5px;color:#b3261e;vertical-align:-2px}
 .tbl .xwarn svg{width:12px;height:12px}
-.tbl .xwarn[data-act]{cursor:pointer;border-radius:4px;padding:1px;margin:-1px -1px -1px 4px}
+.tbl .xwarn[data-act]{cursor:pointer;width:20px;height:20px;align-items:center;justify-content:center;
+  border-radius:50%;margin:-4px -4px -4px 2px}
 .tbl .xwarn[data-act]:hover{background:rgba(179,38,30,.1)}
 .tbl tfoot td{color:var(--ink);font-weight:600}
 .fqt{display:flex;flex-direction:column;gap:4px;min-width:0}
@@ -1551,20 +1552,42 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .pane.margin .pb{gap:8px;overflow:auto}
 .nscope{gap:5px;align-items:center}
 .ncard{position:relative;border:1px solid var(--line-2);border-radius:8px;background:var(--paper);
-  padding:7px 9px;cursor:pointer}
-.ncard:hover{background:var(--fill-2)}
+  padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.ncard:hover{border-color:var(--line)}
 .ncard.on{border-color:var(--ink)}
-.ncard.team{background:#eef2f4;border-color:#c6d4dc}
-.ncard.team.on{border-color:#2f4858}
-.ncard .tie{position:absolute;left:-9px;top:14px;width:8px;height:1px;background:var(--line)}
-.ncard .who{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)}
-.ncard .who b{color:var(--ink);font-size:12px;font-weight:600}
-.ncard .who .when{margin-left:auto;color:var(--ink-3);font-size:11px}
-.ncard .txt{margin-top:3px;font-size:12.5px}
-.ncard .anch{margin-top:5px;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink-3);
-  font-family:var(--mono)}
-.ncard.team .anch{color:#2f4858}
-.ncard .nact{margin-top:7px;display:flex;align-items:center;gap:6px;justify-content:flex-end}
+/* The author: initials in a circle (the signed-in person's in black), name, role. */
+.ncard .au{display:flex;align-items:center;gap:8px;min-width:0;padding-right:30px}
+.ncard .av{width:26px;height:26px;flex:0 0 26px;border-radius:50%;background:var(--fill);display:grid;place-items:center;
+  font-size:10.5px;font-weight:600;color:var(--ink)}
+.ncard .av.me{background:var(--ink);color:#fff}
+.ncard .au .w{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.ncard .au b{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ncard .au .w > span{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ncard .meta{display:flex;align-items:center;gap:8px;min-width:0}
+.ncard .meta .when{margin-left:auto;color:var(--ink-3);font-size:11px;white-space:nowrap}
+.ncard .int{display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 6px;border-radius:4px;background:var(--fill);
+  font-size:10.5px;color:var(--ink-2);white-space:nowrap;flex:0 0 auto}
+.ncard .int .lu{width:11px;height:11px}
+/* Resolve: a ✓ at the corner, shown on hover or when the card is chosen. */
+.ncard .chk{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:5px;display:grid;place-items:center;
+  color:var(--ink-3);opacity:0;border:1px solid transparent;background:var(--paper)}
+.ncard .chk .lu{width:14px;height:14px}
+.ncard:hover .chk,.ncard.on .chk{opacity:1;border-color:var(--line-2)}
+.ncard .chk:hover{color:#2f7a4d;border-color:#2f7a4d}
+.ncard.res .txt{color:var(--ink-3)}
+.ncard .resl{display:flex;align-items:center;gap:8px}
+.ncard .resby{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#2f7a4d;margin-right:auto}
+.ncard .resby .lu{width:11px;height:11px}
+/* Ouverts / Résolus: the archive is the second tab. */
+.ntabs{display:flex;gap:2px;border-bottom:1px solid var(--line-2);margin:2px -2px 0}
+.ntabs .ntab{padding:6px 10px;font-size:12px;color:var(--ink-2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.ntabs .ntab[aria-current="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.ntabs em{font-style:normal;color:var(--ink-3);font-weight:400;margin-left:4px}
+.ncard .txt{font-size:12.5px;line-height:1.45}
+.ncard .anch{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-3);min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ncard .anch .lu{width:12px;height:12px;flex:0 0 12px}
+.ncard .nact{display:flex;align-items:center;gap:6px;justify-content:flex-end}
 .ncard.new{border-color:var(--ink);cursor:default}
 .ncard .nnew{width:100%;margin-top:5px;border:1px solid var(--line-2);border-radius:6px;padding:5px 7px;
   font:inherit;font-size:12.5px;color:var(--ink);background:#fff;resize:none}
@@ -1586,12 +1609,9 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 .npin .nd > svg{transform:rotate(45deg);width:11px;height:11px}
 /* The drop is turned on its corner; the number it carries is not. */
 .npin .nd > i{display:block;transform:rotate(45deg);font-style:normal;line-height:1}
-/* A point just put down wears the same pin that was on the pointer — the
-   same outline, the same proportion — so the gesture and its result are
-   plainly one thing. */
-.npin .ndg{position:absolute;left:-14px;bottom:-3px;width:28px;height:28px;color:var(--ink);
-  filter:drop-shadow(0 2px 4px rgba(17,17,18,.3))}
-.npin .ndg svg{width:28px;height:28px;fill:#fff;stroke:currentColor;stroke-width:1.8}
+/* A point just put down wears the numbered pin's own drop — green, the
+   white ring, no number yet — the same drop that was on the pointer. */
+.npin.pending .nd{background:#c3e05a;color:#2f3a05;border-color:#2f3a05}
 /* An internal note is still a pin: same drop, same number, in the slate
    the internal cards are written on. Colour carries the scope, the way it
    does in the margin; the shape stays the one the eye looks for. */
@@ -1622,7 +1642,7 @@ body:has([data-skppop]) .lcard{visibility:hidden}
    cursor is the pin itself, and the 2D pane is ringed so it is plain which
    surface will take it. The model is not one of them. */
 [data-pin="on"] .zone[data-zone="plan"] .vp,
-[data-pin="on"] .zone[data-zone="plan"] .vp *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='-3 -3 30 30' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='%23fff' stroke-width='5'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3Cg stroke='%23111' stroke-width='2'%3E%3Cpath fill='%23c3e05a' d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/g%3E%3C/svg%3E") 12 26, crosshair}
+[data-pin="on"] .zone[data-zone="plan"] .vp *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='-3 -3 30 30' stroke-linejoin='round'%3E%3Cpath d='M12 20.1L6.7 14.8A7.5 7.5 0 1 1 17.3 14.8Z' fill='none' stroke='%23fff' stroke-width='5'/%3E%3Cpath d='M12 20.1L6.7 14.8A7.5 7.5 0 1 1 17.3 14.8Z' fill='%23c3e05a' stroke='%232f3a05' stroke-width='1.5'/%3E%3C/svg%3E") 15 23, crosshair}
 [data-pin="on"] .zone[data-zone="plan"]{box-shadow:inset 0 0 0 2px #8ba00f}
 /* The sheet is held still while a pin is being placed: a unit that lights
    and names itself under the pointer is an invitation to click it, and the
@@ -2112,12 +2132,6 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
 /* The office's mark, traced from its file to three shapes so it holds at
    any size; drawn in the office green. */
 const OFFICE_MARK = `<svg class="omark" viewBox="0 0 1342 1341" aria-hidden="true"><g fill="currentColor"><path d="M0 0H145V1340H0Z"/><path d="M168 0H618V1340H283V341L572 667V454Z"/><path d="M752 0H1342V1320L797 708V960L1035 1229H752Z"/></g></svg>`;
-/* The pin just put down, drawn inline rather than from the sprite: the
-   sprite's symbols carry fill="none", which the drop's white body cannot
-   override through <use>. Same outline as the pin on the pointer. */
-const PIN_GLYPH = `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path
-  d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>`;
-
 /* Lucide ships as a sprite-less library, so the icons are stamped once into
    a hidden sprite and referenced by id afterwards. */
 function sprite() {
@@ -2139,10 +2153,13 @@ function sprite() {
     "columns-3", "flame", "route", "plus",
     /* the margin: posting a note, keeping one for the studio */
     "lock", "map-pin", "send", "users", "trash-2",
+    /* the scope of a note: the house keeps it in the office, the globe
+       sends it out with the link */
+    "house",
     /* the plan's comment button */
     "message-circle-plus",
     /* a ticked task is filed by hand, and can be pulled back out */
-    "archive", "archive-restore",
+    "archive", "archive-restore", "undo-2",
     /* the task editor */
     "pencil",
     /* the code question: where an article was found, and the other code */
@@ -5310,8 +5327,16 @@ const nextPinId = () => V.pins.reduce((m, p) => Math.max(m, p.id), 0) + 1;
    shows them all — reading the project as the invited side sees it is the
    share dialogue's business, not a mode the studio sits inside. */
 const pinsVisible = () => V.pins;
-const pinsOnSheet = () => pinsVisible().filter((p) => p.surface === "plan" && p.level === paneLevel());
-const pinsOnModel = () => pinsVisible().filter((p) => p.surface === "model");
+/* A resolved comment leaves the drawings; it is read under « Résolus ». */
+const pinsOnSheet = () => pinsVisible().filter((p) => !p.res && p.surface === "plan" && p.level === paneLevel());
+const pinsOnModel = () => pinsVisible().filter((p) => !p.res && p.surface === "model");
+/* Who wrote a note, by name: the signed-in architect, or the person the
+   project was shared with whose role it carries. */
+function pinAuthor(p) {
+  const s = /^Vous/.test(p.who) ? { name: ME.name, role: "Architecte — vous", me: true }
+    : SHARE_PEOPLE.find((x) => x.role === p.who) || { name: p.who, role: "" };
+  return { ...s, ini: s.name.split(/[\s-]+/).map((w) => w[0]).join("").slice(0, 2) };
+}
 const SHEET_NAME = { plan: "plan d'unités", arp: "arpenteur", pay: "paysage" };
 const pinAnchor = (p) => (p.surface === "model"
   ? `maquette — niv. ${p.level} — ${p.face}`
@@ -5337,7 +5362,7 @@ function pinMarkHTML() {
       ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}"
       style="left:${(p.x * 100).toFixed(2)}%;top:${(p.y * 100).toFixed(2)}%;transform:scale(${(1 / z).toFixed(3)})"
       ${p.id ? act("note", p.id) : ""}>
-      ${p.id ? `<span class="nd"><i>${i + 1}</i></span>` : `<span class="ndg">${PIN_GLYPH}</span>`}
+      <span class="nd">${p.id ? `<i>${i + 1}</i>` : ""}</span>
       ${p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""}
     </div>`).join("");
 }
@@ -5351,13 +5376,13 @@ function pinBubbleHTML() {
   const team = V.pinScope === "equipe";
   return `<div class="pbub" data-pinbubble>
     <div class="row" style="gap:3px">
-      <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">À l'interne</span></span>
-      <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
+      <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("house")}<span class="lb">À l'interne</span></span>
+      <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("globe")}<span class="lb">Partagée</span></span>
     </div>
     <textarea class="nnew" data-pindraft rows="3"
-      placeholder="${team ? "Note interne — les collaborateurs ne la verront pas" : "Épingle partagée — visible par le lien"}">${V.draft.replace(/</g, "&lt;")}</textarea>
+      placeholder="${team ? "Note interne — les collaborateurs ne la verront pas" : "Note publique — visible par le lien partagé"}">${V.draft.replace(/</g, "&lt;")}</textarea>
     <div class="row" style="gap:6px;align-items:center">
-      <span class="btnw solid pingo ${V.draft.trim() ? "" : "wait"}" ${act("pinpost")} title="Commenter (⌘↵)">${icon("send")}<span class="hi">Commenter</span></span>
+      <span class="btnw solid pingo ${V.draft.trim() ? "" : "wait"}" ${act("pinpost")} title="Commenter (⌘↵)">${icon(team ? "house" : "globe")}<span class="hi">Commenter</span></span>
       <span class="btnw" ${act("pincancel")}><span class="hi">Annuler</span></span>
     </div>
   </div>`;
@@ -5377,14 +5402,26 @@ function pinArmHTML() {
 function marginHTML() {
   const list = pinsVisible();
   const team = V.pinScope === "equipe";
-  const card = (p) => `<div class="ncard ${p.scope === "equipe" ? "team" : ""} ${p.id === V.selPin ? "on" : ""}"
-      ${act("note", p.id)}>
-    <span class="tie"></span>
-    <div class="who">${icon(p.scope === "equipe" ? "lock" : "circle")}<b>${p.who}</b><span class="when">${p.when}</span></div>
+  const tabOn = V.noteTab === "r" ? "r" : "o";
+  const open = list.filter((p) => !p.res), done = list.filter((p) => p.res);
+  /* A card without connector or scope tile: who wrote it, by name with
+     their role, what they said, where, and when. The ✓ at its corner
+     resolves it; a resolved card says who resolved it and can reopen. */
+  const card = (p) => {
+    const a = pinAuthor(p);
+    return `<div class="ncard ${p.id === V.selPin ? "on" : ""} ${p.res ? "res" : ""}" ${act("note", p.id)}>
+    ${p.res ? "" : `<span class="chk" ${act("noteres", p.id)} title="Résoudre">${icon("check")}</span>`}
+    <div class="au"><span class="av ${a.me ? "me" : ""}">${a.ini}</span><span class="w"><b>${a.name}</b><span>${a.role}</span></span></div>
     <div class="txt">${p.txt}</div>
-    ${p.surface ? `<div class="anch">${icon(p.surface === "model" ? "box" : "file")}${pinAnchor(p)}</div>` : ""}
-    ${p.id === V.selPin ? `<div class="nact"><span class="chip" ${act("notedel", p.id)}>${icon("trash-2")}<span class="lb">Supprimer</span></span></div>` : ""}
+    <div class="meta">${p.surface ? `<span class="anch">${icon(p.surface === "model" ? "box" : "file")}${pinAnchor(p)}</span>` : ""}${p.scope === "equipe"
+      ? `<span class="int">${icon("house")}À l'interne</span>` : ""}<span class="when">${p.when}</span></div>
+    ${p.res ? `<div class="resl"><span class="resby">${icon("check")}Résolu par ${p.res.by === ME.id ? ME.name : p.res.by} · ${p.res.when}</span>
+      <span class="btnw" ${act("notereo", p.id)}>${icon("undo-2")}<span class="hi">Rouvrir</span></span></div>` : ""}
+    ${p.id === V.selPin && !p.res ? `<div class="nact"><span class="chip" ${act("notedel", p.id)}>${icon("trash-2")}<span class="lb">Supprimer</span></span></div>` : ""}
   </div>`;
+  };
+  const shown = tabOn === "o" ? open : done;
+  const subtab = (k, nm, n) => `<span class="ntab" ${act("notetab", k)} aria-current="${tabOn === k}">${nm}<em>${n}</em></span>`;
   /* Two kinds of comment, one composer. Most of what is said about a
      project is said about the project — "la grille est encore à R04" has
      no point on a drawing — so writing is never gated on placing. The pin
@@ -5394,26 +5431,27 @@ function marginHTML() {
      be measured against. */
   const composer = `<div class="ncard new ${team ? "team" : ""}">
         <div class="row nscope">
-          <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("lock")}<span class="lb">À l'interne</span></span>
-          <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("users")}<span class="lb">Partagée</span></span>
+          <span class="chip ${team ? "on" : ""}" ${act("pinscope", "equipe")}>${icon("house")}<span class="lb">À l'interne</span></span>
+          <span class="chip ${team ? "" : "on"}" ${act("pinscope", "partage")}>${icon("globe")}<span class="lb">Partagée</span></span>
         </div>
         <textarea class="hi nnew" data-mdraft rows="3"
           placeholder="${team ? "Commentaire interne — les collaborateurs ne le verront pas" : "Commentaire partagé — visible par le lien"}">${V.mdraft.replace(/</g, "&lt;")}</textarea>
         <div class="nact">
           <span class="chip ${V.pinMode ? "on" : ""}" ${act("markpin")} title="Armer l'épingle, puis cliquer un point du plan">${icon("map-pin")}<span class="lb">${V.pinMode ? "Cliquez le plan" : "Épingler au plan"}</span></span>
           <span style="flex:1"></span>
-          <span class="btnw solid go ${V.mdraft.trim() ? "" : "wait"}" ${act("postnote")}>${icon(team ? "lock" : "send")}<span class="hi">Commenter</span></span>
+          <span class="btnw solid go ${V.mdraft.trim() ? "" : "wait"}" ${act("postnote")}>${icon(team ? "house" : "globe")}<span class="hi">Commenter</span></span>
         </div></div>`;
   /* Two lists in one margin: what people said, and what is wrong. The
      conflicts carry the alarm so they are not read as one more comment. */
   const nIssues = issues().length;
   const tab = (k, ic, nm, n) => `<span class="mtab ${k} ${(V.marginTab === "conf") === (k === "conf") ? "on" : ""}" ${act("mtab", k)}>${icon(ic)}<span class="hi">${nm}</span><i>${n}</i></span>`;
   const inner = `<div class="ph"><span class="lo bar" style="width:70px"></span>
-      <span class="mtabs">${tab("notes", "message-square", "Commentaires", list.length)}${tab("conf", "alert-triangle", "Conflits", nIssues)}</span></div>
+      <span class="mtabs">${tab("notes", "message-square", "Commentaires", open.length)}${tab("conf", "alert-triangle", "Conflits", nIssues)}</span></div>
     <div class="pb nmargin">
       ${V.marginTab === "conf" ? issuesListHTML() : `${composer}
-      ${list.length ? list.map(card).join("")
-        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">Aucun commentaire sur ce projet.</div>`}`}
+      <div class="ntabs">${subtab("o", "Ouverts", open.length)}${subtab("r", "Résolus", done.length)}</div>
+      ${shown.length ? shown.map(card).join("")
+        : `<div class="hi" style="font-size:12px;color:var(--ink-3);padding:4px 2px;line-height:1.5">${tabOn === "o" ? "Aucun commentaire ouvert." : "Rien n'a encore été résolu."}</div>`}`}
     </div>`;
   return `<section class="pane rg margin" data-rg="marge" data-fi="${fiOf("inspector")}"
     data-region="margin">${inner}</section>`;
@@ -5461,7 +5499,7 @@ function pushModelPins() {
   window.fitteModel.setPins([...pinsOnModel(), ...pending].map((p, i) => ({
     id: p.id, p: p.p, n: p.n,
     cls: `${p.scope === "equipe" ? "team" : ""} ${p.id && p.id === V.selPin ? "on" : ""} ${p.id ? "" : "pending"}`,
-    html: p.id ? `<span class="nd"><i>${i + 1}</i></span>` : `<span class="ndg">${PIN_GLYPH}</span>`
+    html: p.id ? `<span class="nd"><i>${i + 1}</i></span>` : `<span class="nd"></span>`
       + (p.id ? `<span class="nl">${p.txt.length > 28 ? `${p.txt.slice(0, 28)}…` : p.txt}</span>` : ""),
   })));
 }
@@ -7458,6 +7496,24 @@ function onClick(e) {
     }
     case "pincancel": V.pending = null; V.draft = ""; V.pinMode = false; break;
     case "pinpost": postPin(); return;
+    /* Resolving files a comment under « Résolus » and takes its pin off
+       the drawings; reopening puts both back. */
+    case "noteres": {
+      const p = V.pins.find((x) => x.id === Number(value));
+      if (p) p.res = { by: ME.id, when: "à l'instant" };
+      if (V.selPin === Number(value)) V.selPin = null;
+      savePins();
+      break;
+    }
+    case "notereo": {
+      const p = V.pins.find((x) => x.id === Number(value));
+      if (p) delete p.res;
+      V.noteTab = "o";
+      V.selPin = Number(value);
+      savePins();
+      break;
+    }
+    case "notetab": V.noteTab = value; break;
     case "note":
       V.selPin = V.selPin === Number(value) ? null : Number(value);
       break;
