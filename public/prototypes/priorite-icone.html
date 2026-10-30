@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>La priorité d'une tâche — sept marques</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* La liste des tâches porte la priorité à droite, en trois barres. Le
+   jaune de « basse » est à peine visible sur blanc et se lit comme un
+   avertissement alors qu'il dit le contraire. Sept marques, mêmes tâches,
+   même place : basse en vert dans toutes. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --haute:#c0362c;--moyenne:#e08a1e;--basse:#3f8f55}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:900px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,392px);gap:28px 24px;margin-top:22px;align-items:start}
+.v h2{margin:0;font-size:14px;font-weight:600}
+.v p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:74px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 10px}
+
+/* la ligne de tâche, comme dans le volet ------------------------------- */
+.task{display:flex;align-items:center;gap:9px;min-height:40px;border-top:1px solid var(--line-2)}
+.task:first-child{border-top:0}
+.tick{width:15px;height:15px;border:1px solid var(--line);border-radius:4px;flex:0 0 15px}
+.w{flex:1;min-width:0}
+.ttl{display:block;font-size:12.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub{display:block;font-size:11px;color:var(--ink-3)}
+.av{width:19px;height:19px;border-radius:50%;background:var(--fill);border:1px solid var(--line-2);
+  display:grid;place-items:center;font-size:9.5px;font-weight:600;color:var(--ink-2);flex:0 0 19px}
+.mark{flex:0 0 auto;display:inline-flex;align-items:flex-end;justify-content:flex-end}
+
+/* A — trois barres, la plus basse en vert */
+.bars{gap:2px;width:28px}
+.bars b{width:3px;border-radius:1px;background:var(--line)}
+.bars b:nth-child(1){height:6px}.bars b:nth-child(2){height:9px}.bars b:nth-child(3){height:12px}
+.bars[data-p="haute"] b{background:var(--haute)}
+.bars[data-p="moyenne"] b:nth-child(-n+2){background:var(--moyenne)}
+.bars[data-p="basse"] b:nth-child(1){background:var(--basse)}
+
+/* B — une seule barre, pleine hauteur, sa part remplie */
+.gauge{width:26px}
+.gauge span{display:block;width:100%;height:4px;border-radius:2px;background:var(--line-2);overflow:hidden}
+.gauge i{display:block;height:100%;border-radius:2px}
+.gauge[data-p="haute"] i{width:100%;background:var(--haute)}
+.gauge[data-p="moyenne"] i{width:62%;background:var(--moyenne)}
+.gauge[data-p="basse"] i{width:28%;background:var(--basse)}
+
+/* C — une forme par priorité : la forme dit le rang, la couleur le répète */
+.shape svg{width:15px;height:15px}
+.shape[data-p="haute"]{color:var(--haute)}
+.shape[data-p="moyenne"]{color:var(--moyenne)}
+.shape[data-p="basse"]{color:var(--basse)}
+
+/* D — le mot, en petite pastille teintée */
+.word{font-size:10.5px;font-weight:600;letter-spacing:.02em;padding:2px 7px;border-radius:9px;line-height:1.3}
+.word[data-p="haute"]{color:var(--haute);background:#fbeceb}
+.word[data-p="moyenne"]{color:#9a5e07;background:#fdf1e0}
+.word[data-p="basse"]{color:#276b3e;background:#e9f3ec}
+
+/* E — un point, et rien d'autre */
+.dot i{display:block;width:9px;height:9px;border-radius:50%}
+.dot[data-p="haute"] i{background:var(--haute)}
+.dot[data-p="moyenne"] i{background:var(--moyenne)}
+.dot[data-p="basse"] i{background:var(--basse)}
+
+/* F — le trait de marge : la couleur quitte l'icône et prend le bord */
+.edge .mark{display:none}
+.edge .task{position:relative;padding-left:9px}
+.edge .task::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:2px}
+.edge .task[data-p="haute"]::before{background:var(--haute)}
+.edge .task[data-p="moyenne"]::before{background:var(--moyenne)}
+.edge .task[data-p="basse"]::before{background:var(--basse)}
+
+/* G — seule la haute se marque ; le reste est silencieux */
+.quiet .mark svg{width:14px;height:14px;color:var(--haute)}
+.quiet .mark .lo{font-size:11px;color:var(--ink-3)}
+
+.note{margin:8px 0 0;font-size:11.5px;color:var(--ink-3)}
+.note b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <h1>La priorité d'une tâche — sept marques</h1>
+  <p class="lede">Le jaune de « basse » disparaît sur blanc, et la couleur qu'il emprunte est celle d'un avertissement alors qu'il dit l'inverse.
+    Dans les sept, la moins sévère est verte : rouge, orange, vert, dans l'ordre où on les lit. Mêmes tâches, même place à droite de la ligne.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+const svg = (d, fill = "none") => `<svg viewBox="0 0 24 24" fill="${fill}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const UP = svg(`<path d="m18 15-6-6-6 6"/>`);
+const EQ = svg(`<path d="M5 9h14"/><path d="M5 15h14"/>`);
+const DOWN = svg(`<path d="m6 9 6 6 6-6"/>`);
+const ALERT = svg(`<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>`);
+
+/* Quatre tâches du Baldwin III, prises telles quelles dans le prototype. */
+const TASKS = [
+  ["Reprendre la hauteur des garde-corps à 1 070 mm", "Benoît — dessin 2D — Permis — 3.3.1.18", "BA", "haute"],
+  ["Recompter les cases après réduction pour le métro", "David — assistant modélisation — Permis — art. 71", "DL", "moyenne"],
+  ["Demande de dérogation mineure rédigée", "Alain — architecte principal — Comité", "AL", "basse"],
+  ["Confirmer le type de construction pour 8 étages", "Guy — modélisation 3D — Permis — 3.2.1.1", "GR", "haute"],
+];
+
+const MARK = {
+  A: (p) => `<span class="mark bars" data-p="${p}"><b></b><b></b><b></b></span>`,
+  B: (p) => `<span class="mark gauge" data-p="${p}"><span><i></i></span></span>`,
+  C: (p) => `<span class="mark shape" data-p="${p}">${p === "haute" ? UP : p === "moyenne" ? EQ : DOWN}</span>`,
+  D: (p) => `<span class="mark word" data-p="${p}">${p}</span>`,
+  E: (p) => `<span class="mark dot" data-p="${p}"><i></i></span>`,
+  F: () => "",
+  G: (p) => `<span class="mark">${p === "haute" ? ALERT : `<span class="lo">${p === "moyenne" ? "" : ""}</span>`}</span>`,
+};
+
+const O = [
+["A", "A — trois barres, la basse en vert", "La marque d'aujourd'hui, au vert près. Une, deux ou trois barres allumées : le rang se lit même sans couleur, et le vert dit que rien ne presse au lieu de le murmurer en jaune."],
+["B", "B — une jauge", "Une seule barre horizontale dont la part remplie dit la priorité. Plus calme qu'une colonne de bâtons, mais il faut comparer deux lignes pour lire un rang : seule, une jauge à 62 % ne se nomme pas."],
+["C", "C — une forme par rang", "Chevron haut, deux traits, chevron bas. La forme porte le rang et la couleur ne fait que le répéter : la seule des sept qui se lit encore en noir et blanc, ou par un œil qui confond le rouge et le vert."],
+["D", "D — le mot", "La priorité écrite, en pastille teintée. Rien à apprendre, rien à deviner — mais trois mots de longueurs différentes au bout de chaque ligne, là où les autres marques tiennent une largeur fixe."],
+["E", "E — un point", "Le plus discret : un point de 9 px, la couleur seule. Convient si la priorité n'est qu'un repère de tri ; ne convient pas si on doit la lire ligne à ligne, car rien ne distingue les trois rangs qu'une teinte."],
+["F", "F — le trait de marge", "La couleur quitte la droite et prend le bord gauche de la ligne, sur toute sa hauteur. La liste se balaie d'un coup d'œil en colonne, et la droite se libère pour les visages."],
+["G", "G — seule la haute parle", "Une seule marque dans toute la liste : l'alarme sur les tâches hautes, rien sur les autres. Le volet cesse d'être tricolore et ce qui presse ressort — au prix de la différence entre moyenne et basse, qui disparaît."],
+];
+
+document.getElementById("grid").innerHTML = O.map(([k, title, note]) => `<section class="v">
+  <h2>${title}</h2><p>${note}</p>
+  <div class="card ${k === "F" ? "edge" : ""} ${k === "G" ? "quiet" : ""}">
+    ${TASKS.map(([t, s, av, p]) => `<div class="task" data-p="${p}">
+      <span class="tick"></span>
+      <span class="w"><span class="ttl">${t}</span><span class="sub">${s}</span></span>
+      <span class="av">${av}</span>
+      ${MARK[k](p)}</div>`).join("")}
+  </div></section>`).join("");
+</script>
+</body>
+</html>

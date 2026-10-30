@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Marquer les jours du calendrier — six façons</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* Le calendrier porte aujourd'hui un point noir par tâche. Le point dit
+   deux choses à la fois — la priorité par sa teinte, l'état par son
+   remplissage — et ne dit laquelle nulle part : il n'y a pas de légende.
+   Six façons de marquer un jour, mêmes tâches de novembre 2026, chacune
+   avec ce qu'elle encode écrit sous elle. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --haute:#c0362c;--moyenne:#e08a1e;--basse:#3f8f55;--sel:#eef3dc}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:940px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,470px);gap:30px 26px;margin-top:22px;align-items:start}
+.v h2{margin:0;font-size:14px;font-weight:600}
+.v p{margin:3px 0 9px;color:var(--ink-2);font-size:12.5px;min-height:76px}
+.v .says{margin:8px 0 0;font-size:11.5px;color:var(--ink-3)}
+.v .says b{color:var(--ink);font-weight:600}
+
+/* le mois, à l'échelle du volet --------------------------------------- */
+.cal{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+.cw{display:grid;grid-template-columns:repeat(7,1fr)}
+.cw .hd{font-size:10px;letter-spacing:.05em;color:var(--ink-3);padding:6px 6px;border-bottom:1px solid var(--line-2);background:var(--fill-2)}
+.day{min-height:62px;border-top:1px solid var(--line-2);border-left:1px solid var(--line-2);padding:4px 5px;position:relative;overflow:hidden}
+.day:nth-child(7n+1){border-left:0}
+.cw.b .day:nth-child(-n+7){border-top:0}
+.day.out{background:var(--fill-2)}
+.day.out .n{color:var(--ink-3)}
+.n{font-size:11.5px;font-weight:600;line-height:1.3}
+.day.today .n{display:inline-block;background:var(--ink);color:#fff;border-radius:4px;padding:0 4px}
+.day.sel{box-shadow:inset 0 0 0 2px var(--ink)}
+.t{font-size:10.5px;line-height:1.25;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.t.done{color:var(--ink-3);text-decoration:line-through}
+.more{font-size:10px;color:var(--ink-3)}
+.leg{display:flex;flex-wrap:wrap;gap:4px 12px;padding:6px 8px;border-top:1px solid var(--line-2);background:var(--fill-2);font-size:11px;color:var(--ink-2)}
+.leg span{display:inline-flex;align-items:center;gap:5px}
+
+/* A — la pastille porte le mot, pas un code */
+.a .ev{display:flex;align-items:center;gap:4px;margin-top:2px;padding:1px 4px 1px 3px;border-radius:4px;background:var(--fill-2)}
+.a .ev i{width:3px;align-self:stretch;min-height:12px;border-radius:2px;background:var(--line)}
+.a .ev[data-p="haute"] i{background:var(--haute)}
+.a .ev[data-p="moyenne"] i{background:var(--moyenne)}
+.a .ev[data-p="basse"] i{background:var(--basse)}
+.a .ev.done{background:transparent}
+.a .ev.done i{background:var(--line)}
+
+/* B — le jour compte, et ne nomme que la première */
+.b2 .cnt{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;
+  border-radius:8px;font-size:10px;font-weight:600;color:#fff;background:var(--ink-3);float:right}
+.b2 .cnt[data-p="haute"]{background:var(--haute)}
+.b2 .cnt[data-p="moyenne"]{background:var(--moyenne)}
+.b2 .cnt[data-p="basse"]{background:var(--basse)}
+.b2 .cnt.alldone{background:transparent;color:var(--ink-3);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* C — la barre du jour : une tâche, une barre pleine largeur */
+.c .ev{display:block;margin-top:2px;padding:1px 4px;border-radius:3px;font-size:10px;line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}
+.c .ev[data-p="haute"]{background:var(--haute)}
+.c .ev[data-p="moyenne"]{background:var(--moyenne)}
+.c .ev[data-p="basse"]{background:var(--basse)}
+.c .ev.done{background:var(--fill);color:var(--ink-3);text-decoration:line-through}
+
+/* D — l'état seul : à faire, fait, en retard. La priorité n'est pas ici. */
+.d .st{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--ink-2);margin-top:1px}
+.d .st svg{width:11px;height:11px}
+.d .st.late{color:var(--haute);font-weight:600}
+.d .st.done{color:var(--basse)}
+
+/* E — le jour se teinte : le fond dit ce qui presse, rien ne se superpose */
+.e .day[data-w="haute"]{background:#fbeceb}
+.e .day[data-w="moyenne"]{background:#fdf4e8}
+.e .day[data-w="basse"]{background:#eef5f0}
+.e .day[data-w="done"]{background:transparent}
+.e .day[data-w="haute"] .t{color:#8f2a22}
+
+/* F — rien qu'un soulignement sous le chiffre */
+.f .n{position:relative;display:inline-block;padding-bottom:2px}
+.f .day[data-w] .n::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:1px;background:var(--line)}
+.f .day[data-w="haute"] .n::after{background:var(--haute)}
+.f .day[data-w="moyenne"] .n::after{background:var(--moyenne)}
+.f .day[data-w="basse"] .n::after{background:var(--basse)}
+.f .day[data-w="done"] .n::after{background:var(--line)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Marquer les jours du calendrier — six façons</h1>
+  <p class="lede">Le point noir dit deux choses à la fois : la priorité par sa teinte, l'état par son remplissage — et ne le dit nulle part, le calendrier n'a pas de légende.
+    Six marques, les tâches réelles de novembre 2026, chacune suivie de ce qu'elle encode et de ce qu'elle laisse tomber. Le 14 est aujourd'hui, le 11 est en retard.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+const svg = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const CHECK = svg(`<path d="M20 6 9 17l-5-5"/>`);
+const CIRCLE = svg(`<circle cx="12" cy="12" r="9"/>`);
+const ALERT = svg(`<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>`);
+
+/* Les tâches du prototype, telles quelles. */
+const TASKS = [
+  ["2026-10-27", "Mix de typologies arrêté", "basse", true],
+  ["2026-11-03", "Tableau des superficies par étage", "moyenne", true],
+  ["2026-11-09", "Élévations avec matériaux au comité", "moyenne", true],
+  ["2026-11-11", "Coupe de la cage d'escalier à reprendre", "haute", false],
+  ["2026-11-14", "Reprendre la hauteur des garde-corps à 1 070 mm", "haute", false],
+  ["2026-11-14", "Largeur libre des portes du parcours sans obstacles", "haute", false],
+  ["2026-11-17", "Confirmer le type de construction pour 8 étages", "haute", false],
+  ["2026-11-20", "Recompter les cases après réduction pour le métro", "moyenne", false],
+  ["2026-11-24", "Note à l'urbaniste sur la marge avant", "moyenne", false],
+  ["2026-11-27", "Demande de dérogation mineure rédigée", "basse", false],
+].map(([day, title, prio, done]) => ({ day, title, prio, done }));
+const TODAY = "2026-11-14";
+const RANK = { haute: 3, moyenne: 2, basse: 1 };
+
+/* La grille de novembre 2026, du lundi 26 octobre au dimanche 6 décembre. */
+const DAYS = [];
+for (let d = new Date(Date.UTC(2026, 9, 26)); d < new Date(Date.UTC(2026, 11, 7)); d.setUTCDate(d.getUTCDate() + 1)) {
+  DAYS.push(d.toISOString().slice(0, 10));
+}
+const on = (s) => TASKS.filter((t) => t.day === s);
+const worst = (ts) => { const open = ts.filter((t) => !t.done);
+  if (!ts.length) return ""; if (!open.length) return "done";
+  return open.sort((a, b) => RANK[b.prio] - RANK[a.prio])[0].prio; };
+const cut = (s, n) => s.length > n ? `${s.slice(0, n - 1)}…` : s;
+
+const WD = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
+function month(cls, cell, legend) {
+  return `<div class="cal ${cls}"><div class="cw">${WD.map((w) => `<span class="hd">${w}</span>`).join("")}</div>
+    <div class="cw b">${DAYS.map((s) => {
+      const ts = on(s), w = worst(ts);
+      const out = !s.startsWith("2026-11");
+      return `<div class="day ${out ? "out" : ""} ${s === TODAY ? "today sel" : ""}" ${w ? `data-w="${w}"` : ""}>
+        <div class="n">${Number(s.slice(8))}</div>${cell(ts, s)}</div>`;
+    }).join("")}</div>
+    <div class="leg">${legend}</div></div>`;
+}
+const lg = (dot, txt) => `<span>${dot}${txt}</span>`;
+const sw = (c) => `<i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${c}"></i>`;
+const PRIO_LEG = `${lg(sw("var(--haute)"), "haute")}${lg(sw("var(--moyenne)"), "moyenne")}${lg(sw("var(--basse)"), "basse")}${lg(sw("var(--line)"), "faite")}`;
+
+const O = [
+{ cls:"a", title:"A — une pastille par tâche, avec son titre",
+  note:"Chaque tâche est une ligne dans la case : un filet de couleur à gauche pour la priorité, le titre à côté, barré quand c'est fait. Le point disparaît : ce qui se lit, c'est la tâche.",
+  says:"Encode <b>priorité</b> (couleur du filet) et <b>état</b> (titre barré). Deux tâches tiennent dans une case, la troisième se compte.",
+  cell:(ts) => ts.slice(0, 2).map((t) => `<div class="ev ${t.done ? "done" : ""}" data-p="${t.prio}"><i></i><span class="t ${t.done ? "done" : ""}">${cut(t.title, 22)}</span></div>`).join("")
+    + (ts.length > 2 ? `<div class="more">+${ts.length - 2}</div>` : ""),
+  legend: PRIO_LEG },
+
+{ cls:"b2", title:"B — le jour compte, la plus pressée se nomme",
+  note:"Un compteur en haut à droite, teinté par la priorité la plus haute du jour ; sous lui, le titre de celle-là. Un jour tout fait porte un compteur vide.",
+  says:"Encode <b>combien</b> (le chiffre), <b>la plus pressée</b> (la teinte) et <b>tout fait</b> (compteur creux). Ne dit pas la priorité des autres.",
+  cell:(ts) => { if (!ts.length) return "";
+    const open = ts.filter((t) => !t.done), w = worst(ts);
+    const first = (open[0] || ts[0]);
+    return `<span class="cnt ${w === "done" ? "alldone" : ""}" ${w !== "done" ? `data-p="${w}"` : ""}>${ts.length}</span>
+      <span class="t ${first.done ? "done" : ""}">${cut(first.title, 20)}</span>`; },
+  legend: `${lg(`<span class="cnt" data-p="haute" style="float:none">2</span>`, "tâches, teinte de la plus pressée")}${lg(`<span class="cnt alldone" style="float:none">1</span>`, "toutes faites")}` },
+
+{ cls:"c", title:"C — la barre pleine largeur",
+  note:"Le vocabulaire des agendas : une barre colorée par tâche, le titre dedans, en blanc. Se repère d'une pièce à l'autre, mais met de la couleur pleine dans une grille qui n'en a nulle part ailleurs.",
+  says:"Encode <b>priorité</b> (fond de la barre) et <b>état</b> (barre grise, titre barré). Le mois devient une carte de chaleur.",
+  cell:(ts) => ts.slice(0, 2).map((t) => `<span class="ev ${t.done ? "done" : ""}" data-p="${t.prio}">${cut(t.title, 20)}</span>`).join("")
+    + (ts.length > 2 ? `<div class="more">+${ts.length - 2}</div>` : ""),
+  legend: PRIO_LEG },
+
+{ cls:"d", title:"D — l'état, pas la priorité",
+  note:"Le calendrier répond à « où en est-on », pas à « qu'est-ce qui presse » : à faire, fait, en retard. La priorité reste dans la liste, où elle se lit ligne à ligne et se trie.",
+  says:"Encode <b>l'état seul</b>, nommé en toutes lettres. Un jour en retard parle en rouge. Ne dit rien de la priorité.",
+  cell:(ts, s) => { if (!ts.length) return "";
+    const open = ts.filter((t) => !t.done), late = open.length && s < TODAY;
+    const cls = late ? "late" : open.length ? "" : "done";
+    const ic = late ? ALERT : open.length ? CIRCLE : CHECK;
+    const word = late ? "en retard" : open.length ? `${open.length} à faire` : "fait";
+    return `<span class="st ${cls}">${ic}${word}</span><span class="t ${open.length ? "" : "done"}">${cut((open[0] || ts[0]).title, 20)}</span>`; },
+  legend: `${lg(`<span class="st" style="margin:0">${CIRCLE}</span>`, "à faire")}${lg(`<span class="st late" style="margin:0">${ALERT}</span>`, "en retard")}${lg(`<span class="st done" style="margin:0">${CHECK}</span>`, "fait")}` },
+
+{ cls:"e", title:"E — la case se teinte",
+  note:"Pas de marque du tout : le fond de la journée prend la couleur de ce qui y presse le plus, très pâle. La semaine chargée se voit de loin, et il n'y a rien de plus à lire dans la case que les titres.",
+  says:"Encode <b>la plus pressée du jour</b> (le fond). Ne dit ni combien ni lesquelles sont faites — un jour tout fait redevient blanc.",
+  cell:(ts) => ts.slice(0, 2).map((t) => `<span class="t ${t.done ? "done" : ""}">${cut(t.title, 22)}</span>`).join("")
+    + (ts.length > 2 ? `<div class="more">+${ts.length - 2}</div>` : ""),
+  legend: `${lg(`<i style="display:inline-block;width:14px;height:12px;border-radius:2px;background:#fbeceb;border:1px solid var(--line-2)"></i>`, "haute")}${
+    lg(`<i style="display:inline-block;width:14px;height:12px;border-radius:2px;background:#fdf4e8;border:1px solid var(--line-2)"></i>`, "moyenne")}${
+    lg(`<i style="display:inline-block;width:14px;height:12px;border-radius:2px;background:#eef5f0;border:1px solid var(--line-2)"></i>`, "basse")}${
+    lg(`<i style="display:inline-block;width:14px;height:12px;border-radius:2px;background:#fff;border:1px solid var(--line-2)"></i>`, "rien, ou tout fait")}` },
+
+{ cls:"f", title:"F — un trait sous le chiffre",
+  note:"La marque quitte le corps de la case et passe sous le numéro du jour : un trait de 2 px, couleur de ce qui presse. La case entière reste au texte.",
+  says:"Encode <b>la plus pressée du jour</b> (couleur du trait) et <b>tout fait</b> (trait gris). Le plus discret des six ; aussi le plus facile à manquer.",
+  cell:(ts) => ts.slice(0, 2).map((t) => `<span class="t ${t.done ? "done" : ""}">${cut(t.title, 22)}</span>`).join("")
+    + (ts.length > 2 ? `<div class="more">+${ts.length - 2}</div>` : ""),
+  legend: PRIO_LEG },
+];
+
+document.getElementById("grid").innerHTML = O.map((o) => `<section class="v">
+  <h2>${o.title}</h2><p>${o.note}</p>
+  ${month(o.cls, o.cell, o.legend)}
+  <p class="says">${o.says}</p></section>`).join("");
+</script>
+</body>
+</html>
