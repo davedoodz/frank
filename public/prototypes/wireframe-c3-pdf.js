@@ -136,6 +136,7 @@ function schedule() {
   if (viewport) {
     const bounds = viewport.getBoundingClientRect();
     for (const canvas of viewport.querySelectorAll("canvas[data-pdf-url]")) {
+      if (canvas.dataset.supabaseTiles === "ready") continue;
       const request = requestFor(canvas, bounds, Number(viewport.dataset.turn || 0));
       if (!request) continue;
       next.set(request.slot, request);

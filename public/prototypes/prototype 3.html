@@ -3,16 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prototype 3</title>
+<title>Frank</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="vendor/geist/geist.css">
 <script type="importmap">
-{"imports":{
   "three":"./vendor/three/build/three.module.js",
   "three/addons/":"./vendor/three/examples/jsm/"
 }}
 </script>
 <script type="module" src="wireframe-c3-viewer.js"></script>
 <script type="module" src="wireframe-c3-pdf.js"></script>
+<script type="module" src="wireframe-c3-supabase-tiles.js"></script>
 <style>
 /* Low fidelity on purpose: one grey, one line weight, one type size ramp.
    What is being tested here is where things sit and in what order they are
@@ -1209,6 +1212,8 @@ body.elev .mtools{display:none}
 .plan canvas.sheetpdf{position:absolute;inset:0;width:100%;height:100%;display:block;
   z-index:var(--planz,1);opacity:var(--planop,1);mix-blend-mode:multiply}
 .plan canvas.sheetpdf[data-ready="1"]{background:#fff}
+.plan .supabase-tiles{position:absolute;inset:0;z-index:var(--planz,1);overflow:hidden;pointer-events:none;mix-blend-mode:multiply}
+.plan .supabase-tiles img{position:absolute;display:block;max-width:none}
 /* While the pass runs the pane says so in its own title bar, at the end of
    the row: the file strip that used to carry it is gone. It is a transient
    note, so it gives way before anything else — under a pane wide enough to
