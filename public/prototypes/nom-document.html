@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nom du document — six façons de le lire en entier</title>
+<link rel="stylesheet" href="vendor/geist/geist.css">
+<style>
+/* The question this page answers: a consultant's file name is 34 to 42
+   characters and the card is 258px wide, so the title is cut. Six ways of
+   giving the whole name back, each shown on the real card at its real
+   width, with the real names from the project. Nothing here is a mockup of
+   a card: it is the card's markup and the card's measurements. */
+:root{
+  --sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --mono:ui-monospace,Menlo,monospace;
+  --ink:#1b1b1b; --ink-2:#6b6b6b; --ink-3:#9b9b9b;
+  --line:#c9c9c9; --line-2:#e2e2e2;
+  --fill:#ededed; --fill-2:#f6f6f6; --page:#fafafa;
+  --card:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);font-size:13px;
+  -webkit-font-smoothing:antialiased}
+header{padding:28px 32px 10px;max-width:1180px}
+h1{margin:0 0 6px;font-size:17px;font-weight:600}
+header p{margin:0;max-width:62ch;color:var(--ink-2);font-size:12.5px;line-height:1.55}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:22px;
+  padding:22px 32px 60px;max-width:1180px}
+.opt{display:flex;flex-direction:column;gap:10px}
+.opt > h2{margin:0;font-size:13px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+.opt > h2 i{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.opt > p{margin:0;color:var(--ink-2);font-size:12px;line-height:1.5;min-height:3em}
+/* The stage is the plan pane's background, so the card is judged against
+   what actually sits behind it. */
+.stage{background:#eef0ee url("assets/plan-niveau-5.jpg") center/420px no-repeat;
+  border:1px solid var(--line-2);border-radius:9px;padding:18px;display:flex;justify-content:center}
+
+/* ---------------------------------------------------------- the card
+   Copied from the prototype, not re-invented: same width, same radius,
+   same header rhythm, so a verdict here is a verdict there. */
+.lcard{width:258px;background:var(--card);border:1px solid var(--line);border-radius:9px;
+  padding:9px 10px;display:flex;flex-direction:column;gap:8px;
+  box-shadow:0 6px 20px rgba(17,17,18,.14);font-size:12px}
+.lcard .hd{display:flex;align-items:center;gap:8px}
+.lcard .hd b{font-family:var(--mono);font-size:11px;font-weight:500;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lcard .hd .x{display:grid;place-items:center;width:20px;height:20px;margin:0 -4px 0 0;flex:0 0 20px;
+  border-radius:5px;color:var(--ink-3);cursor:pointer}
+.lcard .hd .x:hover{background:var(--fill);color:var(--ink)}
+.lcard .hd .x svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;
+  stroke-linecap:round}
+.docbtn{display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;
+  border:1px solid var(--line-2);border-radius:5px;padding:4px 8px;font-size:11.5px}
+.oprow{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-2)}
+.optrack{flex:1;height:3px;background:var(--line-2);border-radius:2px;position:relative}
+.optrack .fill{position:absolute;left:0;top:0;bottom:0;background:var(--ink);border-radius:2px}
+.optrack .knob{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;
+  background:var(--card);border:1.5px solid var(--ink);border-radius:50%}
+.fglyph{width:19px;height:22px;flex:0 0 19px;color:var(--ink-3);overflow:visible}
+.fglyph .band{fill:var(--ink)}
+.fglyph.pdf .band{fill:#c8372d}
+.fglyph text{font-weight:700;font-size:7.4px;fill:#fff;letter-spacing:.03em}
+
+/* ------------------------------------------------------- 1. two lines
+   The name simply gets the room it needs. It is broken at the separators
+   a consultant's name already has, never mid word. */
+.a1 .hd{align-items:flex-start}
+.a1 .hd b{white-space:normal;overflow-wrap:normal;word-break:normal;line-height:1.35;text-overflow:clip}
+
+/* --------------------------------------------- 2. the tail is kept
+   The head of these names is the project and the discipline, which the
+   thumbnail already says; the tail is the level, which is the part being
+   checked. So the cut is put in the middle and the tail survives. */
+.a2 .hd b{display:flex;min-width:0}
+.a2 .hd b .head{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.a2 .hd b .tail{white-space:nowrap;flex:0 0 auto}
+
+/* ------------------------------------------------ 3. unrolls on hover
+   Quiet until wanted: the card widens under the pointer and the name is
+   shown whole, then goes back. The width is animated, so nothing jumps. */
+.a3 .lcard{transition:width .22s cubic-bezier(.3,0,.2,1)}
+.a3 .lcard:hover{width:396px}
+
+/* ----------------------------------------------- 4. the name on a shelf
+   A second line under the title, in the quiet grey, carrying the part
+   that did not fit. Always there, nothing to hover, nothing to click. */
+.a4 .full{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);line-height:1.45;
+  overflow-wrap:normal;margin-top:-3px}
+
+/* ----------------------------------------------------- 5. held tooltip
+   The name follows the pointer onto a black label, the way a file manager
+   does it. Costs nothing in the card, costs one hover to read. */
+.a5 .hd b{position:relative;cursor:default}
+.a5 .hd b::after{content:attr(data-full);position:absolute;left:-6px;top:calc(100% + 7px);z-index:5;
+  padding:5px 8px;border-radius:6px;background:var(--ink);color:#fff;font-size:10.5px;
+  white-space:nowrap;opacity:0;pointer-events:none;transform:translateY(-3px);
+  transition:opacity .12s ease,transform .12s ease;box-shadow:0 6px 18px rgba(17,17,18,.28)}
+.a5 .hd b:hover::after{opacity:1;transform:translateY(0)}
+
+/* ------------------------------------------------- 6. two lines, named
+   The name is split where it means something: the sheet it is, on top,
+   and what it draws, under it. Nothing is hidden and nothing is cut, and
+   the card reads as a title with a subtitle instead of one long string. */
+.a6 .hd{align-items:flex-start}
+.a6 .hd .two{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.a6 .hd .two b{font-size:11.5px;flex:none}
+.a6 .hd .two span{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);
+  overflow-wrap:normal;line-height:1.35}
+
+footer{padding:0 32px 60px;max-width:1180px;color:var(--ink-2);font-size:12px;line-height:1.6}
+footer b{color:var(--ink)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Nom du document — six façons de le lire en entier</h1>
+  <p>Le nom d'un consultant fait de 34 à 42 caractères; la fiche fait 258 px. Chaque option est montrée
+     sur la vraie fiche, à sa vraie largeur, avec les vrais noms du projet. Survolez: les options 3 et 5
+     ne se lisent qu'au pointeur.</p>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  <b>À essayer dans l'ordre:</b> survolez la fiche de l'option 3, puis le titre de l'option 5.
+  Les options 1, 2, 4 et 6 ne demandent rien: le nom est déjà entier.
+</footer>
+
+<script>
+const FILES = {
+  pdf: "BAL3_E-301_ELECTRICITE_NIVEAU_1.pdf",
+  dwg: "A-209_PLAN_NIVEAU_5.dwg",
+  long: "BAL3_M-305_DISTRIBUTION_NIVEAU_5.pdf",
+};
+const ext = (f) => f.split(".").pop().toLowerCase();
+const glyph = (f) => `<svg class="fglyph ${ext(f)}" viewBox="0 0 26 30" aria-hidden="true">
+  <path d="M6.5 1h11l6.5 6.5v20.5a1 1 0 0 1-1 1h-16.5a1 1 0 0 1-1-1v-26a1 1 0 0 1 1-1z"
+    fill="var(--card)" stroke="currentColor" stroke-width="1.2"/>
+  <path d="M17.5 1v6.5h6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+  <rect class="band" x="0" y="14" width="21" height="10" rx="1.6"/>
+  <text x="10.5" y="21.6" text-anchor="middle">${ext(f).toUpperCase()}</text></svg>`;
+const close = `<span class="x"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span>`;
+const body = (op) => `<span class="docbtn">Document</span>
+  <div class="oprow"><span>Opacité</span>
+    <span class="optrack"><span class="fill" style="width:${op}%"></span>
+      <span class="knob" style="left:${op}%"></span></span><span>${op}%</span></div>`;
+
+/* Where a consultant's name can be broken without lying about it: the
+   underscore between the sheet number and what the sheet draws. */
+/* The only places a consultant's name may be broken: after its own
+   underscores. <wbr> offers the break without printing anything. */
+const breaks = (f) => f.replace(/_/g, "_<wbr>");
+
+/* The tail kept must start at a separator, or the name reads as a word cut
+   in half: "UTION_NIVEAU_5" is not a shorter name, it is a wrong one. */
+const tailFrom = (f, want) => {
+  const cut = f.length - want;
+  const at = f.indexOf("_", cut - 1);
+  return at < 0 || f.length - at > want + 10 ? f.slice(cut) : f.slice(at + 1);
+};
+
+const split = (f) => {
+  const dot = f.lastIndexOf(".");
+  const stem = f.slice(0, dot), end = f.slice(dot);
+  const cut = stem.indexOf("_", stem.indexOf("_") + 1);
+  return cut < 0 ? [stem, "", end] : [stem.slice(0, cut), stem.slice(cut + 1), end];
+};
+
+const OPTIONS = [
+  { cls: "a1", n: "1", name: "Sur deux lignes",
+    note: "Le titre prend la place qu'il lui faut. Rien à survoler, rien à cliquer, et la fiche grandit de 14 px.",
+    card: (f, op) => `<div class="lcard"><div class="hd">${glyph(f)}<b>${breaks(f)}</b>${close}</div>${body(op)}</div>` },
+
+  { cls: "a2", n: "2", name: "La fin est gardée",
+    note: "La tête du nom est le projet et la discipline, que la vignette dit déjà. La coupe passe au milieu et le niveau survit.",
+    card: (f, op) => { const keep = f.length > 22 ? tailFrom(f, 18) : f; const head = f.slice(0, f.length - keep.length);
+      return `<div class="lcard"><div class="hd">${glyph(f)}<b><span class="head">${head}</span><span class="tail">${keep}</span></b>${close}</div>${body(op)}</div>`; } },
+
+  { cls: "a3", n: "3", name: "S'élargit au survol",
+    note: "Discrète tant qu'on ne demande rien: la fiche s'ouvre à 396 px sous le pointeur, puis revient.",
+    card: (f, op) => `<div class="lcard"><div class="hd">${glyph(f)}<b>${f}</b>${close}</div>${body(op)}</div>` },
+
+  { cls: "a4", n: "4", name: "Le nom sur une tablette",
+    note: "Le titre reste court; une ligne grise sous lui porte le nom entier. Deux poids de gris au lieu d'un.",
+    card: (f, op) => `<div class="lcard"><div class="hd">${glyph(f)}<b>${f}</b>${close}</div>
+      <div class="full">${breaks(f)}</div>${body(op)}</div>` },
+
+  { cls: "a5", n: "5", name: "Étiquette au survol",
+    note: "Le nom vient sur une étiquette noire, comme dans un gestionnaire de fichiers. Ne coûte rien à la fiche, coûte un survol à lire.",
+    card: (f, op) => `<div class="lcard"><div class="hd">${glyph(f)}<b data-full="${f}">${f}</b>${close}</div>${body(op)}</div>` },
+
+  { cls: "a6", n: "6", name: "Feuille, puis sujet",
+    note: "Coupé là où le nom veut dire quelque chose: la feuille au-dessus, ce qu'elle dessine en dessous. Rien n'est caché.",
+    card: (f, op) => { const [head, rest, end] = split(f);
+      return `<div class="lcard"><div class="hd">${glyph(f)}<span class="two"><b>${head}</b><span>${breaks(rest)}${end}</span></span>${close}</div>${body(op)}</div>`; } },
+];
+
+document.getElementById("grid").innerHTML = OPTIONS.map((o, i) => `<section class="opt ${o.cls}">
+  <h2>${o.name}<i>${o.n}</i></h2>
+  <p>${o.note}</p>
+  <div class="stage">${o.card(i % 2 ? FILES.long : FILES.pdf, i % 2 ? 55 : 55)}</div>
+  <div class="stage">${o.card(FILES.dwg, 100)}</div>
+</section>`).join("");
+</script>
+</body>
+</html>
