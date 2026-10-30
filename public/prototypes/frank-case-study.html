@@ -360,8 +360,18 @@ tr.hl td{background:var(--vert-pale)}
 .ide figure{margin:0;display:flex;flex-direction:column;gap:10px;min-width:0}
 .ide .shot{display:block}
 .ide .shot img{width:100%;height:auto;display:block}
-.ide figcaption{font-size:14px;color:var(--ink-3);line-height:1.4;max-width:300px}
-.ide figcaption .mono{display:block;color:var(--ink);font-size:12px;letter-spacing:.06em;margin-bottom:2px}
+/* captions read like the before and after captions: a grey step label, then
+   the tool in mono and what it did */
+.ide figure{gap:9px}
+.ide figcaption{font-size:14px;color:var(--ink-3);line-height:1.4}
+.ide figcaption .ba{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+.ide figcaption .mono{color:var(--ink)}
+/* the Figma link sits centred on the top edge of the board screenshot */
+.ide .fig-board{position:relative}
+.ide .links.on-board{position:absolute;top:14px;left:50%;transform:translateX(-50%);margin:0}
+.ide .links.on-board a{background:#fff;border:0;border-radius:6px;padding:8px 14px;font-size:16px;white-space:nowrap}
+.ide .links.on-board a .mono{font-size:13px}
+.ide .links.on-board a svg{width:15px;height:15px}
 .ide-arrow{align-self:center;margin-top:-40px;color:var(--ink-3);font-size:18px;text-align:center}
 .pics.cmp.elev{grid-template-rows:auto auto auto auto;row-gap:0}
 .pics.cmp.elev .pic img{max-height:300px}
@@ -751,19 +761,19 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     <p class="lede" style="font-size:19px">I worked out the general concepts with Claude, wrote the user flows as text, then had ChatGPT draw each step as a screen. I plotted every screen on one Figma board, one section per day, one row per flow.</p>
     <div>
       <p class="lede" style="font-size:19px">With the interviews in mind, I marked each flow: green if it would help the office, red if not. The green ones I built in Claude Code as prototypes with real clicks.</p>
-      <div class="links" style="margin-top:18px"><a href="https://www.figma.com/design/BvV6mHHIN86HNJes04iAyh/FRANK?node-id=0-1" target="_blank" rel="noopener">Figma board <span class="mono">figma.com/design/…/FRANK</span>
-        <svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
     </div>
   </div>
   <div class="ide">
     <figure><div class="shot"><img src="assets/frank/ideation-claude.jpg" alt="A Claude conversation scoping the prototype: three questions to ask before touching any code, and why a product that reads the office's drawings matters"></div>
-      <figcaption><span class="mono">1 · Claude</span> General concepts and scope, before any screen.</figcaption></figure>
+      <figcaption><span class="ba">Step 1</span><span class="mono">Claude</span> — General concepts and scope, before any screen.</figcaption></figure>
     <span class="ide-arrow" aria-hidden="true">→</span>
     <figure><div class="shot"><img src="assets/frank/ideation-chatgpt.jpg" alt="A ChatGPT conversation: « generate a visual of a detailed UI for this step of the UX flow », with two generated screens of a floor plan with a unit selected"></div>
-      <figcaption><span class="mono">2 · ChatGPT</span> One prompt per step of the flow, one generated screen back.</figcaption></figure>
+      <figcaption><span class="ba">Step 2</span><span class="mono">ChatGPT</span> — One prompt per step of the flow, one generated screen back.</figcaption></figure>
     <span class="ide-arrow" aria-hidden="true">→</span>
-    <figure><a class="shot" href="https://www.figma.com/design/BvV6mHHIN86HNJes04iAyh/FRANK?node-id=0-1" target="_blank" rel="noopener"><img src="assets/frank/figma-oct24.jpg" alt="Figma board, October 24: market research, the first product concepts, and rows of generated screens marked with green and red squares"></a>
-      <figcaption><span class="mono">3 · Figma</span> Every screen on one board. Green: keep. Red: drop.</figcaption></figure>
+    <figure class="fig-board"><a class="shot" href="https://www.figma.com/design/BvV6mHHIN86HNJes04iAyh/FRANK?node-id=0-1" target="_blank" rel="noopener"><img src="assets/frank/figma-oct24.jpg" alt="Figma board, October 24: market research, the first product concepts, and rows of generated screens marked with green and red squares"></a>
+      <div class="links on-board"><a href="https://www.figma.com/design/BvV6mHHIN86HNJes04iAyh/FRANK?node-id=0-1" target="_blank" rel="noopener">Figma board <span class="mono">figma.com/design/…/FRANK</span>
+        <svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
+      <figcaption><span class="ba">Step 3</span><span class="mono">Figma</span> — Every screen on one board. Green: keep. Red: drop.</figcaption></figure>
   </div>
 </div>
 </section>
@@ -1998,9 +2008,12 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       blocks.push(el);
     });
   });
+  /* A saved caption in the retired ideation markup (« 1 Claude » before the
+     step label existed) is left out so the file's caption shows. */
+  const retired = (e) => /<span class="mono">\d [A-Z]/.test(e.html || "");
   blocks.forEach((el) => {
     const e = edits[el.dataset.ed];
-    if (!e) return;
+    if (!e || retired(e)) return;
     if (e.html != null) el.innerHTML = e.html;
     el.classList.toggle("ed-cut", !!e.gone);
   });
