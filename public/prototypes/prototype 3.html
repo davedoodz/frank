@@ -544,12 +544,13 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .clarity[data-c="moyen"]{--cl:#b58900}
 .clarity[data-c="obscur"]{--cl:#b3261e}
 .clarity svg{width:12px;height:12px;color:var(--ink-3)}
-/* An article's pin: grey outline at rest, the project green once pinned. */
+/* An article's bookmark: grey outline at rest, the project green once kept. */
 .artpin{display:grid;place-items:center;width:26px;height:26px;border-radius:6px;color:var(--ink-3);cursor:pointer;flex:0 0 auto;align-self:center}
 .artpin:hover{background:var(--fill);color:var(--ink-2)}
-.artpin .lu{width:15px;height:15px;fill:none}
-.artpin.on{color:var(--vert-ink)}
-.artpin.on .lu{fill:var(--vert);stroke:var(--vert-ink)}
+.artpin .lu{width:15px;height:15px}
+.artpin:not(.on) .lu{fill:none}
+.artpin.on{color:var(--vert)}
+.artpin.on:hover{color:var(--vert)}
 .claritymenu{position:absolute;top:calc(100% + 4px);right:0;z-index:7;min-width:168px;
   background:var(--card);border:1px solid var(--line);border-radius:6px;
   display:flex;flex-direction:column;overflow:hidden}
@@ -591,11 +592,10 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .cal .day:hover{background:var(--fill-2)}
 .cal .day.dim{color:var(--ink-3);background:var(--fill-2);opacity:.65}
 .cal .day.on{background:var(--fill);box-shadow:0 0 0 1px var(--ink) inset}
-/* Today is the whole cell in green, not a chip around its number. */
-.cal .day.today{background:var(--vert);color:var(--vert-ink)}
-.cal .day.today.on{box-shadow:0 0 0 1px var(--vert-ink) inset}
-.cal .day.today .n{color:var(--vert-ink)}
-.cal .day.today .lbl{color:var(--vert-ink)}
+/* Today is the whole cell in the pale green of the page's highlights, the
+   same ground a chosen row wears — not a chip around its number. */
+.cal .day.today{background:#eef3dc}
+.cal .day.today.on{box-shadow:none}
 /* « Aujourd'hui » lights green while the calendar stands on today. */
 .btnw.today.on,.btnw.today:active{background:var(--vert);border-color:var(--vert);color:var(--vert-ink)}
 .cal .day .n{font-size:11.5px;font-weight:600;align-self:flex-start}
@@ -618,8 +618,8 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .week .wcol.on{background:var(--fill)}
 .week .wh{padding:5px 6px;border-bottom:1px solid var(--line-2);font-size:11px;font-weight:600}
 /* Today is the whole green column, head and body; its cards stay white. */
-.week .wcol.today{background:var(--vert)}
-.week .wcol.today .wh{background:var(--vert);color:var(--vert-ink);border-bottom-color:rgba(47,58,5,.18)}
+.week .wcol.today{background:#eef3dc}
+.week .wcol.today .wh{background:#eef3dc;border-bottom-color:var(--line-2)}
 .week .wb{padding:5px;display:flex;flex-direction:column;gap:4px}
 .wtask{border:1px solid var(--line-2);border-radius:5px;
   padding:4px 5px;font-size:11px;display:flex;flex-direction:column;gap:1px;background:var(--card)}
@@ -640,8 +640,11 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .tseg i{font-style:normal;font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .tday{display:flex;align-items:baseline;gap:6px;padding:12px 6px 5px;border-bottom:1px solid var(--line)}
 .tday b{font-size:12px;font-weight:600;color:var(--ink)}
-.tday > span:last-child{font-size:11px;color:var(--ink-3)}
-.tday .tbadge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--vert);color:var(--vert-ink)}
+/* The day's count, a number in a circle before its date. */
+.tday{align-items:center}
+.tday .tcount{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;
+  background:var(--fill);color:var(--ink-2);font-size:10.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.tday.today .tcount{background:var(--lit,#eef3dc);color:var(--vert-ink)}
 .tnone{padding:12px 6px;font-size:12px;color:var(--ink-3)}
 .task{display:flex;align-items:center;gap:10px;padding:7px 6px;border-bottom:1px solid var(--line-2);background:var(--card);cursor:pointer}
 .task:hover{background:var(--fill-2)}
@@ -673,7 +676,7 @@ input.find:focus,input.note:focus{outline:1px solid var(--ink);outline-offset:1p
 .task .tick{flex:0 0 auto;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--ink-3);
   background:var(--card);display:inline-flex;align-items:center;justify-content:center;color:#fff}
 .task:hover .tick{border-color:var(--ink-2)}
-.task .tick.on{background:var(--vert);border-color:var(--vert-ink);color:var(--vert-ink)}
+.task .tick.on{background:var(--ink);border-color:var(--ink)}
 .task .tick .lu{width:10px;height:10px;stroke-width:3}
 .task .tact{display:flex;align-items:center;color:var(--ink-3);opacity:0;padding:2px}
 .task:hover .tact,.task.on .tact{opacity:1}
@@ -1686,6 +1689,9 @@ body:has([data-skppop]) .lcard{visibility:hidden}
 /* Deleting is the one act a comment cannot take back: it turns red under the cursor. */
 .ncard .nact .chip.del:hover{background:#b3261e;border-color:#b3261e;color:#fff}
 .ncard .nact .chip.del:hover .lb,.ncard .nact .chip.del:hover .lu{color:#fff}
+/* The same red on every other bin: a task's and an article note's. */
+.btnw[data-act="tdel"]:hover,.nedit[data-act="notedrop"]:hover{background:#b3261e;border-color:#b3261e;color:#fff}
+.btnw[data-act="tdel"]:hover .lu,.nedit[data-act="notedrop"]:hover .lu{color:#fff}
 .ncard.new{border-color:var(--ink);cursor:default}
 .ncard .nnew{width:100%;margin-top:5px;border:1px solid var(--line-2);border-radius:6px;padding:5px 7px;
   font:inherit;font-size:12.5px;color:var(--ink);background:#fff;resize:none}
@@ -2113,17 +2119,17 @@ const V = {
   mails: {},
   notes: {
     "3.3.1.18": [{ who: "Chargée de projet", when: "24 oct", txt: "Le garde-corps est dessiné à 1 020 mm sur l'élévation sud. À reprendre avant le dépôt." }],
-    "art. 71": [{ who: "Entrepreneur général", when: "22 oct", txt: "Vérifier la réduction pour proximité du métro avant de recompter les cases." }],
+    "art. 546": [{ who: "Entrepreneur général", when: "22 oct", txt: "Le règlement plafonne à 0,5 case par logement: 52 au plus. Garder les 22 dessinées." }],
   },
   /* The office's own reading of each provision — the one judgement a code
      screen can honestly carry, since nobody outside the firm decides how
      hard a sentence is to interpret. Seeded with what the studio already
      thinks; changed with a click on the row. */
-  clarity: { "art. 9": "moyen", "3.2.3.1": "obscur", "art. 71": "obscur",
-    "art. 134": "moyen", "art. 43": "clair", "art. 22": "moyen", "3.3.1.9": "clair",
-    "3.4.2.1": "clair", "3.3.1.18": "clair", "3.8.1.3": "moyen", "3.2.1.1": "obscur" },
+  clarity: { "art. 9": "moyen", "3.2.3.1": "obscur", "art. 546": "clair",
+    "art. 395": "moyen", "art. 32": "clair", "art. 43": "moyen", "3.3.1.9": "clair",
+    "3.4.2.1": "clair", "3.3.1.18": "clair", "3.8.3.6": "moyen", "3.2.2.48": "obscur" },
   clarityOn: null,
-  /* Codes articles pinned to the top of their list, first pinned first. */
+  /* Codes articles kept at the top of their list, first marked first. */
   artPins: [],
   /* Échéancier: the day the calendar is centred on, the scale it is drawn
      at — chosen on the calendar itself — and which task is open. */
@@ -2248,6 +2254,7 @@ const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
 /* A raised task needs a filled flag: the sprite's symbols declare
    fill="none" on themselves, which no inherited fill can override, so the
    solid one is its own drawing. */
+const BOOKMARK_SOLID = `<svg class="lu" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M5 3h14a2 2 0 0 1 2 2v16l-9-5-9 5V5a2 2 0 0 1 2-2z"/></svg>`;
 const FLAG_SOLID = `<svg class="lu" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22V4" fill="none" stroke-linecap="round"/></svg>`;
 /* The office's mark, traced from its file to three shapes so it holds at
    any size; drawn in the office green. */
@@ -2275,7 +2282,7 @@ function sprite() {
     "map", "drafting-compass", "trees", "zap", "waves", "droplet", "fan",
     "columns-3", "flame", "route", "plus",
     /* the margin: posting a note, keeping one for the studio */
-    "lock", "map-pin", "pin", "send", "users", "trash-2",
+    "lock", "map-pin", "bookmark", "send", "users", "trash-2",
     /* the scope of a note: the house keeps it in the office, the globe
        sends it out with the link */
     "house",
@@ -2558,116 +2565,205 @@ const REASONS = ["coût client", "structure", "code", "ville", "erreur de dessin
    consolidated legal version: every card says so, and links out. */
 const ARTICLES = [
   { id: "art. 9", topic: "Hauteur en étages",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
-    quote: "La hauteur d'un bâtiment ne doit pas excéder le nombre d'étages prescrit à la grille des usages et normes pour la zone.",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Dans un secteur de hauteur en mètres et en étages, la hauteur d'un bâtiment doit : 1º être égale ou inférieure à la hauteur en mètres et en étages maximale prescrite; 2º être égale ou supérieure à la hauteur en étages minimale prescrite.",
     measured: "6 étages", required: "5 étages", state: "non résolu",
-    needs: "grille des usages et normes de la zone",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+    needs: "secteur de hauteur au plan de l'annexe A", page: 21,
     img: "assets/code/art-9-hauteur.png", ratio: "1649 / 954" },
-  /* The Québec code comes right after the height, before the borough's own
-     dimensions: it is what the project is read against first, and the
-     comité asks about it first. */
+  { id: "art. 546", topic: "Stationnement — nombre maximal",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Pour les usages de la famille habitation, le nombre d'unités de stationnement ne doit pas dépasser : 1° 0,5 unité par logement;",
+    measured: "22 cases", required: "52 cases au plus", state: "conforme",
+    needs: "nombre de logements confirmé", page: 147,
+    fig: "classement" },
+  { id: "art. 395", topic: "Plantation d'arbres",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Lors de la construction d'un nouveau bâtiment principal ou l'agrandissement d'un bâtiment principal, tout terrain doit faire l'objet d'une plantation et du maintien d'un nombre minimal d'arbres… 2° un arbre pour chaque 50 m² de terrain non construit…",
+    measured: "—", required: "1 arbre par 50 m² non construits", state: "non résolu",
+    needs: "superficie de terrain non construite, arbres au plan paysager", page: 122,
+    fig: "classement" },
+  { id: "art. 32", topic: "Taux d'implantation",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Le taux d'implantation d'un terrain doit être égal ou supérieur à un taux d'implantation minimal de 30% tout en étant égal ou inférieur au taux d'implantation maximal prescrit par secteur sur ce plan.",
+    measured: "48,2 %", required: "55 %", state: "conforme",
+    needs: "superficie du terrain confirmée par l'arpenteur", page: 27,
+    img: "assets/code/art-43-implantation.png", ratio: "1545 / 1018" },
+  { id: "art. 43", topic: "Marge arrière",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Le mur arrière d'un bâtiment doit être implanté à une distance égale ou supérieure à la marge arrière minimale suivante, qui varie en fonction des hauteurs en mètres maximales prescrites au plan de l'annexe A",
+    measured: "2,70 m", required: "3,00 m", state: "non résolu",
+    needs: "limite arrière relevée, saillies admises à l'art. 349.1", page: 29,
+    img: "assets/code/art-22-marge.png", ratio: "1602 / 982" },
+  { id: "art. 10", topic: "Hauteur en mètres",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Dans un secteur de hauteur en mètres, la hauteur d'un bâtiment doit : 1º être égale ou inférieure à la hauteur en mètres maximale prescrite; 2º être égale ou supérieure à la hauteur en mètres minimale prescrite.",
+    measured: "—", required: "hauteur du secteur (annexe A)", state: "non résolu",
+    needs: "hauteur hors tout sur la coupe", page: 21,
+    fig: "classement" },
+  { id: "art. 26", topic: "Densité",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "La densité d'une construction doit être égale ou supérieure à la densité minimale tout en étant égale ou inférieure à la densité maximale prescrite par secteur sur ce plan.",
+    measured: "—", required: "ISP du secteur (annexe A)", state: "non résolu",
+    needs: "superficie de plancher totale et superficie du terrain", page: 26,
+    fig: "classement" },
+  { id: "art. 38", topic: "Alignement de construction",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "L'implantation d'un mur d'un bâtiment peut varier de plus ou moins 15 cm de la ligne d'implantation de la façade existante ou de la ligne d'implantation déterminée en vertu du Règlement sur les plans d'implantation et d'intégration architecturale…",
+    measured: "—", required: "± 15 cm", state: "non résolu",
+    needs: "ligne d'implantation des voisins sur le relevé", page: 28,
+    fig: "classement" },
+  { id: "art. 39", topic: "Marge latérale",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Un mur latéral d'un bâtiment non érigé sur la limite latérale d'un terrain doit être implanté à une distance égale ou supérieure à la marge latérale minimale suivante, qui varie en fonction des hauteurs en mètres maximales prescrites au plan de l'annexe A",
+    measured: "—", required: "1,5 à 4,0 m selon la hauteur", state: "non résolu",
+    needs: "limites latérales relevées par l'arpenteur", page: 28,
+    fig: "classement" },
+  { id: "art. 349.1", topic: "Saillies dans les marges",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Sous réserve d'une disposition contraire, seules les constructions suivantes sont autorisées dans une cour avant, ainsi que dans les marges latérales ou arrière aux conditions énoncées au tableau suivant :… Galerie ou balcon. 3 m 1,2 m",
+    measured: "—", required: "balcon: 3 m, à 1,2 m des limites", state: "non résolu",
+    needs: "saillie des balcons et distance aux limites", page: 103,
+    fig: "garde" },
+  { id: "art. 18.1", topic: "Terrasse sur le toit",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Chaque élément d'une terrasse doit respecter un retrait par rapport à la façade du bâtiment équivalent à au moins 2 fois leur hauteur.",
+    measured: "—", required: "2 × la hauteur de l'élément", state: "non résolu",
+    needs: "retrait du garde-corps de la terrasse au plan du toit", page: 24,
+    fig: "garde" },
+  { id: "art. 49", topic: "Matériaux prohibés en façade",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Sauf lorsqu'il s'agit d'une composante architecturale d'origine, les matériaux suivant sont prohibés sur toute partie extérieure d'un bâtiment :… 3º le verre, le miroir et tout autre matériau ayant un taux de réflexion de la lumière du jour extérieure supérieur à 20 %, sur plus de 5 % de la surface d'une façade incluant les ouvertures;",
+    measured: "—", required: "verre réfléchissant ≤ 5 % de la façade", state: "non résolu",
+    needs: "vitrage et parements au devis de façade", page: 30,
+    fig: "classement" },
+  { id: "art. 51.2", topic: "Revêtement des toits plats",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Dans le cas de la construction d'un nouveau bâtiment… pour tout toit dont la pente est inférieure à 2 unités à la verticale dans 12 unités à l'horizontale… seuls les revêtements suivants sont autorisés : 1o un toit végétalisé; 2o un matériau dont l'indice de réflectance solaire (IRS) est d'au moins 56…",
+    measured: "—", required: "toit végétalisé ou IRS ≥ 56", state: "non résolu",
+    needs: "membrane de toiture au devis", page: 31,
+    fig: "classement" },
+  { id: "art. 550", topic: "Voies de circulation du stationnement",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Une aire de stationnement intérieure et extérieure doit comporter une voie de circulation conduisant à chaque unité de stationnement. Cette voie de circulation doit avoir une largeur : 1º d'au moins 3 m lorsque l'unité de stationnement est parallèle à la voie de circulation; 2º d'au moins 5 m dans tout autre cas.",
+    measured: "—", required: "5 m (cases en angle)", state: "non résolu",
+    needs: "largeur des allées du garage souterrain", page: 148,
+    fig: "corridor" },
+  { id: "art. 629.5", topic: "Stationnement pour vélos",
+    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
+    quote: "Pour un usage de la famille habitation, le nombre minimal d'unités de stationnement pour vélo est de 1 unité par logement…",
+    measured: "—", required: "1 par logement", state: "non résolu",
+    needs: "supports dessinés au sous-sol et à l'extérieur", page: 154,
+    fig: "issues" },
+  /* The Québec construction code, chapter I — Bâtiment. An article with no
+     measurement yet says « — »: it is followed, not yet read against the
+     drawings. Schematics are drawn here from the two numbers, never a
+     redrawn plan. */
   { id: "3.2.3.1", topic: "Baies non protégées",
     doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "La surface maximale des baies non protégées dans une façade de rayonnement est fonction de la distance limitative et de la surface de la façade.",
+    quote: "Sous réserve des articles 3.2.3.10. à 3.2.3.12., la surface de baies non protégées pour la distance limitative applicable à la façade de rayonnement considérée ne doit pas dépasser la valeur indiquée…",
     measured: "74,2 m²", required: "68,5 m²", state: "non résolu",
-    needs: "distance limitative mesurée, surface de la façade de rayonnement",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    needs: "distance limitative mesurée, surface de la façade de rayonnement", page: 249,
     img: "assets/code/art-3231-baies.png", ratio: "1642 / 958" },
-  { id: "art. 71", topic: "Stationnement",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
-    quote: "Le nombre minimal d'unités de stationnement est établi selon l'usage et le nombre de logements.",
-    measured: "22 cases", required: "30 cases", state: "non résolu",
-    needs: "réductions applicables près du transport collectif",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    img: "assets/code/art-71-stationnement.png", ratio: "1859 / 846" },
-  { id: "art. 134", topic: "Verdissement et pleine terre",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
-    quote: "Une proportion minimale de la superficie du terrain doit être maintenue en pleine terre et végétalisée.",
-    measured: "17 %", required: "20 %", state: "non résolu",
-    needs: "plan d'aménagement paysager coté",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    img: "assets/code/art-134-verdissement.png", ratio: "1597 / 985" },
-  { id: "art. 43", topic: "Taux d'implantation",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
-    quote: "Le taux d'implantation au sol du bâtiment principal ne doit pas excéder le taux maximal prescrit pour la zone.",
-    measured: "48,2 %", required: "55 %", state: "conforme",
-    needs: "superficie du terrain confirmée par l'arpenteur",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    img: "assets/code/art-43-implantation.png", ratio: "1545 / 1018" },
-  { id: "art. 22", topic: "Marge arrière",
-    doc: "Règlement d'urbanisme 01-277", place: "Plateau-Mont-Royal", edition: "consolidé",
-    quote: "Une marge arrière minimale doit être conservée entre le bâtiment et la limite arrière du terrain.",
-    measured: "2,70 m", required: "3,00 m", state: "non résolu",
-    needs: "limite arrière relevée, exceptions et saillies admises",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
-    img: "assets/code/art-22-marge.png", ratio: "1602 / 982" },
-  /* The Québec construction code, chapter I — Bâtiment. These are the ones
-     the building itself is judged against, so the Codes screen lists them
-     before the borough's dimensions. None of them has an exported sheet
-     behind it yet, so each carries a schematic drawn here from the two
-     numbers — never a redrawn plan. */
   { id: "3.3.1.9", topic: "Largeur des corridors communs",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
-    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "La largeur libre d'un corridor commun desservant des logements ne doit pas être inférieure à 1 100 mm.",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Sous réserve du paragraphe 3.3.3.3. 2), la largeur minimale d'un corridor commun est de 1100 mm.",
     measured: "1 120 mm", required: "1 100 mm", state: "conforme",
-    needs: "largeur relevée au point le plus étroit, saillies comprises",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    needs: "largeur relevée au point le plus étroit, saillies comprises", page: 298,
     fig: "corridor" },
   { id: "3.4.2.1", topic: "Nombre d'issues par étage",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
-    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Au moins deux issues doivent desservir chaque étage, placées de manière que les distances de parcours soient respectées.",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Sous réserve des paragraphes 2) à 4), toute aire de plancher destinée à un usage doit être desservie par au moins 2 issues.",
     measured: "2 issues", required: "2 issues", state: "conforme",
-    needs: "distances de parcours mesurées depuis la porte la plus éloignée",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    needs: "distances de parcours mesurées depuis la porte la plus éloignée", page: 322,
     fig: "issues" },
   { id: "3.3.1.18", topic: "Hauteur des garde-corps",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
-    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "La hauteur d'un garde-corps doit être d'au moins 1 070 mm au-dessus de la surface praticable lorsque la dénivellation dépasse 1 800 mm.",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Sous réserve du paragraphe 5) et de l'article 3.3.2.9., un garde-corps d'au moins 1070 mm de hauteur doit être installé : a) au pourtour des toits auxquels un accès est prévu pour d'autres fins que les travaux d'entretien;…",
     measured: "1 020 mm", required: "1 070 mm", state: "non résolu",
-    needs: "hauteur des garde-corps de balcon cotée sur l'élévation",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    needs: "hauteur des garde-corps de balcon cotée sur l'élévation", page: 302,
     fig: "garde" },
-  { id: "3.8.1.3", topic: "Parcours sans obstacles",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
-    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Un parcours sans obstacles doit relier l'entrée principale aux aires desservies; la largeur libre d'une porte ne doit pas être inférieure à 850 mm.",
+  { id: "3.8.3.6", topic: "Portes sans obstacles",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Chaque baie de porte d'un parcours sans obstacles doit offrir une largeur libre d'au moins 850 mm lorsque la porte est ouverte",
     measured: "800 mm", required: "850 mm", state: "non résolu",
-    needs: "largeur libre des portes de l'entrée et du corridor",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    needs: "largeur libre des portes de l'entrée et du corridor", page: 367,
     fig: "porte" },
-  { id: "3.2.1.1", topic: "Classement et construction du bâtiment",
-    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec",
-    edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    quote: "Le bâtiment doit être classé selon son usage principal et construit selon le type exigé pour sa hauteur et son aire de bâtiment.",
+  { id: "3.2.2.48", topic: "Construction — groupe C, au plus 12 étages",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Un bâtiment du groupe C peut être construit conformément au paragraphe 2), à condition : a) qu'il soit entièrement protégé par gicleurs; b) qu'il ait une hauteur de bâtiment d'au plus 12 étages;…",
     measured: "groupe C — 8 étages", required: "incombustible", state: "non résolu",
-    needs: "aire de bâtiment par étage et type de construction retenu",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
+    needs: "type de construction retenu et degré des planchers", page: 231,
+    fig: "classement" },
+  { id: "3.3.4.2", topic: "Séparations coupe-feu entre logements",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Sous réserve des paragraphes 2) et 3.2.2.9. 2), les suites des habitations doivent être isolées les unes des autres et du reste du bâtiment par une séparation coupe-feu d'au moins 1 h.",
+    measured: "—", required: "1 h", state: "non résolu",
+    needs: "degré des murs entre logements et vers le corridor", page: 314,
+    fig: "classement" },
+  { id: "3.3.4.6", topic: "Transmission du son",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Les occupants des logements doivent être protégés contre les sons aériens conformément à la section 5.8.",
+    measured: "—", required: "section 5.8", state: "non résolu",
+    needs: "composition des murs et planchers entre logements", page: 316,
+    fig: "classement" },
+  { id: "3.4.2.5", topic: "Distance de parcours jusqu'à une issue",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "…si une aire de plancher doit avoir plus d'une issue, celles-ci doivent être situées de manière que, pour gagner au moins l'une d'elles, la distance de parcours soit d'au plus :… c) 45 m pour toute aire de plancher entièrement protégée par gicleurs",
+    measured: "—", required: "45 m", state: "non résolu",
+    needs: "parcours depuis la porte de logement la plus éloignée", page: 325,
+    fig: "issues" },
+  { id: "3.4.4.1", topic: "Séparation coupe-feu des issues",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Sous réserve des paragraphes 2), 3.3.5.4. 3), 3.4.4.2. 2) et 3.4.4.3. 1), toutes les issues doivent être isolées du reste du bâtiment par une séparation coupe-feu ayant un degré de résistance au feu au moins égal à celui exigé à la sous-section 3.2.2., sans toutefois être inférieur à 45 min",
+    measured: "—", required: "au moins 45 min", state: "non résolu",
+    needs: "degré des cages d'escalier d'issue sur les coupes", page: 328,
+    fig: "issues" },
+  { id: "3.4.6.1", topic: "Surfaces antidérapantes",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Les rampes, les marches et les paliers des escaliers doivent comporter : a) une surface antidérapante; et b) s'ils sont accessibles au public, une surface présentant une couleur contrastante ou un motif distinctif…",
+    measured: "—", required: "antidérapant, nez contrastant", state: "non résolu",
+    needs: "fini des marches et paliers des deux cages", page: 330,
+    fig: "issues" },
+  { id: "3.4.6.5", topic: "Mains courantes",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Les escaliers de moins de 1100 mm de largeur doivent être munis de 1 main courante. 2) Une main courante doit être installée de chaque côté : a) d'escaliers d'au moins 1100 mm de largeur;…",
+    measured: "—", required: "1 ou 2 selon la largeur", state: "non résolu",
+    needs: "largeur des escaliers et mains courantes aux plans des cages", page: 331,
+    fig: "garde" },
+  { id: "3.2.5.12", topic: "Système de gicleurs",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Sous réserve des paragraphes 2) à 4) et 9), un système de gicleurs doit être conçu, construit, installé et mis à l'essai conformément à la norme NFPA 13",
+    measured: "—", required: "NFPA 13", state: "non résolu",
+    needs: "plans de protection incendie de l'ingénieur", page: 281,
+    fig: "classement" },
+  { id: "3.2.5.3", topic: "Accès au toit",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "…dans un bâtiment de plus de 3 étages de hauteur de bâtiment dont la pente du toit est inférieure à 1 : 4, il doit être possible d'accéder directement aux parties principales du toit depuis les aires de plancher situées immédiatement au-dessous :…",
+    measured: "—", required: "escalier, ou trappe 550 × 900 mm", state: "non résolu",
+    needs: "accès au toit depuis le niveau 8", page: 278,
+    fig: "classement" },
+  { id: "3.2.4.1", topic: "Système d'alarme incendie",
+    doc: "Code de construction du Québec, chapitre I — Bâtiment", place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
+    quote: "Sous réserve des paragraphes 2) et 3), un système d'alarme incendie doit être installé dans un bâtiment protégé par gicleurs.",
+    measured: "—", required: "exigé", state: "non résolu",
+    needs: "plans électriques et de sécurité incendie", page: 263,
     fig: "classement" },
 ];
 
-/* Where "Lire le texte officiel" lands: the provision itself, not the top
-   of a 600-page code. Québec publishes its changes to the national code
-   only in the official PDF (the HTML page's article 1.09 is empty), so a
-   modified article opens that PDF on the page where its change is written —
-   page numbers read from the edition current to 1 July 2026. An article
-   Québec left unchanged is published only by the CNRC; it opens on
-   article 1.01, which incorporates the national code by reference. The
-   enabling law has an anchor per article. The borough bylaw is a PDF behind
-   montreal.ca with no public link to a page, so it stays on its own page. */
-const QC_CODE_PDF = "https://www.legisquebec.gouv.qc.ca/fr/pdf/cr/B-1.1,%20R.%202.pdf";
-const QC_CODE_PAGES = { "3.2.1.1": 33, "3.2.3.1": 37, "3.3.1.4": 50, "3.3.1.9": 51, "9.5.3.1": 110, "9.7.2.3": 110 };
+/* Where "Lire le texte officiel" lands: the page of the official PDF where
+   the article's number and heading are printed, never the cover of a
+   1 659-page code. Each body of rules is one document, so an article is
+   its page in it. The building code is the CNRC's integrated edition — the
+   national code with Québec's changes written in — because LegisQuébec
+   prints only the changes. The zoning bylaw is the borough's administrative
+   codification of 01-277, the copy the OCPM publishes with a stable address.
+   Every page here was read off the PDF text: number and heading on the
+   page. A note from the office has no page in either, and opens neither. */
+const QC_CODE_PDF = "https://nrc-publications.canada.ca/fra/voir/td/?id=3f0b1427-3adc-452d-a3d5-067e1db52750&dsl=fr";
+const ZONING_PDF = "https://ocpm.qc.ca/sites/default/files/pdf/P132/5.1_Re%CC%80glement%20d%26%23039%3Burbanisme_Arrondissement%20du%20Plateau-Mont-Royal_Codification%20administrative_COD%20PMR%2001-277_2024-08-01.pdf";
 function officialUrl(a) {
-  if (a.url.includes("/rc/B-1.1")) {
-    const page = QC_CODE_PAGES[a.id];
-    return page ? `${QC_CODE_PDF}#page=${page}` : `${a.url}#se:1_01`;
-  }
-  const art = /^art\. (\d+(?:\.\d+)?)$/.exec(a.id);
-  if (a.url.includes("/lc/") && art) return `${a.url}#se:${art[1].replace(".", "_")}`;
-  return a.url;
+  const pdf = a.doc.startsWith("Code") ? QC_CODE_PDF : ZONING_PDF;
+  return a.page ? `${pdf}#page=${a.page}` : pdf;
 }
 
 /* Two things are declared beside each table. "type" is what a column holds:
@@ -2730,13 +2826,13 @@ const TASKS = [
   { id: "t3", day: "2026-11-14", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: ["ba"],
     prio: "haute", done: false, phase: "Permis", code: "3.3.1.18" },
   { id: "t4", day: "2026-11-14", title: "Largeur libre des portes du parcours sans obstacles", who: ["ba"],
-    prio: "haute", done: false, phase: "Permis", code: "3.8.1.3" },
+    prio: "haute", done: false, phase: "Permis", code: "3.8.3.6" },
   { id: "t5", day: "2026-11-17", title: "Confirmer le type de construction pour 8 étages", who: ["gr"],
-    prio: "haute", done: false, phase: "Permis", code: "3.2.1.1" },
-  { id: "t6", day: "2026-11-20", title: "Recompter les cases après réduction pour le métro", who: ["dl"],
-    prio: "normale", done: false, phase: "Permis", code: "art. 71" },
-  { id: "t7", day: "2026-11-24", title: "Note à l'urbaniste sur la marge avant", who: ["al"],
-    prio: "normale", done: false, phase: "Comité", code: "art. 22" },
+    prio: "haute", done: false, phase: "Permis", code: "3.2.2.48" },
+  { id: "t6", day: "2026-11-20", title: "Confirmer les cases sous le plafond de 0,5 par logement", who: ["dl"],
+    prio: "normale", done: false, phase: "Permis", code: "art. 546" },
+  { id: "t7", day: "2026-11-24", title: "Note à l'urbaniste sur la marge arrière", who: ["al"],
+    prio: "normale", done: false, phase: "Comité", code: "art. 43" },
   { id: "t8", day: "2026-11-27", title: "Demande de dérogation mineure rédigée", who: ["al"],
     prio: "normale", done: false, phase: "Comité" },
   { id: "t9", day: "2026-12-04", title: "Plans d'émission pour permis", who: ["ba", "dl"],
@@ -3813,7 +3909,7 @@ const CONTACTS = {
   paysage: { role: "Architecte paysagiste", mail: "paysage@exemple.ca", last: "21 oct", waited: 7 },
   direction: { role: "Directeur — service d'urbanisme", mail: "direction.urbanisme@exemple.ca", last: "24 oct", waited: 4 },
 };
-const GROUND_ARTICLES = ["art. 134", "art. 71", "art. 22", "art. 43"];
+const GROUND_ARTICLES = ["art. 395", "art. 546", "art. 43", "art. 32", "art. 39", "art. 349.1"];
 const contactsFor = (a) => [a.doc.startsWith("Code de construction") ? "rbq" : "urbanisme",
   ...(GROUND_ARTICLES.includes(a.id) ? ["paysage"] : []), "direction"];
 
@@ -3855,8 +3951,8 @@ const MAIL_FILES = [
   ["Relevé d'arpentage — 6 oct.pdf", "860 ko"],
 ];
 const codeGroups = () => CODE_GROUPS
-  /* Each code reads in its own order: 3.3.1.9 before 3.3.1.18, art. 22
-     before art. 134 — each number in the reference compared as a number. */
+  /* Each code reads in its own order: 3.3.1.9 before 3.3.1.18, art. 43
+     before art. 349.1 — each number in the reference compared as a number. */
   .map(([prefix, label]) => [label, ARTICLES.filter((a) => a.doc.startsWith(prefix))
     .sort((x, y) => x.id.localeCompare(y.id, "fr", { numeric: true }))])
   .filter(([, rows]) => rows.length);
@@ -3867,58 +3963,63 @@ const codeGroups = () => CODE_GROUPS
    by page, then the official site, which can be newer than the copy. */
 const CODE_READ = {
   "Code de construction": { docs: ["Code de construction du Québec — chapitre I, CNB 2020 modifié.pdf", "Guide de l'utilisateur — CNB 2020, partie 3.pdf"],
-    sites: ["legisquebec.gouv.qc.ca", "nrc-cnrc.gc.ca"] },
-  "Règlement de zonage": { docs: ["Règlement d'urbanisme 01-277 — consolidé.pdf", "Notes d'interprétation du bureau — arrondissement.docx"],
-    sites: ["montreal.ca"] },
+    sites: ["nrc-publications.canada.ca", "legisquebec.gouv.qc.ca"] },
+  "Règlement de zonage": { docs: ["Règlement d'urbanisme 01-277 — codification administrative.pdf", "Notes d'interprétation du bureau — arrondissement.docx"],
+    sites: ["ocpm.qc.ca", "montreal.ca"] },
 };
 /* The index: what each article is found by (its words and the words people
    use for them), why it bears on this project, and where it was read. An
    article the project does not follow carries its own text. */
 const CODE_INDEX = {
   "Code de construction": [
-    { id: "3.8.1.3", page: 612, k: "porte largeur fauteuil roulant accessible accessibilite handicap universel obstacle entree rampe 850", why: "Relevé: 800 mm à la porte d'entrée, 50 mm sous l'exigence." },
-    { id: "3.3.4.4", page: 471, k: "porte largeur logement corridor entree 810", why: "S'applique aux 104 portes de logement sur les corridors communs." },
-    { id: "3.4.2.1", page: 498, k: "issue issues sortie sorties evacuation escalier etage combien nombre incendie", why: "Chaque étage est desservi par 2 issues." },
-    { id: "3.3.1.4", page: 433, k: "distance parcours issue sortie evacuation gicleur gicleurs incendie loin", why: "À mesurer depuis la porte de logement la plus éloignée de chaque étage." },
-    { id: "3.4.3.2", page: 509, k: "escalier escaliers issue largeur main courante marche evacuation", why: "Les deux cages d'escalier, au plan de chaque étage." },
-    { id: "3.3.1.18", page: 455, k: "garde-corps garde corps balcon rampe terrasse chute hauteur toit", why: "Coté à 1 020 mm sur l'élévation des balcons." },
-    { id: "3.2.3.1", page: 301, k: "fenetre fenetres baie baies vitrage ouverture ouvertures facade limite voisin proche distance limitative rayonnement incendie", why: "Façade est: 74,2 m² dessinés pour 68,5 m² permis." },
-    { id: "3.3.1.9", page: 441, k: "corridor couloir largeur commun passage", why: "Relevé: 1 120 mm au point le plus étroit." },
-    { id: "3.2.1.1", page: 288, k: "classement classe construction incombustible combustible usage groupe hauteur aire batiment", why: "Groupe C sur 8 étages: construction incombustible exigée." },
-    { id: "9.7.2.3", page: 1088, k: "fenetre fenetres vitrage vitree lumiere eclairage naturel chambre piece", why: "Se lit pièce par pièce; les vitrages par unité sont dans Unités & ouvertures." },
-    { id: "9.5.3.1", page: 1061, k: "plafond hauteur libre piece sous-sol mezzanine", why: "À vérifier sous les retombées de poutres et les plafonds suspendus." },
-    { id: "A-3.2.3.1", from: "web", site: "nrc-cnrc.gc.ca", sec: "Note explicative", topic: "Calcul des baies d'une façade en biais", fig: "classement",
-      quote: "Lorsque la façade n'est pas parallèle à la limite, la distance limitative se mesure perpendiculairement à la façade, baie par baie.",
-      k: "fenetre fenetres baie baies facade limite voisin proche distance limitative biais calcul", why: "La façade est est en biais sur la limite: la surface permise peut monter.",
-      needs: "angle de la façade est sur le plan d'implantation" },
+    { id: "3.2.3.1", page: 249, k: "fenetre fenetres baie baies vitrage ouverture ouvertures facade limite voisin proche distance limitative rayonnement incendie", why: "Façade est: 74,2 m² dessinés pour 68,5 m² permis." },
+    { id: "3.3.1.9", page: 298, k: "corridor couloir largeur commun passage", why: "Relevé: 1 120 mm au point le plus étroit." },
+    { id: "3.4.2.1", page: 322, k: "issue issues sortie sorties evacuation escalier etage combien nombre incendie", why: "Chaque étage est desservi par 2 issues." },
+    { id: "3.3.1.18", page: 302, k: "garde-corps garde corps balcon rampe terrasse chute hauteur toit", why: "Coté à 1 020 mm sur l'élévation des balcons." },
+    { id: "3.8.3.6", page: 367, k: "porte largeur fauteuil roulant accessible accessibilite handicap universel obstacle entree baie 850", why: "Relevé: 800 mm à la porte d'entrée, 50 mm sous l'exigence." },
+    { id: "3.2.2.48", page: 231, k: "classement classe construction incombustible combustible usage groupe hauteur etages gicleurs", why: "Groupe C sur 8 étages, gicleurs: construction incombustible, planchers 1 h." },
+    { id: "3.3.4.2", page: 314, k: "separation coupe feu logement logements mur mitoyen suite resistance degre", why: "Entre les 104 logements, et entre chaque logement et le corridor." },
+    { id: "3.3.4.6", page: 316, k: "son bruit acoustique insonorisation stc astc mur plancher voisin", why: "Logements superposés et côte à côte sur un corridor à double chargement." },
+    { id: "3.4.2.5", page: 325, k: "distance parcours issue sortie evacuation gicleur gicleurs incendie loin 45", why: "À mesurer depuis la porte de logement la plus éloignée de chaque étage." },
+    { id: "3.4.4.1", page: 328, k: "issue escalier cage separation coupe feu degre resistance", why: "Les deux cages d'escalier, sur les 8 étages." },
+    { id: "3.4.6.1", page: 330, k: "antiderapant marche marches nez palier escalier contraste glissant", why: "Les deux escaliers d'issue et la rampe du garage." },
+    { id: "3.4.6.5", page: 331, k: "main courante mains courantes escalier rampe largeur", why: "Le nombre suit la largeur des deux escaliers d'issue." },
+    { id: "3.2.5.12", page: 281, k: "gicleur gicleurs sprinkler nfpa protection incendie", why: "Le classement 3.2.2.48 et la distance de 45 m en dépendent." },
+    { id: "3.2.5.3", page: 278, k: "toit toiture acces trappe echelle terrasse pompier", why: "8 étages, toit plat avec terrasse." },
+    { id: "3.2.4.1", page: 263, k: "alarme incendie detection detecteur systeme", why: "Exigé dès que le bâtiment est protégé par gicleurs." },
+    { id: "3.3.1.4", page: 295, k: "corridor commun separation coupe feu", why: "Le paragraphe 4) l'allège si le parcours reste sous 45 m, gicleurs compris." },
+    { id: "3.4.3.2", page: 326, k: "escalier escaliers issue largeur porte evacuation 1100 900", why: "Au tableau 3.4.3.2.-A: 1 100 mm pour un escalier qui dessert plus de 2 étages." },
+    { id: "9.5.3.1", page: 899, k: "plafond hauteur libre piece sous-sol", why: "À vérifier sous les retombées de poutres et les plafonds suspendus." },
+    { id: "9.7.2.3", page: 906, k: "fenetre fenetres vitrage vitree lumiere eclairage naturel logement", why: "Se lit logement par logement; les vitrages sont dans Unités & ouvertures." },
+    { id: "A-3.2.3.1. 4)", page: 432, sec: "Note explicative", topic: "Baies en retrait: le plan de projection", fig: "classement",
+      quote: "Le paragraphe 4) s'applique au calcul du pourcentage admissible de baies non protégées en prenant leur projection sur un plan situé en avant de toutes les baies non protégées.",
+      k: "fenetre fenetres baie baies facade retrait projection plan distance limitative calcul pourcentage", why: "La façade est a des baies en retrait: elles se comptent sur un plan devant elles.",
+      needs: "plan vertical devant les baies de la façade est" },
   ],
   "Règlement de zonage": [
-    { id: "art. 9", page: 14, k: "hauteur etage etages maximale maximum haut grille zone depasser", why: "6 étages dessinés, 5 prescrits à la grille." },
-    { id: "art. 22", page: 29, k: "marge recul arriere limite terrain fond cour distance", why: "2,70 m dessinés pour 3,00 m exigés." },
-    { id: "art. 43", page: 41, k: "implantation taux sol emprise couverture terrain densite", why: "48,2 % pour 55 % permis." },
-    { id: "art. 71", page: 66, k: "stationnement case cases auto voiture voitures parking garage logement logements combien nombre", why: "104 logements; 22 cases dessinées pour 30 exigées." },
-    { id: "art. 72", page: 67, sec: "Stationnement", topic: "Réduction près du transport collectif", fig: "issues",
-      quote: "Le nombre minimal d'unités de stationnement peut être réduit pour un terrain situé près d'une station de transport collectif.",
-      k: "stationnement case cases reduction reduire metro autobus transport collectif station combien", why: "C'est la pièce qui manque pour conclure l'art. 71.",
-      needs: "distance à pied jusqu'à la station la plus proche" },
-    { id: "art. 86", page: 74, k: "velo velos bicyclette stationnement support logement", why: "104 supports requis, un par logement." },
-    { id: "art. 134", page: 112, k: "vert verdissement pleine terre gazon arbre arbres paysage vegetal vegetalise jardin", why: "17 % mesurés pour 20 % exigés." },
-    { id: "art. 21", page: 28, sec: "Implantation", topic: "Marges latérales", fig: "classement",
-      quote: "Une marge latérale minimale doit être conservée entre le bâtiment et chaque limite latérale du terrain.",
-      k: "marge recul laterale cote limite voisin terrain distance", why: "Lu sur le plan d'implantation, des deux côtés.",
-      needs: "limites latérales relevées par l'arpenteur" },
-    { id: "art. 71 (2026)", from: "web", site: "montreal.ca", newer: true, sec: "Stationnement", topic: "Stationnement — minimum retiré près du métro", fig: "issues",
-      quote: "Aucun nombre minimal d'unités de stationnement n'est exigé pour un terrain situé à moins de 500 m d'une station de métro.",
-      k: "stationnement case cases auto voiture parking garage logement logements combien nombre metro station reduction minimum",
-      why: "Plus récent que la copie du bureau (2024-03-12): l'exigence de 30 cases peut tomber.", needs: "distance à pied jusqu'à la station" },
+    { id: "art. 9", page: 21, k: "hauteur etage etages maximale maximum haut annexe secteur depasser", why: "6 étages dessinés, 5 prescrits au secteur." },
+    { id: "art. 546", page: 147, k: "stationnement case cases auto voiture voitures parking garage logement logements combien nombre maximum plafond", why: "104 logements: 52 cases au plus; 22 dessinées. Aucun minimum." },
+    { id: "art. 395", page: 122, k: "vert verdissement arbre arbres plantation paysage vegetal jardin cour terrain non construit", why: "Se compte sur la cour paysagée, d'après la superficie non construite." },
+    { id: "art. 32", page: 27, k: "implantation taux sol emprise couverture terrain minimal maximal", why: "48,2 % pour 55 % permis au secteur." },
+    { id: "art. 43", page: 29, k: "marge recul arriere limite terrain fond cour distance", why: "2,70 m dessinés pour 3,00 m exigés." },
+    { id: "art. 10", page: 21, k: "hauteur metres maximale minimale gabarit annexe secteur", why: "Se lit avec l'art. 9: le gabarit en mètres, pas seulement les étages." },
+    { id: "art. 26", page: 26, k: "densite isp indice superficie plancher cos", why: "104 logements: la superficie de plancher totale contre l'ISP du secteur." },
+    { id: "art. 38", page: 28, k: "alignement facade implantation rue voisin ligne avant", why: "La façade sur rue s'aligne sur les voisins." },
+    { id: "art. 39", page: 28, k: "marge recul laterale cote limite voisin terrain distance", why: "La façade est est proche de la limite latérale." },
+    { id: "art. 349.1", page: 103, k: "saillie saillies balcon balcons galerie escalier marge arriere laterale", why: "Les 0,30 m manquants à l'arrière sont des balcons." },
+    { id: "art. 18.1", page: 24, k: "terrasse toit retrait garde-corps parapet facade", why: "La terrasse du toit et son garde-corps." },
+    { id: "art. 49", page: 30, k: "materiau materiaux facade revetement brique maconnerie verre vitrage reflechissant vinyle", why: "Façades en maçonnerie et grandes baies vitrées." },
+    { id: "art. 51.2", page: 31, k: "toit blanc toiture vegetalise vert membrane irs reflectance albedo", why: "Le toit plat, hors terrasse et équipements." },
+    { id: "art. 550", page: 148, k: "allee voie circulation garage souterrain stationnement largeur", why: "Les allées du garage souterrain de 22 cases." },
+    { id: "art. 629.5", page: 154, k: "velo velos bicyclette stationnement support logement", why: "104 supports requis, un par logement." },
+    { id: "art. 558", page: 149, k: "stationnement exterieur cour pleine terre vegetaux", why: "Ne joue que si une case sort du garage souterrain." },
     { id: "Note interne", from: "bureau", file: "Notes d'interprétation du bureau — arrondissement.docx", page: 3, sec: "Note du bureau",
       topic: "Balcons acceptés comme saillies dans la marge arrière", fig: "classement",
       quote: "Sur un projet voisin, l'arrondissement a accepté des balcons jusqu'à 1,5 m dans la marge arrière, comptés comme saillies.",
       k: "marge recul arriere limite balcon balcons saillie saillies terrain fond cour", why: "Les 30 cm manquants sont des balcons: la marge passerait.",
       needs: "confirmer que l'interprétation vaut pour ce terrain" },
   ],
-};
-const codeSource = (label) => CODE_SOURCES.find((x) => x.short === label);
+};const codeSource = (label) => CODE_SOURCES.find((x) => x.short === label);
 /* An entry with the article's own words: from the followed list, else from
    the codes' table of contents, else from the entry itself. */
 function codeEntry(label, e) {
@@ -4054,7 +4155,7 @@ function codeRow(a) {
         <span class="hi tag">${a.id}</span>
         <span class="hi" style="font-weight:600;font-size:13px;flex:1">${a.topic}</span>
         <span class="artpin ${V.artPins.includes(a.id) ? "on" : ""}" ${act("artpin", a.id)}
-          title="${V.artPins.includes(a.id) ? "Désépingler" : "Épingler en haut de la liste"}">${icon("pin")}</span>
+          title="${V.artPins.includes(a.id) ? "Retirer le signet" : "Garder en haut de la liste"}">${V.artPins.includes(a.id) ? BOOKMARK_SOLID : icon("bookmark")}</span>
       </div>
       <blockquote class="hi quote">«&nbsp;${a.quote}&nbsp;»</blockquote>
       <div class="hi src">${a.doc} — ${a.place} — ${a.edition}</div>
@@ -4261,7 +4362,7 @@ function taskListHTML() {
   const group = (d) => {
     const dl = list.filter((t) => dayOf(t) === d);
     const cls = !journal && d === TODAY ? "today" : "";
-    return `<div class="tday ${cls}" data-tday="${d}"><b>${dayLabel(d)}</b>${cls === "today" ? `<span class="tbadge">aujourd'hui</span>` : ""}<span>${dl.length} tâche${dl.length > 1 ? "s" : ""}</span></div>
+    return `<div class="tday ${cls}" data-tday="${d}"><span class="tcount" title="${dl.length} tâche${dl.length > 1 ? "s" : ""}">${dl.length}</span><b>${dayLabel(d)}</b></div>
       ${dl.map(line).join("")}`;
   };
   return `<div class="tlist">${seg}
@@ -4587,7 +4688,7 @@ function headerHTML() {
   const bq = buildingScope() ? buildingQuant() : null;
   const title = { "Projets": ["Projets", ""],
     "Codes": ["Codes et règlements", ""],
-    "Échéancier": ["Échéancier", `${TASKS.filter((t) => !t.done).length} tâches à faire`],
+    "Échéancier": ["Échéancier", ""],
     "Unités": buildingScope()
       ? [`${V.project} — bâtiment entier`,
         `${LEVELS.length} niveaux — ${bq.count} unités — ${fqNum(bq.net)} pi² nets`]
@@ -4825,7 +4926,6 @@ function contentHTML() {
         lprev: "le calendrier", lnext: "la liste" })}
       ${folded("todo") ? foldStripHTML("todo", "la liste") : `<div class="pane" style="flex:1">
         <div class="ph">${icon("list-checks")}<span class="hi" style="font-weight:600">À faire</span>
-          <span class="hi" style="font-size:11.5px;color:var(--ink-3)">${TASKS.filter((t) => !t.done).length} ouvertes</span>
           <span style="flex:1"></span>
           <span class="btnw" ${act("tnew")}>${icon("plus")}<span class="hi">Ajouter une tâche</span></span></div>
         <div class="pb">${taskListHTML()}</div></div>`}
@@ -7097,45 +7197,34 @@ function shareDialogHTML(d) {
 const CODE_SOURCES = [
   { name: "Code de construction du Québec, chapitre I — Bâtiment", short: "Code de construction",
     place: "Québec", edition: "CNB 2020 modifié, en vigueur le 17 avril 2025",
-    url: "https://www.legisquebec.gouv.qc.ca/fr/document/rc/B-1.1,%20r.%202",
     arts: {
       "Partie 3 — Sécurité dans les bâtiments": [
-        { id: "3.3.1.4", topic: "Distance de parcours jusqu'à une issue", required: "45 m",
-          quote: "La distance de parcours jusqu'à une issue ne doit pas dépasser 45 m dans une aire de plancher protégée par gicleurs.",
-          needs: "parcours mesuré depuis la porte de logement la plus éloignée", fig: "issues" },
-        { id: "3.3.4.4", topic: "Portes des logements", required: "810 mm",
-          quote: "La largeur libre d'une porte donnant sur un corridor commun ne doit pas être inférieure à 810 mm.",
-          needs: "largeur libre relevée sur les plans d'étage", fig: "porte" },
-        { id: "3.4.3.2", topic: "Largeur des escaliers d'issue", required: "1 100 mm",
-          quote: "La largeur d'un escalier d'issue doit être d'au moins 1 100 mm entre les mains courantes.",
-          needs: "largeur entre mains courantes cotée sur le plan de la cage", fig: "corridor" },
+        { id: "3.3.1.4", page: 295, topic: "Séparation des corridors communs", required: "séparation coupe-feu",
+          quote: "Sauf indication contraire dans la présente partie ou au paragraphe 4), les corridors communs doivent : a) être isolés du reste de l'étage par une séparation coupe-feu; et b) ne pas abriter d'usage.",
+          needs: "séparations des corridors aux plans d'étage", fig: "corridor" },
+        { id: "3.4.3.2", page: 326, topic: "Largeur des issues", required: "escaliers 900 ou 1 100 mm, portes 850 mm",
+          quote: "Sous réserve du paragraphe 3), la largeur totale minimale exigée pour les issues desservant des aires de plancher destinées à des établissements de réunion, des habitations,…",
+          needs: "largeur des escaliers et des portes d'issue aux plans des cages", fig: "corridor" },
       ],
-      "Partie 9 — Maisons et petits bâtiments": [
-        { id: "9.5.3.1", topic: "Hauteur sous plafond des pièces", required: "2 300 mm",
-          quote: "La hauteur libre d'une pièce habitable ne doit pas être inférieure à 2 300 mm sur au moins la moitié de sa superficie.",
-          needs: "hauteur sous dalle et épaisseur des plafonds suspendus", fig: "garde" },
-        { id: "9.7.2.3", topic: "Surface vitrée des pièces habitables", required: "5 % de l'aire",
-          quote: "La surface vitrée d'une pièce habitable ne doit pas être inférieure à 5 % de l'aire de plancher desservie.",
-          needs: "aires de plancher par pièce et dimensions des fenêtres", fig: "classement" },
+      "Partie 9 — Habitations": [
+        { id: "9.5.3.1", page: 899, topic: "Hauteur sous plafond des pièces", required: "tableau 9.5.3.1",
+          quote: "Sous réserve des paragraphes 2) et 3), la hauteur sous plafond et la hauteur libre dans les pièces ou des espaces des habitations doivent être conformes au tableau 9.5.3.1.",
+          needs: "hauteur sous dalle et plafonds suspendus", fig: "garde" },
+        { id: "9.7.2.3", page: 906, topic: "Surface vitrée des logements", required: "5 % de la superficie de l'étage",
+          quote: "Sous réserve des paragraphes 2) et 4), la surface vitrée minimale des fenêtres procurant de l'éclairage naturel dans un logement doit, pour chacun des étages : a) être équivalente à au moins 5 % de la superficie de l'étage du logement…",
+          needs: "superficie de chaque logement et surface de ses fenêtres", fig: "classement" },
       ],
     } },
-  { name: "Règlement d'urbanisme de l'arrondissement", short: "Règlement de zonage",
-    place: "Arrondissement", edition: "version à jour consultée le 2 novembre 2026",
-    url: "https://montreal.ca/articles/reglement-durbanisme-du-plateau-mont-royal-20131",
+  { name: "Règlement d'urbanisme 01-277", short: "Règlement de zonage",
+    place: "Plateau-Mont-Royal", edition: "codification administrative au 2024-08-01",
     arts: {
-      "Hauteurs et implantation": [
-        { id: "art. 43", topic: "Taux d'implantation au sol", required: "70 %",
-          quote: "Le taux d'implantation au sol du bâtiment ne peut excéder 70 % de la superficie du terrain.",
-          needs: "superficie du terrain et emprise au sol du bâtiment", fig: "classement" },
-      ],
       "Stationnement et accès": [
-        { id: "art. 86", topic: "Unités de stationnement pour vélos", required: "1 par logement",
-          quote: "Au moins une unité de stationnement pour vélo doit être aménagée par logement.",
-          needs: "nombre de supports dessinés au sous-sol et à l'extérieur", fig: "issues" },
+        { id: "art. 558", page: 149, topic: "Aire de stationnement extérieure", required: "50 % de la cour au plus",
+          quote: "L'aménagement d'une aire de stationnement doit s'effectuer en respectant les exigences suivantes : 1° l'aire de stationnement, incluant les dégagements prescrits à l'article 565, ne doit pas occuper plus de 50 % de la superficie de la cour;…",
+          needs: "seulement si une aire est aménagée en cour", fig: "classement" },
       ],
     } },
 ];
-
 /* Three questions and nothing else: the body of rules, the part, the
    article. Each answer narrows the next list, so there is never a form to
    fill — only a choice to make. The added article arrives unmeasured: the
@@ -7340,8 +7429,8 @@ function onClick(e) {
        fall back to its place. */
     case "artpin": {
       const i = V.artPins.indexOf(value);
-      if (i < 0) { V.artPins.push(value); say(`${value} épinglé en haut de la liste.`); }
-      else { V.artPins.splice(i, 1); say(`${value} désépinglé.`); }
+      if (i < 0) { V.artPins.push(value); say(`Signet sur ${value}: il reste en haut de la liste.`); }
+      else { V.artPins.splice(i, 1); say(`Signet retiré de ${value}.`); }
       break;
     }
     case "clarityopen": V.clarityOn = V.clarityOn === value ? null : value; break;
@@ -7446,7 +7535,7 @@ function onClick(e) {
       ARTICLES.push({ id: e.id, topic: e.topic, doc: src.name, place: src.place,
         edition: e.from === "web" ? `en ligne — ${e.site}` : e.from === "bureau" ? "note interne du bureau" : src.edition,
         quote: e.quote, measured: "—", required: e.required || "—", state: "non résolu",
-        needs: e.needs || "à lire contre les dessins", url: src.url, fig: e.fig || "classement" });
+        needs: e.needs || "à lire contre les dessins", page: e.from === "bureau" ? null : e.page, fig: e.fig || "classement" });
       say(`${e.id} suivi. Rien n'est mesuré tant que le dessin n'a pas été lu.`);
       break;
     }
@@ -7457,7 +7546,7 @@ function onClick(e) {
       if (ARTICLES.some((x) => x.id === a.id)) { say(`${a.id} est déjà suivi.`); V.dialog = null; break; }
       ARTICLES.push({ id: a.id, topic: a.topic, doc: src.name, place: src.place, edition: src.edition,
         quote: a.quote, measured: "—", required: a.required, state: "non résolu",
-        needs: a.needs, url: src.url, fig: a.fig });
+        needs: a.needs, page: a.page, fig: a.fig });
       V.articleId = a.id; V.dialog = null;
       say(`${a.id} ajouté. Rien n'est mesuré tant que le dessin n'a pas été lu.`);
       break;
