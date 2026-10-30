@@ -6021,26 +6021,24 @@ document.addEventListener("click", (e) => {
     t: ph.querySelector(".hi")?.textContent.trim(),
   };
 }, true);
-/* The narrowest a pane's header goes before its controls touch: each one at
-   the width it is drawn, none squeezed, plus the gaps and padding between.
+/* The narrowest a pane's header goes before its controls touch: the header
+   laid out at its own max-content width, so every control is drawn whole
+   and nothing is handed spare room. Read at the pane's width instead, a
+   spacer (flex:1) or a pushed button (margin-left:auto) counts the free
+   space as needed, and every pane stops at the width it already has.
    Text that already gives way with an ellipsis, like the file name in the
    model's chip, counts for nothing: it is meant to fold away first. */
 function headNeed(pane) {
   let n = 0;
   pane.querySelectorAll(".ph").forEach((ph) => {
-    const cs = getComputedStyle(ph), kids = [...ph.children].filter((c) => getComputedStyle(c).display !== "none");
-    const was = kids.map((c) => c.style.flexShrink);
     const give = [...ph.querySelectorAll("*")].filter((c) => getComputedStyle(c).textOverflow === "ellipsis");
     const gw = give.map((c) => c.style.display);
     give.forEach((c) => { c.style.display = "none"; });
-    kids.forEach((c) => { c.style.flexShrink = "0"; });
-    const w = kids.reduce((sum, c) => {
-      const k = getComputedStyle(c);
-      return sum + c.getBoundingClientRect().width + parseFloat(k.marginLeft) + parseFloat(k.marginRight);
-    }, 0) + (parseFloat(cs.columnGap) || 0) * Math.max(0, kids.length - 1) + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-    kids.forEach((c, i) => { c.style.flexShrink = was[i]; });
+    const pw = ph.style.width;
+    ph.style.width = "max-content";
+    n = Math.max(n, ph.getBoundingClientRect().width);
+    ph.style.width = pw;
     give.forEach((c, i) => { c.style.display = gw[i]; });
-    n = Math.max(n, w);
   });
   return Math.ceil(n);
 }
