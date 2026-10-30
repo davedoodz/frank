@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Le bandeau — le type d'abord, la part ensuite</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The bar is read before anything else in the pane, so the first thing it
+   must teach is which colour is which typology: it is a legend before it
+   is a measure. The share is true but secondary — it is the answer to a
+   question asked second. Six ways of ranking the two, all built on the
+   two shapes already chosen: figures above the band, or figures inside it.
+   The filter and "Voir sur le plan" work in every one. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill-2:#f6f6f7;--page:#fafafa;--card:#fff;--t3:#e0736e;--t4:#5b9bd5;--t5:#5cb46e}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.45 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--page)}
+main{padding:24px 28px 80px;max-width:1400px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:880px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:26px;margin-top:24px}
+section > h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section > h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section > p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:4.2em}
+
+.pane{background:var(--card);border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.ph{display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;border-bottom:1px solid var(--line-2);
+  font-weight:500}
+.ph .n{margin-left:auto;color:var(--ink-3);font-size:12px}
+.mix{padding:11px 12px 12px;border-bottom:1px solid var(--line-2)}
+.sum{margin-top:9px;font-size:12.5px;color:var(--ink-2)}
+.sum b{color:var(--ink);font-weight:600}
+.plan{display:inline-flex;align-items:center;gap:7px;margin-top:10px;border:1px solid var(--line);
+  border-radius:8px;padding:5px 11px;font-size:12.5px;cursor:pointer;background:var(--card)}
+.plan:hover{background:var(--fill-2)}
+.plan svg{width:14px;height:14px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:5px 12px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+th{color:var(--ink-3);font-weight:500;font-size:11.5px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+.sw{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+.thf{display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:var(--ink-3)}
+.thf svg{width:12px;height:12px}
+
+/* the two shapes, dressed six ways ---------------------------------- */
+.bar{display:flex;gap:2px;width:100%;height:9px;border-radius:5px;overflow:hidden}
+.bar .seg{cursor:pointer;transition:flex-basis .25s cubic-bezier(.3,0,.2,1),opacity .14s ease;
+  display:flex;align-items:center;justify-content:center;white-space:nowrap;color:#fff}
+.bar .seg[data-dim="true"]{opacity:.26}
+.row{display:flex;gap:2px}
+.row .cell{display:flex;align-items:baseline;gap:5px;overflow:hidden;white-space:nowrap;cursor:pointer;
+  transition:flex-basis .25s cubic-bezier(.3,0,.2,1),opacity .14s ease}
+.row .cell[data-dim="true"]{opacity:.34}
+.ty{font-weight:600}
+.pt{color:var(--ink-3);font-size:11px}
+
+/* A — the type leads, the share trails in grey. Same line, two weights
+   and two sizes: 12.5 semibold against 11 grey is a rank the eye takes
+   without being told. */
+[data-v="A"] .row{margin-bottom:6px}
+[data-v="A"] .ty{font-size:12.5px}
+
+/* B — the type is a chip of its own colour and the share is a footnote
+   under it. The colour is attached to the word, not to a square beside
+   it, so the legend survives being read at a glance. */
+[data-v="B"] .row{margin-bottom:7px;align-items:stretch}
+[data-v="B"] .cell{flex-direction:column;gap:2px;align-items:flex-start}
+[data-v="B"] .ty{font-size:12px;color:#fff;padding:1px 7px;border-radius:5px}
+[data-v="B"] .pt{font-size:11px}
+
+/* C — the share goes inside the band, small and translucent; the type
+   stands above it in ink. The number never competes with the word because
+   it is not even the same colour. */
+[data-v="C"] .bar{height:18px;border-radius:5px}
+[data-v="C"] .seg{font-size:10.5px;color:rgba(255,255,255,.88);font-weight:500}
+[data-v="C"] .row{margin-bottom:5px}
+[data-v="C"] .ty{font-size:12.5px}
+
+/* D — the band carries the type in white and nothing else; the share is
+   under it, aligned to the band, in grey. The bar reads as three named
+   fields, and the figures are a caption to them. */
+[data-v="D"] .bar{height:22px;border-radius:6px}
+[data-v="D"] .seg{font-size:11.5px;font-weight:600}
+[data-v="D"] .row{margin-top:5px}
+[data-v="D"] .pt{font-size:11px}
+
+/* E — one size for the word, the share in the margin of the band. The
+   type sits left of the bar like a key, and the percentage rides the
+   band's right end where a scale's labels normally are. */
+[data-v="E"] .bar{height:20px;border-radius:5px}
+[data-v="E"] .seg{justify-content:space-between;padding:0 7px;font-size:11.5px;font-weight:600}
+[data-v="E"] .seg small{font-weight:500;opacity:.8}
+
+/* F — the share is only there when asked. The legend is three names in
+   their colours; the percentages appear under the pointer, so the first
+   glance is only ever the key. */
+[data-v="F"] .row{margin-bottom:6px}
+[data-v="F"] .ty{font-size:12.5px}
+[data-v="F"] .pt{opacity:0;transition:opacity .14s ease}
+[data-v="F"] .cell:hover .pt,[data-v="F"] .row:hover .pt{opacity:1}
+</style>
+</head>
+<body>
+<main>
+  <h1>Le bandeau — le type d'abord, la part ensuite</h1>
+  <p class="lede">La barre est lue avant tout le reste du volet: ce qu'elle doit apprendre en premier, c'est
+     quelle couleur est quelle typologie. C'est une légende avant d'être une mesure; la part est vraie mais
+     secondaire, elle répond à une question posée ensuite. Six façons de classer les deux, toutes bâties sur
+     les deux formes déjà retenues — chiffres au-dessus, ou chiffres dedans.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script>
+const UNITS = [["501","5½",1275],["502","5½",1496],["503","3½",760],["504","4½",1152],["505","4½",1221],
+  ["506","4½",1106],["507","3½",707],["508","4½",970],["509","4½",958],["510","5½",1466],["511","5½",1345],
+  ["512","3½",740],["513","3½",708],["514","3½",716],["515","4½",999]];
+const TYPES = ["3½", "4½", "5½"];
+const INK = { "3½": "var(--t3)", "4½": "var(--t4)", "5½": "var(--t5)" };
+const nb = (n) => n.toLocaleString("fr-CA").replace(/\u202f|\u00a0/g, " ");
+const of = (t) => UNITS.filter((u) => u[1] === t);
+const net = (r) => r.reduce((s, u) => s + u[2], 0);
+const TOTAL = net(UNITS);
+const pc = (t) => Math.round(net(of(t)) / TOTAL * 100);
+
+const sel = {};
+const shown = (v) => (sel[v] ? of(sel[v]) : UNITS);
+const dim = (v, t) => Boolean(sel[v]) && sel[v] !== t;
+const EYE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+  stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const FILT = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+  stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>`;
+
+const bar = (v, inner) => `<div class="bar">${TYPES.map((t) => `
+  <span class="seg" data-pick="${v}:${t}" data-dim="${dim(v, t)}"
+    style="flex:${net(of(t))} 0 0;background:${INK[t]}">${inner ? inner(t) : ""}</span>`).join("")}</div>`;
+
+const row = (v, cell) => `<div class="row">${TYPES.map((t) => `
+  <span class="cell" data-pick="${v}:${t}" data-dim="${dim(v, t)}" style="flex:${net(of(t))} 0 0">
+    ${cell(t)}</span>`).join("")}</div>`;
+
+const key = (t, swatch = true) => `${swatch ? `<i class="sw" style="background:${INK[t]};margin:0"></i>` : ""}
+  <span class="ty">${t}</span>`;
+
+const sum = (v) => {
+  const r = shown(v);
+  return `<div class="sum"><b>${nb(net(r))}</b> pi² nets sur ${r.length} unités</div>
+    <span class="plan" data-plan>${EYE}Voir ${sel[v] ? `les ${sel[v]}` : "tout"} sur le plan</span>`;
+};
+
+const table = (v) => `<table><thead><tr><th>Unité</th>
+  <th><span class="thf">Type ${FILT}</span></th><th class="n">Net pi²</th></tr></thead><tbody>
+  ${shown(v).map(([n, t, a]) => `<tr><td>${n}</td><td><i class="sw" style="background:${INK[t]}"></i>${t}</td>
+    <td class="n">${nb(a)}</td></tr>`).join("")}</tbody></table>`;
+
+const VARIANTS = [
+  ["A", "Le type mène, la part suit",
+   "Même ligne, deux graisses et deux tailles: 12,5 demi-gras contre 11 gris. Le rang se prend sans qu'on l'explique, et la part reste lisible pour qui la cherche.",
+   (v) => `${row(v, (t) => `${key(t)}<span class="pt">${pc(t)} %</span>`)}${bar(v)}${sum(v)}`],
+
+  ["B", "Le type porte sa couleur",
+   "Le nom est une pastille de sa propre couleur et la part est une note en dessous. La couleur est collée au mot, pas à un carré posé à côté.",
+   (v) => `${row(v, (t) => `<span class="ty" style="background:${INK[t]}">${t}</span>
+     <span class="pt">${pc(t)} % — ${of(t).length} unités</span>`)}${bar(v)}${sum(v)}`],
+
+  ["C", "La part dans la bande, en sourdine",
+   "Le chiffre descend dans la bande, petit et translucide; le type reste au-dessus en noir. Le nombre ne concurrence pas le mot: il n'a même pas la même encre.",
+   (v) => `${row(v, (t) => key(t))}${bar(v, (t) => `${pc(t)} %`)}${sum(v)}`],
+
+  ["D", "La bande dit le type, la part est la légende",
+   "La bande porte le nom en blanc et rien d'autre; la part est dessous, alignée sur elle, en gris. Trois champs nommés, et des chiffres en légende.",
+   (v) => `${bar(v, (t) => t)}${row(v, (t) => `<span class="pt">${pc(t)} % — ${of(t).length}</span>`)}${sum(v)}`],
+
+  ["E", "Les deux dans la bande, à ses deux bouts",
+   "Le type à gauche de sa bande, la part à droite, là où les étiquettes d'une échelle se posent. Une seule rangée, et le mot tient le bord d'attaque.",
+   (v) => `${bar(v, (t) => `${t}<small>${pc(t)} %</small>`)}${sum(v)}`],
+
+  ["F", "La part se montre au survol",
+   "La légende n'est que trois noms dans leurs couleurs; les pourcentages viennent sous le pointeur. Le premier regard n'est jamais que la clé.",
+   (v) => `${row(v, (t) => `${key(t)}<span class="pt">${pc(t)} %</span>`)}${bar(v)}${sum(v)}`],
+];
+
+function paint() {
+  grid.innerHTML = VARIANTS.map(([v, h, p, mix]) => `<section data-v="${v}">
+    <h2>${h}<i>${v}</i></h2><p>${p}</p>
+    <div class="pane"><div class="ph">Unités et superficies<span class="n">niveau 5</span></div>
+      <div class="mix">${mix(v)}</div>${table(v)}</div></section>`).join("");
+}
+document.addEventListener("click", (e) => {
+  const pl = e.target.closest("[data-plan]");
+  if (pl) { pl.animate([{ background: "#c3e05a" }, { background: "#fff" }], 420); return; }
+  const p = e.target.closest("[data-pick]");
+  if (!p) return;
+  const [v, t] = p.dataset.pick.split(":");
+  sel[v] = sel[v] === t ? null : t;
+  paint();
+});
+paint();
+</script>
+</body>
+</html>

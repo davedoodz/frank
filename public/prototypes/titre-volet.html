@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Le volet de gauche — comment le nommer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The pane is called "Unités et superficies", but it holds three things:
+   the floor's units and their areas, the materials seen on each façade,
+   and the unit currently selected with its openings. The title names one
+   third of its contents. Six ways out — one of which is to keep the title
+   and change nothing else, because a pane whose first section is named
+   right may not need a name of its own. All six use the sticky titles
+   chosen earlier, so the comparison is only about the top line. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;
+  --fill:#ededed;--fill-2:#f6f6f7;--page:#fafafa;--card:#fff;--wash:rgba(17,17,18,.055);
+  --t3:#e0736e;--t4:#5b9bd5;--t5:#5cb46e;--red:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.45 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--page)}
+main{padding:24px 28px 80px;max-width:1500px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:900px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px;margin-top:24px}
+section > h2{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:7px}
+section > h2 i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-3)}
+section > p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:4.6em}
+
+.pane{background:var(--card);border:1px solid var(--line-2);border-radius:10px;overflow:hidden;
+  display:flex;flex-direction:column;height:520px}
+.ph{display:flex;align-items:center;gap:8px;min-height:38px;padding:0 12px;flex:0 0 auto;
+  border-bottom:1px solid var(--line-2);font-size:13px;font-weight:500}
+.ph{white-space:nowrap}
+.ph .n{margin-left:auto;color:var(--ink-3);font-size:12px;font-weight:400;overflow:hidden;
+  text-overflow:ellipsis;min-width:0}
+.ph .ico{width:14px;height:14px;color:var(--ink-2)}
+.scroll{overflow-y:auto;flex:1;scrollbar-width:thin}
+
+/* sections: the sticky treatment settled in the last round ---------- */
+.sec{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:7px;padding:8px 12px;
+  background:var(--fill-2);border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);
+  font-weight:600;font-size:12.5px;white-space:nowrap}
+.sub{position:sticky;top:34px;z-index:2;display:flex;align-items:center;gap:7px;padding:7px 12px 5px;
+  background:var(--card);box-shadow:0 1px 0 var(--line-2);font-size:11px;font-weight:600;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.sec .q,.sub .q{margin-left:auto;font-weight:400;font-size:11.5px;color:var(--ink-3);
+  text-transform:none;letter-spacing:0}
+.ico{width:13px;height:13px;flex:0 0 13px;color:var(--ink-2)}
+.warn{display:inline-flex;align-items:center;gap:3px;background:var(--red);color:#fff;border-radius:9px;
+  padding:0 6px;height:16px;font-size:10.5px;font-weight:600}
+.warn svg{width:10px;height:10px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:5px 12px;border-bottom:1px solid var(--line-2);white-space:nowrap}
+th{color:var(--ink-3);font-weight:500;font-size:11.5px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.tot td{font-weight:600;border-bottom:1px solid var(--line)}
+.sw{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+.mix{padding:10px 12px}
+.bar{display:flex;height:9px;border-radius:5px;overflow:hidden;gap:2px}
+.keys{display:flex;gap:2px;margin-bottom:6px;font-size:12.5px}
+.keys .k{display:flex;align-items:baseline;gap:5px;overflow:hidden;white-space:nowrap}
+.keys .k b{font-weight:600}
+.keys .k span{color:var(--ink-3);font-size:11px}
+.sum{margin-top:8px;font-size:12.5px;color:var(--ink-2)}
+.sum b{color:var(--ink);font-weight:600}
+
+/* B — the title names the floor, and the sections name the subjects. The
+   pane stops pretending to be about one thing. */
+[data-v="B"] .ph b{font-weight:600}
+
+/* C — the title is a switch. Three sections, three targets: the pane says
+   what it holds by listing it, and clicking scrolls to it. */
+.segs{display:flex;gap:2px;background:var(--fill);border-radius:8px;padding:2px;margin-left:auto}
+.segs button{border:0;background:none;font:inherit;font-size:11.5px;padding:3px 8px;border-radius:6px;
+  cursor:pointer;color:var(--ink-2)}
+.segs button:hover{background:var(--wash)}
+.segs button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600;
+  box-shadow:0 1px 2px rgba(17,17,18,.12)}
+
+/* D — no title at all. The pane's first section is its title, because it
+   is already sticky and already says Unités et superficies. */
+[data-v="D"] .ph{display:none}
+
+/* E — the title is the level and the count. It is the one line that is
+   true of everything under it: this is what is known about niveau 5. */
+[data-v="E"] .ph .n{font-variant-numeric:tabular-nums}
+
+/* F — a title in two parts: what is being read, then where. The subject
+   is the floor; the pane is its record. */
+[data-v="F"] .ph .sub2{color:var(--ink-3);font-weight:400}
+</style>
+</head>
+<body>
+<main>
+  <h1>Le volet de gauche — comment le nommer</h1>
+  <p class="lede">Le volet s'appelle « Unités et superficies », mais il porte trois choses: les unités de
+     l'étage et leurs superficies, les matériaux vus sur chaque façade, et l'unité sélectionnée avec ses
+     ouvertures. Le titre ne nomme qu'un tiers du contenu. Six issues — dont celle de ne rien changer, parce
+     qu'un volet dont la première section est bien nommée n'a peut-être pas besoin d'un nom à lui. Les titres
+     collants retenus au tour précédent sont dans les six: seule la ligne du haut change. Faites défiler.</p>
+  <div class="grid" id="grid"></div>
+</main>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const pascal = (n) => n.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+const svg = (n, cls = "ico") => { const i = lucide.icons[pascal(n)];
+  return i ? `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round">${i[2].map(([t, a]) =>
+      `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>` : ""; };
+
+const UNITS = [["501","5½",1275,118.5],["502","5½",1496,139.0],["503","3½",760,70.6],["504","4½",1152,107.0],
+  ["505","4½",1221,113.4],["506","4½",1106,102.8],["507","3½",707,65.7],["508","4½",970,90.1],
+  ["509","4½",958,89.0],["510","5½",1466,136.2],["511","5½",1345,125.0],["512","3½",740,68.7],
+  ["513","3½",708,65.8],["514","3½",716,66.5],["515","4½",999,92.8]];
+const TYPES = ["3½", "4½", "5½"];
+const INK = { "3½": "var(--t3)", "4½": "var(--t4)", "5½": "var(--t5)" };
+const MAT = {
+  "Façade nord": [["Brique Melville Slik","#b3261e",2485,13],["Bloc architectural Tapestry","#e0922f",2429,13],
+    ["Brique Strata","#2f6fd0",3664,19],["Solin, marquise et parapet","#0f7a6c",518,3],
+    ["Fenêtre et porte-patio","#1b1b1b",1619,8],["Vitrage","#4fc3e8",4632,24],["Garde-corps","#5cb46e",3431,18]],
+  "Façade est": [["Brique Melville Slik","#b3261e",2779,17],["Brique Strata","#2f6fd0",5187,33],
+    ["Panneau d'aluminium série 300","#7a3fb5",221,1],["Vitrage","#4fc3e8",3980,25],
+    ["Garde-corps","#5cb46e",2812,18]],
+  "Façade sud": [["Brique Melville Slik","#b3261e",3104,19],["Brique Strata","#2f6fd0",4120,26],
+    ["Vitrage","#4fc3e8",4410,28],["Garde-corps","#5cb46e",2390,15]],
+};
+const nb = (n) => n.toLocaleString("fr-CA").replace(/\u202f|\u00a0/g, " ");
+const fr1 = (n) => n.toLocaleString("fr-CA", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const of = (t) => UNITS.filter((u) => u[1] === t);
+const net = (r) => r.reduce((s, u) => s + u[2], 0);
+const pc = (t) => Math.round(net(of(t)) / net(UNITS) * 100);
+
+const mix = () => `<div class="mix">
+  <div class="keys">${TYPES.map((t) => `<span class="k" style="flex:${net(of(t))} 0 0">
+    <i class="sw" style="background:${INK[t]};margin:0"></i><b>${t}</b><span>${pc(t)} %</span></span>`).join("")}</div>
+  <div class="bar">${TYPES.map((t) => `<span style="flex:${net(of(t))} 0 0;background:${INK[t]}"></span>`).join("")}</div>
+  <div class="sum"><b>15 619</b> pi² nets sur 15 unités</div></div>`;
+
+const unitTable = () => `<table><thead><tr><th>Unité</th><th>Type</th><th class="n">Net pi²</th>
+  <th class="n">m²</th></tr></thead><tbody>
+  ${UNITS.map(([n, t, a, m]) => `<tr><td>${n}</td><td><i class="sw" style="background:${INK[t]}"></i>${t}</td>
+    <td class="n">${nb(a)}</td><td class="n">${fr1(m)}</td></tr>`).join("")}
+  <tr class="tot"><td>Net</td><td></td><td class="n">15 619</td><td class="n">1 451</td></tr>
+  <tr class="tot"><td>Brut</td><td></td><td class="n">18 375</td><td class="n">1 707</td></tr></tbody></table>`;
+
+const matTable = (rows) => `<table><thead><tr><th>Matériau</th><th class="n">pi²</th><th class="n">Part</th>
+  </tr></thead><tbody>${rows.map(([n, c, a, p]) => `<tr><td><i class="sw" style="background:${c}"></i>${n}</td>
+    <td class="n">${nb(a)}</td><td class="n">${p} %</td></tr>`).join("")}
+  <tr class="tot"><td>Total</td><td class="n">${nb(rows.reduce((s, r) => s + r[2], 0))}</td>
+    <td class="n">100 %</td></tr></tbody></table>`;
+
+const SECTIONS = (v) => `
+  <div class="sec" id="${v}-u">${svg("table")}Unités et superficies<span class="q">niveau 5</span></div>
+  ${mix()}${unitTable()}
+  <div class="sec" id="${v}-s">${svg("box")}Unité 513<span class="q">3½ — 708 pi²</span></div>
+  <table><tbody>
+    <tr><td>Façade est</td><td class="n">4 fenêtres</td><td class="n">93 pi²</td></tr>
+    <tr><td>Façade sud</td><td class="n">5 fenêtres</td><td class="n">122 pi²</td></tr>
+    <tr class="tot"><td>Total</td><td class="n">9</td><td class="n">215 pi²</td></tr></tbody></table>
+  <div class="sec" id="${v}-m">${svg("layers")}Matériaux par façade
+    <span class="warn">${svg("alert-triangle")}2</span><span class="q">vus en élévation</span></div>
+  ${Object.entries(MAT).map(([f, rows]) => `<div class="sub">${f}</div>${matTable(rows)}`).join("")}`;
+
+const VARIANTS = [
+  ["A", "Ne rien changer",
+   "Le volet garde « Unités et superficies » et les sections portent le reste. L'argument: la première section est déjà nommée et déjà collante; un deuxième titre au-dessus d'elle ne dit rien de neuf.",
+   () => `<div class="ph">${svg("table")}Unités et superficies<span class="n">niveau 5</span></div>`],
+
+  ["B", "Le titre nomme l'étage",
+   "« Niveau 5 » en haut, et les sections nomment les sujets. Le volet cesse de prétendre ne parler que d'une chose: il parle d'un étage, sous trois angles.",
+   () => `<div class="ph">${svg("layers-2")}<b>Niveau 5</b><span class="n">15 unités — 15 619 pi² nets</span></div>`],
+
+  ["C", "Le titre est un aiguillage",
+   "Trois sections, trois cibles. Le volet dit ce qu'il contient en le listant, et cliquer y mène. Le titre devient une table des matières d'une seule ligne.",
+   (v) => `<div class="ph">${svg("layers-2")}Niveau 5
+     <span class="segs"><button data-go="${v}-u" aria-pressed="true">Unités</button>
+       <button data-go="${v}-s">Unité 513</button><button data-go="${v}-m">Matériaux</button></span></div>`],
+
+  ["D", "Pas de titre",
+   "La première section est le titre: elle colle déjà en haut et dit déjà « Unités et superficies ». Trente-huit pixels rendus au tableau, et une ligne de moins à lire.",
+   () => ``],
+
+  ["E", "Ce qu'on sait de l'étage",
+   "« Relevé du niveau 5 »: la seule phrase vraie de tout ce qui est dessous. Un relevé est fait de plusieurs mesures, ce qui est exactement le cas ici.",
+   () => `<div class="ph">${svg("clipboard-list")}Relevé du niveau 5<span class="n">3 tableaux</span></div>`],
+
+  ["F", "Le sujet, puis la portée",
+   "Deux parts: ce qu'on lit, puis où. « Quantités » est le mot que l'atelier emploie déjà pour ces tableaux, et « niveau 5 » dit jusqu'où ils comptent.",
+   () => `<div class="ph">${svg("calculator")}Quantités<span class="sub2" style="margin-left:6px">— niveau 5</span>
+     <span class="n">unités, matériaux, ouvertures</span></div>`],
+];
+
+function paint() {
+  grid.innerHTML = VARIANTS.map(([v, h, p, head]) => `<section data-v="${v}">
+    <h2>${h}<i>${v}</i></h2><p>${p}</p>
+    <div class="pane">${head(v)}<div class="scroll">${SECTIONS(v)}</div></div></section>`).join("");
+}
+document.addEventListener("click", (e) => {
+  const g = e.target.closest("[data-go]");
+  if (!g) return;
+  const el = document.getElementById(g.dataset.go);
+  el.closest(".scroll").scrollTo({ top: el.offsetTop - el.closest(".scroll").offsetTop, behavior: "smooth" });
+  [...g.parentElement.children].forEach((b) => b.setAttribute("aria-pressed", b === g));
+});
+paint();
+</script>
+</body>
+</html>
