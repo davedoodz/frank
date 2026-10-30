@@ -47,6 +47,9 @@ function resize(host) {
   const { width, height } = host.getBoundingClientRect();
   if (width < 2 || height < 2) return;
 
+  // Setting a canvas's size clears it, even to the size it already has.
+  const current = renderer.getSize(new THREE.Vector2());
+  if (current.x === width && current.y === height) return;
   renderer.setSize(width, height, false);
   persp.aspect = width / height;
   persp.updateProjectionMatrix();
@@ -390,6 +393,12 @@ let dragTool = "orbit";
 // glyph, which shows what the drag is doing. The glyph is black on a white
 // halo, so it reads over glass and over render.
 let dragging = false;
+// A button held is not yet a drag. The tool cursor only appears once the
+// pointer has actually travelled: a click that selects a unit must not
+// flash the orbit glyph on its way down.
+let dragFrom = null;
+let dragMoved = false;
+const DRAG_SLOP = 4;
 const toolCursors = {};
 function toolCursor(tool) {
   const fallback = tool === "pan" ? "move" : "grab";
@@ -410,13 +419,52 @@ function applyTool() {
   controls.touches.ONE = orbit ? THREE.TOUCH.ROTATE : THREE.TOUCH.PAN;
   showCursor();
 }
+// Over the building the hand says "a click selects"; over the sky or the
+// ground the arrow says nothing will. Held, the cursor is the gesture the
+// drag is making: OrbitControls swaps a left drag to the other gesture while
+// Shift, Ctrl or Cmd is down, and the right button always carries it.
+let overBuilding = false;
+let dragSwap = false;
 function showCursor() {
   if (!renderer) return;
-  if (!dragging) { renderer.domElement.style.cursor = "pointer"; return; }
-  // The right button carries the other gesture, so it shows the other glyph.
-  const orbit = dragTool === "orbit" && !elevation;
-  const held = dragging === "right" ? !orbit : orbit;
-  renderer.domElement.style.cursor = toolCursor(held && !elevation ? "orbit" : "pan");
+  if (!dragging || !dragMoved) { renderer.domElement.style.cursor = overBuilding ? "pointer" : "default"; return; }
+  const orbitTool = dragTool === "orbit";
+  const other = (dragging === "right") !== dragSwap;
+  const orbiting = !elevation && (other ? !orbitTool : orbitTool);
+  renderer.domElement.style.cursor = toolCursor(orbiting ? "orbit" : "pan");
+}
+// The hover test is a raycast, so it runs at most once a frame. A hit counts
+// when it lands on a façade material of the legend, or on anything else
+// inside the building's box above the ground (roofs, balconies) that is not
+// a tree, a car or the site: those keep the arrow.
+let hoverAt = null;
+let hoverFrame = 0;
+function hoverBuilding(clientX, clientY) {
+  hoverAt = [clientX, clientY];
+  if (hoverFrame) return;
+  hoverFrame = requestAnimationFrame(() => {
+    hoverFrame = 0;
+    if (dragging || !hoverAt) return;
+    overBuilding = isBuildingAt(hoverAt[0], hoverAt[1]);
+    showCursor();
+  });
+}
+function isBuildingAt(clientX, clientY) {
+  const canvas = renderer?.domElement;
+  if (!canvas || !model) return false;
+  const r = canvas.getBoundingClientRect();
+  const ray = new THREE.Raycaster();
+  ray.setFromCamera(new THREE.Vector2(
+    ((clientX - r.left) / r.width) * 2 - 1,
+    -((clientY - r.top) / r.height) * 2 + 1), camera);
+  const hit = ray.intersectObject(model, true)[0];
+  if (!hit) return false;
+  const fm = legend();
+  if (!fm || !buildingBox || buildingBox.isEmpty()) return true;
+  const name = (hit.object.userData.fitteMaterial || hit.object.material)?.name;
+  if (fm.isProp(name)) return false;
+  if (fm.categoryOf(name, hit.point.y) > 0) return true;
+  return buildingBox.containsPoint(hit.point) && hit.point.y > buildingBox.min.y + 0.1;
 }
 function setTool(tool) {
   dragTool = tool === "pan" ? "pan" : "orbit";
@@ -526,9 +574,28 @@ function createRenderer() {
   renderer.domElement.addEventListener("pointerdown", (event) => {
     if (event.button !== 0 && event.button !== 2) return;
     dragging = event.button === 2 ? "right" : "left";
+    dragSwap = event.button === 0 && (event.shiftKey || event.ctrlKey || event.metaKey);
+    dragFrom = [event.clientX, event.clientY];
+    dragMoved = false;
     showCursor();
   }, true);
-  const release = () => { if (!dragging) return; dragging = false; showCursor(); };
+  renderer.domElement.addEventListener("pointermove", (event) => {
+    if (!dragging) { hoverBuilding(event.clientX, event.clientY); return; }
+    if (dragMoved || !dragFrom) return;
+    if (Math.hypot(event.clientX - dragFrom[0], event.clientY - dragFrom[1]) < DRAG_SLOP) return;
+    dragMoved = true;
+    showCursor();
+  });
+  renderer.domElement.addEventListener("pointerleave", () => { hoverAt = null; overBuilding = false; showCursor(); });
+  const release = (event) => {
+    if (!dragging) return;
+    dragging = false;
+    dragSwap = false;
+    dragFrom = null;
+    dragMoved = false;
+    if (event?.clientX !== undefined) hoverBuilding(event.clientX, event.clientY);
+    showCursor();
+  };
   window.addEventListener("pointerup", release);
   window.addEventListener("pointercancel", release);
   renderer.domElement.addEventListener("webglcontextlost", (event) => {
