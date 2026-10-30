@@ -49,7 +49,7 @@ svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke
 kbd{font:inherit;font-size:10.5px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:0 4px;height:18px;display:inline-flex;align-items:center}
 
 /* an article, as a compact row of the followed list -------------------- */
-.art{display:grid;grid-template-columns:66px 1fr auto;gap:1px 10px;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fff}
+.art{display:grid;grid-template-columns:minmax(66px,max-content) 1fr auto;gap:1px 10px;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:#fff}
 .art .id{font-weight:600;font-size:12px;white-space:nowrap}
 .art .t{font-weight:600;min-width:0}
 .art .q{grid-column:2 / 4;color:var(--ink-2);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -108,6 +108,19 @@ mark{background:var(--hit);color:var(--ink);padding:0 1px;border-radius:2px}
 .drop .it em{font-style:normal;font-size:11px;color:var(--ink-3)}
 .drop .ft{display:flex;gap:10px;padding:5px 7px 2px;border-top:1px solid var(--line-2);margin-top:4px;font-size:11px;color:var(--ink-3)}
 
+/* where it was found ------------------------------------------------- */
+.from{grid-column:2 / 4;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-3);min-width:0}
+.from span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.from b{font-weight:500;color:var(--ink-2)}
+.flag{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:4px;font-size:10.5px;white-space:nowrap;border:1px solid var(--line)}
+.flag.new{border-color:var(--red);color:var(--red)}
+.prog{display:flex;align-items:center;gap:10px;font-size:11.5px;color:var(--ink-3);flex-wrap:wrap}
+.prog .s{display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none}
+.prog .s b{font-weight:500;color:var(--ink-2)}
+.prog .s.off{text-decoration:line-through;opacity:.6}
+.prog .s .ok{color:var(--green)}
+.prog .s .run{width:10px;height:10px;border:1.5px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .pick{margin-top:30px;font-size:12.5px;color:var(--ink-2);max-width:940px}
 .pick b{color:var(--ink)}
 </style>
@@ -115,8 +128,10 @@ mark{background:var(--hit);color:var(--ink);padding:0 1px;border-radius:2px}
 <body>
 <main>
   <h1>Codes — six façons de chercher dans un code</h1>
-  <p class="lede">Même moteur, mêmes articles, six places et six formes pour la recherche. Chaque maquette commence avec une question
-    déjà posée; on peut en taper une autre, changer d'onglet ou effacer. La recherche est simulée sur un petit index d'articles paraphrasés.</p>
+  <p class="lede">La recherche ne lit pas seulement les articles suivis: elle lit le code entier dans les documents du bureau, page par page,
+    puis le texte officiel en ligne, et dit d'où vient chaque article — fichier et page, ou site. Un texte en ligne plus récent que la copie du
+    bureau est signalé; une note interne du bureau peut répondre aussi. Six places et six formes pour cette recherche, même moteur partout.
+    Chaque maquette commence avec une question déjà posée; cliquer une source la retire de la recherche. Recherche simulée.</p>
   <div class="grid" id="grid"></div>
   <p class="pick"><b>Lecture.</b> A et F gardent l'écran tel qu'il est et ajoutent une seule ligne; B change la liste elle-même;
     C et E ouvrent une surface de plus; D est la seule qui cherche dans les trois codes à la fois.</p>
@@ -132,6 +147,8 @@ const ic = {
   hash: '<svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg>',
   arrow: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   msg: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  file: '<svg viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/></svg>',
+  globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>',
 };
 /* Each mock keeps its own copy of what is followed, so « Suivre » in one
    does not change the others. */
@@ -149,13 +166,35 @@ const field = (m, opt = {}) => `<div class="box" style="${opt.style || ""}">${ic
 const row = (m, a, cls = "", hits) => `<div class="art ${cls}" data-on="${a.id}">
   <span class="id">${a.id}</span><span class="t">${a.t}</span>${m.fol[m.code].has(a.id) ? st(a) : followBtn(m, a)}
   <span></span><span class="q">« ${hits ? lit(a.q, hits) : a.q} »</span>
-  ${hits ? `<span></span><span class="why"><i>Pourquoi:</i> ${a.why}</span>` : ""}</div>`;
+  ${hits ? `<span></span><span class="why"><i>Pourquoi:</i> ${a.why}</span><span></span>${fromLine(a)}` : ""}</div>`;
+/* Where the article was read: the office's copy, page by page, or the
+   official site. An online text newer than the office copy says so. */
+function fromLine(a) {
+  if (a.from === "web") return `<span class="from">${ic.globe}<span><b>En ligne</b> · ${a.site}</span>${a.newer ? `<span class="flag new">Plus récent que la copie du bureau</span>` : `<span class="flag">pas dans les documents du bureau</span>`}</span>`;
+  if (a.from === "bureau") return `<span class="from">${ic.file}<span><b>Bureau</b> · ${a.doc}, p. ${a.page}</span><span class="flag">note interne</span></span>`;
+  return `<span class="from">${ic.file}<span><b>Bureau</b> · ${a.doc}${a.page ? `, p. ${a.page}` : ""}</span><span>· aussi sur ${a.site}</span></span>`;
+}
+/* The search reads the office's documents first, then the official sites.
+   Each phase adds what it found; either source can be turned off. */
+const find = (m, c, q) => search(c, q, { bureau: m.from.bureau && m.phase >= 2, web: m.from.web && m.phase >= 3 });
+function prog(m, c = CODES[m.code]) {
+  const step = (k, label, detail, done) => `<span class="s ${m.from[k] ? "" : "off"}" data-src="${k}" title="${m.from[k] ? "Ne plus chercher ici" : "Chercher ici"}">
+    ${!m.from[k] ? ic[k === "web" ? "globe" : "file"] : done ? `<span class="ok">${ic.check}</span>` : `<span class="run"></span>`}<b>${label}</b> ${detail}</span>`;
+  return `<div class="prog">${step("bureau", "Documents du bureau", `${c.docs.length} fichier${c.docs.length > 1 ? "s" : ""}`, m.phase >= 2)}
+    ${step("web", "En ligne", c.sites.map((x) => x[0]).join(", "), m.phase >= 3)}</div>`;
+}
+function scan(m) {
+  clearTimeout(m.t1); clearTimeout(m.t2);
+  m.phase = 1; paint(m);
+  m.t1 = setTimeout(() => { m.phase = 2; paint(m); }, 450);
+  m.t2 = setTimeout(() => { m.phase = 3; paint(m); }, 1100);
+}
 const head = (m, extra = "") => `<div class="ph">${ic.hash}<b>${CODES[m.code].short}</b><span class="n">${count(m)}</span>${extra}<span class="sp"></span>
   <span class="btn solid">${ic.plus}Ajouter</span></div>`;
 /* The pointer to another code: said in one line, never mixed in. */
 function elseLine(m, rows) {
   const top = rows.length ? rows[0].n : 0;
-  const o = CODES.map((c, i) => ({ c, i, r: i === m.code ? [] : search(c, m.q) }))
+  const o = CODES.map((c, i) => ({ c, i, r: i === m.code ? [] : find(m, c, m.q) }))
     .map((o) => ({ ...o, s: o.r.length ? o.r[0].n : 0 })).filter((o) => o.r.length && o.s >= Math.max(2, top)).sort((a, b) => b.s - a.s)[0];
   return o ? `<div class="else">${ic.arrow}${o.r.length} article${o.r.length > 1 ? "s" : ""} dans <u data-tab="${o.i}">${o.c.short}</u> aussi</div>` : "";
 }
@@ -167,10 +206,10 @@ const MOCKS = [
     p: "Une ligne de plus sous l'en-tête. ↵ pose la question; la réponse s'ouvre entre la barre et la liste suivie, qui ne bouge pas. C'est la page codes-recherche.html.",
     enter: true, code: 2, q: "combien de cases pour les logements",
     html(m) {
-      const rows = m.asked ? search(CODES[m.code], m.asked) : [];
+      const rows = m.asked ? find(m, CODES[m.code], m.asked) : [];
       return `${tabs(m)}<div class="body"><div class="main">${head(m)}
         <div style="padding:8px 10px 0">${field(m, { kbd: "↵" })}</div>
-        <div class="scroll">${m.asked ? `${rows.length ? `<div class="lh"><b style="color:var(--ink)">${rows.length} article${rows.length > 1 ? "s" : ""}</b> ${CODES[m.code].of}</div>${synLine(rows)}${rows.map((r) => row(m, r.a, m.on === r.a.id ? "on" : "", r.hits)).join("")}`
+        <div class="scroll">${m.asked ? `${prog(m)}${rows.length ? `<div class="lh"><b style="color:var(--ink)">${rows.length} article${rows.length > 1 ? "s" : ""}</b> ${CODES[m.code].of}</div>${synLine(rows)}${rows.map((r) => row(m, r.a, m.on === r.a.id ? "on" : "", r.hits)).join("")}`
           : `<div class="none">Aucun article de ce code ne répond à « ${m.asked} ».</div>`}${elseLine({ ...m, q: m.asked }, rows)}` : ""}
           <div class="lh">Articles suivis</div>${followed(m).map((a) => row(m, a)).join("")}</div></div></div>`;
     } },
@@ -178,32 +217,33 @@ const MOCKS = [
     p: "Pas de bloc de résultats: la question filtre la liste suivie, au fil de la frappe. Les articles du code qui répondent sans être suivis s'ajoutent dessous, en pointillé, avec « Suivre ».",
     code: 2, q: "marge recul",
     html(m) {
-      const rows = m.q ? search(CODES[m.code], m.q) : [];
+      const rows = m.q ? find(m, CODES[m.code], m.q) : [];
       const ids = new Set(rows.map((r) => r.a.id));
       const hitOf = (a) => rows.find((r) => r.a.id === a.id)?.hits;
       const fol = followed(m), shown = m.q ? fol.filter((a) => ids.has(a.id)) : fol;
       const more = rows.filter((r) => !m.fol[m.code].has(r.a.id));
       return `${tabs(m)}<div class="body"><div class="main">${head(m)}
         <div style="padding:8px 10px 0">${field(m, { ph: "Filtrer ou poser une question…" })}</div>
-        <div class="scroll">${m.q ? `<div class="lh">${shown.length} sur ${fol.length} articles suivis</div>` : ""}
+        <div class="scroll">${m.q ? `${prog(m)}<div class="lh">${shown.length} sur ${fol.length} articles suivis</div>` : ""}
           ${shown.map((a) => row(m, a, "", hitOf(a))).join("")}
           ${m.q && !shown.length ? `<div class="none">Aucun article suivi ne répond.</div>` : ""}
-          ${more.length ? `<div class="lh">Dans ce code, pas encore suivis</div>${more.map((r) => row(m, r.a, "ghost", r.hits)).join("")}` : ""}
+          ${more.length ? `<div class="lh">Trouvés dans le code, pas encore suivis</div>${more.map((r) => row(m, r.a, "ghost", r.hits)).join("")}` : ""}
           ${m.q ? elseLine(m, rows) : ""}</div></div></div>`;
     } },
   { id: "C", h: "C — Palette au clavier (⌘K)",
     p: "Rien ne s'ajoute à l'écran: ⌘K ou le bouton de l'en-tête ouvre une palette. Les articles à gauche, au clavier; l'article choisi lu à droite avec Pourquoi et Suivre. Échap referme.",
     code: 0, q: "fenêtres trop proches de la limite", open: true,
     html(m) {
-      const rows = m.q ? search(CODES[m.code], m.q) : [];
+      const rows = m.q ? find(m, CODES[m.code], m.q) : [];
       const cur = rows.find((r) => r.a.id === m.on) || rows[0];
       return `${tabs(m)}<div class="body"><div class="main">${head(m, `<span class="sp"></span><span class="btn" data-open>${ic.search}Chercher <kbd>⌘K</kbd></span>`).replace('<span class="sp"></span>', "")}
         <div class="scroll"><div class="lh">Articles suivis</div>${followed(m).map((a) => row(m, a)).join("")}</div></div></div>
-        ${m.open ? `<div class="scrim" data-shut><div class="pal" data-stop>${field(m, { kbd: "Échap" })}
+        ${m.open ? `<div class="scrim" data-shut><div class="pal" data-stop>${field(m, { kbd: "Échap" })}<div style="padding:6px 10px;border-bottom:1px solid var(--line-2)">${prog(m)}</div>
           <div class="cols"><div class="lst">${rows.map((r) => `<div class="it ${r === cur ? "on" : ""}" data-on="${r.a.id}"><b>${r.a.id}</b><span>${r.a.t}</span></div>`).join("") || `<div class="none" style="padding:6px">Aucun article.</div>`}</div>
           <div class="pv">${cur ? `<div style="display:flex;gap:8px;align-items:center"><b>${cur.a.id} — ${cur.a.t}</b><span class="sp"></span>${followBtn(m, cur.a)}</div>
             <span class="q">« ${lit(cur.a.q, cur.hits)} »</span><span><span style="color:var(--ink-3)">Pourquoi:</span> ${cur.a.why}</span>
-            <span style="font-size:11.5px;text-decoration:underline;color:var(--ink-2)">Lire le texte officiel</span>${elseLine(m, rows)}` : ""}</div></div>
+            <span style="font-size:11.5px;color:var(--ink-3)">${fromLine(cur.a).replace(/^<span class="from">|<\/span>$/g, "")}</span>
+            <span style="font-size:11.5px;text-decoration:underline;color:var(--ink-2)">${cur.a.from === "bureau" ? "Ouvrir la note" : "Lire le texte officiel"}</span>${elseLine(m, rows)}` : ""}</div></div>
           <div class="ft"><span><kbd>↑</kbd><kbd>↓</kbd> choisir</span><span><kbd>↵</kbd> suivre</span><span><kbd>Tab</kbd> code suivant</span></div></div></div>` : ""}`;
     } },
   { id: "D", h: "D — Une barre pour les trois codes",
@@ -212,12 +252,14 @@ const MOCKS = [
     html(m) {
       /* Across codes, a code answers when its best article is as good as
          the best anywhere: one shared word is not enough to open a group. */
-      const found = CODES.map((c, i) => ({ c, i, r: m.q ? search(c, m.q) : [] })).filter((g) => g.r.length);
+      const found = CODES.map((c, i) => ({ c, i, r: m.q ? find(m, c, m.q) : [] })).filter((g) => g.r.length);
       const best = Math.max(0, ...found.map((g) => g.r[0].n));
       const all = found.filter((g) => g.r[0].n >= best)
         .sort((a, b) => (b.i === m.code) - (a.i === m.code) || b.r[0].n - a.r[0].n);
       return `<div style="padding:8px 10px;background:#1f1f20">${field(m, { scope: false, ph: "Question aux trois codes…" }).replace('class="box"', 'class="box" ')}</div>${tabs(m)}
         <div class="body"><div class="main">${head(m)}<div class="scroll">
+        ${m.q ? `<div class="prog"><span class="s ${m.from.bureau ? "" : "off"}" data-src="bureau">${m.phase >= 2 ? `<span class="ok">${ic.check}</span>` : `<span class="run"></span>`}<b>Documents du bureau</b> 5 fichiers, 3 codes</span>
+          <span class="s ${m.from.web ? "" : "off"}" data-src="web">${m.phase >= 3 ? `<span class="ok">${ic.check}</span>` : `<span class="run"></span>`}<b>En ligne</b> 4 sites</span></div>` : ""}
         ${m.q ? all.map((g) => `<div class="grp"><b>${g.c.short}</b>${g.r.length} article${g.r.length > 1 ? "s" : ""}${g.i === m.code ? " — ouvert" : `<u data-tab="${g.i}">Ouvrir</u>`}</div>
           ${g.r.map((r) => row({ ...m, code: g.i }, r.a, "", r.hits)).join("")}`).join("") || `<div class="none">Aucun article dans les trois codes.</div>` : ""}
         <div class="lh">Articles suivis — ${CODES[m.code].short}</div>${followed(m).map((a) => row(m, a)).join("")}</div></div></div>`;
@@ -226,16 +268,17 @@ const MOCKS = [
     p: "Le panneau « Article ouvert » prend un mode Question. La réponse y est courte et cite ses articles; dans la liste, les articles cités s'encadrent et ceux qui ne sont pas suivis s'insèrent en pointillé.",
     enter: true, code: 1, q: "les voisins peuvent-ils s'opposer",
     html(m) {
-      const rows = m.asked ? search(CODES[m.code], m.asked) : [];
+      const rows = m.asked ? find(m, CODES[m.code], m.asked) : [];
       const ids = new Set(rows.map((r) => r.a.id));
       const list = [...followed(m), ...rows.filter((r) => !m.fol[m.code].has(r.a.id)).map((r) => r.a)];
       return `${tabs(m)}<div class="body"><div class="main">${head(m)}
         <div class="scroll"><div class="lh">Articles suivis${m.asked ? " · cités encadrés" : ""}</div>${list.map((a) =>
           row(m, a, `${m.fol[m.code].has(a.id) ? "" : "ghost"} ${ids.has(a.id) ? "lit" : m.asked ? "dim" : ""} ${m.on === a.id ? "on" : ""}`)).join("")}</div></div>
         <div class="side"><div class="ph">${ic.msg}<b>Question</b><span class="sp"></span><span class="n">Article ouvert</span></div>
-          <div class="scroll"><div class="qa">Demander ${CODES[m.code].of}</div>${field(m, { scope: false, kbd: "↵", ph: "Votre question…" })}
+          <div class="scroll"><div class="qa">Demander ${CODES[m.code].of}</div>${field(m, { scope: false, kbd: "↵", ph: "Votre question…" })}${m.asked ? prog(m) : ""}
           ${m.asked ? rows.length ? `<div class="qa"><b>${rows.length} article${rows.length > 1 ? "s" : ""}</b> répond${rows.length > 1 ? "ent" : ""}.</div>
-            ${rows.map((r) => `<div class="chip ${m.on === r.a.id ? "on" : ""}" data-on="${r.a.id}"><b>${r.a.id} — ${r.a.t}</b><span>${r.a.why}</span></div>`).join("")}
+            ${rows.map((r) => `<div class="chip ${m.on === r.a.id ? "on" : ""}" data-on="${r.a.id}"><b>${r.a.id} — ${r.a.t}</b><span>${r.a.why}</span>
+              <span style="display:flex;gap:5px;align-items:center;color:var(--ink-3);margin-top:2px">${r.a.from === "web" ? `${ic.globe}${r.a.site}` : `${ic.file}${r.a.from === "bureau" ? "note interne" : `p. ${r.a.page}`}`}${r.a.newer ? ` <span class="flag new">plus récent</span>` : ""}</span></div>`).join("")}
             <div class="qa" style="font-size:11px;color:var(--ink-3)">Tiré des articles; le texte officiel fait foi.</div>`
             : `<div class="none">Aucun article de ce code.</div>` : ""}
           ${m.asked ? elseLine({ ...m, q: m.asked }, rows) : ""}</div></div></div>`;
@@ -244,24 +287,25 @@ const MOCKS = [
     p: "Un champ dans la ligne d'en-tête, à côté d'Ajouter. Les articles apparaissent pendant la frappe dans une liste déroulante; en choisir un fait défiler la liste jusqu'à lui ou l'ajoute s'il n'est pas suivi.",
     code: 0, q: "largeur porte", open: true,
     html(m) {
-      const rows = m.q ? search(CODES[m.code], m.q) : [];
+      const rows = m.q ? find(m, CODES[m.code], m.q) : [];
       return `${tabs(m)}<div class="body"><div class="main">
         <div class="ph">${ic.hash}<b>${CODES[m.code].short}</b><span class="n">${count(m)}</span><span class="sp"></span>
           ${field(m, { scope: false, style: "width:250px;height:28px", ph: "Chercher un article…", kbd: "/" })}
           <span class="btn solid">${ic.plus}Ajouter</span></div>
-        ${m.open && m.q ? `<div class="drop" data-stop>${rows.map((r, i) => `<div class="it ${i === 0 ? "on" : ""}" data-go="${r.a.id}">
-            <b>${r.a.id}</b><span>${r.a.t}</span><em>${m.fol[m.code].has(r.a.id) ? "suivi" : "↵ suivre"}</em><span class="w">${r.a.why}</span></div>`).join("")
+        ${m.open && m.q ? `<div class="drop" data-stop><div style="padding:3px 7px 5px">${prog(m)}</div>${rows.map((r, i) => `<div class="it ${i === 0 ? "on" : ""}" data-go="${r.a.id}">
+            <b>${r.a.id}</b><span>${r.a.t}</span><em>${r.a.newer ? `<span class="flag new">plus récent</span> ` : ""}${m.fol[m.code].has(r.a.id) ? "suivi" : "↵ suivre"}</em><span class="w">${r.a.why}</span>
+            <span class="w" style="display:flex;gap:5px;align-items:center;color:var(--ink-3)">${r.a.from === "web" ? `${ic.globe}En ligne · ${r.a.site}` : `${ic.file}${r.a.from === "bureau" ? "Note interne du bureau" : `Bureau · p. ${r.a.page}`}`}</span></div>`).join("")
             || `<div class="none" style="padding:6px 7px">Aucun article de ce code.</div>`}
           <div class="ft"><span><kbd>↑</kbd><kbd>↓</kbd></span><span><kbd>↵</kbd> ouvrir</span><span><kbd>Échap</kbd> fermer</span>${elseLine(m, rows).replace('class="else"', 'class="else" style="margin-left:auto"')}</div></div>` : ""}
         <div class="scroll"><div class="lh">Articles suivis</div>${followed(m).map((a) => row(m, a, m.on === a.id ? "lit" : "")).join("")}</div></div></div>`;
     } },
 ];
 
-MOCKS.forEach((m) => { m.fol = fresh(); m.asked = m.enter ? m.q : undefined; m.on = null; });
+MOCKS.forEach((m) => { m.fol = fresh(); m.asked = m.enter ? m.q : undefined; m.on = null; m.phase = 3; m.from = { bureau: true, web: true }; });
 const grid = document.getElementById("grid");
 grid.innerHTML = MOCKS.map((m) => `<section class="v"><h2>${m.h}</h2><p>${m.p}</p><div class="scr" data-m="${m.id}"></div></section>`).join("");
 const host = (m) => grid.querySelector(`[data-m="${m.id}"]`);
-function paint(m, keepFocus) {
+function paint(m, keepFocus = host(m).contains(document.activeElement) && document.activeElement.matches("[data-in]")) {
   const el = host(m), inp = el.querySelector("[data-in]"), pos = inp?.selectionStart;
   el.innerHTML = m.html(m);
   if (keepFocus) { const i = el.querySelector("[data-in]"); i.focus(); i.setSelectionRange(pos, pos); }
@@ -271,9 +315,10 @@ const mockOf = (el) => MOCKS.find((m) => m.id === el.closest("[data-m]")?.datase
 
 grid.addEventListener("click", (e) => {
   const m = mockOf(e.target); if (!m) return;
-  const t = e.target.closest("[data-tab],[data-clear],[data-follow],[data-on],[data-open],[data-go],[data-shut],[data-stop]");
+  const t = e.target.closest("[data-src],[data-tab],[data-clear],[data-follow],[data-on],[data-open],[data-go],[data-shut],[data-stop]");
   if (!t) return;
-  if (t.dataset.tab) { m.code = +t.dataset.tab; m.on = null; }
+  if (t.dataset.src) { m.from[t.dataset.src] = !m.from[t.dataset.src]; return scan(m); }
+  if (t.dataset.tab) { m.code = +t.dataset.tab; m.on = null; if (m.q) return scan(m); }
   else if (t.hasAttribute("data-clear")) { m.q = ""; m.asked = m.enter ? "" : undefined; }
   else if (t.dataset.follow) m.fol[m.code].add(t.dataset.follow);
   else if (t.dataset.on) m.on = t.dataset.on;
@@ -287,11 +332,11 @@ grid.addEventListener("click", (e) => {
 grid.addEventListener("input", (e) => {
   const m = mockOf(e.target); if (!m || !e.target.matches("[data-in]")) return;
   m.q = e.target.value;
-  if (!m.enter) { m.open = m.id === "C" ? true : m.id === "F" ? !!m.q : m.open; m.on = null; paint(m, true); }
+  if (!m.enter) { m.open = m.id === "C" ? true : m.id === "F" ? !!m.q : m.open; m.on = null; scan(m); }
 });
 grid.addEventListener("keydown", (e) => {
   const m = mockOf(e.target); if (!m || !e.target.matches("[data-in]")) return;
-  if (e.key === "Enter" && m.enter) { m.asked = m.q.trim(); m.on = null; paint(m, true); }
+  if (e.key === "Enter" && m.enter) { m.asked = m.q.trim(); m.on = null; scan(m); }
   if (e.key === "Escape") { if (m.id === "C" || m.id === "F") m.open = false; else { m.q = ""; m.asked = m.enter ? "" : undefined; } paint(m); }
 });
 /* ⌘K opens the palette of mock C, as it would on the screen. */

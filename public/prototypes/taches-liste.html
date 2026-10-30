@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>À faire — la liste dans la langue de Coordination</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* The schedule's task list, redrawn in the language of the Coordination
+   screen: a pane head with its icon and count, hairline tables with grey
+   column heads and tabular figures, segmented switches, small swatched
+   chips, the chosen row lit in pale green — and no cards. Four ways, each
+   live: tick a task, pick a row, switch the filter. Same tasks, same
+   people as the prototype. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --vert:#c3e05a;--vert-ink:#2f3a05;--lit:#eef3dc;--red:#b3261e;--mono:ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+body{margin:0;font:12px/1.4 Geist,"Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+header{padding:20px 24px 4px;max-width:1100px}
+header h1{margin:0;font-size:16px;font-weight:600}
+header p{margin:4px 0 0;color:var(--ink-2);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(640px,1fr));gap:18px;padding:12px 24px 30px}
+.opt{border:1px solid var(--line-2);border-radius:8px;background:#fff;padding:12px 14px 14px}
+.opt.rec{border-color:var(--ink)}
+.opt h3{margin:0;font-size:13px;font-weight:600}
+.opt h3 i{font-style:normal;font-weight:500;font-size:11px;color:var(--ink-2);margin-left:6px}
+.opt .why{margin:2px 0 10px;font-size:11.5px;color:var(--ink-2)}
+.svg{width:14px;height:14px;flex:0 0 14px}
+
+/* the pane, as on Coordination */
+.pane{border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:#fff}
+.ph{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-bottom:1px solid var(--line-2)}
+.ph b{font-size:13px;font-weight:600}
+.ph .ct{font-size:11.5px;color:var(--ink-3)}
+.ibadge{display:inline-flex;align-items:center;gap:3px;height:18px;padding:0 6px;border-radius:9px;background:var(--red);color:#fff;font-size:10.5px;font-weight:600}
+.ibadge .svg{width:11px;height:11px}
+.sp{flex:1}
+.btnw{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:11.5px;color:var(--ink-2);cursor:pointer}
+.btnw:hover{border-color:var(--ink);color:var(--ink)}
+.pb{padding:10px 12px;display:flex;flex-direction:column;gap:10px;max-height:470px;overflow:auto}
+.seg{display:inline-flex;gap:2px;padding:2px;border-radius:7px;background:var(--fill);align-self:flex-start}
+.seg span{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:5px;font-size:11.5px;font-weight:500;color:var(--ink-2);cursor:pointer}
+.seg span.on{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+.seg .n{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* the table */
+.tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tbl th{font-size:11px;font-weight:500;color:var(--ink-3);text-align:left;padding:6px 6px;border-bottom:1px solid var(--line)}
+.tbl td{padding:7px 6px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.tbl .n{text-align:right;white-space:nowrap}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover td{background:var(--fill-2)}
+.tbl tbody tr.on td{background:var(--lit)}
+.tbl tr.grp td{padding:12px 6px 5px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);
+  border-bottom:1px solid var(--line);background:none;cursor:default}
+.tbl tr.grp:hover td{background:none}
+.tbl tr.grp .c{font-weight:500;margin-left:5px;letter-spacing:0}
+.tbl tr.done .ttl{text-decoration:line-through;color:var(--ink-3)}
+.tbl tr.done .meta{color:var(--ink-3)}
+.ttl{font-size:12.5px}
+.meta{font-size:11px;color:var(--ink-3);margin-top:1px}
+.meta .late{color:var(--red);font-weight:500}
+.cb{width:15px;height:15px;border:1.5px solid var(--ink-3);border-radius:4px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:#fff}
+.cb.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.cb .svg{width:11px;height:11px}
+.who{display:inline-flex}
+.who i{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--fill);
+  border:1.5px solid #fff;font-style:normal;font-size:9px;font-weight:600;color:var(--ink-2)}
+.who i + i{margin-left:-6px}
+.ref{font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+/* priority as the typology chip: a swatch, then the word */
+.prio{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 7px;border:1px solid var(--line-2);border-radius:10px;font-size:11px;color:var(--ink-2);white-space:nowrap}
+.prio i{width:7px;height:7px;border-radius:2px;background:var(--ink-3)}
+.prio[data-p="haute"] i{background:var(--vert)}
+.prio[data-p="haute"]{color:var(--ink)}
+.prio[data-p="moyenne"] i{background:#8b8c90}
+.prio[data-p="basse"] i{background:#d9d9db}
+/* priority as one bar of three */
+.bars{display:inline-flex;gap:2px;align-items:flex-end}
+.bars b{width:3px;border-radius:1px;background:var(--line)}
+.bars b:nth-child(1){height:6px}.bars b:nth-child(2){height:9px}.bars b:nth-child(3){height:12px}
+.bars[data-p="haute"] b{background:var(--ink)}
+.bars[data-p="moyenne"] b:nth-child(-n+2){background:var(--ink)}
+.bars[data-p="basse"] b:nth-child(1){background:var(--ink)}
+.date{white-space:nowrap}
+.date.late{color:var(--red);font-weight:600}
+.dd{width:24px;text-align:right;color:var(--ink-3)}
+.dd .svg{width:13px;height:13px}
+.sheet td{background:var(--fill-2)!important;cursor:default}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:11.5px;padding:2px 0 4px 27px}
+.kv .k{color:var(--ink-3)}
+/* D: the day as the group, the date column gone */
+.day td{padding:12px 6px 5px;border-bottom:1px solid var(--line);cursor:default;background:none!important}
+.day b{font-size:12px;font-weight:600}
+.day span{font-size:11px;color:var(--ink-3);margin-left:6px}
+.day.today b::after{content:"aujourd'hui";margin-left:6px;font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--ink);color:#fff}
+.day.late b{color:var(--red)}
+/* F: the week as the switch */
+.wk{display:flex;align-items:center;gap:6px}
+.wk .seg{flex:1;display:grid;grid-template-columns:auto repeat(7,1fr) auto}
+.wk .seg span{flex-direction:column;height:38px;gap:0;justify-content:center;padding:0 6px}
+.wk .seg span small{font-size:10px;color:var(--ink-3);font-weight:500}
+.wk .seg span.today small{color:var(--ink)}
+.wk .seg span.empty{color:var(--ink-3);font-weight:400}
+.wk .seg span .dot{display:flex;gap:2px;height:5px;margin-top:2px}
+.wk .seg span .dot i{width:4px;height:4px;border-radius:50%;background:var(--ink)}
+.wk .seg span .dot i.late{background:var(--red)}
+.wk .seg span .dot i.done{background:var(--line)}
+.wk .nav{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:1px solid var(--line);border-radius:6px;color:var(--ink-2);cursor:pointer}
+.wk .nav:hover{border-color:var(--ink)}
+.wkh{font-size:11.5px;color:var(--ink-2)}
+/* G: the day as a gutter, written once */
+.gut{width:74px;vertical-align:top!important;padding-top:9px!important;white-space:nowrap;background:#fff!important;cursor:default}
+.gut b{display:block;font-size:12px;font-weight:600}
+.gut span{font-size:10.5px;color:var(--ink-3)}
+.gut.today b{color:var(--ink)}
+.gut.today span{display:inline-block;margin-top:2px;padding:0 5px;border-radius:7px;background:var(--ink);color:#fff;font-weight:600}
+.gut.late b{color:var(--red)}
+.tbl tr.dayfirst td{border-top:1px solid var(--line)}
+.tbl tr.wkbreak td{padding:9px 6px 4px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);cursor:default;background:none!important;border-bottom:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>À faire — la liste dans la langue de l'écran Coordination</h1>
+  <p>Aujourd'hui, chaque tâche est une carte à bordure. Des façons de la redessiner comme les tableaux de Coordination: en-tête de volet, filets fins, chiffres alignés, sélection en vert pâle, pas de cartes. E, F et G combinent le sélecteur de B et les jours de D. Cochez une tâche, choisissez une ligne, changez le filtre. L'option recommandée a la bordure noire.</p>
+</header>
+<div class="grid" id="grid"></div>
+<script src="vendor/lucide/lucide.min.js"></script>
+<script>
+const svg = (n) => `<svg class="svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+  lucide.icons[n][2].map(([t, a]) => `<${t} ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}/>`).join("")}</svg>`;
+const PEOPLE = { al: ["AL", "Alain — architecte principal"], gr: ["GR", "Guy — modélisation 3D, esquisses, codes"],
+  ba: ["BA", "Benoit — dessin 2D"], dl: ["DL", "David — assistant modélisation 3D/2D"] };
+const TODAY = "2026-11-14";
+const T = [
+  { id: 1, day: "2026-10-27", title: "Mix de typologies arrêté", who: ["al"], prio: "basse", done: true, phase: "Programme" },
+  { id: 2, day: "2026-11-05", title: "Tableau des superficies par étage", who: ["ba"], prio: "moyenne", done: true, phase: "Comité" },
+  { id: 3, day: "2026-11-10", title: "Élévations avec matériaux au comité", who: ["gr", "al"], prio: "moyenne", done: true, phase: "Comité" },
+  { id: 4, day: "2026-11-11", title: "Coupe de la cage d'escalier à reprendre", who: ["ba", "gr"], prio: "haute", done: false, phase: "Permis", code: "3.4.4.1" },
+  { id: 5, day: "2026-11-14", title: "Reprendre la hauteur des garde-corps à 1 070 mm", who: ["ba"], prio: "haute", done: false, phase: "Permis", code: "3.3.1.18" },
+  { id: 6, day: "2026-11-14", title: "Largeur libre des portes du parcours sans obstacles", who: ["ba"], prio: "haute", done: false, phase: "Permis", code: "3.8.1.3" },
+  { id: 7, day: "2026-11-17", title: "Confirmer le type de construction pour 8 étages", who: ["gr"], prio: "haute", done: false, phase: "Permis", code: "3.2.1.1" },
+  { id: 8, day: "2026-11-20", title: "Recompter les cases après réduction pour le métro", who: ["dl"], prio: "moyenne", done: false, phase: "Permis", code: "art. 71" },
+  { id: 9, day: "2026-11-24", title: "Note à l'urbaniste sur la marge avant", who: ["al"], prio: "moyenne", done: false, phase: "Comité", code: "art. 22" },
+  { id: 10, day: "2026-11-27", title: "Demande de dérogation mineure rédigée", who: ["al"], prio: "basse", done: false, phase: "Comité" },
+  { id: 11, day: "2026-12-04", title: "Plans d'émission pour permis", who: ["ba", "dl"], prio: "haute", done: false, phase: "Permis" },
+  { id: 12, day: "2026-12-08", title: "Calculs de conformité joints au dépôt", who: ["gr"], prio: "haute", done: false, phase: "Permis" },
+  { id: 13, day: "2026-12-15", title: "Dépôt de la demande de permis", who: ["al"], prio: "haute", done: false, phase: "Permis" },
+];
+const MONTHS = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+const DAYS = ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."];
+const fmt = (d) => { const [y, m, dd] = d.split("-").map(Number); return `${dd} ${MONTHS[m - 1]}`; };
+const dow = (d) => DAYS[new Date(d + "T12:00").getDay()];
+const late = (t) => !t.done && t.day < TODAY;
+const S = Object.fromEntries(["A", "B", "C", "D", "E", "F", "G"].map((k) => [k, { sel: 5, filter: "open", open: null, day: TODAY, week: 0 }]));
+/* B's switch, shared by the combined options */
+const FILTERS = [["open", "Ouvertes", (t) => !isDone(t)], ["late", "En retard", (t) => !isDone(t) && t.day < TODAY],
+  ["week", "Cette semaine", (t) => !isDone(t) && t.day >= "2026-11-09" && t.day <= "2026-11-15"], ["done", "Faites", (t) => isDone(t)]];
+const segHTML = (o) => `<span class="seg">${FILTERS.map(([k, label, fn]) => `<span class="${S[o].filter === k ? "on" : ""}" data-filter="${k}">${label}<span class="n">${T.filter(fn).length}</span></span>`).join("")}</span>`;
+const filtered = (o) => T.filter(FILTERS.find((x) => x[0] === S[o].filter)[2]);
+const bars = (t) => `<span class="bars" data-p="${t.prio}" title="Priorité ${t.prio}"><b></b><b></b><b></b></span>`;
+const dayCls = (d, l) => (d === TODAY ? "today" : l.some((t) => !isDone(t)) && d < TODAY ? "late" : "");
+const addDays = (d, n) => { const x = new Date(d + "T12:00"); x.setDate(x.getDate() + n); return x.toISOString().slice(0, 10); };
+const EMPTY = (n) => `<tr><td colspan="${n}" style="color:var(--ink-3);cursor:default">Aucune tâche</td></tr>`;
+const done = new Set(T.filter((t) => t.done).map((t) => t.id));
+const isDone = (t) => done.has(t.id);
+const who = (t) => `<span class="who" title="${t.who.map((w) => PEOPLE[w][1]).join(", ")}">${t.who.map((w) => `<i>${PEOPLE[w][0]}</i>`).join("")}</span>`;
+const cb = (t) => `<span class="cb ${isDone(t) ? "on" : ""}" data-tick="${t.id}">${isDone(t) ? svg("Check") : ""}</span>`;
+const meta = (t) => `${t.phase}${t.code ? ` — <span class="ref">${t.code}</span>` : ""}${late(Object.assign({}, t, { done: isDone(t) })) ? ` — <span class="late">en retard</span>` : ""}`;
+const openCount = () => T.filter((t) => !isDone(t)).length;
+const lateCount = () => T.filter((t) => !isDone(t) && t.day < TODAY).length;
+const head = (extra = "") => `<div class="ph">${svg("ListChecks")}<b>À faire</b><span class="ct">${openCount()} ouvertes</span>
+  ${lateCount() ? `<span class="ibadge">${svg("TriangleAlert")}${lateCount()} en retard</span>` : ""}<span class="sp"></span>${extra}
+  <span class="btnw">${svg("Plus")}Ajouter une tâche</span></div>`;
+const groups = () => [
+  ["En retard", T.filter((t) => !isDone(t) && t.day < TODAY)],
+  ["Aujourd'hui", T.filter((t) => !isDone(t) && t.day === TODAY)],
+  ["La suite", T.filter((t) => !isDone(t) && t.day > TODAY)],
+  ["Faites", T.filter(isDone)],
+].filter(([, l]) => l.length);
+const row = (o, t, cells) => `<tr class="${S[o].sel === t.id ? "on" : ""} ${isDone(t) ? "done" : ""}" data-row="${t.id}">${cells}</tr>`;
+
+const OPTS = [
+  { k: "A", title: "A — Le tableau des unités",
+    why: "Une tâche par ligne, comme une unité: case, tâche (le titre, puis la phase et l'article en gris), qui, priorité en puce à pastille comme les typologies, échéance alignée à droite. Les groupes sont des lignes de titre dans le même tableau. Le retard se lit en rouge à la date — la seule couleur forte, comme les badges de conflit.",
+    html: (o) => `${head()}<div class="pb"><table class="tbl"><thead><tr><th style="width:24px"></th><th>Tâche</th><th>Qui</th><th>Priorité</th><th class="n">Échéance</th></tr></thead><tbody>
+      ${groups().map(([g, l]) => `<tr class="grp"><td colspan="5">${g}<span class="c">${l.length}</span></td></tr>${l.map((t) => row(o, t,
+        `<td>${cb(t)}</td><td><div class="ttl">${t.title}</div><div class="meta">${meta(t)}</div></td><td>${who(t)}</td>
+         <td><span class="prio" data-p="${t.prio}"><i></i>${t.prio}</span></td><td class="n date ${late({ ...t, done: isDone(t) }) ? "late" : ""}">${fmt(t.day)}</td>`)).join("")}`).join("")}
+    </tbody></table></div>` },
+  { k: "B", title: "B — Un sélecteur de phase, comme Superficies / Ouvertures",
+    why: "Le même tableau, mais un sélecteur segmenté filtre au lieu des pastilles « 14 nov » et « 1 en retard »: Ouvertes, En retard, Cette semaine, Faites — chacune avec son compte. La priorité devient trois barres, lisible sans mot. Plus calme que A, mais les tâches faites quittent la liste.",
+    html: (o) => {
+      const F = [["open", "Ouvertes", (t) => !isDone(t)], ["late", "En retard", (t) => !isDone(t) && t.day < TODAY],
+        ["week", "Cette semaine", (t) => !isDone(t) && t.day >= "2026-11-09" && t.day <= "2026-11-15"], ["done", "Faites", isDone]];
+      const f = F.find((x) => x[0] === S[o].filter);
+      return `${head()}<div class="pb"><span class="seg">${F.map(([k, label, fn]) => `<span class="${S[o].filter === k ? "on" : ""}" data-filter="${k}">${label}<span class="n">${T.filter(fn).length}</span></span>`).join("")}</span>
+      <table class="tbl"><thead><tr><th style="width:24px"></th><th>Tâche</th><th>Qui</th><th title="Priorité">Prio.</th><th class="n">Échéance</th></tr></thead><tbody>
+      ${T.filter(f[2]).map((t) => row(o, t, `<td>${cb(t)}</td><td><div class="ttl">${t.title}</div><div class="meta">${meta(t)}</div></td><td>${who(t)}</td>
+        <td><span class="bars" data-p="${t.prio}" title="${t.prio}"><b></b><b></b><b></b></span></td><td class="n date ${late({ ...t, done: isDone(t) }) ? "late" : ""}">${fmt(t.day)}</td>`)).join("")
+        || `<tr><td colspan="5" style="color:var(--ink-3);cursor:default">Aucune tâche</td></tr>`}
+      </tbody></table></div>`;
+    } },
+  { k: "C", title: "C — Une ligne par tâche, la fiche se déplie",
+    why: "Le plus dense: titre, qui et date sur une seule ligne de 32 px. La phase, l'article, la priorité et les personnes en toutes lettres sont dans une fiche qui se déplie sous la ligne, comme la fiche d'un matériau. Deux fois plus de tâches à l'écran, mais il faut ouvrir la ligne pour lire le contexte.",
+    html: (o) => `${head()}<div class="pb"><table class="tbl"><thead><tr><th style="width:24px"></th><th>Tâche</th><th>Qui</th><th class="n">Échéance</th><th class="dd"></th></tr></thead><tbody>
+      ${groups().map(([g, l]) => `<tr class="grp"><td colspan="5">${g}<span class="c">${l.length}</span></td></tr>${l.map((t) => {
+        const open = S[o].open === t.id;
+        return `${row(o, t, `<td>${cb(t)}</td><td><span class="ttl">${t.title}</span></td><td>${who(t)}</td>
+          <td class="n date ${late({ ...t, done: isDone(t) }) ? "late" : ""}">${fmt(t.day)}</td><td class="dd" data-open="${t.id}">${svg(open ? "ChevronUp" : "ChevronDown")}</td>`)}
+          ${open ? `<tr class="sheet"><td colspan="5"><div class="kv"><span class="k">Phase</span><span>${t.phase}</span>${t.code ? `<span class="k">Article</span><span class="ref">${t.code}</span>` : ""}
+            <span class="k">Priorité</span><span><span class="prio" data-p="${t.prio}"><i></i>${t.prio}</span></span>
+            <span class="k">Qui</span><span>${t.who.map((w) => PEOPLE[w][1]).join("<br>")}</span></div></td></tr>` : ""}`;
+      }).join("")}`).join("")}
+    </tbody></table></div>` },
+  { k: "D", title: "D — L'agenda: le jour est le titre",
+    why: "Les tâches rangées sous leur jour, comme un agenda: la date sort de la ligne et devient le titre du groupe (« ven. 14 nov — aujourd'hui »). Se lit avec le calendrier à gauche, jour pour jour. Mais une semaine sans tâche ne laisse aucune trace, et la priorité doit tenir en barres.",
+    html: (o) => {
+      const days = [...new Set(T.map((t) => t.day))].sort();
+      return `${head()}<div class="pb"><table class="tbl"><tbody>
+      ${days.map((d) => { const l = T.filter((t) => t.day === d);
+        const cls = d === TODAY ? "today" : l.some((t) => !isDone(t) && d < TODAY) ? "late" : "";
+        return `<tr class="day ${cls}"><td colspan="4"><b>${dow(d)} ${fmt(d)}</b><span>${l.length} tâche${l.length > 1 ? "s" : ""}</span></td></tr>
+          ${l.map((t) => row(o, t, `<td style="width:24px">${cb(t)}</td><td><div class="ttl">${t.title}</div><div class="meta">${meta(t)}</div></td><td>${who(t)}</td>
+            <td class="n"><span class="bars" data-p="${t.prio}" title="${t.prio}"><b></b><b></b><b></b></span></td>`)).join("")}`; }).join("")}
+      </tbody></table></div>`;
+    } },
+  { k: "E", rec: true, title: "E — Le sélecteur de B, les jours de D",
+    why: "Le sélecteur segmenté avec ses comptes choisit quelles tâches; l'agenda les range sous leur jour. « Ouvertes » se lit comme un agenda de ce qui reste, « Faites » comme un journal. Le jour en retard est en rouge, aujourd'hui porte son badge; la priorité en trois barres, à droite comme une colonne de chiffres.",
+    html: (o) => {
+      const l = filtered(o), days = [...new Set(l.map((t) => t.day))].sort();
+      return `${head()}<div class="pb">${segHTML(o)}<table class="tbl"><tbody>
+      ${days.map((d) => { const dl = l.filter((t) => t.day === d);
+        return `<tr class="day ${dayCls(d, dl)}"><td colspan="4"><b>${dow(d)} ${fmt(d)}</b><span>${dl.length} tâche${dl.length > 1 ? "s" : ""}</span></td></tr>
+          ${dl.map((t) => row(o, t, `<td style="width:24px">${cb(t)}</td><td><div class="ttl">${t.title}</div><div class="meta">${meta(t)}</div></td><td>${who(t)}</td><td class="n">${bars(t)}</td>`)).join("")}`; }).join("") || EMPTY(4)}
+      </tbody></table></div>`;
+    } },
+  { k: "F", title: "F — La semaine est le sélecteur",
+    why: "Le sélecteur segmenté devient la semaine: un segment par jour, avec un point par tâche (rouge en retard, gris faite), entre « En retard » et « Plus tard ». Choisir un jour montre ses tâches; les flèches changent de semaine. Le plus proche du calendrier à gauche, mais on lit un jour à la fois.",
+    html: (o) => {
+      const st = S[o], mon = addDays("2026-11-09", st.week * 7), days = [...Array(7)].map((_, i) => addDays(mon, i));
+      const sun = days[6];
+      const segs = [["late", "En retard", T.filter((t) => !isDone(t) && t.day < mon)],
+        ...days.map((d) => [d, `${dow(d)} ${Number(d.slice(8))}`, T.filter((t) => t.day === d)]),
+        ["later", "Plus tard", T.filter((t) => !isDone(t) && t.day > sun)]];
+      const cur = segs.find((s) => s[0] === st.day) || segs[1];
+      const dots = (l) => `<span class="dot">${l.slice(0, 4).map((t) => `<i class="${isDone(t) ? "done" : t.day < TODAY ? "late" : ""}"></i>`).join("")}</span>`;
+      return `${head()}<div class="pb"><div class="wk"><span class="nav" data-week="-1">${svg("ChevronLeft")}</span><span class="seg">
+        ${segs.map(([k, label, l]) => `<span class="${cur[0] === k ? "on" : ""} ${k === TODAY ? "today" : ""} ${l.length ? "" : "empty"}" data-day="${k}">${label}${
+          k.length === 10 ? dots(l) : `<small>${l.length}</small>`}</span>`).join("")}</span><span class="nav" data-week="1">${svg("ChevronRight")}</span></div>
+        <div class="wkh">${cur[0].length === 10 ? `${dow(cur[0])} ${fmt(cur[0])}${cur[0] === TODAY ? " — aujourd'hui" : ""}` : cur[1]} — ${cur[2].length} tâche${cur[2].length > 1 ? "s" : ""}</div>
+        <table class="tbl"><tbody>${cur[2].map((t) => row(o, t, `<td style="width:24px">${cb(t)}</td><td><div class="ttl">${t.title}</div><div class="meta">${meta(t)}${cur[0].length === 10 ? "" : ` — ${fmt(t.day)}`}</div></td><td>${who(t)}</td><td class="n">${bars(t)}</td>`)).join("") || EMPTY(4)}</tbody></table></div>`;
+    } },
+  { k: "G", title: "G — Le tableau de B, le jour en marge",
+    why: "Le tableau de B et son sélecteur, mais la date n'est plus une colonne répétée: elle est écrite une fois, dans une marge à gauche, pour toutes les tâches du jour. Un trait sépare les semaines, nommées. Le plus dense des trois; l'œil descend la marge comme un agenda et lit la ligne comme un tableau.",
+    html: (o) => {
+      const l = filtered(o), days = [...new Set(l.map((t) => t.day))].sort();
+      const wkOf = (d) => addDays(d, -((new Date(d + "T12:00").getDay() + 6) % 7));
+      let lastWk = "";
+      return `${head()}<div class="pb">${segHTML(o)}<table class="tbl"><thead><tr><th>Jour</th><th style="width:24px"></th><th>Tâche</th><th>Qui</th><th class="n">Prio.</th></tr></thead><tbody>
+      ${days.map((d) => { const dl = l.filter((t) => t.day === d), w = wkOf(d);
+        const brk = w !== lastWk ? `<tr class="wkbreak"><td colspan="5">Semaine du ${fmt(w)}</td></tr>` : ""; lastWk = w;
+        return brk + dl.map((t, i) => `<tr class="${S[o].sel === t.id ? "on" : ""} ${isDone(t) ? "done" : ""} ${i ? "" : "dayfirst"}" data-row="${t.id}">
+          ${i ? "" : `<td class="gut ${dayCls(d, dl)}" rowspan="${dl.length}"><b>${dow(d)} ${Number(d.slice(8))}</b><span>${d === TODAY ? "aujourd'hui" : MONTHS[Number(d.slice(5, 7)) - 1]}</span></td>`}
+          <td>${cb(t)}</td><td><div class="ttl">${t.title}</div><div class="meta">${meta(t)}</div></td><td>${who(t)}</td><td class="n">${bars(t)}</td></tr>`).join(""); }).join("") || EMPTY(5)}
+      </tbody></table></div>`;
+    } },
+];
+
+function paint() {
+  document.getElementById("grid").innerHTML = OPTS.map((o) => `<div class="opt ${o.rec ? "rec" : ""}" data-o="${o.k}">
+    <h3>${o.title}${o.rec ? "<i>recommandée</i>" : ""}</h3><div class="why">${o.why}</div><div class="pane">${o.html(o.k)}</div></div>`).join("");
+}
+document.addEventListener("click", (e) => {
+  const box = e.target.closest("[data-o]");
+  if (!box) return;
+  const st = S[box.dataset.o];
+  const tick = e.target.closest("[data-tick]"), f = e.target.closest("[data-filter]"), op = e.target.closest("[data-open]"), r = e.target.closest("[data-row]");
+  if (tick) { const id = Number(tick.dataset.tick); done.has(id) ? done.delete(id) : done.add(id); }
+  else if (f) st.filter = f.dataset.filter;
+  else if (e.target.closest("[data-day]")) st.day = e.target.closest("[data-day]").dataset.day;
+  else if (e.target.closest("[data-week]")) { st.week += Number(e.target.closest("[data-week]").dataset.week); st.day = addDays("2026-11-09", st.week * 7); }
+  else if (op) st.open = st.open === Number(op.dataset.open) ? null : Number(op.dataset.open);
+  else if (r) st.sel = st.sel === Number(r.dataset.row) ? null : Number(r.dataset.row);
+  else return;
+  paint();
+});
+paint();
+</script>
+</body>
+</html>

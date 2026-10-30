@@ -4312,7 +4312,7 @@ function tabsHTML() {
   /* Sharing names the project it shares, so on a project screen it sits on
      the studio's line, after the project's tab, beside the person sharing. */
   const shareLvl = studio || mode !== "Two rows, no rail" ? "" : `<span class="btnw lvlshare" ${act("share")} title="Partager le projet en lecture et commentaires"
-       style="flex:0 0 auto;margin-left:10px">${icon("share-2")}<span class="hi">Partager</span></span>`;
+       style="flex:0 0 auto;margin-left:10px;margin-bottom:9px">${icon("share-2")}<span class="hi">Partager</span></span>`;
   const one = `<div class="tabs one ${studio ? "studio" : ""} rg ${solo("nav")}" data-rg="atelier" data-fi="${fiOf("nav")}"
        data-labels-mode="${V.nav.labels}">
       ${back}${ech}${projTab}<span class="sp"></span>${me}
