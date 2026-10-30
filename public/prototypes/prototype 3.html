@@ -3430,7 +3430,9 @@ function contentHTML() {
           <text data-axt="${a}" x="0" y="0">${a.toUpperCase()}</text>`).join("")}
         <circle cx="0" cy="0" r="1.6"></circle>
       </svg>`;
-      const pane = (t, note, kind, cls = "", layers = "", fx = "1") => `<div class="pane drawing" style="flex:${fx}"><div class="ph">${icon("file")}
+      /* The model's header carries the cube, the same glyph that marks a
+         note pinned on the model; the plan keeps the sheet. */
+      const pane = (t, note, kind, cls = "", layers = "", fx = "1") => `<div class="pane drawing" style="flex:${fx}"><div class="ph">${icon(kind === "model" ? "box" : "file")}
         <span class="lo bar" style="width:90px"></span><span class="hi">${t}</span>
         <span style="flex:1"></span>
         ${hostButton(kind === "plan" ? "plan" : "model")}</div>
@@ -3609,9 +3611,13 @@ function floorQuant() {
         fqNum(r[6]), fqNum(r[6] * M2, 1), fqPct(r[6], net)],
       on: r === unit, index: visible.indexOf(r),
     })),
-    foot: [["Net", "", fqNum(net), fqNum(net * M2), "100 %"],
-      ["Circulation", "", fqNum(brut - net), fqNum((brut - net) * M2), "15 %"],
-      ["Brut", "", fqNum(brut), fqNum(brut * M2), ""]],
+    /* A share of nothing is not 100 %: with no unit on the level the
+       three lines keep their place and stay empty. */
+    foot: floor.length
+      ? [["Net", "", fqNum(net), fqNum(net * M2), "100 %"],
+        ["Circulation", "", fqNum(brut - net), fqNum((brut - net) * M2), "15 %"],
+        ["Brut", "", fqNum(brut), fqNum(brut * M2), ""]]
+      : [["Net", "", "", "", ""], ["Circulation", "", "", "", ""], ["Brut", "", "", "", ""]],
     versus: unit ? `${unit[6] >= mean ? "+" : "−"}${fqNum(Math.abs(unit[6] - mean))} pi² par rapport à la moyenne des ${unit[5]} de l'étage` : "",
   };
 }
@@ -3621,6 +3627,8 @@ function floorQuant() {
    The floor's net area stands beside it because every percentage on the
    row is a share of it. */
 function fqMixHTML(q) {
+  if (!q.count) return `<div class="fqmix"><div class="mixrow">
+    <span class="mixnet">Aucune unité résidentielle à ce niveau</span></div></div>`;
   return `<div class="fqmix">
     <div class="mixbar">${q.types.map(([ty, , share]) =>
       `<span style="width:${(share * 100).toFixed(1)}%;background:${TYPO_INK[ty]}" title="${ty} — ${Math.round(share * 100)} %"></span>`).join("")}</div>
@@ -4992,11 +5000,12 @@ function render() {
      drawings, the margin and its rail all belong to a floor, so the four
      tables take the work area on their own. */
   const whole = buildingScope();
-  /* A basement and the roof carry no apartment unit: a list whose only
-     line says it is empty is worse than no list, and the plan is the
-     reason one is on those levels at all. */
-  const noUnits = V.screen === "Unités" && isNonresLevel(paneLevel());
-  const hasList = !whole && !noUnits && def.regions.includes("list")
+  /* A basement and the roof carry no apartment unit, and the column still
+     stands: a level that drops a whole pane reads as a different screen,
+     and the eye has to find the drawing again every time a tab is crossed.
+     The tables are drawn as they always are, empty where there is nothing
+     to count. */
+  const hasList = !whole && def.regions.includes("list")
     && V.list.layout !== "Hidden" && V.list.layout !== "Filter bar only";
   const hasInsp = !whole && def.regions.includes("inspector") && V.inspector.layout === "Right panel";
   /* The margin is a note stuck to a point of a drawing, so it belongs to
@@ -5038,7 +5047,7 @@ function render() {
         <div class="work" style="grid-template-columns:${SCREENS[V.screen].home ? "1fr" : cols};grid-auto-rows:min-content 1fr min-content;align-content:stretch">
           <div style="grid-column:1/-1">${headerHTML()}</div>
           ${SCREENS[V.screen].home ? `<div style="grid-column:1/-1;display:flex;min-height:0;gap:var(--gap)">${(HOMES[V.homeLayout] || HOMES["Card grid"])()}</div>` : ""}
-          ${SCREENS[V.screen].home ? "" : `${!whole && !noUnits && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
+          ${SCREENS[V.screen].home ? "" : `${!whole && V.list.layout === "Filter bar only" && def.regions.includes("list") ? listHTML() : ""}
           ${hasList && !listShut ? listHTML() : ""}
           ${hasList ? gutter({ size: "list", grab: "prev", prev: "list", lprev: "la liste" }) : ""}
           ${contentHTML()}
