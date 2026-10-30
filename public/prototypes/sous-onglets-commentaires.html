@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Les deux sous-onglets des commentaires — mots et glyphes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* « Ouverts / Résolus » partage une colonne de 289 px avec « Commentaires »
+   et « Conflits » : les deux lignes se lisent l'une sous l'autre et ne
+   doivent pas dire la même chose de la même façon. Huit familles, chacune
+   montrée dans sa colonne, sur les mêmes commentaires que le prototype :
+   deux ouverts, un résolu. L'onglet choisi est à gauche dans chaque carte,
+   et la deuxième rangée montre l'autre état. */
+:root{--ink:#1b1b1b;--ink-2:#55565a;--ink-3:#8b8c90;--line:#d9d9db;--line-2:#e6e6e8;--fill:#f1f1f2;--fill-2:#f6f6f7;
+  --vert:#c3e05a;--vert-ink:#2f3a05;--ok:#2f7a4d;--haute:#c0362c}
+*{box-sizing:border-box}
+body{margin:0;font:13px/1.4 "Inter",system-ui,-apple-system,sans-serif;color:var(--ink);background:#fafafa}
+main{padding:22px 28px 60px}
+h1{margin:0;font-size:17px;font-weight:600}
+.lede{margin:5px 0 0;color:var(--ink-2);max-width:980px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,330px);gap:34px 26px;margin-top:24px;align-items:start}
+.v h2{margin:0;font-size:14px;font-weight:600}
+.v p{margin:3px 0 10px;color:var(--ink-2);font-size:12.5px;min-height:76px}
+.sec{margin:12px 0 5px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.says{margin:9px 0 0;font-size:11.5px;color:var(--ink-3)}
+.says b{color:var(--ink);font-weight:600}
+svg{width:13px;height:13px;flex:0 0 13px;stroke-width:1.8;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+
+/* la colonne, à la largeur réelle du prototype --------------------------- */
+.col{width:289px;background:#fff;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.mtabs{display:flex;align-items:center;gap:6px;padding:7px 9px;border-bottom:1px solid var(--line-2)}
+.mtab{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:6px;
+  font-size:12px;color:var(--ink-2);white-space:nowrap}
+.mtab.on{background:var(--ink);color:#fff;font-weight:600}
+.mtab i{font-style:normal;font-size:11px;opacity:.75}
+.mtab.conf{color:var(--haute)}
+.body{padding:8px 9px 10px}
+
+/* les deux sous-onglets : soulignés, comme au prototype ------------------ */
+.sub{display:flex;gap:4px;border-bottom:1px solid var(--line-2);margin-bottom:8px}
+.st{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;margin-bottom:-1px;font-size:12.5px;
+  color:var(--ink-3);border-bottom:2px solid transparent;white-space:nowrap}
+.st.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.st n{font-style:normal;font-size:12px;color:var(--ink-3);font-weight:400}
+.st.on n{color:var(--ink-3)}
+
+/* les commentaires, juste assez pour que l'onglet ait un sens ------------ */
+.nc{border:1px solid var(--line-2);border-radius:7px;padding:7px 8px;margin-bottom:6px}
+.nc .au{display:flex;align-items:center;gap:6px}
+.nc .av{width:20px;height:20px;border-radius:50%;background:var(--fill);border:1px solid var(--line-2);
+  display:grid;place-items:center;font-size:9px;font-weight:600;color:var(--ink-2);flex:0 0 20px}
+.nc .nm{font-size:11.5px;font-weight:600}
+.nc .ro{font-size:10.5px;color:var(--ink-3)}
+.nc .tx{margin-top:4px;font-size:12px;line-height:1.35}
+.nc .ft{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:10.5px;color:var(--ink-3)}
+.nc .ft .wh{margin-left:auto}
+.nc.res .tx{color:var(--ink-3)}
+.nc .by{display:inline-flex;align-items:center;gap:4px;color:var(--ok);font-size:10.5px}
+
+/* B — le glyphe sur les deux */
+.b .st svg{color:var(--ink-3)}
+.b .st.on svg{color:var(--ink)}
+
+/* C — le glyphe seulement sur l'état fini */
+.c .st:first-child svg{display:none}
+
+/* D — le compte en pastille plutôt qu'en chiffre gris */
+.d .st n{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 5px;border-radius:9px;
+  background:var(--fill);color:var(--ink-2);font-size:10.5px;font-weight:600}
+.d .st.on n{background:var(--ink);color:#fff}
+
+/* E — un segment plein, pas un souligné */
+.e .sub{border-bottom:0;gap:2px;padding:2px;background:var(--fill);border-radius:7px;align-self:flex-start;
+  display:inline-flex;margin-bottom:9px}
+.e .st{border-bottom:0;margin-bottom:0;height:24px;padding:0 10px;border-radius:5px;font-size:12px}
+.e .st.on{background:#fff;color:var(--ink);box-shadow:0 0 0 1px var(--line-2)}
+
+/* F — l'état fini porte le vert de la maison */
+.f .st.done svg{color:var(--ok)}
+.f .st.done.on{border-bottom-color:var(--ok);color:var(--ok)}
+.f .st.done.on svg{color:var(--ok)}
+
+/* G — une seule ligne : un interrupteur, pas deux onglets */
+.g .sub{border-bottom:1px solid var(--line-2);justify-content:space-between;align-items:center;padding-bottom:5px}
+.g .ttl{font-size:12.5px;font-weight:600}
+.g .sw{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-2);
+  border:1px solid var(--line);border-radius:6px;height:23px;padding:0 8px;margin-bottom:-1px}
+.g .sw svg{width:12px;height:12px;flex-basis:12px;color:var(--ink-3)}
+.g .sw n{font-style:normal;color:var(--ink-3)}
+.g .ttl{white-space:nowrap}
+
+/* H — le mot seul, le compte derrière le mot fini seulement */
+.h .st:first-child n{display:none}
+</style>
+</head>
+<body>
+<main>
+<h1>Les deux sous-onglets des commentaires — mots et glyphes</h1>
+<p class="lede">La colonne fait 289 px et porte déjà deux onglets au-dessus (« Commentaires », « Conflits ») : la
+deuxième rangée doit se distinguer de la première sans crier, et nommer un état, pas une action. Huit familles,
+montrées dans la vraie colonne, sur les commentaires du prototype — deux ouverts, un résolu.</p>
+<div class="grid" id="g"></div>
+</main>
+<script>
+/* Les glyphes : traits seulement, comme ceux du prototype. */
+const SVG = {
+  dot: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>',
+  checks: '<svg viewBox="0 0 24 24"><path d="M1.5 12.5 6 17 17 6"/><path d="M11 15.5 13 17 23 6.5"/></svg>',
+  msg: '<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>',
+  inbox: '<svg viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5h13l3.5 7v7H2v-7z"/></svg>',
+  archive: '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11h16V8"/><path d="M10 12h4"/></svg>',
+  clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  folder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m9.5 13.5 2 2 4-4"/></svg>',
+  eye: '<svg viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>',
+};
+
+/* Les mêmes commentaires qu'au prototype : deux ouverts, un résolu. */
+const OPEN = [
+  { ab: "MA", nm: "Marc-André Gagnon", ro: "Entrepreneur général",
+    tx: "Le dégagement devant la porte d'entrée du 507 fait 860 mm, il en faut 900.",
+    an: "plan d'unités — niv. 5 — unité 507", wh: "hier 16:20" },
+  { ab: "CT", nm: "Camille Tremblay", ro: "Chargée de projet",
+    tx: "Le balcon du 510 dépasse la ligne d'alignement de 0,4 m.",
+    an: "plan d'unités — niv. 5 — unité 510", wh: "lun. 09:05" },
+];
+const DONE = [
+  { ab: "GR", nm: "Guy Roberge", ro: "Architecte — vous",
+    tx: "La porte du corridor vers l'escalier est reprise à la bonne position.",
+    an: "plan d'unités — niv. 5 — corridor commun", wh: "mar. 08:40", by: "résolu par vous · mar. 11:02" },
+];
+
+const note = (p) => `<div class="nc ${p.by ? "res" : ""}">
+  <div class="au"><span class="av">${p.ab}</span><span><span class="nm">${p.nm}</span><br><span class="ro">${p.ro}</span></span></div>
+  <div class="tx">${p.tx}</div>
+  <div class="ft"><span>${p.an}</span><span class="wh">${p.wh}</span>
+    ${p.by ? `<span class="by">${SVG.check}${p.by}</span>` : ""}</div>
+</div>`;
+
+/* Une carte = la colonne, deux fois : l'état ouvert choisi, puis l'autre. */
+const tabs = (o, on) => `<div class="sub">${o.tabs.map((t, i) => `<span class="st ${i === 1 ? "done" : ""} ${i === on ? "on" : ""}">${
+  t.ic ? SVG[t.ic] : ""}${t.w}<n>${i === 0 ? OPEN.length : DONE.length}</n></span>`).join("")}</div>`;
+
+const head = `<div class="mtabs"><span class="mtab on">${SVG.msg}Commentaires<i>2</i></span>
+  <span class="mtab conf">Conflits<i>12</i></span></div>`;
+
+const OPTS = [
+  { k: "a", t: "A — les mots seuls, tels quels",
+    d: "« Ouverts » et « Résolus » sans glyphe : deux participes, l'un et son contraire, et le compte en gris derrière. La rangée du dessus porte déjà deux icônes ; celle-ci reste du texte pour qu'on ne lise pas deux barres d'outils superposées.",
+    tabs: [{ w: "Ouverts" }, { w: "Résolus" }],
+    says: "Le plus discret, et le mot <b>résolu</b> est celui qu'on emploie en chantier." },
+  { k: "b", t: "B — un glyphe sur chacun",
+    d: "Le point ouvert et la coche : l'état se lit avant le mot, ce qui aide quand la colonne est étroite et que les deux mots se ressemblent. Deux glyphes de plus dans une colonne qui en porte déjà trois.",
+    tabs: [{ w: "Ouverts", ic: "dot" }, { w: "Résolus", ic: "check" }],
+    says: "Le glyphe double le mot : utile si la colonne rétrécit, bruyant sinon." },
+  { k: "c", t: "C — le glyphe seulement sur la fin",
+    d: "Rien sur « Ouverts », une coche sur « Résolus ». Un état par défaut n'a pas besoin de marque — c'est la même règle que la priorité : on ne marque que ce qui sort de l'ordinaire.",
+    tabs: [{ w: "Ouverts" }, { w: "Résolus", ic: "check" }],
+    says: "Une seule marque, sur le seul état qui est un <b>aboutissement</b>." },
+  { k: "d", t: "D — le compte en pastille",
+    d: "Mêmes mots, mais le chiffre devient une pastille : il se détache du mot au lieu de le suivre, et l'onglet choisi porte sa pastille en noir. C'est ce que fait la rangée du dessus avec ses deux comptes.",
+    tabs: [{ w: "Ouverts" }, { w: "Résolus" }],
+    says: "Accorde la deuxième rangée à la première : partout un <b>compte</b>, jamais un chiffre nu." },
+  { k: "e", t: "E — un segment, pas un souligné",
+    d: "Les deux états dans un segment gris clair, l'actif en blanc. Le souligné noir disparaît, donc la colonne ne porte plus qu'une seule ligne forte — celle des onglets du haut.",
+    tabs: [{ w: "Ouverts" }, { w: "Résolus" }],
+    says: "Deux traitements différents pour deux rangées différentes : plus personne ne les confond." },
+  { k: "f", t: "F — à régler, réglés",
+    d: "« À régler » dit ce qu'il reste à faire plutôt que l'état du fil, et « Réglés » prend le vert de la maison avec sa coche. Le mot est plus court que « Résolus » et tient mieux dans 289 px.",
+    tabs: [{ w: "À régler", ic: "clock" }, { w: "Réglés", ic: "checks" }],
+    says: "Le premier onglet devient une <b>liste de travail</b>, pas un classeur." },
+  { k: "g", t: "G — un seul mot, un interrupteur",
+    d: "Pas de sous-onglets : la colonne montre les commentaires ouverts, et un bouton à droite montre les résolus. Une rangée de moins, et l'état par défaut n'a plus à se nommer.",
+    tabs: null,
+    says: "Reprend 24 px de hauteur ; en retour, les résolus se <b>cherchent</b> au lieu de s'offrir." },
+  { k: "h", t: "H — en cours, classés",
+    d: "Le vocabulaire du dossier plutôt que celui du problème : ce qui est en cours, et ce qui est classé. Le compte ne s'écrit que derrière « Classés » — personne ne compte ce qu'il est en train de lire.",
+    tabs: [{ w: "En cours", ic: "inbox" }, { w: "Classés", ic: "archive" }],
+    says: "Juste si la colonne est une <b>boîte de réception</b> ; faux si c'est un relevé de problèmes." },
+];
+
+const colFor = (o, on) => `<div class="col">${head}<div class="body">${
+  o.tabs ? tabs(o, on) : `<div class="sub"><span class="ttl">${on === 0 ? "Commentaires ouverts" : "Commentaires résolus"}</span>
+    <span class="sw">${SVG.eye}${on === 0 ? "Résolus" : "Ouverts"} <n>${on === 0 ? DONE.length : OPEN.length}</n></span></div>`}
+  ${(on === 0 ? OPEN : DONE).map(note).join("")}</div></div>`;
+
+document.getElementById("g").innerHTML = OPTS.map((o) => `<section class="v ${o.k}">
+  <h2>${o.t}</h2><p>${o.d}</p>
+  <div class="sec">Les ouverts</div>${colFor(o, 0)}
+  <div class="sec">Les résolus</div>${colFor(o, 1)}
+  <p class="says">${o.says}</p>
+</section>`).join("");
+</script>
+</body>
+</html>
