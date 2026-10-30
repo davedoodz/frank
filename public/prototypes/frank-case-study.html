@@ -58,7 +58,7 @@ p b,.lede b{color:var(--ink);font-weight:600}
 .c7-5{grid-template-columns:7fr 5fr}
 .item h3{margin-bottom:10px}
 .item .n{font-family:var(--pixel);font-size:13px;letter-spacing:.09em;color:var(--ink-3);display:block;margin-bottom:14px}
-.bar-top{border-top:1px solid var(--ink);padding-top:18px}
+.bar-top{padding-top:18px}
 
 /* images */
 .shot{border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
@@ -184,7 +184,7 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .read .won{background:var(--vert)}
 .read .won .k{color:var(--vert-dark)}
 .rp{display:flex;flex-direction:column;gap:18px}
-.rp>div{display:grid;grid-template-columns:30px 1fr;column-gap:14px;row-gap:6px;padding-top:16px;border-top:1px solid var(--line)}
+.rp>div{display:grid;grid-template-columns:30px 1fr;column-gap:14px;row-gap:6px;padding-top:16px}
 .rp .pi{grid-row:1/3;margin-top:8px;width:24px;height:24px}
 .rp b{font-size:38px;font-weight:600;letter-spacing:-.04em;line-height:1}
 .rp span{font-size:15px;line-height:1.45;color:var(--ink-2)}
@@ -199,10 +199,10 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .item.ov .ic,.ag-ic .ic{width:28px;height:28px;fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;display:block;margin-bottom:16px}
 .item.ov .logos{display:flex;gap:10px;margin-bottom:16px}
 .item.ov .logo{width:28px;height:28px;display:block}
-.ag.ag-ic div{border-top:0;padding-top:0}
+.ag.ag-ic div{padding-top:0}
 .ag-ic .ic{width:32px;height:32px;stroke:var(--vert-dark)}
 .ag{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:80px}
-.ag div{border-top:3px solid var(--ink);padding-top:20px}
+.ag div{padding-top:20px}
 .ag .n{font-family:var(--pixel);font-size:14px;color:var(--ink-3);letter-spacing:.09em}
 .ag h3{font-size:30px;margin:10px 0 12px}
 
@@ -217,7 +217,7 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .q cite{display:block;font-style:normal;margin-top:14px;font-size:16px;color:var(--ink-3)}
 
 /* "Instead of … I chose …" */
-.dec{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:56px;border-top:1px solid var(--ink)}
+.dec{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:56px}
 .dec>div{padding:26px 40px 0 0}
 .dec>div+div{padding-left:40px;border-left:1px solid var(--line)}
 .dec .k{display:block;margin-bottom:12px}
@@ -236,7 +236,7 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .zm.full{padding:0}
 .zm.full img{width:100%;height:100%;max-height:none;object-fit:cover;object-position:center;border-radius:0;box-shadow:none}
 .zm .src{position:absolute;left:12px;top:12px;z-index:1;font-family:var(--pixel);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);background:#fff;padding:4px 8px;border-radius:4px;box-shadow:0 0 0 1px var(--line)}
-.tx figcaption{padding-top:16px;margin-top:18px;border-top:1px solid var(--ink);position:relative}
+.tx figcaption{padding-top:16px;margin-top:18px;position:relative}
 .tx figcaption .k{display:block;margin-bottom:8px}
 .tx figcaption p{font-size:20px;line-height:1.45;color:var(--ink)}
 .tx .won figcaption .k{color:var(--vert-dark)}
@@ -248,8 +248,8 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 
 /* tables */
 table{border-collapse:collapse;width:100%;margin-top:44px;font-size:18px}
-th{font-family:var(--pixel);font-weight:400;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:0 20px 12px 0;border-bottom:1px solid var(--ink)}
-td{padding:13px 20px 13px 0;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.4;color:var(--ink-2)}
+th{font-family:var(--pixel);font-weight:400;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:0 20px 12px 0}
+td{padding:13px 20px 13px 0;vertical-align:top;line-height:1.4;color:var(--ink-2)}
 td:first-child{color:var(--ink)}
 td .who{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;color:var(--ink-3);margin-left:8px}
 td.arrow{color:var(--ink-3);width:40px}
@@ -279,6 +279,8 @@ tr.hl td{background:var(--vert-pale)}
 .tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
 .tags span{font-size:15px;padding:6px 12px;border-radius:999px;background:var(--fill);color:var(--ink-2)}
 .tags span.on{background:var(--vert);color:var(--vert-dark)}
+.tags{align-items:center}
+.tags .ar{width:20px;height:20px;color:var(--ink-3);flex:none}
 
 /* before / after */
 .ba td:nth-child(2){color:var(--ink-3)}
@@ -318,16 +320,16 @@ tr.hl td{background:var(--vert-pale)}
 .chap-side>p:first-child{font-size:17px}
 .sets{display:flex;flex-direction:column;gap:14px;margin-top:12px}
 .set .k{display:block;margin-bottom:4px;color:var(--ink)}
-.set p{font-size:17px;padding:5px 0;border-top:1px solid var(--line)}
+.set p{font-size:17px;padding:5px 0}
 .set .n,.chaps .n{font-family:var(--pixel);font-size:13px;color:var(--vert-dark);letter-spacing:.09em;margin-right:12px}
 .chap-side .links{margin-top:26px}
 .chap-side .links a{white-space:nowrap;font-size:18px}
 .chap-side .links a .mono{font-size:13px}
 .chaps{display:grid;grid-template-columns:repeat(3,1fr);gap:0 40px;margin-top:44px}
-.chaps h3{font-size:22px;padding-bottom:12px;border-bottom:2px solid var(--ink);margin-bottom:14px}
+.chaps h3{font-size:22px;padding-bottom:12px;margin-bottom:14px}
 .chaps .set{margin-bottom:16px}
 .plist{display:grid;grid-template-columns:repeat(4,1fr);gap:0 28px;margin-top:44px}
-.plist div{font-size:20px;padding:14px 0;border-top:1px solid var(--line);color:var(--ink)}
+.plist div{font-size:20px;padding:14px 0;color:var(--ink)}
 .plist .n{font-family:var(--pixel);font-size:13px;color:var(--ink-3);letter-spacing:.09em;margin-right:12px}
 
 /* tiny drawing of the problem */
@@ -759,13 +761,25 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <p class="k">Reframes 1 and 2</p>
   <h2>I moved the product away from design and toward the work nobody wants to redo.</h2>
   <div class="rule"></div>
-  <div class="cols c2" style="margin-top:60px">
-    <div class="item bar-top"><span class="n">REFRAME 1 — OCT 24</span><h3>Not a design tool</h3>
-      <p>Designing is the part architects enjoy and trust themselves with. The pain is in the repetitive reading of drawings: schedules, counts, checks. That is where software earns trust.</p></div>
-    <div class="item bar-top"><span class="n">REFRAME 2 — OCT 25</span><h3>Not a detail library</h3>
-      <p>My first direction was a library of construction details. I dropped it after looking at where the office's knowledge lives: in 2D unit plans. The unit schedule is the document rebuilt most often by hand.</p></div>
+  <div class="cols c5-7" style="margin-top:48px;flex:1;min-height:0;gap:64px">
+    <div style="display:flex;flex-direction:column;gap:36px">
+      <div class="item bar-top"><span class="n">REFRAME 1 — OCT 24</span><h3>Not a design tool</h3>
+        <p>Designing is the part architects enjoy and trust themselves with. The pain is in the repetitive reading of drawings: schedules, counts, checks. That is where software earns trust.</p></div>
+      <div class="item bar-top"><span class="n">REFRAME 2 — OCT 25</span><h3>Not a detail library</h3>
+        <p>My first direction was a library of construction details. I dropped it after looking at where the office's knowledge lives: in 2D unit plans. The unit schedule is the document rebuilt most often by hand.</p></div>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:20px;min-height:0">
+      <figure style="margin:0;display:flex;flex-direction:column;min-height:0">
+        <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/coupe-library.jpg" alt="coupe, October 25: a library of construction details, wall and floor sections filtered by code part, condition, structure and fire and sound ratings"></div>
+        <figcaption class="cap"><span class="mono" style="margin-right:10px">Dropped</span>coupe, October 25 morning: the detail library, wall sections filtered by condition, structure and rating.</figcaption>
+      </figure>
+      <figure style="margin:0;display:flex;flex-direction:column;min-height:0">
+        <div class="shot" style="flex:1;min-height:0"><img src="assets/frank/fitte-units.jpg" alt="fitte, October 25: the level 5 floor plan with unit 501 selected, beside its unit schedule row and details"></div>
+        <figcaption class="cap"><span class="mono" style="margin-right:10px">Kept</span>fitte, October 25: the unit plan and its schedule, read from the sheet A-205.</figcaption>
+      </figure>
+    </div>
   </div>
-  <div class="tags" style="margin-top:56px"><span>Construction detail library</span><span>→</span><span class="on">Unit plans and the schedule</span><span>→</span><span>Plans against the model</span></div>
+  <div class="tags" style="margin-top:28px"><span>Construction detail library</span><svg class="ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span class="on">Unit plans and the schedule</span><svg class="ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg><span>Plans against the model</span></div>
 </div>
 </section>
 
@@ -783,6 +797,24 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <div class="sets"><div class="set"><span class="k">Which product</span><p><span class="n">01</span>Direction</p></div><div class="set"><span class="k">What the city asks</span><p><span class="n">02</span>Codes</p></div></div>
       <div class="links"><a href="https://cafitte-prototype1.vercel.app/prototypes/index.html" target="_blank" rel="noopener">Open prototype 1 <span class="mono">cafitte-prototype1.vercel.app</span><svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
     </div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ prototype 1 — annotated screen -->
+<section class="s" data-sec="Process — Prototype 1">
+<div class="b" style="padding-top:72px">
+  <p class="k">Prototype 1 — Direction B</p>
+  <h2 style="font-size:44px">The plan and the model on one screen, with the gap between them named.</h2>
+  <div class="shot full"><img src="assets/frank/p1-plateforme-b.jpg" alt="Prototype 1, direction B: the type floor plan beside the SketchUp massing, with unit 9 selected and its 240 mm window gap measured">
+    <span class="mk" style="--x:32%;--y:8%">1</span>
+    <span class="mk" style="--x:12.5%;--y:34%">2</span>
+    <span class="mk" style="--x:91.5%;--y:40.5%">3</span>
+  </div>
+  <div class="notes">
+    <p><span class="mn">1</span><b>Both drawings, or one.</b>Plan 2D, Volumétrie 3D, or the two side by side on the same unit.</p>
+    <p><span class="mn">2</span><b>A unit is a row or a gap.</b>Units with a measured area, and units carrying an « écart » between the two drawings.</p>
+    <p><span class="mn">3</span><b>The gap is a decision.</b>1 800 against 1 560 mm, since R03: correct the plan, correct the model, or keep it.</p>
   </div>
 </div>
 </section>
@@ -899,6 +931,24 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 </div>
 </section>
 
+<!-- ============================================================ prototype 2 — annotated screen -->
+<section class="s" data-sec="Process — Prototype 2">
+<div class="b" style="padding-top:72px">
+  <p class="k">Prototype 2 — Direction C</p>
+  <h2 style="font-size:44px">One floor of the permit set, with the other trades stacked on it.</h2>
+  <div class="shot full"><img src="assets/frank/p2-wireframe-c3.jpg" alt="Prototype 2: level 5 with the unit and area table, the 2D plan, the 3D model and the comments">
+    <span class="mk" style="--x:33.3%;--y:4.7%">1</span>
+    <span class="mk" style="--x:50%;--y:33%">2</span>
+    <span class="mk" style="--x:67.7%;--y:53%">3</span>
+  </div>
+  <div class="notes">
+    <p><span class="mn">1</span><b>One floor at a time.</b>Eight levels and the roof, each its own screen, counted from the same drawings.</p>
+    <p><span class="mn">2</span><b>The other trades as layers.</b>Surveyor, architecture, landscape, electrical, drainage, distribution, ventilation, turned on over the plan.</p>
+    <p><span class="mn">3</span><b>Pick a unit once.</b>501 selected in the table is 501 on the plan and 501 on the model.</p>
+  </div>
+</div>
+</section>
+
 <!-- ============================================================ 19 test round 2 -->
 <section class="s" data-sec="Process — Prototype 2">
 <div class="b">
@@ -908,7 +958,10 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <div class="cols c5-7" style="margin-top:56px">
     <div class="q"><blockquote>Both technicians focused on usability and workflow details rather than new features.</blockquote><cite>Central finding, prototype 2 testing notes</cite>
       <p style="margin-top:28px">So prototype 3 added little. It made what was there behave the way an architect expects.</p></div>
-    <div class="slot" style="min-height:420px"><span class="k">Image</span><span>Test session: Benoît or Guy using prototype 2</span></div>
+    <figure style="margin:0;display:flex;flex-direction:column;min-height:0">
+      <div class="shot" style="aspect-ratio:4/3"><img src="assets/frank/tl-feedback2.jpg" alt="Two people at the office counter, prototype 2 open on the laptop, a printed set beside it" style="object-position:50% 28%"></div>
+      <figcaption class="cap">Test of prototype 2 at the office counter, October 28, with the permit set the screen was built from.</figcaption>
+    </figure>
   </div>
 </div>
 </section>
