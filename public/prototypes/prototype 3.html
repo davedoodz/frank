@@ -183,9 +183,13 @@ body{background:var(--page);color:var(--ink);font-size:13px;line-height:1.45;-we
 .tabs .crumb:hover{color:var(--ink)}
 .tabs .crumb.ech{padding:0 8px;height:24px;border-radius:7px;margin-left:2px}
 .tabs .crumb.ech:hover{background:var(--fill-2)}
-.tabs .crumb.ech .late{display:inline-flex;align-items:center;justify-content:center;min-width:15px;height:15px;
-  padding:0 4px;border-radius:8px;background:var(--rouge-soft,#f7e8e4);color:var(--rouge,#b4442f);
-  font-size:10px;font-weight:600}
+.tabs .crumb.ech .late{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;
+  padding:0 4px;border-radius:8px;background:#fff;color:#111;box-shadow:inset 0 0 0 1px var(--line);
+  font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}
+/* The schedule is the one door out of every screen, so it reads at full
+   strength rather than as a dimmed crumb; open, it is lit like a tab. */
+.tabs .crumb.ech{color:var(--ink);font-weight:500}
+.tabs .crumb.ech.cur{background:var(--fill)}
 .tabs .crumb.on{cursor:default}
 .tabs .crumb.on{color:var(--ink);font-weight:500}
 .tabs .grp{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
@@ -576,7 +580,25 @@ body.tdrag,body.tdrag *{cursor:grabbing !important}
 .ftbl.open thead tr:hover th{background:#000}
 .ftbl td:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;width:100%}
 .ftbl .fsw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:7px;vertical-align:-1px}
-.ftbl .fno{display:inline-block;min-width:16px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.ftbl .fno{display:inline-block;min-width:21px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+/* The dropdown at the end of a material row, and the sheet it opens. */
+.ftbl th.fdd,.ftbl td.fdd{width:26px;padding-left:0;padding-right:2px;text-align:right}
+.ftbl .fddb{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:5px;color:var(--ink-3);cursor:pointer}
+.ftbl .fddb:hover{background:var(--fill);color:var(--ink)}
+.ftbl .fddb svg{width:14px;height:14px}
+.ftbl tr.fopen td{border-bottom-color:transparent}
+.ftbl tr.fsheet td{padding:2px 6px 12px;background:none;white-space:normal;max-width:none;overflow:visible}
+.fsh{display:flex;gap:12px;align-items:flex-start}
+.fimg{flex:0 0 72px;width:72px;height:72px;border-radius:4px;object-fit:cover;display:block;border:1px solid var(--line-2)}
+.fimg.fit{object-fit:contain;background:#fff}
+.finfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.fgrid{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12px}
+.fgrid .fk{color:var(--ink-3)}
+.fgrid .fv{color:var(--ink)}
+.fchk{display:flex;gap:6px;align-items:center;font-size:11.5px;color:#9a5b00}
+.fchk svg{width:13px;height:13px;flex:0 0 auto}
+.flinks{display:flex;flex-wrap:wrap;gap:6px}
+.flinks a{text-decoration:none}
 body.elev .mtools{display:none}
 [data-theme="dark"] .tbl tr.on td{background:#2b3313}
 /* A figure and its head belong on one line: a wrapped "pi² total" stops
@@ -642,7 +664,11 @@ body.elev .mtools{display:none}
    two rows never argue over which one is the filter. */
 .frame[data-chrome="black"] .tabs button[aria-current="true"]{background:#fff;color:#141416;font-weight:600}
 .frame[data-chrome="black"] .tabs .crumb{color:rgba(255,255,255,.58)}
+.frame[data-chrome="black"] .tabs .crumb.ech{color:rgba(255,255,255,.92)}
 .frame[data-chrome="black"] .tabs .crumb.ech:hover{background:rgba(255,255,255,.1);color:#fff}
+.frame[data-chrome="black"] .tabs .crumb.ech.cur{background:#fff;color:#111}
+.frame[data-chrome="black"] .tabs .crumb.ech .late{box-shadow:none}
+.frame[data-chrome="black"] .tabs .crumb.ech.cur .late{background:#111;color:#fff}
 .frame[data-chrome="black"] .tabs .crumb.on{color:#fff;font-size:13px}
 .frame[data-chrome="black"] .tabs .div,
 .frame[data-chrome="black"] .tabs .sep{background:rgba(255,255,255,.16)}
@@ -830,6 +856,10 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   border-radius:5px;color:var(--ink-3);cursor:pointer}
 .lcard .hd .x:hover{background:var(--fill);color:var(--ink)}
 .lcard .hd .x svg{width:14px;height:14px}
+/* The card on loan is lighter than the one that was asked for, so which of
+   the two the pointer is responsible for is never in doubt. */
+.lcard[data-peek]{border-style:dashed;box-shadow:0 4px 14px rgba(17,17,18,.10)}
+.lcard[data-peek] .hd .x{display:none}
 .lcard .fn{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--ink-2);
   word-break:break-all}
 .lcard .docbtn{display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;
@@ -848,14 +878,35 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 /* The previous documents hang under their row, newest first: the
    revision, the file, the date. */
 .lpast{display:flex;flex-direction:column;border-top:1px solid var(--line-2);background:var(--fill-2)}
-.lpast .pd{display:grid;grid-template-columns:auto 1fr;column-gap:7px;row-gap:1px;
-  padding:5px 8px 5px 10px;cursor:pointer}
+.lpast .pd{display:grid;grid-template-columns:auto 1fr;column-gap:8px;row-gap:1px;
+  padding:6px 8px 6px 9px;cursor:pointer}
 .lpast .pd + .pd{border-top:1px solid var(--line)}
 .lpast .pd:hover{background:var(--fill)}
-.lpast .tg{grid-row:span 2;align-self:center;font-family:var(--mono);font-size:10.5px;color:var(--ink-2);
-  border:1px solid var(--line-2);border-radius:999px;padding:0 6px;background:var(--card)}
-.lpast .pf{font-family:var(--mono);font-size:10.5px;color:var(--ink);overflow:hidden;
+.lpast .fglyph{grid-row:span 2;align-self:center}
+.lpast .pf{font-family:var(--mono);font-size:10.5px;color:var(--ink);font-weight:500;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
+/* The file glyph: a page with its kind on a band. */
+.fglyph{width:24px;height:28px;flex:0 0 24px;color:var(--ink-3);overflow:visible}
+.fglyph .band{fill:var(--ink)}
+.fglyph.pdf .band{fill:#c8372d}
+.fglyph text{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:7.4px;fill:#fff;letter-spacing:.03em}
+.lcard .fn{display:flex;align-items:center;gap:7px}
+.lcard .fn > span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.lcard .fn .fglyph{width:19px;height:22px;flex:0 0 19px}
+.lcard .fn.swapped{animation:fnswap .9s ease}
+@keyframes fnswap{0%{background:var(--vert);color:var(--vert-ink)}100%{background:transparent}}
+/* The swap, mimicked: the sheet is wiped from the top and drawn back in
+   behind a moving line, as if the new file were being read. Nothing stays
+   on the drawing once it is done. */
+.swapfx{position:absolute;inset:0;pointer-events:none;z-index:40;background:var(--card);
+  animation:swapveil .85s cubic-bezier(.4,0,.2,1) forwards}
+.swapfx::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--ink);
+  animation:swapline .85s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes swapveil{0%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(100% 0 0 0)}}
+@keyframes swapline{0%{top:0;opacity:.9}100%{top:100%;opacity:0}}
+.lay.swapin{animation:layin .85s cubic-bezier(.4,0,.2,1)}
+@keyframes layin{0%{clip-path:inset(0 0 100% 0)}100%{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion: reduce){.swapfx,.swapfx::after,.lay.swapin,.lcard .fn.swapped{animation-duration:.01s}}
 .lpast .pdt{font-size:10.5px;color:var(--ink-3)}
 /* The export menu hangs off the table's header, right-aligned to the
    button that opens it so it never leaves the pane. */
@@ -882,7 +933,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
   border:1.5px solid var(--ink);transform:translateX(-50%);box-shadow:0 1px 2px rgba(0,0,0,.18)}
 .opval{min-width:32px;text-align:right;color:var(--ink-2);font-variant-numeric:tabular-nums}
 /* North and the corner view stand clear of the strip, not under it. */
-.zone[data-zone="plan"] .north,.zone[data-zone="plan"] .mini{right:154px}
+.zone[data-zone="plan"] .north,.zone[data-zone="plan"] .mini{right:114px}
 /* One typology, one colour, laid on the unit it belongs to. */
 .plan .utagsvg{position:absolute;inset:0;width:100%;height:100%;z-index:14;pointer-events:none;overflow:visible}
 .plan .utagsvg polygon{opacity:.45;mix-blend-mode:multiply}
@@ -896,15 +947,20 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .vp{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab;background:#fff}
 .vp.drag{cursor:grabbing}
 
-/* The zoom is a fixture, not a hint: a flat opaque column against the outer
-   edge of the pane, in the flow, so it takes its own 40 px and never covers
-   a line of the drawing. Nothing about it fades. */
+/* The zoom floats in the bottom-left corner of the drawing: − 100 % +, on
+   white, framed like the drag tools. It no longer takes a column, so the
+   drawing runs to the pane's edge. Centred, it ran into the corner view
+   once the plan pane was narrow; the corner opposite the corner view is
+   the one that is always free. On the model the axes stand on top of it. */
 .pb.zone{position:relative}
-.zcol{flex:0 0 40px;display:flex;flex-direction:column;align-items:center;gap:5px;
-  padding:7px 0;background:var(--paper);border-left:1px solid var(--line-2);z-index:4}
-.zslider{appearance:slider-vertical;-webkit-appearance:slider-vertical;writing-mode:vertical-lr;
-  direction:rtl;width:18px;flex:1;min-height:50px;accent-color:var(--ink);cursor:ns-resize;margin:0}
-.zread{font-size:10.5px;color:var(--ink);font-variant-numeric:tabular-nums;text-align:center}
+.zpill{position:absolute;bottom:10px;left:10px;z-index:7;
+  display:flex;align-items:center;height:34px;padding:0 2px;background:#fff;
+  border:1px solid var(--line);border-radius:8px;user-select:none}
+.zpill .zb{width:30px;height:30px;flex:0 0 30px;border-radius:6px;color:var(--ink)}
+.zpill .zb svg{width:16px;height:16px}
+.zread{min-width:46px;font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;text-align:center}
+.zread.fit{cursor:pointer}
+[data-fi="low"] .zpill{display:none}
 .zb{width:26px;height:26px;display:flex;align-items:center;justify-content:center;
   color:var(--ink-2);cursor:pointer;flex:0 0 26px}
 .zb:hover{background:var(--fill);color:var(--ink)}
@@ -916,13 +972,15 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 /* The tool in use is the one solid thing in the corner. */
 .mtools .zb.on,.mtools .zb.on:hover{background:#111;color:#fff}
 [data-fi="low"] .mtools{display:none}
-/* The corner view, beside the column, never under it: the whole drawing at
+/* The corner view, bottom right, never under the zoom: the whole drawing at
    a glance and the rectangle of what is on screen. Flat, framed, opaque. */
-.mini{position:absolute;right:50px;bottom:10px;z-index:5;width:132px;background:var(--paper);
+.mini{position:absolute;right:10px;bottom:10px;z-index:5;width:132px;background:var(--paper);
   border:1px solid var(--line);user-select:none}
 .mini .mi{position:relative;display:block;cursor:crosshair;overflow:hidden}
-.mini img{display:block;width:100%;filter:contrast(.72);opacity:.85}
-.mini .mrect{position:absolute;border:1.5px solid var(--ink);background:rgba(17,17,18,.08)}
+/* The plan is shown as drawn: no filter, no fade, no shade inside the
+   rectangle. The frame alone says what is on screen. */
+.mini img{display:block;width:100%}
+.mini .mrect{position:absolute;border:1.5px solid var(--ink);background:none}
 [data-fi="low"] .mini{display:none}
 /* The model's corner view is a live render, not a picture: it keeps the
    building's proportions and is never greyed, because the marker inside it
@@ -936,7 +994,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 .mini[data-mini="model"] canvas[data-mini3d]{background:none}
 /* North, top right of the drawing: a ring, a needle, a letter. Nothing but
    line work, so it reads over a white sheet and over a grey render alike. */
-.north{position:absolute;right:50px;top:10px;z-index:5;width:34px;height:50px;
+.north{position:absolute;right:10px;top:10px;z-index:5;width:34px;height:50px;
   pointer-events:none;overflow:visible}
 .north circle{fill:#fff;stroke:var(--ink);stroke-width:1.7}
 .north polygon{fill:none;stroke:var(--ink);stroke-width:1.7}
@@ -1033,7 +1091,7 @@ body.ldrag,body.ldrag *{cursor:grabbing !important}
 /* The three axes as the camera sees them, in the corner the drawing never
    uses. Red X, green Y, blue Z — the convention every host application the
    file passes through already draws. */
-.axes{position:absolute;left:10px;bottom:10px;z-index:5;width:62px;height:62px;
+.axes{position:absolute;left:10px;bottom:50px;z-index:5;width:62px;height:62px;
   pointer-events:none}
 .axes line{stroke-width:1.8;stroke-linecap:round}
 .axes line[data-ax="x"]{stroke:#d24b3e}
@@ -1398,6 +1456,8 @@ const V = {
   exportMenu: false,  /* the format list on the table's header */
   layMenu: false,
   layHist: false,     /* the previous-documents list inside that menu */
+  layCur: {},         /* per drawing, which of its documents is laid on (0 = issued) */
+  laySwap: null,      /* the drawing whose document was just swapped, for the card's flash */
 };
 
 const icon = (n) => `<svg class="lu"><use href="#lu-${n}"></use></svg>`;
@@ -2128,44 +2188,71 @@ const layStripHTML = () => `<div class="lstrip hi" data-lstrip>
    done with it, and how strongly it is laid on the sheet. Nothing about
    the pile — that is the badge's job. */
 /* The documents this sheet replaced, newest first. Sample issues for the
-   prototype: the earlier revisions are named, not read from a drawing. */
+   prototype: named, not read from an archive. The names differ at their
+   head, the way an office's folder really does — a coordination set, a
+   permit PDF, an early sketch — so they are told apart at a glance. */
 const LAY_PAST = {
-  arp: [["2026-08-19", "19 août 2026"], ["2026-05-12", "12 mai 2026"], ["2026-02-03", "3 févr 2026"]],
-  pay: [["2026-05-22", "22 mai 2026"], ["2026-03-11", "11 mars 2026"], ["2025-12-04", "4 déc 2025"]],
+  plan: (n) => [
+    { file: `COORD-MEP_A-${200 + n}_NIV${n}.dwg`, date: "3 oct 2026" },
+    { file: `PERMIS_PLAN-ETAGE-${n}_EMIS.pdf`, date: "29 août 2026" },
+    { file: `ESQUISSE_ETAGE-${n}_CLIENT.dwg`, date: "14 juil 2026" }],
+  arp: () => [
+    { file: "CERTIFICAT-LOCALISATION_2026-08-19.pdf", date: "19 août 2026" },
+    { file: "RELEVE-TOPO_2026-05-12.dwg", date: "12 mai 2026" },
+    { file: "PIQUETAGE_2026-02-03.dwg", date: "3 févr 2026" }],
+  pay: () => [
+    { file: "PLANTATION_2026-05-22.pdf", date: "22 mai 2026" },
+    { file: "CONCEPT-PAYSAGER_2026-03-11.pdf", date: "11 mars 2026" },
+    { file: "ESQUISSE-PAYSAGE_2025-12-04.dwg", date: "4 déc 2025" }],
 };
-const PLAN_PAST_DATES = ["3 oct 2026", "29 août 2026", "14 juil 2026"];
-function layHistory(k) {
-  const file = LAYDOC[k].file();
-  const [stem, ext] = [file.replace(/\.[^.]+$/, ""), file.split(".").pop()];
-  if (k === "plan") {
-    const n = Number(String(sheet().rev).slice(1)) || 4;
-    return [1, 2, 3].map((i) => {
-      const rev = `R${String(n - i).padStart(2, "0")}`;
-      return { tag: rev, file: `${stem}_${rev}.${ext}`, date: PLAN_PAST_DATES[i - 1] };
-    });
-  }
-  if (LAY_PAST[k]) return LAY_PAST[k].map(([iso, date], i) => ({
-    tag: `v${3 - i}`, file: file.replace(/\d{4}-\d{2}-\d{2}/, iso), date }));
-  return [3, 2, 1].map((em) => ({ tag: `Ém. ${em}`, file: `${stem}_EM${em}.${ext}`, date: "émission précédente" }));
+/* Every document a drawing has had, the issued one first. */
+function layDocs(k) {
+  const D = LAYDOC[k];
+  const now = { file: D.file(), date: D.date() };
+  const stem = now.file.replace(/\.[^.]+$/, "");
+  const past = LAY_PAST[k] ? LAY_PAST[k](paneLevel())
+    : [{ file: `COORD_${stem}.pdf`, date: "émission de coordination" },
+       { file: `REV-B_${stem}.dwg`, date: "révision B" },
+       { file: `PRELIM_${stem}.pdf`, date: "émission préliminaire" }];
+  return [now, ...past];
 }
+/* The one laid on the sheet now: the issued document unless another was
+   picked from the list. */
+const layDoc = (k) => layDocs(k)[V.layCur[k] || 0];
+const extOf = (file) => file.split(".").pop().toLowerCase();
+/* A file reads by its kind before its name: a page with the extension on
+   a band, ink for a drawing, red for a PDF. */
+const fileGlyph = (file) => {
+  const ext = extOf(file);
+  return `<svg class="fglyph ${ext}" viewBox="0 0 26 30" aria-hidden="true">
+    <path d="M6.5 1h11l6.5 6.5v20.5a1 1 0 0 1-1 1h-16.5a1 1 0 0 1-1-1v-26a1 1 0 0 1 1-1z" fill="var(--card)" stroke="currentColor" stroke-width="1.2"/>
+    <path d="M17.5 1v6.5h6.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+    <rect class="band" x="0" y="14" width="21" height="10" rx="1.6"/>
+    <text x="10.5" y="21.6" text-anchor="middle">${ext.toUpperCase()}</text></svg>`;
+};
 
-function layCardHTML() {
-  if (!V.layCard) return "";
-  const k = layKeys().includes(V.layPick) ? V.layPick : "plan";
+/* `peek` draws the card for a drawing that is only being hovered: the same
+   card, marked so it can be told from the pinned one and never kept. */
+function layCardHTML(peekKey = null) {
+  if (!peekKey && !V.layCard) return "";
+  const k = peekKey || (layKeys().includes(V.layPick) ? V.layPick : "plan");
   const D = LAYDOC[k], op = Math.round(V.lay[k].opacity);
-  const past = layHistory(k);
-  return `<div class="lcard" data-lcard data-anchor="${k}">
-    <div class="hd"><b>${D.disc}</b><span class="dt">${D.date()}</span>
+  const docs = layDocs(k), cur = V.layCur[k] || 0, doc = docs[cur];
+  const past = docs.map((d, i) => ({ ...d, i })).filter((d) => d.i !== cur);
+  const pdf = extOf(doc.file) === "pdf";
+  const menu = !peekKey && V.layMenu, hist = !peekKey && V.layHist;
+  return `<div class="lcard" data-lcard data-anchor="${k}" ${peekKey ? "data-peek" : ""}>
+    <div class="hd"><b>${D.disc}</b><span class="dt">${doc.date}</span>
       <span class="x" ${act("lclose")} title="Fermer">${icon("x")}</span></div>
-    <div class="fn">${D.file()}</div>
+    <div class="fn ${V.laySwap === k ? "swapped" : ""}">${fileGlyph(doc.file)}<span>${doc.file}</span></div>
     <span class="docbtn" ${act("ldoc")}>${icon("file")}Document ${icon("chevron-down")}</span>
-    ${V.layMenu ? `<div class="lmenu">
-      <span class="mi" ${act(D.act, k)}>Ouvrir dans ${D.app}</span>
+    ${menu ? `<div class="lmenu">
+      <span class="mi" ${act(pdf ? "pdfview" : "autocad", k)}>Ouvrir dans ${pdf ? "Acrobat" : "AutoCAD"}</span>
       <span class="mi" ${act("lswap", k)}>Changer le document…</span>
-      <span class="mi hist ${V.layHist ? "open" : ""}" ${act("lhist", k)} aria-expanded="${V.layHist}">
-        Voir les documents précédents (${past.length})${icon("chevron-down")}</span>
-      ${V.layHist ? `<div class="lpast">${past.map((p, i) => `<span class="pd" ${act("lold", `${k}|${i}`)} title="${p.file}">
-        <span class="tg">${p.tag}</span><span class="pf">${p.file}</span><span class="pdt">${p.date}</span></span>`).join("")}</div>` : ""}
+      <span class="mi hist ${hist ? "open" : ""}" ${act("lhist", k)} aria-expanded="${hist}">
+        ${cur ? "Voir les autres documents" : "Voir les documents précédents"} (${past.length})${icon("chevron-down")}</span>
+      ${hist ? `<div class="lpast">${past.map((p) => `<span class="pd" ${act("lold", `${k}|${p.i}`)} title="Remplacer par ${p.file}">
+        ${fileGlyph(p.file)}<span class="pf">${p.file}</span><span class="pdt">${p.i ? p.date : `${p.date} — émis`}</span></span>`).join("")}</div>` : ""}
     </div>` : ""}
     <div class="oprow"><span class="oplbl">${icon("blend")}Opacité</span>
       <span class="optrack" data-lop="${k}" title="Opacité ${LAYDOC[k].short} — ${op}%">
@@ -2173,6 +2260,89 @@ function layCardHTML() {
         <span class="knob" style="left:${op}%"></span></span>
       <span class="opval">${op}%</span></div>
   </div>`;
+}
+
+/* Hovering a drawing's thumbnail shows its card for as long as the pointer
+   is on the thumbnail or on the card. A click — on the thumbnail, or
+   anywhere in the card — is what keeps it. A card that was asked for is
+   never taken away by the pointer passing over a neighbour: the hovered
+   card is drawn beside the kept one, not in its place. The peek is written
+   straight into the pane, not through render(): a full redraw per hover
+   would rebuild the sheet and every thumbnail. */
+let layPeek = null;       // the card on loan, while hovered
+let layPeekTimer = 0;     // the grace for crossing from thumbnail to card
+const keepLayPeek = () => { clearTimeout(layPeekTimer); layPeekTimer = 0; };
+function showLayPeek(k) {
+  keepLayPeek();
+  if (layPeek?.isConnected && layPeek.dataset.anchor === k) return;
+  clearLayPeek();
+  const strip = document.querySelector("[data-lstrip]");
+  if (!strip) return;
+  const host = strip.parentElement;
+  host.insertAdjacentHTML("beforeend", layCardHTML(k));
+  layPeek = host.querySelector(":scope > [data-lcard][data-peek]");
+  placeLayCard();
+}
+function clearLayPeek() {
+  keepLayPeek();
+  layPeek?.remove();
+  layPeek = null;
+  placeLayCard();
+}
+document.addEventListener("pointerover", (e) => {
+  if (e.pointerType === "touch" || document.body.classList.contains("dragging")) return;
+  const tile = e.target.closest?.("[data-ltile]");
+  if (tile) {
+    const k = tile.dataset.ltile;
+    // The pinned card is already this one: nothing to lend.
+    if (V.layCard && V.layPick === k && !layPeek) return;
+    if (V.layCard && V.layPick === k) { clearLayPeek(); return; }
+    showLayPeek(k);
+    return;
+  }
+  if (e.target.closest?.("[data-lcard][data-peek]")) { keepLayPeek(); return; }
+  // The pointer crosses a few pixels of sheet between thumbnail and card.
+  if (layPeek && !layPeekTimer) layPeekTimer = setTimeout(() => { layPeekTimer = 0; clearLayPeek(); }, 160);
+});
+/* Touching the borrowed card keeps it: it becomes the pinned card, and the
+   one it stood in for is let go. The action under the pointer then runs on
+   the card as it now is. */
+document.addEventListener("pointerdown", (e) => {
+  const card = e.target.closest?.("[data-lcard][data-peek]");
+  if (!card) return;
+  V.layPick = card.dataset.anchor;
+  V.layCard = true;
+  V.layMenu = false;
+  V.layHist = false;
+  /* The borrowed card becomes the kept one, and the card it was shown
+     beside gives way: one kept card at a time. */
+  card.parentElement.querySelectorAll(":scope > [data-lcard]:not([data-peek])").forEach((el) => el.remove());
+  card.removeAttribute("data-peek");
+  layPeek = null;
+  placeLayCard();
+}, true);
+
+/* Plays the swap on the sheet once the screen is redrawn with the new
+   document: the architecture is veiled and redrawn from the top; an
+   overlay drawing is revealed from the top. */
+function swapFx(k) {
+  const zone = document.querySelector('[data-zone="plan"]');
+  if (!zone) return;
+  if (k === "plan") {
+    const plan = zone.querySelector(".plan");
+    if (!plan) return;
+    const fx = document.createElement("div");
+    fx.className = "swapfx";
+    plan.append(fx);
+    fx.addEventListener("animationend", () => fx.remove(), { once: true });
+    return;
+  }
+  const el = zone.querySelector(`.lay[data-lay="${k}"]`);
+  if (!el) return;
+  el.classList.remove("swapin");
+  void el.offsetWidth;
+  el.classList.add("swapin");
+  el.addEventListener("animationend", () => el.classList.remove("swapin"), { once: true });
 }
 
 /* ------------------------------------------------------- the conflicts
@@ -2450,10 +2620,10 @@ const HOSTS = { plan: ["autocad", "Ouvrir dans AutoCAD"], model: ["sketchup", "O
 
 function hostButton(kind) {
   const [a, label] = HOSTS[kind];
-  /* Solid: handing the drawing back to its application is the one action
-     on a drawing pane, so it carries the weight of the primary button. */
-  return `<span class="btnw solid" ${act(a)} title="${label}">${icon("external-link")}
-    <span class="lo bar" style="width:46px;background:#fff;opacity:.6"></span><span class="hi">${label}</span></span>`;
+  /* The same quiet button as Exporter on the list: a pane header holds
+     tools, and a black one there outweighed the drawing under it. */
+  return `<span class="btnw sm" ${act(a)} title="${label}">${icon("external-link")}
+    <span class="lo bar" style="width:46px"></span><span class="hi">${label}</span></span>`;
 }
 
 /* ------------------------------------------------------------ code cards
@@ -3015,7 +3185,9 @@ function tabsHTML() {
      leaves the path on the left and sits at the right end of the strip with
      the other things that are about leaving: it is a door out, like Partager
      is a door out, and the path reads project → screen without a detour. */
-  const ech = `<span class="crumb ech hi" data-screen="Échéancier" style="margin-left:auto;flex:0 0 auto"
+  const echOn = V.screen === "Échéancier";
+  const ech = `<span class="crumb ech hi ${echOn ? "cur" : ""}" data-screen="Échéancier" aria-current="${echOn}"
+      style="margin-left:auto;flex:0 0 auto"
       title="Échéancier de l'atelier — ce qui est dû, tous les projets">${icon("calendar-check")}Échéancier${late
         ? `<span class="late">${late}</span>` : ""}</span>`;
   if (studio) {
@@ -3026,7 +3198,7 @@ function tabsHTML() {
         <span class="hi">${label}</span></button>`;
     items = `<span class="crumb on hi">${icon("folder")}Tous les projets</span>
       <span class="div"></span>
-      <div class="views">${stab("Projets", "Projets")}${stab("Échéancier", "Échéancier")}</div>
+      <div class="views">${stab("Projets", "Projets")}</div>
       <span class="sp"></span>`;
   } else if (!views.length && mode !== "Two rows, no rail") {
     /* A screen that reads on one page has nothing to filter, so the strip
@@ -3086,7 +3258,7 @@ function tabsHTML() {
   return `<div class="tabs rg ${solo("nav")}" data-rg="${top ? "navigation + onglets" : "onglets"}" data-fi="${fiOf("nav")}"
        data-style="${V.nav.tabStyle}" data-align="${V.nav.tabAlign}" data-labels-mode="${V.nav.labels}">
     ${top ? `<span class="btnw" style="margin-right:8px">${icon("box")}<span class="hi">ça fitte</span></span>` : ""}
-    ${items}${studio ? "" : ech}${share}
+    ${items}${ech}${share}
   </div>${row2}`;
 }
 
@@ -3188,16 +3360,14 @@ function contentHTML() {
   const body = {
     "Unités": () => {
       const unit = (selRow("Unités") || ["—"])[0];
-      /* The zoom stands against the outer edge of each pane: flat, opaque,
-         always there. Vertical, because the course it runs is vertical. */
-      const zcol = (side) => `<div class="zcol" data-zcol="${side}">
-        <span class="zb" ${act("zstep", side + ":+")} title="Agrandir">${icon("plus")}</span>
-        <input class="zslider" type="range" ${side === "plan"
-          ? `min="${ZMIN}" max="${ZMAX}" step="1" value="${V.zoom}" data-zoom aria-label="Zoom du plan"`
-          : `min="0" max="100" step="1" value="${V.mzoom}" data-mzoom aria-label="Zoom de la maquette"`}>
-        <span class="zb" ${act("zstep", side + ":-")} title="Reculer">${icon("minus")}</span>
+      /* The zoom is three things on one line, at the foot of each pane:
+         step out, the percentage, step in. The wheel and the pinch do the
+         rest; a slider was a long control for a number read at a glance. */
+      const zoomPill = (side) => `<div class="zpill" data-zpill="${side}">
+        <span class="zb" ${act("zstep", side + ":-")} title="Réduire">${icon("minus")}</span>
         <span class="zread hi ${side === "plan" ? "fit" : ""}" ${side === "plan"
           ? `data-zread ${act("zfit")} title="Revoir la feuille entière"` : "data-mread"}>${side === "plan" ? V.zoom : V.mzoom}%</span>
+        <span class="zb" ${act("zstep", side + ":+")} title="Agrandir">${icon("plus")}</span>
       </div>`;
       /* The corner view: the drawing whole, small. On the plan it is the
          sheet as a picture, with the rectangle of what is on screen, dragged
@@ -3263,14 +3433,14 @@ function contentHTML() {
                 <span class="lo"></span><span class="hi">${note}</span>
                 ${planVector() ? `<canvas class="sheetpdf" data-sheetpdf data-pdf-url="${sheet().pdf}"></canvas>` : ""}
                 ${layers}${unitMarkHTML()}${conflictMarkHTML()}${pinMarkHTML()}</div></div>
-              ${north("plan")}${mini("plan")}${zcol("plan")}${pinArmHTML()}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}${pinBubbleHTML()}</div>`
+              ${north("plan")}${mini("plan")}${zoomPill("plan")}${pinArmHTML()}${layStripHTML()}${layCardHTML()}${conflictCardHTML()}${pinBubbleHTML()}</div>`
           : `<div class="pb zone" style="padding:0;overflow:hidden;flex-direction:row;gap:0" data-zone="model">
               <div class="model3d" data-building-model data-state="loading" role="region"
                    aria-label="Maquette 3D interactive du Baldwin III" aria-busy="true">
                 <div class="model3d-status" data-model-status aria-live="polite">Chargement de la maquette…</div>
               </div>
               <div class="npins" data-npins></div>
-              ${mtools}${north("model")}${axes}${mini("model")}${zcol("model")}
+              ${mtools}${north("model")}${axes}${mini("model")}${zoomPill("model")}
             </div>`}
         </div>`;
       /* The 2D pane carries the surveyor's and the landscaper's sheets, which
@@ -3510,19 +3680,44 @@ function facadeTablesHTML() {
     const on = open?.face === face;
     const body = rows.map((r) => {
       const c = fm.category(r.n);
-      return `<tr class="${on && open.focus === r.n ? "on" : ""}" ${act("facmat", `${face}|${r.n}`)} title="${c.note}">
+      const key = `${face}|${r.n}`;
+      const sheet = V.matOpen?.[key];
+      return `<tr class="${on && open.focus === r.n ? "on" : ""} ${sheet ? "fopen" : ""}" ${act("facmat", key)} title="${c.note}">
         <td><span class="fsw" style="background:${c.color}"></span><span class="fno">${c.n}</span>${c.name}</td>
-        <td class="n">${fqNum(r.ft2)}</td><td class="n">${fqPct(r.ft2, total)}</td></tr>`;
+        <td class="n">${fqNum(r.ft2)}</td><td class="n">${fqPct(r.ft2, total)}</td>
+        <td class="fdd"><span class="fddb" ${act("matinfo", key)} role="button" aria-expanded="${Boolean(sheet)}"
+          title="${sheet ? "Masquer la fiche" : "Voir la fiche du produit"}">${icon(sheet ? "chevron-up" : "chevron-down")}</span></td></tr>
+        ${sheet ? `<tr class="fsheet"><td colspan="4">${materialSheetHTML(c)}</td></tr>` : ""}`;
     }).join("");
     return `<table class="tbl ftbl ${on ? "open" : ""}">
       <thead><tr ${act("facade", face)} title="${on ? "Revenir à la vue 3D" : `Voir l'élévation ${face} dans la maquette`}">
-        <th>${icon(on ? "eye" : "scan")}Façade ${face}</th><th class="n">pi²</th><th class="n">Part</th></tr></thead>
+        <th>${icon(on ? "eye" : "scan")}Façade ${face}</th><th class="n">pi²</th><th class="n">Part</th><th class="fdd"></th></tr></thead>
       <tbody>${body}</tbody>
-      <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td></tr></tfoot></table>`;
+      <tfoot><tr><td>Total</td><td class="n">${fqNum(total)}</td><td class="n">100 %</td><td class="fdd"></td></tr></tfoot></table>`;
   }).join("");
   return `<div class="fq-fac" data-facades>${head}${tables}
     <div class="fqn">aires lues dans la maquette 3D, élévation par élévation ; numéros de la légende des élévations${
       absent.length ? ` — absent de la maquette : ${absent.map((c) => `${c.n} ${c.name.toLowerCase()} (${c.note.split(" · ").pop()})`).join(", ")}` : ""}</div></div>`;
+}
+
+/* A material's sheet, opened under its row: the legend's swatch, then what
+   the specification gives (maker, colour, size) and the maker's page in a
+   new tab. Items the legend names no maker for have no link. */
+function materialSheetHTML(c) {
+  const line = (k, v) => (v ? `<div class="fk">${k}</div><div class="fv">${v}</div>` : "");
+  const pic = c.thumb
+    ? `<img class="fimg ${c.n === 7 ? "fit" : ""}" src="assets/materials/${c.thumb}.png" alt="${c.name}">`
+    : `<span class="fimg" style="background:${c.tile}"></span>`;
+  const host = (u) => new URL(u).hostname.replace(/^www\./, "");
+  const links = [
+    c.url ? `<a class="btnw sm" href="${c.url}" target="_blank" rel="noopener noreferrer">${icon("external-link")}<span class="hi">${c.maker} — ${host(c.url)}</span></a>` : "",
+    c.colourUrl ? `<a class="btnw sm" href="${c.colourUrl}" target="_blank" rel="noopener noreferrer">${icon("external-link")}<span class="hi">Nuancier Vicwest</span></a>` : "",
+  ].join("");
+  return `<div class="fsh">${pic}<div class="finfo">
+    <div class="fgrid">${line("Fabricant", c.maker)}${line("Couleur", c.colour)}${line("Format", c.size)}</div>
+    ${c.check ? `<div class="fchk">${icon("alert-triangle")}${c.check}</div>` : ""}
+    ${links ? `<div class="flinks">${links}</div>` : `<div class="fqn">aucun fabricant nommé à la légende</div>`}
+  </div></div>`;
 }
 
 /* What the viewer reads to draw an elevation, set with the list. A screen
@@ -4153,12 +4348,10 @@ function paintSheet() {
   const base = layoutSheet(el);
   clampPan(el.getBoundingClientRect(), V.zoom, base);
   if (plan) plan.style.transform = `translate(${V.pan.x}px,${V.pan.y}px) scale(${V.zoom / 100})`;
-  /* V.zoom runs through fractions while the sheet glides; the slider and
-     the percentage are read by a person, so they are rounded here rather
-     than quantising the motion itself. */
+  /* V.zoom runs through fractions while the sheet glides; the percentage
+     is read by a person, so it is rounded here rather than quantising the
+     motion itself. */
   const shown = Math.round(V.zoom);
-  const slider = document.querySelector("[data-zoom]");
-  if (slider && document.activeElement !== slider) slider.value = String(shown);
   const read = document.querySelector("[data-zread]");
   if (read) read.textContent = `${shown}%`;
   el.querySelectorAll(".umark polygon").forEach((r) => { r.style.strokeWidth = `${(1.6 / V.zoom * 100).toFixed(3)}px`; });
@@ -4326,17 +4519,31 @@ document.addEventListener("keydown", (e) => {
    the markup without a position, then measured to that tile's height.
    Measuring after the fact is the only way to follow a tile that moves
    when the pile is reordered. */
+/* Each card stands beside the thumbnail it belongs to. The kept card is
+   placed first and keeps its place; a hovered card that would land on top
+   of it is pushed clear, above or below, whichever side it came from. */
 function placeLayCard() {
-  const card = document.querySelector("[data-lcard]");
-  if (!card) return;
-  const zone = card.parentElement, strip = zone.querySelector("[data-lstrip]");
-  const tile = zone.querySelector(`[data-ltile="${card.dataset.anchor}"]`);
-  if (!tile || !strip) { card.style.display = "none"; return; }
-  const z = zone.getBoundingClientRect(), t = tile.getBoundingClientRect();
-  card.style.display = "";
-  card.style.right = `${z.right - strip.getBoundingClientRect().left + 8}px`;
-  card.style.top = `${Math.min(z.height - card.offsetHeight - 8,
-    Math.max(8, t.top - z.top + t.height / 2 - 30))}px`;
+  const cards = [...document.querySelectorAll("[data-lcard]")]
+    .sort((a, b) => (a.hasAttribute("data-peek") ? 1 : 0) - (b.hasAttribute("data-peek") ? 1 : 0));
+  const taken = [];
+  for (const card of cards) {
+    const zone = card.parentElement, strip = zone.querySelector("[data-lstrip]");
+    const tile = zone.querySelector(`[data-ltile="${card.dataset.anchor}"]`);
+    if (!tile || !strip) { card.style.display = "none"; continue; }
+    const z = zone.getBoundingClientRect(), t = tile.getBoundingClientRect();
+    card.style.display = "";
+    card.style.right = `${z.right - strip.getBoundingClientRect().left + 8}px`;
+    const h = card.offsetHeight;
+    const fit = (v) => Math.min(z.height - h - 8, Math.max(8, v));
+    let top = fit(t.top - z.top + t.height / 2 - 30);
+    for (const r of taken) {
+      if (top + h + 8 <= r.top || top >= r.top + r.h + 8) continue;
+      const below = top >= r.top;
+      top = fit(below ? r.top + r.h + 8 : r.top - h - 8);
+    }
+    taken.push({ top, h });
+    card.style.top = `${top}px`;
+  }
 }
 
 /* Opacity is dragged, not stepped. The value is written straight onto the
@@ -4685,23 +4892,10 @@ function wireViewport() {
    so the one listener re-centres whatever is on screen. */
 window.addEventListener("resize", () => paintSheet());
 
-/* The two sliders are the only zoom controls left, so each one is wired to
-   the thing it moves: the plan slider to the sheet transform, the model
-   slider to the camera distance the viewer module exposes. The model writes
-   back through an event, because orbiting with the mouse changes the same
-   number the slider shows. */
+/* The model's percentage follows the camera: orbiting and the wheel change
+   the same number the pill shows, so the viewer writes back through an
+   event (below) and the pill is painted from V.mzoom. */
 function wireZoomRails() {
-  const sheet = document.querySelector("[data-zoom]");
-  if (sheet) sheet.oninput = () => { zoomBy(Number(sheet.value)); paintSheet(); };
-  const cam = document.querySelector("[data-mzoom]");
-  if (cam) {
-    cam.value = String(V.mzoom);
-    cam.oninput = () => {
-      V.mzoom = Number(cam.value);
-      paintModelRead();
-      window.fitteModel?.writeZoom(V.mzoom);
-    };
-  }
   paintModelRead();
   wireMiniPlan();
 }
@@ -4759,8 +4953,6 @@ function paintModelRead() {
 window.addEventListener("fitte:model-zoom", (e) => {
   if (!Number.isFinite(e.detail)) return;
   V.mzoom = e.detail;
-  const cam = document.querySelector("[data-mzoom]");
-  if (cam && document.activeElement !== cam) cam.value = String(V.mzoom);
   paintModelRead();
 });
 /* ---------------------------------------------------------------- frame */
@@ -5353,6 +5545,11 @@ function onClick(e) {
       V.facade = V.facade?.face === value ? null : { face: value, focus: 0 };
       paintFacades();
       return;
+    /* A material's sheet opens under its row; the elevation is left as is. */
+    case "matinfo":
+      V.matOpen = { ...V.matOpen, [value]: !V.matOpen?.[value] };
+      paintFacades();
+      return;
     case "facmat": {
       const [face, n] = value.split("|");
       const focus = Number(n);
@@ -5679,16 +5876,23 @@ function onClick(e) {
     /* The list opens in place, under its row: the card stays the one
        place a drawing's documents are read. */
     case "lhist": V.layHist = !V.layHist; break;
+    /* Picking a document from the list lays it on the sheet in place of
+       the current one: the card's name and date change, and the drawing
+       redraws from the top so the swap is seen, not just read. */
     case "lold": {
       const [lk, i] = value.split("|");
-      const p = layHistory(lk)[Number(i)];
+      V.layCur[lk] = Number(i);
       V.layMenu = false; V.layHist = false;
-      say(`${p.file} — ouvert dans ${LAYDOC[lk].app}, en lecture seule.`);
-      break;
+      V.laySwap = lk;
+      render();
+      swapFx(lk);
+      say(`${layDoc(lk).file} — posé sur le plan.`);
+      setTimeout(() => { if (V.laySwap === lk) V.laySwap = null; }, 900);
+      return;
     }
     case "pdfview":
       V.layMenu = false;
-      say(`${LAYDOC[value].file()} — ouvert dans Acrobat.`);
+      say(`${layDoc(value).file} — ouvert dans Acrobat.`);
       break;
     case "mtool":
       V.mtool = value;
@@ -5698,9 +5902,8 @@ function onClick(e) {
       });
       window.fitteModel?.setTool(value);
       return;
-    /* The two steppers move the same numbers the sliders move, so they do
-       not go through render: the drawing must not be rebuilt to be pushed
-       one notch. */
+    /* The steppers move the zoom without going through render: the drawing
+       must not be rebuilt to be pushed one notch. */
     case "zfit": { V.zoom = 100; V.pan = { x: 0, y: 0 }; paintSheet(); return; }
     case "zstep": {
       const [side, dir] = value.split(":");
@@ -5710,8 +5913,6 @@ function onClick(e) {
         paintSheet();
       } else {
         V.mzoom = Math.max(0, Math.min(100, V.mzoom + k * 8));
-        const cam = document.querySelector("[data-mzoom]");
-        if (cam) cam.value = String(V.mzoom);
         paintModelRead();
         window.fitteModel?.writeZoom(V.mzoom);
       }
@@ -5776,7 +5977,7 @@ function onClick(e) {
       say(`Lien copié: ${value} — ${(V.dialog && V.dialog.right) || "Lecture et commentaires"}.`);
       break;
     case "autocad":
-      say(`Remise à AutoCAD: ${dwgName()} s'ouvre sur l'unité, la décision suit.`);
+      say(`Remise à AutoCAD: ${value && LAYDOC[value] ? layDoc(value).file : dwgName()} s'ouvre sur l'unité, la décision suit.`);
       break;
     case "sketchup":
       say(`Remise à SketchUp: ${V.docs.skp} s'ouvre sur ${viewOf("Unités").toLowerCase()}. Lecture seule.`);
