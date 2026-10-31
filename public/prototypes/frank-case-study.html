@@ -532,7 +532,8 @@ a.dep:hover{box-shadow:0 0 0 2px var(--vert)}
 [data-lh="Underline draws"] .links a:hover::after{transform:scaleX(1)}
 [data-lh="Green highlight"] .links a{background:linear-gradient(var(--vert),var(--vert)) no-repeat 0 100%/0 100%;transition:background-size .3s cubic-bezier(.2,.7,.2,1)}
 [data-lh="Green highlight"] .links a:hover{background-size:100% 100%}
-[data-lh="Green highlight"] .links a:hover .mono{color:var(--ink)}
+/* on the green fill every part of the link is dark, also on the dark closing slide */
+[data-lh="Green highlight"] .links a:hover,[data-lh="Green highlight"] .links a:hover .mono{color:#111111}
 [data-lh="Ink fill"] .links a:hover{background:var(--ink);color:#fff;border-bottom-color:var(--ink)}
 [data-lh="Ink fill"] .links a:hover .mono{color:#bdbdbd}
 [data-lh="URL lights up"] .links a:hover{border-bottom-color:var(--ink)}
