@@ -1584,7 +1584,10 @@ body:has([data-skppop]) .lcard{visibility:hidden}
    is centred in it, and neither drawing states an edge of its own. The
    field is the sheet's own white — the paper of these plans is #fff — so
    the drawing has no visible edge and the pane reads as one surface. */
-.vp{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab;background:#fff}
+.vp{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab;background:#fff;
+  user-select:none;-webkit-user-select:none}
+.vp img{-webkit-user-drag:none;user-drag:none}
+.vp input,.vp textarea,.vp [contenteditable]{user-select:text;-webkit-user-select:text}
 .vp.drag{cursor:grabbing}
 
 /* The zoom floats in the bottom-left corner of the drawing: − 100 % +, on

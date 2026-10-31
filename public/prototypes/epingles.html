@@ -247,6 +247,7 @@ body[data-as="invite"] .onlyteam{display:none !important}
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { ELEVATIONS } from "./wireframe-c3-selection.js";
 
 /* ------------------------------------------------------------------ icons */
@@ -667,7 +668,7 @@ function mountModel() {
   controls.enablePan = false;
   mdl = { renderer, scene, camera, controls, root: null, center: null };
 
-  new GLTFLoader().load("assets/building.glb", (gltf) => {
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load("assets/building.glb", (gltf) => {
     const root = gltf.scene;
     const box = new THREE.Box3().setFromObject(root);
     const center = box.getCenter(new THREE.Vector3());

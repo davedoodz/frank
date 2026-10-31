@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { createBuildingSelection, ELEVATIONS } from "./wireframe-c3-selection.js";
 
 const MODEL_URL = "assets/building.glb";
@@ -909,7 +910,7 @@ function paintNorth() {
 function loadModel(host) {
   if (modelPromise) return modelPromise;
 
-  const loader = new GLTFLoader();
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   modelPromise = new Promise((resolve, reject) => {
     loader.load(
       MODEL_URL,
@@ -1000,7 +1001,7 @@ async function mountBuildingViewer() {
   setStatus(host, "loading", "Chargement de la maquette…");
   try {
     await loadModel(host);
-    // A render may have replaced the host while the 58 MB GLB was decoding.
+    // A render may have replaced the host while the GLB was decoding.
     // Mount again so the persistent canvas follows the current pane.
     const currentHost = document.querySelector("[data-building-model]");
     if (currentHost && renderer.domElement.parentElement !== currentHost) {

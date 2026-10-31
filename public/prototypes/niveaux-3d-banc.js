@@ -5,6 +5,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { createBuildingSelection, ELEVATIONS } from "./wireframe-c3-selection.js";
 
 export const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -208,7 +209,7 @@ export function mountBench({ variants, options = [], margin = 0, fit = 1 }) {
   }
 
   const status = document.getElementById("status");
-  new GLTFLoader().load("assets/building.glb", (gltf) => {
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load("assets/building.glb", (gltf) => {
     const model = gltf.scene;
     scene.add(model);
     const box = new THREE.Box3().setFromObject(model);
