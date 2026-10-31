@@ -437,7 +437,9 @@ tr.hl td{background:var(--vert-pale)}
 .pics.cmp.solo .pic>a{justify-content:center}
 .pics.cmp.solo figcaption{text-align:center}
 /* before above after, each screenshot whole at its own 16:10 */
-.pics.cmp.stack{grid-template-columns:1fr;grid-template-rows:auto auto auto auto;row-gap:0}
+/* one column the width of a 16:10 screenshot at the row height, centred
+   between the text boxes and the right margin (the column gap is taken back) */
+.pics.cmp.stack{grid-template-columns:358px;justify-content:center;grid-template-rows:auto auto auto auto;row-gap:0;margin-left:-56px}
 .pics.cmp.stack .pic+.pic{margin-top:18px}
 .pics.cmp.stack .pic img{max-height:236px}
 .pics.cmp.stack figcaption{margin-top:8px}
