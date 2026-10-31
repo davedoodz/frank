@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frank — New product direction, title options</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"Geist Pixel Square";src:url("assets/GeistPixel-Square.woff2") format("woff2");font-display:swap}
+:root{--ink:#111111;--ink-2:#5a5a5a;--ink-3:#8f8f8f;--line:#e6e6e4;--fill:#f6f6f6;--vert:#c3e05a;--vert-dark:#2f3a05;
+  --sans:"Geist",sans-serif;--pixel:"Geist Pixel Square","Geist Mono",monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:#ededed;-webkit-font-smoothing:antialiased;padding:48px 48px 96px}
+.top{max-width:1360px;margin:0 auto 32px}
+.top h1{font-size:30px;font-weight:600;letter-spacing:-.02em}
+.top p{font-size:17px;line-height:1.5;color:var(--ink-2);margin-top:10px;max-width:860px}
+.opt{max-width:1360px;margin:0 auto 20px;background:#fff;border-radius:8px;box-shadow:0 0 0 1px var(--line);padding:40px 56px 44px}
+.opt>header{display:flex;align-items:baseline;gap:14px;margin-bottom:26px}
+.opt>header b{font-family:var(--pixel);font-size:13px;letter-spacing:.09em;text-transform:uppercase}
+.opt>header span{font-size:15px;color:var(--ink-2)}
+.opt>header i{font-style:normal;font-family:var(--pixel);font-size:12px;letter-spacing:.09em;text-transform:uppercase;background:var(--vert);color:var(--vert-dark);padding:4px 8px;border-radius:4px}
+.opt.now{opacity:.55}
+/* the slide's own type, at deck size */
+.k{font-family:var(--pixel);font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+h2{font-size:54px;font-weight:600;letter-spacing:-.035em;line-height:1.08;margin-top:14px;max-width:1240px;text-wrap:balance}
+.rule{width:82px;height:7px;background:var(--vert);margin-top:26px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>New product direction — title options</h1>
+  <p>Benoît's point after prototype 1: the 3D lining up with the 2D is not the problem, they patch the model in post. The work is in the 2D, where the structural and mechanical plans clash with the architecture. The title should say that turn, from prototype 1's plan-against-model to prototype 2's checks on the drawings.</p>
+</div>
+
+<section class="opt">
+  <header><b>A — Plans against plans</b><span>Names both sides of the turn in one line.</span><i>Recommended</i></header>
+  <p class="k">New product direction</p>
+  <h2>Not the model against the plan. The plans against each other.</h2>
+  <div class="rule"></div>
+</section>
+
+<section class="opt">
+  <header><b>B — Patched later</b><span>Puts Benoît's reason first.</span></header>
+  <p class="k">New product direction</p>
+  <h2>The 3D gets patched later. The clashes in the 2D do not.</h2>
+  <div class="rule"></div>
+</section>
+
+<section class="opt">
+  <header><b>C — Where revisions happen</b><span>Leads with the cost, the revisions.</span></header>
+  <p class="k">New product direction</p>
+  <h2>Revisions start where the engineers' plans meet ours.</h2>
+  <div class="rule"></div>
+</section>
+
+<section class="opt">
+  <header><b>D — Shortest</b><span>Four words, the before and the after.</span></header>
+  <p class="k">New product direction</p>
+  <h2>Less model. More drawings.</h2>
+  <div class="rule"></div>
+</section>
+
+<section class="opt now">
+  <header><b>Now</b><span>For comparison.</span></header>
+  <p class="k">New product direction</p>
+  <h2>Not an overview of the project. The checks that repeat every revision.</h2>
+  <div class="rule"></div>
+</section>
+
+</body>
+</html>

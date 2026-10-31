@@ -300,9 +300,10 @@ td .who{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;color:var(-
 .fb3 .ic,.b>.tag{width:56px;height:56px;padding:13px;border-radius:14px;background:var(--vert);fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* on a prototype 3 screen, the feedback theme it answers: tracking, drawings, totals */
 .b>.tag{position:absolute;top:96px;right:120px}
-/* a full screenshot keeps one frame size on every slide: the headline holds
-   two lines' room, so a short one does not stretch and crop the screen */
-.b:has(>.shot.full) h2{min-height:2.16em}
+/* a full screenshot keeps one frame size on every slide, pinned with its
+   notes to the bottom: a one-line headline leaves air above, never a
+   stretched, cropped screen */
+.b:has(>.shot.full) .full{flex:none;height:445px;margin-top:auto}
 .fb3 h3{font-size:28px;font-weight:600;letter-spacing:-.02em;margin-top:20px}
 .fb3 .sum{font-size:17px;line-height:1.4;color:var(--ink-2);margin-top:6px}
 .fb3 .note{margin-top:12px;padding:14px 16px;border-radius:10px;background:var(--fill);display:grid;grid-template-columns:20px 1fr;column-gap:12px}
@@ -953,6 +954,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <p class="k">Prototype 1 — Direction B</p>
   <h2>The plan and the model on one screen, with the gap between them named.</h2>
+  <div class="rule"></div>
   <div class="shot full"><img src="assets/frank/p1-plateforme-b.jpg" alt="Prototype 1, direction B: the type floor plan beside the SketchUp massing, with unit 9 selected and its 240 mm window gap measured">
     <span class="mk" style="--x:44.5%;--y:18.4%">1</span>
     <span class="mk" style="--x:12%;--y:78.4%">2</span>
@@ -1290,6 +1292,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <svg class="ic tag" viewBox="0 0 24 24" role="img" aria-label="Drawings"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
   <p class="k">Prototype 3 — Layers</p>
   <h2>Every engineering sheet, laid over the architecture.</h2>
+  <div class="rule"></div>
   <div class="shot full"><img src="assets/frank/p3-calques.jpg" alt="Prototype 3, level 5 plan: architecture, surveyor, drainage, electrical and distribution sheets shown together, the Arpenteur thumbnail being dragged up the layer pile, its file card open">
     <span class="mk" style="--x:75%;--y:40%">1</span>
     <span class="mk" style="--x:40%;--y:50%">2</span>
@@ -1309,6 +1312,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <svg class="ic tag" viewBox="0 0 24 24" role="img" aria-label="Totals"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
   <p class="k">Prototype 3 — The floor</p>
   <h2>The area table, the plan, the model and the comments, all on one unit.</h2>
+  <div class="rule"></div>
   <div class="shot full"><img src="assets/frank/p3-niveau.jpg" alt="Prototype 3 floor screen: the level 5 plan with each unit filled by type, 3½ red, 4½ blue, 5½ green, beside the unit table, the model and the comments">
     <span class="mk" style="--x:17.5%;--y:44%">1</span>
     <span class="mk" style="--x:29%;--y:70%">2</span>
@@ -1328,6 +1332,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <svg class="ic tag" viewBox="0 0 24 24" role="img" aria-label="Totals"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
   <p class="k">Prototype 3 — The whole building</p>
   <h2>Every floor at once: the unit mix the developer prices from.</h2>
+  <div class="rule"></div>
   <div class="shot full"><img src="assets/frank/p3-batiment.jpg" alt="Prototype 3 whole-building view: unit types per floor beside the full building model">
     <span class="mk" style="--x:24%;--y:45%">1</span>
     <span class="mk" style="--x:11.5%;--y:21%">2</span>
@@ -1347,6 +1352,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <svg class="ic tag" viewBox="0 0 24 24" role="img" aria-label="Totals"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M16 14v4"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
   <p class="k">Prototype 3 — Elevations</p>
   <h2>The model turns to the façade being checked.</h2>
+  <div class="rule"></div>
   <div class="shot full"><img src="assets/frank/p3-elevation.jpg" alt="Prototype 3, whole building: the south elevation coloured by material, beside the Matériaux table with each material's area per façade">
     <span class="mk" style="--x:44.8%;--y:21.4%">1</span>
     <span class="mk" style="--x:14.6%;--y:25%">2</span>
@@ -1366,6 +1372,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <svg class="ic tag" viewBox="0 0 24 24" role="img" aria-label="Drawings"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
   <p class="k">Prototype 3 — Conflicts</p>
   <h2>One click from a conflict to the two drawings that cause it.</h2>
+  <div class="rule"></div>
   <div class="shot full"><img src="assets/frank/p3-conflits.jpg" alt="Prototype 3 conflicts: conflict C-05-21 selected in red, its note open on the plan over unit 505 with the drainage sheet laid over the architecture, the 3D model folded away">
     <span class="mk" style="--x:80%;--y:47%">1</span>
     <span class="mk" style="--x:52%;--y:64%">2</span>
@@ -1384,6 +1391,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 <div class="b">
   <p class="k">Prototype 3 — Codes</p>
   <h2>The code study as a living list, read in the office's words.</h2>
+  <div class="rule"></div>
   <div class="shot full"><img src="assets/frank/p3-codes.jpg" alt="Prototype 3 codes">
     <span class="mk" style="--x:50%;--y:22%">1</span>
     <span class="mk" style="--x:17.8%;--y:35.3%">2</span>
@@ -1403,6 +1411,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <svg class="ic tag" viewBox="0 0 24 24" role="img" aria-label="Tracking"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
   <p class="k">Prototype 3 — Échéancier</p>
   <h2>Deadlines that lead back to the project.</h2>
+  <div class="rule"></div>
   <div class="shot full"><img src="assets/frank/p3-echeancier.jpg" alt="Prototype 3 schedule">
     <span class="mk" style="--x:95.8%;--y:23.4%">1</span>
     <span class="mk" style="--x:55%;--y:40.3%">2</span>
