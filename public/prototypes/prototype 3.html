@@ -1730,6 +1730,8 @@ body:has([data-skppop]) .lcard{visibility:hidden}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ncard .anch .lu{width:12px;height:12px;flex:0 0 12px}
 .ncard .nact{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+/* A pill holds one line: its words never wrap, however narrow the margin. */
+.ncard .nact .chip,.ncard .nact .btnw{white-space:nowrap;flex:0 0 auto}
 /* The margin's comment has its point on the plan: the chip holds it in brand green. */
 .ncard .nact .chip.pinned{background:var(--vert);border-color:var(--vert);color:var(--vert-ink)}
 .ncard .nact .chip.pinned .lb,.ncard .nact .chip.pinned .lu{color:var(--vert-ink)}
@@ -5554,8 +5556,8 @@ function marginHTML() {
           placeholder="${team ? "Note interne pour le bureau seulement" : "Commentaire partagé — visible par le lien"}">${V.mdraft.replace(/</g, "&lt;")}</textarea>
         <div class="nact">
           ${V.mAnchor
-            ? `<span class="chip pinned" ${act("markpin")} title="Épinglé: ${pinAnchor(V.mAnchor)} — cliquer pour retirer l'épingle">${icon("map-pin")}<span class="lb">Épinglé au plan</span></span>`
-            : `<span class="chip ${V.pinMode && V.pinFor === "margin" ? "on" : ""}" ${act("markpin")} title="Armer l'épingle, puis cliquer un point du plan">${icon("map-pin")}<span class="lb">${V.pinMode && V.pinFor === "margin" ? "Cliquez le plan" : "Épingler au plan"}</span></span>`}
+            ? `<span class="chip pinned" ${act("markpin")} title="Pointé: ${pinAnchor(V.mAnchor)} — cliquer pour retirer le point">${icon("map-pin")}<span class="lb">Pointé</span></span>`
+            : `<span class="chip ${V.pinMode && V.pinFor === "margin" ? "on" : ""}" ${act("markpin")} title="Armer le pointeur, puis cliquer un point du plan">${icon("map-pin")}<span class="lb">${V.pinMode && V.pinFor === "margin" ? "Cliquez le plan" : "Pointer"}</span></span>`}
           <span style="flex:1"></span>
           <span class="btnw solid pingo ${V.mdraft.trim() ? "" : "wait"}" ${act("postnote")}>${icon("send")}<span class="hi">Commenter</span></span>
         </div></div>`;
