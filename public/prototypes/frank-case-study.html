@@ -325,7 +325,12 @@ td .who{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;color:var(-
 .fb3 .said{font-size:17px;line-height:1.4;color:var(--ink)}
 .fb3 .said .who{font-family:var(--pixel);font-size:12px;letter-spacing:.09em;color:var(--ink-3);margin-left:6px;white-space:nowrap}
 .fb3 .chg{font-size:16px;line-height:1.45;color:var(--ink-3);margin-top:6px;padding-left:22px;position:relative}
-.fb3 .chg::before{content:"→";position:absolute;left:0;color:var(--vert-dark)}
+.fb3 .chg::before{content:"";position:absolute;left:0;top:.28em;width:15px;height:15px;background:var(--vert-dark);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='m12 5 7 7-7 7'/%3E%3C/svg%3E") center/contain no-repeat}
+/* Lucide arrow-right wherever the deck reads « from → to » */
+.ar{width:.9em;height:.9em;vertical-align:-.08em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nums b .ar{width:.5em;height:.5em;vertical-align:.12em;stroke-width:2.4;color:var(--ink-3)}
 td.arrow{color:var(--ink-3);width:40px}
 tr.hl td{background:var(--vert-pale)}
 
@@ -868,10 +873,10 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <div class="ide">
     <figure><div class="shot"><img src="assets/frank/ideation-claude.jpg" alt="A Claude conversation scoping the prototype: three questions to ask before touching any code, and why a product that reads the office's drawings matters"></div>
       <figcaption><span class="ba">Step 1</span><span class="mono">Claude</span> — General concepts and scope, before any screen.</figcaption></figure>
-    <span class="ide-arrow" aria-hidden="true">→</span>
+    <span class="ide-arrow" aria-hidden="true"><svg class="ar" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
     <figure><div class="shot"><img src="assets/frank/ideation-chatgpt.jpg" alt="A ChatGPT conversation: « generate a visual of a detailed UI for this step of the UX flow », with two generated screens of a floor plan with a unit selected"></div>
       <figcaption><span class="ba">Step 2</span><span class="mono">ChatGPT</span> — One prompt per step of the flow, one generated screen back.</figcaption></figure>
-    <span class="ide-arrow" aria-hidden="true">→</span>
+    <span class="ide-arrow" aria-hidden="true"><svg class="ar" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
     <figure class="fig-board"><a class="shot" href="https://www.figma.com/design/BvV6mHHIN86HNJes04iAyh/FRANK?node-id=0-1" target="_blank" rel="noopener"><img src="assets/frank/figma-oct24.jpg" alt="Figma board, October 24: market research, the first product concepts, and rows of generated screens marked with green and red squares"></a>
       <div class="links on-board"><a href="https://www.figma.com/design/BvV6mHHIN86HNJes04iAyh/FRANK?node-id=0-1" target="_blank" rel="noopener">Figma board <span class="mono">figma.com/design/…/FRANK</span>
         <svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
@@ -1800,7 +1805,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
       <p class="need">43 engineering sheets laid over the plans by eye. Frank lists the conflicts; a person confirms each one. <b>Needs:</b> native AutoCAD and SketchUp palettes.</p></div>
   </div>
   <div class="nums c3" style="display:grid;margin-top:44px">
-    <div><b>23 h → 5.5 h</b><span>Per revision, for the three tasks above.</span></div>
+    <div><b>23 h <svg class="ar" viewBox="0 0 24 24" role="img" aria-label="to"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg> 5.5 h</b><span>Per revision, for the three tasks above.</span></div>
     <div><b>≈ 105 h</b><span>Saved over a project revised six times.</span></div>
     <div><b>≈ $5,800</b><span>Of technician time per project, at $55 an hour.</span></div>
   </div>
