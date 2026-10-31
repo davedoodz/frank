@@ -94,6 +94,10 @@ a.shot:hover{box-shadow:0 0 0 2px var(--ink)}
 /* title slide */
 .title .b{justify-content:center;align-items:center;text-align:center}
 .title .rule{margin:30px auto 0}
+/* centre the ink, not the box: the kicker's tracking adds space after its last
+   letter and the title's negative tracking removes it, so both sat off-centre */
+.title .k{padding-left:.09em}
+.title h1{margin-left:-.045em}
 .title .lede{margin:34px auto 0;text-align:center;max-width:900px}
 .title .meta{display:flex;gap:64px;margin-top:56px;justify-content:center;text-align:center}
 .title .meta div{align-items:center}
@@ -147,8 +151,9 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
   .b{left:0;top:0;margin:0;transform:none}
   .jump,.pdf,#edCut,#grid,[class*="dialkit"]{display:none!important}
 }
-.title .lede:empty,.title .byline:empty{display:none}
-.title .byline{margin-top:18px;font-size:24px;font-weight:500;letter-spacing:-.01em;color:var(--ink-2)}
+/* the byline stays in the markup (saved edits count it) but the cover no
+   longer shows it: the name sits bottom left with the email */
+.title .lede:empty,.title .byline{display:none}
 .div .trk button{color:#fff}
 .div .trk button.on{color:var(--vert)}
 
