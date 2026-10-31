@@ -543,7 +543,7 @@ a.dep:hover{box-shadow:0 0 0 2px var(--vert)}
 
 /* the cover of the MIT book */
 /* the book alone: its dark backdrop is cut away, the cursor dot and ring stay on the cover */
-.book{height:calc(760px * var(--book-s, 1));display:flex;justify-content:center}
+.book{height:calc(760px * var(--book-s, 1));display:flex;justify-content:center;transform:translate(var(--book-x, 0px), var(--book-y, 0px))}
 .book img{height:100%;width:auto}
 
 /* outcome screens */
@@ -2221,6 +2221,9 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     gridView: false,
     /* slide 2: the portfolio book's size, 1 = 760px tall */
     bookScale: [1, 0.5, 1.2, 0.01],
+    /* slide 2: nudge the book, in slide pixels */
+    bookX: [0, -400, 400, 1],
+    bookY: [0, -300, 300, 1],
     resetOrder: { type: "action", label: "Reset slide order" },
     restoreSlides: { type: "action", label: "Restore deleted slides" },
   }, {
@@ -2345,7 +2348,7 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
     if (changed) location.reload();
   }
   /* subscribed last: the first call is immediate, and the grid needs everything above */
-  dial.subscribe((v) => { setEditing(!!v.editText); document.body.dataset.lh = v.linkHover; setGrid(!!v.gridView); document.body.style.setProperty("--book-s", v.bookScale); document.body.dataset.dt = v.dividerTitle; });
+  dial.subscribe((v) => { setEditing(!!v.editText); document.body.dataset.lh = v.linkHover; setGrid(!!v.gridView); document.body.style.setProperty("--book-s", v.bookScale); document.body.style.setProperty("--book-x", v.bookX + "px"); document.body.style.setProperty("--book-y", v.bookY + "px"); document.body.dataset.dt = v.dividerTitle; });
 })();
 </script>
 <script>
