@@ -69,7 +69,7 @@ function showStatus() {
   const pane = document.querySelector("[data-vp]")?.closest(".pane");
   if (!pane) return;
   const floor = wanted.get("floor");
-  pane.dataset.pdf = !floor ? "" : failures.has(floor.url) ? "error"
+  pane.dataset.pdf = !floor || tiled(floor.canvas) ? "" : failures.has(floor.url) ? "error"
     : tiles.has(floor.key) ? "" : "busy";
 }
 
@@ -93,7 +93,7 @@ async function pageFor(url) {
 
 async function pump() {
   if (busy) return;
-  const request = [...wanted.values()].find((r) => !tiles.has(r.key) && !failures.has(r.url));
+  const request = [...wanted.values()].find((r) => !tiles.has(r.key) && !failures.has(r.url) && !tiled(r.canvas));
   if (!request) { showStatus(); return; }
   busy = true;
   try {
@@ -130,13 +130,18 @@ async function pump() {
   }
 }
 
+// The tile loader marks a sheet's box "pending" while it looks for its
+// pyramid and "ready" once tiles cover it; pdf.js renders only sheets
+// without one.
+const tiled = (canvas) => ["pending", "ready"].includes(canvas.parentElement?.dataset.supabaseTiles);
+
 function schedule() {
   const viewport = document.querySelector("[data-vp]");
   const next = new Map();
   if (viewport) {
     const bounds = viewport.getBoundingClientRect();
     for (const canvas of viewport.querySelectorAll("canvas[data-pdf-url]")) {
-      if (canvas.dataset.supabaseTiles === "ready") continue;
+      if (tiled(canvas)) continue;
       const request = requestFor(canvas, bounds, Number(viewport.dataset.turn || 0));
       if (!request) continue;
       next.set(request.slot, request);
@@ -160,6 +165,7 @@ function schedule() {
 }
 
 window.addEventListener("fitte:plan-paint", schedule);
+window.addEventListener("fitte:tiles-missing", schedule);
 window.addEventListener("fitte:render", () => queueMicrotask(schedule));
 window.addEventListener("resize", schedule);
 schedule();

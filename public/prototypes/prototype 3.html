@@ -1213,6 +1213,11 @@ body.elev .mtools{display:none}
 .plan canvas.sheetpdf[data-ready="1"]{background:#fff}
 .plan .supabase-tiles{position:absolute;inset:0;z-index:var(--planz,1);overflow:hidden;pointer-events:none}
 .plan .supabase-tiles img{position:absolute;display:block;max-width:none}
+/* Once a consultant sheet's tiles cover it, its low-resolution picture goes;
+   the engineering sheets set theirs inline, hence the !important. */
+.plan .lay[data-supabase-tiles="ready"]{background-image:none !important}
+.plan[data-supabase-tiles="ready"] > canvas[data-pdf-url],
+.plan .lay[data-supabase-tiles="ready"] > canvas[data-pdf-url]{visibility:hidden}
 /* While the pass runs the pane says so in its own title bar, at the end of
    the row: the file strip that used to carry it is gone. It is a transient
    note, so it gives way before anything else — under a pane wide enough to
@@ -2890,11 +2895,14 @@ const layersHTML = () => layKeys().filter((k) => k !== "plan" && V.lay[k].on).ma
   if (ENG_SET.has(k)) {
     const s = engSheet(k, paneLevel());
     const vector = s.pdf && s.detail !== "image";
-    return `<div class="lay eng" data-lay="${k}" style="z-index:${layZ(k)};opacity:${V.lay[k].opacity / 100};background-image:url(${s.img})">${
+    return `<div class="lay eng" data-lay="${k}" ${vector ? `data-sheet-pdf="${s.pdf}"` : ""} style="z-index:${layZ(k)};opacity:${V.lay[k].opacity / 100};background-image:url(${s.img})">${
       vector ? `<canvas data-laypdf="${k}" data-pdf-url="${s.pdf}"></canvas>` : ""}</div>`;
   }
-  return `<div class="lay" data-lay="${k}" style="${sheetStyle(k)};z-index:${layZ(k)}">${
-    planVector() ? `<canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${k === "arp" ? 180 : 0}"></canvas>` : ""}</div>`;
+  /* The box names its PDF at every zoom: the tile loader reads it from
+     there, while the canvas only mounts past ZSHARP for pdf.js. */
+  const turn = k === "arp" ? 180 : 0;
+  return `<div class="lay" data-lay="${k}" data-sheet-pdf="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${turn}" style="${sheetStyle(k)};z-index:${layZ(k)}">${
+    planVector() ? `<canvas data-laypdf="${k}" data-pdf-url="${OVERLAY_SHEETS[k].pdf}" data-pdf-turn="${turn}"></canvas>` : ""}</div>`;
 }).join("");
 
 /* ---------------------------------------------------------------- the pile
@@ -5986,10 +5994,6 @@ function paintSheet() {
     plan.style.transform = RA
       ? `translate(${real.width / 2}px,${real.height / 2}px) rotate(${ang}deg) scale(${kz}) translate(${-RA.fx * base.w}px,${-RA.fy * base.h}px)`
       : `translate(${real.width / 2}px,${real.height / 2}px) rotate(${ang}deg) translate(${V.pan.x - box.width / 2}px,${V.pan.y - box.height / 2}px) scale(${kz})`;
-    plan.dataset.tileBaseWidth = String(base.w);
-    plan.dataset.tileBaseHeight = String(base.h);
-    plan.dataset.tilePanX = String(V.pan.x);
-    plan.dataset.tilePanY = String(V.pan.y);
   }
   /* North turns with the sheet: the needle swings, the letter rides round
      the ring and stays upright. */

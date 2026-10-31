@@ -1,3 +1,6 @@
+// Every drawing in the plan pane — the architect's floor and each consultant
+// sheet laid over it — is read from a pre-rendered tile pyramid when one has
+// been published. pdf.js only runs for a sheet with no pyramid.
 const manifests = new Map();
 let storageConfig;
 let timer;
@@ -25,9 +28,13 @@ async function manifestFor(pdfUrl) {
     const drawing = drawingName(pdfUrl);
     if (!settings?.tileBaseUrl || !drawing) return null;
     const url = `${settings.tileBaseUrl}/baldwin-iii/${encodeURIComponent(drawing)}/manifest.json`;
-    const response = await fetch(url, { cache: "no-cache" });
-    if (!response.ok) return null;
-    return { ...(await response.json()), baseUrl: url.slice(0, url.lastIndexOf("/")) };
+    try {
+      const response = await fetch(url, { cache: "no-cache" });
+      if (!response.ok) return null;
+      return { ...(await response.json()), baseUrl: url.slice(0, url.lastIndexOf("/")) };
+    } catch {
+      return null;
+    }
   })();
   manifests.set(pdfUrl, pending);
   const manifest = await pending;
@@ -55,30 +62,42 @@ function tileRange(manifest, level, x0, x1, y0, y1) {
   return tiles;
 }
 
-function visibleTiles(plan, manifest, viewport, turn) {
-  const rect = plan.getBoundingClientRect();
+function planZoom(host) {
+  const plan = host.closest(".plan") || host;
+  return Number(plan.style.transform.match(/scale\(([\d.]+)\)/)?.[1] || 1);
+}
+
+/* The surveyor's sheet is shown upside down: its box is turned a half turn
+   by CSS, so the part of it on screen is read back into the sheet's own
+   axes the same way pdf.js does for that canvas. */
+function visibleTiles(host, manifest, viewport, turn, halfTurn) {
+  const rect = host.getBoundingClientRect();
   const left = Math.max(rect.left, viewport.left);
   const top = Math.max(rect.top, viewport.top);
   const right = Math.min(rect.right, viewport.right);
   const bottom = Math.min(rect.bottom, viewport.bottom);
-  if (right <= left || bottom <= top) return null;
+  if (right <= left || bottom <= top || rect.width < 1 || rect.height < 1) return null;
 
   const side = turn === 90 || turn === 270;
   const logicalWidth = side ? rect.height : rect.width;
   const logicalHeight = side ? rect.width : rect.height;
-  const zoom = Number(plan.style.transform.match(/scale\(([\d.]+)\)/)?.[1] || 1);
   const targetWidth = logicalWidth * (window.devicePixelRatio || 1) * 1.5;
-  const level = zoom >= 1.2
+  const level = planZoom(host) >= 1.2
     ? manifest.levels.at(-1)
     : manifest.levels.find((entry) => entry.width >= targetWidth) || manifest.levels.at(-1);
   if (!level) return null;
 
   const [p0x, p0y] = localPoint(turn, rect, left, top);
   const [p1x, p1y] = localPoint(turn, rect, right, bottom);
-  const x0 = Math.max(0, Math.min(p0x, p1x) / logicalWidth * level.width);
-  const x1 = Math.min(level.width, Math.max(p0x, p1x) / logicalWidth * level.width);
-  const y0 = Math.max(0, Math.min(p0y, p1y) / logicalHeight * level.height);
-  const y1 = Math.min(level.height, Math.max(p0y, p1y) / logicalHeight * level.height);
+  let vx0 = Math.min(p0x, p1x), vx1 = Math.max(p0x, p1x);
+  let vy0 = Math.min(p0y, p1y), vy1 = Math.max(p0y, p1y);
+  if (halfTurn) {
+    [vx0, vx1, vy0, vy1] = [logicalWidth - vx1, logicalWidth - vx0, logicalHeight - vy1, logicalHeight - vy0];
+  }
+  const x0 = Math.max(0, vx0 / logicalWidth * level.width);
+  const x1 = Math.min(level.width, vx1 / logicalWidth * level.width);
+  const y0 = Math.max(0, vy0 / logicalHeight * level.height);
+  const y1 = Math.min(level.height, vy1 / logicalHeight * level.height);
   return { level, tiles: tileRange(manifest, level, x0, x1, y0, y1) };
 }
 
@@ -87,12 +106,12 @@ function tileUrl(manifest, level, column, row) {
   return `${manifest.baseUrl}${tilePath}/${level.level}/${column}_${row}.webp`;
 }
 
-function tileLayer(plan) {
-  let layer = plan.querySelector(":scope > .supabase-tiles");
+function tileLayer(host) {
+  let layer = host.querySelector(":scope > .supabase-tiles");
   if (!layer) {
     layer = document.createElement("div");
     layer.className = "supabase-tiles";
-    plan.append(layer);
+    host.append(layer);
   }
   return layer;
 }
@@ -106,9 +125,9 @@ function placeTile(image, manifest, level, column, row) {
   });
 }
 
-async function paint(plan, manifest, request) {
-  if (!plan.isConnected || !request.tiles.length) return;
-  const layer = tileLayer(plan);
+async function paint(host, manifest, request) {
+  if (!host.isConnected || !request.tiles.length) return;
+  const layer = tileLayer(host);
   const levelKey = String(request.level.level);
   const images = request.tiles.map(({ column, row }) => {
     const key = `${levelKey}/${column}_${row}`;
@@ -127,29 +146,25 @@ async function paint(plan, manifest, request) {
   });
 
   await Promise.all(images.map((image) => image.decode().catch(() => null)));
-  if (!plan.isConnected || images.some((image) => !image.complete || image.naturalWidth === 0)) return;
-  plan.dataset.supabaseTiles = "ready";
+  if (!host.isConnected || images.some((image) => !image.complete || image.naturalWidth === 0)) return;
+  host.dataset.supabaseTiles = "ready";
   for (const image of layer.querySelectorAll("img[data-level]")) {
     if (image.dataset.level !== levelKey) image.remove();
   }
-  const canvas = plan.querySelector("canvas[data-sheetpdf]");
-  if (canvas) {
-    canvas.dataset.supabaseTiles = "ready";
-    canvas.style.visibility = "hidden";
-  }
 }
 
-function prewarm(plan, manifest, viewport) {
-  if (!window.requestIdleCallback || !plan.isConnected) return;
+/* Fetch the sharpest level around the middle of the sheet while nothing
+   else is happening, so the first zoom past fit lands on cached tiles. */
+function prewarm(host, manifest, viewport) {
+  if (!window.requestIdleCallback || !host.isConnected) return;
   window.requestIdleCallback(() => {
-    if (!plan.isConnected) return;
+    if (!host.isConnected) return;
     const level = manifest.levels.at(-1);
-    const baseWidth = Number(plan.dataset.tileBaseWidth);
-    const baseHeight = Number(plan.dataset.tileBaseHeight);
-    if (!level || !baseWidth || !baseHeight) return;
+    const fitWidth = host.offsetWidth, fitHeight = host.offsetHeight;
+    if (!level || !fitWidth || !fitHeight) return;
     const zoom = 3.05;
-    const halfWidth = Math.min(0.5, viewport.width / (baseWidth * zoom) / 2);
-    const halfHeight = Math.min(0.5, viewport.height / (baseHeight * zoom) / 2);
+    const halfWidth = Math.min(0.5, viewport.width / (fitWidth * zoom) / 2);
+    const halfHeight = Math.min(0.5, viewport.height / (fitHeight * zoom) / 2);
     const tiles = tileRange(
       manifest,
       level,
@@ -166,30 +181,41 @@ function prewarm(plan, manifest, viewport) {
   }, { timeout: 1200 });
 }
 
-async function schedule() {
-  const viewport = document.querySelector("[data-vp]");
-  const plan = viewport?.querySelector("[data-plan-pdf]");
-  if (!viewport || !plan) return;
-  const pdfUrl = plan.dataset.planPdf;
-  const manifest = await manifestFor(pdfUrl);
-  const currentViewport = document.querySelector("[data-vp]");
-  const currentPlan = currentViewport?.querySelector(`[data-plan-pdf="${CSS.escape(pdfUrl)}"]`);
-  if (!manifest || !currentViewport || !currentPlan) return;
-  const request = visibleTiles(
-    currentPlan,
-    manifest,
-    currentViewport.getBoundingClientRect(),
-    Number(currentViewport.dataset.turn || 0),
-  );
-  if (request) void paint(currentPlan, manifest, request);
-  if (request?.level.level !== manifest.levels.at(-1)?.level) {
-    prewarm(currentPlan, manifest, currentViewport.getBoundingClientRect());
+/* A sheet box is the floor plan ([data-plan-pdf]) or a consultant layer
+   ([data-sheet-pdf]). Its state tells pdf.js whether to stay out of it:
+   "pending" while the pyramid is looked up, "ready" once tiles cover it,
+   "none" when no pyramid was published. */
+async function paintSheet(host) {
+  const url = host.dataset.planPdf || host.dataset.sheetPdf;
+  if (!url) return;
+  if (!host.dataset.supabaseTiles) host.dataset.supabaseTiles = "pending";
+  const manifest = await manifestFor(url);
+  if (!host.isConnected) return;
+  if (!manifest) {
+    if (host.dataset.supabaseTiles !== "none") {
+      host.dataset.supabaseTiles = "none";
+      window.dispatchEvent(new Event("fitte:tiles-missing"));
+    }
+    return;
   }
+  const viewport = host.closest("[data-vp]");
+  if (!viewport) return;
+  const bounds = viewport.getBoundingClientRect();
+  const request = visibleTiles(host, manifest, bounds, Number(viewport.dataset.turn || 0),
+    host.dataset.pdfTurn === "180");
+  if (request) await paint(host, manifest, request);
+  if (request && request.level.level !== manifest.levels.at(-1)?.level) prewarm(host, manifest, bounds);
+}
+
+function schedule() {
+  const viewport = document.querySelector("[data-vp]");
+  if (!viewport) return;
+  for (const host of viewport.querySelectorAll("[data-plan-pdf], .lay[data-sheet-pdf]")) void paintSheet(host);
 }
 
 function queue() {
   clearTimeout(timer);
-  timer = setTimeout(() => void schedule(), 40);
+  timer = setTimeout(schedule, 40);
 }
 
 window.addEventListener("fitte:plan-paint", queue);
