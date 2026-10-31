@@ -2352,6 +2352,43 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
 })();
 </script>
 <script>
+/* « Prototype 3 » reads « Final prototype » everywhere on screen. The rename
+   happens on the displayed text only: slide ids, sections and saved edits are
+   keyed on the original words, so the markup and the saved edits keep them.
+   File paths in mono (« /prototypes/prototype 3.html ») are left alone. */
+(() => {
+  const RX = /(\bthe\s+)?\bprototype\s+0?3\b/gi;
+  const swap = (s) => s.replace(RX, (m, the, at, str) => {
+    if (m === m.toUpperCase()) return (the || "") + "FINAL PROTOTYPE";
+    if (the) return the + "final prototype";
+    const lead = str.slice(0, at);
+    if (/Frank\s+$/.test(lead)) return "Final Prototype";
+    if (/[A-Za-z]\s+$/.test(lead) || /^p/.test(m)) return "the final prototype";
+    return "Final prototype";
+  });
+  const fix = (root) => {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => n.parentElement && !n.parentElement.closest(".mono, script, style, [contenteditable=true]")
+        && /prototype\s+0?3/i.test(n.data) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+    });
+    const hits = []; while (w.nextNode()) hits.push(w.currentNode);
+    hits.forEach((n) => { n.data = swap(n.data); });
+    root.querySelectorAll?.("img[alt]").forEach((i) => { if (/prototype\s+0?3/i.test(i.alt)) i.alt = swap(i.alt); });
+    /* the file path is the same page as the deployed Frank: show and open that */
+    root.querySelectorAll?.(".mono").forEach((m) => {
+      if (!/prototype 3\.html/.test(m.textContent)) return;
+      m.textContent = "hey-its-frank.vercel.app";
+      const a = m.closest("a"); if (a) a.href = "https://hey-its-frank.vercel.app/";
+    });
+  };
+  fix(document.body);
+  /* the section nav, the grid view and edit-mode exits redraw text later */
+  new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => {
+    if (n.nodeType === 1) fix(n); else if (n.nodeType === 3 && n.parentElement) fix(n.parentElement);
+  }))).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+<script>
 /* Section titles: the first letter's side bearing grows with the 240px type, so
    the glyph sat right of the logo. Pull each title left by its own first
    letter's bearing, in em, so it holds at every DialKit title size. */
