@@ -218,6 +218,9 @@ body[data-dt="300 · huge"] .div h1{font-size:300px}
 .nums{display:grid;gap:40px;margin-top:64px}
 .nums b{display:block;font-size:84px;font-weight:600;letter-spacing:-.045em;line-height:1;color:var(--ink)}
 .nums span{display:block;font-size:18px;color:var(--ink-2);margin-top:14px;line-height:1.45}
+/* a stat's icon: the deck's green tile, above the number */
+.nums .nic{display:block;width:44px;height:44px;padding:10px;margin-bottom:18px;border-radius:11px;background:var(--vert);fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.item .n .nil{width:15px;height:15px;margin:-2px 8px 0 0;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* time saved: by hand against Frank, bars scaled to 12 h */
 .sv .row{display:grid;grid-template-columns:96px 1fr 64px;align-items:center;gap:12px;margin-top:10px;font-size:15px;color:var(--ink-2)}
 .sv .bar{display:block;height:12px;border-radius:3px;background:var(--ink-3);min-width:6px}
@@ -1742,14 +1745,14 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <h2>Real drawings, real interactions. The host programs are simulated.</h2>
   <div class="rule"></div>
   <div class="nums c4" style="display:grid">
-    <div><b>104</b><span>units on the real permit set, 8 floors, 2 basements and a roof</span></div>
-    <div><b>7</b><span>drawing layers per floor, from survey to ventilation</span></div>
-    <div><b>3</b><span>prototypes in six days, two tested with the users</span></div>
-    <div><b>2</b><span>testers. One office. Results are theirs, not a market's.</span></div>
+    <div><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg><b>104</b><span>units on the real permit set, 8 floors, 2 basements and a roof</span></div>
+    <div><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg><b>7</b><span>drawing layers per floor, from survey to ventilation</span></div>
+    <div><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg><b>3</b><span>prototypes in six days, two tested with the users</span></div>
+    <div><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><b>2</b><span>testers. One office. Results are theirs, not a market's.</span></div>
   </div>
   <div class="cols c2" style="margin-top:72px">
-    <div class="item bar-top"><span class="n">REAL</span><p>Plans, model and engineering sheets of one real project. Area tables, conflicts, façade quantities, codes, comments, schedule. Project names anonymised.</p></div>
-    <div class="item bar-top"><span class="n">SIMULATED</span><p>AutoCAD and SketchUp. Their screens are web pages in host chrome, labelled “simulated”. Writes to drawings are proposals only.</p></div>
+    <div class="item bar-top"><span class="n"><svg class="nil" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/></svg>REAL</span><p>Plans, model and engineering sheets of one real project. Area tables, conflicts, façade quantities, codes, comments, schedule. Project names anonymised.</p></div>
+    <div class="item bar-top"><span class="n"><svg class="nil" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>SIMULATED</span><p>AutoCAD and SketchUp. Their screens are web pages in host chrome, labelled “simulated”. Writes to drawings are proposals only.</p></div>
   </div>
   <div class="links" style="margin-top:28px"><a href="prototype%203.html" target="_blank" rel="noopener">Open prototype 3 <span class="mono">/prototypes/prototype 3.html</span><svg viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a></div>
 </div>
