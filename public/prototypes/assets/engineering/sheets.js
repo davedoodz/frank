@@ -1,7 +1,8 @@
 window.fitteEngineering = {
   "electrical": {
     "0": {
-      "img": "assets/engineering/electrical-0.jpg",
+      "img": "assets/engineering/electrical-0.webp",
+      "thumb": "assets/thumbs/engineering/electrical-0.webp",
       "pdf": "assets/engineering/electrical-0.pdf",
       "code": "E-300",
       "page": 5,
@@ -14,7 +15,8 @@ window.fitteEngineering = {
       "registrationMethod": "elec0->drain0 SIFT corr+basement-base(union bbox fit, mech drainage reference)"
     },
     "1": {
-      "img": "assets/engineering/electrical-1.jpg",
+      "img": "assets/engineering/electrical-1.webp",
+      "thumb": "assets/thumbs/engineering/electrical-1.webp",
       "pdf": "assets/engineering/electrical-1.pdf",
       "code": "E-301",
       "page": 6,
@@ -27,7 +29,8 @@ window.fitteEngineering = {
       "registrationMethod": "ground(elec floor1 vs arch1 jpg, SIFT/RANSAC)"
     },
     "2": {
-      "img": "assets/engineering/electrical-2.jpg",
+      "img": "assets/engineering/electrical-2.webp",
+      "thumb": "assets/thumbs/engineering/electrical-2.webp",
       "pdf": "assets/engineering/electrical-2.pdf",
       "code": "E-302",
       "page": 7,
@@ -40,7 +43,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "3": {
-      "img": "assets/engineering/electrical-3.jpg",
+      "img": "assets/engineering/electrical-3.webp",
+      "thumb": "assets/thumbs/engineering/electrical-3.webp",
       "pdf": "assets/engineering/electrical-3.pdf",
       "code": "E-303",
       "page": 8,
@@ -53,7 +57,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "4": {
-      "img": "assets/engineering/electrical-4.jpg",
+      "img": "assets/engineering/electrical-4.webp",
+      "thumb": "assets/thumbs/engineering/electrical-4.webp",
       "pdf": "assets/engineering/electrical-4.pdf",
       "code": "E-304",
       "page": 9,
@@ -66,7 +71,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "5": {
-      "img": "assets/engineering/electrical-5.jpg",
+      "img": "assets/engineering/electrical-5.webp",
+      "thumb": "assets/thumbs/engineering/electrical-5.webp",
       "pdf": "assets/engineering/electrical-5.pdf",
       "code": "E-305",
       "page": 10,
@@ -79,7 +85,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "6": {
-      "img": "assets/engineering/electrical-6.jpg",
+      "img": "assets/engineering/electrical-6.webp",
+      "thumb": "assets/thumbs/engineering/electrical-6.webp",
       "pdf": "assets/engineering/electrical-6.pdf",
       "code": "E-306",
       "page": 11,
@@ -92,7 +99,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "7": {
-      "img": "assets/engineering/electrical-7.jpg",
+      "img": "assets/engineering/electrical-7.webp",
+      "thumb": "assets/thumbs/engineering/electrical-7.webp",
       "pdf": "assets/engineering/electrical-7.pdf",
       "code": "E-307",
       "page": 12,
@@ -105,7 +113,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "8": {
-      "img": "assets/engineering/electrical-8.jpg",
+      "img": "assets/engineering/electrical-8.webp",
+      "thumb": "assets/thumbs/engineering/electrical-8.webp",
       "pdf": "assets/engineering/electrical-8.pdf",
       "code": "E-308",
       "page": 13,
@@ -118,7 +127,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "roof": {
-      "img": "assets/engineering/electrical-roof.jpg",
+      "img": "assets/engineering/electrical-roof.webp",
+      "thumb": "assets/thumbs/engineering/electrical-roof.webp",
       "pdf": "assets/engineering/electrical-roof.pdf",
       "code": "E-309",
       "page": 14,
@@ -133,7 +143,8 @@ window.fitteEngineering = {
   },
   "drainage": {
     "00": {
-      "img": "assets/engineering/drainage-00.jpg",
+      "img": "assets/engineering/drainage-00.webp",
+      "thumb": "assets/thumbs/engineering/drainage-00.webp",
       "pdf": "assets/engineering/drainage-00.pdf",
       "code": "M199",
       "page": 3,
@@ -146,7 +157,8 @@ window.fitteEngineering = {
       "registrationMethod": "basement-base(union bbox fit, mech drainage reference)"
     },
     "0": {
-      "img": "assets/engineering/drainage-0.jpg",
+      "img": "assets/engineering/drainage-0.webp",
+      "thumb": "assets/thumbs/engineering/drainage-0.webp",
       "pdf": "assets/engineering/drainage-0.pdf",
       "code": "M200",
       "page": 4,
@@ -159,7 +171,8 @@ window.fitteEngineering = {
       "registrationMethod": "basement-base(union bbox fit, mech drainage reference)"
     },
     "1": {
-      "img": "assets/engineering/drainage-1.jpg",
+      "img": "assets/engineering/drainage-1.webp",
+      "thumb": "assets/thumbs/engineering/drainage-1.webp",
       "pdf": "assets/engineering/drainage-1.pdf",
       "code": "M201",
       "page": 5,
@@ -172,7 +185,8 @@ window.fitteEngineering = {
       "registrationMethod": "ground(elec floor1 vs arch1 jpg, SIFT/RANSAC)"
     },
     "2": {
-      "img": "assets/engineering/drainage-2.jpg",
+      "img": "assets/engineering/drainage-2.webp",
+      "thumb": "assets/thumbs/engineering/drainage-2.webp",
       "pdf": "assets/engineering/drainage-2.pdf",
       "code": "M202",
       "page": 6,
@@ -185,7 +199,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "3": {
-      "img": "assets/engineering/drainage-3.jpg",
+      "img": "assets/engineering/drainage-3.webp",
+      "thumb": "assets/thumbs/engineering/drainage-3.webp",
       "pdf": "assets/engineering/drainage-3.pdf",
       "code": "M203",
       "page": 7,
@@ -198,7 +213,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "4": {
-      "img": "assets/engineering/drainage-4.jpg",
+      "img": "assets/engineering/drainage-4.webp",
+      "thumb": "assets/thumbs/engineering/drainage-4.webp",
       "pdf": "assets/engineering/drainage-4.pdf",
       "code": "M204",
       "page": 8,
@@ -211,7 +227,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "5": {
-      "img": "assets/engineering/drainage-5.jpg",
+      "img": "assets/engineering/drainage-5.webp",
+      "thumb": "assets/thumbs/engineering/drainage-5.webp",
       "pdf": "assets/engineering/drainage-5.pdf",
       "code": "M205",
       "page": 9,
@@ -224,7 +241,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "6": {
-      "img": "assets/engineering/drainage-6.jpg",
+      "img": "assets/engineering/drainage-6.webp",
+      "thumb": "assets/thumbs/engineering/drainage-6.webp",
       "pdf": "assets/engineering/drainage-6.pdf",
       "code": "M206",
       "page": 10,
@@ -237,7 +255,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "7": {
-      "img": "assets/engineering/drainage-7.jpg",
+      "img": "assets/engineering/drainage-7.webp",
+      "thumb": "assets/thumbs/engineering/drainage-7.webp",
       "pdf": "assets/engineering/drainage-7.pdf",
       "code": "M207",
       "page": 11,
@@ -250,7 +269,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "8": {
-      "img": "assets/engineering/drainage-8.jpg",
+      "img": "assets/engineering/drainage-8.webp",
+      "thumb": "assets/thumbs/engineering/drainage-8.webp",
       "pdf": "assets/engineering/drainage-8.pdf",
       "code": "M208",
       "page": 12,
@@ -263,7 +283,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "roof": {
-      "img": "assets/engineering/drainage-roof.jpg",
+      "img": "assets/engineering/drainage-roof.webp",
+      "thumb": "assets/thumbs/engineering/drainage-roof.webp",
       "pdf": "assets/engineering/drainage-roof.pdf",
       "code": "M209",
       "page": 13,
@@ -278,7 +299,8 @@ window.fitteEngineering = {
   },
   "distribution": {
     "00": {
-      "img": "assets/engineering/distribution-00.jpg",
+      "img": "assets/engineering/distribution-00.webp",
+      "thumb": "assets/thumbs/engineering/distribution-00.webp",
       "pdf": "assets/engineering/distribution-00.pdf",
       "code": "M299",
       "page": 15,
@@ -291,7 +313,8 @@ window.fitteEngineering = {
       "registrationMethod": "dist00->drain00 SIFT corr+basement-base(union bbox fit, mech drainage reference)"
     },
     "0": {
-      "img": "assets/engineering/distribution-0.jpg",
+      "img": "assets/engineering/distribution-0.webp",
+      "thumb": "assets/thumbs/engineering/distribution-0.webp",
       "pdf": "assets/engineering/distribution-0.pdf",
       "code": "M300",
       "page": 16,
@@ -304,7 +327,8 @@ window.fitteEngineering = {
       "registrationMethod": "dist0->drain0 SIFT corr+basement-base(union bbox fit, mech drainage reference)"
     },
     "1": {
-      "img": "assets/engineering/distribution-1.jpg",
+      "img": "assets/engineering/distribution-1.webp",
+      "thumb": "assets/thumbs/engineering/distribution-1.webp",
       "pdf": "assets/engineering/distribution-1.pdf",
       "code": "M301",
       "page": 17,
@@ -317,7 +341,8 @@ window.fitteEngineering = {
       "registrationMethod": "ground(elec floor1 vs arch1 jpg, SIFT/RANSAC)"
     },
     "2": {
-      "img": "assets/engineering/distribution-2.jpg",
+      "img": "assets/engineering/distribution-2.webp",
+      "thumb": "assets/thumbs/engineering/distribution-2.webp",
       "pdf": "assets/engineering/distribution-2.pdf",
       "code": "M302",
       "page": 18,
@@ -330,7 +355,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "3": {
-      "img": "assets/engineering/distribution-3.jpg",
+      "img": "assets/engineering/distribution-3.webp",
+      "thumb": "assets/thumbs/engineering/distribution-3.webp",
       "pdf": "assets/engineering/distribution-3.pdf",
       "code": "M303",
       "page": 19,
@@ -343,7 +369,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "4": {
-      "img": "assets/engineering/distribution-4.jpg",
+      "img": "assets/engineering/distribution-4.webp",
+      "thumb": "assets/thumbs/engineering/distribution-4.webp",
       "pdf": "assets/engineering/distribution-4.pdf",
       "code": "M304",
       "page": 20,
@@ -356,7 +383,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "5": {
-      "img": "assets/engineering/distribution-5.jpg",
+      "img": "assets/engineering/distribution-5.webp",
+      "thumb": "assets/thumbs/engineering/distribution-5.webp",
       "pdf": "assets/engineering/distribution-5.pdf",
       "code": "M305",
       "page": 21,
@@ -369,7 +397,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "6": {
-      "img": "assets/engineering/distribution-6.jpg",
+      "img": "assets/engineering/distribution-6.webp",
+      "thumb": "assets/thumbs/engineering/distribution-6.webp",
       "pdf": "assets/engineering/distribution-6.pdf",
       "code": "M306",
       "page": 22,
@@ -382,7 +411,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "7": {
-      "img": "assets/engineering/distribution-7.jpg",
+      "img": "assets/engineering/distribution-7.webp",
+      "thumb": "assets/thumbs/engineering/distribution-7.webp",
       "pdf": "assets/engineering/distribution-7.pdf",
       "code": "M307",
       "page": 23,
@@ -395,7 +425,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "8": {
-      "img": "assets/engineering/distribution-8.jpg",
+      "img": "assets/engineering/distribution-8.webp",
+      "thumb": "assets/thumbs/engineering/distribution-8.webp",
       "pdf": "assets/engineering/distribution-8.pdf",
       "code": "M308",
       "page": 24,
@@ -408,7 +439,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "roof": {
-      "img": "assets/engineering/distribution-roof.jpg",
+      "img": "assets/engineering/distribution-roof.webp",
+      "thumb": "assets/thumbs/engineering/distribution-roof.webp",
       "pdf": "assets/engineering/distribution-roof.pdf",
       "code": "M309",
       "page": 25,
@@ -423,7 +455,8 @@ window.fitteEngineering = {
   },
   "ventilation": {
     "00": {
-      "img": "assets/engineering/ventilation-00.jpg",
+      "img": "assets/engineering/ventilation-00.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-00.webp",
       "pdf": "assets/engineering/ventilation-00.pdf",
       "code": "M399",
       "page": 26,
@@ -436,7 +469,8 @@ window.fitteEngineering = {
       "registrationMethod": "vent00->drain00 SIFT corr+basement-base(union bbox fit, mech drainage reference)"
     },
     "0": {
-      "img": "assets/engineering/ventilation-0.jpg",
+      "img": "assets/engineering/ventilation-0.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-0.webp",
       "pdf": "assets/engineering/ventilation-0.pdf",
       "code": "M400",
       "page": 27,
@@ -449,7 +483,8 @@ window.fitteEngineering = {
       "registrationMethod": "vent0->drain0 SIFT corr+basement-base(union bbox fit, mech drainage reference)"
     },
     "1": {
-      "img": "assets/engineering/ventilation-1.jpg",
+      "img": "assets/engineering/ventilation-1.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-1.webp",
       "pdf": "assets/engineering/ventilation-1.pdf",
       "code": "M401",
       "page": 28,
@@ -462,7 +497,8 @@ window.fitteEngineering = {
       "registrationMethod": "ground(elec floor1 vs arch1 jpg, SIFT/RANSAC)"
     },
     "2": {
-      "img": "assets/engineering/ventilation-2.jpg",
+      "img": "assets/engineering/ventilation-2.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-2.webp",
       "pdf": "assets/engineering/ventilation-2.pdf",
       "code": "M402",
       "page": 29,
@@ -475,7 +511,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "3": {
-      "img": "assets/engineering/ventilation-3.jpg",
+      "img": "assets/engineering/ventilation-3.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-3.webp",
       "pdf": "assets/engineering/ventilation-3.pdf",
       "code": "M403",
       "page": 30,
@@ -488,7 +525,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "4": {
-      "img": "assets/engineering/ventilation-4.jpg",
+      "img": "assets/engineering/ventilation-4.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-4.webp",
       "pdf": "assets/engineering/ventilation-4.pdf",
       "code": "M404",
       "page": 31,
@@ -501,7 +539,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "5": {
-      "img": "assets/engineering/ventilation-5.jpg",
+      "img": "assets/engineering/ventilation-5.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-5.webp",
       "pdf": "assets/engineering/ventilation-5.pdf",
       "code": "M405",
       "page": 32,
@@ -514,7 +553,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "6": {
-      "img": "assets/engineering/ventilation-6.jpg",
+      "img": "assets/engineering/ventilation-6.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-6.webp",
       "pdf": "assets/engineering/ventilation-6.pdf",
       "code": "M406",
       "page": 33,
@@ -527,7 +567,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "7": {
-      "img": "assets/engineering/ventilation-7.jpg",
+      "img": "assets/engineering/ventilation-7.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-7.webp",
       "pdf": "assets/engineering/ventilation-7.pdf",
       "code": "M407",
       "page": 34,
@@ -540,7 +581,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "8": {
-      "img": "assets/engineering/ventilation-8.jpg",
+      "img": "assets/engineering/ventilation-8.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-8.webp",
       "pdf": "assets/engineering/ventilation-8.pdf",
       "code": "M408",
       "page": 35,
@@ -553,7 +595,8 @@ window.fitteEngineering = {
       "registrationMethod": "typical(avg elec2-8+mech5 vs arch jpg, SIFT/RANSAC)"
     },
     "roof": {
-      "img": "assets/engineering/ventilation-roof.jpg",
+      "img": "assets/engineering/ventilation-roof.webp",
+      "thumb": "assets/thumbs/engineering/ventilation-roof.webp",
       "pdf": "assets/engineering/ventilation-roof.pdf",
       "code": "M409",
       "page": 36,

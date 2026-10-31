@@ -9,6 +9,9 @@ JPGs (public/prototypes/assets/plan-niveau-N.jpg), and writes:
   public/prototypes/assets/engineering/<kind>-<level>.jpg   (full raster preview)
   public/prototypes/assets/engineering/sheets.js            (window.fitteEngineering manifest)
 
+The manifest points at the WebP copies of each preview and at its strip
+thumbnail; write them afterwards with scripts/import/web-images.py.
+
 Registration strategy:
 
   * "typical" similarity transform (uniform scale, ~0 rotation, small
@@ -313,7 +316,8 @@ def main() -> None:
 
         alignment = "registered" if spec.arch_ref else "reference"
         sheet = {
-            "img": f"assets/engineering/{jpg_name}",
+            "img": f"assets/engineering/{base}.webp",
+            "thumb": f"assets/thumbs/engineering/{base}.webp",
             "pdf": f"assets/engineering/{pdf_name}",
             "code": spec.code,
             "page": spec.page,
