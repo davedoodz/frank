@@ -436,6 +436,11 @@ tr.hl td{background:var(--vert-pale)}
 .pics.cmp.solo{grid-template-columns:1fr}
 .pics.cmp.solo .pic>a{justify-content:center}
 .pics.cmp.solo figcaption{text-align:center}
+/* before above after, each screenshot whole at its own 16:10 */
+.pics.cmp.stack{grid-template-columns:1fr;grid-template-rows:auto auto auto auto;row-gap:0}
+.pics.cmp.stack .pic+.pic{margin-top:18px}
+.pics.cmp.stack .pic img{max-height:236px}
+.pics.cmp.stack figcaption{margin-top:8px}
 .pic .ba{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
 .pic figcaption a{font-family:var(--mono);color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
 /* Process chapters: a prototype as deployed beside the problems it raised */
@@ -458,10 +463,13 @@ a.dep:hover{box-shadow:0 0 0 2px var(--vert)}
 /* The problems a prototype raised: one flat list with an icon per problem.
    The group eyebrows are gone — the icon carries the kind, the number carries
    the order, and the reader is not asked to hold two taxonomies at once. */
-.sets{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;margin-top:12px}
-.sets p{display:grid;grid-template-columns:20px 26px 1fr;align-items:center;gap:0 10px;font-size:17px;padding:6px 0}
+.sets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+/* each problem a gray box on one line; the number stays in the markup for
+   saved edits but is not shown */
+.sets p{display:flex;align-items:center;gap:9px;font-size:16px;padding:10px 12px;border-radius:10px;background:var(--fill);white-space:nowrap;min-width:0}
 .sets .pi{width:19px;height:19px;color:var(--ink-3)}
-.sets .n,.chaps .n{font-family:var(--pixel);font-size:13px;color:var(--vert-dark);letter-spacing:.09em}
+.sets .n{display:none}
+.chaps .n{font-family:var(--pixel);font-size:13px;color:var(--vert-dark);letter-spacing:.09em}
 /* The delta line: what the previous prototype was, and what this one became. */
 .delta{display:grid;grid-template-columns:1fr 20px 1fr;align-items:start;gap:14px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
 .delta b{display:block;font-family:var(--pixel);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:400;margin-bottom:5px}
@@ -1008,7 +1016,6 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
         <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg><span>Keeping the project on rails</span><b>2</b></li>
         <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg><span>Showing the project to other people</span><b>3</b></li>
       </ul>
-      <div class="q" style="margin-top:28px"><blockquote style="font-size:20px;font-weight:600">“We patch the 3D in post. What matters is the 2D: where the engineers’ structural and mechanical plans clash with ours. That is where the revisions are.”</blockquote><cite>Benoît, on prototype 1 — paraphrased, Oct 26</cite></div>
     </div>
     <div class="live fit"><iframe src="interview-features.html" title="The twenty user requests, as a page you can sort and re-rank" loading="lazy"></iframe></div>
   </div>
@@ -1021,20 +1028,20 @@ body.editing.on-dark #edCut{background:#fff;color:var(--ink)}
   <div class="st">
     <div class="st-t">
       <div class="pnum"><b>01</b><span><span class="k">Which product</span>Direction</span></div>
-      <h2>Not an overview of the project. The checks that repeat every revision.</h2>
+      <h2>Not the model against the plan. The plans against each other.</h2>
       <div class="rule"></div>
       <dl>
-        <div class="said"><dt class="k">They said</dt><dd><q>Measures each unit with polylines, floor by floor, and types it into a table. Every revision, again.</q><cite>Benoît — interview, Oct 26</cite></dd></div>
-        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Prototype 1 showed two ideas: coordination as its own page (A), or as a layer on each unit (B). Neither started from what the technicians redo.</dd></div>
-        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>Drawing the same content three ways, then ten hierarchies of one screen, the strongest version led with the checks that repeat each revision, not with the project.</dd></div>
-        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Option C, « what repeats », became the line every later prototype grew from: wireframe C, then C3, then prototype 3.</dd></div>
+        <div class="said"><dt class="k">They said</dt><dd><q>We patch the 3D in post. What matters is the 2D: where the engineers’ structural and mechanical plans clash with ours. That is where the revisions are.</q><cite>Benoît, on prototype 1 — paraphrased, Oct 26</cite></dd></div>
+        <div class="pb"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>Problem</dt><dd>Prototype 1 checked the architect's plan against the SketchUp model. That gap gets fixed later, by hand.</dd></div>
+        <div class="rz"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Realization</dt><dd>The revisions come from the other offices: a duct or a beam on the engineers' sheet that the architecture does not allow for.</dd></div>
+        <div class="won"><dt class="k"><svg class="sti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Decision</dt><dd>Prototype 2 lays the surveyor's and engineers' sheets over the architecture, floor by floor, and marks where they clash.</dd></div>
       </dl>
     </div>
-    <div class="pics cmp">
-      <figure class="pic"><a href="https://cafitte-prototype1.vercel.app/prototypes/plateforme-b.html" target="_blank" rel="noopener"><img src="assets/frank/p1-plateforme-b-full.jpg" alt="Prototype 1: Direction B: the plan and the model side by side"></a>
-        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype1.vercel.app/prototypes/plateforme-b.html" target="_blank" rel="noopener">Prototype 1</a> — Direction B: the plan and the model side by side</figcaption></figure>
-      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/p2-wireframe-c3.jpg" alt="Prototype 2: Direction C: the checks around one floor"></a>
-        <figcaption><span class="ba">After</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — Direction C: the checks around one floor</figcaption></figure>
+    <div class="pics cmp stack">
+      <figure class="pic"><a href="https://cafitte-prototype1.vercel.app/prototypes/plateforme-b.html" target="_blank" rel="noopener"><img src="assets/frank/p1-plateforme-b-full.jpg" alt="Prototype 1, direction B: the architect's plan beside the SketchUp model, with the gap between them measured"></a>
+        <figcaption><span class="ba">Before</span><a href="https://cafitte-prototype1.vercel.app/prototypes/plateforme-b.html" target="_blank" rel="noopener">Prototype 1</a> — The plan against the model</figcaption></figure>
+      <figure class="pic"><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener"><img src="assets/frank/p2-calques.jpg" alt="Prototype 2, level 5: the surveyor, electrical, drainage and distribution sheets laid over the architecture, with the units they clash on marked in red"></a>
+        <figcaption><span class="ba">After</span><a href="https://cafitte-prototype2.vercel.app/prototypes/wireframe-c3.html" target="_blank" rel="noopener">Prototype 2</a> — The engineers' sheets over the architecture, clashes in red</figcaption></figure>
     </div>
   </div>
 </div>
